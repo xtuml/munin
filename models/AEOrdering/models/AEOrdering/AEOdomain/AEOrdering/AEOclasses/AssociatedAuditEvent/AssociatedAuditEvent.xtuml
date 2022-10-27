@@ -1,0 +1,162 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	'AssociatedAuditEvent',
+	13,
+	'AssociatedAuditEvent',
+	'This captures details abouut an Audit event that is associated with another audit event. This is detected when the domain finds a match to a prev event id.
+
+Audit events can be associated with many other audit events.',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_NBATTR
+	VALUES ("444281aa-0993-44db-a394-d1243306f88b",
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6");
+INSERT INTO O_BATTR
+	VALUES ("444281aa-0993-44db-a394-d1243306f88b",
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6");
+INSERT INTO O_ATTR
+	VALUES ("444281aa-0993-44db-a394-d1243306f88b",
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	"00000000-0000-0000-0000-000000000000",
+	'associatedTime',
+	'',
+	'',
+	'associatedTime',
+	0,
+	"8409038f-e39e-4c48-aa46-57f35c1d3c38",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("8409038f-e39e-4c48-aa46-57f35c1d3c38",
+	"00000000-0000-0000-0000-000000000000",
+	'timestamp',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_REF
+	VALUES ("78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	"956aa587-965c-41c9-bf50-bc941aac3a81",
+	0,
+	"1f8b0c48-7873-4e8d-a808-68474fa37412",
+	"a52c9186-b956-443a-abde-7d690a7e6052",
+	"2c5e3779-7acd-4db0-b62d-67f9e652b694",
+	"10dc4ccd-2e10-482c-9211-b1340ac02813",
+	"dc3086d4-ea40-4696-99be-6dd91086b3a0",
+	"7729ee77-4999-4f7c-931c-31364978bc9c",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AuditEvent',
+	'auditEventId',
+	'R11.''isFollowedBy''');
+INSERT INTO R_RGO_PROXY
+	VALUES ("78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	"a52c9186-b956-443a-abde-7d690a7e6052",
+	"2c5e3779-7acd-4db0-b62d-67f9e652b694",
+	'../AEOclasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("1f8b0c48-7873-4e8d-a808-68474fa37412",
+	"956aa587-965c-41c9-bf50-bc941aac3a81",
+	0,
+	"a52c9186-b956-443a-abde-7d690a7e6052",
+	"10dc4ccd-2e10-482c-9211-b1340ac02813",
+	'../AEOclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("dc3086d4-ea40-4696-99be-6dd91086b3a0",
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	"1f8b0c48-7873-4e8d-a808-68474fa37412",
+	"956aa587-965c-41c9-bf50-bc941aac3a81",
+	1,
+	'auditEventId');
+INSERT INTO O_BATTR_PROXY
+	VALUES ("1f8b0c48-7873-4e8d-a808-68474fa37412",
+	"956aa587-965c-41c9-bf50-bc941aac3a81",
+	'../AuditEvent/AuditEvent.xtuml');
+INSERT INTO O_ATTR
+	VALUES ("dc3086d4-ea40-4696-99be-6dd91086b3a0",
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	"444281aa-0993-44db-a394-d1243306f88b",
+	'followedByauditEventId',
+	'',
+	'followedBy',
+	'auditEventId',
+	1,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	"956aa587-965c-41c9-bf50-bc941aac3a81",
+	0,
+	"1f8b0c48-7873-4e8d-a808-68474fa37412",
+	"a52c9186-b956-443a-abde-7d690a7e6052",
+	"2c5e3779-7acd-4db0-b62d-67f9e652b694",
+	"6b45dc0b-1e2a-43f5-bda8-ca481953f14f",
+	"9eed494e-0db5-472c-811f-c1401d91e7cd",
+	"e46715eb-966b-4855-ac42-dafed1d415e8",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AuditEvent',
+	'auditEventId',
+	'R11.''follows''');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("1f8b0c48-7873-4e8d-a808-68474fa37412",
+	"956aa587-965c-41c9-bf50-bc941aac3a81",
+	0,
+	"a52c9186-b956-443a-abde-7d690a7e6052",
+	"6b45dc0b-1e2a-43f5-bda8-ca481953f14f",
+	'../AEOclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("9eed494e-0db5-472c-811f-c1401d91e7cd",
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	"1f8b0c48-7873-4e8d-a808-68474fa37412",
+	"956aa587-965c-41c9-bf50-bc941aac3a81",
+	1,
+	'auditEventId');
+INSERT INTO O_ATTR
+	VALUES ("9eed494e-0db5-472c-811f-c1401d91e7cd",
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	"dc3086d4-ea40-4696-99be-6dd91086b3a0",
+	'followsauditEventId',
+	'',
+	'follows',
+	'auditEventId',
+	1,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_ID
+	VALUES (0,
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6");
+INSERT INTO O_OIDA
+	VALUES ("dc3086d4-ea40-4696-99be-6dd91086b3a0",
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	0,
+	'followedByauditEventId');
+INSERT INTO O_OIDA
+	VALUES ("9eed494e-0db5-472c-811f-c1401d91e7cd",
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	0,
+	'followsauditEventId');
+INSERT INTO O_ID
+	VALUES (1,
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6");
+INSERT INTO O_ID
+	VALUES (2,
+	"78b83f81-ac97-48be-8a5c-cb9eca9167e6");
+INSERT INTO PE_PE
+	VALUES ("78b83f81-ac97-48be-8a5c-cb9eca9167e6",
+	1,
+	"4e31923b-253c-45ba-b003-819b251264a9",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("4e31923b-253c-45ba-b003-819b251264a9",
+	"00000000-0000-0000-0000-000000000000",
+	"93a25cc9-604e-47d9-928e-aad6575c0677",
+	'AEOclasses',
+	'',
+	0,
+	'../AEOclasses.xtuml');

@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  plus_processor:
+    image: "ghcr.io/xtuml/plus_processor"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    volumes:
+      - "./sequenceFiles:/root/sequenceFiles"
+    command: "-source sequenceFiles/ -output sequenceFiles/output/ -postinit schedule/startup.sch -util Inspector -inspector-port 0"

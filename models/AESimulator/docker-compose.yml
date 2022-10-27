@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  aesimulator:
+    image: "ghcr.io/xtuml/aesimulator"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20010"
+      - "30000:30010"
+      - "40000:40010"
+    command: "-test-config config/test1config.txt -postinit schedule/startup.sch -util Inspector -inspector-port 10 -util MetaData"

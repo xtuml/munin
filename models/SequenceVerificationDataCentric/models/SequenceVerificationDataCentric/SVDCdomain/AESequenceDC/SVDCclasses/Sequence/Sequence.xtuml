@@ -1,0 +1,209 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("475b64d7-320f-456d-aef2-7e81c8ed171b",
+	'Sequence',
+	9,
+	'SEQ',
+	'A Sequence is a connected chain of Audit Events within a Job. 
+The Audit Events within a Sequence are connected by the next Audit 
+Event referring explicitly to the Id of the previous Audit Event(s).
+A Job can contain multiple Sequences but there is no link between
+the Sequences of a Job other than Job Id. There is no way to ensure
+that the Sequences run in a specific order within the Job. A specific
+type of Audit Event starts a Sequence and this is not expected to have a 
+previous Event Id. A specific type of Audit Event also ends a Sequence.
+A Sequence can have multiple end points.',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_NBATTR
+	VALUES ("2c7c7c84-107e-4780-897b-022e4deefc28",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b");
+INSERT INTO O_BATTR
+	VALUES ("2c7c7c84-107e-4780-897b-022e4deefc28",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b");
+INSERT INTO O_ATTR
+	VALUES ("2c7c7c84-107e-4780-897b-022e4deefc28",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"00000000-0000-0000-0000-000000000000",
+	'sequenceId',
+	'',
+	'',
+	'sequenceId',
+	0,
+	"2c7953f2-99b9-47a8-a2b6-50cdd050b5ac",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("2c7953f2-99b9-47a8-a2b6-50cdd050b5ac",
+	"00000000-0000-0000-0000-000000000000",
+	'MASLunique',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_REF
+	VALUES ("475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"f50894a2-8c45-468f-896f-f76df8bebddc",
+	0,
+	"57838f77-04c2-459e-984c-bf6ae53bfbd8",
+	"65a0b8a2-cefc-486d-ab46-0a2b386f1062",
+	"81cd8a68-e189-4b03-94dd-96c2a792a3f3",
+	"c351a08e-0a29-479d-84f7-4a372b27d93a",
+	"3fb6673b-6024-47fe-ab0a-d9e25f8ce6c9",
+	"ed7d79fa-0702-488d-9f63-bebd3c23e2fc",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'Job',
+	'jobID',
+	'R10.''is_part_of''');
+INSERT INTO R_RGO_PROXY
+	VALUES ("475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"65a0b8a2-cefc-486d-ab46-0a2b386f1062",
+	"81cd8a68-e189-4b03-94dd-96c2a792a3f3",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("57838f77-04c2-459e-984c-bf6ae53bfbd8",
+	"f50894a2-8c45-468f-896f-f76df8bebddc",
+	0,
+	"65a0b8a2-cefc-486d-ab46-0a2b386f1062",
+	"c351a08e-0a29-479d-84f7-4a372b27d93a",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("3fb6673b-6024-47fe-ab0a-d9e25f8ce6c9",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"57838f77-04c2-459e-984c-bf6ae53bfbd8",
+	"f50894a2-8c45-468f-896f-f76df8bebddc",
+	1,
+	'jobID');
+INSERT INTO O_BATTR_PROXY
+	VALUES ("57838f77-04c2-459e-984c-bf6ae53bfbd8",
+	"f50894a2-8c45-468f-896f-f76df8bebddc",
+	'../Job/Job.xtuml');
+INSERT INTO O_ATTR
+	VALUES ("3fb6673b-6024-47fe-ab0a-d9e25f8ce6c9",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"2c7c7c84-107e-4780-897b-022e4deefc28",
+	'jobID',
+	'',
+	'',
+	'jobID',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("5ac80f44-4569-41d5-87c0-80d4329f7afa",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b");
+INSERT INTO O_BATTR
+	VALUES ("5ac80f44-4569-41d5-87c0-80d4329f7afa",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b");
+INSERT INTO O_ATTR
+	VALUES ("5ac80f44-4569-41d5-87c0-80d4329f7afa",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"3fb6673b-6024-47fe-ab0a-d9e25f8ce6c9",
+	'isComplete',
+	'',
+	'',
+	'isComplete',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000001",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("fdf384f7-8b4a-4184-b728-64a57f3f884a",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b");
+INSERT INTO O_BATTR
+	VALUES ("fdf384f7-8b4a-4184-b728-64a57f3f884a",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b");
+INSERT INTO O_ATTR
+	VALUES ("fdf384f7-8b4a-4184-b728-64a57f3f884a",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"5ac80f44-4569-41d5-87c0-80d4329f7afa",
+	'branchExtent',
+	'This measures the current number of parallel branches active within the sequence. 
+It is used to determine sequence completion for sequences with forks and multiple end points.',
+	'',
+	'branchExtent',
+	1,
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
+	0,
+	"3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
+	"4f6588e9-dc08-4618-adf2-4f3f8afc20ef",
+	"8b2e1c2a-99db-4faf-8395-da5893601668",
+	"e59a87e0-71c9-4659-b5c8-d071008a00e5",
+	"b66c35e4-fbd7-4488-b4ce-7fb6232e1dd9",
+	"b77f99c0-a18d-4ab6-ab88-0d5bbc296ca7",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AESequenceDefinition',
+	'AESequenceId',
+	'R14.''is_defined_by''');
+INSERT INTO R_RGO_PROXY
+	VALUES ("475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"4f6588e9-dc08-4618-adf2-4f3f8afc20ef",
+	"8b2e1c2a-99db-4faf-8395-da5893601668",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
+	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
+	0,
+	"4f6588e9-dc08-4618-adf2-4f3f8afc20ef",
+	"e59a87e0-71c9-4659-b5c8-d071008a00e5",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("b66c35e4-fbd7-4488-b4ce-7fb6232e1dd9",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
+	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
+	1,
+	'AESequenceId');
+INSERT INTO O_BATTR_PROXY
+	VALUES ("3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
+	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
+	'../AESequenceDefinition/AESequenceDefinition.xtuml');
+INSERT INTO O_ATTR
+	VALUES ("b66c35e4-fbd7-4488-b4ce-7fb6232e1dd9",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b",
+	"fdf384f7-8b4a-4184-b728-64a57f3f884a",
+	'AESequenceId',
+	'',
+	'',
+	'AESequenceId',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_ID
+	VALUES (0,
+	"475b64d7-320f-456d-aef2-7e81c8ed171b");
+INSERT INTO O_OIDA
+	VALUES ("2c7c7c84-107e-4780-897b-022e4deefc28",
+	"475b64d7-320f-456d-aef2-7e81c8ed171b",
+	0,
+	'sequenceId');
+INSERT INTO O_ID
+	VALUES (1,
+	"475b64d7-320f-456d-aef2-7e81c8ed171b");
+INSERT INTO O_ID
+	VALUES (2,
+	"475b64d7-320f-456d-aef2-7e81c8ed171b");
+INSERT INTO PE_PE
+	VALUES ("475b64d7-320f-456d-aef2-7e81c8ed171b",
+	1,
+	"77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
+	"00000000-0000-0000-0000-000000000000",
+	"be1840aa-9d3d-4f55-baec-da45c54219a5",
+	'SVDCclasses',
+	'',
+	0,
+	'../SVDCclasses.xtuml');

@@ -1,0 +1,254 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("74b9e96a-542a-498e-a745-e5dfea718ecb",
+	'SystemSpec',
+	12,
+	'SystemSpec',
+	'The SystemSpec is a singleton object that is responsible for loading details from teh configuration file.
+
+It schedules an event every spec update rate to check if teh configuration file has been updated and if so it shall re-read the config file and populate the domain.',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_NBATTR
+	VALUES ("c9295ae3-7ed7-40c3-a44d-48939d4d6b96",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("c9295ae3-7ed7-40c3-a44d-48939d4d6b96",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("c9295ae3-7ed7-40c3-a44d-48939d4d6b96",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"00000000-0000-0000-0000-000000000000",
+	'systemSpecId',
+	'An arbitary unique identifier.',
+	'',
+	'systemSpecId',
+	0,
+	"085313de-30a8-43e8-949c-89b5fb20570a",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("085313de-30a8-43e8-949c-89b5fb20570a",
+	"00000000-0000-0000-0000-000000000000",
+	'MASLunique',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("dd527fdf-a4ea-4858-a393-7f0524b3021d",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("dd527fdf-a4ea-4858-a393-7f0524b3021d",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("dd527fdf-a4ea-4858-a393-7f0524b3021d",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"6518ed19-6af2-490d-8ca1-25c34158cd0d",
+	'current_state',
+	'',
+	'',
+	'current_state',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000006",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("16197c18-d083-4e8f-b2ec-1eb16f2dd625",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("16197c18-d083-4e8f-b2ec-1eb16f2dd625",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("16197c18-d083-4e8f-b2ec-1eb16f2dd625",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"c9295ae3-7ed7-40c3-a44d-48939d4d6b96",
+	'configFilePath',
+	'The  path and filename of the config file for this domain.',
+	'',
+	'configFilePath',
+	0,
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("ca05455a-8231-467f-be9a-63be44793e6a",
+	"00000000-0000-0000-0000-000000000000",
+	'string',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("737ead3c-ac9a-46df-9eeb-ce005791ecc1",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("737ead3c-ac9a-46df-9eeb-ce005791ecc1",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("737ead3c-ac9a-46df-9eeb-ce005791ecc1",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"224cbb10-ecda-4109-9cc9-0692a3692a6b",
+	'specUpdateRate',
+	'This defines the frequency that the configuration file shall be checked to determine if it has been updated.',
+	'',
+	'specUpdateRate',
+	0,
+	"5121b717-dfad-45ae-bb2f-9cb5ed060878",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("5121b717-dfad-45ae-bb2f-9cb5ed060878",
+	"00000000-0000-0000-0000-000000000000",
+	'duration',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("c2c21d21-36f1-4c12-a502-5d41e45612a6",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("c2c21d21-36f1-4c12-a502-5d41e45612a6",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("c2c21d21-36f1-4c12-a502-5d41e45612a6",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"737ead3c-ac9a-46df-9eeb-ce005791ecc1",
+	'configFileModificationTime',
+	'',
+	'',
+	'configFileModificationTime',
+	0,
+	"8409038f-e39e-4c48-aa46-57f35c1d3c38",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("8409038f-e39e-4c48-aa46-57f35c1d3c38",
+	"00000000-0000-0000-0000-000000000000",
+	'timestamp',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("f735c538-4a92-4901-9722-df09777febb1",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("f735c538-4a92-4901-9722-df09777febb1",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("f735c538-4a92-4901-9722-df09777febb1",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"c2c21d21-36f1-4c12-a502-5d41e45612a6",
+	'configTimer',
+	'This timer is used to schedule an event to check if the configuration file has been updated.',
+	'',
+	'configTimer',
+	0,
+	"f93e8fda-cfc1-49d7-80e2-1a3df8a06efe",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("f93e8fda-cfc1-49d7-80e2-1a3df8a06efe",
+	"00000000-0000-0000-0000-000000000000",
+	'timer',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("e49e0fd9-32a9-4736-862c-869f6729d259",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("e49e0fd9-32a9-4736-862c-869f6729d259",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("e49e0fd9-32a9-4736-862c-869f6729d259",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"f735c538-4a92-4901-9722-df09777febb1",
+	'maxOutOfSequenceEvents',
+	'This is the consecutive maximum out of sequence events that can be received for a job before an error is declared.',
+	'',
+	'maxOutOfSequenceEvents',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("606cd872-924c-43a0-8cbc-2a451a051d5c",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("606cd872-924c-43a0-8cbc-2a451a051d5c",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("606cd872-924c-43a0-8cbc-2a451a051d5c",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"e49e0fd9-32a9-4736-862c-869f6729d259",
+	'maximumJobTime',
+	'This is the maximum time it should take for a job to be finished. When this time has been reached after the job was started it shall be archived if there are no blocked events or failed if there are blocked events.',
+	'',
+	'maximumJobTime',
+	0,
+	"5121b717-dfad-45ae-bb2f-9cb5ed060878",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("6518ed19-6af2-490d-8ca1-25c34158cd0d",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("6518ed19-6af2-490d-8ca1-25c34158cd0d",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("6518ed19-6af2-490d-8ca1-25c34158cd0d",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"606cd872-924c-43a0-8cbc-2a451a051d5c",
+	'jobCompletePeriod',
+	'When a Job has completed it shall be either archived or failed and once the job complete period has expired it shall be deleted from the domain with all associated events.',
+	'',
+	'jobCompletePeriod',
+	0,
+	"5121b717-dfad-45ae-bb2f-9cb5ed060878",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("224cbb10-ecda-4109-9cc9-0692a3692a6b",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("224cbb10-ecda-4109-9cc9-0692a3692a6b",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("224cbb10-ecda-4109-9cc9-0692a3692a6b",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"16197c18-d083-4e8f-b2ec-1eb16f2dd625",
+	'configFile',
+	'',
+	'',
+	'configFile',
+	0,
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	'',
+	'');
+INSERT INTO O_ID
+	VALUES (0,
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_OIDA
+	VALUES ("c9295ae3-7ed7-40c3-a44d-48939d4d6b96",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	0,
+	'systemSpecId');
+INSERT INTO O_ID
+	VALUES (1,
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ID
+	VALUES (2,
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO PE_PE
+	VALUES ("74b9e96a-542a-498e-a745-e5dfea718ecb",
+	1,
+	"4e31923b-253c-45ba-b003-819b251264a9",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("4e31923b-253c-45ba-b003-819b251264a9",
+	"00000000-0000-0000-0000-000000000000",
+	"93a25cc9-604e-47d9-928e-aad6575c0677",
+	'AEOclasses',
+	'',
+	0,
+	'../AEOclasses.xtuml');

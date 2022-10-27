@@ -1,0 +1,19 @@
+//! ACTIVITY BEGIN. 'd29a6cce-dab9-4231-ac80-3e04e9615260' DO NOT EDIT THIS LINE.
+public service AEReception::Req_IF_Ordering~>AcceptEvent ( auditEventType : in string,
+                                                          jobId : in string,
+                                                          auditEventId : in string,
+                                                          prevAuditEventIds : in sequence of string,
+                                                          auditEventTime : in string,
+                                                          application : in string,
+                                                          nodeName : in string ) is
+begin
+  Logger::information(
+    auditEventType &
+    jobId &
+    auditEventId &
+    auditEventTime &
+    application &
+    nodeName );
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

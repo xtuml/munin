@@ -1,0 +1,110 @@
+-- BP 7.1.6 content: Package syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO EP_PKG
+	VALUES ("8b8ce531-6aa7-41d0-ae5a-74f329aa4393",
+	"00000000-0000-0000-0000-000000000000",
+	"93a25cc9-604e-47d9-928e-aad6575c0677",
+	'scenarios',
+	'',
+	0);
+INSERT INTO GD_MD
+	VALUES ("9aac4cf6-fd04-4bdf-b02d-c936b0770af3",
+	112,
+	"8b8ce531-6aa7-41d0-ae5a-74f329aa4393",
+	108,
+	0,
+	0,
+	1,
+	1,
+	1,
+	12,
+	1,
+	0,
+	0,
+	0,
+	0,
+	0,
+	'',
+	'AEOrdering::AEOdomain::AEOrdering::scenarios');
+INSERT INTO DIM_DIA
+	VALUES ("9aac4cf6-fd04-4bdf-b02d-c936b0770af3",
+	'',
+	1.000000,
+	0.000000,
+	0.000000,
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO S_SYNC
+	VALUES ("082ae146-03c4-46f9-ad89-d7de41b1ff36",
+	"00000000-0000-0000-0000-000000000000",
+	'init',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	1,
+	1);
+INSERT INTO PE_PE
+	VALUES ("082ae146-03c4-46f9-ad89-d7de41b1ff36",
+	1,
+	"8b8ce531-6aa7-41d0-ae5a-74f329aa4393",
+	"00000000-0000-0000-0000-000000000000",
+	1);
+INSERT INTO S_SYNC
+	VALUES ("ffcee2b3-5671-490c-8731-d0a4a122cdab",
+	"00000000-0000-0000-0000-000000000000",
+	'registerCommandLineArgs',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	2);
+INSERT INTO PE_PE
+	VALUES ("ffcee2b3-5671-490c-8731-d0a4a122cdab",
+	1,
+	"8b8ce531-6aa7-41d0-ae5a-74f329aa4393",
+	"00000000-0000-0000-0000-000000000000",
+	1);
+INSERT INTO PE_PE
+	VALUES ("8b8ce531-6aa7-41d0-ae5a-74f329aa4393",
+	1,
+	"00000000-0000-0000-0000-000000000000",
+	"0c61776b-35f2-46ed-b4e3-2b6fa7f18526",
+	7);
+INSERT INTO C_C_PROXY
+	VALUES ("0c61776b-35f2-46ed-b4e3-2b6fa7f18526",
+	"00000000-0000-0000-0000-000000000000",
+	"00000000-0000-0000-0000-000000000000",
+	'AEOrdering',
+	'The events to be verified by this system comes from numerous places across a distributed system.
+As a result it is possible, even lilely, that events will be received out of sequence.
+
+The events carry sufficient data to allow the correct sequence to be determined. 
+The role of this domain is to reorder the received events into the correct sequence prior to
+the sequence being validated.
+
+This domain will therefore have to wait for out of sequence events to arrive. Timeouts will be
+required to raise errors if events do not arrive within some acceptable time. The acceptable
+time is to be determined but this may be specific to the source of the events.
+
+the events that are received are related to a specific job. As soon as events are known to be in
+the correct order they can be forwarded for verification. There is no need to wait for all of the 
+events of a single job to be received before ordering can start.
+
+It is likely that events from multiple jobs will concurrently be received by the system.
+The event ordering is therefore job specific and there is no dependency between events from
+different jobs.
+',
+	0,
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'Audit Event Ordering',
+	'../AEOrdering.xtuml');
+INSERT INTO S_SYS_PROXY
+	VALUES ("93a25cc9-604e-47d9-928e-aad6575c0677",
+	'AEOrdering',
+	1,
+	'../../../AEOrdering.xtuml');

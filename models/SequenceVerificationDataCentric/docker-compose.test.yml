@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  aesequence_test:
+    image: "ghcr.io/xtuml/aesequencedc:test"
+    build:
+      context: .
+      target: install-test
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    volumes:
+      - "./test_results:/root/test_results"
+    entrypoint: ["/usr/bin/timeout", "30s", "AESequenceDC_transient_standalone"]
+    command: "-log-level Debug -postinit schedule/test.sch -util Inspector -inspector-port 0"

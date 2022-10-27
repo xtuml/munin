@@ -1,0 +1,200 @@
+//! ACTIVITY BEGIN. 'b38f7f4c-1bb3-42e4-a42f-80debcdc30cc' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::JobType.loadEventTypes ( jobTypeJSONObject : in JSON::JSONObject ) is
+logMessage : string;
+jobDefinitionName : string;
+eventTypeJSONElement : JSON::JSONElement;
+eventDefJSONObject : JSON::JSONObject;
+prevEventTypeJSONElement : JSON::JSONElement;
+prevEventDefJSONObject : JSON::JSONObject;
+eventTypeName : string;
+sequenceName : string;
+occurrenceId : integer;
+applicationName : string;
+sequenceStart : boolean;
+sequenceEnd : boolean;
+emptyPreviousEventTypes : sequence of PreviousEventType;
+previousEventTypes : sequence of PreviousEventType;
+previousEventName : string;
+previousEventOccurrenceId : integer;
+application : instance of Application;
+eventType : instance of AuditEventType;
+
+begin
+	
+	logMessage := "AEOrdering::JobType.loadEventTypes";
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	// check the job definition name in the config file matches this job definition name
+	jobDefinitionName := JSON::get_string(jobTypeJSONObject["JobDefinitionName"]);
+	if this.jobTypeName = jobDefinitionName then
+		if jobTypeJSONObject'contains("Events") and jobTypeJSONObject["Events"].kind = JSON::Array then
+			for eventTypeJSONElement in JSON::get_array(jobTypeJSONObject["Events"]) loop
+				eventTypeName := "";
+				sequenceName := "";
+				occurrenceId := 1;
+				applicationName := "";
+				sequenceStart := false;
+				sequenceEnd := false;
+				previousEventTypes := emptyPreviousEventTypes;
+				eventDefJSONObject := JSON::get_object(eventTypeJSONElement);
+				eventTypeName := JSON::get_string(eventDefJSONObject["EventName"]);
+				sequenceName := JSON::get_string(eventDefJSONObject["SequenceName"]);
+				occurrenceId := JSON::get_integer(eventDefJSONObject["OccurrenceId"]);
+				applicationName := JSON::get_string(eventDefJSONObject["Application"]);
+				if eventDefJSONObject'contains("SequenceStart") then
+					sequenceStart := JSON::get_boolean(eventDefJSONObject["SequenceStart"]);
+				end if;
+				if eventDefJSONObject'contains("SequenceEnd") then
+					sequenceEnd := JSON::get_boolean(eventDefJSONObject["SequenceEnd"]);
+				end if;
+				if eventDefJSONObject'contains("PreviousEvents") and eventDefJSONObject["PreviousEvents"].kind = JSON::Array then
+					for prevEventTypeJSONElement in JSON::get_array(eventDefJSONObject["PreviousEvents"]) loop
+						previousEventName := "";
+						previousEventOccurrenceId := 1;
+						prevEventDefJSONObject := JSON::get_object(prevEventTypeJSONElement);
+						previousEventName := JSON::get_string(prevEventDefJSONObject["PreviousEventName"]);
+						previousEventOccurrenceId := JSON::get_integer(prevEventDefJSONObject["PreviousOccurrenceId"]);
+						previousEventTypes := previousEventTypes & (previousEventName, previousEventOccurrenceId);
+					end loop;
+				end if;
+				// now we have extracted the data create the event
+				application := find_one Application(applicationName = applicationName);
+				if application = null then
+					application := create Application(applicationName => applicationName);
+				end if;
+				
+				eventType := find_one AuditEventType(eventType = eventTypeName and applicationName = applicationName and occurrenceId = occurrenceId);
+				if eventType = null then
+					eventType := create unique AuditEventType(eventType => eventTypeName, occurrenceId => occurrenceId, 
+						                               applicationName => applicationName, sequenceName => sequenceName,
+						                               isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
+						                               staleAuditEventDuration => this.staleAuditEventDuration, 
+						                               blockedAuditEventDuration => this.blockedAuditEventDuration, 
+						                               previousEventTypes => previousEventTypes);
+					link eventType R6 application;
+					link eventType R12 this;
+				else
+					eventType.isSequenceEnd := sequenceEnd;
+					eventType.isSequenceStart := sequenceStart;
+					eventType.previousEventTypes := previousEventTypes;
+				end if;				
+				
+			end loop;
+		end if;
+	else
+		raise program_error;
+	end if;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '4cb90deb-ec72-4c55-a54c-050a3e3307ad' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::JobType.updateAuditEventDurations ( eventRulesJSONArray : in JSON::JSONArray ) is
+logMessage : string;
+eventRuleJSONObject : JSON::JSONObject;
+auditEventType : instance of AuditEventType;
+auditEventTypeName : string;
+applicationName : string;
+
+begin
+	
+	logMessage := "AEOrdering::JobType.updateAuditEventDurations";
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	for eventRuleJSONElement in eventRulesJSONArray loop
+		eventRuleJSONObject := JSON::get_object(eventRuleJSONElement);
+		auditEventTypeName := JSON::get_string(eventRuleJSONObject["EventName"]);
+		applicationName := JSON::get_string(eventRuleJSONObject["ApplicationName"]);
+		auditEventType := find_one AuditEventType(eventType = auditEventTypeName and applicationName = applicationName);
+		if auditEventType /= null then
+			if eventRuleJSONObject'contains("StaleAuditEventDuration") then
+				auditEventType.staleAuditEventDuration := duration'parse(JSON::get_string(eventRuleJSONObject["StaleAuditEventDuration"]));
+			end if;
+			if eventRuleJSONObject'contains("BlockedAuditEventDuration") then
+				auditEventType.blockedAuditEventDuration := duration'parse(JSON::get_string(eventRuleJSONObject["BlockedAuditEventDuration"]));
+			end if;
+		end if;
+	end loop;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '92f32a2d-c26e-437a-a132-bfcd1e409a15' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::JobType.loadEventDataItemTypes ( eventDataTypesJSONObject : in JSON::JSONObject ) is
+logMessage : string;
+jobType : string;
+eventTypeJSONElement : JSON::JSONElement;
+eventDefJSONObject : JSON::JSONObject;
+eventDataTypeJSONObject : JSON::JSONObject;
+eventTypeName : string;
+eventDataName : string;
+eventDataType : string;
+dataItemType : instance of DataItemType;
+auditEventTypes : sequence of instance of AuditEventType;
+constrainedDataTypeJSONObject : JSON::JSONObject;
+constrainedJobType : string;
+constrainedEventType : string;
+constrainedDataItemName : string;
+constrainedDataItems : sequence of instance of ConstrainedDataItem;
+constrainedDataItem : instance of ConstrainedDataItem;
+
+begin
+	
+	logMessage := "AEOrdering::JobType.loadEventTypes";
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	// check the job definition name in the config file matches this job definition name
+	jobType := JSON::get_string(eventDataTypesJSONObject["JobType"]);
+	if this.jobTypeName = jobType then
+		if eventDataTypesJSONObject'contains("Events") and eventDataTypesJSONObject["Events"].kind = JSON::Array then
+			for eventDataTypeJSONElement in JSON::get_array(eventDataTypesJSONObject["Events"]) loop
+				eventDataTypeJSONObject := JSON::get_object(eventDataTypeJSONElement);
+				eventTypeName := "";
+				eventTypeName := JSON::get_string(eventDataTypeJSONObject["EventName"]);
+				if eventDataTypeJSONObject'contains("EventData") and eventDataTypeJSONObject["EventData"].kind = JSON::Array then
+					for eventDataItemsJSONElement in JSON::get_array(eventDataTypeJSONObject["EventData"]) loop
+						eventDataName := "";
+						eventDataType := "";
+						eventDefJSONObject := JSON::get_object(eventDataItemsJSONElement);
+						eventDataName := JSON::get_string(eventDefJSONObject["EventDataName"]);
+						eventDataType := JSON::get_string(eventDefJSONObject["EventDataType"]);
+						auditEventTypes := this -> R12.AuditEventType(eventType = eventTypeName);
+						for auditEventType in auditEventTypes loop
+							dataItemType := find_one (auditEventType -> R14.DataItemType)(dataItemName = eventDataName);
+							if dataItemType = null then
+								dataItemType := create unique DataItemType(dataItemName => eventDataName);
+								link auditEventType R14 dataItemType;
+							end if;
+							dataItemType.dataItemType := eventDataType;
+						end loop;
+						// check if they have and constrained event data items
+						if eventDefJSONObject'contains("ConstrainedEvents") and eventDefJSONObject["ConstrainedEvents"].kind = JSON::Array then
+							constrainedDataItems := auditEventTypes -> R14.DataItemType(dataItemName = eventDataName) -> R15.ConstrainedDataItem;
+							for constrainedDataItemsJSONElement in JSON::get_array(eventDefJSONObject["ConstrainedEvents"]) loop
+								constrainedDataTypeJSONObject := JSON::get_object(constrainedDataItemsJSONElement);
+								constrainedJobType := "";
+								constrainedEventType := "";
+								constrainedDataItemName := "";
+								constrainedJobType := JSON::get_string(constrainedDataTypeJSONObject["JobType"]);
+								constrainedEventType := JSON::get_string(constrainedDataTypeJSONObject["ConstrainedEvent"]);
+								constrainedDataItemName := JSON::get_string(constrainedDataTypeJSONObject["ConstrainedDataItemName"]);
+								if find_one constrainedDataItems(jobTypeName = constrainedJobType and eventType = constrainedEventType and dataItemName = constrainedDataItemName) = null then
+									constrainedDataItem := create unique ConstrainedDataItem(jobTypeName => constrainedJobType, eventType => constrainedEventType, dataItemName => constrainedDataItemName);
+									for dataItem in auditEventTypes -> R14.DataItemType(dataItemName = eventDataName) loop
+										link constrainedDataItem R15 dataItem;
+									end loop;
+								end if;
+							end loop;
+						end if;
+					end loop;
+				end if;
+				
+			end loop;
+		end if;
+	else
+		raise program_error;
+	end if;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

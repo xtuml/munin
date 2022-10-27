@@ -1,0 +1,1775 @@
+//! ACTIVITY BEGIN. '794dcdbe-ccbe-4597-96a4-6e18a2f8ec79' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitialisationData () is
+// Initialisation data for specification classes
+
+
+nearInputED : instance of AuditEventDefinition;
+nearPartWriteED : instance of AuditEventDefinition;
+nearJustificationWriteED : instance of AuditEventDefinition;
+agentRequestWidgetsED : instance of AuditEventDefinition;
+authoriserReadWidgetRequestED : instance of AuditEventDefinition;
+authoriserParsedJustificationED : instance of AuditEventDefinition;
+authoriserSendWidgetsED : instance of AuditEventDefinition;
+agentReceiveWidgetsED : instance of AuditEventDefinition;
+agentProcessedRequestED : instance of AuditEventDefinition;
+agentPartReadED : instance of AuditEventDefinition;
+agentWritePayloadED : instance of AuditEventDefinition;
+gatewayReadPayloadED : instance of AuditEventDefinition;
+gatewayWritePayloadED : instance of AuditEventDefinition;
+midProcessPayloadED : instance of AuditEventDefinition;
+midWritePayloadED : instance of AuditEventDefinition;
+farInputED : instance of AuditEventDefinition;
+farOutputED : instance of AuditEventDefinition;
+
+testSequenceDefinitionBankTransfer : instance of AESequenceDefinition;
+testSequenceDefinitionMid : instance of AESequenceDefinition;
+testSequenceDefinitionFarSide : instance of AESequenceDefinition;
+
+nearInputInSDA : instance of AEOccurrenceInSequenceDefinition;
+nearPartWriteInSDA : instance of AEOccurrenceInSequenceDefinition;
+nearJustificationWriteInSDA : instance of AEOccurrenceInSequenceDefinition;
+agentRequestWidgetsInSDA : instance of AEOccurrenceInSequenceDefinition;
+authoriserReadWidgetRequestInSDA : instance of AEOccurrenceInSequenceDefinition;
+authoriserParsedJustificationInSDA : instance of AEOccurrenceInSequenceDefinition;
+authoriserSendWidgetsInSDA : instance of AEOccurrenceInSequenceDefinition;
+agentReceiveWidgetsInSDA : instance of AEOccurrenceInSequenceDefinition;
+agentProcessedRequestInSDA : instance of AEOccurrenceInSequenceDefinition;
+agentPartReadInSDA : instance of AEOccurrenceInSequenceDefinition;
+agentWritePayloadInSDA : instance of AEOccurrenceInSequenceDefinition;
+gatewayReadPayloadInSDA : instance of AEOccurrenceInSequenceDefinition;
+gatewayWritePayloadInSDA : instance of AEOccurrenceInSequenceDefinition;
+midProcessPayloadInSDA : instance of AEOccurrenceInSequenceDefinition;
+midWritePayloadInSDA : instance of AEOccurrenceInSequenceDefinition;
+farInputInSDA : instance of AEOccurrenceInSequenceDefinition;
+farOutputInSDA : instance of AEOccurrenceInSequenceDefinition;
+
+begin
+//nearInputED := create unique AuditEventDefinition (AEType => "NearInput");
+//nearPartWriteED := create unique AuditEventDefinition (AEType => "NearPartWrite");
+//nearJustificationWriteED := create unique AuditEventDefinition (AEType => "NearJustificationWrite");
+//agentRequestWidgetsED := create unique AuditEventDefinition (AEType => "AgentRequestWidgets");
+//authoriserReadWidgetRequestED := create unique AuditEventDefinition (AEType => "AuthoriserReadWidgetRequest");
+//authoriserParsedJustificationED := create unique AuditEventDefinition (AEType => "AuthoriserParsedJustification");
+//authoriserSendWidgetsED := create unique AuditEventDefinition (AEType => "AuthoriserSendWidgets");
+//agentReceiveWidgetsED := create unique AuditEventDefinition (AEType => "AgentReceiveWidgets");
+//agentProcessedRequestED := create unique AuditEventDefinition (AEType => "AgentProcessedRequest");
+//agentPartReadED := create unique AuditEventDefinition (AEType => "AgentPartRead");
+//agentWritePayloadED := create unique AuditEventDefinition (AEType => "AgentWritePayload");
+//gatewayReadPayloadED := create unique AuditEventDefinition (AEType => "GatewayReadPayload");
+//gatewayWritePayloadED := create unique AuditEventDefinition (AEType => "GatewayWritePayload");
+//midProcessPayloadED := create unique AuditEventDefinition (AEType => "MidProcessPayload");
+//midWritePayloadED := create unique AuditEventDefinition (AEType => "MidWritePayload");
+//farInputED := create unique AuditEventDefinition (AEType => "FarInput");
+//farOutputED := create unique AuditEventDefinition (AEType => "FarOutput");
+
+
+//testSequenceDefinitionBankTransfer := create unique AESequenceDefinition (sequenceDefinitionName => "NearSideBankTransfer");
+//testSequenceDefinitionMid := create unique AESequenceDefinition (sequenceDefinitionName => "Mid");
+//testSequenceDefinitionFarSide := create unique AESequenceDefinition (sequenceDefinitionName => "FarSide");
+
+//nearInputInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => nearInputED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 1, isSequenceStart => true, isSequenceEnd => false);
+//link nearInputED R1 testSequenceDefinitionBankTransfer using nearInputInSDA;
+//nearPartWriteInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => nearPartWriteED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 2, isSequenceStart => false, isSequenceEnd => false);
+//link nearPartWriteED R1 testSequenceDefinitionBankTransfer using nearPartWriteInSDA;
+//nearJustificationWriteInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => nearJustificationWriteED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 3, isSequenceStart => false, isSequenceEnd => false);
+//link nearJustificationWriteED R1 testSequenceDefinitionBankTransfer using nearJustificationWriteInSDA;
+//agentRequestWidgetsInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => agentRequestWidgetsED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 4, isSequenceStart => false, isSequenceEnd => false);
+//link agentRequestWidgetsED R1 testSequenceDefinitionBankTransfer using agentRequestWidgetsInSDA;
+//authoriserReadWidgetRequestInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => authoriserReadWidgetRequestED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 5, isSequenceStart => false, isSequenceEnd => false);
+//link authoriserReadWidgetRequestED R1 testSequenceDefinitionBankTransfer using authoriserReadWidgetRequestInSDA;
+//authoriserParsedJustificationInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => authoriserParsedJustificationED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 6, isSequenceStart => false, isSequenceEnd => false);
+//link authoriserParsedJustificationED R1 testSequenceDefinitionBankTransfer using authoriserParsedJustificationInSDA;
+//authoriserSendWidgetsInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => authoriserSendWidgetsED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 7, isSequenceStart => false, isSequenceEnd => false);
+//link authoriserSendWidgetsED R1 testSequenceDefinitionBankTransfer using authoriserSendWidgetsInSDA;
+//agentReceiveWidgetsInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => agentReceiveWidgetsED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 8, isSequenceStart => false, isSequenceEnd => false);
+//link agentReceiveWidgetsED R1 testSequenceDefinitionBankTransfer using agentReceiveWidgetsInSDA;
+//agentProcessedRequestInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => agentProcessedRequestED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 9, isSequenceStart => false, isSequenceEnd => false);
+//link agentProcessedRequestED R1 testSequenceDefinitionBankTransfer using agentProcessedRequestInSDA;
+//agentPartReadInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => agentPartReadED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 10, isSequenceStart => false, isSequenceEnd => false);
+//link agentPartReadED R1 testSequenceDefinitionBankTransfer using agentPartReadInSDA;
+//agentWritePayloadInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => agentWritePayloadED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 11, isSequenceStart => false, isSequenceEnd => false);
+//link agentWritePayloadED R1 testSequenceDefinitionBankTransfer using agentWritePayloadInSDA;
+//gatewayReadPayloadInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => gatewayReadPayloadED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 12, isSequenceStart => false, isSequenceEnd => false);
+//link gatewayReadPayloadED R1 testSequenceDefinitionBankTransfer using gatewayReadPayloadInSDA;
+//gatewayWritePayloadInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => gatewayWritePayloadED.AEDefinitionId, AESequenceId => testSequenceDefinitionBankTransfer.AESequenceId, occurrenceNumberInSequence => 13, isSequenceStart => false, isSequenceEnd => true);
+//link gatewayWritePayloadED R1 testSequenceDefinitionBankTransfer using gatewayWritePayloadInSDA;
+//midProcessPayloadInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => midProcessPayloadED.AEDefinitionId, AESequenceId => testSequenceDefinitionMid.AESequenceId, occurrenceNumberInSequence => 1, isSequenceStart => true, isSequenceEnd => false);
+//link midProcessPayloadED R1 testSequenceDefinitionMid using midProcessPayloadInSDA;
+//midWritePayloadInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => midWritePayloadED.AEDefinitionId, AESequenceId => testSequenceDefinitionMid.AESequenceId, occurrenceNumberInSequence => 2, isSequenceStart => false, isSequenceEnd => true);
+//link midWritePayloadED R1 testSequenceDefinitionMid using midWritePayloadInSDA;
+//farInputInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => farInputED.AEDefinitionId, AESequenceId => testSequenceDefinitionFarSide.AESequenceId, occurrenceNumberInSequence => 1, isSequenceStart => true, isSequenceEnd => false);
+//link farInputED R1 testSequenceDefinitionFarSide using farInputInSDA;
+//farOutputInSDA := create unique AEOccurrenceInSequenceDefinition (AEDefinitionId => farOutputED.AEDefinitionId, AESequenceId => testSequenceDefinitionFarSide.AESequenceId, occurrenceNumberInSequence => 2, isSequenceStart => false, isSequenceEnd => true);
+//link farOutputED R1 testSequenceDefinitionFarSide using farOutputInSDA;
+
+// Here's where the sequences actually get defined
+
+// Near Side Bank Transfer Sequence
+//link nearInputInSDA R6.precedes nearPartWriteInSDA;
+//link nearPartWriteInSDA R6.precedes nearJustificationWriteInSDA;
+//link nearJustificationWriteInSDA R6.precedes agentRequestWidgetsInSDA;
+//link agentRequestWidgetsInSDA R6.precedes authoriserReadWidgetRequestInSDA;
+//link authoriserReadWidgetRequestInSDA R6.precedes authoriserParsedJustificationInSDA;
+//link authoriserParsedJustificationInSDA R6.precedes authoriserSendWidgetsInSDA;
+//link authoriserSendWidgetsInSDA R6.precedes agentReceiveWidgetsInSDA;
+//link agentReceiveWidgetsInSDA R6.precedes agentProcessedRequestInSDA; //Remove the comments when fork nodes are supported
+//link agentReceiveWidgetsInSDA R6.precedes agentPartReadInSDA;
+//link agentPartReadInSDA R6.precedes agentWritePayloadInSDA;
+//link agentWritePayloadInSDA R6.precedes gatewayReadPayloadInSDA;
+//link gatewayReadPayloadInSDA R6.precedes gatewayWritePayloadInSDA;
+//link gatewayWritePayloadInSDA R6.precedes midProcessPayloadInSDA; // No longer needed now there are 3 sequences defined
+
+// Mid Sequence
+//link midProcessPayloadInSDA R6.precedes midWritePayloadInSDA;
+
+// Far Side Sequence
+//link farInputInSDA R6.precedes farOutputInSDA;
+// 
+//
+//
+//
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '6982fda3-b19f-46ad-80bd-3640bd1c5ebb' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitEventDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job BankTransferJob, Sequence 1 NearSideBankTransfer
+  // 
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","NearInput",1,previousEventTypes,true,false);
+  previousEventTypes := ("NearInput",1,"","");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","NearPartWrite",1,previousEventTypes,false,false);
+  previousEventTypes := ("NearPartWrite",1,"","");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","NearJustificationWrite",1,previousEventTypes,false,false);
+  previousEventTypes := ("NearJustificationWrite",1,"","");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentRequestWidgets",1,previousEventTypes,false,false);
+  previousEventTypes := ("AgentRequestWidgets",1,"","");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AuthoriserReadWidgetRequest",1,previousEventTypes,false,false);
+  previousEventTypes := ("AuthoriserReadWidgetRequest",1,"","");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AuthoriserParsedJustification",1,previousEventTypes,false,false);
+  previousEventTypes := ("AuthoriserParsedJustification",1,"","");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AuthoriserSendWidgets",1,previousEventTypes,false,false);
+  previousEventTypes := ("AuthoriserSendWidgets",1,"","");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentReceiveWidgets",1,previousEventTypes,false,false);
+  previousEventTypes := ("AgentReceiveWidgets",1,"Cons1","AND");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentProcessedRequest",1,previousEventTypes,false,true);
+  previousEventTypes := ("AgentReceiveWidgets",1,"Cons1","AND");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentPartRead",1,previousEventTypes,false,false);
+  previousEventTypes := ("AgentPartRead",1,"","");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentWritePayload",1,previousEventTypes,false,false);
+  previousEventTypes := ("AgentWritePayload",1,"","");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","GatewayReadPayload",1,previousEventTypes,false,false);
+  previousEventTypes := ("GatewayReadPayload",1,"","");
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","GatewayWritePayload",1,previousEventTypes,false,true);
+  //
+  // Job BankTransferJob, Sequence 2 Mid
+  //
+  previousEventTypes := empty;
+  eventDefinition ("BankTransferJob","Mid","MidProcessPayload",1,previousEventTypes,true,false);
+  previousEventTypes := ("MidProcessPayload",1,"Cons2","XOR");
+  eventDefinition ("BankTransferJob","Mid","MidWritePayload",1,previousEventTypes,false,true);
+  // New definition added here for testing of Exclusive OR constraint
+  previousEventTypes := ("MidProcessPayload",1,"Cons2","XOR");
+  eventDefinition ("BankTransferJob","Mid","MidPayloadError",1,previousEventTypes,false,true);
+  //
+  // Job BankTransferJob, Sequence 3 FarSide
+  //
+  previousEventTypes := empty;
+  eventDefinition ("BankTransferJob","FarSide","FarInput",1,previousEventTypes,true,false);
+  previousEventTypes := ("FarInput",1,"","");
+  eventDefinition ("BankTransferJob","FarSide","FarOutput",1,previousEventTypes,false,true);
+  //
+  // Job AuthJob, Sequence 1 Auth
+  //
+  previousEventTypes := empty;
+  eventDefinition ("AuthJob","Auth","AuthoriserSendOrderRequest",1,previousEventTypes,true,false);
+  previousEventTypes := ("AuthoriserSendOrderRequest",1,"","");
+  eventDefinition ("AuthJob","Auth","AuthReceiveRequest",1,previousEventTypes,false,false);
+  previousEventTypes := ("AuthReceiveRequest",1,"","");
+  eventDefinition ("AuthJob","Auth","AuthSendMidRequest",1,previousEventTypes,false,false);
+  previousEventTypes := ("AuthSendMidRequest",1,"","");
+  eventDefinition ("AuthJob","Auth","AuthReceiveMidResponse",1,previousEventTypes,false,false);
+  previousEventTypes := ("AuthReceiveMidResponse",1,"","");
+  eventDefinition ("AuthJob","Auth","AuthSendMidRequest",2,previousEventTypes,false,false);
+  previousEventTypes := ("AuthSendMidRequest",2,"","");
+  eventDefinition ("AuthJob","Auth","AuthReceiveMidResponse",2,previousEventTypes,false,false);
+  previousEventTypes := ("AuthReceiveMidResponse",2,"","");
+  eventDefinition ("AuthJob","Auth","AuthSendResponse",1,previousEventTypes,false,false);
+  previousEventTypes := ("AuthSendResponse",1,"","");
+  eventDefinition ("AuthJob","Auth","AuthoriserReceiveOrder",1,previousEventTypes,false,true);
+//
+//
+//
+//
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'e2c5b52e-6496-4d77-883c-92583789019f' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent01_NearInput () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920000","export-control-1234","NearInput","Job_Alpha","","Ev1",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'ab40b49c-393e-491f-a47c-ef16bb4c2b7c' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent02_NearPartWrite () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920001","export-control-1234","NearPartWrite","Job_Alpha","Ev1","Ev2",theAuditEventData);
+  //
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'ae8f81a9-0a16-418f-bb9b-b44486f5be66' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent03_NearJustificationWrite () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920002","export-control-1234","NearJustificationWrite","Job_Alpha","Ev2","Ev3",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c923ebbc-ea3f-47bb-94c0-f970ced546f7' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent05_AuthoriserReadWidgetRequest () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920004","authoriser-1234","AuthoriserReadWidgetRequest","Job_Alpha","Ev4","Ev5",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '08943406-3512-4cb8-89dc-8f3bbcc8e19c' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent06_AuthoriserParsedJustification () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920005","authoriser-1234","AuthoriserParsedJustification","Job_Alpha","Ev5","Ev6",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '1a7ebfab-b7a1-4731-9024-6dee2eebe90f' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent07_AuthoriserSendWidgets () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920006","authoriser-1234","AuthoriserSendWidgets","Job_Alpha","Ev6","Ev7",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '55109a23-9450-4d7d-8a06-a479287738a7' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent08_AgentReceiveWidgets () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920007","agent-1234","AgentReceiveWidgets","Job_Alpha","Ev7","Ev8",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '16576b75-689b-4407-9782-36bdc8260395' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent04_AgentRequestWidgets () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920003","agent-1234","AgentRequestWidgets","Job_Alpha","Ev3","Ev4",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a36b76a8-7d43-4491-8f0d-c4d498957a2d' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent09_AgentPartRead () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920008","agent-1234","AgentPartRead","Job_Alpha","Ev8","Ev9",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '144a37d3-2601-4045-818e-6d065902b775' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent10_AgentWritePayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920009","agent-1234","AgentWritePayload","Job_Alpha","Ev9","Ev10",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '86261f0e-8cb2-42e2-94f5-4659f45b95c0' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent11_GatewayReadPayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920010","gateway-1234","GatewayReadPayload","Job_Alpha","Ev10","Ev11",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '88bd863e-202b-4bb6-af3b-60be4768ad79' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent12_GatewayWritePayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920011","gateway-1234","GatewayWritePayload","Job_Alpha","Ev11","Ev12",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7e9b83c5-7fc1-4649-8865-e64a08a132dd' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent13_MidProcessPayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920012","mid-1234","MidProcessPayload","Job_Alpha","","Ev13",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '634d902e-cca4-4ec6-8ce5-b21520471fb1' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent14_MidWritePayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920013","mid-1234","MidWritePayload","Job_Alpha","Ev13","Ev14",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '58fa6003-4ae1-4542-9574-f860eeb0bdbc' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent15_FarInput () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920050","import_control-1234","FarInput","Job_Alpha","","Ev50",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '6b5c747a-4f1c-45d4-b869-cf2b511257f8' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestMalEvent02_FakeNearPartWrite () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920001","export-control-1234","FakeNearPartWrite","Job_Alpha","Ev1","Ev2",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b4a3a648-1d45-4242-946a-956b055fa77a' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent01_NearInput () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920000","export-control-1234","NearInput","Job_Beta","","Ev101",theAuditEventData);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '07eff704-f467-4106-a832-93c099c43fa0' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent02_NearPartWrite () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920001","export-control-1234","NearPartWrite","Job_Beta","Ev101","Ev102",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '4ff6bcad-ee9c-4bd7-be77-7629e9c50c42' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent03_NearJustificationWrite () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920002","export-control-1234","NearJustificationWrite","Job_Beta","Ev102","Ev103",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3c3fa5e3-4b16-4e47-b62a-71de9794a8cd' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent05_AuthoriserReadWidgetRequest () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920004","authoriser-1234","AuthoriserReadWidgetRequest","Job_Beta","Ev104","Ev105",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '4f1bc07a-4bfe-4035-a317-e34cf2f37908' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent06_AuthoriserParsedJustification () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920005","authoriser-1234","AuthoriserParsedJustification","Job_Beta","Ev105","Ev106",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '80a8fc1e-b811-4ada-a3cc-a1831f90e913' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent07_AuthoriserSendWidgets () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920006","authoriser-1234","AuthoriserSendWidgets","Job_Beta","Ev106","Ev107",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8b0750eb-f424-4bbd-b0ce-13cece470a25' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent08_AgentReceiveWidgets () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920007","agent-1234","AgentReceiveWidgets","Job_Beta","Ev107","Ev108",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a2e704f9-ead3-4352-b8aa-adac5086370e' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent04_AgentRequestWidgets () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920003","agent-1234","AgentRequestWidgets","Job_Beta","Ev103","Ev104",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'f64d66e2-b65a-4202-8b98-b145a17453ad' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent09_AgentPartRead () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920008","agent-1234","AgentPartRead","Job_Beta","Ev108","Ev109",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b354faf9-d0c3-4e38-8858-f2da498b0448' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent10_AgentWritePayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920009","agent-1234","AgentWritePayload","Job_Beta","Ev109","Ev110",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '752690c5-f1eb-488d-8d06-e6a6f0b9bc26' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent11_GatewayReadPayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920010","gateway-1234","GatewayReadPayload","Job_Beta","Ev110","Ev111",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '4c46ed9f-a55e-4ead-983f-34e699f0be05' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent12_GatewayWritePayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920011","gateway-1234","GatewayWritePayload","Job_Beta","Ev111","Ev112",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '054c8dd5-b91d-4cab-b88e-074b3f3d6268' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent13_MidProcessPayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920012","mid-1234","MidProcessPayload","Job_Beta","","Ev113",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '81247e98-a153-49cb-a938-8aae8507fced' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent14_MidWritePayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920013","mid-1234","MidWritePayload","Job_Beta","Ev113","Ev114",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '037c7b93-83a2-4fa4-89ba-812167ddb9dd' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent15_FarInput () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920050","import_control-1234","FarInput","Job_Beta","","Ev150",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c666ab3e-5353-46b2-9b41-d2b7a6384d5c' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestJobAComplete () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+    jobComplete ("Job_Alpha");
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3d745f69-9ac0-4e55-9e5b-ef89c39fcfdc' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestJobBComplete () is
+begin
+      jobComplete ("Job_Beta");
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9b64d144-d69c-49e8-a0ef-5935874f42b3' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestJobAFailed () is
+begin
+      failedJob ("Job_Alpha","Illegal Audit Event Order");
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'daf54d0b-aa6c-4a37-a68a-7affc88a8efc' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestJobBFailed () is
+begin
+  failedJob ("Job_Beta","Timeout waiting for next Audit Event");
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '5c49bd74-5b76-4289-bad1-ef96d3e96614' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent16_FarOutput () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920055","import_control-1234","FarOutput","Job_Alpha","Ev50","Ev55",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9d410d3f-ef6c-4652-9ac1-47c8b600138a' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent16_FarOutput () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920055","import_control-1234","FarOutput","Job_Beta","Ev150","Ev155",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '5fd98861-240c-412c-8318-3d4f966b35fc' DO NOT EDIT THIS LINE.
+private service AESequenceDC::CleanUpJobA () is
+begin
+//
+    deleteJob ("Job_Alpha");
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '811a0139-9936-4a63-85f1-b95b6aa6b70e' DO NOT EDIT THIS LINE.
+private service AESequenceDC::CleanUpJobB () is
+begin
+  deleteJob ("Job_Beta");
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '6c648605-c046-482f-9fcb-d27965faa720' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestRepeatEvent02_NearPartWrite () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920001","export-control-1234","NearPartWrite","Job_Alpha","Ev1","Ev222",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8a6d456b-0d86-45a0-a691-579cef262f6c' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestDeprecateJobADefinition () is
+begin
+  deprecateJobDefinition("Job_Alpha");
+  //
+  //
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b4d6a864-ac1d-49d9-9884-d091375c4cc9' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobAEvent09a_AgentProcessedRequest () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920008","agent-1234","AgentProcessedRequest","Job_Alpha","Ev8","Ev9a",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '1285a1c5-f829-4fef-beae-dc60cdc1b339' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestDeprecateJobBDefinition () is
+begin
+  deprecateJobDefinition("Job_Beta");
+  //
+  //
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'be2f1af0-6453-4d83-9ca2-ec068265656d' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertJobBEvent09a_AgentProcessedRequest () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920008","agent-1234","AgentProcessedRequest","Job_Beta","Ev108","Ev109a",theAuditEventData);
+//
+//;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd52771f0-92dc-4d0e-9466-c512dac62314' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertAuthJobGEvent01_AuthoriserSendOrderRequest () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920000","Auth-0001","AuthoriserSendOrderRequest","Job_Gamma","","Ev201",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'fb9ae94c-6387-4419-83e2-e78dbf4215ad' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertAuthJobGEvent02_AuthReceiveRequest () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920001","Auth-0001","AuthReceiveRequest","Job_Gamma","Ev201","Ev202",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8e9ffc8a-cf91-45ab-b036-291b9f6737d6' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertAuthJobGEvent03_AuthSendMidRequest () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920002","Auth-0001","AuthSendMidRequest","Job_Gamma","Ev202","Ev203",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'ac7b4ef8-6126-4357-8eaf-d98d4b83547d' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertAuthJobGEvent04_AuthReceiveMidResponse () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920003","Auth-0001","AuthReceiveMidResponse","Job_Gamma","Ev203","Ev204",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'fd24dd05-621a-4a25-859a-6a4d595f08ee' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertAuthJobGEvent05_AuthSendMidRequest () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920004","Auth-0001","AuthSendMidRequest","Job_Gamma","Ev204","Ev205",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '5edf908d-c39c-4cc6-ae1d-06932b18a38e' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertAuthJobGEvent06_AuthReceiveMidResponse () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920005","Auth-0001","AuthReceiveMidResponse","Job_Gamma","Ev205","Ev206",theAuditEventData);
+  //
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '1e4d88fd-6f13-4879-969e-e76675ce0f9a' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertAuthJobGEvent07_AuthSendResponse () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920006","Auth-0001","AuthSendResponse","Job_Gamma","Ev206","Ev207",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '2cc4be5b-1447-4ecb-9e19-f635276c3046' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertAuthJobGEvent08_AuthoriserReceiveOrder () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920007","Auth-0001","AuthoriserReceiveOrder","Job_Gamma","Ev207","Ev208",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '6c468945-c8e5-480e-a38a-fb294e1d39d5' DO NOT EDIT THIS LINE.
+private service AESequenceDC::CleanUpJobG () is
+begin
+  deleteJob ("Job_Gamma");
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '2845e29a-e6ea-4f77-a05d-810a065b0add' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitCyclicTopologyEventDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job CyclicJob, Sequence CyclicSequence
+  // 
+  eventDefinition ("CyclicJob","CyclicSequence","A",1,previousEventTypes,true,false);
+  previousEventTypes := ("A",1,"","") & ("C",1,"","");
+  eventDefinition ("CyclicJob","CyclicSequence","B",1,previousEventTypes,false,false);
+  previousEventTypes := ("B",1,"","");
+  eventDefinition ("CyclicJob","CyclicSequence","C",1,previousEventTypes,false,false);
+  previousEventTypes := ("C",1,"","");
+  eventDefinition ("CyclicJob","CyclicSequence","D",1,previousEventTypes,false,true);
+
+//
+//
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8f804563-7650-49aa-9301-aa27bdf218ba' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertCycJobEvent01_A () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920000","Test-0001","A","Job_Cyclo","","Ev301",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '65c3ca25-ae72-423e-af09-4b5b2ab8921b' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertCycJobEvent02_B () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920001","Test-0001","B","Job_Cyclo","Ev301","Ev302",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '1a8a41ab-f50a-494b-9b5c-145360aec335' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertCycJobEvent03_C () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920002","Test-0001","C","Job_Cyclo","Ev302","Ev303",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a6e4ef7c-5c8a-46b9-99b1-0b7d8a072221' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertCycJobEvent04_B () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920001","Test-0001","B","Job_Cyclo","Ev303","Ev304",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c94d0998-bc95-438e-8621-0be499fb882e' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertCycJobEvent05_C () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920004","Test-0001","C","Job_Cyclo","Ev304","Ev305",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '56e7681d-f4ff-4cb2-8068-3ef3232df683' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertCycJobEvent06_enD () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920005","Test-0001","D","Job_Cyclo","Ev305","Ev306",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '0511036f-fae4-4c4d-beed-4d7518c46244' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertCycJobEvent06_B () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920005","Test-0001","B","Job_Cyclo","Ev305","Ev306",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a9fd2f96-81b5-46b4-bfd3-24f5ada24bf2' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertCycJobEvent07_C () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920004","Test-0001","C","Job_Cyclo","Ev306","Ev307",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '07c5321c-6aa3-4378-a6bb-416a165c9d7c' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertCycJobEvent04_enD () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920005","Test-0001","D","Job_Cyclo","Ev303","Ev304",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'ff165d90-a906-43f1-a45c-c518122bc528' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertCycJobEvent08_enD () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920005","Test-0001","D","Job_Cyclo","Ev307","Ev308",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'be834099-9983-4b50-8ba2-f14c715c9835' DO NOT EDIT THIS LINE.
+private service AESequenceDC::CleanUpAllJobs () is
+theJobs : set of instance of Job;
+theJob : instance of Job;
+begin
+//
+    theJobs := find Job ();
+    for theJob in theJobs loop
+          deleteJob (theJob.jobID);     
+    end loop;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'cb99e9a8-3c77-4d96-be2f-b226eb5c235f' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitSystemSpec () is
+begin
+  createSVDCsystemSpec(@PT1S@,@P1D@,@PT5M@,@P1D@);
+  //
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9fe65133-a1f2-4b98-a12d-1823267bd100' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitForkAndMergeTopologyEventDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job BranchedJob, Sequence BranchedSequence
+  // 
+  eventDefinition ("BranchedJob","BranchedSequence","FMA",1,previousEventTypes,true,false);
+  previousEventTypes := ("FMA",1,"","");
+  eventDefinition ("BranchedJob","BranchedSequence","FMB",1,previousEventTypes,false,false);
+  previousEventTypes := ("FMB",1,"","");
+  eventDefinition ("BranchedJob","BranchedSequence","FMC",1,previousEventTypes,false,false);
+  previousEventTypes := ("FMB",1,"","");
+  eventDefinition ("BranchedJob","BranchedSequence","FMD",1,previousEventTypes,false,false);
+  previousEventTypes := ("FMB",1,"","");
+  eventDefinition ("BranchedJob","BranchedSequence","FME",1,previousEventTypes,false,false);
+  previousEventTypes := ("FMC",1,"","") & ("FMD",1,"","") & ("FME",1,"","");
+  eventDefinition ("BranchedJob","BranchedSequence","FMF",1,previousEventTypes,false,false);
+  previousEventTypes := ("FMF",1,"","");
+  eventDefinition ("BranchedJob","BranchedSequence","FMG",1,previousEventTypes,false,true);
+//
+// An illegal definition since it contains an end sequence in the middle of the event chain
+// This is provided to test a defensive feature of the model and should not be permitted in normal circumstances
+// IllegalJob and IllegalSequence
+  previousEventTypes := empty;
+  eventDefinition ("IllegalJob","IllegalSequence","MALA",1,previousEventTypes,true,false);
+  previousEventTypes := ("MALA",1,"","");
+  eventDefinition ("IllegalJob","IllegalSequence","MALB",1,previousEventTypes,false,false);
+  previousEventTypes := ("MALB",1,"","");
+  eventDefinition ("IllegalJob","IllegalSequence","MALC",1,previousEventTypes,false,true);
+  previousEventTypes := ("MALC",1,"","");
+  eventDefinition ("IllegalJob","IllegalSequence","MALD",1,previousEventTypes,false,false);
+  previousEventTypes := ("MALD",1,"","");
+  eventDefinition ("IllegalJob","IllegalSequence","MALE",1,previousEventTypes,false,true);
+//
+// This definition is for testing instance fork and merge
+// InstForkJob and InstForkSequence
+// Note that for an instance fork there is no fork visible in the definition. This is a simple linear sequence
+//
+  previousEventTypes := empty;
+  eventDefinition ("InstForkJob","InstForkSequence","IFA",1,previousEventTypes,true,false);
+  previousEventTypes := ("IFA",1,"","");
+  eventDefinition ("InstForkJob","InstForkSequence","IFB",1,previousEventTypes,false,false);
+  previousEventTypes := ("IFB",1,"","");
+  eventDefinition ("InstForkJob","InstForkSequence","IFC",1,previousEventTypes,false,false);
+  previousEventTypes := ("IFC",1,"","");
+  eventDefinition ("InstForkJob","InstForkSequence","IFD",1,previousEventTypes,false,false);
+  previousEventTypes := ("IFD",1,"","");
+  eventDefinition ("InstForkJob","InstForkSequence","IFE",1,previousEventTypes,false,false);
+  previousEventTypes := ("IFE",1,"","");
+  eventDefinition ("InstForkJob","InstForkSequence","IFF",1,previousEventTypes,false,true);
+  //
+  // Job SplitBranchedJob, Sequence ForkSequence
+  // 
+  previousEventTypes := empty;
+  eventDefinition ("SplitBranchedJob","ForkSequence","SFMA",1,previousEventTypes,true,false);
+  previousEventTypes := ("SFMA",1,"","");
+  eventDefinition ("SplitBranchedJob","ForkSequence","SFMB",1,previousEventTypes,false,false);
+  previousEventTypes := ("SFMB",1,"","");
+  eventDefinition ("SplitBranchedJob","ForkSequence","SFMC",1,previousEventTypes,false,true);
+  previousEventTypes := ("SFMB",1,"","");
+  eventDefinition ("SplitBranchedJob","ForkSequence","SFMD",1,previousEventTypes,false,true);
+  previousEventTypes := ("SFMB",1,"","");
+  eventDefinition ("SplitBranchedJob","ForkSequence","SFME",1,previousEventTypes,false,true);
+  //
+  // Job SplitBranchedJob, Sequence MergeSequence
+  // 
+  
+  
+  previousEventTypes := empty;
+  eventDefinition ("SplitBranchedJob","MergeSequence","SFMC1",1,previousEventTypes,true,false);
+  previousEventTypes := empty;
+  eventDefinition ("SplitBranchedJob","MergeSequence","SFMD1",1,previousEventTypes,true,false);
+  previousEventTypes := empty;
+  eventDefinition ("SplitBranchedJob","MergeSequence","SFME1",1,previousEventTypes,true,false);
+  previousEventTypes := ("SFMC1",1,"","") & ("SFMD1",1,"","") & ("SFME1",1,"","");
+  eventDefinition ("SplitBranchedJob","MergeSequence","SFMF",1,previousEventTypes,false,false);
+  previousEventTypes := ("SFMF",1,"","");
+  eventDefinition ("SplitBranchedJob","MergeSequence","SFMG",1,previousEventTypes,false,true);
+
+// This definition is for testing a split instance fork and merge
+// SplitInstForkJob and SplitInstForkSequence
+// Note that for an instance fork there is no fork visible in the definition. This is a simple linear sequence
+//
+  previousEventTypes := empty;
+  eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFA",1,previousEventTypes,true,false);
+  previousEventTypes := ("SIFA",1,"","");
+  eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFB",1,previousEventTypes,false,false);
+  previousEventTypes := ("SIFB",1,"","");
+  eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFC",1,previousEventTypes,false,true);
+  
+// SplitInstForkJob and SplitInstMergeSequence
+//
+  previousEventTypes := empty;
+  eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFD",1,previousEventTypes,true,false);
+  previousEventTypes := ("SIFD",1,"","");
+  eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFE",1,previousEventTypes,false,false);
+  previousEventTypes := ("SIFE",1,"","");
+  eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFF",1,previousEventTypes,false,true);
+
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3d1792ab-ca1f-4758-916c-d9b13d64af16' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertFandMJobEvent01_A () is
+previousEvents : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+    acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM",previousEvents,"Ev301",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd61bf368-3a2e-4141-8220-3f30b4e4aca1' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertFandMJobEvent02_B () is
+previousEvents : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM",previousEvents,"Ev302",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '51bc88ef-8de0-422f-98df-f3bd9d560d90' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertFandMJobEvent03_C () is
+previousEvents : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev303",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9bc287f8-cb68-4229-a9ec-c805391a9aec' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertFandMJobEvent04_D () is
+previousEvents : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev304",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'caf644fa-63c6-4a68-ab36-ff640118813a' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertFandMJobEvent05_E () is
+previousEvents : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev305",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '84358915-3afd-464d-8136-3fcb78885863' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertFandMJobEvent06_F () is
+eventC : string;
+eventD : string;
+eventE : string;
+previousEvents : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  //eventC := "Ev303";
+  //eventD := "Ev304";
+  //eventE := "Ev305";
+  previousEvents := previousEvents & "Ev303" & "Ev304" & "Ev305";
+  acceptOrderedEvent ("1620920006","Test-0001","FMF","Job_FandM",previousEvents,"Ev306",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7e648241-1bc8-40ef-bb37-80092aaaab8b' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertFandMJobEvent07_G () is
+previousEvents : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  previousEvents := ("Ev306");
+  acceptOrderedEvent ("1620920007","Test-0001","FMG","Job_FandM",previousEvents,"Ev307",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'ae5165ba-4c63-466b-a2d8-8d663352f9c2' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertMalJobAEvent13_MidProcessPayload () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920012","mid-1234","MidProcessPayload","Job_Alpha","Ev12","Ev13",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c907d3e3-c4c9-4048-8a76-090daae9e701' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertIllegalSequenceEndEvents01to03 () is
+previousEvents : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920000","Test-0001","MALA","Illegal_Job",previousEvents,"Ev301",theAuditEventData);
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","MALB","Illegal_Job",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  // The folfaring audit event corresponds to an audit event definition that is defined as end of sequence
+  // yet there is a folfaring event. This should be trapped as an error condition
+  acceptOrderedEvent ("1620920002","Test-0001","MALC","Illegal_Job",previousEvents,"Ev303",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b95ab2cb-d746-4dae-804a-49b07a3c5a27' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertIllegalSequenceEndEvents04to05 () is
+previousEvents : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  previousEvents := ("Ev303");
+  acceptOrderedEvent ("1620920002","Test-0001","MALD","Illegal_Job",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev304");
+  acceptOrderedEvent ("1620920002","Test-0001","MALE","Illegal_Job",previousEvents,"Ev305",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'dc87290d-f881-4b30-9cb8-d054c79e1cb7' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertSplitFandMJobEvents01to05 () is
+previousEvents : sequence of string;
+empty : sequence of string;
+
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920000","Test-0001","SFMA","Job_Split_FandM",previousEvents,"Ev301",theAuditEventData);
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","SFMB","Job_Split_FandM",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","SFMC","Job_Split_FandM",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","SFMD","Job_Split_FandM",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","SFME","Job_Split_FandM",previousEvents,"Ev305",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'cc923833-dcc9-4cb1-bc25-aa293571df8b' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertSplitFandMJobEvents06to10 () is
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920005","Test-0001","SFMC1","Job_Split_FandM",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920005","Test-0001","SFMD1","Job_Split_FandM",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920005","Test-0001","SFME1","Job_Split_FandM",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := empty & "Ev306" & "Ev307" & "Ev308";
+  acceptOrderedEvent ("1620920006","Test-0001","SFMF","Job_Split_FandM",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev309");
+  acceptOrderedEvent ("1620920007","Test-0001","SFMG","Job_Split_FandM",previousEvents,"Ev310",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a4b126a1-2b69-43d3-9c80-14b33a4818d3' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertSplitInstanceFandMJobEvents01to21 () is
+previousEvents : sequence of string;
+empty : sequence of string;
+
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  
+  // Merging Sequence
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev316",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev317",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev318",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev319",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev320",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev321",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'fa5ee628-5964-4dc2-91c0-f48343ec51a4' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertSplitInstanceFandMJobEvents22to24 () is
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev322",theAuditEventData);
+  previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317" & "Ev318" & "Ev319" & "Ev320" & "Ev321" & "Ev322";
+  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job",previousEvents,"Ev323",theAuditEventData);
+  previousEvents := ("Ev323");
+  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job",previousEvents,"Ev324",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '36008065-f8e6-4b23-bd0f-a3799231af1b' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitIntraJobInvariantDefinition () is
+// Initialisation goes here.
+invariantEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job SplitBranchedJob, Invariant InvA attached to audit event definitions SFMA and SFMF
+  // Note this initialisation scenario is dependent upon the prior execution of InitForkAndMergeTopologyEventDefinition
+  // 
+  invariantEventTypes := ("SFMA",1,"","") & ("SFMF",1,"","");
+  IntraJobInvariantDefn.createIntraJobInvariantDefn("SplitBranchedJob","InvA",invariantEventTypes);
+
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'bc1a67b4-9d1f-430b-ae84-edfef1f09d8d' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitEventDefinitionForInclusiveOR () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job BankTransferJob, Sequence 1 NearSideBankTransfer
+  // 
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_NearInput",1,previousEventTypes,true,false);
+  previousEventTypes := ("IOR_NearInput",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_NearPartWrite",1,previousEventTypes,false,false);
+  previousEventTypes := ("IOR_NearPartWrite",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_NearJustificationWrite",1,previousEventTypes,false,false);
+  previousEventTypes := ("IOR_NearJustificationWrite",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentRequestWidgets",1,previousEventTypes,false,false);
+  previousEventTypes := ("IOR_AgentRequestWidgets",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AuthoriserReadWidgetRequest",1,previousEventTypes,false,false);
+  previousEventTypes := ("IOR_AuthoriserReadWidgetRequest",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AuthoriserParsedJustification",1,previousEventTypes,false,false);
+  previousEventTypes := ("IOR_AuthoriserParsedJustification",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AuthoriserSendWidgets",1,previousEventTypes,false,false);
+  previousEventTypes := ("IOR_AuthoriserSendWidgets",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentReceiveWidgets",1,previousEventTypes,false,false);
+  previousEventTypes := ("IOR_AgentReceiveWidgets",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentProcessedRequest",1,previousEventTypes,false,true);
+  previousEventTypes := ("IOR_AgentReceiveWidgets",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentPartRead",1,previousEventTypes,false,false);
+  previousEventTypes := ("IOR_AgentPartRead",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentWritePayload",1,previousEventTypes,false,false);
+  previousEventTypes := ("IOR_AgentWritePayload",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_GatewayReadPayload",1,previousEventTypes,false,false);
+  previousEventTypes := ("IOR_GatewayReadPayload",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_GatewayWritePayload",1,previousEventTypes,false,true);
+  //
+  // Job BankTransferJob, Sequence 2 Mid
+  //
+  previousEventTypes := empty;
+  eventDefinition ("IOR_BankTransferJob","IOR_Mid","IOR_MidProcessPayload",1,previousEventTypes,true,false);
+  previousEventTypes := ("IOR_MidProcessPayload",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_Mid","IOR_MidWritePayload",1,previousEventTypes,false,true);
+  //
+  // Job BankTransferJob, Sequence 3 FarSide
+  //
+  previousEventTypes := empty;
+  eventDefinition ("IOR_BankTransferJob","IOR_FarSide","IOR_FarInput",1,previousEventTypes,true,false);
+  previousEventTypes := ("IOR_FarInput",1,"","");
+  eventDefinition ("IOR_BankTransferJob","IOR_FarSide","IOR_FarOutput",1,previousEventTypes,false,true);
+  //
+
+//
+//
+//
+//
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd83cd78b-a6f3-4f2a-abc4-3099558813a2' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitPersistentInvariantAuthDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+invariantEventType : eventStructure;
+
+begin
+  //
+  // Job Auth_PersistentInvariantJob, Sequence 1 Auth_PersistentInvariant
+  //
+  previousEventTypes := empty;
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthoriserSendOrderRequest",1,previousEventTypes,true,false);
+  previousEventTypes := ("EAuthoriserSendOrderRequest",1,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveRequest",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthReceiveRequest",1,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendMidRequest",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthSendMidRequest",1,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveMidResponse",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthReceiveMidResponse",1,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendMidRequest",2,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthSendMidRequest",2,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveMidResponse",2,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthReceiveMidResponse",2,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendResponse",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthSendResponse",1,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthoriserReceiveOrder",1,previousEventTypes,false,true);
+//
+  invariantEventType := ("EAuthoriserSendOrderRequest",1,"","");
+  ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn("PersistentInvariantTypeA",invariantEventType, @P1D@);
+  invariantEventType := ("EAuthoriserReceiveOrder",1,"","");
+  ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn("PersistentInvariantTypeB",invariantEventType, @P1D@);
+//
+//
+//
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '1455f461-ebac-4dea-bcc6-0dca316bd76f' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEAuthJobGEvent08a_AuthoriserReceiveOrderWithPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Ent123456789");
+  acceptOrderedEvent ("1620920007","Auth-0001","EAuthoriserReceiveOrder","Job_PersistentInvariant","Ev1207","Ev1208",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b7d4d7e3-2b4a-43bb-9333-be9b579f22bb' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEAuthJobGEvent01a_AuthoriserSendOrderRequestWithPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeA", "Ent987654321");
+  acceptOrderedEvent ("1620920000","Auth-0001","EAuthoriserSendOrderRequest","Job_PersistentInvariant","","Ev1201",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '19c0a88e-ecde-40c9-a069-988586be2cac' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEJobAEvent01e_NearInputUsingPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Ent123456789");
+  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_Epsilon","","Ev451",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '403ac790-8948-4669-a642-a19d64ffc15d' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEJobAEvent08e_AgentReceiveWidgetsUsingPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Ent123456789");
+  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_Epsilon","Ev457","Ev458",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'eac28f53-6346-47ca-a05c-dfbc99ddb2db' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEJobAEvent12e_GatewayWritePayloadUsingPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Ent123456789");
+  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_Epsilon","Ev461","Ev462",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '367d59ce-c6df-458f-82cc-45744fa79fda' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEAuthJobGEvent02a_AuthReceiveRequestWithoutPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920001","Auth-0001","EAuthReceiveRequest","Job_PersistentInvariant","Ev1201","Ev1202",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a5749e3f-1969-4422-8b96-85f3ee64caf2' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEAuthJobGEvent03a_AuthSendMidRequestWithoutPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920002","Auth-0001","EAuthSendMidRequest","Job_PersistentInvariant","Ev1202","Ev1203",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'dcbe9974-38b4-4183-95a7-b666cb8a62fa' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEAuthJobGEvent04a_AuthReceiveMidResponseWithoutPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920003","Auth-0001","EAuthReceiveMidResponse","Job_PersistentInvariant","Ev1203","Ev1204",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '5f7c6d97-e4bd-411d-8be8-b1e99542be00' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEAuthJobGEvent05a_AuthSendMidRequestWithoutPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920004","Auth-0001","EAuthSendMidRequest","Job_PersistentInvariant","Ev1204","Ev1205",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '5726a6ab-948d-48ea-af44-263931e35921' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEAuthJobGEvent06a_AuthReceiveMidResponseWithoutPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920005","Auth-0001","EAuthReceiveMidResponse","Job_PersistentInvariant","Ev1205","Ev1206",theAuditEventData);
+  //
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '4a81e71e-1b4a-45bf-9806-cff2e82716ad' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEAuthJobGEvent07a_AuthSendResponseWithoutPersistentInvariant () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920006","Auth-0001","EAuthSendResponse","Job_PersistentInvariant","Ev1206","Ev1207",theAuditEventData);
+  //
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3cf0e0ab-a917-4a78-9500-1e8044935516' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitPersistentInvariantBankTransferDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+invariantEventType : sequence of eventStructure;
+begin
+  //
+  // Job BankTransferJob, Sequence 1 NearSideBankTransfer
+  // 
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearInput",1,previousEventTypes,true,false);
+  previousEventTypes := ("ENearInput",1,"","");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearPartWrite",1,previousEventTypes,false,false);
+  previousEventTypes := ("ENearPartWrite",1,"","");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearJustificationWrite",1,previousEventTypes,false,false);
+  previousEventTypes := ("ENearJustificationWrite",1,"","");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentRequestWidgets",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAgentRequestWidgets",1,"","");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAuthoriserReadWidgetRequest",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthoriserReadWidgetRequest",1,"","");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAuthoriserParsedJustification",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthoriserParsedJustification",1,"","");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAuthoriserSendWidgets",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthoriserSendWidgets",1,"","");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentReceiveWidgets",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAgentReceiveWidgets",1,"Cons1","AND");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentProcessedRequest",1,previousEventTypes,false,true);
+  previousEventTypes := ("EAgentReceiveWidgets",1,"Cons1","AND");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentPartRead",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAgentPartRead",1,"","");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentWritePayload",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAgentWritePayload",1,"","");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EGatewayReadPayload",1,previousEventTypes,false,false);
+  previousEventTypes := ("EGatewayReadPayload",1,"","");
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EGatewayWritePayload",1,previousEventTypes,false,true);
+  //
+  // Job BankTransferJob, Sequence 2 Mid
+  //
+  previousEventTypes := empty;
+  eventDefinition ("EBankTransferJob","EMid","EMidProcessPayload",1,previousEventTypes,true,false);
+  previousEventTypes := ("EMidProcessPayload",1,"Cons2","XOR");
+  eventDefinition ("EBankTransferJob","EMid","EMidWritePayload",1,previousEventTypes,false,true);
+  // New definition added here for testing of Exclusive OR constraint
+  previousEventTypes := ("EMidProcessPayload",1,"Cons2","XOR");
+  eventDefinition ("EBankTransferJob","EMid","EMidPayloadError",1,previousEventTypes,false,true);
+  //
+  // Job BankTransferJob, Sequence 3 FarSide
+  //
+  previousEventTypes := empty;
+  eventDefinition ("EBankTransferJob","EFarSide","EFarInput",1,previousEventTypes,true,false);
+  previousEventTypes := ("EFarInput",1,"","");
+  eventDefinition ("EBankTransferJob","EFarSide","EFarOutput",1,previousEventTypes,false,true);
+  //
+  invariantEventType := ("ENearInput",1,"","") & ("EAgentReceiveWidgets",1,"","") & ("EGatewayWritePayload",1,"","");
+  ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn("PersistentInvariantTypeB",invariantEventType);
+//
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'cf719b55-de6c-4ea6-9bf3-f16970b799fd' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEJobAEvent02to07 () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  //
+  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_Epsilon","Ev451","Ev452",theAuditEventData);
+  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_Epsilon","Ev452","Ev453",theAuditEventData);
+  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_Epsilon","Ev453","Ev454",theAuditEventData);
+  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_Epsilon","Ev454","Ev455",theAuditEventData);
+  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_Epsilon","Ev455","Ev456",theAuditEventData);
+  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_Epsilon","Ev456","Ev457",theAuditEventData);
+  //
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b76fdd27-5fc2-4b64-8dbf-564b4df7bb25' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEJobAEvent09to11 () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_Epsilon","Ev458","Ev459",theAuditEventData);
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_Epsilon","Ev458","Ev459a",theAuditEventData);
+  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_Epsilon","Ev459","Ev460",theAuditEventData);
+  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_Epsilon","Ev460","Ev461",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '6795d860-3507-4f5a-8611-542a5518e4fd' DO NOT EDIT THIS LINE.
+private service AESequenceDC::TestInsertEJobAEvent13to16 () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_Epsilon","","Ev463",theAuditEventData);
+  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_Epsilon","Ev463","Ev464",theAuditEventData);
+  // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_Epsilon","","Ev470",theAuditEventData);
+  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_Epsilon","Ev470","Ev471",theAuditEventData);
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

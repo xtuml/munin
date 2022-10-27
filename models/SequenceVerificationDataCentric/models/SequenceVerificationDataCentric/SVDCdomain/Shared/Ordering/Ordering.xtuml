@@ -1,0 +1,340 @@
+-- BP 7.1.6 content: Interface syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO C_I
+	VALUES ("27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
+	"00000000-0000-0000-0000-000000000000",
+	'Ordering',
+	'');
+INSERT INTO C_EP
+	VALUES ("490bbac3-d732-46ca-88e5-12a1cbdd6f7c",
+	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
+	-1,
+	'acceptOrderedEvent',
+	'',
+	2);
+INSERT INTO C_IO
+	VALUES ("490bbac3-d732-46ca-88e5-12a1cbdd6f7c",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'acceptOrderedEvent',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_PP
+	VALUES ("c0556ac2-d19c-4698-8bf7-c96c28d3e0e1",
+	"490bbac3-d732-46ca-88e5-12a1cbdd6f7c",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'ae_time',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_PP
+	VALUES ("5f6448ab-9e71-485d-8946-cba547ce8ab6",
+	"490bbac3-d732-46ca-88e5-12a1cbdd6f7c",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'app',
+	'',
+	0,
+	'',
+	"c0556ac2-d19c-4698-8bf7-c96c28d3e0e1");
+INSERT INTO C_PP
+	VALUES ("acf451c3-0720-4684-bac3-a3b7badcaebf",
+	"490bbac3-d732-46ca-88e5-12a1cbdd6f7c",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'ae_type',
+	'',
+	0,
+	'',
+	"5f6448ab-9e71-485d-8946-cba547ce8ab6");
+INSERT INTO C_PP
+	VALUES ("b6cf660b-6d0a-4756-8c01-fc4a57704cce",
+	"490bbac3-d732-46ca-88e5-12a1cbdd6f7c",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'jobId',
+	'',
+	0,
+	'',
+	"acf451c3-0720-4684-bac3-a3b7badcaebf");
+INSERT INTO C_PP
+	VALUES ("9e860cf6-e018-46fc-b310-aee2a638925f",
+	"490bbac3-d732-46ca-88e5-12a1cbdd6f7c",
+	"9a51a7f0-6c00-49dc-8ad2-ec81fb737253",
+	'prevAEIds',
+	'',
+	0,
+	'',
+	"b6cf660b-6d0a-4756-8c01-fc4a57704cce");
+INSERT INTO S_DT_PROXY
+	VALUES ("9a51a7f0-6c00-49dc-8ad2-ec81fb737253",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of string',
+	'',
+	'',
+	'../Shared.xtuml');
+INSERT INTO C_PP
+	VALUES ("90243063-8aca-4f1e-a6fe-4f33bd06ca08",
+	"490bbac3-d732-46ca-88e5-12a1cbdd6f7c",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'id',
+	'',
+	0,
+	'',
+	"9e860cf6-e018-46fc-b310-aee2a638925f");
+INSERT INTO C_EP
+	VALUES ("c0a74fc7-1fda-4573-98b4-88b9a6ec61d5",
+	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
+	-1,
+	'failedJob',
+	'',
+	3);
+INSERT INTO C_IO
+	VALUES ("c0a74fc7-1fda-4573-98b4-88b9a6ec61d5",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'failedJob',
+	'',
+	0,
+	'',
+	"490bbac3-d732-46ca-88e5-12a1cbdd6f7c");
+INSERT INTO C_PP
+	VALUES ("1a17ee52-06cd-4a15-9170-a6fd62f6310e",
+	"c0a74fc7-1fda-4573-98b4-88b9a6ec61d5",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'jobId',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_PP
+	VALUES ("30bf94bf-2097-4952-a84c-af47146e1288",
+	"c0a74fc7-1fda-4573-98b4-88b9a6ec61d5",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'failureReason',
+	'',
+	0,
+	'',
+	"1a17ee52-06cd-4a15-9170-a6fd62f6310e");
+INSERT INTO C_EP
+	VALUES ("66b828db-9d3b-458a-aa7b-59d41aafb29c",
+	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
+	-1,
+	'jobComplete',
+	'',
+	4);
+INSERT INTO C_IO
+	VALUES ("66b828db-9d3b-458a-aa7b-59d41aafb29c",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'jobComplete',
+	'',
+	0,
+	'',
+	"c0a74fc7-1fda-4573-98b4-88b9a6ec61d5");
+INSERT INTO C_PP
+	VALUES ("9cd9a750-cf89-4b57-8624-7856a4bd82a3",
+	"66b828db-9d3b-458a-aa7b-59d41aafb29c",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'jobId',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_EP
+	VALUES ("53291260-f2ab-4172-a52e-80575791cf8e",
+	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
+	-1,
+	'eventDefinition',
+	'This service defines the specification instance for an Audit Event Definition. 
+Each one of these refers to its previous Audit Event Definition to define the sequence. 
+The first one in the sequence has no previous audit event definition and has the boolean isSequenceStartEvent set to true.
+The last one in the sequence does have a previous audit event definition and has the boolean isSequenceEndEvent set to true.
+Forks in the sequence are supported by multiple Audit Event Definitions having the same previous Audit Event Definition.
+Merges in the sequence could be supported by allowing multiple values in Previous Audit Event Definition',
+	7);
+INSERT INTO C_IO
+	VALUES ("53291260-f2ab-4172-a52e-80575791cf8e",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'eventDefinition',
+	'This service defines the specification instance for an Audit Event Definition. 
+Each one of these refers to its previous Audit Event Definition to define the sequence. 
+The first one in the sequence has no previous audit event definition and has the boolean isSequenceStartEvent set to true.
+The last one in the sequence does have a previous audit event definition and has the boolean isSequenceEndEvent set to true.
+Forks in the sequence are supported by multiple Audit Event Definitions having the same previous Audit Event Definition.
+Merges in the sequence could be supported by allowing multiple values in Previous Audit Event Definition',
+	0,
+	'',
+	"66b828db-9d3b-458a-aa7b-59d41aafb29c");
+INSERT INTO C_PP
+	VALUES ("b0de1150-fb84-4d14-9a2c-54e20acf1c23",
+	"53291260-f2ab-4172-a52e-80575791cf8e",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'jobName',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_PP
+	VALUES ("54be32e8-6b51-4b57-91ba-5458fc287428",
+	"53291260-f2ab-4172-a52e-80575791cf8e",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'sequenceName',
+	'',
+	0,
+	'',
+	"b0de1150-fb84-4d14-9a2c-54e20acf1c23");
+INSERT INTO C_PP
+	VALUES ("b969f6fa-2df2-466c-8947-653ab6b0eae1",
+	"53291260-f2ab-4172-a52e-80575791cf8e",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'eventType',
+	'',
+	0,
+	'',
+	"54be32e8-6b51-4b57-91ba-5458fc287428");
+INSERT INTO C_PP
+	VALUES ("4c84bb41-7134-41c8-9802-8e0cbfd5c077",
+	"53291260-f2ab-4172-a52e-80575791cf8e",
+	"4143450e-1328-4130-af42-81ccbebf7894",
+	'previousEventTypes',
+	'',
+	0,
+	'',
+	"41b23aae-9c6c-4171-bed7-89b9ffc3732b");
+INSERT INTO S_DT_PROXY
+	VALUES ("4143450e-1328-4130-af42-81ccbebf7894",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of eventStructure',
+	'',
+	'',
+	'../Shared.xtuml');
+INSERT INTO C_PP
+	VALUES ("af26b1d0-3428-455a-872d-dcaad8233b59",
+	"53291260-f2ab-4172-a52e-80575791cf8e",
+	"ba5eda7a-def5-0000-0000-000000000001",
+	'isSequenceStart',
+	'',
+	0,
+	'',
+	"4c84bb41-7134-41c8-9802-8e0cbfd5c077");
+INSERT INTO C_PP
+	VALUES ("4b5baf0b-52b6-438e-afdb-11dc0c62ce36",
+	"53291260-f2ab-4172-a52e-80575791cf8e",
+	"ba5eda7a-def5-0000-0000-000000000001",
+	'isSequenceEnd',
+	'',
+	0,
+	'',
+	"af26b1d0-3428-455a-872d-dcaad8233b59");
+INSERT INTO C_PP
+	VALUES ("41b23aae-9c6c-4171-bed7-89b9ffc3732b",
+	"53291260-f2ab-4172-a52e-80575791cf8e",
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'occurrenceId',
+	'',
+	0,
+	'',
+	"b969f6fa-2df2-466c-8947-653ab6b0eae1");
+INSERT INTO C_EP
+	VALUES ("a69a6b02-3831-4089-b179-fe5fb0b6103f",
+	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
+	-1,
+	'deprecateJobDefinition',
+	'This service allows a Job Definition to be deprecated. In early versions this will simple result in deletion of the Job Defintion and its
+associated Sequence Definitions, Audit Events Definitions, etc. In due course this can be refuiend to check that there are no Jobs of that
+Job Definition currently in progress. If there are then these jobs should be allowed to complete. The Job Definition is then only removed 
+when there are no in progress Jobs.',
+	9);
+INSERT INTO C_IO
+	VALUES ("a69a6b02-3831-4089-b179-fe5fb0b6103f",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'deprecateJobDefinition',
+	'This service allows a Job Definition to be deprecated. In early versions this will simple result in deletion of the Job Defintion and its
+associated Sequence Definitions, Audit Events Definitions, etc. In due course this can be refuiend to check that there are no Jobs of that
+Job Definition currently in progress. If there are then these jobs should be allowed to complete. The Job Definition is then only removed 
+when there are no in progress Jobs.',
+	0,
+	'',
+	"53291260-f2ab-4172-a52e-80575791cf8e");
+INSERT INTO C_PP
+	VALUES ("a16266e6-67d4-4d62-a48b-e9878d88f044",
+	"a69a6b02-3831-4089-b179-fe5fb0b6103f",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'jobName',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_EP
+	VALUES ("0f82608c-67c1-46c2-95a0-f01118131c67",
+	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
+	-1,
+	'createSVDCsystemSpec',
+	'',
+	10);
+INSERT INTO C_IO
+	VALUES ("0f82608c-67c1-46c2-95a0-f01118131c67",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'createSVDCsystemSpec',
+	'',
+	0,
+	'',
+	"a69a6b02-3831-4089-b179-fe5fb0b6103f");
+INSERT INTO C_PP
+	VALUES ("fd215c54-1efd-450c-92a7-5e890be9d052",
+	"0f82608c-67c1-46c2-95a0-f01118131c67",
+	"2c3d62ba-7048-4ec3-bae6-f725ea1bedbf",
+	'maxIntraSequenceEventTimeoutPeriod',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO S_DT_PROXY
+	VALUES ("2c3d62ba-7048-4ec3-bae6-f725ea1bedbf",
+	"00000000-0000-0000-0000-000000000000",
+	'duration',
+	'',
+	'',
+	'../../../types/types.xtuml');
+INSERT INTO C_EP
+	VALUES ("b7f6ea58-cc1f-4cfa-b3b4-f7b878bfda45",
+	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
+	-1,
+	'reactivateJobDefinition',
+	'',
+	12);
+INSERT INTO C_IO
+	VALUES ("b7f6ea58-cc1f-4cfa-b3b4-f7b878bfda45",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'reactivateJobDefinition',
+	'',
+	0,
+	'',
+	"0f82608c-67c1-46c2-95a0-f01118131c67");
+INSERT INTO C_EP
+	VALUES ("e008f839-4f6f-4bab-940a-5e2c5c59133a",
+	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
+	-1,
+	'suspendJobDefinition',
+	'',
+	11);
+INSERT INTO C_IO
+	VALUES ("e008f839-4f6f-4bab-940a-5e2c5c59133a",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'suspendJobDefinition',
+	'',
+	0,
+	'',
+	"b7f6ea58-cc1f-4cfa-b3b4-f7b878bfda45");
+INSERT INTO PE_PE
+	VALUES ("27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
+	1,
+	"43d4329b-5241-4a80-b393-ee1e5a928ccf",
+	"00000000-0000-0000-0000-000000000000",
+	6);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("43d4329b-5241-4a80-b393-ee1e5a928ccf",
+	"00000000-0000-0000-0000-000000000000",
+	"be1840aa-9d3d-4f55-baec-da45c54219a5",
+	'Shared',
+	'',
+	0,
+	'../Shared.xtuml');

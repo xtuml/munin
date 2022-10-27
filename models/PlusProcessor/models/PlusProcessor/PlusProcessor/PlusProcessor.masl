@@ -1,0 +1,68 @@
+//! ACTIVITY BEGIN. '528576b9-1d88-4bf9-995d-fcfba8c282cd' DO NOT EDIT THIS LINE.
+public service SequenceProcessor::StatementParser~>getJobAndApps ( jobId : in integer ) is
+begin
+
+	StatementParser::getJobAndApps(jobId);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9c0892d2-f435-4c12-b39d-51103e70fb1a' DO NOT EDIT THIS LINE.
+public service SequenceProcessor::StatementParser~>validateStatements ( jobId : in integer,
+                                                                       plusStatements : in string ) is
+begin
+
+	StatementParser::validateStatements(jobId, plusStatements);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '80624a3c-2dcb-49bc-a39c-b9351b7aba8a' DO NOT EDIT THIS LINE.
+public service SequenceProcessor::StatementParser~>getNextStatement ( jobId : in integer ) is
+begin
+	
+	StatementParser::getNextStatement(jobId);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3497dcb1-44a2-43ec-a20d-63c9e4e916ea' DO NOT EDIT THIS LINE.
+public service StatementParser::Consumer~>fileVerified ( jobId : in integer,
+                                                        validFile : in boolean,
+                                                        failureReason : in string ) is
+begin
+
+	SequenceProcessor::fileVerified(jobId, validFile, failureReason);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a07b77c2-f6e6-4ffa-959e-d2799d3c1fad' DO NOT EDIT THIS LINE.
+public service StatementParser::Consumer~>jobAndApps ( jobId : in integer,
+                                                      jobName : in string,
+                                                      applications : in sequence of string ) is
+begin
+
+	SequenceProcessor::jobAndApps(jobId, jobName, applications);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7ca9321a-7e62-4573-a169-4f5cc57c5b77' DO NOT EDIT THIS LINE.
+public service StatementParser::Consumer~>nextStatement ( statementType : in string,
+                                                         sequenceName : in string,
+                                                         applicationName : in string,
+                                                         controlType : in string,
+                                                         eventName : in string,
+                                                         isStartEvent : in boolean,
+                                                         isEndEvent : in boolean,
+                                                         occurrenceId : in integer,
+                                                         jobId : in integer,
+                                                         allStatementsProcessed : in boolean ) is
+begin
+
+	SequenceProcessor::eventData(statementType, sequenceName, applicationName, controlType, eventName, isStartEvent, isEndEvent, occurrenceId, jobId, allStatementsProcessed);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

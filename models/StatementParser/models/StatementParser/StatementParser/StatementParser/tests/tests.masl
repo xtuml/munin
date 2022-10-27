@@ -1,0 +1,36 @@
+//! ACTIVITY BEGIN. 'b82014bd-59c5-4b44-92c8-d395bc5adc1f' DO NOT EDIT THIS LINE.
+private service StatementParser::testParser () is
+logMessage : string;
+plusStatements : string;
+fileName : Filesystem::filename := "testFiles/test-sequence.puml";
+jobId : integer := 1;
+statementType : string := "START";
+reportedStatement :  instance of _TEST_Consumer_nextStatement;
+fileVerified :  instance of _TEST_Consumer_fileVerified;
+
+begin
+
+	if Filesystem::file_exists(fileName) then
+		plusStatements := Filesystem::read_file(fileName);
+		validateStatements(jobId, plusStatements);
+		fileVerified := find_one _TEST_Consumer_fileVerified();
+		if fileVerified.validFile = true then
+			getJobAndApps(jobId);
+			getNextStatement(jobId);
+			reportedStatement := find_one _TEST_Consumer_nextStatement(allStatementsProcessed = true);
+			while reportedStatement = null loop
+				getNextStatement(jobId);
+				reportedStatement := find_one _TEST_Consumer_nextStatement(allStatementsProcessed = true);
+			end loop;
+		else
+			logMessage := "StatementParser::testParser - file verification failed " & string(fileName) & ", failure reason = " & fileVerified.failureReason;
+			Logger::log(Logger::Information, "StatementParser", logMessage);
+		end if;
+	else
+		logMessage := "StatementParser::testParser - file does not exist " & string(fileName);
+		Logger::log(Logger::Information, "StatementParser", logMessage);
+	end if;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

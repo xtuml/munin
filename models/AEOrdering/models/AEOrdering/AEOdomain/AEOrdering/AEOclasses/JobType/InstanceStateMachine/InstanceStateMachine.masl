@@ -1,0 +1,83 @@
+//! ACTIVITY BEGIN. 'a19e9f01-791c-40e7-bd19-607b8886a3ad' 'f0ae3bd4-0855-439f-9d52-f10126388dc5' DO NOT EDIT THIS LINE.
+state AEOrdering::JobType.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a19e9f01-791c-40e7-bd19-607b8886a3ad' 'd2ba58c0-6e05-4d92-ba11-0bae460d903d' DO NOT EDIT THIS LINE.
+state AEOrdering::JobType.JobTypeDeprecated () is
+begin
+	
+	// schedule to check the expiry timer
+	cancel this.expiryTimer;
+	schedule this.expiryTimer generate JobType.expireJobType() to this at this.jobTypeExpiryTime;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a19e9f01-791c-40e7-bd19-607b8886a3ad' '34af9e5e-e930-4980-933a-2dff76a087a8' DO NOT EDIT THIS LINE.
+state AEOrdering::JobType.JobTypeExpired () is
+jobs : set of instance of Job;
+application : instance of Application;
+node : instance of Node;
+constrainedDataItems : sequence of instance of ConstrainedDataItem;
+
+begin
+	
+	// fail any in progress jobs
+	jobs := this -> R12.AuditEventType -> R7.AuditEvent -> R9.Job;
+	for job in jobs loop
+		job.failJob("The job type has been deprecated and is now expired");
+		job.jobDeleted();
+	end loop;
+	
+	// report the job type as deleted
+	Req_IF_Verification~>jobTypeDeleted(this.jobTypeName);
+	
+	// remove the job type and all associated event
+	for auditEventType in this -> R12.AuditEventType loop
+		application := auditEventType -> R6.Application;
+		unlink auditEventType R6 application;
+		node := application -> R5.Node;
+		if (application -> R6.AuditEventType)'length = 0 then
+			if node /= null then
+				unlink node R5 application;
+			end if;
+			delete application;
+		end if;
+		if node /= null and (node -> R5.Application)'length = 0 then
+			delete node;
+		end if;
+		
+		for dataItemType in auditEventType -> R14.DataItemType loop
+			constrainedDataItems := dataItemType -> R15.ConstrainedDataItem;
+			unlink constrainedDataItems R15;
+			delete constrainedDataItems;
+			unlink dataItemType R14;
+			delete dataItemType;
+		end loop;
+		
+		unlink auditEventType R12;
+		unlink auditEventType R7;
+		delete auditEventType;
+		
+	end loop;
+	
+	delete this;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a19e9f01-791c-40e7-bd19-607b8886a3ad' '1433e520-9517-440f-96b7-0b01db5ddf05' DO NOT EDIT THIS LINE.
+state AEOrdering::JobType.JobTypeActive () is
+begin
+	
+	cancel this.expiryTimer;
+	if this.deprecated = true then
+		generate JobType.deprecateJobType() to this;
+	end if;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

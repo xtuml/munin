@@ -1,0 +1,81 @@
+//! ACTIVITY BEGIN. '74d12669-f0f1-4050-8f62-08b090fb01ce' DO NOT EDIT THIS LINE.
+public service AEOrdering::AcceptEvent ( jobId : in string,
+                                        nodeName : in string,
+                                        application : in string,
+                                        auditEventType : in string,
+                                        auditEventId : in string,
+                                        auditEventTime : in string,
+                                        prevAuditEventIds : in sequence of string,
+                                        auditEventData : in AuditEventDataType ) is
+logMessage : string;
+job : instance of Job;
+inProgressJob : instance of InProgressJob;
+failedJob : instance of FailedJob;
+node : instance of Node;
+auditEvent : instance of AuditEvent;
+failureReason : string;
+systemSpec : instance of SystemSpec;
+
+begin
+
+	logMessage := "AEOrdering::AcceptEvent - jobId = " & jobId & ", auditEventType = " & auditEventType & ", auditEventId = " & auditEventId;
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	job := find_one Job(jobId = jobId);
+	if job = null then
+		job := create Job(jobId => jobId, outOfSequenceEventCount => 0, jobStartTime => timestamp'now, totalOutOfSequence => 0, maxOutOfSequence => 0, Current_State => Created);
+		inProgressJob := create InProgressJob(jobId => job.jobId);
+		link inProgressJob R2 job;
+		generate Job.jobStarted() to job;
+	end if;
+	
+	// create the audit event
+	if job -> R2.FailedJob /= null then
+		failureReason := "Job has failed";
+	elsif job -> R2.ArchivedJob /= null then
+		failureReason := "Job is already archived";
+	end if;
+	auditEvent := AuditEvent.createAuditEvent(job, nodeName, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData, failureReason);
+	
+	// check if the audit event is blocked
+	if auditEvent = null or job -> R2.ArchivedJob /= null or job -> R2.FailedJob /= null then
+		job.failJob(failureReason);
+	elsif auditEvent -> R4.BlockedAuditEvent /= null then
+		link auditEvent R1 job;
+		job.outOfSequenceEventCount := (job -> R1.AuditEvent)'length;
+		// if this out of sequence event count is higher than the current max out of sequence then update the current max out of sequence
+		if job.outOfSequenceEventCount > job.maxOutOfSequence then
+			job.maxOutOfSequence := job.outOfSequenceEventCount;
+		end if;
+		// if we have exceeded the max out of sequence events then fail the job
+		systemSpec := find_one SystemSpec();
+		if job.outOfSequenceEventCount >= systemSpec.maxOutOfSequenceEvents then
+			failureReason := "Maximum out of sequence events reached, max = " & systemSpec.maxOutOfSequenceEvents'image;
+			job.failJob(failureReason);
+		end if;
+		
+	// check if the audit event is failed and if so migrate the job to failed
+	elsif auditEvent -> R4.FailedAuditEvent /= null and job -> R2.InProgressJob /= null then
+		job.failJob(failureReason);
+	end if;
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd313277c-1d1c-4def-8303-bc6aa6b950dd' DO NOT EDIT THIS LINE.
+public service AEOrdering::deleteJob ( jobId : in string ) is
+logMessage : string;
+job : instance of Job;
+
+begin
+	logMessage := "AEOrdering::AcceptEvent - jobId = " & jobId;
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	job := find_one Job(jobId = jobId);
+	if job /= null then
+		job.jobDeleted();
+	end if;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

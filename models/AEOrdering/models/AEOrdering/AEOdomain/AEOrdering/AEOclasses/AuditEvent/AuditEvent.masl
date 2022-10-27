@@ -1,0 +1,182 @@
+//! ACTIVITY BEGIN. '132f9323-3874-4c33-a0e6-bef8cf58ded1' DO NOT EDIT THIS LINE.
+public service AEOrdering::AuditEvent.createAuditEvent ( job : in instance of Job,
+                                                        nodeName : in string,
+                                                        applicationName : in string,
+                                                        auditEventType : in string,
+                                                        auditEventId : in string,
+                                                        auditEventTime : in string,
+                                                        prevAuditEventIds : in sequence of string,
+                                                        auditEventData : in AuditEventDataType,
+                                                        failureReason : out string ) return instance of AuditEvent is
+logMessage : string;
+auditEvent : instance of AuditEvent;
+reportedAuditEvent : instance of ReportedAuditEvent;
+blockedAuditEvent : instance of BlockedAuditEvent;
+failedAuditEvent : instance of FailedAuditEvent;
+previousJob : instance of Job;
+previousAuditEvent : instance of PreviousAuditEvent;
+
+begin
+	
+	logMessage := "AEOrdering::AuditEvent.createAuditEvent";
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	// verify that the audit event does not already exist
+	auditEvent := find_one AuditEvent(auditEventId = auditEventId);
+	if auditEvent = null then
+		auditEvent := create AuditEvent(auditEventId => auditEventId, reportedEventType => auditEventType, reportedApplication => applicationName,
+			                            reportedNodeName => nodeName, reportedAuditEventTime => auditEventTime, reportedPrevEventIds => prevAuditEventIds, 
+			                            eventCreationTime => timestamp'now, eventState => EventStateEnum.BLOCKED, auditEventData => auditEventData);
+		link auditEvent R9 job;
+		for prevEventId in prevAuditEventIds loop
+			previousAuditEvent := find_one (auditEvent -> R13.PreviousAuditEvent)(previousAuditEventId = prevEventId and auditEventId = auditEvent.auditEventId);
+			if previousAuditEvent = null then
+				previousAuditEvent := create PreviousAuditEvent(previousAuditEventId => prevEventId,  auditEventId => auditEvent.auditEventId);
+				link auditEvent R13 previousAuditEvent;
+			end if;
+		end loop;
+		auditEvent.setEventState(job, failureReason);
+		case auditEvent.eventState is
+			when EventStateEnum.REPORTED =>
+				begin
+					reportedAuditEvent := create ReportedAuditEvent(auditEventId => auditEvent.auditEventId);
+					link reportedAuditEvent R4 auditEvent;
+					// locate any events that are followed by this event
+					auditEvent.linkPreviousEvents(job);
+					// report the event
+					reportedAuditEvent.reportEvent();
+				end;
+			when EventStateEnum.BLOCKED =>
+				begin
+					blockedAuditEvent := create BlockedAuditEvent(auditEventId => auditEvent.auditEventId, Current_State => Created);
+					link blockedAuditEvent R4 auditEvent;
+					// locate any events that are followed by this event
+					auditEvent.linkPreviousEvents(job);
+					job.totalOutOfSequence := job.totalOutOfSequence + 1;
+					generate BlockedAuditEvent.eventBlocked() to blockedAuditEvent;
+				end;
+			when EventStateEnum.FAILED =>
+				begin
+					failedAuditEvent := create FailedAuditEvent(auditEventId => auditEventId, failureTime => timestamp'now, failureReason => failureReason);
+					link failedAuditEvent R4 auditEvent;
+					logMessage := "AEOrdering::AuditEvent.createAuditEvent - " & failureReason;
+					Logger::log(Logger::Error, "AEOrdering", logMessage);
+				end;
+		end case;
+	else
+		
+		// the audit event already exists check if it was in a previous job or for the same job and report the failure
+		previousJob := auditEvent -> R9.Job;
+		if previousJob = job then
+			failureReason := "Audit Event has previously been reported for the same job, jobId = " & job.jobId & ", auditEventId = " & auditEventId;
+		else
+			failureReason := "Audit Event has previously been reported for a different job, jobId = " & job.jobId & ", auditEventId = " & auditEventId & ", previous jobId = " & previousJob.jobId;
+		end if;
+		auditEvent := null;
+		logMessage := "AEOrdering::AuditEvent.createAuditEvent - " & failureReason;
+		Logger::log(Logger::Error, "AEOrdering", logMessage);
+	
+	end if;
+	
+	return auditEvent;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'ca3f8c05-5cac-45fe-ae6e-8b7ef6387d97' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::AuditEvent.setEventState ( job : in instance of Job,
+                                                              failureReason : out string ) is
+logMessage : string;
+eventTime : timestamp;
+eventType : instance of AuditEventType;
+lastReportedAuditEvent : instance of AuditEvent;
+previousReportedEvents : sequence of instance of ReportedAuditEvent;
+previousEventsReported : boolean := false;
+
+begin
+	
+	logMessage := "AEOrdering::AuditEvent.setEventState";
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	// verify that this is an allowed event
+	if (job -> R2.InProgressJob /= null) and Application.validEvent(this, failureReason) then
+		
+		// we have a valid audit event so we now need to determine if it can be reported or if it is blocked
+		eventType := this -> R7.AuditEventType;
+		eventTime := timestamp'parse(this.reportedAuditEventTime);
+		if eventTime + eventType.staleAuditEventDuration < timestamp'now then
+			this.eventState := EventStateEnum.FAILED;
+			failureReason := "The reported event is older than the stale event time out, auditEventId = " & auditEventId & ",eventTime = " & eventTime'image & 
+			                 "reportedTime = " & this.eventCreationTime'image; 
+		elsif this.reportedPrevEventIds'length = 0 then
+			// this is a therefore we can report it first event 
+			link this R10 job;
+			this.eventState := EventStateEnum.REPORTED;
+		else
+			lastReportedAuditEvent := job -> R3.AuditEvent;
+			if lastReportedAuditEvent = null then
+				// we have not reported any events and therefore we must be waiting 
+				// for the first event of the job
+				this.eventState := EventStateEnum.BLOCKED;
+			else
+				// check if the previous events has been reported and if so we can report this event
+				previousReportedEvents := job -> R9.AuditEvent -> R4.ReportedAuditEvent;
+				previousEventsReported := true;
+				for prevAuditEvent in this -> R13.PreviousAuditEvent loop
+					if find_one previousReportedEvents(auditEventId = prevAuditEvent.previousAuditEventId) = null then
+						previousEventsReported := false;
+						exit;
+					end if;
+				end loop;
+				if previousEventsReported = true then
+					this.eventState := EventStateEnum.REPORTED;
+				else
+					this.eventState := EventStateEnum.BLOCKED;
+				end if;
+			end if;
+		end if;
+		
+	else
+		this.eventState := EventStateEnum.FAILED;
+	end if;
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'efb9ae73-3c2f-49e1-9a45-a26328b55721' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::AuditEvent.linkPreviousEvents ( job : in instance of Job ) is
+followedByAuditEvents : sequence of instance of PreviousAuditEvent;
+
+jobAuditEvents : sequence of instance of AuditEvent;
+selectedAuditEvents : sequence of instance of AuditEvent;
+associatedAuditEvent : instance of AssociatedAuditEvent;
+
+
+begin
+	
+	jobAuditEvents := job -> R9.AuditEvent;
+	// locate any events that are followed by this event
+	followedByAuditEvents := find (jobAuditEvents -> R13.PreviousAuditEvent)(previousAuditEventId = this.auditEventId);
+	selectedAuditEvents := followedByAuditEvents -> R13.AuditEvent;
+	for jobAuditEvent in selectedAuditEvents loop
+		if find_one AssociatedAuditEvent(followsauditEventId = this.auditEventId and followedByauditEventId = jobAuditEvent.auditEventId) = null then
+			associatedAuditEvent := create AssociatedAuditEvent(followsauditEventId => this.auditEventId, followedByauditEventId => jobAuditEvent.auditEventId, associatedTime => timestamp'now);
+			link this R11.isFollowedBy jobAuditEvent using associatedAuditEvent;
+		end if;
+	end loop;
+	
+	// locate any events that this event follows
+	selectedAuditEvents := null;
+	for prevEvent in this -> R13.PreviousAuditEvent loop
+		selectedAuditEvents := selectedAuditEvents & find jobAuditEvents(auditEventId = prevEvent.previousAuditEventId);
+	end loop;
+	for jobAuditEvent in selectedAuditEvents loop
+		if find_one AssociatedAuditEvent(followsauditEventId = jobAuditEvent.auditEventId and followedByauditEventId = this.auditEventId) = null then
+			associatedAuditEvent := create AssociatedAuditEvent(followsauditEventId => jobAuditEvent.auditEventId, followedByauditEventId => this.auditEventId, associatedTime => timestamp'now);
+			link this R11.follows jobAuditEvent using associatedAuditEvent;
+		end if;
+	end loop;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

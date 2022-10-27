@@ -1,0 +1,25 @@
+{
+  "$schema": "/opt/masl/share/json/json-metaschema.json",
+  "$id": "audit_event_schema.json",
+  "title": "Audit Event Definition",
+  "description": "Defines a valid audit event sequence with node names and comments",
+  "type": "array",
+  "items": {
+    "oneOf": [
+      {
+        "type": "string"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "__comment__": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "minProperties": 1
+      },
+      {"$ref": "/install/share/json/audit_event_schema.json"}
+    ]
+  }
+}

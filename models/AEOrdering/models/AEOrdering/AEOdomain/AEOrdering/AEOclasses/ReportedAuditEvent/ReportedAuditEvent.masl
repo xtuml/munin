@@ -1,0 +1,66 @@
+//! ACTIVITY BEGIN. 'c6da956b-01c1-4061-8e07-9f0c61f1548c' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::ReportedAuditEvent.reportEvent () is
+logMessage : string;
+auditEvent : instance of AuditEvent;
+job : instance of Job;
+blockedAuditEvent : instance of BlockedAuditEvent;
+lastReportedAuditEvent : instance of AuditEvent;
+reportedAuditEvent : instance of ReportedAuditEvent;
+theAuditEventData : AuditEventDataType;
+reportableAuditEventData : ReportableAuditEventDataType;
+allReportableAuditEventData : sequence of ReportableAuditEventDataType;
+
+begin
+	
+	logMessage := "AEOrdering::ReportedAuditEvent.reportEvent";
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	this.eventReportedTime := timestamp'now;
+	
+	// report the event
+	auditEvent := this -> R4.AuditEvent;
+	job := auditEvent -> R9.Job;
+	if job -> R3.AuditEvent /= null then
+		unlink job R3;
+	end if;
+	link auditEvent R3 job;
+	if auditEvent -> R1.Job /= null then
+		unlink auditEvent R1;
+		job.outOfSequenceEventCount := (job -> R1.AuditEvent)'length;
+	end if;
+	
+	// build the audit data details to be reported
+	theAuditEventData := auditEvent.auditEventData;
+	for auditEventData in auditEvent -> R7.AuditEventType -> R14.DataItemType loop
+		if theAuditEventData.dataItems'contains(auditEventData.dataItemName) = true then
+			reportableAuditEventData.dataName := auditEventData.dataItemName;
+			reportableAuditEventData.dataKind := DataKindType'value(auditEventData.dataItemType);
+			reportableAuditEventData.dataValue := theAuditEventData.dataItems[auditEventData.dataItemName];
+			allReportableAuditEventData := allReportableAuditEventData & reportableAuditEventData;
+		end if;
+	end loop;
+	
+	Req_IF_Verification~>audit_event(job.jobId, auditEvent.reportedNodeName, auditEvent.reportedApplication, auditEvent.reportedEventType, 
+		                             auditEvent.auditEventId, auditEvent.reportedAuditEventTime, auditEvent.reportedPrevEventIds, allReportableAuditEventData);
+	// check for any following events that need reporting
+	for followedByEvent in (auditEvent -> R11.isFollowedBy.AuditEvent) loop
+		// this event should be blocked and if it is not then an error has occurred
+		blockedAuditEvent := followedByEvent -> R4.BlockedAuditEvent;
+		if blockedAuditEvent /= null then
+			unlink blockedAuditEvent R4 followedByEvent;
+			reportedAuditEvent := create ReportedAuditEvent(auditEventId => followedByEvent.auditEventId);
+			link reportedAuditEvent R4 followedByEvent;
+			cancel blockedAuditEvent.blockedEventTimer;
+			delete blockedAuditEvent;
+			followedByEvent.eventState := EventStateEnum.REPORTED;
+			reportedAuditEvent.reportEvent();
+		else
+			logMessage := "AEOrdering::ReportedAuditEvent.reportEvent, followed by event was not blocked";
+			Logger::log(Logger::Error, "AEOrdering", logMessage);
+			raise program_error;
+		end if;
+	end loop;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

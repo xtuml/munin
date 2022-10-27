@@ -1,0 +1,198 @@
+//! ACTIVITY BEGIN. '72df1002-232e-4515-8231-e5da5231c5bf' DO NOT EDIT THIS LINE.
+private service AESimulator::registerCommanLineArgs () is
+begin
+  // The domain needs to be started with the command line argument -test-config
+  // that specifies where to find the configuration file;
+  CommandLine::register_value(
+    "-test-config",
+    "The test configuration file",
+    CommandLine::Required,
+    "test-config",
+    CommandLine::Required,
+    CommandLine::Single);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '1e02e3af-a8f5-4c29-b7d2-09120da69fd6' DO NOT EDIT THIS LINE.
+private service AESimulator::initialise () is
+logMessage : string;
+configFilePath : string;
+configData : string;
+configLines : sequence of string;
+configLine : string;
+configElements : sequence of string;
+seperator : character := '=';
+testDefinition : instance of TestDefinition;
+testDefinitions : sequence of instance of TestDefinition;
+job : instance of Job;
+eventDefinition : instance of EventDefinition;
+prevEventDefinition : instance of EventDefinition;
+testId : integer;
+jobSpecName : string;
+jobSpec : instance of JobSpec;
+eventTypeName : string;
+eventElements : sequence of string;
+nodeName : string;
+applicationName : string;
+delayDuration : duration;
+eventId : string;
+prevEventId : string;
+sequenceStart : boolean;
+testJobSpecName : string;
+testJobSpec : instance of TestJobSpec;
+eventDispatchOrder : instance of EventDispatchOrder;
+eventDispatchIdList : sequence of string;
+emptyEventDispatchIdList : sequence of string;
+eventDefintions : sequence of instance of EventDefinition;
+prevEventDispatchOrder : instance of EventDispatchOrder;
+
+begin
+  
+  logMessage := "AESimulator::initialise";
+  Logger::log(Logger::Information, "AESimulator", logMessage);
+  
+  // check the config file has not been removed
+  configFilePath := CommandLine::get_option_value("-test-config");
+  
+  if Filesystem::file_exists(Filesystem::filename(configFilePath)) then
+    // read the contents of the config file - t
+    configData := Filesystem::read_file(Filesystem::filename(configFilePath));
+    configLines := Strings::tokenize(configData, '\n');
+    for line in configLines loop
+      configLine := Strings::trim(line);
+      if configLine = "" then
+        null;  // Ignore blank lines
+      elsif configLine = "Test" then
+        testDefinition := null;
+      elsif configLine = "TestJobSpec" then
+        eventDispatchOrder := null;
+      elsif configLine = "Job" then
+        job := null;
+        eventDefinition := null;
+        prevEventDefinition := null;
+      elsif configLine = "EventDefinition" then
+        eventDefinition := null;
+      else
+        configElements := Strings::tokenize(configLine, seperator);
+        if configElements[configElements'first] = "TestId" then
+          testId := integer'parse(configElements[configElements'last]);
+          testDefinition := find_one TestDefinition(testId = testId);;
+          if testDefinition = null then
+            testDefinition := create unique TestDefinition(testId => testId, testCount => 0, Current_State => Created);
+            testDefinitions := testDefinitions & testDefinition;
+          else
+            logMessage := "AESimulator::initialise - invalid configuration file duplicate test id = " & testId'image;
+            Logger::log(Logger::Error, "AESimulator", logMessage);
+            raise program_error;
+          end if;
+        elsif configElements[configElements'first] = "TestName" then
+          testDefinition.testName := configElements[configElements'last];
+        elsif configElements[configElements'first] = "GenerateEventFiles" then
+          testDefinition.generateTestFiles := boolean'parse(configElements[configElements'last]);
+        elsif configElements[configElements'first] = "TestFileLocation" then
+          testDefinition.testFileLocation := configElements[configElements'last];
+        elsif configElements[configElements'first] = "TestFileDestination" then
+          testDefinition.testFileDestination := configElements[configElements'last];
+        elsif configElements[configElements'first] = "TotalTests" then
+          testDefinition.totalTests := integer'parse(configElements[configElements'last]);
+        elsif configElements[configElements'first] = "TestFrequency" then
+          testDefinition.testFrequency := duration'parse(configElements[configElements'last]);
+        elsif configElements[configElements'first] = "TestJobSpecName" then
+          testJobSpecName := configElements[configElements'last];
+          jobSpec := find_one JobSpec(jobSpecName = testJobSpecName);
+          testJobSpec := testDefinition with jobSpec -> R8.TestJobSpec;
+          if jobSpec /= null and testJobSpec = null then
+            testJobSpec := create TestJobSpec(testId => testDefinition.testId, jobSpecName => jobSpec.jobSpecName);
+            link jobSpec R8 testDefinition using testJobSpec;
+          else
+		    logMessage := "AESimulator::initialise, failed to find job spec for test, job spec name = " & jobSpecName & " testId = " & testDefinition.testId'image;
+		    Logger::log(Logger::Error, "AESimulator", logMessage);
+		    raise program_error;
+          end if;
+        elsif configElements[configElements'first] = "EventDispatchOrder" then
+          eventDispatchIdList := emptyEventDispatchIdList;
+          prevEventDispatchOrder := null;
+          eventDispatchIdList := Strings::tokenize(configElements[configElements'last], ',');
+          eventDefintions := jobSpec -> R9.EventDefinition;
+          testJobSpec := testDefinition with jobSpec -> R8.TestJobSpec;
+          for eventDispatchId in eventDispatchIdList loop
+          	eventDefinition := find_one eventDefintions(eventDefinitionId = eventDispatchId and jobSpecName = testJobSpec.jobSpecName);;
+          	if eventDefinition /= null then
+          		eventDispatchOrder := eventDefinition with testDefinition -> R14.EventDispatchOrder;
+          		if eventDispatchOrder = null then
+          			eventDispatchOrder := create EventDispatchOrder(eventDefinitionId => eventDispatchId, 
+          				                                            jobSpecName => testJobSpec.jobSpecName,
+          				                                            testId => testDefinition.testId);
+          			link eventDefinition R14 testDefinition using eventDispatchOrder;
+          			if testJobSpec -> R12.EventDispatchOrder = null then
+          				link testJobSpec R12 eventDispatchOrder;
+          			end if;
+          			if prevEventDispatchOrder /= null then
+          				link eventDispatchOrder R13.previousEvent prevEventDispatchOrder;
+          			end if;
+          			prevEventDispatchOrder := eventDispatchOrder; 
+          		else
+		            logMessage := "AESimulator::initialise - invalid configuration duplicate event definition for EventDispatchOrder, eventDispacthId = " & eventDispatchId & "job spec name = " & jobSpecName;
+		            Logger::log(Logger::Error, "AESimulator", logMessage);
+          		end if;
+          	else
+	            logMessage := "AESimulator::initialise - invalid configuration failed to find event definition for EventDispatchOrder, eventDispacthId = " & eventDispatchId & "job spec name = " & jobSpecName;
+	            Logger::log(Logger::Error, "AESimulator", logMessage);
+	            raise program_error;
+          	end if;
+          end loop;
+        elsif configElements[configElements'first] = "JobSpecName" then
+          jobSpecName := configElements[configElements'last];
+          jobSpec := find_one JobSpec(jobSpecName = jobSpecName);
+          if jobSpec = null then
+            jobSpec := create JobSpec(jobSpecName => jobSpecName);
+          else
+            logMessage := "AESimulator::initialise - invalid configuration file duplicate job spec name = " & jobSpecName;
+            Logger::log(Logger::Error, "AESimulator", logMessage);
+            raise program_error;
+          end if;
+        elsif configElements[configElements'first] = "EventName" then
+          eventElements := Strings::tokenize(configElements[configElements'last], ',');
+          eventId := eventElements[eventElements'first];
+          eventTypeName := eventElements[eventElements'first + 1];
+          nodeName := eventElements[eventElements'first + 2];
+          applicationName := eventElements[eventElements'first + 3];
+          delayDuration := duration'parse(eventElements[eventElements'first + 4]);
+          sequenceStart := boolean'parse(eventElements[eventElements'first + 5]);
+          if eventElements'length = (eventElements'first + 6) then
+            prevEventId := eventElements[eventElements'first + 6];
+          end if;
+          eventDefinition := create EventDefinition(eventDefinitionId => eventId, jobSpecName => jobSpec.jobSpecName, eventTypeName => eventTypeName, nodeName=> nodeName, 
+                                                  applicationName => applicationName, delayDuration => delayDuration, prevId => prevEventId, sequenceStart => sequenceStart);
+          link jobSpec R9 eventDefinition;
+          prevEventDefinition := find_one (jobSpec -> R9.EventDefinition)(eventDefinitionId = prevEventId);
+          if prevEventDefinition /= null then
+            link eventDefinition R1.follows prevEventDefinition;
+          else
+            link jobSpec R2 eventDefinition;
+          end if;
+        end if;
+      end if;
+    end loop;
+    
+    // now the config is loaded start the jobs
+    for testDefinition in testDefinitions loop
+      generate TestDefinition.startTest() to testDefinition;
+    end loop;
+    
+  else
+    logMessage := "AESimulator::initialise, failed to locate config file. Specified file = " & configFilePath;
+    Logger::log(Logger::Error, "AESimulator", logMessage);
+    raise program_error;
+  end if;
+  
+exception
+  when program_error =>
+    raise program_error;
+  when others =>   
+    logMessage := "AESimulator::initialise, failed to load configuration file";
+    Logger::log(Logger::Error, "AESimulator", logMessage);
+    
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

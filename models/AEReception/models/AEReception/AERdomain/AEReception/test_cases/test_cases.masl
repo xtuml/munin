@@ -1,0 +1,377 @@
+//! ACTIVITY BEGIN. 'd507866f-4579-4744-a871-2284db088ea1' DO NOT EDIT THIS LINE.
+private service AEReception::basicTest01 () is
+incomingDirectory: readonly Filesystem::filename := "./incoming/";
+testDirectory: readonly Filesystem::filename := "./testing/";
+testFile: readonly Filesystem::filename := "basicTest01.json";
+auditEvents: set of instance of _TEST_Req_IF_Ordering_AcceptEvent;
+auditEvent: instance of _TEST_Req_IF_Ordering_AcceptEvent;
+logMessage : string;
+
+begin
+
+  // clear the domain down
+  AEReception::clearDomain();
+  
+  // Copy a file into the incoming folder, wait for the file to be processed and
+  // assure the correct terminator message has been called
+  
+  // copy the test file into the incoming directory
+  Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
+  
+  // service the event queues and scheduled timers up to 2s in the future
+  Test::service_event_queue();
+  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+  Test::service_event_queue();
+  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+  Test::service_event_queue();
+  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+  
+  // confirm that the terminator was invoked the correct number of times
+  auditEvents := find _TEST_Req_IF_Ordering_AcceptEvent ();
+  Assertions::assertTrue(auditEvents'length = 3, "wrong number of audit events created: " & (auditEvents'length)'image);
+  
+  // confirm that the first audit event has the correct parameter values
+  auditEvent := find_only _TEST_Req_IF_Ordering_AcceptEvent (auditEventId = "dea5b47b-438b-47b0-8046-585254327fd2");
+  Assertions::assertTrue(auditEvent /= null, "Failed to find audit event with ID: " & "dea5b47b-438b-47b0-8046-585254327fd2");
+  Assertions::assertEquals("TestEvent1", auditEvent.auditEventType);
+  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", auditEvent.jobId);
+  Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", auditEvent.auditEventId);
+  Assertions::assertTrue((auditEvent.prevAuditEventIds'length = 0), "basicTest01: Failed as verification reported prevEventIds was invalid " & auditEvent.prevAuditEventIds'length'image);
+  Assertions::assertEquals("2021-05-13T10:07:34Z", auditEvent.auditEventTime);
+  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", auditEvent.application);
+  Assertions::assertEquals("node1", auditEvent.nodeName);
+  
+  // confirm that the second audit event has the correct parameter values
+  auditEvent := find_only _TEST_Req_IF_Ordering_AcceptEvent (auditEventId = "735cc6c2-05e1-437f-a3e8-3b2cc36803a4");
+  Assertions::assertTrue(auditEvent /= null, "Failed to find audit event with ID: " & "735cc6c2-05e1-437f-a3e8-3b2cc36803a4");
+  Assertions::assertEquals("TestEvent2", auditEvent.auditEventType);
+  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", auditEvent.jobId);
+  Assertions::assertEquals("735cc6c2-05e1-437f-a3e8-3b2cc36803a4", auditEvent.auditEventId);
+  Assertions::assertTrue((auditEvent.prevAuditEventIds'length = 1), "basicTest01: Failed as verification reported prevEventIds was invalid " & auditEvent.prevAuditEventIds'length'image);
+  Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", auditEvent.prevAuditEventIds'any);
+  Assertions::assertEquals("2021-05-13T10:07:35Z", auditEvent.auditEventTime);
+  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", auditEvent.application);
+  Assertions::assertEquals("node1", auditEvent.nodeName);
+  
+  // confirm that the third audit event has the correct parameter values
+  auditEvent := find_only _TEST_Req_IF_Ordering_AcceptEvent (auditEventId = "daf4d86c-084b-49cc-acfb-f558eeef6e80");
+  Assertions::assertTrue(auditEvent /= null, "Failed to find audit event with ID: " & "daf4d86c-084b-49cc-acfb-f558eeef6e80");
+  Assertions::assertEquals("TestEvent3", auditEvent.auditEventType);
+  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", auditEvent.jobId);
+  Assertions::assertEquals("daf4d86c-084b-49cc-acfb-f558eeef6e80", auditEvent.auditEventId);
+  Assertions::assertTrue((auditEvent.prevAuditEventIds'length = 2), "basicTest01: Failed as verification reported prevEventIds was invalid " & auditEvent.prevAuditEventIds'length'image);
+  Assertions::assertTrue((auditEvent.prevAuditEventIds'get_unique intersection "dea5b47b-438b-47b0-8046-585254327fd2")'length = 1, "Missing previous audit event id: " & "dea5b47b-438b-47b0-8046-585254327fd2");
+  Assertions::assertTrue((auditEvent.prevAuditEventIds'get_unique intersection "735cc6c2-05e1-437f-a3e8-3b2cc36803a4")'length = 1, "Missing previous audit event id: " & "735cc6c2-05e1-437f-a3e8-3b2cc36803a4");
+  Assertions::assertEquals("2021-05-13T10:07:36Z", auditEvent.auditEventTime);
+  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", auditEvent.application);
+  Assertions::assertEquals("node1", auditEvent.nodeName);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd4d4c832-e7d5-41a4-ace3-c832a06fa75d' DO NOT EDIT THIS LINE.
+private service AEReception::testConfigLoad () is
+receptionSpec : instance of ReceptionSpec;
+configFile : string := "test_config.json";
+
+begin
+
+	// clear the domain down
+	AEReception::clearDomain();
+	
+	// the config file should have been loaded so we want to check that the spec class has been created corretcly
+	receptionSpec := find_one ReceptionSpec ();
+	Assertions::assertTrue(receptionSpec.concurrentReceptionLimit = 1, "invalid  concurrentReceptionLimit, expected 1 found " & receptionSpec.concurrentReceptionLimit'image);
+	Assertions::assertTrue(receptionSpec.receptionDeletionTime = @PT10M@, "invalid  receptionDeletionTime, expected 10M found " & receptionSpec.receptionDeletionTime'image);
+	Assertions::assertTrue(receptionSpec.eventThrottleRate = @PT0S@, "invalid  eventThrottleRate, expected 0S found " & receptionSpec.eventThrottleRate'image);
+	Assertions::assertTrue(receptionSpec.processedDirectory = "./processed", "invalid  processedDirectory, expected ./processed found " & receptionSpec.processedDirectory);
+	Assertions::assertTrue(receptionSpec.processingDirectory = "./processing", "invalid  processingDirectory, expected ./processing found " & receptionSpec.processingDirectory);
+	Assertions::assertTrue(receptionSpec.incomingDirectory = "./incoming", "invalid  processingDirectory, expected ./incoming found " & receptionSpec.incomingDirectory);
+	Assertions::assertTrue(receptionSpec.specUpdateRate = @PT2M@, "invalid specUpdateRate, expected 2M found " & receptionSpec.specUpdateRate'image);
+	
+	// fire the timer to check if the config class has not been as the config file has not changed
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'minutes(2));
+	Assertions::assertTrue(receptionSpec.concurrentReceptionLimit = 1, "invalid  concurrentReceptionLimit, expected 1 found " & receptionSpec.concurrentReceptionLimit'image);
+	Assertions::assertTrue(receptionSpec.receptionDeletionTime = @PT10M@, "invalid  receptionDeletionTime, expected 10M found " & receptionSpec.receptionDeletionTime'image);
+	Assertions::assertTrue(receptionSpec.eventThrottleRate = @PT0S@, "invalid  eventThrottleRate, expected 0 found " & receptionSpec.eventThrottleRate'image);
+	Assertions::assertTrue(receptionSpec.processedDirectory = "./processed", "invalid  processedDirectory, expected ./processed found " & receptionSpec.processedDirectory);
+	Assertions::assertTrue(receptionSpec.processingDirectory = "./processing", "invalid  processingDirectory, expected ./processing found " & receptionSpec.processingDirectory);
+	Assertions::assertTrue(receptionSpec.incomingDirectory = "./incoming", "invalid  processingDirectory, expected ./incoming found " & receptionSpec.incomingDirectory);
+	Assertions::assertTrue(receptionSpec.specUpdateRate = @PT2M@, "invalid specUpdateRate, expected 2M found " & receptionSpec.specUpdateRate'image);
+	
+	// put a new config file in place
+	receptionSpec.configFile := configFile;
+	Filesystem::touch_file(Filesystem::filename(receptionSpec.configFilePath & configFile));
+	
+	// fire the timer to check the config file
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'minutes(2));
+	
+	// verify that the config file has been updated
+	Assertions::assertTrue(receptionSpec.concurrentReceptionLimit = 10, "invalid  concurrentReceptionLimit, expected 10 found " & receptionSpec.concurrentReceptionLimit'image);
+	Assertions::assertTrue(receptionSpec.receptionDeletionTime = @PT20M@, "invalid  receptionDeletionTime, expected 20M found " & receptionSpec.receptionDeletionTime'image);
+	Assertions::assertTrue(receptionSpec.eventThrottleRate = @PT10S@, "invalid  eventThrottleRate, expected 10 found " & receptionSpec.eventThrottleRate'image);
+	Assertions::assertTrue(receptionSpec.processedDirectory = "./processed-test", "invalid  processedDirectory, expected ./processed-test found " & receptionSpec.processedDirectory);
+	Assertions::assertTrue(receptionSpec.processingDirectory = "./processing-test", "invalid  processingDirectory, expected ./processing-test found " & receptionSpec.processingDirectory);
+	Assertions::assertTrue(receptionSpec.incomingDirectory = "./incoming-test", "invalid  processingDirectory, expected ./incoming-test found " & receptionSpec.incomingDirectory);
+	Assertions::assertTrue(receptionSpec.specUpdateRate = @PT10M@, "invalid specUpdateRate, expected 10M found " & receptionSpec.specUpdateRate'image);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a9fd047c-7666-4134-8f37-09c1747e14b0' DO NOT EDIT THIS LINE.
+private service AEReception::clearDomain () is
+begin
+
+	// delete all receptions
+	for reception in find Reception() loop
+		unlink reception R2;
+		delete reception;
+	end loop;
+	
+	// delete all the event files
+	for eventFile in find EventFile() loop
+		unlink eventFile R1;
+		unlink eventFile R2;
+		delete eventFile;
+	end loop;
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '2a0c19de-ad2e-44a7-a3e3-d8196449857e' DO NOT EDIT THIS LINE.
+private service AEReception::testFileCapacityManagement () is
+incomingDirectory: readonly Filesystem::filename := "./incoming/";
+testDirectory: readonly Filesystem::filename := "./testing/";
+testFile: readonly Filesystem::filename := "capacityTest01.json";
+testFile2: readonly Filesystem::filename := "capacityTest02.json";
+testFile3: readonly Filesystem::filename := "capacityTest03.json";
+testFile4: readonly Filesystem::filename := "capacityTest04.json";
+auditEvents: set of instance of _TEST_Req_IF_Ordering_AcceptEvent;
+auditEvent: instance of _TEST_Req_IF_Ordering_AcceptEvent;
+eventFiles : sequence of instance of EventFile;
+eventFile : instance of EventFile;
+receptionJobs : sequence of instance of Reception;
+receptionSpec : instance of ReceptionSpec;
+jobId1 : string := "8a783c30-3161-4cca-9ac1-37f6b50fe6e1";
+auditEventId1 : string := "dea5b47b-438b-47b0-8046-585254327f21";
+jobId2 : string := "8a783c30-3161-4cca-9ac1-37f6b50fe6e2";
+auditEventId2 : string := "dea5b47b-438b-47b0-8046-585254327fd2";
+
+begin
+
+	// clear the domain down
+	AEReception::clearDomain();
+	delete (find _TEST_Req_IF_Ordering_AcceptEvent());
+	  
+	// copy the test file into the incoming directory
+	Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
+	Filesystem::copy_file(testDirectory & testFile2, incomingDirectory & testFile2);
+
+	// service the event queues and scheduled timers up to 2s in the future
+	// this should force file control to detect the incoming files and assign
+	// one of them to be processed
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+
+	// confirm that the terminator was invoked exactly once
+	auditEvents := find _TEST_Req_IF_Ordering_AcceptEvent ();
+	Assertions::assertTrue(auditEvents'length = 1, "wrong number of audit events created: " & (auditEvents'length)'image);
+  
+	// verify that we have one file that has been assigned 
+ 	eventFiles := find EventFile (assigned = true);
+	Assertions::assertTrue(eventFiles'length = 1, "wrong number of assigned event files, expected 1 found: " & (eventFiles'length)'image);
+   	eventFile := eventFiles'any;
+
+	// confirm that the single audit event has the correct parameter values
+	auditEvent := auditEvents'any;
+	if eventFile.fileName = string(testFile) then
+		Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", auditEvent.jobId);
+		Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327f21", auditEvent.auditEventId);
+	elsif eventFile.fileName = string(testFile2) then
+		Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e2", auditEvent.jobId);
+		Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", auditEvent.auditEventId);
+	else
+		Assertions::assertTrue(false, "Invalid event file assigned");
+	end if;
+	
+	// verify that we have one file that is unaasigned
+   	eventFiles := find EventFile (assigned = false);
+	Assertions::assertTrue(eventFiles'length = 1, "wrong number of unassigned event files, expected 1 found: " & (eventFiles'length)'image);
+   	receptionJobs := find Reception (receptionComplete = true);
+	Assertions::assertTrue(receptionJobs'length = 1, "wrong number of reception jobs, expected 1 found: " & (eventFiles'length)'image);
+	delete auditEvents;
+	
+	// force the next file to be processed
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+			
+	// confirm that the terminator was invoked exactly once
+	auditEvents := find _TEST_Req_IF_Ordering_AcceptEvent ();
+	Assertions::assertTrue(auditEvents'length = 1, "wrong number of audit events created: " & (auditEvents'length)'image);
+  
+	// verify that we have two files that has been assigned
+ 	eventFiles := find EventFile (assigned = true);
+	Assertions::assertTrue(eventFiles'length = 2, "wrong number of assigned event files, expected 2 found: " & (eventFiles'length)'image);
+   	eventFile := find_one eventFiles(fileName /= eventFile.fileName);
+	
+	// confirm that the single audit event has the correct parameter values
+	auditEvent := auditEvents'any;
+	if eventFile.fileName = string(testFile) then
+		Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", auditEvent.jobId);
+		Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327f21", auditEvent.auditEventId);
+	elsif eventFile.fileName = string(testFile2) then
+		Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e2", auditEvent.jobId);
+		Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", auditEvent.auditEventId);
+	else
+		Assertions::assertTrue(false, "Invalid event file assigned");
+	end if;   	
+   	// verify that we have no files that has been unassigned
+ 	eventFiles := find EventFile (assigned = false);
+	Assertions::assertTrue(eventFiles'length = 0, "wrong number of unassigned event files, expected 0 found: " & (eventFiles'length)'image);
+   	receptionJobs := find Reception (receptionComplete = true);
+	Assertions::assertTrue(receptionJobs'length = 2, "wrong number of reception jobs, expected 2 found: " & (eventFiles'length)'image);
+	delete auditEvents;
+	
+	// increase the capacity to 2
+	AEReception::clearDomain();
+	receptionSpec := find_one ReceptionSpec();
+	receptionSpec.concurrentReceptionLimit := 2;
+
+	// copy the test file into the incoming directory
+	Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
+	Filesystem::copy_file(testDirectory & testFile2, incomingDirectory & testFile2);
+	Filesystem::copy_file(testDirectory & testFile3, incomingDirectory & testFile3);
+	Filesystem::copy_file(testDirectory & testFile4, incomingDirectory & testFile4);
+
+	// service the event queues and scheduled timers up to 2s in the future
+	// this should force file control to detect the incoming files and assign
+	// one of them to be processed
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+
+	// confirm that the terminator was invoked exactly once
+	auditEvents := find _TEST_Req_IF_Ordering_AcceptEvent ();
+	Assertions::assertTrue(auditEvents'length = 2, "wrong number of audit events created: " & (auditEvents'length)'image);
+
+	// verify that we have one file that has been assigned and one file that is unaasigned
+ 	eventFiles := find EventFile (assigned = true);
+	Assertions::assertTrue(eventFiles'length = 2, "wrong number of assigned event files, expected 2 found: " & (eventFiles'length)'image);
+   	eventFiles := find EventFile (assigned = false);
+	Assertions::assertTrue(eventFiles'length = 2, "wrong number of unassigned event files, expected 2 found: " & (eventFiles'length)'image);
+   	receptionJobs := find Reception (receptionComplete = true);
+	Assertions::assertTrue(receptionJobs'length = 2, "wrong number of reception jobs, expected 2 found: " & (eventFiles'length)'image);
+	delete auditEvents;
+	
+	// force the next file to be processed
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+			
+	// confirm that the terminator was invoked exactly once
+	auditEvents := find _TEST_Req_IF_Ordering_AcceptEvent ();
+	Assertions::assertTrue(auditEvents'length = 2, "wrong number of audit events created: " & (auditEvents'length)'image);
+  
+	// verify that we have one file that has been assigned and one file that is unaasigned
+ 	eventFiles := find EventFile (assigned = true);
+	Assertions::assertTrue(eventFiles'length = 4, "wrong number of assigned event files, expected 4 found: " & (eventFiles'length)'image);
+   	eventFiles := find EventFile (assigned = false);
+	Assertions::assertTrue(eventFiles'length = 0, "wrong number of unassigned event files, expected 0 found: " & (eventFiles'length)'image);
+   	receptionJobs := find Reception (receptionComplete = true);
+	Assertions::assertTrue(receptionJobs'length = 4, "wrong number of reception jobs, expected 4 found: " & (eventFiles'length)'image);
+	delete auditEvents;
+	
+	// reset the capacity to 1
+	receptionSpec.concurrentReceptionLimit := 1;
+	
+	// test the reception deletion time
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'minutes(10));
+	
+	// verify that all the reception jobs and event files have been cleared down
+   	receptionJobs := find Reception ();
+	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (eventFiles'length)'image);
+ 	eventFiles := find EventFile ();
+	Assertions::assertTrue(eventFiles'length = 0, "wrong number of assigned event files, expected 0 found: " & (eventFiles'length)'image);
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9bc7953d-2ce6-4eb0-aab2-a6edd9e89113' DO NOT EDIT THIS LINE.
+private service AEReception::testEventThrottling () is
+incomingDirectory: readonly Filesystem::filename := "./incoming/";
+testDirectory: readonly Filesystem::filename := "./testing/";
+testFile: readonly Filesystem::filename := "eventThrottleTest01.json";
+auditEvents: set of instance of _TEST_Req_IF_Ordering_AcceptEvent;
+auditEvent: instance of _TEST_Req_IF_Ordering_AcceptEvent;
+eventFiles : sequence of instance of EventFile;
+receptionJobs : sequence of instance of Reception;
+receptionSpec : instance of ReceptionSpec;
+
+begin
+
+	// clear the domain down
+	AEReception::clearDomain();
+	delete (find _TEST_Req_IF_Ordering_AcceptEvent());
+	
+	// set the throttle rate to be 1 second
+	receptionSpec := find_one ReceptionSpec();
+	receptionSpec.eventThrottleRate := @PT1S@;
+	  
+	// copy the test file into the incoming directory
+	Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
+
+	// service the event queues
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+
+	// confirm that the terminator was invoked exactly once
+	auditEvents := find _TEST_Req_IF_Ordering_AcceptEvent ();
+	Assertions::assertTrue(auditEvents'length = 1, "wrong number of audit events created: " & (auditEvents'length)'image);
+	
+	// verify that the reception job is not complete
+   	receptionJobs := find Reception (receptionComplete = true);
+	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (eventFiles'length)'image);
+
+	// service the event queues and scheduled timers up to 1s in the future
+	// this should force reception to process the next event
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+
+	// confirm that the terminator was invoked exactly once
+	auditEvents := find _TEST_Req_IF_Ordering_AcceptEvent ();
+	Assertions::assertTrue(auditEvents'length = 2, "wrong number of audit events created: " & (auditEvents'length)'image);
+	
+	// verify that the reception job is not complete
+   	receptionJobs := find Reception (receptionComplete = true);
+	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (eventFiles'length)'image);
+
+	// service the event queues and scheduled timers up to 1s in the future
+	// this should force reception to process the next event
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+
+	// confirm that the terminator was invoked exactly once
+	auditEvents := find _TEST_Req_IF_Ordering_AcceptEvent ();
+	Assertions::assertTrue(auditEvents'length = 3, "wrong number of audit events created: " & (auditEvents'length)'image);
+	
+	// verify that the reception job is not complete
+   	receptionJobs := find Reception (receptionComplete = true);
+	Assertions::assertTrue(receptionJobs'length = 1, "wrong number of complete reception jobs, expected 1 found: " & (eventFiles'length)'image);
+
+	// test the reception deletion time
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'minutes(10));
+	
+	// verify that all the reception jobs and event files have been cleared down
+   	receptionJobs := find Reception ();
+	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (eventFiles'length)'image);
+ 	eventFiles := find EventFile ();
+	Assertions::assertTrue(eventFiles'length = 0, "wrong number of assigned event files, expected 0 found: " & (eventFiles'length)'image);	
+
+	// reset the throttle rate to be 1 second
+	receptionSpec.eventThrottleRate := @PT0S@;
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

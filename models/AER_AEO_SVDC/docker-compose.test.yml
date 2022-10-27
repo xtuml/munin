@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  aer_aeo_svdc:
+    image: "ghcr.io/xtuml/aer_aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    volumes:
+      - "./config:/root/config"
+      - "../test-files/incoming:/root/incoming"
+      - "../test-files/processing:/root/processing"
+      - "../test-files/processed:/root/processed"
+    command: "-configPath config/ -preinit schedule/startup.sch -util Inspector -inspector-port 0"
+  aesimulator:
+    image: "ghcr.io/xtuml/aesimulator"
+    command: "-test-config config/test1config.txt -postinit schedule/startup.sch -util MetaData"
+    volumes:
+      - "../test-files/incoming:/root/test-files/incoming"

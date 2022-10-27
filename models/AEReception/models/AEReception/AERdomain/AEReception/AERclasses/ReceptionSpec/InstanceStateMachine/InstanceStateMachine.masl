@@ -1,0 +1,124 @@
+//! ACTIVITY BEGIN. '0013b87a-9be6-42fe-b6dd-e94f76305654' 'bf6bb441-7c79-4c2e-97ff-fcd447f98097' DO NOT EDIT THIS LINE.
+state AEReception::ReceptionSpec.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '0013b87a-9be6-42fe-b6dd-e94f76305654' '48b977e8-0f45-4ea5-9720-6eed321a8aa5' DO NOT EDIT THIS LINE.
+state AEReception::ReceptionSpec.ConfigurationLoaded () is
+logMessage : string;
+fileStatus : Filesystem::file_status;
+fileControl : instance of FileControl;
+fileName : Filesystem::filename;
+configJSONString : string;
+configJSONElement : JSON::JSONElement;
+configJSONObject : JSON::JSONObject;
+configValidationResult : JSON::JSONObject;
+
+begin
+	
+	logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded";
+	Logger::log(Logger::Information, "AEReception", logMessage);
+	
+	// check the config file has not been removed
+	fileName := Filesystem::filename(this.configFilePath & this.configFile);
+	if Filesystem::file_exists(fileName) then
+
+		configJSONString := Filesystem::read_file(fileName);
+		configJSONElement := JSON::parse(configJSONString);
+    configValidationResult := JSONValidation::validate(configJSONElement, #PROP["receptionConfigSchema"]#);
+		
+		if JSON::get_boolean(configValidationResult["valid"]) then
+		    // extract the spec data items
+			configJSONObject := JSON::get_object(configJSONElement);
+			if configJSONObject'contains("SpecUpdateRate") then
+				this.specUpdateRate := duration'parse(JSON::get_string(configJSONObject["SpecUpdateRate"]));
+			end if;
+			if configJSONObject'contains("IncomingDirectory") then
+				this.incomingDirectory := JSON::get_string(configJSONObject["IncomingDirectory"]);
+			end if;
+			if configJSONObject'contains("ProcessingDirectory") then
+				this.processingDirectory := JSON::get_string(configJSONObject["ProcessingDirectory"]);
+			end if;
+			if configJSONObject'contains("ProcessedDirectory") then
+				this.processedDirectory := JSON::get_string(configJSONObject["ProcessedDirectory"]);
+			end if;
+			if configJSONObject'contains("EventThrottleRate") then
+				this.eventThrottleRate := duration'parse(JSON::get_string(configJSONObject["EventThrottleRate"]));
+			end if;
+			if configJSONObject'contains("ReceptionDeletionTime") then
+				this.receptionDeletionTime := duration'parse(JSON::get_string(configJSONObject["ReceptionDeletionTime"]));
+			end if;
+			if configJSONObject'contains("ConcurrentReceptionLimit") then
+				this.concurrentReceptionLimit := JSON::get_integer(configJSONObject["ConcurrentReceptionLimit"]);
+			end if;
+    else
+		  Logger::log(Logger::Debug, "AEReception", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
+      raise JSON::JSONException("Config file invalid");
+		end if;
+
+		// set the config file mod time
+		fileName := Filesystem::filename(this.configFilePath & this.configFile);
+		fileStatus := Filesystem::get_file_status(Filesystem::filename(fileName));
+		this.configFileModificationTime := fileStatus.modification_time;
+				
+		// schedule to check the config file
+		schedule this.configTimer generate ReceptionSpec.checkConfigUpdate() to this delay this.specUpdateRate;
+	else
+		logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded, failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+		Logger::log(Logger::Error, "AEReception", logMessage);
+		raise program_error;
+	end if;
+	
+	// check if file control exists and if not create it
+	fileControl := find_one FileControl();
+	if fileControl = null then
+		fileControl := create unique FileControl(Current_State => Created);
+		generate FileControl.checkCapacity() to fileControl;
+	end if;
+	
+exception
+	when program_error =>
+		raise program_error;
+	when others => 	
+	
+		logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded, failed to load configuration file";
+		Logger::log(Logger::Error, "AEReception", logMessage);
+		
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '0013b87a-9be6-42fe-b6dd-e94f76305654' 'd066c27b-7954-4717-9523-722056755b7a' DO NOT EDIT THIS LINE.
+state AEReception::ReceptionSpec.ConfigChecked () is
+logMessage : string;
+fileStatus : Filesystem::file_status;
+
+begin
+
+	logMessage := "AEReception::ReceptionSpec.ConfigChecked";
+	Logger::log(Logger::Information, "AEReception", logMessage);
+	
+	if Filesystem::file_exists(Filesystem::filename(this.configFilePath & this.configFile)) then
+		fileStatus := Filesystem::get_file_status(Filesystem::filename(this.configFilePath & this.configFile));
+		if fileStatus.modification_time /= this.configFileModificationTime then
+			generate ReceptionSpec.loadConfig() to this;
+		else
+			schedule this.configTimer generate ReceptionSpec.checkConfigUpdate() to this delay this.specUpdateRate;
+		end if;
+		else
+		logMessage := "AEReception::ReceptionSpec.ConfigChecked, failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+		Logger::log(Logger::Error, "AEReception", logMessage);
+		raise program_error;
+	end if;
+	
+exception
+	when others => 	
+	
+		logMessage := "AEReception::ReceptionSpec.ConfigChecked, failed to load configuration file";
+		Logger::log(Logger::Error, "AEReception", logMessage);
+		
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

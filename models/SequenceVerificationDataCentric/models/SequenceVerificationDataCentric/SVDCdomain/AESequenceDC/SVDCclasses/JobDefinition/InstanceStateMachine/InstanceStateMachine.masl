@@ -1,0 +1,57 @@
+//! ACTIVITY BEGIN. '7c60a2b8-d138-4002-8b06-0793a4ad6635' '31212253-3ca7-48c3-8c90-9a8a8d253784' DO NOT EDIT THIS LINE.
+state AESequenceDC::JobDefinition.Active () is
+begin
+  //
+  this.isSuspended := false;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7c60a2b8-d138-4002-8b06-0793a4ad6635' '9eacda2c-4dfd-45ac-9d5e-111bdcfd90ba' DO NOT EDIT THIS LINE.
+state AESequenceDC::JobDefinition.Deprecated () is
+theSystemSpec : instance of SystemSpecification;
+logMessage : string;
+
+begin
+  this.isDeprecated := true;
+  // Log info: Report that the JobDefinition has been deprecated.
+  logMessage := "JobDefinition has been deprecated - jobName = " & this.jobName;
+  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+  
+  // Check to see if there are any Jobs in progress that are dependent upon this JobDefinition.
+  if (this -> R8)'length = 0 then
+    // There are no Jobs using this deprecated JobDefinition, so it can safely be deleted.
+    generate JobDefinition.noJobsUsingDeprecatedJobDefinition () to this;
+  else
+    // There are Jobs in progress that are still using this JobDefinition - wait and check again later.
+    theSystemSpec := find_one SystemSpecification();
+    schedule this.jobDefDeletionTimer generate JobDefinition.itsTimeToCheckForRemainingJobs() to this delay theSystemSpec.checkJobDefReadyForDeletionPeriod;
+  end;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7c60a2b8-d138-4002-8b06-0793a4ad6635' '4d97a1e4-0eb7-4e59-acd7-d8b40567fcc5' DO NOT EDIT THIS LINE.
+state AESequenceDC::JobDefinition.Suspended () is
+begin
+  this.isSuspended := true;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7c60a2b8-d138-4002-8b06-0793a4ad6635' 'ce307922-2855-427f-b621-7137b0f50edc' DO NOT EDIT THIS LINE.
+state AESequenceDC::JobDefinition.Deleted () is
+theJobName : string;
+logMessage : string;
+begin
+  // TODO: The deleteJobDefinition function also deletes all related Jobs (if any) - this needs to be removed
+  // from that function because Jobs will auto delete after a period (and the JobDefinition will not be deleted
+  // after deprecation until all remaining Jobs of this type have gone.
+  
+  //Delete this JobDefinition
+  theJobName := this.jobName;
+  this.deleteJobDefinition(this.jobName);
+  
+  // Log info: Report that the deprecated JobDefinition has been deleted.
+  logMessage := "Deprecated JobDefinition has been deleted - jobName = " & theJobName;
+  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

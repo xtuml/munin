@@ -1,0 +1,554 @@
+name: Test
+on:
+
+  # run on PRs to main
+  pull_request:
+    branches: [ main ]
+
+  # run on push to main
+  push:
+    branches: [ main ]
+
+  # run daily at 4am UTC
+  #schedule:
+  #  - cron: '0 4 * * *'
+
+  # run manually
+  workflow_dispatch:
+
+jobs:
+  build_aeordering:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: AEOrdering
+      DOMAIN_NAME: AEOrdering
+      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
+    steps:
+      # Setup
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - id: lowercase
+        run: echo '::set-output name=DOMAIN_LOWER::'$(echo "console.log('${{ env.DOMAIN_NAME }}'.toLowerCase())" | node -)
+
+      - name: Check if files have been modified
+        id: check-modified
+        uses: tj-actions/changed-files@v29.0.0
+        with:
+          files: models/${{ env.PROJECT_NAME }}
+
+      - name: Generate MASL
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DOMAIN_NAME }}
+          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -d ${{ env.DOMAIN_NAME }} -o masl
+
+      - uses: docker/login-action@v2
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image (prod)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: docker/build-push-action@v3
+        with:
+          context: models/${{ env.PROJECT_NAME }}
+          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          target: install-release
+          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
+          push: true
+
+      - name: Run test
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          cd models/${{ env.PROJECT_NAME }}
+          docker compose -f docker-compose.test.yml build --no-cache
+          docker compose -f docker-compose.test.yml up --force-recreate
+
+      - name: Archive test results
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.lowercase.outputs.DOMAIN_LOWER }}-results
+          path: models/**/test_results/*.json
+
+
+  build_aereception:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: AEReception
+      DOMAIN_NAME: AEReception
+      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
+    steps:
+      # Setup
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - id: lowercase
+        run: echo '::set-output name=DOMAIN_LOWER::'$(echo "console.log('${{ env.DOMAIN_NAME }}'.toLowerCase())" | node -)
+
+      - name: Check if files have been modified
+        id: check-modified
+        uses: tj-actions/changed-files@v29.0.0
+        with:
+          files: models/${{ env.PROJECT_NAME }}
+
+      - name: Generate MASL
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DOMAIN_NAME }}
+          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -d ${{ env.DOMAIN_NAME }} -o masl
+
+      - uses: docker/login-action@v2
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image (prod)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: docker/build-push-action@v3
+        with:
+          context: models/${{ env.PROJECT_NAME }}
+          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          target: install-release
+          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
+          push: true
+
+      - name: Run test
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          cd models/${{ env.PROJECT_NAME }}
+          docker compose -f docker-compose.test.yml build --no-cache
+          docker compose -f docker-compose.test.yml up --force-recreate
+
+      - name: Archive test results
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.lowercase.outputs.DOMAIN_LOWER }}-results
+          path: models/**/test_results/*.json
+
+
+  build_aesequencedc:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: SequenceVerificationDataCentric
+      DOMAIN_NAME: AESequenceDC
+      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - id: lowercase
+        run: echo '::set-output name=DOMAIN_LOWER::'$(echo "console.log('${{ env.DOMAIN_NAME }}'.toLowerCase())" | node -)
+
+      - name: Check if files have been modified
+        id: check-modified
+        uses: tj-actions/changed-files@v29.0.0
+        with:
+          files: models/${{ env.PROJECT_NAME }}
+
+      - name: Generate MASL
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DOMAIN_NAME }}
+          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -d ${{ env.DOMAIN_NAME }} -o masl
+
+      - uses: docker/login-action@v2
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image (prod)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: docker/build-push-action@v3
+        with:
+          context: models/${{ env.PROJECT_NAME }}
+          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          target: install-release
+          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
+          push: true
+
+      - name: Run test
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          cd models/${{ env.PROJECT_NAME }}
+          docker compose -f docker-compose.test.yml build --no-cache
+          docker compose -f docker-compose.test.yml up --force-recreate
+
+      - name: Archive test results
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.lowercase.outputs.DOMAIN_LOWER }}-results
+          path: models/**/test_results/*.json
+
+
+  build_aesimulator:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: AESimulator
+      DOMAIN_NAME: AESimulator
+      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
+    steps:
+      # Setup
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - id: lowercase
+        run: echo '::set-output name=DOMAIN_LOWER::'$(echo "console.log('${{ env.DOMAIN_NAME }}'.toLowerCase())" | node -)
+
+      - name: Check if files have been modified
+        id: check-modified
+        uses: tj-actions/changed-files@v29.0.0
+        with:
+          files: models/${{ env.PROJECT_NAME }}
+
+      - name: Generate MASL
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DOMAIN_NAME }}
+          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -d ${{ env.DOMAIN_NAME }} -o masl
+
+      - uses: docker/login-action@v2
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image (prod)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: docker/build-push-action@v3
+        with:
+          context: models/${{ env.PROJECT_NAME }}
+          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          target: install-release
+          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
+          push: true
+
+
+  build_aer_aeo_svdc:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: AER_AEO_SVDC
+      DEPLOYMENT_NAME: AER_AEO_SVDC
+      DOCKER_BUILDKIT: '1'
+      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
+    needs:
+      - build_aeordering
+      - build_aereception
+      - build_aesequencedc
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - id: lowercase
+        run: echo '::set-output name=DEPLOYMENT_LOWER::'$(echo "console.log('${{ env.DEPLOYMENT_NAME }}'.toLowerCase())" | node -)
+
+      - name: Check if files have been modified
+        id: check-modified
+        uses: tj-actions/changed-files@v29.0.0
+        with:
+          files: |
+            models/${{ env.PROJECT_NAME }}
+            models/AEOrdering
+            models/AEReception
+            models/SequenceVerificationDataCentric
+
+      - name: Generate MASL
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DEPLOYMENT_NAME }}
+          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -p ${{ env.DEPLOYMENT_NAME }} -o masl
+
+      - uses: docker/login-action@v2
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image (prod)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: docker/build-push-action@v3
+        with:
+          context: models/${{ env.PROJECT_NAME }}
+          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DEPLOYMENT_LOWER }}:latest
+          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
+          push: true
+
+
+  build_statementparser:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: StatementParser
+      DOMAIN_NAME: StatementParser
+      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - id: lowercase
+        run: echo '::set-output name=DOMAIN_LOWER::'$(echo "console.log('${{ env.DOMAIN_NAME }}'.toLowerCase())" | node -)
+
+      - name: Check if files have been modified
+        id: check-modified
+        uses: tj-actions/changed-files@v29.0.0
+        with:
+          files: models/${{ env.PROJECT_NAME }}
+
+      - name: Generate MASL
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DOMAIN_NAME }}
+          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -d ${{ env.DOMAIN_NAME }} -o masl
+
+      - uses: docker/login-action@v2
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image (prod)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: docker/build-push-action@v3
+        with:
+          context: models/${{ env.PROJECT_NAME }}
+          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          target: install-release
+          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
+          push: true
+
+      - name: Run test
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          cd models/${{ env.PROJECT_NAME }}
+          docker compose -f docker-compose.test.yml build --no-cache
+          docker compose -f docker-compose.test.yml up --force-recreate
+
+      - name: Archive test results
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.lowercase.outputs.DOMAIN_LOWER }}-results
+          path: models/**/test_results/*.json
+
+
+  build_sequenceprocessor:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: SequenceProcessor
+      DOMAIN_NAME: SequenceProcessor
+      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - id: lowercase
+        run: echo '::set-output name=DOMAIN_LOWER::'$(echo "console.log('${{ env.DOMAIN_NAME }}'.toLowerCase())" | node -)
+
+      - name: Check if files have been modified
+        id: check-modified
+        uses: tj-actions/changed-files@v29.0.0
+        with:
+          files: models/${{ env.PROJECT_NAME }}
+
+      - name: Generate MASL
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DOMAIN_NAME }}
+          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -d ${{ env.DOMAIN_NAME }} -o masl
+
+      - uses: docker/login-action@v2
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image (prod)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: docker/build-push-action@v3
+        with:
+          context: models/${{ env.PROJECT_NAME }}
+          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          target: install-release
+          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
+          push: true
+
+      - name: Run test
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          cd models/${{ env.PROJECT_NAME }}
+          docker compose -f docker-compose.test.yml build --no-cache
+          docker compose -f docker-compose.test.yml up --force-recreate
+
+      - name: Archive test results
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.lowercase.outputs.DOMAIN_LOWER }}-results
+          path: models/**/test_results/*.json
+
+
+  build_plusprocessor:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: PlusProcessor
+      DEPLOYMENT_NAME: PlusProcessor
+      DOCKER_BUILDKIT: '1'
+      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
+    needs:
+      - build_statementparser
+      - build_sequenceprocessor
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - id: lowercase
+        run: echo '::set-output name=DEPLOYMENT_LOWER::'$(echo "console.log('${{ env.DEPLOYMENT_NAME }}'.toLowerCase())" | node -)
+
+      - name: Check if files have been modified
+        id: check-modified
+        uses: tj-actions/changed-files@v29.0.0
+        with:
+          files: |
+            models/${{ env.PROJECT_NAME }}
+            models/StatementParser
+            models/SequenceProcessor
+
+      - name: Generate MASL
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        run: |
+          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DEPLOYMENT_NAME }}
+          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -p ${{ env.DEPLOYMENT_NAME }} -o masl
+
+      - uses: docker/login-action@v2
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image (prod)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        uses: docker/build-push-action@v3
+        with:
+          context: models/${{ env.PROJECT_NAME }}
+          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DEPLOYMENT_LOWER }}:latest
+          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
+          push: true
+
+ 
+  generate_report:
+    runs-on: ubuntu-latest
+    needs:
+      - build_aeordering
+      - build_aereception
+      - build_aesequencedc
+      - build_statementparser
+      - build_sequenceprocessor
+    env:
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Configure python
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      - run: pip install -r test_reporting/requirements.txt
+
+      # Download test results
+      - uses: actions/download-artifact@v3
+        with:
+          path: test_reporting/results
+
+      # Get a shortened SHA
+      - name: Shorten SHA
+        id: short_sha
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+      # Generate the report
+      - name: Generate JUnit report
+        run: |
+          cd test_reporting
+          python generate-report.py ${{ github.head_ref || github.ref_name }} ${{ steps.short_sha.outputs.sha_short }}
+      - run: mkdir -p test_reporting/summaries && cp test_reporting/target/surefire-reports/* test_reporting/summaries
+
+      # Generate surefire report
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'maven'
+      - run: |
+          cd test_reporting
+          mvn site
+
+      # Get the existing summaries for this branch
+      - name: Download summaries
+        uses: prewk/s3-cp-action@v2
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          source: 's3://${{ secrets.AWS_S3_BUCKET }}/munin/${{ github.head_ref || github.ref_name }}/surefire-reports'
+          dest: 'test_reporting/summaries'
+          flags: --recursive
+
+      # Generate the test history
+      - name: Generate history
+        run: |
+          cd test_reporting
+          python generate-history.py
+
+      # Aggregate results
+      - name: Aggregate results
+        run: |
+          cd test_reporting
+          mkdir dist
+          cp target/site/surefire-report.html dist/index.html
+          cp target/site/history.html dist/
+          cp -r target/surefire-reports dist/
+
+      # Upload the report
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: test_reporting/dist/
+
+      # Publish to S3
+      - uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks
+        env:
+          SOURCE_DIR: test_reporting/dist/
+          DEST_DIR: "munin/${{ github.head_ref || github.ref_name }}"
+
+      # Publish to S3 permalink
+      - uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks
+        env:
+          SOURCE_DIR: test_reporting/dist/
+          DEST_DIR: "munin/${{ steps.short_sha.outputs.sha_short }}"
+
+      # Comment on the PR with a link to the test results
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          hide_and_recreate: true
+          hide_classify: "OUTDATED"
+          message: |
+            Test results for branch "${{ github.head_ref || github.ref_name }}": <https://s3.amazonaws.com/${{ secrets.AWS_S3_BUCKET }}/munin/${{ github.head_ref || github.ref_name }}/index.html>
+            Permanent link for this run: <https://s3.amazonaws.com/${{ secrets.AWS_S3_BUCKET }}/munin/${{ steps.short_sha.outputs.sha_short }}/index.html>
+
+      # Fail check if any failures or errors exist
+      - name: Check failures
+        run: |
+          cd test_reporting
+          python generate-report.py -check

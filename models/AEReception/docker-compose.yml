@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  aereception:
+    image: "ghcr.io/xtuml/aereception"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"

@@ -1,0 +1,192 @@
+//! ACTIVITY BEGIN. '968942e1-6507-4f02-ab18-2ee8acb5865d' DO NOT EDIT THIS LINE.
+private service StatementParser::populateDomain () is
+logMessage : string;
+statementType : instance of StatementType;
+grammarType : instance of GrammarType;
+grammarInStatement : instance of GrammarInStatement;
+prevGrammarInStatement : instance of GrammarInStatement;
+
+begin
+	
+	logMessage := "StatementParser::populateDomain";
+	Logger::log(Logger::Information, "StatementParser", logMessage);
+	
+	// create the statement type and grammar for job definition
+	statementType := create StatementType(statementName => "job definition");
+	grammarType := create GrammarType(grammarName => "title", grammarDefinitionType => GrammarDefinitionType.KEYWORD);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+	grammarType := create GrammarType(grammarName => "jobName", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+
+
+	// create the statement type and grammar for sequence definition
+	statementType := create StatementType(statementName => "start sequence definition");
+	grammarType := create GrammarType(grammarName => "box", grammarDefinitionType => GrammarDefinitionType.KEYWORD);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+	grammarType := create GrammarType(grammarName => "sequenceName", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+	statementType := create StatementType(statementName => "end sequence definition");
+	grammarType := create GrammarType(grammarName => "endbox", grammarDefinitionType => GrammarDefinitionType.KEYWORD);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+
+	// create the statement type and grammar for autonumber
+	statementType := create StatementType(statementName => "autonumber start");
+	grammarType := create GrammarType(grammarName => "autonumber", grammarDefinitionType => GrammarDefinitionType.KEYWORD);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+	statementType := create StatementType(statementName => "autonumber resume");
+	grammarType := create GrammarType(grammarName => "autonumberresume", grammarDefinitionType => GrammarDefinitionType.KEYWORD);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+	statementType := create StatementType(statementName => "autonumber stop");
+	grammarType := create GrammarType(grammarName => "autonumberstop", grammarDefinitionType => GrammarDefinitionType.KEYWORD);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+
+	// create the statement type and grammar for application definition
+	statementType := create StatementType(statementName => "application");
+	grammarType := create GrammarType(grammarName => "participant", grammarDefinitionType => GrammarDefinitionType.KEYWORD);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+	grammarType := create GrammarType(grammarName => "applicationName", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+	
+	// create the statement type and grammar for sequence definition
+	statementType := create StatementType(statementName => "sequence start end");
+	grammarType := create GrammarType(grammarName => "actor", grammarDefinitionType => GrammarDefinitionType.KEYWORD);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+	grammarType := create GrammarType(grammarName => "startEndName", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+		
+	// create the statement type and grammar for audit event definition
+	statementType := create StatementType(statementName => "audit event");
+	grammarType := create GrammarType(grammarName => "sendingApplication", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+	grammarType := create GrammarType(grammarName => "->", grammarDefinitionType => GrammarDefinitionType.KEYWORD);
+	link statementType R8 grammarType;
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+	grammarType := create GrammarType(grammarName => "receivingApplication", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+	grammarType := create GrammarType(grammarName => ":", grammarDefinitionType => GrammarDefinitionType.KEYWORD);
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+	grammarType := create GrammarType(grammarName => "eventName", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+		
+	// create the statement type and grammar for and control definition
+	statementType := create StatementType(statementName => "alt control statement");
+	grammarType := create GrammarType(grammarName => "alt", grammarDefinitionType => GrammarDefinitionType.CONTROL);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+	prevGrammarInStatement := grammarInStatement;
+	grammarType := create GrammarType(grammarName => "altControlName", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+
+	// create the statement type and grammar for and else control definition
+	statementType := create StatementType(statementName => "alt else control statement");
+	grammarType := create GrammarType(grammarName => "else", grammarDefinitionType => GrammarDefinitionType.CONTROL);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+	prevGrammarInStatement := grammarInStatement;
+	grammarType := create GrammarType(grammarName => "elseControlName", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+
+	// create the statement type and grammar for and end control definition
+	statementType := create StatementType(statementName => "alt end control statement");
+	grammarType := create GrammarType(grammarName => "endalt", grammarDefinitionType => GrammarDefinitionType.CONTROL);
+	link statementType R8 grammarType;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link statementType R14 grammarInStatement;
+	prevGrammarInStatement := grammarInStatement;
+	grammarType := create GrammarType(grammarName => "endAltControlName", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+	prevGrammarInStatement := grammarInStatement;
+	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+	link statementType R3 grammarType using grammarInStatement;
+	link prevGrammarInStatement R6.precedes grammarInStatement;
+
+	// create the statement type and grammar for loop control definition
+//	statementType := create StatementType(statementName => "loop control statement");
+//	grammarType := create GrammarType(grammarName => "loop", grammarDefinitionType => GrammarDefinitionType.CONTROL);
+//	link statementType R8 grammarType;
+//	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+//	link statementType R3 grammarType using grammarInStatement;
+//	link statementType R14 grammarInStatement;
+//	prevGrammarInStatement := grammarInStatement;
+//	grammarType := create GrammarType(grammarName => "loopControlName", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+//	prevGrammarInStatement := grammarInStatement;
+//	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+//	link statementType R3 grammarType using grammarInStatement;
+//	link prevGrammarInStatement R6.precedes grammarInStatement;
+//
+//	// create the statement type and grammar for end loop control definition
+//	statementType := create StatementType(statementName => "end loop control statement");
+//	grammarType := create GrammarType(grammarName => "end loop", grammarDefinitionType => GrammarDefinitionType.CONTROL);
+//	link statementType R8 grammarType;
+//	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+//	link statementType R3 grammarType using grammarInStatement;
+//	prevGrammarInStatement := grammarInStatement;
+//	grammarType := create GrammarType(grammarName => "endLoopControlName", grammarDefinitionType => GrammarDefinitionType.VARIABLE);
+//	prevGrammarInStatement := grammarInStatement;
+//	grammarInStatement := create GrammarInStatement(statementName => statementType.statementName, grammarName => grammarType.grammarName);
+//	link statementType R3 grammarType using grammarInStatement;
+//	link prevGrammarInStatement R6.precedes grammarInStatement;
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

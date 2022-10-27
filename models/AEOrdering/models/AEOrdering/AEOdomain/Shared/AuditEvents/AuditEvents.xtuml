@@ -1,0 +1,134 @@
+-- BP 7.1.6 content: Interface syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO C_I
+	VALUES ("7816fcad-2be2-457c-824e-da13c9383164",
+	"00000000-0000-0000-0000-000000000000",
+	'AuditEvents',
+	'');
+INSERT INTO C_EP
+	VALUES ("ae28696e-2b9f-4104-8003-3dbfe562b7b4",
+	"7816fcad-2be2-457c-824e-da13c9383164",
+	-1,
+	'AcceptEvent',
+	'',
+	1);
+INSERT INTO C_IO
+	VALUES ("ae28696e-2b9f-4104-8003-3dbfe562b7b4",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'AcceptEvent',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_PP
+	VALUES ("13656a66-9711-402a-a715-2bb98fbfac78",
+	"ae28696e-2b9f-4104-8003-3dbfe562b7b4",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'auditEventType',
+	'',
+	0,
+	'',
+	"5067c62b-5efd-46e9-8c2a-a29021e3c8e4");
+INSERT INTO C_PP
+	VALUES ("bc0294d2-5584-4952-ace8-a19eba927f4c",
+	"ae28696e-2b9f-4104-8003-3dbfe562b7b4",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'jobId',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_PP
+	VALUES ("045bbca5-e651-4ebf-9557-7282a79aada2",
+	"ae28696e-2b9f-4104-8003-3dbfe562b7b4",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'auditEventId',
+	'',
+	0,
+	'',
+	"13656a66-9711-402a-a715-2bb98fbfac78");
+INSERT INTO C_PP
+	VALUES ("bdec27e5-d9ca-4371-a7ec-11b15af9e2ae",
+	"ae28696e-2b9f-4104-8003-3dbfe562b7b4",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'prevAuditEventId',
+	'',
+	0,
+	'',
+	"95faceba-7099-41de-8eaa-0192c33b3963");
+INSERT INTO C_PP
+	VALUES ("95faceba-7099-41de-8eaa-0192c33b3963",
+	"ae28696e-2b9f-4104-8003-3dbfe562b7b4",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'auditEventTime',
+	'',
+	0,
+	'',
+	"045bbca5-e651-4ebf-9557-7282a79aada2");
+INSERT INTO C_PP
+	VALUES ("5067c62b-5efd-46e9-8c2a-a29021e3c8e4",
+	"ae28696e-2b9f-4104-8003-3dbfe562b7b4",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'application',
+	'',
+	0,
+	'',
+	"7a87894a-b7e1-4432-b4d9-6b8af3ba49a8");
+INSERT INTO C_PP
+	VALUES ("7a87894a-b7e1-4432-b4d9-6b8af3ba49a8",
+	"ae28696e-2b9f-4104-8003-3dbfe562b7b4",
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	'nodeName',
+	'',
+	0,
+	'',
+	"bc0294d2-5584-4952-ace8-a19eba927f4c");
+INSERT INTO S_DT_PROXY
+	VALUES ("ca05455a-8231-467f-be9a-63be44793e6a",
+	"00000000-0000-0000-0000-000000000000",
+	'string',
+	'',
+	'',
+	'../../../types/types.xtuml');
+INSERT INTO C_EP
+	VALUES ("936fa180-565c-4887-8297-40764af3108b",
+	"7816fcad-2be2-457c-824e-da13c9383164",
+	-1,
+	'deleteJob',
+	'This service shall be called by verification when it has determined the job has completed.
+
+In this scenario it is safe to proceed with deleting the jib irrespectve of its current state in this domain.',
+	3);
+INSERT INTO C_IO
+	VALUES ("936fa180-565c-4887-8297-40764af3108b",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'deleteJob',
+	'This service shall be called by verification when it has determined the job has completed.
+
+In this scenario it is safe to proceed with deleting the jib irrespectve of its current state in this domain.',
+	0,
+	'',
+	"ae28696e-2b9f-4104-8003-3dbfe562b7b4");
+INSERT INTO C_PP
+	VALUES ("f9da8e4f-175d-4040-8055-d9a28ccd24ea",
+	"936fa180-565c-4887-8297-40764af3108b",
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	'jobId',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO PE_PE
+	VALUES ("7816fcad-2be2-457c-824e-da13c9383164",
+	1,
+	"d4422526-1dd9-43ae-aeb1-16b02ebbf976",
+	"00000000-0000-0000-0000-000000000000",
+	6);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("d4422526-1dd9-43ae-aeb1-16b02ebbf976",
+	"00000000-0000-0000-0000-000000000000",
+	"93a25cc9-604e-47d9-928e-aad6575c0677",
+	'Shared',
+	'',
+	0,
+	'../Shared.xtuml');

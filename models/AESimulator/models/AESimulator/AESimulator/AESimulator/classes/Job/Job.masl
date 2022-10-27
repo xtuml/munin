@@ -1,0 +1,57 @@
+//! ACTIVITY BEGIN. 'c7bbe686-38f6-421a-a419-d42d67e208d1' DO NOT EDIT THIS LINE.
+public instance service AESimulator::Job.selectEventToDispatch () is
+logMessage : string;
+jobSpec : instance of JobSpec;
+testDefinition : instance of TestDefinition;
+testJobSpec : instance of TestJobSpec;
+eventDispatchOrder : instance of EventDispatchOrder;
+deployedEvents : sequence of instance of DeployedEvent;
+eventToDispatch : instance of DeployedEvent;
+eventDefinition : instance of EventDefinition;
+
+begin
+	// locate the first event to dispatch and request that it is dispatched
+	logMessage := "AESimulator::Job.selectEventToDispatch";
+	Logger::log(Logger::Information, "AESimulator", logMessage);
+	jobSpec := this -> R3.JobSpec;
+	testDefinition := this -> R7.TestDefinition;
+	testJobSpec := jobSpec with testDefinition -> R8.TestJobSpec;
+	if testJobSpec /= null then
+		eventDispatchOrder := testJobSpec -> R15.EventDispatchOrder;
+		if eventDispatchOrder = null then
+			// this must be the first event to dispatch
+			eventDispatchOrder := testJobSpec -> R12.EventDispatchOrder;
+		else
+			// locate the next event to be dispatched
+			unlink testJobSpec R15 eventDispatchOrder;
+			eventDispatchOrder := eventDispatchOrder -> R13.nextEvent;
+		end if;
+		if eventDispatchOrder /= null then
+			link testJobSpec R15 eventDispatchOrder;
+			deployedEvents := this -> R6.DeployedEvent;
+			eventToDispatch := find_one deployedEvents(eventDefinitionId = eventDispatchOrder.eventDefinitionId and deployed = false);
+			if eventToDispatch /= null then
+				eventDefinition := eventToDispatch -> R5.EventDefinition;
+				if eventDefinition.delayDuration /= @PT0S@ then
+					schedule eventToDispatch.dispatchTimer generate DeployedEvent.dispatchEvent() to eventToDispatch delay eventDefinition.delayDuration;
+					logMessage := "AESimulator::Job.selectedEventToDispatch - delaying dispatch event type = " & eventDefinition.eventTypeName;
+					Logger::log(Logger::Information, "AESimulator", logMessage);
+				else
+					generate DeployedEvent.dispatchEvent() to eventToDispatch;
+				end if;
+			else
+				generate Job.jobComplete() to this;
+			end if;
+		else
+			generate Job.jobComplete() to this;
+			logMessage := "AESimulator::Job.selectEventToDispatch - job failed test name = " & testDefinition.testName & ", job spec name = " & jobSpec.jobSpecName;
+			Logger::log(Logger::Error, "AESimulator", logMessage);
+		end if;
+	else
+		generate Job.jobComplete() to this;
+		logMessage := "AESimulator::Job.selectEventToDispatch - job failed test name = " & testDefinition.testName & ", job spec name = " & jobSpec.jobSpecName;
+		Logger::log(Logger::Error, "AESimulator", logMessage);
+	end if; 
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

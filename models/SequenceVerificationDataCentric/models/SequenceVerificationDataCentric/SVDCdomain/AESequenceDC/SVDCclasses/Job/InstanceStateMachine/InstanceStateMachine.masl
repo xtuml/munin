@@ -1,0 +1,657 @@
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '4363c1b5-2587-4a86-9702-c5975f4b2816' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.JobInProgress ( eventId : in string,
+                                       prevAEIds : in sequence of string,
+                                       aeType : in string,
+                                       aeData : in sequence of auditEventDataStructure ) is
+newEvent : instance of AuditEvent;
+existingEvent : instance of AuditEvent;
+theEventType : instance of AuditEventDefinition;
+prevEvent : instance of AuditEvent;
+prevEventIsValid : boolean;
+theAeSequenceDef : instance of AESequenceDefinition;
+theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
+theAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
+prevAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
+expectedAeOccsInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
+possibleAeOccInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
+theAeInSequenceDef : instance of AEInSequenceDefinition;
+aeSequenceDefs : set of instance of AESequenceDefinition;
+theSequenceDef : instance of AESequenceDefinition;
+theAeInSequencePairDefn : instance of AEInSequencePairDefn;
+existingAuditEventPair : instance of AuditEventPair;
+newAuditEventPair : instance of AuditEventPair;
+currentSequence : instance of Sequence;
+newSequence : instance of Sequence;
+incompleteSequences : set of instance of Sequence;
+incompleteSequence : instance of Sequence;
+completeSequences : set of instance of Sequence;
+sequencesForJob : set of instance of Sequence;
+aeDataElement : auditEventDataStructure;
+newIntraJobInvariant : instance of TransientInvariant;
+theIntraJobInvariantDefn : instance of IntraJobInvariantDefn;
+theSourceExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+theUserExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+theSourceExtraJobInvariant : instance of PersistedInvariant;
+theUserExtraJobInvariant : instance of TransientInvariant;
+empty : sequence of string;
+emptyPrevId : sequence of string:= empty & "";
+logMessage : string;
+failureMessage : string;
+creationErrorMessage : string;
+
+
+begin
+  // Check to see if we've seen this event instance before
+  existingEvent := find_one AuditEvent (AuditEventId = eventId);
+  if existingEvent = null then
+    // The received event has not been seen before, so link the new event to this Job.
+    newEvent := create AuditEvent (AuditEventId => eventId, seenAsPreviousEvent => false);
+    link this R3 newEvent;
+    theEventType := find_only AuditEventDefinition (AEType = aeType);
+    if theEventType /= null then
+      // We have a valid event type
+      link newEvent R2 theEventType;
+      
+      // Next, determine if the received event is of a type that is expected for the stated previous event - firstly
+      // find the set of occurrences of the received event type for the sequence
+      theSequenceDef := theEventType -> R1.AESequenceDefinition;
+      theAeInSequenceDef := theSequenceDef with theEventType -> R1.AEInSequenceDefinition;
+      theAeOccurrencesInSequenceDef := theAeInSequenceDef -> R12;
+
+      // ...and then check that just one of these matches with an event occurrence that is expected for the previous event
+      if (prevAEIds /= empty) and (prevAEIds /= emptyPrevId) then
+        // Log info: Event has previous event ids
+        logMessage := "Follow on event for existing Job received - jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
+	    Logger::log(Logger::Information, "AESequenceDC", logMessage);   
+
+        for aPrevEventId in prevAEIds loop //NEW INSERT
+          // Need to locate the previous event as defined in the event parameter
+          prevEvent := find_one AuditEvent (AuditEventId = aPrevEventId);
+          if prevEvent /= null then
+            prevAeOccInSequenceDef := prevEvent -> R13;
+            // Find the occurrence definitions for the events that are expected to follow that one as our new event should be one of those
+            expectedAeOccsInSequenceDef := prevAeOccInSequenceDef -> R6.precedes.AEOccurrenceInSequenceDefinition;
+      
+            possibleAeOccInSequenceDef := expectedAeOccsInSequenceDef intersection theAeOccurrencesInSequenceDef;
+
+            if (possibleAeOccInSequenceDef'length = 1) then
+              theAeOccInSequenceDef := find_one possibleAeOccInSequenceDef ();
+              // We have found the occurrence definition class to link with the new event
+              if (newEvent -> R13 = null) then
+                link theAeOccInSequenceDef R13 newEvent;
+              end if;
+          
+              if theAeOccInSequenceDef.isSequenceStart = false then
+	                 
+                // We have a follow on event for an existing Job with a valid previous event
+                theAeInSequencePairDefn := theAeOccInSequenceDef with prevAeOccInSequenceDef -> R6.follows.AEInSequencePairDefn;
+                // Check that the previous event has not already been seen with this event as that would be an error
+                
+//                existingAuditEventPair := find_one AuditEventPair (previousAuditEventId = prevEvent.AuditEventId and
+//                                                                   nextAuditEventId = newEvent.AuditEventId);
+                existingAuditEventPair := find_one AuditEventPair (previousAuditEventId = prevEvent.AuditEventId and
+                	                                               nextAuditEventId = newEvent.AuditEventId);
+               
+                if existingAuditEventPair = null then
+                  // Link the new event to the previous event to capture the sequence we are seeing
+                  newAuditEventPair := create AuditEventPair (previousAuditEventId => prevEvent.AuditEventId,
+                                                              nextAuditEventId => newEvent.AuditEventId);
+                  link newEvent R4.has_previous.AuditEvent prevEvent using newAuditEventPair;
+                  link newAuditEventPair R15 theAeInSequencePairDefn;
+                else
+                    this.sequencingFailed := true;
+                    this.failJob("The previous event has been repeated with this event which is an error - This Event Id = " & newEvent.AuditEventId & " and Previous Event Id = " & prevEvent.AuditEventId );              
+                end if;  
+             
+                // Now test to see if this is a valid event sequence
+                newEvent.TestPreviousEventIsValid (prevEvent, prevEventIsValid); 
+                if prevEventIsValid then
+                  // Previous event is valid 
+                  logMessage := "Previous event is valid - jobId = " & this.jobID & ", audit event sequence = " & theSequenceDef.sequenceDefinitionName & ", current event type = " & theEventType.AEType;
+	              Logger::log(Logger::Information, "AESequenceDC", logMessage);    
+                  // The new event is a follow on event to the previous event so we know it is part of the same sequence as the previous event
+                  currentSequence := prevEvent -> R11;
+                  if currentSequence /= null then
+                    if (newEvent -> R11 = null) then
+                      link newEvent R11 currentSequence;
+                    end if;  
+                    if prevEvent.seenAsPreviousEvent = false then
+                      //Implementation of part of the Hanrahan algorithm
+                      currentSequence.branchExtent := currentSequence.branchExtent - 1;
+                    end if;
+                    // Note that the previous Audit Event has now been seen as a previous audit event       
+                    prevEvent.seenAsPreviousEvent := true;
+              
+                  else
+                    //Log Job failure: Previous event is valid but is part of a broken sequence
+                    this.sequencingFailed := true;
+                    this.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
+                  end if;  
+          
+                else
+                  //Log Job failure: Previous event is not valid for this sequence
+                  this.sequencingFailed := true;
+                  this.failJob("The type of a previous event provided is not known or not valid - Event Id = " & aPrevEventId);
+         
+                end if;
+              else
+                // The received event is a sequence start event but it has a previous event with it. This is an error condition
+                this.sequencingFailed := true;
+                this.failJob("This is a sequence start event with a previous event which can't happen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
+              end if;  
+            elsif possibleAeOccInSequenceDef'length = 0 then
+              // There is no available definition for this situation so the sequence is broken.
+              this.sequencingFailed := true;
+              this.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
+        
+            else
+              // There are multiple possible Audit Event Occurrences In the Sequence Definition 
+              // TODO What does this circumstance imply and what can we do about it.
+              this.sequencingFailed := true;
+              this.failJob("The are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
+            end if;
+          else
+            // The previous event id provided in the audit event data is not recognised as a previous event 
+            this.sequencingFailed := true;
+            this.failJob("The previous event id provided in the audit event data is not recognised as a previous event - in Job = " & this.jobID & " provided previous event id = " & aPrevEventId);
+            
+          end if;
+        end loop; //End of loop over each previous event id  
+        
+        // Need to increment the branch extent for this sequence for this new event as part of the Hanrahan algorithm  
+        currentSequence := newEvent -> R11;
+        if currentSequence /= null then
+          currentSequence.branchExtent := currentSequence.branchExtent + 1;
+              
+        else
+          //Log Job failure: Previous event is valid but is part of a broken sequence
+          this.sequencingFailed := true;
+          this.failJob("No current sequence has been found for this audit event - Event Type = " & (newEvent -> R2).AEType);
+        end if;  
+
+      else
+        // There is no previous event so check for a single AEOccurrenceInSequenceDef that marks a sequence start
+        theAeOccInSequenceDef := find_one theAeOccurrencesInSequenceDef (isSequenceStart = true);
+
+        if theAeOccInSequenceDef /= null then
+          // The new event type is one that starts a sequence even though it's for an existing Job. This indicates a follow on sequence for an existing Job
+          // This is expected when a start event is seen for a new sequence in an existing Job
+          link newEvent R13 theAeOccInSequenceDef;
+          //TODO Validate the new sequence is in the correct order
+          // Check that no other sequences for the same Job are still in progress
+          sequencesForJob := this -> R10;
+          incompleteSequences := find sequencesForJob (isComplete = false);
+          if incompleteSequences'length = 0 then
+            // Log info: Received a new sequence start event for an existing Job but other sequences are complete
+	        logMessage := "A further new sequence has been started for - jobId = " & this.jobID & ", with audit event = " & theEventType.AEType;
+	        Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	        
+	        // This must be the first start event seen for a new sequence so create and link the sequence
+	        newSequence := create unique Sequence (isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
+	        link newSequence R10 this;
+	        link newSequence R11 newEvent;
+	        link newSequence R14 theSequenceDef;
+	        
+	      else
+            // Log info: Received a new sequence start event for an existing Job - but other sequences are still in progress
+	        logMessage := "A new sequence start event has been seen with other sequences incomplete for - jobId = " & this.jobID & ", with audit event = " & theEventType.AEType;
+	        Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	        
+	        // Need to check if an incomplete sequence is one of the right type for this event
+	        for incompleteSequence in incompleteSequences loop
+	          if (incompleteSequence -> R14) = theSequenceDef then
+	            // We have an incomplete sequence of the same type as the new event belongs to so this must be another start event for that sequence
+	            link incompleteSequence R11 newEvent;
+	            // So increment the branch extent
+	            incompleteSequence.branchExtent := incompleteSequence.branchExtent + 1;
+                // Log info: Received a new sequence start event that is an additional start event for an existing sequence
+	            logMessage := "An additional sequence start event has been seen for an existing sequence for - jobId = " & this.jobID & ", in sequence = " & incompleteSequence.AESequenceId'image & "with audit event type = " & theEventType.AEType;
+	            Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	            
+	          end if;
+	        end loop;
+	        // If the new start sequence event didn't match any existing sequences then it must be a new sequence
+	        if (newEvent -> R11) = null then
+	          // This must be the first start event seen for a new sequence so create and link the sequence
+	          newSequence := create unique Sequence (isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
+	          link newSequence R10 this;
+	          link newSequence R11 newEvent;
+	          link newSequence R14 theSequenceDef;          
+	        end if;
+	      end if;  
+        
+        else
+          // We have a valid new event type and no previous event. This should indicate the start of
+          // a new sequence within a Job yet the definition is ambiguous about which start event it is
+          // TODO Check: Can this ever happen and if so what can we do about it?
+          this.sequencingFailed := true;
+          this.failJob("An event starting a new sequence has been received but there is no matching start event definition for Job = " & this.jobID & ", with audit event type = " & theEventType.AEType);
+        end if; 
+      end if;           
+
+      // Capture any audit event data associated with this audit event
+      theAeOccInSequenceDef := newEvent -> R13;
+      for aeDataElement in aeData loop
+        case aeDataElement.aedKind is
+          when aeDataKindEnum.INTRAJOBINV =>  
+            // For this Audit Event Occurrence only the following IntraJobInvarinatDefinition is allowed
+            theIntraJobInvariantDefn := theAeOccInSequenceDef -> R19;
+            // Check that the provided invariant name matches the expected invariant name
+            if theIntraJobInvariantDefn /= null then
+              if theIntraJobInvariantDefn.intraJobInvName = aeDataElement.aedName then
+                //Check that the invariant value is not empty
+                if aeDataElement.aedValue /= "" then
+                  newIntraJobInvariant := create TransientInvariant (AuditEventId => newEvent.AuditEventId, invariantName => aeDataElement.aedName, invariantValue => aeDataElement.aedValue);
+                  link newIntraJobInvariant R23 newEvent;
+//                  newIntraJobInvariant := create IntraJobInvariant (AuditEventId => newEvent.AuditEventId, invariantName => aeDataElement.aedName);
+//                  link newIntraJobInvariant R25 newInvariant;
+                  link newIntraJobInvariant R26 theIntraJobInvariantDefn;
+                  // Log info: Audit event data provided with this audit event has been captured
+	              logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & this.jobID & " has been added for this type of audit event = " & theEventType.AEType;
+	              Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+	            else
+                  this.failJob("Empty Invariant Value provided for this Job = " & this.jobID & " and Event Type = " & theEventType.AEType);        
+	            end if;                 
+              else
+                // Log warning: The audit event data type provided with this audit event is of a disallowed type for this type of audit event
+	            logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & this.jobID & " is disallowed for this type of audit event = " & theEventType.AEType;
+	            Logger::log(Logger::Information, "AESequenceDC", logMessage);                
+                this.failJob("Invalid audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+              end if;
+            else
+               this.failJob("INTRAJOBINV Audit event data sent on an event type is not the expected audit event data - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);               
+            end if;  
+          when aeDataKindEnum.EXTRAJOBINV =>  
+            // For this Audit Event Occurrence only the following ExtraJobInvarinatDefinition is allowed
+            theSourceExtraJobInvariantDefn := theAeOccInSequenceDef -> R20;
+            theUserExtraJobInvariantDefn := theAeOccInSequenceDef -> R21;
+            if theSourceExtraJobInvariantDefn /= null then
+              // We have the source event that provided a new Extra Job Invariant
+              // Check the name matches
+              if theSourceExtraJobInvariantDefn.extraJobInvName = aeDataElement.aedName then
+                // We have a match between the name in the definition and the name in the audit event data
+                theSourceExtraJobInvariant := PersistedInvariant.createSourceExtraJobInvariant(theSourceExtraJobInvariantDefn,
+               	                                                                            aeDataElement.aedName,
+               	                                                                            aeDataElement.aedValue,
+               	                                                                            creationErrorMessage );
+               	if theSourceExtraJobInvariant /= null then                                                                            
+                  link theSourceExtraJobInvariant R27 newEvent;
+                else
+                  this.failJob(creationErrorMessage);
+                end if;    
+              else
+                this.failJob("Invalid audit event data - the name of the audit event data does not match that expected - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+                    
+              end if;
+              // We have the source event that provided a new Extra Job Invariant
+              //ExtraJobInvariant.createSourceExtraJobInvariant(theSourceExtraJobInvariant);
+            elsif theUserExtraJobInvariantDefn /= null then
+              // We have a user event that references an existing Extra Job Invariant
+                if theUserExtraJobInvariantDefn.extraJobInvName = aeDataElement.aedName then
+                  // We have a match between the name in the definition and the name in the audit event data
+                  if aeDataElement.aedValue /= "" then
+                    theUserExtraJobInvariant := create TransientInvariant (AuditEventId => newEvent.AuditEventId, invariantName => aeDataElement.aedName, invariantValue => aeDataElement.aedValue);
+                    link theUserExtraJobInvariant R23 newEvent;
+                    link theUserExtraJobInvariant R28 theUserExtraJobInvariantDefn;
+                    // Log info: Audit event data provided with this audit event has been captured
+	                logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & this.jobID & " has been added for this type of audit event = " & theEventType.AEType;
+	                Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+	              else
+                    this.failJob("Empty Invariant Value provided for this Job = " & this.jobID & " and Event Type = " & theEventType.AEType);        
+	              end if;                 
+                end if;
+            
+            else
+              // The definition does not match the audit event data seen so this is an error condition
+              this.failJob("EXTRAJOBINV Audit event data sent on the event type is not the expected audit event data - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);               
+                
+            end if;
+          when others =>
+            // Log warning: Unsupported audit event data type
+            this.failJob("The audit event data type provided for jobId = " & this.jobID & " is an unsupported type of audit event data = " & aeDataElement.aedName'image);               
+        end case;  
+      end loop;      
+      
+  
+      // Check to see if the received event marks an end point in the current sequence and if so check whether or
+      // not it completes the sequence (note that sequences can have multiple end points due to branching)
+      if (theAeOccInSequenceDef /= null) and (theAeOccInSequenceDef.isSequenceEnd) = true then
+        currentSequence := newEvent -> R11;
+        if currentSequence /= null then
+          // Check to to see if the 'end point' event in the sequence also marks the sequence end.
+          generate Job.endEventInSequenceDetected(currentSequence) to this;
+        else
+          //Log Job failure: This event marks the end of a sequence but is part of a broken sequence
+          this.sequencingFailed := true;
+          this.failJob("This event marks the end of a sequence but is part of a broken sequence - Event Type = " & theEventType.AEType);
+        end if;
+  
+      end if;
+      
+      
+    else
+      // Log error: unrecognised event type received
+      this.sequencingFailed := true;
+      this.failJob("An unrecognised event type - " & aeType & "has been received for - jobId = " & this.jobID);
+    //
+    end if;
+  else
+    // Log error: The audit event id received has been seen before
+    this.sequencingFailed := true;
+    this.failJob("The audit event id received has been seen before - event id " & eventId & " , jobId = " & this.jobID);
+  
+  end if;  
+//  
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '45910edf-ed38-4fdb-b6b8-206e07e4bdec' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.AssessingJobConstraints () is
+eachAuditEventPair : instance of AuditEventPair;
+theAuditEventPairs : sequence of instance of AuditEventPair;
+theConstraintDefn : instance of ConstraintDefinition;
+theConstraintDefns : sequence of instance of ConstraintDefinition;
+theConstrainedSeqPairDefns : sequence of instance of AEInSequencePairDefn;
+eachConstrainedSeqPairDefn : instance of AEInSequencePairDefn;
+theConstrainedAuditEventsPairs : sequence of instance of AuditEventPair;
+validatedConstraint : boolean;
+logMessage : string;
+failureReason: string;
+
+begin
+  // Need to check that constraints are honoured	
+  theAuditEventPairs := this -> R3 -> R4.has_next.AuditEventPair;
+  validatedConstraint := true;
+  for eachAuditEventPair in theAuditEventPairs loop
+    theConstraintDefn := eachAuditEventPair -> R15 -> R16;
+    if theConstraintDefn /= null then
+      if theConstraintDefn.constraintType = AND then
+        // AND Constraint Logic
+        theConstrainedSeqPairDefns := theConstraintDefn -> R16.AEInSequencePairDefn;
+        for eachConstrainedSeqPairDefn in theConstrainedSeqPairDefns loop
+          // Check that every element within the AND constraint is present
+          if ((eachConstrainedSeqPairDefn -> R15) intersection theAuditEventPairs)'length = 0 then
+            validatedConstraint := false;
+          end if;
+        end loop;
+      elsif theConstraintDefn.constraintType = XOR then
+        //XOR Constraint logic
+        theConstrainedSeqPairDefns := theConstraintDefn -> R16.AEInSequencePairDefn;
+        // Check that only one element within the XOR constraint is present
+        if ((theConstrainedSeqPairDefns -> R15) intersection theAuditEventPairs)'length /= 1 then
+          validatedConstraint := false;
+        end if;
+        
+      elsif theConstraintDefn.constraintType = LOOPCOUNT then
+        //TODO Add loop count logic here  
+    
+      elsif theConstraintDefn.constraintType = BRANCHCOUNT then    
+        //TODO Add loop count logic here  
+      else
+        logMessage := "Unsupported Constraint Type for Job = " & this.jobID;
+        Logger::log(Logger::Information, "AESequenceDC", logMessage);    
+      end if;
+    end if;  
+  end loop;
+  
+  if validatedConstraint = false then
+    failureReason := "Constraint Failed";
+    generate Job.jobFailed(failureReason) to this;
+  else
+    logMessage := "Constraint check passed for - jobId = " & this.jobID;
+    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+    generate Job.constraintCheckSuccessful() to this;
+  end if;
+//
+end state;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '629612ca-ac5a-494b-b9de-7ef1afda21f0' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.JobFailed ( failureReason : in string ) is
+logMessage : string;
+theSystemSpec : instance of SystemSpecification;
+
+begin
+  // Cancel the jobDeletionTimer (that may have been set in previous states) in preparation
+  // for being set again within this state.
+  cancel this.jobDeletionTimer;
+  
+  // The following line is necessary because it is possible for JobFailed to be received when the Job has completed
+  // Current policy is that FailJob from AEOrdering trumps all behaviour in SVDC and so even a completed Job will be
+  // set to JobFailed in this situation. Consequently it seems appropriate to clear the jobCompleted boolean
+  this.jobCompleted := false;
+  
+  // Log info: Audit Event Sequence Verification has been informed of Job failure
+  logMessage := "Job Failed - jobId = " & this.jobID & " due to " & failureReason;
+  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+  
+  // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
+  theSystemSpec := find_one SystemSpecification();
+  schedule this.jobDeletionTimer generate Job.endOfLifeReached() to this delay theSystemSpec.jobDeletionWaitPeriod;
+  //          
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' 'e08a98eb-9e0e-4eaf-83d7-60649b23bdac' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.JobGoneHorriblyWrong ( eventId : in string,
+                                              prevAEIds : in sequence of string,
+                                              aeType : in string,
+                                              aeData : in sequence of auditEventDataStructure ) is
+logMessage : string;
+theSystemSpec : instance of SystemSpecification;
+
+begin
+    // Cancel the jobDeletionTimer (that may have been set in previous states) in preparation
+  // for being set again within this state.
+  cancel this.jobDeletionTimer;
+  
+  // The following line is necessary because it seems appropriate to clear the jobCompleted boolean if further
+  // events are received after the Job completed
+  this.jobCompleted := false;
+
+  // Log error: new follow on event received for completed or failed Job
+      // Log info: Audit Event Sequence Verification has been informed of Job completion
+    logMessage := "Job gone horribly wrong - a follow on event for a completed or failed job has been received - jobId = " & this.jobID;
+    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+
+  // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
+  theSystemSpec := find_one SystemSpecification();
+  schedule this.jobDeletionTimer generate Job.endOfLifeReached() to this delay theSystemSpec.jobDeletionWaitPeriod;
+  //
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '02372df1-eda5-43dc-9e3b-740dccc50479' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.AssessingSequenceCompletion ( thePotentiallyCompletedSequence : in instance of Sequence ) is
+aeSequenceDefs : set of instance of AESequenceDefinition;
+completeSequences : set of instance of Sequence;
+sequencesForJob : set of instance of Sequence;
+theSystemSpec : instance of SystemSpecification;
+logMessage : string;
+ 
+begin
+  // Log info: Audit Event Sequence Verification is checking for completion of a Sequence or Job
+  logMessage := "Checking for completion of a Sequence or Job - jobId = " & this.jobID & " ,sequenceId = " & thePotentiallyCompletedSequence.sequenceId'image & " and branch extent = " & thePotentiallyCompletedSequence.branchExtent'image;
+  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+
+  // Test to see if this is the last 'end' event for the current sequence
+  thePotentiallyCompletedSequence.branchExtent := thePotentiallyCompletedSequence.branchExtent - 1;
+  if thePotentiallyCompletedSequence.branchExtent = 0 then
+    thePotentiallyCompletedSequence.isComplete := true; 
+  else
+    thePotentiallyCompletedSequence.isComplete := false;
+  end if;  
+   
+  // Then check to see if the job is complete
+  aeSequenceDefs := this -> R8 -> R7;
+  sequencesForJob := this -> R10;
+  completeSequences := find sequencesForJob (isComplete = true);
+  if aeSequenceDefs'length = completeSequences'length then
+    // All sequences for the Job appear to be complete - but just in case there's a late delivery of the first
+    // event in a previously unseen optional branch of one of those sequences then give a short period for it to 
+    // arrive before moving the Job into the JobCompleted state.
+    theSystemSpec := find_one SystemSpecification();
+    schedule this.jobEventTimer generate Job.jobComplete() to this delay theSystemSpec.intraSequenceEventTimeoutPeriod;
+  end if;
+        
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' 'fe76e332-fa89-4fc8-bf40-ea0923527fad' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.JobTimeoutReported () is
+logMessage : string;
+begin
+  // TODO: Can a jobFailed event occur once this state is reached?
+  
+  logMessage := "The Job has been reported having timed out - jobId = " & this.jobID;
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  
+  // TODO: Consider adding a jobTimedOut (boolean) attribute to Job and set this to true on
+  //       entry to this state such that it can be used in test assertions (because you cannot
+  //       currently check the value of the current_state 'attribute'.
+
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' 'af8e77f2-393f-44d3-add2-d0babcb15053' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.JobSuccessful () is
+logMessage : string;
+theSystemSpec : instance of SystemSpecification;
+
+begin
+  // Job is considered to have completed - Record and log this fact.
+  this.jobCompleted := true;
+  
+  // Log info: Audit Event Sequence Verification has determined that the Job is Complete
+  logMessage := "Sequence Verification determines that the Job - jobId = " & this.jobID & " is complete.";
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  
+  // The Job is thus near the end of it's useful life - wait a bit longer and then trigger its final demise.
+  theSystemSpec := find_one SystemSpecification();
+  schedule this.jobDeletionTimer generate Job.endOfLifeReached() to this delay theSystemSpec.jobDeletionWaitPeriod;
+  //
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '8fe3aaed-1b2a-4e4b-bd5a-8206f6e08cf0' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.Deleted () is
+logMessage : string;
+theJobID : string;
+
+begin
+  // The Job has reached the end of its useful life and can be deleted.
+  theJobID := this.jobID;
+  this.deleteJob();
+  
+  // Synchronise the deletion of any counterpart Job instances in other domains.
+  JobAdmin~>deleteJob(theJobID);
+
+  logMessage := "Job with jobID: " & theJobID & " has been deleted";
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  //
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '8296783c-a40c-413b-b700-e18ecd9df26d' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.AssessingInvariants () is
+expectedIntraJobInvDefns : set of instance of IntraJobInvariantDefn;
+expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
+theExpectedIntraJobInvDefn : instance of IntraJobInvariantDefn;
+theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;
+theJobsAuditEvents : set of instance of AuditEvent;
+theInvariantAuditEvents : set of instance of AuditEvent;
+theJobsInvariantAuditEvents : set of instance of AuditEvent;
+theIntraJobInvariant : instance of TransientInvariant;
+theTransientExtraJobInvariant : instance of TransientInvariant;
+thePersistedExtraJobInvariant : instance of PersistedInvariant;
+thePersistedExtraJobInvariants : set of instance of PersistedInvariant;
+theInForcePersistedExtraJobInvariants : set of instance of PersistedInvariant;
+intraJobInvariantCheckPassed : boolean;
+extraJobInvariantCheckPassed : boolean;
+matched : boolean;
+invariantValue : string := "";
+failureReason : string;
+logMessage : string;
+
+begin
+// Checking Intra Job Invariants if any
+      intraJobInvariantCheckPassed := true;
+      theJobsAuditEvents := this -> R3;
+      expectedIntraJobInvDefns := this -> R3 -> R13 -> R19;
+      for theExpectedIntraJobInvDefn in expectedIntraJobInvDefns loop
+        theInvariantAuditEvents := theExpectedIntraJobInvDefn -> R19 -> R13;
+        // This finds the set of audit events that are expected to have invariants attached
+        theJobsInvariantAuditEvents :=  theJobsAuditEvents intersection theInvariantAuditEvents;
+        for eachJobsInvariantAuditEvent in theJobsInvariantAuditEvents loop
+          theIntraJobInvariant := eachJobsInvariantAuditEvent -> R23;
+          if theIntraJobInvariant /= null then
+            if invariantValue = "" then
+              invariantValue := theIntraJobInvariant.invariantValue;
+            else  
+              if invariantValue /= theIntraJobInvariant.invariantValue then
+                intraJobInvariantCheckPassed := false;
+              end if;
+            end if;    
+          else
+            // No invariant provided with the audit event when expected
+            intraJobInvariantCheckPassed := false;
+          end if;  
+        end loop;
+      end loop;
+      
+  // Checking Extra Job Invariants
+      matched := false;
+      extraJobInvariantCheckPassed := true;
+      theJobsAuditEvents := this -> R3;
+      expectedUserExtraJobInvDefns := this -> R3 -> R13 -> R21;
+      for theExpectedIntraJobInvDefn in expectedUserExtraJobInvDefns loop
+        theInvariantAuditEvents := theExpectedIntraJobInvDefn -> R21 -> R13;
+        // This finds the set of audit events that are expected to have invariants attached
+        theJobsInvariantAuditEvents :=  theJobsAuditEvents intersection theInvariantAuditEvents;
+        for eachJobsInvariantAuditEvent in theJobsInvariantAuditEvents loop
+          theTransientExtraJobInvariant := eachJobsInvariantAuditEvent -> R23;
+          thePersistedExtraJobInvariants := theTransientExtraJobInvariant -> R28 -> R24;
+          // The following allows for more than one instance of a persisted extra job invariant to be in force at the same time
+          // If any one of them matches the value of the transient invariant then the transient invariant is valid
+          theInForcePersistedExtraJobInvariants := find thePersistedExtraJobInvariants (inForce = true);
+          for eachInForceInvariant in theInForcePersistedExtraJobInvariants loop
+            if eachInForceInvariant.invariantValue = theTransientExtraJobInvariant.invariantValue then
+              matched := true;
+              exit;
+            else
+              matched := false;
+            end if;  
+          end loop;
+          if not matched then
+            extraJobInvariantCheckPassed := false;
+          end if;
+        end loop;
+      end loop;
+
+      if intraJobInvariantCheckPassed then
+        logMessage := "Intra-Job Invariant check passed for - jobId = " & this.jobID;
+        Logger::log(Logger::Information, "AESequenceDC", logMessage);
+      end if;  
+
+      if extraJobInvariantCheckPassed then
+        logMessage := "Extra-Job Invariant check passed for - jobId = " & this.jobID;
+        Logger::log(Logger::Information, "AESequenceDC", logMessage);
+      end if;  
+
+      if intraJobInvariantCheckPassed and extraJobInvariantCheckPassed then
+        generate Job.invariantCheckSuccessful() to this;
+      elsif intraJobInvariantCheckPassed and not extraJobInvariantCheckPassed then
+        failureReason := "Extra-Job Invariant Failed";
+        generate Job.jobFailed(failureReason) to this;  
+      elsif not intraJobInvariantCheckPassed and extraJobInvariantCheckPassed then   
+        failureReason := "Intra-Job Invariant Failed";
+        generate Job.jobFailed(failureReason) to this;  
+      else
+        failureReason := "Extra-Job and Intra-Job Invariants Failed";
+        generate Job.jobFailed(failureReason) to this;
+      end if;  
+  
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

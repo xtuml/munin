@@ -1,0 +1,110 @@
+//! ACTIVITY BEGIN. 'f265001f-97e1-4e0d-b14f-defefb0bbfab' 'f107bb75-87f9-4d8b-b539-892818c3e4ef' DO NOT EDIT THIS LINE.
+state AEReception::FileControl.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'f265001f-97e1-4e0d-b14f-defefb0bbfab' '3242925b-9d77-4233-be69-afeb0a895d4b' DO NOT EDIT THIS LINE.
+state AEReception::FileControl.WaitingForFile () is
+logMessage : string;
+receptionSpec : instance of ReceptionSpec;
+fileNames : sequence of Filesystem::filename;
+unassignedEventFile : instance of EventFile;
+eventFile : instance of EventFile;
+
+begin
+
+	logMessage := "AEReception::FileControl.WaitingForFile";
+	Logger::log(Logger::Information, "AEReception", logMessage);
+		
+	// if we have files to process then select one
+	cancel this.fileControlTimer;
+	unassignedEventFile := find_one EventFile(assigned = false);
+	if unassignedEventFile /= null then
+		unassignedEventFile.assigned := true;
+		generate FileControl.allocateFile(unassignedEventFile) to this;
+		logMessage := "AEReception::FileControl.WaitingForFile - assigning file " & unassignedEventFile.fileName;
+		Logger::log(Logger::Information, "AEReception", logMessage);
+	else
+		// no files to process so check the incoming directory
+		receptionSpec := find_one ReceptionSpec();
+		if not Filesystem::file_exists(Filesystem::filename(receptionSpec.incomingDirectory)) then
+			Filesystem::create_directory(Filesystem::filename(receptionSpec.incomingDirectory));
+		end if;
+		fileNames := Filesystem::list_directory(Filesystem::filename(receptionSpec.incomingDirectory));
+		for fileName in fileNames loop
+			eventFile := find_one EventFile(fileName = string(fileName));
+			if eventFile = null then
+				eventFile := create EventFile(fileName => string(fileName), assigned => false);
+				link this R1 eventFile;
+			end if;
+		end loop;
+		unassignedEventFile := find_one EventFile(assigned = false);
+		if unassignedEventFile /= null then
+			unassignedEventFile.assigned := true;
+			generate FileControl.allocateFile(unassignedEventFile) to this;
+			logMessage := "AEReception::FileControl.WaitingForFile - assigning file " & unassignedEventFile.fileName;
+			Logger::log(Logger::Information, "AEReception", logMessage);
+		else
+			schedule this.fileControlTimer generate FileControl.checkForFile() to this delay @PT1S@;
+		end if;
+	end if;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'f265001f-97e1-4e0d-b14f-defefb0bbfab' '0e9ddd05-8211-4291-b0a1-3203854776a8' DO NOT EDIT THIS LINE.
+state AEReception::FileControl.ProcessingFile ( eventFile : in instance of EventFile ) is
+logMessage : string;
+receptionSpec : instance of ReceptionSpec;
+receptionJob : instance of Reception;
+fileToBeProcessed : string;
+
+begin
+	
+	logMessage := "AEReception::FileControl.ProcessingFile";
+	Logger::log(Logger::Information, "AEReception", logMessage);
+		
+	// create the reception job and link to the event file it has to process
+	receptionSpec := find_one ReceptionSpec();
+	// move the file to be processed
+	if not Filesystem::file_exists(Filesystem::filename(receptionSpec.processingDirectory)) then
+		Filesystem::create_directory(Filesystem::filename(receptionSpec.processingDirectory));
+	end if;
+	fileToBeProcessed := receptionSpec.processingDirectory & "/" & eventFile.fileName;
+	Filesystem::move_file( Filesystem::filename(receptionSpec.incomingDirectory & "/" & eventFile.fileName), Filesystem::filename(fileToBeProcessed));
+	receptionJob := create unique Reception (filePath => fileToBeProcessed, aeDelay => receptionSpec.eventThrottleRate, Current_State => starting);
+	link receptionJob R2 eventFile;
+	generate Reception.ready_to_parse() to receptionJob;
+	
+	// check for more capacity
+	generate FileControl.checkCapacity() to this;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'f265001f-97e1-4e0d-b14f-defefb0bbfab' '21ed2448-1468-4d2f-8dc7-e25047d11ad8' DO NOT EDIT THIS LINE.
+state AEReception::FileControl.WaitingForCapacity () is
+logMessage : string;
+receptionSpec : instance of ReceptionSpec;
+currentJobs : sequence of instance of Reception;
+
+begin
+	
+	logMessage := "AEReception::FileControl.WaitingForCapacity";
+	Logger::log(Logger::Information, "AEReception", logMessage);
+	
+	cancel this.fileControlTimer;
+	receptionSpec := find_one ReceptionSpec();
+	currentJobs := find Reception(receptionComplete = false);
+	if currentJobs'length < receptionSpec.concurrentReceptionLimit then
+		generate FileControl.checkForFile() to this;
+	else
+		// schedule to check for capacity. Should not be needed as conclusion of reception processing should force the check.
+		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay @PT1S@;
+	end if;
+  
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

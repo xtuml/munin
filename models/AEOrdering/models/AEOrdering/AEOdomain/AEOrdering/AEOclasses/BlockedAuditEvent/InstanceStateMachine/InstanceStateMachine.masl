@@ -1,0 +1,48 @@
+//! ACTIVITY BEGIN. '8ccfb9c6-9ebb-4977-af73-d83e86e76531' '4e8f98fd-690d-4d5f-8408-6b007dc32eef' DO NOT EDIT THIS LINE.
+state AEOrdering::BlockedAuditEvent.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8ccfb9c6-9ebb-4977-af73-d83e86e76531' 'f361886b-cab0-4738-a427-8ced29d273fb' DO NOT EDIT THIS LINE.
+state AEOrdering::BlockedAuditEvent.Waiting () is
+logMessage : string;
+eventType : instance of AuditEventType;
+
+begin
+
+	logMessage := "AEOrdering::BlockedAuditEvent.Waiting, auditEventId = " & this.auditEventId;
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	eventType := this -> R4.AuditEvent -> R7.AuditEventType;
+	schedule this.blockedEventTimer generate BlockedAuditEvent.eventFailed() to this delay eventType.blockedAuditEventDuration;
+
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8ccfb9c6-9ebb-4977-af73-d83e86e76531' 'd0891e75-9b0c-40bf-9711-e7efca6c0004' DO NOT EDIT THIS LINE.
+state AEOrdering::BlockedAuditEvent.Failed () is
+logMessage : string;
+failedAuditEvent : instance of FailedAuditEvent;
+auditEvent : instance of AuditEvent;
+failureReason : string;
+
+begin
+
+	logMessage := "AEOrdering::BlockedAuditEvent.Failed, auditEventId = " & this.auditEventId;
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	
+	cancel this.blockedEventTimer;
+	failureReason := "The reported event has been blocked longer than the blocked event time, audit eventId = " & this.auditEventId;
+	auditEvent := this -> R4.AuditEvent;
+	unlink this R4 auditEvent;
+	failedAuditEvent := create FailedAuditEvent(auditEventId => this.auditEventId, failureTime => timestamp'now, failureReason => failureReason);
+	link failedAuditEvent R4 auditEvent;
+	(auditEvent -> R9.Job).failJob(failureReason);
+	delete this;
+
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

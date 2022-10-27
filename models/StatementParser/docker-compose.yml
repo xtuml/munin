@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  statementparser:
+    image: "ghcr.io/xtuml/statementparser"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"

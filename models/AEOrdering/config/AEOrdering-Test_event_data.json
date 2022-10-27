@@ -1,0 +1,46 @@
+{
+  "JobType": "AEOrdering-Test",
+  "Events": [
+    {
+      "EventName": "aaa",
+      "EventData": [
+        {
+          "EventDataName": "Data1",
+          "EventDataType": "EXTRAJOBINV",
+          "ConstrainedEvents": [
+            {
+              "JobType": "Other-Test-Job",
+              "ConstrainedEvent": "Other-aaa",
+              "ConstrainedDataItemName": "Other-Data1"
+            },
+            {
+              "JobType": "Other-Test-Job",
+              "ConstrainedEvent": "Other-bbb",
+              "ConstrainedDataItemName": "Data1"
+            }
+          ]
+        },
+        {
+          "EventDataName": "Data2",
+          "EventDataType": "INTRAJOBINV"
+        }
+      ]
+    },
+    {
+      "EventName": "ddd",
+      "EventData": [
+        {
+          "EventDataName": "Data4",
+          "EventDataType": "EXTRAJOBINV",
+          "ConstrainedEvents": [
+            {
+              "JobType": "Other-Test-Job",
+              "ConstrainedEvent": "Other-ddd",
+              "ConstrainedDataItemName": "Other-Data4"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

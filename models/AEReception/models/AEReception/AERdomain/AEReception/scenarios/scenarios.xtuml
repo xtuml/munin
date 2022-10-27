@@ -1,0 +1,102 @@
+-- BP 7.1.6 content: Package syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO EP_PKG
+	VALUES ("c2c1404d-24aa-458c-bf54-4f10f339ddd5",
+	"00000000-0000-0000-0000-000000000000",
+	"6fafc65a-4ccb-4590-a21b-7340823150ad",
+	'scenarios',
+	'',
+	0);
+INSERT INTO GD_MD
+	VALUES ("f8c1c9d5-c757-4c49-b576-a05e7ca093f5",
+	112,
+	"c2c1404d-24aa-458c-bf54-4f10f339ddd5",
+	108,
+	0,
+	0,
+	1,
+	1,
+	1,
+	12,
+	1,
+	0,
+	0,
+	0,
+	0,
+	0,
+	'',
+	'AEReception::AERdomain::AEReception::scenarios');
+INSERT INTO DIM_DIA
+	VALUES ("f8c1c9d5-c757-4c49-b576-a05e7ca093f5",
+	'',
+	1.000000,
+	0.000000,
+	0.000000,
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO S_SYNC
+	VALUES ("34441031-02bb-4aca-bb64-18df20b7a725",
+	"00000000-0000-0000-0000-000000000000",
+	'init',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	1,
+	1);
+INSERT INTO PE_PE
+	VALUES ("34441031-02bb-4aca-bb64-18df20b7a725",
+	1,
+	"c2c1404d-24aa-458c-bf54-4f10f339ddd5",
+	"00000000-0000-0000-0000-000000000000",
+	1);
+INSERT INTO S_SYNC
+	VALUES ("b618c6b6-06c2-4e2c-9050-9133e025bde1",
+	"00000000-0000-0000-0000-000000000000",
+	'registerCommandLineArgs',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	1,
+	2);
+INSERT INTO PE_PE
+	VALUES ("b618c6b6-06c2-4e2c-9050-9133e025bde1",
+	1,
+	"c2c1404d-24aa-458c-bf54-4f10f339ddd5",
+	"00000000-0000-0000-0000-000000000000",
+	1);
+INSERT INTO PE_PE
+	VALUES ("c2c1404d-24aa-458c-bf54-4f10f339ddd5",
+	1,
+	"00000000-0000-0000-0000-000000000000",
+	"6bf543bd-8274-4a52-b02f-c1df89312cfa",
+	7);
+INSERT INTO C_C_PROXY
+	VALUES ("6bf543bd-8274-4a52-b02f-c1df89312cfa",
+	"00000000-0000-0000-0000-000000000000",
+	"00000000-0000-0000-0000-000000000000",
+	'AEReception',
+	'This domain receives audit events from the monitored system. The domain is responsible for decoding 
+the event messages from the form in which they are received to a form that can be used within this 
+verification model.
+
+Any errors in the formatting of the received audit events will be notified through the Logging 
+required interface.
+
+There may be multiple versions of this domain:
+1. To receive and decode audit events in batch file format
+2. To receive and decode events live from the monitored system
+',
+	0,
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'Audit Event Reception',
+	'../AEReception.xtuml');
+INSERT INTO S_SYS_PROXY
+	VALUES ("6fafc65a-4ccb-4590-a21b-7340823150ad",
+	'AEReception',
+	1,
+	'../../../AEReception.xtuml');

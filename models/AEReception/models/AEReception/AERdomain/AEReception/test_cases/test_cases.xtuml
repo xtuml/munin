@@ -1,0 +1,153 @@
+-- BP 7.1.6 content: Package syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO EP_PKG
+	VALUES ("6ff57e18-9827-4fce-84d3-a0049b72f8a1",
+	"00000000-0000-0000-0000-000000000000",
+	"6fafc65a-4ccb-4590-a21b-7340823150ad",
+	'test_cases',
+	'',
+	0);
+INSERT INTO GD_MD
+	VALUES ("e425c907-f393-4c3e-9255-d0b633e2b155",
+	112,
+	"6ff57e18-9827-4fce-84d3-a0049b72f8a1",
+	108,
+	0,
+	0,
+	1,
+	1,
+	1,
+	12,
+	1,
+	0,
+	0,
+	0,
+	0,
+	0,
+	'',
+	'AEReception::AERdomain::AEReception::test_cases');
+INSERT INTO DIM_DIA
+	VALUES ("e425c907-f393-4c3e-9255-d0b633e2b155",
+	'',
+	1.000000,
+	0.000000,
+	0.000000,
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO S_SYNC
+	VALUES ("d507866f-4579-4744-a871-2284db088ea1",
+	"00000000-0000-0000-0000-000000000000",
+	'basicTest01',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	6);
+INSERT INTO PE_PE
+	VALUES ("d507866f-4579-4744-a871-2284db088ea1",
+	1,
+	"6ff57e18-9827-4fce-84d3-a0049b72f8a1",
+	"00000000-0000-0000-0000-000000000000",
+	1);
+INSERT INTO S_SYNC
+	VALUES ("d4d4c832-e7d5-41a4-ace3-c832a06fa75d",
+	"00000000-0000-0000-0000-000000000000",
+	'testConfigLoad',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	7);
+INSERT INTO PE_PE
+	VALUES ("d4d4c832-e7d5-41a4-ace3-c832a06fa75d",
+	1,
+	"6ff57e18-9827-4fce-84d3-a0049b72f8a1",
+	"00000000-0000-0000-0000-000000000000",
+	1);
+INSERT INTO S_SYNC
+	VALUES ("a9fd047c-7666-4134-8f37-09c1747e14b0",
+	"00000000-0000-0000-0000-000000000000",
+	'clearDomain',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	8);
+INSERT INTO PE_PE
+	VALUES ("a9fd047c-7666-4134-8f37-09c1747e14b0",
+	1,
+	"6ff57e18-9827-4fce-84d3-a0049b72f8a1",
+	"00000000-0000-0000-0000-000000000000",
+	1);
+INSERT INTO S_SYNC
+	VALUES ("2a0c19de-ad2e-44a7-a3e3-d8196449857e",
+	"00000000-0000-0000-0000-000000000000",
+	'testFileCapacityManagement',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	9);
+INSERT INTO PE_PE
+	VALUES ("2a0c19de-ad2e-44a7-a3e3-d8196449857e",
+	1,
+	"6ff57e18-9827-4fce-84d3-a0049b72f8a1",
+	"00000000-0000-0000-0000-000000000000",
+	1);
+INSERT INTO S_SYNC
+	VALUES ("9bc7953d-2ce6-4eb0-aab2-a6edd9e89113",
+	"00000000-0000-0000-0000-000000000000",
+	'testEventThrottling',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	10);
+INSERT INTO PE_PE
+	VALUES ("9bc7953d-2ce6-4eb0-aab2-a6edd9e89113",
+	1,
+	"6ff57e18-9827-4fce-84d3-a0049b72f8a1",
+	"00000000-0000-0000-0000-000000000000",
+	1);
+INSERT INTO PE_PE
+	VALUES ("6ff57e18-9827-4fce-84d3-a0049b72f8a1",
+	1,
+	"00000000-0000-0000-0000-000000000000",
+	"6bf543bd-8274-4a52-b02f-c1df89312cfa",
+	7);
+INSERT INTO C_C_PROXY
+	VALUES ("6bf543bd-8274-4a52-b02f-c1df89312cfa",
+	"00000000-0000-0000-0000-000000000000",
+	"00000000-0000-0000-0000-000000000000",
+	'AEReception',
+	'This domain receives audit events from the monitored system. The domain is responsible for decoding 
+the event messages from the form in which they are received to a form that can be used within this 
+verification model.
+
+Any errors in the formatting of the received audit events will be notified through the Logging 
+required interface.
+
+There may be multiple versions of this domain:
+1. To receive and decode audit events in batch file format
+2. To receive and decode events live from the monitored system
+',
+	0,
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'Audit Event Reception',
+	'../AEReception.xtuml');
+INSERT INTO S_SYS_PROXY
+	VALUES ("6fafc65a-4ccb-4590-a21b-7340823150ad",
+	'AEReception',
+	1,
+	'../../../AEReception.xtuml');

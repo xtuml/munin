@@ -1,0 +1,69 @@
+{
+  "JobDefinitionName": "AEOrdering-Test",
+  "Events": [
+    {
+      "EventName": "aaa",
+      "SequenceName": "SEQUENCE1",
+      "OccurrenceId": 1,
+      "Application": "app1",
+      "SequenceStart": true
+    },
+    {
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "aaa",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "SequenceName": "SEQUENCE1",
+      "EventName": "bbb",
+      "OccurrenceId": 1,
+      "Application": "app1"
+    },
+    {
+      "EventName": "ccc",
+      "SequenceName": "SEQUENCE1",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "bbb",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "OccurrenceId": 1,
+      "Application": "app2"
+    },
+    {
+      "EventName": "ddd",
+      "SequenceName": "SEQUENCE1",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "ccc",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "OccurrenceId": 1,
+      "Application": "app3"
+    },
+    {
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "ddd",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "SequenceName": "SEQUENCE1",
+      "EventName": "eee",
+      "OccurrenceId": 1,
+      "Application": "app3",
+      "SequenceEnd": true
+    },
+    {
+      "SequenceName": "SEQUENCE2",
+      "EventName": "fff",
+      "OccurrenceId": 1,
+      "Application": "app4",
+      "SequenceStart": true,
+      "SequenceEnd": true
+    }
+  ]
+}

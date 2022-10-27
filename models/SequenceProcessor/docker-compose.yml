@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  sequenceprocessor:
+    image: "ghcr.io/xtuml/sequenceprocessor"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"

@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  sequenceprocessor_test:
+    image: "ghcr.io/xtuml/sequenceprocessor:test"
+    build:
+      context: .
+      target: install-test
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    volumes:
+      - "./testFiles:/root/testFiles"
+      - "./test_results:/root/test_results"
+    entrypoint: ["/usr/bin/timeout", "30s", "SequenceProcessor_transient_standalone"]
+    command: "-log-level Debug -source testFiles -output testFiles/output -postinit schedule/test.sch -util Inspector -inspector-port 0"

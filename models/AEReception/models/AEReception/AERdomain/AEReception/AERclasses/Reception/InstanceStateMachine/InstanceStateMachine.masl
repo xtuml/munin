@@ -1,0 +1,186 @@
+//! ACTIVITY BEGIN. 'bb579c50-132b-494e-8018-81a7b4ca3778' '167ab2c4-e4fa-415a-a012-1eed723e4434' DO NOT EDIT THIS LINE.
+state AEReception::Reception.starting () is
+begin
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'bb579c50-132b-494e-8018-81a7b4ca3778' '00f732b9-8e05-41dc-a357-6bdce5e53842' DO NOT EDIT THIS LINE.
+state AEReception::Reception.receiving_audit_event () is
+logMessage: string;
+element_received : JSON::JSONElement;
+json_object: JSON::JSONObject;
+validation_result: JSON::JSONObject;
+event_received: boolean := false;
+begin
+
+	logMessage := "AEReception::Reception.receiving_audit_event";
+	Logger::log(Logger::Information, "AEReception", logMessage);
+
+    // We may get a node name or an event.
+    element_received := this.jsonElements[this.currentIndex];
+    if element_received.kind = JSON::String then
+        // If we received a node name, then we did not get the event.  Go get it.
+        this.currentNodeName := JSON::get_string(element_received);
+
+    elsif element_received.kind = JSON::Object then
+        json_object := JSON::get_object(element_received);
+        if json_object'keys'length = 1 and json_object'keys'any = "__comment__" then
+            // ignore comment objects
+	       Logger::log(Logger::Information, "AEReception", "JSON comment: " & JSON::get_string(json_object[json_object'keys'any]));
+        else
+            declare
+                jobId: string;
+                application: string;
+                auditEventType: string;
+                auditEventId: string;
+                auditEventTime: string;
+                prevAuditEventIds: sequence of string;
+                auditEventData: JSON::JSONObject;
+            begin
+                // extract the data from the JSON structure
+                auditEventType := JSON::get_string(json_object["eventType"]);
+                jobId := JSON::get_string(json_object["jobId"]);
+                auditEventId := JSON::get_string(json_object["eventId"]);
+
+                // accept a single string value for the previous event ID or an array of string values. "previousEventIds" is an optional field.
+                if json_object'contains("previousEventIds") then
+                    if json_object["previousEventIds"].kind = JSON::String then
+                        prevAuditEventIds := prevAuditEventIds & JSON::get_string(json_object["previousEventIds"]);
+                    elsif json_object["previousEventIds"].kind = JSON::Array then
+                        for prev_id in JSON::get_array(json_object["previousEventIds"]) loop
+                            prevAuditEventIds := prevAuditEventIds & JSON::get_string(prev_id);
+                        end loop;
+                    end if;
+                end if;
+                auditEventTime := JSON::get_string(json_object["timestamp"]);
+                application := JSON::get_string(json_object["applicationName"]);
+
+                // TODO audit event data
+                
+                // send the event along
+                if this.currentNodeName = "" then
+                    logMessage := "Audit event with blank node name";
+                    Logger::log(Logger::Warning, "AEReception", logMessage);
+                end if;
+                Req_IF_Ordering~>AcceptEvent(jobId, this.currentNodeName, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData);
+                event_received := true;
+            end;
+        end if;
+
+    else
+	    logMessage := "Invalid JSON type: " & element_received.kind'image;
+	    Logger::log(Logger::Error, "AEReception", logMessage);
+    end if;
+    
+    // process the next data item or finish
+    this.currentIndex := this.currentIndex + 1;
+    if this.currentIndex <= this.jsonElements'last then
+        if event_received then
+            // only reschedule the throttle timer if an event was received
+            schedule this.throttleTimer generate Reception.ready_for_event() to this delay this.aeDelay;
+        else
+            generate Reception.ready_for_event() to this;
+        end if;
+    else
+        cancel this.throttleTimer;
+        generate Reception.no_more_events() to this;
+    end if;
+
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'bb579c50-132b-494e-8018-81a7b4ca3778' 'af392d9f-ad3c-4926-8aee-c8e9eb8dffa9' DO NOT EDIT THIS LINE.
+state AEReception::Reception.done () is
+logMessage : string;
+receptionSpec : instance of ReceptionSpec;
+eventFile : instance of EventFile;
+fileControl : instance of FileControl;
+
+begin
+	
+	logMessage := "AEReception::Reception.done";
+	Logger::log(Logger::Information, "AEReception", logMessage);
+
+	receptionSpec := find_one ReceptionSpec();
+	// keep the reception job until the deletion timer fires
+	this.receptionComplete := true;
+	
+	// move the processed job
+	eventFile := this -> R2.EventFile;
+	if not Filesystem::file_exists(Filesystem::filename(receptionSpec.processedDirectory)) then
+		Filesystem::create_directory(Filesystem::filename(receptionSpec.processedDirectory));
+	end if;
+	Filesystem::move_file( Filesystem::filename(this.filePath), Filesystem::filename(receptionSpec.processedDirectory & "/" & eventFile.fileName));
+	
+	// request that file control check for capacity
+	fileControl := find_one FileControl();
+	cancel fileControl.fileControlTimer;
+	schedule fileControl.fileControlTimer generate FileControl.checkCapacity() to fileControl delay @PT0S@;
+	
+	// schedule the deletion
+	schedule this.deletionTimer generate Reception.reception_expired() to this delay receptionSpec.receptionDeletionTime;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'bb579c50-132b-494e-8018-81a7b4ca3778' 'b800b83d-014a-4d72-9661-d34476c735a0' DO NOT EDIT THIS LINE.
+state AEReception::Reception.parsing () is
+logMessage : string;
+json_string: string;
+json_element: JSON::JSONElement;
+validation_result: JSON::JSONObject;
+begin
+	logMessage := "AEReception::Reception.parsing";
+	Logger::log(Logger::Information, "AEReception", logMessage);
+
+    // Read the file and parse
+    json_string := Filesystem::read_file(Filesystem::filename(this.filePath));
+    json_element := JSON::parse(json_string);
+    validation_result := JSONValidation::validate(json_element, #PROP["auditEventSchema"]#);
+    
+    if JSON::get_boolean(validation_result["valid"]) then
+        this.jsonElements := JSON::get_array(json_element);
+        this.currentIndex := this.jsonElements'first;
+        generate Reception.ready_for_event() to this;
+    else
+        logMessage := "Incorrect JSON format for file: " & this.filePath & "\n" & JSON::dump(validation_result, true);
+        Logger::log(Logger::Error, "AEReception", logMessage);
+        generate Reception.parse_failed() to this;
+    end if;
+
+exception
+
+    when JSON::JSONException =>
+	   logMessage := "Failed to parse JSON for file: " & this.filePath;
+	   Logger::log(Logger::Error, "AEReception", logMessage);
+	   generate Reception.parse_failed() to this;
+	   
+	when others =>
+	   logMessage := "Could not read file: " & this.filePath;
+	   Logger::log(Logger::Error, "AEReception", logMessage);
+	   generate Reception.parse_failed() to this;
+
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'bb579c50-132b-494e-8018-81a7b4ca3778' 'cc64b9b1-baf2-4721-863b-afbb21126496' DO NOT EDIT THIS LINE.
+state AEReception::Reception.ReceptionDeleted () is
+logMessage : string;
+receptionSpec : instance of ReceptionSpec;
+eventFile : instance of EventFile;
+
+begin
+	
+	logMessage := "AEReception::Reception.ReceptionDeleted";
+	Logger::log(Logger::Information, "AEReception", logMessage);
+	
+	// remove the reception and the file
+	eventFile := this -> R2.EventFile;
+	unlink eventFile R1;
+	unlink this R2;
+	delete eventFile;
+	delete this;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

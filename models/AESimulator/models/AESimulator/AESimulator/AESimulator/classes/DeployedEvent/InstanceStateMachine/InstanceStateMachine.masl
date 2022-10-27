@@ -1,0 +1,79 @@
+//! ACTIVITY BEGIN. '7a91df5f-048f-4aad-9b7d-2892981ccf6a' '8cba67e7-b098-475f-ac61-a2fab572481a' DO NOT EDIT THIS LINE.
+state AESimulator::DeployedEvent.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7a91df5f-048f-4aad-9b7d-2892981ccf6a' '4f617e45-d8a4-40db-8071-c06ca871b507' DO NOT EDIT THIS LINE.
+state AESimulator::DeployedEvent.Dispatched () is
+logMessage : string;
+job : instance of Job;
+eventDefinition : instance of EventDefinition;
+testDefinition : instance of TestDefinition;
+audit_event: JSON::JSONObject;
+
+begin
+	
+	logMessage := "AESimulator::DeployedEvent.Dispatched";
+	Logger::log(Logger::Information, "AESimulator", logMessage);
+	
+	job := this -> R6.Job;
+	eventDefinition := this -> R5.EventDefinition;
+	testDefinition := job -> R7.TestDefinition;
+	this.deployed := true;
+	if testDefinition.generateTestFiles = true then
+		
+//		logMessage := "jobId = " & string(job.jobId) & ", eventTypeName = " & eventDefinition.eventTypeName &
+//		              ", id = " & string(this.eventId) & ", prevId = " & this.prevEventId;
+//		Logger::log(Logger::Information, "AESimulator", logMessage);
+		job.auditEvents := job.auditEvents & JSON::to_json(eventDefinition.nodeName);
+		
+		audit_event["time"] := JSON::to_json(this.epochEventTime);
+		audit_event["app"] := JSON::to_json(eventDefinition.applicationName);
+		audit_event["jobId"] := JSON::to_json(string(job.jobId));
+		audit_event["type"] := JSON::to_json(eventDefinition.eventTypeName);
+		audit_event["id"] := JSON::to_json(string(this.eventId));
+		if this.prevEventId /= "" and eventDefinition.sequenceStart = false then
+		  audit_event["prev"] := JSON::to_json(this.prevEventId);
+		end if;
+		job.auditEvents := job.auditEvents & JSON::to_json(audit_event);
+
+	else
+	  // TODO
+	end if;
+	link this R10 job;
+	generate Job.eventDispatched() to job;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7a91df5f-048f-4aad-9b7d-2892981ccf6a' '83414080-da18-4c72-8ad9-9fb52257d05c' DO NOT EDIT THIS LINE.
+state AESimulator::DeployedEvent.DispatchScheduled () is
+logMessage : string;
+job : instance of Job;
+eventDefinition : instance of EventDefinition;
+deployedEvent : instance of DeployedEvent;
+jobSpec : instance of JobSpec;
+epochDate : timestamp;
+epochEventTime : integer;
+
+begin
+	
+	logMessage := "AESimulator::DeployedEvent.DispatchScheduled";
+	Logger::log(Logger::Information, "AESimulator", logMessage);
+	
+	job := this -> R6.Job;
+	eventDefinition := this -> R5.EventDefinition;
+	for nextEventDefinition in eventDefinition -> R1.isFollowedBy.EventDefinition loop
+		epochEventTime := (timestamp'now - epochDate)'seconds;
+		deployedEvent := create DeployedEvent(eventId => UUID::generate_formatted(), epochEventTime => epochEventTime, prevEventId => string(this.eventId), deployed => false, Current_State => Created);
+		link deployedEvent R5 nextEventDefinition;
+		link job R6 deployedEvent;
+		generate DeployedEvent.evaluateDispatch() to deployedEvent;
+	end loop;
+	generate Job.eventCreated() to job;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

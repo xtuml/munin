@@ -1,0 +1,280 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	'JobType',
+	14,
+	'JobType',
+	'Captures the details of a type of job that can be performed, if it is deprecated and a timestamp indicating when the job type is no longer supported.
+
+If the job type is deprected the expiry timer for this job type is started.',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_TFR
+	VALUES ("b38f7f4c-1bb3-42e4-a42f-80debcdc30cc",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	'loadEventTypes',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	3,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	1,
+	1);
+INSERT INTO O_TPARM
+	VALUES ("28d6d6f7-f6bf-415f-be81-5daf5b03af8b",
+	"b38f7f4c-1bb3-42e4-a42f-80debcdc30cc",
+	'jobTypeJSONObject',
+	"e6bd3cb7-f59d-4ddf-80da-a50541a32c4e",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("e6bd3cb7-f59d-4ddf-80da-a50541a32c4e",
+	"00000000-0000-0000-0000-000000000000",
+	'JSON::JSONObject',
+	'',
+	'',
+	'../../types/types.xtuml');
+INSERT INTO O_TFR
+	VALUES ("4cb90deb-ec72-4c55-a54c-050a3e3307ad",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	'updateAuditEventDurations',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	3,
+	'',
+	"b38f7f4c-1bb3-42e4-a42f-80debcdc30cc",
+	1,
+	2);
+INSERT INTO O_TPARM
+	VALUES ("0095b488-1008-420d-81c2-707fd2171fca",
+	"4cb90deb-ec72-4c55-a54c-050a3e3307ad",
+	'eventRulesJSONArray',
+	"e1b0b4d9-6f26-4f00-8fd4-5c156bb3cc7a",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("e1b0b4d9-6f26-4f00-8fd4-5c156bb3cc7a",
+	"00000000-0000-0000-0000-000000000000",
+	'JSON::JSONArray',
+	'',
+	'',
+	'../../types/types.xtuml');
+INSERT INTO O_TFR
+	VALUES ("92f32a2d-c26e-437a-a132-bfcd1e409a15",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	'loadEventDataItemTypes',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	3,
+	'',
+	"4cb90deb-ec72-4c55-a54c-050a3e3307ad",
+	1,
+	3);
+INSERT INTO O_TPARM
+	VALUES ("442dbe39-410b-41ab-a5a8-fd05493961b3",
+	"92f32a2d-c26e-437a-a132-bfcd1e409a15",
+	'eventDataTypesJSONObject',
+	"e6bd3cb7-f59d-4ddf-80da-a50541a32c4e",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("fbba7aa4-15a4-4f0d-9370-60f9d63c0203",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_BATTR
+	VALUES ("fbba7aa4-15a4-4f0d-9370-60f9d63c0203",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_ATTR
+	VALUES ("fbba7aa4-15a4-4f0d-9370-60f9d63c0203",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	"00000000-0000-0000-0000-000000000000",
+	'jobTypeName',
+	'',
+	'',
+	'jobTypeName',
+	0,
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("ca05455a-8231-467f-be9a-63be44793e6a",
+	"00000000-0000-0000-0000-000000000000",
+	'string',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("7e85841e-ef8e-40da-844a-cdd223599599",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_BATTR
+	VALUES ("7e85841e-ef8e-40da-844a-cdd223599599",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_ATTR
+	VALUES ("7e85841e-ef8e-40da-844a-cdd223599599",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	"fbba7aa4-15a4-4f0d-9370-60f9d63c0203",
+	'deprecated',
+	'',
+	'',
+	'deprecated',
+	0,
+	"937e7b24-4016-44da-abc5-a7bf3c67b00c",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("937e7b24-4016-44da-abc5-a7bf3c67b00c",
+	"00000000-0000-0000-0000-000000000000",
+	'boolean',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("6afa74d1-f759-439c-a19f-0c372358e117",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_BATTR
+	VALUES ("6afa74d1-f759-439c-a19f-0c372358e117",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_ATTR
+	VALUES ("6afa74d1-f759-439c-a19f-0c372358e117",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	"7e85841e-ef8e-40da-844a-cdd223599599",
+	'jobTypeExpiryTime',
+	'',
+	'',
+	'jobTypeExpiryTime',
+	0,
+	"8409038f-e39e-4c48-aa46-57f35c1d3c38",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("8409038f-e39e-4c48-aa46-57f35c1d3c38",
+	"00000000-0000-0000-0000-000000000000",
+	'timestamp',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("52097b42-3d37-4c48-a230-e78fadd5b144",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_BATTR
+	VALUES ("52097b42-3d37-4c48-a230-e78fadd5b144",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_ATTR
+	VALUES ("52097b42-3d37-4c48-a230-e78fadd5b144",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	"ee173375-4f86-48fa-bafd-3c9742d75d57",
+	'current_state',
+	'',
+	'',
+	'current_state',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000006",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("882aa1ce-a65d-466d-b53a-e6a291208033",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_BATTR
+	VALUES ("882aa1ce-a65d-466d-b53a-e6a291208033",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_ATTR
+	VALUES ("882aa1ce-a65d-466d-b53a-e6a291208033",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	"6afa74d1-f759-439c-a19f-0c372358e117",
+	'expiryTimer',
+	'',
+	'',
+	'expiryTimer',
+	0,
+	"f93e8fda-cfc1-49d7-80e2-1a3df8a06efe",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("f93e8fda-cfc1-49d7-80e2-1a3df8a06efe",
+	"00000000-0000-0000-0000-000000000000",
+	'timer',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("be2723e1-2d6d-4dd1-830d-65ab8d74b58e",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_BATTR
+	VALUES ("be2723e1-2d6d-4dd1-830d-65ab8d74b58e",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_ATTR
+	VALUES ("be2723e1-2d6d-4dd1-830d-65ab8d74b58e",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	"882aa1ce-a65d-466d-b53a-e6a291208033",
+	'staleAuditEventDuration',
+	'When an event of this type is received if it is older that staleAuditEventDuration then the event shall be considered as failed.',
+	'',
+	'staleAuditEventDuration',
+	0,
+	"5121b717-dfad-45ae-bb2f-9cb5ed060878",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("5121b717-dfad-45ae-bb2f-9cb5ed060878",
+	"00000000-0000-0000-0000-000000000000",
+	'duration',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("ee173375-4f86-48fa-bafd-3c9742d75d57",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_BATTR
+	VALUES ("ee173375-4f86-48fa-bafd-3c9742d75d57",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_ATTR
+	VALUES ("ee173375-4f86-48fa-bafd-3c9742d75d57",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	"be2723e1-2d6d-4dd1-830d-65ab8d74b58e",
+	'blockedAuditEventDuration',
+	'When an event of this type is blocked for longer than blockedAuditEventDuration then the event shall be considered as failed.',
+	'',
+	'blockedAuditEventDuration',
+	0,
+	"5121b717-dfad-45ae-bb2f-9cb5ed060878",
+	'',
+	'');
+INSERT INTO O_ID
+	VALUES (0,
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_OIDA
+	VALUES ("fbba7aa4-15a4-4f0d-9370-60f9d63c0203",
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	0,
+	'jobTypeName');
+INSERT INTO O_ID
+	VALUES (1,
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO O_ID
+	VALUES (2,
+	"2bef10fc-dd7c-40c9-be3e-9de46bc05652");
+INSERT INTO PE_PE
+	VALUES ("2bef10fc-dd7c-40c9-be3e-9de46bc05652",
+	1,
+	"4e31923b-253c-45ba-b003-819b251264a9",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("4e31923b-253c-45ba-b003-819b251264a9",
+	"00000000-0000-0000-0000-000000000000",
+	"93a25cc9-604e-47d9-928e-aad6575c0677",
+	'AEOclasses',
+	'',
+	0,
+	'../AEOclasses.xtuml');

@@ -1,0 +1,7 @@
+$TESTSCHEDULE
+
+RUN SCENARIO AEOrdering 1 "init"
+RUN SCENARIO AEReception 1 "init"
+RUN SCENARIO AESequenceDC 3 "InitSystemSpec"
+
+$ENDTESTSCHEDULE

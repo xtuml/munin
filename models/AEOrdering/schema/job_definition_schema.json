@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "job_definition_schema.json",
+  "title": "Job Definition",
+  "description": "Defines the valid sequences of events that make up a job.",
+  "type": "object",
+  "properties": {
+    "JobDefinitionName": {
+      "description": "The name of the job.",
+      "type": "string"
+    },
+    "Events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/event"
+      },
+      "minItems": 1
+    }
+  },
+  "required": ["JobDefinitionName", "Events"],
+  "additionalProperties": false,
+  "$defs": {
+    "event": {
+      "description": "Definition of an audit event type",
+      "type": "object",
+      "properties": {
+        "EventName": {
+          "description": "The name of the event.",
+          "type": "string"
+        },
+        "SequenceName": {
+          "description": "The name of the sequence.",
+          "type": "string"
+        },
+        "OccurrenceId": {
+          "description": "TODO",
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "Application": {
+          "description": "The name of the issuing application.",
+          "type": "string"
+        },
+        "SequenceStart": {
+          "description": "A flag denoting whether or not this event is the first event in a sequence",
+          "type": "boolean"
+        },
+        "SequenceEnd": {
+          "description": "A flag denoting whether or not this event is the last event in a sequence",
+          "type": "boolean"
+        },
+        "PreviousEvents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "PreviousEventName": {
+                "description": "The name of the previous event.",
+                "type": "string"
+              },
+              "PreviousOccurrenceId": {
+                "description": "TODO",
+                "type": "integer",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": ["PreviousEventName", "PreviousOccurrenceId"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["EventName", "SequenceName", "OccurrenceId", "Application"],
+      "additionalProperties": false
+    }
+  }
+}

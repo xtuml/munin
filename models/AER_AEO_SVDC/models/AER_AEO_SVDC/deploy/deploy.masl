@@ -1,0 +1,152 @@
+//! ACTIVITY BEGIN. '7c311f2e-a63f-40fa-9864-bff9c543a07b' DO NOT EDIT THIS LINE.
+public service AEReception::Req_IF_Ordering~>AcceptEvent ( jobId : in string,
+                                                          nodeName : in string,
+                                                          application : in string,
+                                                          auditEventType : in string,
+                                                          auditEventId : in string,
+                                                          auditEventTime : in string,
+                                                          prevAuditEventIds : in sequence of string,
+                                                          auditEventData : in JSON::JSONObject ) is
+eventData: AEOrdering::AuditEventDataType;
+begin
+  // TODO: for now simply dump each key in the event data object to a string
+  for key in auditEventData'keys loop
+    eventData.dataItems[key] := JSON::dump(auditEventData[key]);
+  end loop;
+  AEOrdering::AcceptEvent(
+    jobId,
+    nodeName,
+    application,
+    auditEventType,
+    auditEventId,
+    auditEventTime,
+    prevAuditEventIds,
+    eventData);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'faebfbe8-d538-4338-a2ea-9e070ed87bb1' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Audited~>reportAuditFailure ( jobId : in string,
+                                                               auditReport : in string ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '4b702671-9788-483e-9fa9-ddb65865daf9' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Audited~>reportAuditSuccess ( jobId : in string ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '92cb9d80-b6b6-4d3b-a5da-d8956aa981c1' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Audited~>reportAuditItem ( jobId : in string,
+                                                            auditReport : in string ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '27271bd8-3231-4485-ad4b-0fb06b0e061b' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>audit_event ( jobId : in string,
+                                                             nodeName : in string,
+                                                             application : in string,
+                                                             auditEventType : in string,
+                                                             auditEventId : in string,
+                                                             auditEventTime : in string,
+                                                             prevAuditEventIds : in sequence of string,
+                                                             reportableAuditEventDataItems : in sequence of ReportableAuditEventDataType ) is
+auditEventData: sequence of AESequenceDC::auditEventDataStructure;
+begin
+  for dataItem in reportableAuditEventDataItems loop
+    declare
+      auditEventDataItem: AESequenceDC::auditEventDataStructure;
+    begin
+      case dataItem.dataKind is
+        when AEOrdering::INTRAJOBINV => auditEventDataItem.aedKind := AESequenceDC::INTRAJOBINV;
+        when AEOrdering::EXTRAJOBINV => auditEventDataItem.aedKind := AESequenceDC::EXTRAJOBINV;
+        when AEOrdering::BRANCHCONSTRAINT => auditEventDataItem.aedKind := AESequenceDC::BRANCHCONSTRAINT;
+        when AEOrdering::LOOPCONSTRAINT => auditEventDataItem.aedKind := AESequenceDC::LOOPCONSTRAINT;
+      end case;
+      auditEventDataItem.aedName := dataItem.dataName;
+      auditEventDataItem.aedValue := dataItem.dataValue;
+      auditEventData := auditEventData & auditEventDataItem;
+    end;
+  end loop;
+  AESequenceDC::acceptOrderedEvent(
+    auditEventTime,
+    application,
+    auditEventType,
+    jobId,
+    prevAuditEventIds,
+    auditEventId,
+    auditEventData
+    // nodeName ??
+  );
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3b9bfb7a-c53d-45d6-9bab-5fc06a280e4d' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>failedJob ( jobId : in string,
+                                                           failureReason : in string ) is
+begin
+  AESequenceDC::failedJob(jobId, failureReason);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9970bb4d-2642-44ca-81f9-985a40322b42' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>jobComplete ( jobId : in string ) is
+begin
+  AESequenceDC::jobComplete(jobId);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '23fc86c0-2ce3-4f23-a826-870f4c216c2b' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>eventDefinition ( jobName : in string,
+                                                                 sequenceName : in string,
+                                                                 eventType : in string,
+                                                                 occurrenceId : in integer,
+                                                                 previousEventTypes : in sequence of PreviousEventType,
+                                                                 isSequenceStart : in boolean,
+                                                                 isSequenceEnd : in boolean,
+                                                                 eventDataItemDefinitions : in sequence of DataItemDefinitionType ) is
+prevEventTypes: sequence of AESequenceDC::eventStructure;
+begin
+  // convert the AEOrdering type to an AESequenceDC type
+  for previousEventType in previousEventTypes loop
+    declare
+      prevEventType: AESequenceDC::eventStructure;
+    begin
+      prevEventType.eventTypeName := previousEventType.previousEventTypeName;
+      prevEventType.occurrenceId := previousEventType.occurrenceId;
+      prevEventTypes := prevEventTypes & prevEventType;
+    end;
+  end;
+  // call the public service
+  AESequenceDC::eventDefinition(
+    jobName,
+    sequenceName,
+    eventType,
+    occurrenceId,
+    prevEventTypes,
+    isSequenceStart,
+    isSequenceEnd
+  );
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd5a3bab6-d999-49ff-99ef-2cc78192eb89' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>jobTypeDeleted ( jobTypeName : in string ) is
+begin
+  AESequenceDC::deprecateJobDefinition(jobTypeName);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd4b92a51-840e-4576-9b1c-0bb790c5e199' DO NOT EDIT THIS LINE.
+public service AESequenceDC::JobAdmin~>deleteJob ( jobID : in string ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

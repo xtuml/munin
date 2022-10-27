@@ -1,0 +1,233 @@
+//! ACTIVITY BEGIN. '1c910ac3-72cf-4b5c-9022-936017cad0c7' DO NOT EDIT THIS LINE.
+public service AESequenceDC::AuditEvent.AddEventForNewJob ( jobId : in string,
+                                                           eventId : in string,
+                                                           prevAEIds : in sequence of string,
+                                                           aeType : in string,
+                                                           aeData : in sequence of auditEventDataStructure ) is
+newJob :  instance of Job;
+newEvent : instance of AuditEvent;
+oldEvent : instance of AuditEvent;
+newEventType : instance of AuditEventDefinition;
+prevEvent : instance of AuditEvent;
+theAeSequenceDef : instance of AESequenceDefinition;
+theAeInSequenceDef : instance of AEInSequenceDefinition;
+theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
+theAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
+theJobDef : instance of JobDefinition;
+newSequence : instance of Sequence;
+aeDataElement : auditEventDataStructure;
+newIntraJobInvariant : instance of TransientInvariant;
+theIntraJobInvariantDefn : instance of IntraJobInvariantDefn;
+newExtraJobInvariant : instance of PersistedInvariant;
+theSourceExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+theUserExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+theSourceExtraJobInvariant : instance of PersistedInvariant;
+theUserExtraJobInvariant : instance of TransientInvariant;
+logMessage : string;
+creationErrorMessage : string;
+
+empty : sequence of string;
+emptyString : sequence of string := empty & ("");
+
+begin
+  oldEvent := find_one AuditEvent (AuditEventId = eventId);
+  // Check to see if we've seen this event instance before
+  if (oldEvent = null) then
+    //We have a new job and this event must be a valid initial event for a Job
+    newJob := create Job (jobID => jobId, sequencingFailed => false, jobCompleted => false, Current_State => JobInProgress );
+    newEvent := create AuditEvent (AuditEventId => eventId);
+  
+    link newJob R3 newEvent;
+    newEventType := find_only AuditEventDefinition (AEType = aeType);
+    if (newEventType /= null) and ((prevAEIds = empty) or (prevAEIds = emptyString)) then
+  	  //We have a valid event type and no previous events
+      link newEvent R2 newEventType;
+      theAeSequenceDef := newEventType -> R1.AESequenceDefinition;
+      theJobDef := theAeSequenceDef -> R7;
+      theAeInSequenceDef := theAeSequenceDef with newEventType -> R1.AEInSequenceDefinition;
+      theAeOccurrencesInSequenceDef := theAeInSequenceDef -> R12;
+      //TODO The following constrains a Job start event to be occurrence 1
+      theAeOccInSequenceDef := find_one theAeOccurrencesInSequenceDef (occurrenceNumberInSequence = 1);
+      if theAeOccInSequenceDef /= null then
+        link newEvent R13 theAeOccInSequenceDef;
+        newSequence := create unique Sequence(isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
+        link newSequence R10 newJob;
+        link newSequence R11 newEvent;
+        link newSequence R14 theAeSequenceDef;
+   
+        link newJob R8 theJobDef;
+        if theAeOccInSequenceDef.isSequenceStart then
+          //The the first event for this new Job is a valid event type for starting the sequence
+          // Log info: new Job and event sequence started
+          logMessage := "New Job started - jobId = " & newJob.jobID & ", Initial audit event = " & newEventType.AEType;
+	      Logger::log(Logger::Information, "AESequenceDC", logMessage);
+      
+        else
+          // Log error: first event for new Job is not a valid event to start a sequence
+          newJob.sequencingFailed := true;
+          newJob.failJob("First event for new Job is not a valid event type to start a sequence - Job Id = " & newJob.jobID & " Event Type = " & newEventType.AEType);
+        end if;
+    
+        // Capture any audit event data associated with this audit event
+        for aeDataElement in aeData loop
+          case aeDataElement.aedKind is
+            when aeDataKindEnum.INTRAJOBINV =>  
+              // For this Audit Event Occurrence only the following IntraJobInvarinatDefinition is allowed
+              theIntraJobInvariantDefn := theAeOccInSequenceDef -> R19;
+              if theIntraJobInvariantDefn.intraJobInvName = aeDataElement.aedName then
+                //Check that the invariant value is not empty
+                if aeDataElement.aedValue /= "" then
+                  newIntraJobInvariant := create TransientInvariant (AuditEventId => newEvent.AuditEventId, invariantName => aeDataElement.aedName, invariantValue => aeDataElement.aedValue);
+                  link newIntraJobInvariant R23 newEvent;
+                  link newIntraJobInvariant R26 theIntraJobInvariantDefn;
+                  // Log info: Audit event data provided with this audit event has been captured
+	              logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & newJob.jobID & " has been added for this type of audit event = " & newEventType.AEType;
+	              Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+	            else
+                  newJob.failJob("Empty Invariant Value provided for this Job = " & newJob.jobID & " and Event Type = " & newEventType.AEType);        
+	            end if;                 
+              else
+                // Log warning: The audit event data type provided with this audit event is of a disallowed type for this type of audit event
+	            logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & jobId & " is disallowed for this type of audit event = " & newEventType.AEType;
+	            Logger::log(Logger::Information, "AESequenceDC", logMessage);                
+                newJob.failJob("Invalid audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+              end if;
+            when aeDataKindEnum.EXTRAJOBINV =>  
+              // For this Audit Event Occurrence only the following ExtraJobInvariantDefinition is allowed
+              theSourceExtraJobInvariantDefn := theAeOccInSequenceDef -> R20;
+              theUserExtraJobInvariantDefn := theAeOccInSequenceDef -> R21;
+              if theSourceExtraJobInvariantDefn /= null then
+                // We have the source event that provided a new Extra Job Invariant
+                // Check the name matches
+                if theSourceExtraJobInvariantDefn.extraJobInvName = aeDataElement.aedName then	              
+                  // We have a match between the name in the definition and the name in the audit event data
+                  theSourceExtraJobInvariant := PersistedInvariant.createSourceExtraJobInvariant (theSourceExtraJobInvariantDefn,
+                  	                                                                            aeDataElement.aedName,
+                  	                                                                            aeDataElement.aedValue,
+                  	                                                                            creationErrorMessage );	              
+                  if theSourceExtraJobInvariant /= null then
+                    link theSourceExtraJobInvariant R27 newEvent;
+                  else
+                    newJob.failJob("Persisted Invariant creation failed - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+                  end if;
+                  
+                else    
+                  newJob.failJob("Invalid audit event data - the name of the audit event data does not match that expected - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+                end if;
+                // We have the source event that provided a new Extra Job Invariant
+                //ExtraJobInvariant.createSourceExtraJobInvariant(theSourceExtraJobInvariant);
+              elsif theUserExtraJobInvariantDefn /= null then
+                // We have a user event that references an existing Extra Job Invariant
+                if theUserExtraJobInvariantDefn.extraJobInvName = aeDataElement.aedName then
+                  // We have a match between the name in the definition and the name in the audit event data
+                  if aeDataElement.aedValue /= "" then
+                    theUserExtraJobInvariant := create TransientInvariant (AuditEventId => newEvent.AuditEventId, invariantName => aeDataElement.aedName, invariantValue => aeDataElement.aedValue);
+                    link theUserExtraJobInvariant R23 newEvent;
+                    link theUserExtraJobInvariant R28 theUserExtraJobInvariantDefn;
+                    // Log info: Audit event data provided with this audit event has been captured
+	                logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & newJob.jobID & " has been added for this type of audit event = " & newEventType.AEType;
+	                Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+	              else
+                    newJob.failJob("Empty Invariant Value provided for this Job = " & newJob.jobID & " and Event Type = " & newEventType.AEType);        
+	              end if;                 
+                end if;
+              else
+                // The definition does not match the audit event data seen so this is an error condition
+                newJob.failJob("Invalid audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+               
+              end if;
+                     
+            when others =>
+              // Log warning: Unsupported audit event data type
+  	          logMessage := "The audit event data type provided for jobId = " & jobId & " is an unsupported type of audit event data = " & aeDataElement.aedKind'image;
+	          Logger::log(Logger::Information, "AESequenceDC", logMessage);
+          end case;  
+        end loop;
+      else
+        newJob.failJob("Invalid audit event definition for a start event in job definition = " & theJobDef.jobName & " since the occurrenceNumberInSequence is expected to be 1");    
+      end if;  
+    else
+      //We have an unrecognised event type
+      // Log error: unrecognised event type received
+      newJob.sequencingFailed := true;
+      newJob.failJob("An unrecognised event type has been received - Job Id = " & newJob.jobID & " Event Type = " & newEventType.AEType);
+    
+    end if;
+  else
+      // Log error: The audit event id received has been seen before
+	  logMessage := "The audit event has been seen before for jobId = " & jobId & ", Initial audit event = " & aeType;
+	  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  
+  
+  end if;  
+  //
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '26822f33-6a72-4785-a400-7c11e5d71d99' DO NOT EDIT THIS LINE.
+public instance service AESequenceDC::AuditEvent.AddEventTBD () is
+newJob :  instance of Job;
+newEvent : instance of AuditEvent;
+newEventType : instance of AuditEventDefinition;
+prevEvent : instance of AuditEvent;
+
+begin
+  null;
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'f6c7376e-a155-480d-8007-f3c3ebc441aa' DO NOT EDIT THIS LINE.
+public instance service AESequenceDC::AuditEvent.TestPreviousEventIsValid ( prevEventInstance : in instance of AuditEvent,
+                                                                           previousEventIsValid : out boolean ) is
+//The Audit Event instance on which this operation is invoked is newEvent
+// The input parameter is prevEventInstance
+
+//prevEventInstance : instance of AuditEvent;
+theAuditEventDefinition : instance of AuditEventDefinition;
+prevAuditEventDefinition : instance of AuditEventDefinition;
+thisEventInSequence : instance of AEInSequenceDefinition;
+prevEventOccInSequence : instance of AEOccurrenceInSequenceDefinition;
+intersectionEventOccsInSequence : set of instance of AEOccurrenceInSequenceDefinition;
+intersectionEventOccInSequence : instance of AEOccurrenceInSequenceDefinition;
+thisAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
+theseAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
+possibleAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
+theSequenceDef : instance of AESequenceDefinition;
+theJob : instance of Job;
+isValidEventPair : boolean := false;
+
+begin
+  theJob := this -> R3;
+ 
+  theAuditEventDefinition := this -> R2;
+  prevEventOccInSequence := prevEventInstance -> R13;
+  
+  if prevEventOccInSequence.isSequenceEnd = false then
+    theSequenceDef := theAuditEventDefinition -> R1.AESequenceDefinition;
+    thisEventInSequence := theAuditEventDefinition with theSequenceDef -> R1.AEInSequenceDefinition;
+    theseAeOccurrencesInSequenceDef := thisEventInSequence -> R12;
+    possibleAeOccurrencesInSequenceDef := prevEventOccInSequence -> R6.precedes.AEOccurrenceInSequenceDefinition;
+    intersectionEventOccsInSequence := possibleAeOccurrencesInSequenceDef intersection theseAeOccurrencesInSequenceDef;
+ 
+    if intersectionEventOccsInSequence /= null then
+      // this is a valid event sequence
+      isValidEventPair := true;
+    end if;
+  end if;
+ // 
+ // 
+  previousEventIsValid := isValidEventPair;
+  //
+  //
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

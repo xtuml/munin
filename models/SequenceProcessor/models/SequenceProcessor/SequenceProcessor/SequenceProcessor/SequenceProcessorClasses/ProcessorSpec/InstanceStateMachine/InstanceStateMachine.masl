@@ -1,0 +1,62 @@
+//! ACTIVITY BEGIN. 'aae17139-2ef6-448a-ab90-71d16609aa3d' '1f74ad02-4492-4184-a35c-df8b2dac0753' DO NOT EDIT THIS LINE.
+state SequenceProcessor::ProcessorSpec.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'aae17139-2ef6-448a-ab90-71d16609aa3d' '885f83e9-8c1d-40a7-aee9-e51f5bfa1fe3' DO NOT EDIT THIS LINE.
+state SequenceProcessor::ProcessorSpec.FilesIdentified () is
+logMessage : string;
+sequenceFile : instance of SequenceFile;
+
+begin
+	
+	logMessage := "SequenceProcessor::ProcessorSpec.LoadingFiles";
+	Logger::log(Logger::Information, "SequenceProcessor", logMessage);
+	
+	for filename in Filesystem::list_directory(Filesystem::filename(this.dataDirectory)) loop
+		if Strings::ends_with(string(filename), ".puml") then
+			sequenceFile := create unique SequenceFile(fileName => this.dataDirectory & "/" & string(filename), 
+				                                       loadComplete => false, currentSequenceName => "UNKNOWN", Current_State => Created
+			);
+		end if;
+	end loop;
+	generate ProcessorSpec.loadFile() to this;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'aae17139-2ef6-448a-ab90-71d16609aa3d' 'fbe352c4-026e-4ee0-9871-c96a41d19eb1' DO NOT EDIT THIS LINE.
+state SequenceProcessor::ProcessorSpec.LoadingFiles () is
+logMessage : string;
+sequenceFile : instance of SequenceFile;
+
+begin
+	
+	logMessage := "SequenceProcessor::ProcessorSpec.FileLoaded";
+	Logger::log(Logger::Information, "SequenceProcessor", logMessage);
+	
+	// check if there are any files to load
+	sequenceFile := find_one SequenceFile(loadComplete = false);
+	if sequenceFile /= null then
+		generate SequenceFile.parseFile() to sequenceFile;
+	else
+		generate ProcessorSpec.configFilesComplete() to this;
+	end if;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'aae17139-2ef6-448a-ab90-71d16609aa3d' '108b7b51-b2d5-471a-bea9-968eef486293' DO NOT EDIT THIS LINE.
+state SequenceProcessor::ProcessorSpec.ConfigFileProduced () is
+logMessage : string;
+
+begin
+	
+	logMessage := "SequenceProcessor::ProcessorSpec.ConfigFileProduced";
+	Logger::log(Logger::Information, "SequenceProcessor", logMessage);
+	raise PlusProcessorEnd;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

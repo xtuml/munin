@@ -1,0 +1,128 @@
+//! ACTIVITY BEGIN. '5846a20c-7c6b-4ce2-af9e-28c4a1466a35' DO NOT EDIT THIS LINE.
+public instance service AESequenceDC::JobDefinition.deleteJobDefinition ( jobName : in string ) is
+theJobDefn : instance of JobDefinition;
+theSequenceDefn : instance of AESequenceDefinition;
+thePrevSequenceDefn : instance of AESequenceDefinition;
+theNextSequenceDefn : instance of AESequenceDefinition;
+theSequenceDefns : set of instance of AESequenceDefinition;
+theEventDefn : instance of AuditEventDefinition;
+theEventDefns : set of instance of AuditEventDefinition;
+thePrevEventDefn : instance of AuditEventDefinition;
+theEventInSeqDef : instance of AEInSequenceDefinition;
+theEventsInSeqDefns : set of instance of AEInSequenceDefinition;
+theEventOccInSeqDef : instance of AEOccurrenceInSequenceDefinition;
+theEventOccurrencesInSeqDef : set of instance of AEOccurrenceInSequenceDefinition;
+thePrevEventInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
+thePrevEventInSeqDefns : set of instance of AEOccurrenceInSequenceDefinition;
+theNextEventInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
+theNextEventInSeqDefns : set of instance of AEOccurrenceInSequenceDefinition;
+theEventInSeqPairDef : instance of AEInSequencePairDefn;
+theConstraintDefinitions : sequence of instance of ConstraintDefinition;
+theConstraintDefinition : instance of ConstraintDefinition;
+theIntraJobInvariantDefn : instance of IntraJobInvariantDefn;
+theExtraJobInvariantDefns : set of instance of ExtraJobInvariantDefn;
+theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+theJobs: set of instance of Job;
+theJob: instance of Job;
+logMessage : string;
+previousEventType : string;
+
+begin
+    theJobs := this -> R8;
+    for theJob in theJobs'elements loop
+      theJob.deleteJob();
+    end loop;
+    
+    // Delete the Audit Event Data Definitions
+    theIntraJobInvariantDefn := this -> R22;
+    if theIntraJobInvariantDefn /= null then
+      if (theIntraJobInvariantDefn -> R19) /= null then
+        unlink (theIntraJobInvariantDefn -> R19) R19 theIntraJobInvariantDefn;
+      end if;
+      if (theIntraJobInvariantDefn -> R26) /= null then
+        unlink (theIntraJobInvariantDefn -> R26) R26 theIntraJobInvariantDefn;
+      end if;
+      unlink this R22 theIntraJobInvariantDefn;
+      delete theIntraJobInvariantDefn;
+    end if;  
+    
+    theExtraJobInvariantDefns := find ExtraJobInvariantDefn();
+    for theExtraJobInvariantDefn in theExtraJobInvariantDefns loop
+      if (theExtraJobInvariantDefn -> R21) /= null then
+        unlink (theExtraJobInvariantDefn -> R21) R21 theExtraJobInvariantDefn;
+      end if;
+      if (theExtraJobInvariantDefn -> R20) /= null then
+        unlink (theExtraJobInvariantDefn -> R20) R20 theExtraJobInvariantDefn;
+      end if;
+      if (theExtraJobInvariantDefn -> R24) /= null then
+        unlink (theExtraJobInvariantDefn -> R24) R24 theExtraJobInvariantDefn;
+      end if;
+      delete theExtraJobInvariantDefn;
+    end loop;  
+    
+    // Delete the Sequences and their associated audit event definitions
+    
+    theSequenceDefns := this -> R7; 
+    for theSequenceDefn in theSequenceDefns'elements loop
+      theEventDefns := theSequenceDefn -> R1.AuditEventDefinition;
+      for theEventDefn in theEventDefns loop
+        theEventInSeqDef := theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
+        theEventOccurrencesInSeqDef := theEventInSeqDef -> R12;
+        for theEventOccInSeqDef in theEventOccurrencesInSeqDef loop
+          thePrevEventInSeqDefns := theEventOccInSeqDef -> R6.follows.AEOccurrenceInSequenceDefinition;
+          for thePrevEventInSeqDefn in thePrevEventInSeqDefns'elements loop
+            if thePrevEventInSeqDefn /= null then 
+              theEventInSeqPairDef := theEventOccInSeqDef with thePrevEventInSeqDefn -> R6.follows.AEInSequencePairDefn;
+              if theEventInSeqPairDef /= null then
+                if (theEventInSeqPairDef -> R16) /= null then
+                  unlink (theEventInSeqPairDef -> R16) R16 theEventInSeqPairDef;
+                end if;  
+                unlink theEventOccInSeqDef R6.follows thePrevEventInSeqDefn using theEventInSeqPairDef; 
+                delete theEventInSeqPairDef;
+              end if;  
+            end if;  
+          end loop;  
+          theNextEventInSeqDefns := theEventOccInSeqDef -> R6.precedes.AEOccurrenceInSequenceDefinition;
+          for theNextEventInSeqDefn in theNextEventInSeqDefns'elements loop
+            if theNextEventInSeqDefn /= null then 
+              theEventInSeqPairDef := theEventOccInSeqDef with theNextEventInSeqDefn -> R6.precedes.AEInSequencePairDefn;
+              if theEventInSeqPairDef /= null then
+                if (theEventInSeqPairDef -> R16) /= null then
+                  unlink (theEventInSeqPairDef -> R16) R16 theEventInSeqPairDef;
+                end if;  
+                unlink theEventOccInSeqDef R6.precedes theNextEventInSeqDefn using theEventInSeqPairDef; 
+                delete theEventInSeqPairDef;
+              end if;  
+            end if;  
+          end loop; 
+          unlink theEventOccInSeqDef R12 theEventInSeqDef;
+          delete theEventOccInSeqDef;
+        end loop;       
+        unlink theEventDefn R1 theSequenceDefn using theEventInSeqDef;
+        delete theEventInSeqDef; 
+      end loop;
+      delete theEventDefns;
+      thePrevSequenceDefn := theSequenceDefn -> R9.follows;
+      if thePrevSequenceDefn /= null then
+        unlink theSequenceDefn R9.follows thePrevSequenceDefn;
+      end if;
+      theNextSequenceDefn := theSequenceDefn -> R9.precedes;
+      if theNextSequenceDefn /= null then
+        unlink theSequenceDefn R9.precedes theNextSequenceDefn;
+      end if;
+     end loop;
+     unlink this R7 theSequenceDefns;
+    delete theSequenceDefns;
+    theConstraintDefinitions := this -> R17;
+    if (this -> R17) /= null then
+      unlink (this -> R17) R17 this;
+    end if;
+    delete theConstraintDefinitions;
+    delete this;
+    
+    logMessage := "Job Definition " & jobName & " has been deleted";
+	Logger::log(Logger::Information, "AESequenceDC", logMessage);
+    
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

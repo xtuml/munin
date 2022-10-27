@@ -1,0 +1,127 @@
+//! ACTIVITY BEGIN. 'd5bc3732-696d-40e1-9238-c57209150c1e' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::Job.failJob ( failureReason : in string ) is
+logMessage : string;
+inProgressJob : instance of InProgressJob;
+failedJob : instance of FailedJob;
+archivedJob : instance of ArchivedJob;
+
+begin
+	
+	logMessage := "AEOrdering::Job.failJob";
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	inProgressJob := this -> R2.InProgressJob;
+	if inProgressJob /= null then
+		unlink inProgressJob R2 this;
+		failedJob := create FailedJob(jobId => this.jobId, failureReason => failureReason, jobFailureTime => timestamp'now);
+		link failedJob R2 this;
+		delete inProgressJob;
+		generate Job.jobFailed() to this;
+	else
+		archivedJob := this -> R2.ArchivedJob;
+		if archivedJob /= null then
+			unlink archivedJob R2 this;
+			failedJob := create FailedJob(jobId => this.jobId, failureReason => failureReason, jobFailureTime => timestamp'now);
+			link failedJob R2 this;
+			delete inProgressJob;
+			generate Job.jobFailed() to this;
+		else
+			failedJob := this -> R2.FailedJob;
+			failedJob.failureReason := failedJob.failureReason & " " & failureReason;
+		end if;
+	end if;
+	// inform sequence verification and audited
+	Req_IF_Verification~>failedJob(this.jobId, failureReason);
+	Req_IF_Audited~>reportAuditFailure(this.jobId, failureReason);
+	
+	// now log the failure
+	logMessage := "Job failed - jobId = " & this.jobId & ", failureReason = " & failureReason;
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'eb7daf4b-9cb3-4ab9-b0a8-8f19e30802f2' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::Job.jobDeleted () is
+logMessage : string;
+associatedAuditEvent : instance of AssociatedAuditEvent;
+reportedAuditEvent : instance of ReportedAuditEvent;
+blockedAuditEvent : instance of BlockedAuditEvent;
+failedAuditEvent : instance of FailedAuditEvent;
+inProgressJob : instance of InProgressJob;
+archivedJob : instance of ArchivedJob;
+failedJob : instance of FailedJob;
+previousAuditEvents : sequence of instance of PreviousAuditEvent;
+
+begin
+
+	logMessage := "AEOrdering::Job.deleteJob";
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	cancel this.jobTimer;
+	
+	// find all the audit events and delete them
+	for auditEvent in this -> R9.AuditEvent loop
+		
+		// unlink all the associated event
+		for followedAuditEvent in (auditEvent -> R11.isFollowedBy.AuditEvent) loop
+			associatedAuditEvent := auditEvent with followedAuditEvent -> R11.isFollowedBy.AssociatedAuditEvent;
+			unlink auditEvent R11.isFollowedBy followedAuditEvent using associatedAuditEvent;
+			delete associatedAuditEvent;
+		end loop;
+		for followsAuditEvent in (auditEvent -> R11.follows.AuditEvent) loop
+			associatedAuditEvent := auditEvent with followsAuditEvent -> R11.follows.AssociatedAuditEvent;
+			unlink auditEvent R11.follows.AuditEvent followsAuditEvent using associatedAuditEvent;
+			delete associatedAuditEvent;
+		end loop;
+		
+		// remove the sub types and delete the event
+		reportedAuditEvent := auditEvent -> R4.ReportedAuditEvent;
+		if reportedAuditEvent /= null then
+			unlink reportedAuditEvent R4 auditEvent;
+			delete reportedAuditEvent;
+		else
+			blockedAuditEvent := auditEvent -> R4.BlockedAuditEvent;
+			if blockedAuditEvent /= null then
+				unlink blockedAuditEvent R4 auditEvent;
+				delete blockedAuditEvent;
+			else
+				failedAuditEvent := auditEvent -> R4.FailedAuditEvent;
+				unlink failedAuditEvent R4 auditEvent;
+				delete failedAuditEvent;
+			end if;
+		end if;
+		
+		previousAuditEvents := auditEvent -> R13.PreviousAuditEvent;
+		unlink auditEvent R13;
+		delete previousAuditEvents;
+		
+		unlink auditEvent R1;
+		unlink auditEvent R3;
+		unlink auditEvent R7;
+		unlink auditEvent R9;
+		unlink auditEvent R10;
+		
+		delete auditEvent;
+	end loop;
+	
+	// remove the sub types and delete the job
+	inProgressJob := this -> R2.InProgressJob;
+	if inProgressJob /= null then
+		unlink inProgressJob R2 this;
+		delete inProgressJob;
+	else
+		archivedJob := this -> R2.ArchivedJob;
+		if archivedJob /= null then
+			unlink archivedJob R2 this;
+			delete archivedJob;
+		else
+			failedJob := this -> R2.FailedJob;
+			unlink failedJob R2 this;
+			delete failedJob;
+		end if;
+	end if;
+	delete this;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

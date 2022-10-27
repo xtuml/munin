@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ordering_config_schema.json",
+  "title": "Ordering Config",
+  "description": "Configuration parameters for AEOrdering",
+  "type": "object",
+  "properties": {
+    "SpecUpdateRate": {
+      "description": "This duration determines how often the application checks for updated config files",
+      "type": "string",
+      "format": "duration"
+    },
+    "MaxOutOfSequenceEvents": {
+      "description": "This is the consecutive maximum out of sequence events that can be received for a job before an error is declared.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "MaximumJobTime": {
+      "description": "This is the maximum time it should take for a job to be finished. When this time has been reached after the job was started it shall be archived if there are no blocked events or failed if there are blocked events.",
+      "type": "string",
+      "format": "duration"
+    },
+    "JobCompletePeriod": {
+      "description": "When a Job has completed it shall be either archived or failed and once the job complete period has expired it shall be deleted from the domain with all associated events.",
+      "type": "string",
+      "format": "duration"
+    },
+    "Jobs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/job"
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "job": {
+      "description": "A valid sequence of events",
+      "type": "object",
+      "properties": {
+        "JobDefinitionName": {
+          "description": "The name of the job. This name must _exactly_ match the name of the JSON file for the job produced by the Plus processor in the previous step.",
+          "type": "string"
+        },
+        "JobDeprecated": {
+          "description": "A boolean value specifying if the job is deprecated. This flag can immediately invalidate future jobs of a specific type.",
+          "type": "boolean"
+        },
+        "JobTypeExpiryDate": {
+          "description": "A timestamp value specifying the latest date at which the job type is valid.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "StaleAuditEventDuration": {
+          "description": "A duration value specifying the maximum age of an event at the time it is received for it to be considered valid.",
+          "type": "string",
+          "format": "duration"
+        },
+        "BlockedAuditEventDuration": {
+          "description": "A duration value specifying the maximum time an event can be blocked before the job is considered to be failed.",
+          "type": "string",
+          "format": "duration"
+        },
+        "EventRules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event_rule"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["JobDefinitionName"],
+      "additionalProperties": false
+    },
+    "event_rule": {
+      "description": "Event specific configuration parameters",
+      "type": "object",
+      "properties": {
+        "EventName": {
+          "description": "The name of the event. Must _exactly match_ the name in the job definition file.",
+          "type": "string"
+        },
+        "ApplicationName": {
+          "description": "The name of the issuing application.",
+          "type": "string"
+        },
+        "OccurrenceId": {
+          "description": "TODO",
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "StaleAuditEventDuration": {
+          "description": "A duration value specifying the maximum age of an event at the time it is received for it to be considered valid.",
+          "type": "string",
+          "format": "duration"
+        },
+        "BlockedAuditEventDuration": {
+          "description": "A duration value specifying the maximum time an event can be blocked before the job is considered to be failed.",
+          "type": "string",
+          "format": "duration"
+        }
+      },
+      "required": ["EventName", "ApplicationName", "OccurrenceId"],
+      "additionalProperties": false
+    }
+  }
+}

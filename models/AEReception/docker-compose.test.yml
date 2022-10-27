@@ -1,0 +1,20 @@
+version: "3.9"
+services:
+  aereception_test:
+    image: "ghcr.io/xtuml/aereception:test"
+    build:
+      context: .
+      target: install-test
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    volumes:
+      - "./test_results:/root/test_results"
+      - "./testing:/root/testing"
+      - "./config:/root/config"
+      - "./schedule:/root/schedule"
+    entrypoint: ["/usr/bin/timeout", "30s", "AEReception_transient_standalone"]
+    command: "-log-level Debug -configPath config/ -postinit schedule/test.sch -util Inspector -inspector-port 0"

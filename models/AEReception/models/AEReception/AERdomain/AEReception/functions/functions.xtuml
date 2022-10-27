@@ -1,0 +1,68 @@
+-- BP 7.1.6 content: Package syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO EP_PKG
+	VALUES ("2e2ca657-4284-4ae3-a75a-8683102b75fe",
+	"00000000-0000-0000-0000-000000000000",
+	"6fafc65a-4ccb-4590-a21b-7340823150ad",
+	'functions',
+	'',
+	0);
+INSERT INTO GD_MD
+	VALUES ("11229fba-8e1b-43c0-9f24-7b286fdf83db",
+	112,
+	"2e2ca657-4284-4ae3-a75a-8683102b75fe",
+	108,
+	0,
+	0,
+	1,
+	1,
+	1,
+	12,
+	1,
+	0,
+	0,
+	0,
+	0,
+	0,
+	'',
+	'AEReception::AERdomain::AEReception::functions');
+INSERT INTO DIM_DIA
+	VALUES ("11229fba-8e1b-43c0-9f24-7b286fdf83db",
+	'',
+	1.000000,
+	0.000000,
+	0.000000,
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO PE_PE
+	VALUES ("2e2ca657-4284-4ae3-a75a-8683102b75fe",
+	1,
+	"00000000-0000-0000-0000-000000000000",
+	"6bf543bd-8274-4a52-b02f-c1df89312cfa",
+	7);
+INSERT INTO C_C_PROXY
+	VALUES ("6bf543bd-8274-4a52-b02f-c1df89312cfa",
+	"00000000-0000-0000-0000-000000000000",
+	"00000000-0000-0000-0000-000000000000",
+	'AEReception',
+	'This domain receives audit events from the monitored system. The domain is responsible for decoding 
+the event messages from the form in which they are received to a form that can be used within this 
+verification model.
+
+Any errors in the formatting of the received audit events will be notified through the Logging 
+required interface.
+
+There may be multiple versions of this domain:
+1. To receive and decode audit events in batch file format
+2. To receive and decode events live from the monitored system
+',
+	0,
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'Audit Event Reception',
+	'../AEReception.xtuml');
+INSERT INTO S_SYS_PROXY
+	VALUES ("6fafc65a-4ccb-4590-a21b-7340823150ad",
+	'AEReception',
+	1,
+	'../../../AEReception.xtuml');

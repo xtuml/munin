@@ -1,0 +1,100 @@
+//! ACTIVITY BEGIN. '3d42cd49-1305-4d1b-9faf-370efe278d18' DO NOT EDIT THIS LINE.
+public instance service AESequenceDC::Job.failJob ( failureReason : in string ) is
+logMessage : string;
+begin
+	
+	logMessage := "AESequenceDC::Job.failJob";
+	Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	
+		
+	generate Job.jobFailed(failureReason) to this;
+	
+	// TODO: Every call to this function (elsewhere in the model) could be replaced
+	// with the generate Job.jobFailed(failureReason) to this; statement and then this
+	// function could be deleted from the model.
+	//
+end service;
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '29df042e-fb35-4443-881f-62ea6991447a' DO NOT EDIT THIS LINE.
+public instance service AESequenceDC::Job.deleteJob () is
+theAuditEvents : set of instance of AuditEvent;
+theAuditEvent : instance of AuditEvent;
+theNextAuditEvent : instance of AuditEvent;
+theNextAuditEvents : set of instance of AuditEvent;
+theSequences : set of instance of Sequence;
+theJobDef : instance of JobDefinition;
+theAuditEventPairs : set of instance of AuditEventPair;
+theAuditEventPair : instance of AuditEventPair;
+theAuditEventDefinition : instance of AuditEventDefinition;
+theTransientInvariant : instance of TransientInvariant;
+thePersistedInvariant : instance of PersistedInvariant;
+
+
+begin
+  theAuditEvents := this -> R3;
+  for theAuditEvent in theAuditEvents'elements loop
+    theNextAuditEvents := theAuditEvent -> R4.has_next.AuditEvent;
+    for theNextAuditEvent in theNextAuditEvents loop
+      theAuditEventPair := theAuditEvent with theNextAuditEvent -> R4.has_next.AuditEventPair;
+      if (theAuditEventPair -> R15) /= null then
+        unlink (theAuditEventPair -> R15) R15 theAuditEventPair;
+      end if;
+      unlink theAuditEvent R4.has_next.AuditEvent theNextAuditEvent using theAuditEventPair;
+      delete theAuditEventPair;
+    end loop;
+    if (theAuditEvent -> R11) /= null then
+      unlink (theAuditEvent -> R11) R11 theAuditEvent;
+    end if;  
+    if (theAuditEvent -> R2) /= null then
+      unlink (theAuditEvent -> R2) R2 theAuditEvent;
+    end if;
+    if (theAuditEvent -> R3) /= null then      
+      unlink (theAuditEvent -> R3) R3 theAuditEvent;  
+    end if;  
+    if (theAuditEvent -> R13) /= null then      
+      unlink (theAuditEvent -> R13) R13 theAuditEvent;  
+    end if;  
+    
+    // Delete the associated Intra Job Invariants
+    theTransientInvariant := theAuditEvent -> R23;
+    if theTransientInvariant /= null then
+      if (theTransientInvariant -> R26) /= null then
+        unlink (theTransientInvariant -> R26) R26 theTransientInvariant;
+      end if;  
+      if (theTransientInvariant -> R28) /= null then
+        unlink (theTransientInvariant -> R28) R28 theTransientInvariant;
+      end if;  
+      unlink theTransientInvariant R23 theAuditEvent;
+      delete theTransientInvariant;
+    end if;
+    // Extra Job Invariants are not deleted here as they have an independent lifecycle
+
+    // Unlink the associated Source Extra Job Invariant
+    thePersistedInvariant := theAuditEvent -> R27;
+    if thePersistedInvariant /= null then
+      unlink thePersistedInvariant R27 theAuditEvent;
+    end if;
+    
+  end loop;
+  
+  delete theAuditEvents;
+  theSequences := this -> R10;
+  if theSequences /= null then
+    for theSequence in theSequences loop
+      if (theSequence -> R14) /= null then
+        unlink theSequence R14 (theSequence -> R14);
+      end if;
+    end loop;
+    unlink theSequences R10 this;
+    delete theSequences;
+  end if;  
+  theJobDef := this -> R8;
+  if theJobDef /= null then
+    unlink theJobDef R8 this;
+  end if;  
+  delete this;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

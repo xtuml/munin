@@ -1,0 +1,159 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	'JobDefinition',
+	8,
+	'JD',
+	'The definition of the type of a Job. A single Job Defintion may contain one or more 
+Sequence Defintions.',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_TFR
+	VALUES ("5846a20c-7c6b-4ce2-af9e-28c4a1466a35",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	'deleteJobDefinition',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	3,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	1,
+	1);
+INSERT INTO O_TPARM
+	VALUES ("4e0fda72-6c07-48cb-9e64-b1f1bb358e0a",
+	"5846a20c-7c6b-4ce2-af9e-28c4a1466a35",
+	'jobName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("ce51957e-3e87-424e-85c3-75c022e6c476",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_BATTR
+	VALUES ("ce51957e-3e87-424e-85c3-75c022e6c476",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_ATTR
+	VALUES ("ce51957e-3e87-424e-85c3-75c022e6c476",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	"00000000-0000-0000-0000-000000000000",
+	'jobName',
+	'',
+	'',
+	'jobName',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("78cd4208-4b6c-4c87-83c7-6d31e5d91e06",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_BATTR
+	VALUES ("78cd4208-4b6c-4c87-83c7-6d31e5d91e06",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_ATTR
+	VALUES ("78cd4208-4b6c-4c87-83c7-6d31e5d91e06",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	"ce51957e-3e87-424e-85c3-75c022e6c476",
+	'current_state',
+	'',
+	'',
+	'current_state',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000006",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("d98ad57f-8f07-4469-94a3-8550c4f96b57",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_BATTR
+	VALUES ("d98ad57f-8f07-4469-94a3-8550c4f96b57",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_ATTR
+	VALUES ("d98ad57f-8f07-4469-94a3-8550c4f96b57",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	"78cd4208-4b6c-4c87-83c7-6d31e5d91e06",
+	'isDeprecated',
+	'',
+	'',
+	'isDeprecated',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000001",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("a325b384-1539-4c96-ab5a-4e175de17f11",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_BATTR
+	VALUES ("a325b384-1539-4c96-ab5a-4e175de17f11",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_ATTR
+	VALUES ("a325b384-1539-4c96-ab5a-4e175de17f11",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	"d98ad57f-8f07-4469-94a3-8550c4f96b57",
+	'jobDefDeletionTimer',
+	'When a JobDefinition is deprecated it must wait until all Jobs of that type that are currently being processed have been deleted (after either 
+completing successfully or having failed)- this timer is used to repetitively trigger the check that all such Jobs have been deleted prior to 
+deleting the deprecated JobDefinition itself.',
+	'',
+	'jobDefDeletionTimer',
+	0,
+	"78c29c89-7a3e-4b79-8163-53652917088c",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("78c29c89-7a3e-4b79-8163-53652917088c",
+	"00000000-0000-0000-0000-000000000000",
+	'timer',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("c94c5fe2-a26c-4f5f-9286-7ec6e378708a",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_BATTR
+	VALUES ("c94c5fe2-a26c-4f5f-9286-7ec6e378708a",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_ATTR
+	VALUES ("c94c5fe2-a26c-4f5f-9286-7ec6e378708a",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	"a325b384-1539-4c96-ab5a-4e175de17f11",
+	'isSuspended',
+	'',
+	'',
+	'isSuspended',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000001",
+	'',
+	'');
+INSERT INTO O_ID
+	VALUES (0,
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_OIDA
+	VALUES ("ce51957e-3e87-424e-85c3-75c022e6c476",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	0,
+	'jobName');
+INSERT INTO O_ID
+	VALUES (1,
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO O_ID
+	VALUES (2,
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a");
+INSERT INTO PE_PE
+	VALUES ("6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	1,
+	"77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
+	"00000000-0000-0000-0000-000000000000",
+	"be1840aa-9d3d-4f55-baec-da45c54219a5",
+	'SVDCclasses',
+	'',
+	0,
+	'../SVDCclasses.xtuml');

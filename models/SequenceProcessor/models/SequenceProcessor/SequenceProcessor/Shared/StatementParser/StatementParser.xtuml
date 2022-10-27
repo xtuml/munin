@@ -1,0 +1,109 @@
+-- BP 7.1.6 content: Interface syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO C_I
+	VALUES ("af35e036-c3b7-4336-a807-ef56ebb91469",
+	"00000000-0000-0000-0000-000000000000",
+	'StatementParser',
+	'');
+INSERT INTO C_EP
+	VALUES ("deefce20-0c95-4672-95fb-61bdfbfdf23b",
+	"af35e036-c3b7-4336-a807-ef56ebb91469",
+	-1,
+	'validateStatements',
+	'',
+	1);
+INSERT INTO C_IO
+	VALUES ("deefce20-0c95-4672-95fb-61bdfbfdf23b",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'validateStatements',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_PP
+	VALUES ("67006ce3-7a87-4188-9ae2-441ff2ed256d",
+	"deefce20-0c95-4672-95fb-61bdfbfdf23b",
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'jobId',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_PP
+	VALUES ("aba4bf13-31f3-43b3-89db-32bc52cf8b62",
+	"deefce20-0c95-4672-95fb-61bdfbfdf23b",
+	"6dcfd273-7652-4193-83d8-2f086134fd80",
+	'plusStatements',
+	'',
+	0,
+	'',
+	"67006ce3-7a87-4188-9ae2-441ff2ed256d");
+INSERT INTO S_DT_PROXY
+	VALUES ("6dcfd273-7652-4193-83d8-2f086134fd80",
+	"00000000-0000-0000-0000-000000000000",
+	'string',
+	'',
+	'',
+	'../../../types/types.xtuml');
+INSERT INTO C_EP
+	VALUES ("349a637a-c458-4b8b-8b65-954baa12df80",
+	"af35e036-c3b7-4336-a807-ef56ebb91469",
+	-1,
+	'getJobAndApps',
+	'',
+	2);
+INSERT INTO C_IO
+	VALUES ("349a637a-c458-4b8b-8b65-954baa12df80",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'getJobAndApps',
+	'',
+	0,
+	'',
+	"deefce20-0c95-4672-95fb-61bdfbfdf23b");
+INSERT INTO C_PP
+	VALUES ("8913b722-e4cc-4434-89f6-1443aecf43c5",
+	"349a637a-c458-4b8b-8b65-954baa12df80",
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'jobId',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_EP
+	VALUES ("85da5d05-c53e-434e-8a66-835368c60eb0",
+	"af35e036-c3b7-4336-a807-ef56ebb91469",
+	-1,
+	'getNextStatement',
+	'',
+	3);
+INSERT INTO C_IO
+	VALUES ("85da5d05-c53e-434e-8a66-835368c60eb0",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'getNextStatement',
+	'',
+	0,
+	'',
+	"349a637a-c458-4b8b-8b65-954baa12df80");
+INSERT INTO C_PP
+	VALUES ("c3dd8ae0-c2d8-4149-88ce-602263f80c95",
+	"85da5d05-c53e-434e-8a66-835368c60eb0",
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'jobId',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO PE_PE
+	VALUES ("af35e036-c3b7-4336-a807-ef56ebb91469",
+	1,
+	"d3620092-4782-4cb2-aa05-167d67c20d94",
+	"00000000-0000-0000-0000-000000000000",
+	6);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("d3620092-4782-4cb2-aa05-167d67c20d94",
+	"00000000-0000-0000-0000-000000000000",
+	"c9509a3c-67ba-42b4-9da8-3ae4aed8d12d",
+	'Shared',
+	'',
+	0,
+	'../Shared.xtuml');
