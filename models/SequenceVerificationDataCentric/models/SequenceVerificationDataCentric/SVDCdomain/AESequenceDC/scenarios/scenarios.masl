@@ -1773,3 +1773,32 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '3e4b9216-516e-4bae-8ee7-7dc46bc8de42' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitLoopBreakEventDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job LoopWithBreakJob, Sequence LoopWithBreakSequence
+  // 
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LA",1,previousEventTypes,true,false);
+  previousEventTypes := ("LA",1,"","") & ("LD",1,"","");
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LB",1,previousEventTypes,false,false);
+  previousEventTypes := ("LB",1,"","");
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LC",1,previousEventTypes,false,false);
+  previousEventTypes := ("LC",1,"CFork","XOR");
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LD",1,previousEventTypes,false,false);
+  previousEventTypes := ("LC",1,"CFork","XOR");
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LCError",1,previousEventTypes,false,false);
+  previousEventTypes := ("LD",1,"","") & ("LCError",1,"","");
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LE",1,previousEventTypes,false,true);
+
+//
+//
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

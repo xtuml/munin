@@ -353,7 +353,8 @@ theConstraintDefn : instance of ConstraintDefinition;
 theConstraintDefns : sequence of instance of ConstraintDefinition;
 theConstrainedSeqPairDefns : sequence of instance of AEInSequencePairDefn;
 eachConstrainedSeqPairDefn : instance of AEInSequencePairDefn;
-theConstrainedAuditEventsPairs : sequence of instance of AuditEventPair;
+theConstrainedAuditEventPairs : sequence of instance of AuditEventPair;
+thePreviousAuditEvents : set of instance of AuditEvent;
 validatedConstraint : boolean;
 logMessage : string;
 failureReason: string;
@@ -377,8 +378,12 @@ begin
       elsif theConstraintDefn.constraintType = XOR then
         //XOR Constraint logic
         theConstrainedSeqPairDefns := theConstraintDefn -> R16.AEInSequencePairDefn;
-        // Check that only one element within the XOR constraint is present
-        if ((theConstrainedSeqPairDefns -> R15) intersection theAuditEventPairs)'length /= 1 then
+        // Check that the number of branches after an XOR fork is the same as the number
+        // of XOR fork audit events. This is a sound check since exactly one branch will
+        // follow each XOR fork audit event.
+        theConstrainedAuditEventPairs := theConstrainedSeqPairDefns -> R15;
+        thePreviousAuditEvents := theConstrainedAuditEventPairs -> R4.has_previous.AuditEvent;
+        if theConstrainedAuditEventPairs'length /= thePreviousAuditEvents'length then
           validatedConstraint := false;
         end if;
         
