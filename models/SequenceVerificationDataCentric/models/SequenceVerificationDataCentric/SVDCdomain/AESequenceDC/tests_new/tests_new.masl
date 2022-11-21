@@ -1,0 +1,51 @@
+//! ACTIVITY BEGIN. 'bd15c0f3-5f0f-4aa7-af17-cc725b91c1ef' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test25NormalLoopWithBreakPath () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Jobs with 1 sequences based on a looped path definition - 4 full iterations of the loop
+  // followed by an error which cause the loop to be exited.
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  acceptOrderedEvent ("1620920000","Test-0001","LA","Job_LoopBreak_1","","Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","LB","Job_LoopBreak_1","Ev301","Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","LC","Job_LoopBreak_1","Ev302","Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","LD","Job_LoopBreak_1","Ev303","Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","LB","Job_LoopBreak_1","Ev304","Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","LC","Job_LoopBreak_1","Ev305","Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920006","Test-0001","LD","Job_LoopBreak_1","Ev306","Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920007","Test-0001","LB","Job_LoopBreak_1","Ev307","Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920008","Test-0001","LC","Job_LoopBreak_1","Ev308","Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920009","Test-0001","LD","Job_LoopBreak_1","Ev309","Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920010","Test-0001","LB","Job_LoopBreak_1","Ev310","Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920011","Test-0001","LC","Job_LoopBreak_1","Ev311","Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920012","Test-0001","LD","Job_LoopBreak_1","Ev312","Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920013","Test-0001","LB","Job_LoopBreak_1","Ev313","Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920014","Test-0001","LC","Job_LoopBreak_1","Ev314","Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920015","Test-0001","LCError","Job_LoopBreak_1","Ev315","Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920016","Test-0001","LE","Job_LoopBreak_1","Ev316","Ev317",theAuditEventData);
+
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 17, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
