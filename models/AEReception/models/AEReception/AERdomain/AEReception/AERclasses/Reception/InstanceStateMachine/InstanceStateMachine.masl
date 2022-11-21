@@ -35,7 +35,7 @@ begin
                 auditEventId: string;
                 auditEventTime: string;
                 prevAuditEventIds: sequence of string;
-                auditEventData: JSON::JSONObject;
+                auditEventData: dictionary;
             begin
                 // extract the data from the JSON structure
                 auditEventType := JSON::get_string(json_object["eventType"]);
@@ -55,7 +55,28 @@ begin
                 auditEventTime := JSON::get_string(json_object["timestamp"]);
                 application := JSON::get_string(json_object["applicationName"]);
 
-                // TODO audit event data
+                // Any other key is an event data item
+                for eventDataName in json_object'keys loop
+                    if eventDataName /= "jobId" and
+                       eventDataName /= "jobName" and
+                       eventDataName /= "applicationName" and
+                       eventDataName /= "eventType" and
+                       eventDataName /= "eventId" and
+                       eventDataName /= "timestamp" and
+                       eventDataName /= "previousEventIds" and
+                       eventDataName /= "__comment__" then
+                        declare
+                            eventDataItem: JSON::JSONObject;
+                        begin
+                            eventDataItem := JSON::get_object(json_object[eventDataName]);
+                            if eventDataItem["value"].kind = JSON::Integer then
+                                auditEventData[eventDataName] := JSON::get_integer(eventDataItem["value"])'image;
+                            elsif eventDataItem["value"].kind = JSON::String then
+                                auditEventData[eventDataName] := JSON::get_string(eventDataItem["value"]);
+                            end if;
+                        end;
+                    end if;
+                end loop;
                 
                 // send the event along
                 if this.currentNodeName = "" then

@@ -24,72 +24,67 @@ end service;
 //! ACTIVITY BEGIN. 'b99cf356-baee-45eb-a09a-1b65922b2b33' DO NOT EDIT THIS LINE.
 private service AEOrdering::testConfigTestData () is
 reportEventDefinition :  instance of _TEST_Req_IF_Verification_eventDefinition;
-allReportEventDefinitions :  sequence of instance of _TEST_Req_IF_Verification_eventDefinition;
+intraEventDataDef : instance of _TEST_Req_IF_Verification_intraJobInvariantDefinition;
+extraEventDataDef : instance of _TEST_Req_IF_Verification_extraJobInvariantDefinition;
 
 begin
 	
 	// When the domain has started it should report the details of the event definitions to verifications
-    
-    allReportEventDefinitions := find _TEST_Req_IF_Verification_eventDefinition();
-    for repDef in allReportEventDefinitions loop
-    	reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test");
-    	reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1");
-    	reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "aaa");
-    end loop;
     reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "aaa" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = JOB1, sequenceName = SEQUENCE1, eventType = aaa and occurrenceId = 1");
-    Assertions::assertTrue((reportEventDefinition.eventDataItemDefinitions'length = 2), "Test Config Test Data: Failed to find correct number of event data definition jobName = JOB1, eventType = aaa, definitions =  " & reportEventDefinition.eventDataItemDefinitions'length'image);
-    for eventDataItemDefinition in reportEventDefinition.eventDataItemDefinitions loop
-    	if eventDataItemDefinition.dataItemName = "Data1" then
-    		Assertions::assertTrue((eventDataItemDefinition.dataItemName = "Data1"), "Test Config Test Data: Failed to find event data definition jobName = JOB1, eventType = aaa and dataItemName = Data1");
-    		Assertions::assertTrue((eventDataItemDefinition.dataItemType = "EXTRAJOBINV"), "Test Config Test Data: Failed to find event data definition jobName = JOB1, eventType = aaa and dataItemType = EXTRAJOBINV");
- 		    Assertions::assertTrue((eventDataItemDefinition.constrainedDataItemTypes'length = 2), "Test Config Test Data: Failed to find correct number of constrained event data definition jobName = JOB1, eventType = aaa, definitions = " & eventDataItemDefinition.constrainedDataItemTypes'length'image);
-    		for constrainedDataItem in eventDataItemDefinition.constrainedDataItemTypes loop
-    			Assertions::assertTrue((constrainedDataItem.jobName = "Other-Test-Job"), "Test Config Test Data: Failed to find constrained event data definition jobName = Other-Test-Job");
-    			if constrainedDataItem.dataItemName = "Other-Data1" then
-	    			Assertions::assertTrue((constrainedDataItem.dataItemName = "Other-Data1"), "Test Config Test Data: Failed to find constrained event data definition dataItemName = Other-Data1");
-	    			Assertions::assertTrue((constrainedDataItem.eventName = "Other-aaa"), "Test Config Test Data: Failed to find constrained event data definition eventName = Other-aaa");
-    			elsif constrainedDataItem.dataItemName = "Data1" then
-	    			Assertions::assertTrue((constrainedDataItem.dataItemName = "Data1"), "Test Config Test Data: Failed to find constrained event data definition dataItemName = Data1");
-	    			Assertions::assertTrue((constrainedDataItem.eventName = "Other-bbb"), "Test Config Test Data: Failed to find constrained event data definition eventName = Other-bbb");
-				end if;
-    		end loop;
-    	elsif eventDataItemDefinition.dataItemName = "Data2" then
-    		Assertions::assertTrue((eventDataItemDefinition.dataItemName = "Data2"), "Test Config Test Data: Failed to find event data definition jobName = JOB1, eventType = aaa and dataItemName = Data2");
-    		Assertions::assertTrue((eventDataItemDefinition.dataItemType = "INTRAJOBINV"), "Test Config Test Data: Failed to find event data definition jobName = JOB1, eventType = aaa and dataItemType = INTRAJOBINV");
-    	end if;
-    end loop;
-	
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = aaa and occurrenceId = 1");
+
     reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "bbb" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = JOB1, sequenceName = SEQUENCE1, eventType = bbb and occurrenceId = 1");
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = bbb and occurrenceId = 1");
 	
     reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "ccc" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = JOB1, sequenceName = SEQUENCE1, eventType = ccc and occurrenceId = 1");
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = ccc and occurrenceId = 1");
 	
     reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "ddd" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = JOB1, sequenceName = SEQUENCE1, eventType = ddd and occurrenceId = 1");
-    Assertions::assertTrue((reportEventDefinition.eventDataItemDefinitions'length = 1), "Test Config Test Data: Failed to find correct number of event data definition jobName = JOB1, eventType = ddd, definitions =  " & reportEventDefinition.eventDataItemDefinitions'length'image);
-    for eventDataItemDefinition in reportEventDefinition.eventDataItemDefinitions loop
-    	if eventDataItemDefinition.dataItemName = "Data4" then
-    		Assertions::assertTrue((eventDataItemDefinition.dataItemName = "Data4"), "Test Config Test Data: Failed to find event data definition jobName = JOB1, eventType = ddd and dataItemName = Data4");
-    		Assertions::assertTrue((eventDataItemDefinition.dataItemType = "EXTRAJOBINV"), "Test Config Test Data: Failed to find event data definition jobName = JOB1, eventType = ddd and dataItemType = EXTRAJOBINV");
- 		    Assertions::assertTrue((eventDataItemDefinition.constrainedDataItemTypes'length = 1), "Test Config Test Data: Failed to find correct number of constrained event data definition jobName = JOB1, eventType = ddd, definitions = " & eventDataItemDefinition.constrainedDataItemTypes'length'image);
-    		for constrainedDataItem in eventDataItemDefinition.constrainedDataItemTypes loop
-    			Assertions::assertTrue((constrainedDataItem.jobName = "Other-Test-Job"), "Test Config Test Data: Failed to find constrained event data definition jobName = Other-Test-Job");
-    			if constrainedDataItem.dataItemName = "Other-Data4" then
-	    			Assertions::assertTrue((constrainedDataItem.dataItemName = "Other-Data4"), "Test Config Test Data: Failed to find constrained event data definition dataItemName = Other-Data4");
-	    			Assertions::assertTrue((constrainedDataItem.eventName = "Other-ddd"), "Test Config Test Data: Failed to find constrained event data definition eventName = Other-ddd");
-				end if;
-    		end loop;
-    	end if;
-    end loop;
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = ddd and occurrenceId = 1");
 	
     reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "eee" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = JOB1, sequenceName = SEQUENCE1, eventType = eee and occurrenceId = 1");
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = eee and occurrenceId = 1");
 	
     reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE2" and eventType = "fff" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = JOB1, sequenceName = SEQUENCE1, eventType = fff and occurrenceId = 1");
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = fff and occurrenceId = 1");
 	
+	extraEventDataDef := find_one _TEST_Req_IF_Verification_extraJobInvariantDefinition(auditEventDataName = "Data1" and sourceJobDefnName = "AEOrdering-Test" and sourceEventType = "aaa" and sourceOccurrenceId = 1);
+    Assertions::assertTrue((extraEventDataDef /= null), "Test Config Test Data: Failed to find extra job invariant event data definition auditEventDataName = Data1, jobName = AEOrdering-Test, sourceEventType = aaa and occurrenceId = 1");
+	for userEvent in extraEventDataDef.userEvents loop
+		if userEvent.jobDefinitionName = "Other-Test-Job" and userEvent.auditEventType = "Other-aaa" and userEvent.occurrenceId = 1 and userEvent.alternativeDataItemName = "Other-Data1" then
+			null;
+		elsif userEvent.jobDefinitionName = "Other-Test-Job" and userEvent.auditEventType = "Other-bbb" and userEvent.occurrenceId = 1 and userEvent.alternativeDataItemName = "Data1" then
+			null;
+		else
+    		Assertions::assertTrue((false), "Test Config Test Data: Failed to find extra job invariant event data definition user events auditEventDataName = Data1, jobName = AEOrdering-Test, sourceEventType = aaa and occurrenceId = 1");
+		end if;
+	end loop;
+
+	extraEventDataDef := find_one _TEST_Req_IF_Verification_extraJobInvariantDefinition(auditEventDataName = "Data4" and sourceJobDefnName = "AEOrdering-Test" and sourceEventType = "ddd" and sourceOccurrenceId = 1);
+    Assertions::assertTrue((extraEventDataDef /= null), "Test Config Test Data: Failed to find extra job invariant event data definition auditEventDataName = Data4, jobName = AEOrdering-Test, sourceEventType = ddd and occurrenceId = 1");
+	for userEvent in extraEventDataDef.userEvents loop
+		if userEvent.jobDefinitionName = "Other-Test-Job" and userEvent.auditEventType = "Other-ddd" and userEvent.occurrenceId = 1 and userEvent.alternativeDataItemName = "Other-Data1" then
+			null;
+		else
+    		Assertions::assertTrue((false), "Test Config Test Data: Failed to find extra job invariant event data definition user events auditEventDataName = Data4, jobName = AEOrdering-Test, sourceEventType = ddd and occurrenceId = 1");
+		end if;
+	end loop;
+
+	intraEventDataDef := find_one _TEST_Req_IF_Verification_intraJobInvariantDefinition(auditEventDataName = "Data2" and jobDefinitionName = "AEOrdering-Test");
+    Assertions::assertTrue((intraEventDataDef /= null), "Test Config Test Data: Failed to find intra job invariant event data definition auditEventDataName = Data2 and jobName = AEOrdering-Test");
+	for associatedEvent in intraEventDataDef.associatedEvents loop
+		if associatedEvent.auditEventType = "aaa" and associatedEvent.occurrenceId = 1 and associatedEvent.alternativeDataItemName = "Data2" then
+			null;
+		elsif associatedEvent.auditEventType = "bbb" and associatedEvent.occurrenceId = 1 and associatedEvent.alternativeDataItemName = "Data2" then
+			null;
+		elsif associatedEvent.auditEventType = "ccc" and associatedEvent.occurrenceId = 1 and associatedEvent.alternativeDataItemName = "Data2" then
+			null;
+		else
+    		Assertions::assertTrue((false), "Test Config Test Data: Failed to find intra job invariant event data definition user events auditEventDataName = Data2, jobName = AEOrdering-Test");
+		end if;
+	end loop;
+
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -115,6 +110,7 @@ nodes : sequence of instance of Node;
 applications : sequence of instance of Application;
 jobTypes : sequence of instance of JobType;
 auditEventTypes : sequence of instance of AuditEventType;
+dataItemTypes : sequence of instance of DataItemType;
 
 begin
 	
@@ -134,10 +130,15 @@ begin
 		delete applications;
 		jobTypes := find JobType();
 		unlink jobTypes R12;
+		unlink jobTypes R14;
 		delete jobTypes;
 		auditEventTypes := find AuditEventType();
 		unlink auditEventTypes R7;
+		unlink auditEventTypes R16;
 		delete auditEventTypes;
+		dataItemTypes := find DataItemType();
+		unlink dataItemTypes R18.constrains.DataItemType;
+		delete dataItemTypes;
 	end if;
 		
 end service;
@@ -1332,6 +1333,7 @@ begin
 	// verify the audit event data
 	verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "1");
     Assertions::assertTrue((verificationAuditEvent /= null), "Test Ordered Job: Failed to find` verification audit event id = 1");
+	Logger::log(Logger::Information, "AEOrdering", "LEVI: " & verificationAuditEvent.reportableAuditEventDataItems'length'image);
     Assertions::assertTrue((verificationAuditEvent.reportableAuditEventDataItems'length = 2), "Test Ordered Job With Data: Failed as verification audit event data Items /= 2");
     for dataItem in verificationAuditEvent.reportableAuditEventDataItems loop
 	    if dataItem.dataName = "Data1" then

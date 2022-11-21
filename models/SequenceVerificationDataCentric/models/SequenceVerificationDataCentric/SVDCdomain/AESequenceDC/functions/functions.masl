@@ -350,3 +350,42 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. 'e02e51d5-9455-4a34-b8c1-e2c7f0a628ed' DO NOT EDIT THIS LINE.
+public service AESequenceDC::extraJobInvariantDefinition ( auditEventDataName : in string,
+                                                          sourceJobDefnName : in string,
+                                                          sourceEventType : in string,
+                                                          sourceOccurrenceId : in integer,
+                                                          userEvents : in sequence of userEventDataStructure ) is
+sourceInvariantEventType : eventStructure;
+invariantEventType : eventStructure;
+
+begin
+  sourceInvariantEventType := (sourceEventType,sourceOccurrenceId,"","");
+  ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn(sourceJobDefnName,auditEventDataName, sourceInvariantEventType, @P1D@);
+
+  for userEvent in userEvents loop
+    invariantEventType := (userEvent.auditEventType,userEvent.occurrenceId,"","");
+    ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn(userEvent.jobDefinitionName, auditEventDataName, invariantEventType);
+  end loop;
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a7653f36-7f90-48e4-b78f-af997de14261' DO NOT EDIT THIS LINE.
+public service AESequenceDC::intraJobInvariantDefinition ( jobDefnName : in string,
+                                                          auditEventDataName : in string,
+                                                          associatedEvents : in sequence of intraJobInvDataStructure ) is
+invariantEventType : eventStructure;
+invariantEventTypes : sequence of eventStructure;
+begin
+  
+  for associatedEvent in associatedEvents loop
+    invariantEventType := (associatedEvent.auditEventType,associatedEvent.occurrenceId,"","");
+    invariantEventTypes := invariantEventTypes & invariantEventType;
+  end loop;
+  IntraJobInvariantDefn.createIntraJobInvariantDefn(jobDefnName, auditEventDataName, invariantEventTypes);
+
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

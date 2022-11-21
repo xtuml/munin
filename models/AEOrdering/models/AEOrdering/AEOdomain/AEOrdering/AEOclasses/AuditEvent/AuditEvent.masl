@@ -60,7 +60,7 @@ begin
 					failedAuditEvent := create FailedAuditEvent(auditEventId => auditEventId, failureTime => timestamp'now, failureReason => failureReason);
 					link failedAuditEvent R4 auditEvent;
 					logMessage := "AEOrdering::AuditEvent.createAuditEvent - " & failureReason;
-					Logger::log(Logger::Error, "AEOrdering", logMessage);
+					Logger::log(Logger::Error, "Monitored System Failure", logMessage);
 				end;
 		end case;
 	else
@@ -74,7 +74,7 @@ begin
 		end if;
 		auditEvent := null;
 		logMessage := "AEOrdering::AuditEvent.createAuditEvent - " & failureReason;
-		Logger::log(Logger::Error, "AEOrdering", logMessage);
+		Logger::log(Logger::Error, "Monitored System Failure", logMessage);
 	
 	end if;
 	

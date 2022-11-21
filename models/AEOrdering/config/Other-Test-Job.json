@@ -1,0 +1,36 @@
+{
+  "JobDefinitionName": "Other-Test-Job",
+  "Events": [
+    {
+      "EventName": "Other-aaa",
+      "SequenceName": "SEQUENCE1",
+      "OccurrenceId": 1,
+      "Application": "app1",
+      "SequenceStart": true
+    },
+    {
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "Other-aaa",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "SequenceName": "SEQUENCE1",
+      "EventName": "Other-bbb",
+      "OccurrenceId": 1,
+      "Application": "app1"
+    },
+    {
+      "EventName": "Other-ddd",
+      "SequenceName": "SEQUENCE1",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "Other-bbb",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "OccurrenceId": 1,
+      "Application": "app3"
+    }
+  ]
+}

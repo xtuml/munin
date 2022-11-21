@@ -6,12 +6,11 @@ public service AEReception::Req_IF_Ordering~>AcceptEvent ( jobId : in string,
                                                           auditEventId : in string,
                                                           auditEventTime : in string,
                                                           prevAuditEventIds : in sequence of string,
-                                                          auditEventData : in JSON::JSONObject ) is
+                                                          auditEventData : in dictionary ) is
 eventData: AEOrdering::AuditEventDataType;
 begin
-  // TODO: for now simply dump each key in the event data object to a string
   for key in auditEventData'keys loop
-    eventData.dataItems[key] := JSON::dump(auditEventData[key]);
+    eventData.dataItems[key] := auditEventData[key];
   end loop;
   AEOrdering::AcceptEvent(
     jobId,
@@ -109,8 +108,7 @@ public service AEOrdering::Req_IF_Verification~>eventDefinition ( jobName : in s
                                                                  occurrenceId : in integer,
                                                                  previousEventTypes : in sequence of PreviousEventType,
                                                                  isSequenceStart : in boolean,
-                                                                 isSequenceEnd : in boolean,
-                                                                 eventDataItemDefinitions : in sequence of DataItemDefinitionType ) is
+                                                                 isSequenceEnd : in boolean ) is
 prevEventTypes: sequence of AESequenceDC::eventStructure;
 begin
   // convert the AEOrdering type to an AESequenceDC type
@@ -140,6 +138,36 @@ end service;
 public service AEOrdering::Req_IF_Verification~>jobTypeDeleted ( jobTypeName : in string ) is
 begin
   AESequenceDC::deprecateJobDefinition(jobTypeName);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '6dbf6567-2587-433c-a961-eb1b2269ba85' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>intraJobInvariantDefinition ( auditEventDataName : in string,
+                                                                             jobDefinitionName : in string,
+                                                                             associatedEvents : in sequence of IntraJobInvDataType ) is
+assocEvents: sequence of AESequenceDC::intraJobInvDataStructure;
+begin
+  for evt in associatedEvents loop
+    assocEvents := assocEvents & (evt.auditEventType, evt.occurrenceId, evt.alternativeDataItemName);
+  end loop;
+  AESequenceDC::intraJobInvariantDefinition(jobDefinitionName, auditEventDataName, assocEvents);
+end service;
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '6f608352-3395-4805-9adc-b151bf40f633' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>extraJobInvariantDefinition ( auditEventDataName : in string,
+                                                                             sourceJobDefnName : in string,
+                                                                             sourceEventType : in string,
+                                                                             sourceOccurrenceId : in integer,
+                                                                             userEvents : in sequence of UserEventDataType ) is
+userEventData: sequence of AESequenceDC::userEventDataStructure;
+begin
+  for evt in userEvents loop
+    userEventData := userEventData & (evt.jobDefinitionName, evt.auditEventType, evt.occurrenceId, evt.alternativeDataItemName);
+  end loop;
+  AESequenceDC::extraJobInvariantDefinition(auditEventDataName, sourceJobDefnName, sourceEventType, sourceOccurrenceId, userEventData);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

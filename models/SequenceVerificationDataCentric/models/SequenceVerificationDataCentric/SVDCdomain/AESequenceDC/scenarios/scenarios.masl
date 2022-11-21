@@ -1244,8 +1244,8 @@ begin
   previousEvents := ("Ev301");
   acceptOrderedEvent ("1620920001","Test-0001","MALB","Illegal_Job",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  // The folfaring audit event corresponds to an audit event definition that is defined as end of sequence
-  // yet there is a folfaring event. This should be trapped as an error condition
+  // The following audit event corresponds to an audit event definition that is defined as end of sequence
+  // yet there is a following event. This should be trapped as an error condition
   acceptOrderedEvent ("1620920002","Test-0001","MALC","Illegal_Job",previousEvents,"Ev303",theAuditEventData);
   //
 end service;
@@ -1398,16 +1398,16 @@ end service;
 //! ACTIVITY BEGIN. '36008065-f8e6-4b23-bd0f-a3799231af1b' DO NOT EDIT THIS LINE.
 private service AESequenceDC::InitIntraJobInvariantDefinition () is
 // Initialisation goes here.
-invariantEventTypes : sequence of eventStructure;
-empty : sequence of eventStructure;
+invariantEventTypes : sequence of intraJobInvDataStructure;
+empty : sequence of intraJobInvDataStructure;
 
 begin
   //
   // Job SplitBranchedJob, Invariant InvA attached to audit event definitions SFMA and SFMF
   // Note this initialisation scenario is dependent upon the prior execution of InitForkAndMergeTopologyEventDefinition
   // 
-  invariantEventTypes := ("SFMA",1,"","") & ("SFMF",1,"","");
-  IntraJobInvariantDefn.createIntraJobInvariantDefn("SplitBranchedJob","InvA",invariantEventTypes);
+  invariantEventTypes := ("SFMA",1,"") & ("SFMF",1,"");
+  intraJobInvariantDefinition("SplitBranchedJob","InvA",invariantEventTypes);
 
 end service;
 //
@@ -1466,46 +1466,6 @@ begin
   //
 
 //
-//
-//
-//
-end service;
-//
-//
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'd83cd78b-a6f3-4f2a-abc4-3099558813a2' DO NOT EDIT THIS LINE.
-private service AESequenceDC::InitPersistentInvariantAuthDefinition () is
-// Initialisation goes here.
-previousEventTypes : sequence of eventStructure;
-empty : sequence of eventStructure;
-invariantEventType : eventStructure;
-
-begin
-  //
-  // Job Auth_PersistentInvariantJob, Sequence 1 Auth_PersistentInvariant
-  //
-  previousEventTypes := empty;
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthoriserSendOrderRequest",1,previousEventTypes,true,false);
-  previousEventTypes := ("EAuthoriserSendOrderRequest",1,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveRequest",1,previousEventTypes,false,false);
-  previousEventTypes := ("EAuthReceiveRequest",1,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendMidRequest",1,previousEventTypes,false,false);
-  previousEventTypes := ("EAuthSendMidRequest",1,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveMidResponse",1,previousEventTypes,false,false);
-  previousEventTypes := ("EAuthReceiveMidResponse",1,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendMidRequest",2,previousEventTypes,false,false);
-  previousEventTypes := ("EAuthSendMidRequest",2,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveMidResponse",2,previousEventTypes,false,false);
-  previousEventTypes := ("EAuthReceiveMidResponse",2,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendResponse",1,previousEventTypes,false,false);
-  previousEventTypes := ("EAuthSendResponse",1,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthoriserReceiveOrder",1,previousEventTypes,false,true);
-//
-  invariantEventType := ("EAuthoriserSendOrderRequest",1,"","");
-  ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn("PersistentInvariantTypeA",invariantEventType, @P1D@);
-  invariantEventType := ("EAuthoriserReceiveOrder",1,"","");
-  ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn("PersistentInvariantTypeB",invariantEventType, @P1D@);
 //
 //
 //
@@ -1662,15 +1622,39 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '3cf0e0ab-a917-4a78-9500-1e8044935516' DO NOT EDIT THIS LINE.
-private service AESequenceDC::InitPersistentInvariantBankTransferDefinition () is
+private service AESequenceDC::InitPersistentInvariantAuthAndBankTransferDefinition () is
 // Initialisation goes here.
 previousEventTypes : sequence of eventStructure;
 empty : sequence of eventStructure;
-invariantEventType : sequence of eventStructure;
+invariantEventType : eventStructure;
+userEvents : sequence of userEventDataStructure;
+userEvent : userEventDataStructure;
+
 begin
+  //
+  // Job Auth_PersistentInvariantJob, Sequence 1 Auth_PersistentInvariant
+  //
+  previousEventTypes := empty;
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthoriserSendOrderRequest",1,previousEventTypes,true,false);
+  previousEventTypes := ("EAuthoriserSendOrderRequest",1,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveRequest",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthReceiveRequest",1,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendMidRequest",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthSendMidRequest",1,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveMidResponse",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthReceiveMidResponse",1,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendMidRequest",2,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthSendMidRequest",2,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveMidResponse",2,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthReceiveMidResponse",2,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendResponse",1,previousEventTypes,false,false);
+  previousEventTypes := ("EAuthSendResponse",1,"","");
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthoriserReceiveOrder",1,previousEventTypes,false,true);
+  //
   //
   // Job BankTransferJob, Sequence 1 NearSideBankTransfer
   // 
+  previousEventTypes := empty;
   eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearInput",1,previousEventTypes,true,false);
   previousEventTypes := ("ENearInput",1,"","");
   eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearPartWrite",1,previousEventTypes,false,false);
@@ -1714,8 +1698,15 @@ begin
   previousEventTypes := ("EFarInput",1,"","");
   eventDefinition ("EBankTransferJob","EFarSide","EFarOutput",1,previousEventTypes,false,true);
   //
-  invariantEventType := ("ENearInput",1,"","") & ("EAgentReceiveWidgets",1,"","") & ("EGatewayWritePayload",1,"","");
-  ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn("PersistentInvariantTypeB",invariantEventType);
+//  invariantEventType := ("ENearInput",1,"","");
+//  ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn("EBankTransferJob","PersistentInvariantTypeB",invariantEventType);
+//  invariantEventType := ("EAgentReceiveWidgets",1,"","");
+//  ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn("EBankTransferJob","PersistentInvariantTypeB",invariantEventType);
+//  invariantEventType := ("EGatewayWritePayload",1,"","");
+//  ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn("EBankTransferJob","PersistentInvariantTypeB",invariantEventType);
+
+  userEvents := ("EBankTransferJob","ENearInput",1,"") & ("EBankTransferJob","EAgentReceiveWidgets",1,"") & ("EBankTransferJob","EGatewayWritePayload",1,"");
+  extraJobInvariantDefinition("PersistentInvariantTypeB", "Auth_PersistentInvariantJob", "EAuthoriserReceiveOrder",1,userEvents);
 //
 end service;
 //
@@ -1771,5 +1762,34 @@ begin
 //
 //
 end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3e4b9216-516e-4bae-8ee7-7dc46bc8de42' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitLoopBreakEventDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job LoopWithBreakJob, Sequence LoopWithBreakSequence
+  // 
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LA",1,previousEventTypes,true,false);
+  previousEventTypes := ("LA",1,"","") & ("LD",1,"","");
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LB",1,previousEventTypes,false,false);
+  previousEventTypes := ("LB",1,"","");
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LC",1,previousEventTypes,false,false);
+  previousEventTypes := ("LC",1,"CFork","XOR");
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LD",1,previousEventTypes,false,false);
+  previousEventTypes := ("LC",1,"CFork","XOR");
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LCError",1,previousEventTypes,false,false);
+  previousEventTypes := ("LD",1,"","") & ("LCError",1,"","");
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LE",1,previousEventTypes,false,true);
+
+//
+//
+end service;
+//
+//
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

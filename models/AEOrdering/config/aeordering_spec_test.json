@@ -1,31 +1,34 @@
 {
-  "SpecUpdateRate": "PT2M",
-  "MaxOutOfSequenceEvents": 10,
-  "MaximumJobTime": "PT10M",
-  "JobCompletePeriod": "PT24H",
-  "Jobs": [
+	"SpecUpdateRate": "PT2M",
+	"MaxOutOfSequenceEvents": 10,
+	"MaximumJobTime": "PT10M",
+	"JobCompletePeriod": "PT24H",
+	"Jobs": [{
+		"JobDefinitionName": "AEOrdering-Test",
+		"JobDeprecated": false,
+		"JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+		"StaleAuditEventDuration": "P99W",
+		"BlockedAuditEventDuration": "PT5M",
+		"EventRules": [{
+			"EventName": "aaa",
+			"ApplicationName": "app1",
+      "OccurrenceId": 1,
+			"StaleAuditEventDuration": "PT1H",
+			"BlockedAuditEventDuration": "PT1M"
+		},
     {
-      "JobDefinitionName": "AEOrdering-Test",
-      "JobDeprecated": false,
-      "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
-      "StaleAuditEventDuration": "P99W",
-      "BlockedAuditEventDuration": "PT5M",
-      "EventRules": [
-        {
-          "EventName": "aaa",
-          "ApplicationName": "app1",
-          "OccurrenceId": 1,
-          "StaleAuditEventDuration": "PT1H",
-          "BlockedAuditEventDuration": "PT1M"
-        },
-        {
-          "EventName": "fff",
-          "ApplicationName": "app4",
-          "OccurrenceId": 1,
-          "StaleAuditEventDuration": "PT2H",
-          "BlockedAuditEventDuration": "PT2M"
-        }
-      ]
-    }
-  ]
+      "EventName": "fff",
+			"ApplicationName": "app4",
+			"OccurrenceId": 1,
+			"StaleAuditEventDuration": "PT2H",
+			"BlockedAuditEventDuration": "PT2M"
+    }]
+  },
+	{
+		"JobDefinitionName": "Other-Test-Job",
+		"JobDeprecated": false,
+		"JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+		"StaleAuditEventDuration": "P99W",
+		"BlockedAuditEventDuration": "PT5M"
+	}]
 }

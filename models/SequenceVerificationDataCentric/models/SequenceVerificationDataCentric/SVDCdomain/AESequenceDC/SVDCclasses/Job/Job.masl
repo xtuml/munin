@@ -3,7 +3,8 @@ public instance service AESequenceDC::Job.failJob ( failureReason : in string ) 
 logMessage : string;
 begin
 	
-	logMessage := "AESequenceDC::Job.failJob";
+	// This is just a progress message - the failure is reported in the state machine
+	logMessage := "AESequenceDC::Job.failJob function entered";
 	Logger::log(Logger::Information, "AESequenceDC", logMessage);
 	
 		

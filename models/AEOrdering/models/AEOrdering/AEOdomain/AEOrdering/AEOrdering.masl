@@ -28,7 +28,8 @@ public service AEOrdering::Req_IF_Verification~>audit_event ( jobId : in string,
                                                              auditEventType : in string,
                                                              auditEventId : in string,
                                                              auditEventTime : in string,
-                                                             prevAuditEventIds : in sequence of string ) is
+                                                             prevAuditEventIds : in sequence of string,
+                                                             reportableAuditEventDataItems : in sequence of ReportableAuditEventDataType ) is
 begin
   null;
 end service;
@@ -56,8 +57,7 @@ public service AEOrdering::Req_IF_Verification~>eventDefinition ( jobName : in s
                                                                  occurrenceId : in integer,
                                                                  previousEventTypes : in sequence of PreviousEventType,
                                                                  isSequenceStart : in boolean,
-                                                                 isSequenceEnd : in boolean,
-                                                                 eventDataItemDefinitions : in sequence of DataItemDefinitionType ) is
+                                                                 isSequenceEnd : in boolean ) is
 begin
   null;
 end service;
@@ -65,6 +65,26 @@ end service;
 
 //! ACTIVITY BEGIN. 'd1002ab2-b5a0-4dd8-94d5-9bcf4a4d7e6d' DO NOT EDIT THIS LINE.
 public service AEOrdering::Req_IF_Verification~>jobTypeDeleted ( jobTypeName : in string ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '5a38e2c3-17f0-473d-8eac-e3e6f2be795f' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>intraJobInvariantDefinition ( auditEventDataName : in string,
+                                                                             jobDefinitionName : in string,
+                                                                             associatedEvents : in sequence of IntraJobInvDataType ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8b706899-5b87-4c7c-9b4e-53606f74364a' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>extraJobInvariantDefinition ( auditEventDataName : in string,
+                                                                             sourceJobDefnName : in string,
+                                                                             sourceEventType : in string,
+                                                                             sourceOccurrenceId : in integer,
+                                                                             userEvents : in sequence of UserEventDataType ) is
 begin
   null;
 end service;

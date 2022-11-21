@@ -57,145 +57,166 @@ jobTypeJSONElement : JSON::JSONElement;
 jobTypeValidationResult : JSON::JSONObject;
 eventDataTypesJSONString : string;
 eventDataTypesJSONElement : JSON::JSONElement;
-dataItemDefinitionTypes : sequence of DataItemDefinitionType;
-emptyDataItemDefinitionTypes : sequence of DataItemDefinitionType;
-dataItemDefinitionType : DataItemDefinitionType;
-emptyDataItemDefinitionType : DataItemDefinitionType;
-constrainedDataDefItem : ConstrainedDataItemType;
-emptyConstrainedDataDefItem : ConstrainedDataItemType;
+userEvent : UserEventDataType;
+emptyUserEvent : UserEventDataType;
+userEvents : sequence of UserEventDataType;
+emptyUserEvents : sequence of UserEventDataType;
+associatedEvent : IntraJobInvDataType;
+emptyAssociatedEvent : IntraJobInvDataType;
+associatedEvents : sequence of IntraJobInvDataType;
+emptyAssociatedEvents : sequence of IntraJobInvDataType;
 
 begin
-	
-	logMessage := "AEOrdering::SystemSpec.ConfigUpdated";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
-	// check the config file has not been removed
-	fileName := Filesystem::filename(this.configFilePath & this.configFile);
-	if Filesystem::file_exists(fileName) then
-		// read the contents of the config file 
-		
-		
-		configJSONString := Filesystem::read_file(fileName);
-		configJSONElement := JSON::parse(configJSONString);
-    configValidationResult := JSONValidation::validate(configJSONElement, #PROP["orderingConfigSchema"]#);
-		
-		if JSON::get_boolean(configValidationResult["valid"]) then
-			// extract the spec data items
-			configJSONObject := JSON::get_object(configJSONElement);
-			if configJSONObject'contains("SpecUpdateRate") then
-				this.specUpdateRate := duration'parse(JSON::get_string(configJSONObject["SpecUpdateRate"]));
-			end if;
-			if configJSONObject'contains("MaxOutOfSequenceEvents") then
-				this.maxOutOfSequenceEvents := JSON::get_integer(configJSONObject["MaxOutOfSequenceEvents"]);
-			end if;
-			if configJSONObject'contains("MaximumJobTime") then
-				this.maximumJobTime := duration'parse(JSON::get_string(configJSONObject["MaximumJobTime"]));
-			end if;
-			if configJSONObject'contains("JobCompletePeriod") then
-				this.jobCompletePeriod := duration'parse(JSON::get_string(configJSONObject["JobCompletePeriod"]));
-			end if;
-			// read in the jobs that we expect to process
-			if configJSONObject'contains("Jobs") and configJSONObject["Jobs"].kind = JSON::Array then
-				for jobDefinitionElement in JSON::get_array(configJSONObject["Jobs"]) loop
-					jobDefJSONObject := JSON::get_object(jobDefinitionElement);
-					jobDefinitionName := JSON::get_string(jobDefJSONObject["JobDefinitionName"]);
-					jobType := find_one JobType(jobTypeName = jobDefinitionName);
-					if jobType = null then
-						jobType := create JobType(jobTypeName => jobDefinitionName, deprecated => false, Current_State => Created);
-						generate JobType.activateJobType() to jobType;
-					end if;
-					if jobDefJSONObject'contains("JobDeprecated") then
-						jobType.deprecated := JSON::get_boolean(jobDefJSONObject["JobDeprecated"]);
-						if jobType.deprecated = true then
-							jobType.jobTypeExpiryTime := timestamp'parse(JSON::get_string(jobDefJSONObject["JobTypeExpiryDate"]));
-							generate JobType.deprecateJobType() to jobType;
-						else
-							generate JobType.activateJobType() to jobType;
-						end if;
-					end if;
-					jobType.staleAuditEventDuration := duration'parse(JSON::get_string(jobDefJSONObject["StaleAuditEventDuration"]));
-					jobType.blockedAuditEventDuration := duration'parse(JSON::get_string(jobDefJSONObject["BlockedAuditEventDuration"]));
-					// load in the audit eventTypes
-					fileName := Filesystem::filename(this.configFilePath & jobType.jobTypeName & ".json");
-					if Filesystem::file_exists(fileName) then
-						jobTypeJSONString := Filesystem::read_file(fileName);
-						jobTypeJSONElement := JSON::parse(jobTypeJSONString);
-            jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, #PROP["jobDefinitionSchema"]#);
-		        if JSON::get_boolean(jobTypeValidationResult["valid"]) then
-              // extract the spec data items
-              jobType.loadEventTypes(JSON::get_object(jobTypeJSONElement));
-              // now adjust stale and blocked audit event durations
-              if jobDefJSONObject'contains("EventRules") and jobDefJSONObject["EventRules"].kind = JSON::Array then
-                jobType.updateAuditEventDurations(JSON::get_array(jobDefJSONObject["EventRules"]));
-              end if;
-              
-              // now check for any event data definition
-              fileName := Filesystem::filename(this.configFilePath & jobType.jobTypeName & "_event_data.json");
-              if Filesystem::file_exists(fileName) then
+    
+    logMessage := "AEOrdering::SystemSpec.ConfigUpdated";
+    Logger::log(Logger::Information, "AEOrdering", logMessage);
+    
+    // check the config file has not been removed
+    fileName := Filesystem::filename(this.configFilePath & this.configFile);
+    if Filesystem::file_exists(fileName) then
+        // read the contents of the config file 
+        configJSONString := Filesystem::read_file(fileName);
+        configJSONElement := JSON::parse(configJSONString);
+        configValidationResult := JSONValidation::validate(configJSONElement, #PROP["orderingConfigSchema"]#);
+        if JSON::get_boolean(configValidationResult["valid"]) then
+            // extract the spec data items
+            configJSONObject := JSON::get_object(configJSONElement);
+            if configJSONObject'contains("SpecUpdateRate") then
+                this.specUpdateRate := duration'parse(JSON::get_string(configJSONObject["SpecUpdateRate"]));
+            end if;
+            if configJSONObject'contains("MaxOutOfSequenceEvents") then
+                this.maxOutOfSequenceEvents := JSON::get_integer(configJSONObject["MaxOutOfSequenceEvents"]);
+            end if;
+            if configJSONObject'contains("MaximumJobTime") then
+                this.maximumJobTime := duration'parse(JSON::get_string(configJSONObject["MaximumJobTime"]));
+            end if;
+            if configJSONObject'contains("JobCompletePeriod") then
+                this.jobCompletePeriod := duration'parse(JSON::get_string(configJSONObject["JobCompletePeriod"]));
+            end if;
+            // read in the jobs that we expect to process
+            if configJSONObject'contains("Jobs") and configJSONObject["Jobs"].kind = JSON::Array then
+                for jobDefinitionElement in JSON::get_array(configJSONObject["Jobs"]) loop
+                    jobDefJSONObject := JSON::get_object(jobDefinitionElement);
+                    jobDefinitionName := JSON::get_string(jobDefJSONObject["JobDefinitionName"]);
+                    jobType := find_one JobType(jobTypeName = jobDefinitionName);
+                    if jobType = null then
+                        jobType := create JobType(jobTypeName => jobDefinitionName, deprecated => false, Current_State => Created);
+                        generate JobType.activateJobType() to jobType;
+                    end if;
+                    if jobDefJSONObject'contains("JobDeprecated") then
+                        jobType.deprecated := JSON::get_boolean(jobDefJSONObject["JobDeprecated"]);
+                        if jobType.deprecated = true then
+                            jobType.jobTypeExpiryTime := timestamp'parse(JSON::get_string(jobDefJSONObject["JobTypeExpiryDate"]));
+                            generate JobType.deprecateJobType() to jobType;
+                        else
+                            generate JobType.activateJobType() to jobType;
+                        end if;
+                    end if;
+                    jobType.staleAuditEventDuration := duration'parse(JSON::get_string(jobDefJSONObject["StaleAuditEventDuration"]));
+                    jobType.blockedAuditEventDuration := duration'parse(JSON::get_string(jobDefJSONObject["BlockedAuditEventDuration"]));
+
+                    // load in the audit eventTypes
+                    fileName := Filesystem::filename(this.configFilePath & jobType.jobTypeName & ".json");
+                    if Filesystem::file_exists(fileName) then
+                        jobTypeJSONString := Filesystem::read_file(fileName);
+                        jobTypeJSONElement := JSON::parse(jobTypeJSONString);
+                        jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, #PROP["jobDefinitionSchema"]#);
+                        if JSON::get_boolean(jobTypeValidationResult["valid"]) then
+                            // extract the spec data items
+                            jobType.loadEventTypes(JSON::get_object(jobTypeJSONElement));
+                            // now adjust stale and blocked audit event durations
+                            if jobDefJSONObject'contains("EventRules") and jobDefJSONObject["EventRules"].kind = JSON::Array then
+                              jobType.updateAuditEventDurations(JSON::get_array(jobDefJSONObject["EventRules"]));
+                            end if;
+                        else
+                            Logger::log(Logger::Debug, "AEReception", "Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true));
+                            raise JSON::JSONException("Config file invalid");
+                        end if;
+                    else
+                        raise program_error;
+                    end if;
+                end loop;
+            end if;
+        else
+            Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
+            raise JSON::JSONException("Config file invalid");
+        end if;
+        
+        // set the config file mod time
+        fileName := Filesystem::filename(this.configFilePath & this.configFile);
+        fileStatus := Filesystem::get_file_status(Filesystem::filename(fileName));
+        this.configFileModificationTime := fileStatus.modification_time;
+        
+        // now check for any event data definition
+        // TODO check the schema here
+        for jobType in find JobType() loop
+            fileName := Filesystem::filename(this.configFilePath & jobType.jobTypeName & "_event_data.json");
+            if Filesystem::file_exists(fileName) then
                 eventDataTypesJSONString := Filesystem::read_file(fileName);
                 eventDataTypesJSONElement := JSON::parse(eventDataTypesJSONString);
                 
                 // extract the spec data items
-                jobType.loadEventDataItemTypes(JSON::get_object(eventDataTypesJSONElement));
-              end if;
-            else
-              Logger::log(Logger::Debug, "AEReception", "Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true));
-              raise JSON::JSONException("Config file invalid");
+                jobType.loadEventDataItemTypes(JSON::get_array(eventDataTypesJSONElement));
             end if;
-					else
-						raise program_error;
-					end if;
-				end loop;
-			end if;
+        end loop;
+        
+        // report the latest set of events to the sequence domain
+        for job in find JobType() loop
+            for auditEventType in (job -> R12.AuditEventType() ordered_by (auditEventTypeId)) loop
+                Req_IF_Verification~>eventDefinition(auditEventType.jobTypeName, auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd);
+            end loop;
+        end loop;
+        
+        // report the latest set of extra job inv event data to the sequence domain
+        for dataItemType in find DataItemType(dataItemType = "EXTRAJOBINV") loop
+            if dataItemType -> R18.isConstrainedBy.DataItemType = null then
+                // build up the event data items
+                userEvents := emptyUserEvents;
+                for constrainedDataItem in dataItemType -> R18.constrains.DataItemType loop
+                    userEvent := emptyUserEvent;
+                    userEvent.jobDefinitionName := constrainedDataItem.jobTypeName;
+                    userEvent.auditEventType := constrainedDataItem.eventType;
+                    userEvent.occurrenceId := constrainedDataItem.occurrenceId;
+                    userEvent.alternativeDataItemName := constrainedDataItem.dataItemName;
+                    userEvents := userEvents & userEvent;
+                end loop;
+                Req_IF_Verification~>extraJobInvariantDefinition(dataItemType.dataItemName, dataItemType.jobTypeName, dataItemType.eventType, dataItemType.occurrenceId, userEvents);
+            end if;
+        end loop;
+
+        // report the latest set of extra job inv event data to the sequence domain
+        for dataItemType in find DataItemType(dataItemType = "INTRAJOBINV") loop
+            if dataItemType -> R18.isConstrainedBy.DataItemType = null then
+                // build up the event data items
+                associatedEvents := emptyAssociatedEvents;
+                for constrainedDataItem in dataItemType -> R18.constrains.DataItemType loop
+                    associatedEvent := emptyAssociatedEvent;
+                    associatedEvent.auditEventType := constrainedDataItem.eventType;
+                    associatedEvent.occurrenceId := constrainedDataItem.occurrenceId;
+                    associatedEvent.alternativeDataItemName := constrainedDataItem.dataItemName;
+                    associatedEvents := associatedEvents & associatedEvent;
+                end loop;
+                Req_IF_Verification~>intraJobInvariantDefinition(dataItemType.dataItemName, dataItemType.jobTypeName, associatedEvents);
+            end if;
+        end loop;
+
+        // schedule to check the config file
+        schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
     else
-		  Logger::log(Logger::Debug, "AEReception", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
-      raise JSON::JSONException("Config file invalid");
-		end if;
-		
-		// set the config file mod time
-		fileName := Filesystem::filename(this.configFilePath & this.configFile);
-		fileStatus := Filesystem::get_file_status(Filesystem::filename(fileName));
-		this.configFileModificationTime := fileStatus.modification_time;
-		
-		// report the latest set of events to the sequence domain
-		for job in find JobType() loop
-			for auditEventType in (job -> R12.AuditEventType() ordered_by (auditEventTypeId)) loop
-				// build up the event data items
-				dataItemDefinitionTypes := emptyDataItemDefinitionTypes;
-				for dataItemType  in auditEventType -> R14.DataItemType loop
-					dataItemDefinitionType := emptyDataItemDefinitionType;
-					dataItemDefinitionType.dataItemName := dataItemType.dataItemName;
-					dataItemDefinitionType.dataItemType := dataItemType.dataItemType;
-					for constrainedDataItem in dataItemType -> R15.ConstrainedDataItem loop
-						constrainedDataDefItem := emptyConstrainedDataDefItem;
-						constrainedDataDefItem.jobName := constrainedDataItem.jobTypeName;
-						constrainedDataDefItem.eventName := constrainedDataItem.eventType;
-						constrainedDataDefItem.dataItemName := constrainedDataItem.dataItemName;
-						dataItemDefinitionType.constrainedDataItemTypes := dataItemDefinitionType.constrainedDataItemTypes & constrainedDataDefItem;
-					end loop;
-					dataItemDefinitionTypes := dataItemDefinitionTypes & dataItemDefinitionType;
-				end loop;
-				Req_IF_Verification~>eventDefinition(auditEventType.jobTypeName, auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd, dataItemDefinitionTypes);
-			end loop;
-		end loop;
-		// schedule to check the config file
-		schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
-	else
-		logMessage := "AEOrdering::ConfigUpdated, failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-		Logger::log(Logger::Error, "AEOrdering", logMessage);
-		raise program_error;
-	end if;
-	
+        logMessage := "AEOrdering::ConfigUpdated, failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        raise program_error;
+    end if;
+    
 exception
-	when program_error =>
-		logMessage := "AEOrdering::SystemSpec.ConfigUpdated, failed to load configuration file";
-		Logger::log(Logger::Error, "AEOrdering", logMessage);
-		raise program_error;
-	when others => 	
-	
-		logMessage := "AEOrdering::SystemSpec.ConfigUpdated, failed to load configuration file";
-		Logger::log(Logger::Error, "AEOrdering", logMessage);
-		
+    when program_error =>
+        logMessage := "AEOrdering::SystemSpec.ConfigUpdated, failed to load configuration file";
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        raise program_error;
+    when others =>     
+    
+        logMessage := "AEOrdering::SystemSpec.ConfigUpdated, failed to load configuration file";
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

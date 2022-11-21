@@ -31,7 +31,7 @@ begin
 	
 	// build the audit data details to be reported
 	theAuditEventData := auditEvent.auditEventData;
-	for auditEventData in auditEvent -> R7.AuditEventType -> R14.DataItemType loop
+	for auditEventData in auditEvent -> R7.AuditEventType -> R16.DataItemType loop
 		if theAuditEventData.dataItems'contains(auditEventData.dataItemName) = true then
 			reportableAuditEventData.dataName := auditEventData.dataItemName;
 			reportableAuditEventData.dataKind := DataKindType'value(auditEventData.dataItemType);
@@ -39,6 +39,8 @@ begin
 			allReportableAuditEventData := allReportableAuditEventData & reportableAuditEventData;
 		end if;
 	end loop;
+	
+	// identify 
 	
 	Req_IF_Verification~>audit_event(job.jobId, auditEvent.reportedNodeName, auditEvent.reportedApplication, auditEvent.reportedEventType, 
 		                             auditEvent.auditEventId, auditEvent.reportedAuditEventTime, auditEvent.reportedPrevEventIds, allReportableAuditEventData);
@@ -56,7 +58,7 @@ begin
 			reportedAuditEvent.reportEvent();
 		else
 			logMessage := "AEOrdering::ReportedAuditEvent.reportEvent, followed by event was not blocked";
-			Logger::log(Logger::Error, "AEOrdering", logMessage);
+			Logger::log(Logger::Error, "Monitored System Failure", logMessage);
 			raise program_error;
 		end if;
 	end loop;

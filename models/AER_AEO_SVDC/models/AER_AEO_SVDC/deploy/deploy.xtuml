@@ -183,15 +183,15 @@ INSERT INTO D_TSPARM
 	VALUES ("9edf51ce-a985-4142-a064-eb3e98759e88",
 	"7c311f2e-a63f-40fa-9864-bff9c543a07b",
 	'auditEventData',
-	"08a70eae-25d7-4e97-aed0-ce0a4dc30882",
+	"69d183d4-40b4-41fd-b6de-550940b09d0a",
 	0,
 	'',
 	"dd9c7446-6508-498a-8499-d67dd1de442f",
 	'');
 INSERT INTO S_DT_PROXY
-	VALUES ("08a70eae-25d7-4e97-aed0-ce0a4dc30882",
+	VALUES ("69d183d4-40b4-41fd-b6de-550940b09d0a",
 	"00000000-0000-0000-0000-000000000000",
-	'JSON::JSONObject',
+	'dictionary',
 	'',
 	'',
 	'./Shared/Shared.xtuml');
@@ -541,22 +541,6 @@ INSERT INTO D_TSPARM
 	'',
 	"e0028f39-983e-45df-bb22-8b98322a6d90",
 	'');
-INSERT INTO D_TSPARM
-	VALUES ("90832f1b-6ce5-4761-9027-be0db7c6f574",
-	"23fc86c0-2ce3-4f23-a826-870f4c216c2b",
-	'eventDataItemDefinitions',
-	"ffe65518-e604-41b0-b1c8-a1359784033b",
-	0,
-	'',
-	"ae042374-b2ea-4fa4-b57d-0ae56b4c1f3c",
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("ffe65518-e604-41b0-b1c8-a1359784033b",
-	"00000000-0000-0000-0000-000000000000",
-	'sequence of DataItemDefinitionType',
-	'',
-	'',
-	'./Shared/Shared.xtuml');
 INSERT INTO D_TSVC
 	VALUES ("d5a3bab6-d999-49ff-99ef-2cc78192eb89",
 	"c1049413-7cad-49ac-9c56-3485f8fe8d19",
@@ -579,6 +563,118 @@ INSERT INTO D_TSPARM
 	'',
 	"00000000-0000-0000-0000-000000000000",
 	'');
+INSERT INTO D_TSVC
+	VALUES ("6dbf6567-2587-433c-a961-eb1b2269ba85",
+	"c1049413-7cad-49ac-9c56-3485f8fe8d19",
+	'intraJobInvariantDefinition',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	0,
+	1,
+	6);
+INSERT INTO D_TSPARM
+	VALUES ("92720ee2-aa3d-49d2-a571-322daffb953b",
+	"6dbf6567-2587-433c-a961-eb1b2269ba85",
+	'auditEventDataName',
+	"76dece4a-4b48-4900-9c2f-4be1d5ec7c37",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("4bfb3aee-7742-40b9-a36b-2b04c70d858c",
+	"6dbf6567-2587-433c-a961-eb1b2269ba85",
+	'jobDefinitionName',
+	"76dece4a-4b48-4900-9c2f-4be1d5ec7c37",
+	0,
+	'',
+	"92720ee2-aa3d-49d2-a571-322daffb953b",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("5e3c923f-46dc-4ff4-8345-c95744435c2c",
+	"6dbf6567-2587-433c-a961-eb1b2269ba85",
+	'associatedEvents',
+	"12c700ba-e9b3-457b-b4e8-1325504eae07",
+	0,
+	'',
+	"4bfb3aee-7742-40b9-a36b-2b04c70d858c",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("12c700ba-e9b3-457b-b4e8-1325504eae07",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of IntraJobInvDataType',
+	'',
+	'',
+	'./Shared/Shared.xtuml');
+INSERT INTO D_TSVC
+	VALUES ("6f608352-3395-4805-9adc-b151bf40f633",
+	"c1049413-7cad-49ac-9c56-3485f8fe8d19",
+	'extraJobInvariantDefinition',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	0,
+	1,
+	7);
+INSERT INTO D_TSPARM
+	VALUES ("3c96721f-87e7-4c47-bb58-540f8decef65",
+	"6f608352-3395-4805-9adc-b151bf40f633",
+	'auditEventDataName',
+	"76dece4a-4b48-4900-9c2f-4be1d5ec7c37",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("9c31fdcf-bd3d-46d1-b536-0abbd706af1c",
+	"6f608352-3395-4805-9adc-b151bf40f633",
+	'sourceJobDefnName',
+	"76dece4a-4b48-4900-9c2f-4be1d5ec7c37",
+	0,
+	'',
+	"3c96721f-87e7-4c47-bb58-540f8decef65",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("41f5a13a-18ad-43ee-ad96-8769a8e6d94d",
+	"6f608352-3395-4805-9adc-b151bf40f633",
+	'sourceEventType',
+	"76dece4a-4b48-4900-9c2f-4be1d5ec7c37",
+	0,
+	'',
+	"9c31fdcf-bd3d-46d1-b536-0abbd706af1c",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("f5b03338-afec-418f-94ef-612f875980ec",
+	"6f608352-3395-4805-9adc-b151bf40f633",
+	'sourceOccurrenceId',
+	"ba5eda7a-def5-0000-0000-000000000002",
+	0,
+	'',
+	"41f5a13a-18ad-43ee-ad96-8769a8e6d94d",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("06bc172f-432f-42e4-bfd0-1e029503aeeb",
+	"6f608352-3395-4805-9adc-b151bf40f633",
+	'userEvents',
+	"f8bbdc7a-91e2-425c-96ec-f7066d8d2f5d",
+	0,
+	'',
+	"f5b03338-afec-418f-94ef-612f875980ec",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("f8bbdc7a-91e2-425c-96ec-f7066d8d2f5d",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of UserEventDataType',
+	'',
+	'',
+	'./Shared/Shared.xtuml');
 INSERT INTO D_TERM
 	VALUES ("e37884f3-90eb-481c-9a8d-d5d615824abb",
 	"d0bb6f73-bd7b-40f3-9ccb-9f73b016c657",
@@ -764,6 +860,22 @@ INSERT INTO D_TSPARM
 	'',
 	"df4cb5e9-a53c-4915-9040-be2e3eca2c88",
 	'');
+INSERT INTO D_TSPARM
+	VALUES ("f1a1cb0e-c8c5-4c96-8045-d365d60b087a",
+	"e57eaec3-9057-41a4-9a8f-0f7c42fae9a1",
+	'auditEventData',
+	"ba073d58-8f7c-4040-b91d-eee6c9f80fce",
+	0,
+	'',
+	"7c9728f6-5535-4d71-8261-8b06c2a2063e",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("ba073d58-8f7c-4040-b91d-eee6c9f80fce",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of auditEventDataStructure',
+	'',
+	'',
+	'./Shared/Shared.xtuml');
 INSERT INTO D_TSVC
 	VALUES ("665758f0-6b67-4bae-90ba-27f1eb5ffc8c",
 	"12d99918-af9c-4c65-a44e-641718aa68b4",
@@ -943,7 +1055,7 @@ INSERT INTO D_TSPARM
 	0,
 	'',
 	"00000000-0000-0000-0000-000000000000",
-	'');
+	'The maximum period of time allowed for waiting for the start of additional Job sequences before the respective Job is consided to have ''completed''.');
 INSERT INTO S_DT_PROXY
 	VALUES ("df530228-def7-4f06-bef4-4fb28b9e9150",
 	"00000000-0000-0000-0000-000000000000",
@@ -951,6 +1063,33 @@ INSERT INTO S_DT_PROXY
 	'',
 	'',
 	'./Shared/Shared.xtuml');
+INSERT INTO D_TSPARM
+	VALUES ("c24e774b-615d-4f09-84d6-9507b500f76d",
+	"442643b2-7b97-4479-bf34-c27127517cba",
+	'waitPeriodForAllJobsCompletedCheck',
+	"df530228-def7-4f06-bef4-4fb28b9e9150",
+	0,
+	'',
+	"690f966a-8ac6-4895-b2b9-7476aa219e92",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("dcfabd73-afd3-44cf-8602-fa1e87132efc",
+	"442643b2-7b97-4479-bf34-c27127517cba",
+	'waitPeriodForJobDeletion',
+	"df530228-def7-4f06-bef4-4fb28b9e9150",
+	0,
+	'',
+	"c24e774b-615d-4f09-84d6-9507b500f76d",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("dd294169-e0f6-403d-a0b4-13bf8f738a70",
+	"442643b2-7b97-4479-bf34-c27127517cba",
+	'waitPeriodForInvariantDeletion',
+	"df530228-def7-4f06-bef4-4fb28b9e9150",
+	0,
+	'',
+	"dcfabd73-afd3-44cf-8602-fa1e87132efc",
+	'');
 INSERT INTO D_TSVC
 	VALUES ("ddaa1078-5f12-4329-88b3-18229f517d00",
 	"12d99918-af9c-4c65-a44e-641718aa68b4",
@@ -964,6 +1103,15 @@ INSERT INTO D_TSVC
 	0,
 	0,
 	12);
+INSERT INTO D_TSPARM
+	VALUES ("2860f5a4-74ec-4852-92c9-132831b37ed9",
+	"ddaa1078-5f12-4329-88b3-18229f517d00",
+	'jobName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
 INSERT INTO D_TSVC
 	VALUES ("397352af-71c0-4b47-812f-742f68775b34",
 	"12d99918-af9c-4c65-a44e-641718aa68b4",
@@ -977,6 +1125,127 @@ INSERT INTO D_TSVC
 	0,
 	0,
 	11);
+INSERT INTO D_TSPARM
+	VALUES ("bb448f58-21d6-4d55-8d15-adf5df58156e",
+	"397352af-71c0-4b47-812f-742f68775b34",
+	'jobName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO D_TSVC
+	VALUES ("5c6cc343-56ca-4001-8c30-0a776e0ef92b",
+	"12d99918-af9c-4c65-a44e-641718aa68b4",
+	'extraJobInvariantDefinition',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	6,
+	0,
+	0,
+	13);
+INSERT INTO D_TSPARM
+	VALUES ("cd60a420-1a7d-4d9a-aacb-55418a522ec6",
+	"5c6cc343-56ca-4001-8c30-0a776e0ef92b",
+	'auditEventDataName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("b9c2fca4-082b-4bd0-9505-01735c263e1e",
+	"5c6cc343-56ca-4001-8c30-0a776e0ef92b",
+	'sourceJobDefnName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"cd60a420-1a7d-4d9a-aacb-55418a522ec6",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("df9f0ba8-01d9-4553-9bc6-857c9a138a75",
+	"5c6cc343-56ca-4001-8c30-0a776e0ef92b",
+	'sourceEventType',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"b9c2fca4-082b-4bd0-9505-01735c263e1e",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("42e61d7c-7f2b-4e71-9f90-994e3d1d4589",
+	"5c6cc343-56ca-4001-8c30-0a776e0ef92b",
+	'sourceOccurrenceId',
+	"ba5eda7a-def5-0000-0000-000000000002",
+	0,
+	'',
+	"df9f0ba8-01d9-4553-9bc6-857c9a138a75",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("076b471d-2301-4824-b9b1-f6752bdd5e66",
+	"5c6cc343-56ca-4001-8c30-0a776e0ef92b",
+	'userEvents',
+	"c22eccba-412d-4c08-8517-b0aa43cdb196",
+	0,
+	'',
+	"42e61d7c-7f2b-4e71-9f90-994e3d1d4589",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("c22eccba-412d-4c08-8517-b0aa43cdb196",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of userEventDataStructure',
+	'',
+	'',
+	'./Shared/Shared.xtuml');
+INSERT INTO D_TSVC
+	VALUES ("8c1684a2-743b-49dd-b0e1-053fcbadaaa9",
+	"12d99918-af9c-4c65-a44e-641718aa68b4",
+	'intraJobInvariantDefinition',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	6,
+	0,
+	0,
+	13);
+INSERT INTO D_TSPARM
+	VALUES ("46efc0ff-eac8-453c-9c5b-c5322beb52d1",
+	"8c1684a2-743b-49dd-b0e1-053fcbadaaa9",
+	'jobDefnName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("bdb38f6e-5661-4aef-9b3f-ea6fd534b27a",
+	"8c1684a2-743b-49dd-b0e1-053fcbadaaa9",
+	'auditEventDataName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"46efc0ff-eac8-453c-9c5b-c5322beb52d1",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("f40cf3b7-e375-4e33-9edf-a601382454b7",
+	"8c1684a2-743b-49dd-b0e1-053fcbadaaa9",
+	'associatedEvents',
+	"c06494e6-ee09-4ca1-8727-cf69d4f47e97",
+	0,
+	'',
+	"bdb38f6e-5661-4aef-9b3f-ea6fd534b27a",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("c06494e6-ee09-4ca1-8727-cf69d4f47e97",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of intraJobInvDataStructure',
+	'',
+	'',
+	'./Shared/Shared.xtuml');
 INSERT INTO D_TERM
 	VALUES ("ebd77ec1-45b7-4686-bebe-4cd2a3780651",
 	"d0bb6f73-bd7b-40f3-9ccb-9f73b016c657",

@@ -21,7 +21,6 @@ state AEOrdering::JobType.JobTypeExpired () is
 jobs : set of instance of Job;
 application : instance of Application;
 node : instance of Node;
-constrainedDataItems : sequence of instance of ConstrainedDataItem;
 
 begin
 	
@@ -50,20 +49,20 @@ begin
 			delete node;
 		end if;
 		
-		for dataItemType in auditEventType -> R14.DataItemType loop
-			constrainedDataItems := dataItemType -> R15.ConstrainedDataItem;
-			unlink constrainedDataItems R15;
-			delete constrainedDataItems;
-			unlink dataItemType R14;
-			delete dataItemType;
+		for dataItemType in auditEventType -> R16.DataItemType loop
+			dataItemType.deleteDataItemType();
 		end loop;
-		
+				
 		unlink auditEventType R12;
 		unlink auditEventType R7;
 		delete auditEventType;
 		
 	end loop;
 	
+	for dataItemType in this -> R14.DataItemType loop
+		dataItemType.deleteDataItemType();
+	end loop;
+
 	delete this;
 	
 end state;

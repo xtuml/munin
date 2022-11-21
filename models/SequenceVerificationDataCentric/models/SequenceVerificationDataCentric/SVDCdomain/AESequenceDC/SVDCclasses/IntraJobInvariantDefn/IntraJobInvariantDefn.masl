@@ -9,6 +9,7 @@ theSequenceDefn: instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
+logMessage: string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobName);
@@ -25,7 +26,12 @@ begin
         theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = eachInvariantEventDefn.occurrenceId);
         link newInvariant R19 theEventOccInSeqDefn;
       end if;
-    end loop;    
+    end loop;
+  else
+    // Digital Twin Error dues to failed configurations
+    logMessage := "Invalid Job Definition for this intra-job invariant definition = " & theJobDefn.jobName;
+    Logger::log(Logger::Error, "AESequenceDC", logMessage);
+          
   end if;
   
 end service;
