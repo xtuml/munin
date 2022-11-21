@@ -2865,7 +2865,7 @@ emptyAuditEventData : sequence of auditEventDataStructure;
 
 begin
   // This test covers 2 Jobs with 4 sequences and all events are in the standard default order
-  // It includes both events folfaring an XOR constraint at Ev14 - this is an error condition
+  // It includes both events following an XOR constraint at Ev14 - this is an error condition
   // This test does reveal any erroneous behaviour of the twin
   //
   // Bank Transfer Sequence
@@ -2884,7 +2884,7 @@ begin
   acceptOrderedEvent ("1620920011","gateway-1234","GatewayWritePayload","Job_Alpha","Ev11","Ev12",theAuditEventData);
   // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
   acceptOrderedEvent ("1620920012","mid-1234","MidProcessPayload","Job_Alpha","","Ev13",theAuditEventData);
-  // This is a variant of Test01NormalPath where the folfaring 2 events are violating an exclusive Or constraint 
+  // This is a variant of Test01NormalPath where the following 2 events are violating an exclusive Or constraint 
   acceptOrderedEvent ("1620920013","mid-1234","MidWritePayload","Job_Alpha","Ev13","Ev14",theAuditEventData);
   acceptOrderedEvent ("1620920013","mid-1234","MidPayloadError","Job_Alpha","Ev13","Ev14a",theAuditEventData);
   // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
