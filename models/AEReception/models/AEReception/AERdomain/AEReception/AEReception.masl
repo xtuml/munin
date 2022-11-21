@@ -1,11 +1,12 @@
 //! ACTIVITY BEGIN. 'd29a6cce-dab9-4231-ac80-3e04e9615260' DO NOT EDIT THIS LINE.
-public service AEReception::Req_IF_Ordering~>AcceptEvent ( auditEventType : in string,
-                                                          jobId : in string,
-                                                          auditEventId : in string,
-                                                          prevAuditEventIds : in sequence of string,
-                                                          auditEventTime : in string,
+public service AEReception::Req_IF_Ordering~>AcceptEvent ( jobId : in string,
+                                                          nodeName : in string,
                                                           application : in string,
-                                                          nodeName : in string ) is
+                                                          auditEventType : in string,
+                                                          auditEventId : in string,
+                                                          auditEventTime : in string,
+                                                          prevAuditEventIds : in sequence of string,
+                                                          auditEventData : in JSON::JSONObject ) is
 begin
   Logger::information(
     auditEventType &

@@ -120,80 +120,115 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '92f32a2d-c26e-437a-a132-bfcd1e409a15' DO NOT EDIT THIS LINE.
-public instance service AEOrdering::JobType.loadEventDataItemTypes ( eventDataTypesJSONObject : in JSON::JSONObject ) is
+public instance service AEOrdering::JobType.loadEventDataItemTypes ( eventDataTypesJSONArray : in JSON::JSONArray ) is
 logMessage : string;
-jobType : string;
+jobTypeName : string;
+eventTypeName : string;
+occurrenceId : integer;
+eventDataName : string;
+eventDataType : string;
+jobType : instance of JobType;
+sourceAuditEventType : instance of AuditEventType;
+auditEventType : instance of AuditEventType;
 eventTypeJSONElement : JSON::JSONElement;
 eventDefJSONObject : JSON::JSONObject;
 eventDataTypeJSONObject : JSON::JSONObject;
-eventTypeName : string;
-eventDataName : string;
-eventDataType : string;
+userEventJSONObject : JSON::JSONObject;
 dataItemType : instance of DataItemType;
-auditEventTypes : sequence of instance of AuditEventType;
-constrainedDataTypeJSONObject : JSON::JSONObject;
-constrainedJobType : string;
-constrainedEventType : string;
-constrainedDataItemName : string;
-constrainedDataItems : sequence of instance of ConstrainedDataItem;
-constrainedDataItem : instance of ConstrainedDataItem;
+constrainedDataItems : sequence of instance of DataItemType;
+constrainedDataItem : instance of DataItemType;
 
 begin
 	
 	logMessage := "AEOrdering::JobType.loadEventTypes";
 	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
-	// check the job definition name in the config file matches this job definition name
-	jobType := JSON::get_string(eventDataTypesJSONObject["JobType"]);
-	if this.jobTypeName = jobType then
-		if eventDataTypesJSONObject'contains("Events") and eventDataTypesJSONObject["Events"].kind = JSON::Array then
-			for eventDataTypeJSONElement in JSON::get_array(eventDataTypesJSONObject["Events"]) loop
-				eventDataTypeJSONObject := JSON::get_object(eventDataTypeJSONElement);
-				eventTypeName := "";
-				eventTypeName := JSON::get_string(eventDataTypeJSONObject["EventName"]);
-				if eventDataTypeJSONObject'contains("EventData") and eventDataTypeJSONObject["EventData"].kind = JSON::Array then
-					for eventDataItemsJSONElement in JSON::get_array(eventDataTypeJSONObject["EventData"]) loop
-						eventDataName := "";
-						eventDataType := "";
-						eventDefJSONObject := JSON::get_object(eventDataItemsJSONElement);
-						eventDataName := JSON::get_string(eventDefJSONObject["EventDataName"]);
-						eventDataType := JSON::get_string(eventDefJSONObject["EventDataType"]);
-						auditEventTypes := this -> R12.AuditEventType(eventType = eventTypeName);
-						for auditEventType in auditEventTypes loop
-							dataItemType := find_one (auditEventType -> R14.DataItemType)(dataItemName = eventDataName);
-							if dataItemType = null then
-								dataItemType := create unique DataItemType(dataItemName => eventDataName);
-								link auditEventType R14 dataItemType;
-							end if;
-							dataItemType.dataItemType := eventDataType;
-						end loop;
-						// check if they have and constrained event data items
-						if eventDefJSONObject'contains("ConstrainedEvents") and eventDefJSONObject["ConstrainedEvents"].kind = JSON::Array then
-							constrainedDataItems := auditEventTypes -> R14.DataItemType(dataItemName = eventDataName) -> R15.ConstrainedDataItem;
-							for constrainedDataItemsJSONElement in JSON::get_array(eventDefJSONObject["ConstrainedEvents"]) loop
-								constrainedDataTypeJSONObject := JSON::get_object(constrainedDataItemsJSONElement);
-								constrainedJobType := "";
-								constrainedEventType := "";
-								constrainedDataItemName := "";
-								constrainedJobType := JSON::get_string(constrainedDataTypeJSONObject["JobType"]);
-								constrainedEventType := JSON::get_string(constrainedDataTypeJSONObject["ConstrainedEvent"]);
-								constrainedDataItemName := JSON::get_string(constrainedDataTypeJSONObject["ConstrainedDataItemName"]);
-								if find_one constrainedDataItems(jobTypeName = constrainedJobType and eventType = constrainedEventType and dataItemName = constrainedDataItemName) = null then
-									constrainedDataItem := create unique ConstrainedDataItem(jobTypeName => constrainedJobType, eventType => constrainedEventType, dataItemName => constrainedDataItemName);
-									for dataItem in auditEventTypes -> R14.DataItemType(dataItemName = eventDataName) loop
-										link constrainedDataItem R15 dataItem;
-									end loop;
-								end if;
-							end loop;
+
+	for eventDataTypeJSONElement in eventDataTypesJSONArray loop
+		eventDataTypeJSONObject := JSON::get_object(eventDataTypeJSONElement);
+		eventDataName := JSON::get_string(eventDataTypeJSONObject["EventDataName"]);
+		eventDataType := JSON::get_string(eventDataTypeJSONObject["EventDataType"]);
+		if eventDataType = "EXTRAJOBINV" then
+			jobTypeName := JSON::get_string(eventDataTypeJSONObject["SourceEventJobDefinitionName"]);
+			jobType := find_one JobType(jobTypeName = jobTypeName);
+			if jobType = null then
+				raise program_error;
+			end if;
+			eventTypeName := JSON::get_string(eventDataTypeJSONObject["SourceEventType"]);
+			occurrenceId := JSON::get_integer(eventDataTypeJSONObject["SourceEventOccurrenceId"]);
+			sourceAuditEventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
+			if sourceAuditEventType = null then
+				raise program_error;
+			end if;
+			dataItemType := find_one (jobType -> R14.DataItemType)(dataItemName = eventDataName);
+			if dataItemType = null then
+				dataItemType := create unique DataItemType(dataItemName => eventDataName, dataItemType => eventDataType);
+				link jobType R14 dataItemType;
+				link dataItemType R16 sourceAuditEventType;
+			end if;
+			if eventDataTypeJSONObject'contains("UserEvents") and eventDataTypeJSONObject["UserEvents"].kind = JSON::Array then
+				for eventDataItemsJSONElement in JSON::get_array(eventDataTypeJSONObject["UserEvents"]) loop
+					constrainedDataItems := dataItemType -> R18.constrains.DataItemType;
+					userEventJSONObject := JSON::get_object(eventDataItemsJSONElement);
+					jobTypeName := JSON::get_string(userEventJSONObject["JobDefinitionName"]);
+					jobType := find_one JobType(jobTypeName = jobTypeName);
+					if jobType = null then
+						raise program_error;
+					end if;
+					eventTypeName := JSON::get_string(userEventJSONObject["UserEventType"]);
+					occurrenceId := JSON::get_integer(userEventJSONObject["OccurrenceId"]);
+					eventDataName := JSON::get_string(userEventJSONObject["UserEventDataItemName"]);
+					auditEventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
+					if auditEventType = null then
+						raise program_error;
+					end if;
+					// check that the data item has not already been created with a different data item type
+					if find_one (auditEventType -> R16.DataItemType)(dataItemName = eventDataName and dataItemType /= eventDataType) /= null then
+						raise program_error;
+					end if;
+					if find_one constrainedDataItems(jobTypeName = jobTypeName and eventType = eventTypeName and occurrenceId = occurrenceId and dataItemName = eventDataName) = null then
+						constrainedDataItem := create unique DataItemType(dataItemName => eventDataName, dataItemType => eventDataType);
+						link jobType R14 constrainedDataItem;
+						link constrainedDataItem R16 auditEventType;
+						link constrainedDataItem R18.isConstrainedBy dataItemType;
+					end if;
+				end loop;
+			end if;
+		else
+			// this is an intra job definition
+			jobTypeName := JSON::get_string(eventDataTypeJSONObject["JobDefinitionName"]);
+			jobType := find_one JobType(jobTypeName = jobTypeName);
+			if jobType = null then
+				raise program_error;
+			end if;
+			if eventDataTypeJSONObject'contains("Events") and eventDataTypeJSONObject["Events"].kind = JSON::Array then
+				for eventDataItemsJSONElement in JSON::get_array(eventDataTypeJSONObject["Events"]) loop
+					userEventJSONObject := JSON::get_object(eventDataItemsJSONElement);
+					eventTypeName := JSON::get_string(userEventJSONObject["EventType"]);
+					occurrenceId := JSON::get_integer(userEventJSONObject["OccurrenceId"]);
+					eventDataName := JSON::get_string(userEventJSONObject["EventDataItemName"]);
+					auditEventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
+					if auditEventType = null then
+						raise program_error;
+					end if;
+					dataItemType := find_one (jobType -> R14.DataItemType)(dataItemName = eventDataName);
+					if dataItemType = null then
+						dataItemType := create unique DataItemType(dataItemName => eventDataName, dataItemType => eventDataType);
+						link jobType R14 dataItemType;
+						link dataItemType R16 auditEventType;
+					else
+						constrainedDataItems := dataItemType -> R18.constrains.DataItemType;
+						if find_one constrainedDataItems(jobTypeName = jobTypeName and eventType = eventTypeName and occurrenceId = occurrenceId and dataItemName = eventDataName) = null then
+							constrainedDataItem := create unique DataItemType(dataItemName => eventDataName, dataItemType => eventDataType);
+							link jobType R14 constrainedDataItem;
+							link constrainedDataItem R16 auditEventType;
+							link constrainedDataItem R18.isConstrainedBy dataItemType;
 						end if;
-					end loop;
-				end if;
-				
-			end loop;
+					end if;
+				end loop;
+			end if;
 		end if;
-	else
-		raise program_error;
-	end if;
+		
+	end loop;
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

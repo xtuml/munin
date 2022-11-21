@@ -1,8 +1,11 @@
 //! ACTIVITY BEGIN. '3040a8fc-2d4a-4228-a303-7525d987dba5' DO NOT EDIT THIS LINE.
-public service AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn ( invariantName : in string,
+public service AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn ( jobDefnName : in string,
+                                                                                      invariantName : in string,
                                                                                       invariantEventDefn : in eventStructure,
                                                                                       lifetime : in duration ) is
 newInvariant : instance of ExtraJobInvariantDefn;
+theJobDefn : instance of JobDefinition;
+theJobsEvents : set of instance of AuditEventDefinition;
 theEventDefn : instance of AuditEventDefinition;
 theSequenceDefn: instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
@@ -10,24 +13,29 @@ theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefiniti
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
 
 begin
+  theJobDefn := find_one JobDefinition (jobName = jobDefnName);
+  theJobsEvents := theJobDefn -> R7 -> R1.AuditEventDefinition;
+  
+  theEventDefn := find_one theJobsEvents (AEType = invariantEventDefn.eventTypeName);
+  if theEventDefn /= null then
     newInvariant := create ExtraJobInvariantDefn (extraJobInvName => invariantName, lifetime => lifetime);
-    
-    theEventDefn := find_one AuditEventDefinition (AEType = invariantEventDefn.eventTypeName);
-    if theEventDefn /= null then
-      theSequenceDefn := theEventDefn -> R1.AESequenceDefinition;
-      theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
-      theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
-      theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = invariantEventDefn.occurrenceId);
-      link newInvariant R20 theEventOccInSeqDefn;
-    end if;
+    theSequenceDefn := theEventDefn -> R1.AESequenceDefinition;
+    theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
+    theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
+    theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = invariantEventDefn.occurrenceId);
+    link newInvariant R20 theEventOccInSeqDefn;
+  end if;
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'e3251a43-6565-4cb4-8261-012dab3e36fe' DO NOT EDIT THIS LINE.
-public service AESequenceDC::ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn ( invariantName : in string,
-                                                                                  invariantEventDefn : in sequence of eventStructure ) is
+public service AESequenceDC::ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn ( jobDefnName : in string,
+                                                                                  invariantName : in string,
+                                                                                  invariantEventDefn : in eventStructure ) is
 theInvariantDefn : instance of ExtraJobInvariantDefn;
+theJobDefn : instance of JobDefinition;
+theJobsEvents : set of instance of AuditEventDefinition;
 theEventDefn : instance of AuditEventDefinition;
 theSequenceDefn: instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
@@ -35,20 +43,24 @@ theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefiniti
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
 
 begin
+  theJobDefn := find_one JobDefinition (jobName = jobDefnName);
+  theJobsEvents := theJobDefn -> R7 -> R1.AuditEventDefinition;
+  
+  theEventDefn := find_one theJobsEvents (AEType = invariantEventDefn.eventTypeName);
+  if theEventDefn /= null then
     theInvariantDefn := find_one ExtraJobInvariantDefn (extraJobInvName = invariantName);
-    
-    for eachInvariantEventDefn in invariantEventDefn loop
-      theEventDefn := find_one AuditEventDefinition (AEType = eachInvariantEventDefn.eventTypeName);
-      if theEventDefn /= null then
-        theSequenceDefn := theEventDefn -> R1.AESequenceDefinition;
-        theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
-        theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
-        theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = eachInvariantEventDefn.occurrenceId);
-        link theInvariantDefn R21 theEventOccInSeqDefn;
-      else
-        // TODO Add error response here  
-      end if;
-    end loop;  
+    if theInvariantDefn /= null then
+      theSequenceDefn := theEventDefn -> R1.AESequenceDefinition;
+      theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
+      theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
+      theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = invariantEventDefn.occurrenceId);
+      link theInvariantDefn R21 theEventOccInSeqDefn;
+    else
+      // TODO Add error response here  
+    end if;
+  else
+    // TODO Add error response here  
+  end if;  
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

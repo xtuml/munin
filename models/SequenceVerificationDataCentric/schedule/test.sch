@@ -6,8 +6,7 @@ RUN SCENARIO AESequenceDC 2 "InitCyclicTopologyEventDefinition"
 RUN SCENARIO AESequenceDC 3 "InitSystemSpec"
 RUN SCENARIO AESequenceDC 4 "InitForkAndMergeTopologyEventDefinition"
 RUN SCENARIO AESequenceDC 5 "InitIntraJobInvariantDefinition"
-RUN SCENARIO AESequenceDC 6 "InitPersistentInvariantAuthDefinition"
-RUN SCENARIO AESequenceDC 7 "InitPersistentInvariantBankTransferDefinition"
+RUN SCENARIO AESequenceDC 7 "InitPersistentInvariantAuthAndBankTransferDefinition"
 RUN SCENARIO AESequenceDC 8 "InitEventDefinitionForInclusiveOR"
 
 # run normal path tests

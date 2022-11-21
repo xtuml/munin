@@ -1,0 +1,20 @@
+//! ACTIVITY BEGIN. '2f0ccf86-2944-4ef8-bb82-36c30b2d9fcd' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::DataItemType.deleteDataItemType () is
+constrainedDataItems : sequence of instance of DataItemType;
+constrainedDataItem : instance of DataItemType;
+
+begin
+
+	constrainedDataItems := this -> R18.constrains.DataItemType;
+	unlink this R18.constrains constrainedDataItems;
+	constrainedDataItem := this -> R18.isConstrainedBy.DataItemType;
+	if constrainedDataItem /= null then
+		unlink this R18.isConstrainedBy constrainedDataItem;
+	end if;
+	unlink this R16;
+	unlink this R14;
+	delete this;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

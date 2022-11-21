@@ -74,7 +74,7 @@ begin
             when aeDataKindEnum.INTRAJOBINV =>  
               // For this Audit Event Occurrence only the following IntraJobInvarinatDefinition is allowed
               theIntraJobInvariantDefn := theAeOccInSequenceDef -> R19;
-              if theIntraJobInvariantDefn.intraJobInvName = aeDataElement.aedName then
+              if (theIntraJobInvariantDefn /= null) and (theIntraJobInvariantDefn.intraJobInvName = aeDataElement.aedName) then
                 //Check that the invariant value is not empty
                 if aeDataElement.aedValue /= "" then
                   newIntraJobInvariant := create TransientInvariant (AuditEventId => newEvent.AuditEventId, invariantName => aeDataElement.aedName, invariantValue => aeDataElement.aedValue);

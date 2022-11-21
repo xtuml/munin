@@ -58,6 +58,7 @@
   },
   "$defs": {
     "event_data": {
+      "type": "object",
       "oneOf": [
         {"$ref": "#/$defs/invariant"},
         {"$ref": "#/$defs/constraint"}
@@ -66,7 +67,6 @@
     },
     "invariant": {
       "description": "TODO",
-      "type": "object",
       "properties": {
         "dataItemType": {
           "enum": ["EXTRAJOBINV", "INTRAJOBINV"]

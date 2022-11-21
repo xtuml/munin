@@ -23,7 +23,10 @@ public service StatementParser::Consumer~>nextStatement ( statementType : in str
                                                          controlType : in string,
                                                          eventName : in string,
                                                          isStartEvent : in boolean,
-                                                         isEndEvent : in boolean ) is
+                                                         isEndEvent : in boolean,
+                                                         occurrenceId : in integer,
+                                                         jobId : in integer,
+                                                         allStatementsProcessed : in boolean ) is
 begin
   null;
 end service;

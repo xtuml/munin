@@ -447,6 +447,131 @@ INSERT INTO PE_PE
 	"f745c3da-aec7-48b9-b505-23762deb7dd3",
 	"00000000-0000-0000-0000-000000000000",
 	1);
+INSERT INTO S_SYNC
+	VALUES ("e02e51d5-9455-4a34-b8c1-e2c7f0a628ed",
+	"00000000-0000-0000-0000-000000000000",
+	'extraJobInvariantDefinition',
+	'This function, invoked during initialisation after all of the eventDefinition functions have been called, adds an 
+extra job invariant definition(such as entropy). The parameters define the extra job invariant, the job defintion and event 
+definition that is the source of the and the invariant and also the full set of job definitions and event definitions
+that use the invariant.',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	13);
+INSERT INTO S_SPARM
+	VALUES ("f2ff41d7-c21a-47b9-9ec7-57b9651b5772",
+	"e02e51d5-9455-4a34-b8c1-e2c7f0a628ed",
+	'auditEventDataName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO S_SPARM
+	VALUES ("d634e920-5faf-4af7-8b74-4745f9d23e1f",
+	"e02e51d5-9455-4a34-b8c1-e2c7f0a628ed",
+	'sourceJobDefnName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"f2ff41d7-c21a-47b9-9ec7-57b9651b5772",
+	'');
+INSERT INTO S_SPARM
+	VALUES ("fd503321-c08a-4d41-849f-286200d0fab5",
+	"e02e51d5-9455-4a34-b8c1-e2c7f0a628ed",
+	'sourceEventType',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"d634e920-5faf-4af7-8b74-4745f9d23e1f",
+	'');
+INSERT INTO S_SPARM
+	VALUES ("0d557e6d-c652-4322-b42b-f43659d57968",
+	"e02e51d5-9455-4a34-b8c1-e2c7f0a628ed",
+	'sourceOccurrenceId',
+	"ba5eda7a-def5-0000-0000-000000000002",
+	0,
+	'',
+	"fd503321-c08a-4d41-849f-286200d0fab5",
+	'');
+INSERT INTO S_SPARM
+	VALUES ("09ec6f99-52ff-4975-825b-61e96ef3c1c2",
+	"e02e51d5-9455-4a34-b8c1-e2c7f0a628ed",
+	'userEvents',
+	"769d0096-bb26-4d84-8fb7-4379aa48d33b",
+	0,
+	'',
+	"0d557e6d-c652-4322-b42b-f43659d57968",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("769d0096-bb26-4d84-8fb7-4379aa48d33b",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of userEventDataStructure',
+	'',
+	'',
+	'../../Shared/Shared.xtuml');
+INSERT INTO PE_PE
+	VALUES ("e02e51d5-9455-4a34-b8c1-e2c7f0a628ed",
+	1,
+	"f745c3da-aec7-48b9-b505-23762deb7dd3",
+	"00000000-0000-0000-0000-000000000000",
+	1);
+INSERT INTO S_SYNC
+	VALUES ("a7653f36-7f90-48e4-b78f-af997de14261",
+	"00000000-0000-0000-0000-000000000000",
+	'intraJobInvariantDefinition',
+	'This function, invoked during initialisation after all of the eventDefinition functions have been called, adds an 
+intra job invariant definition. The parameters define the intra job invariant, the job defintion that the invariant is used in 
+and the full set of event definitions within that job definition that use the invariant.',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	1,
+	13);
+INSERT INTO S_SPARM
+	VALUES ("8b4ac98e-2148-4537-98f2-64245f743dc2",
+	"a7653f36-7f90-48e4-b78f-af997de14261",
+	'auditEventDataName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"fc0b6c48-b3fc-4cc4-b379-14960e02dc2b",
+	'');
+INSERT INTO S_SPARM
+	VALUES ("fc0b6c48-b3fc-4cc4-b379-14960e02dc2b",
+	"a7653f36-7f90-48e4-b78f-af997de14261",
+	'jobDefnName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO S_SPARM
+	VALUES ("46a205ca-ea4c-434e-b343-a1beb07bb9fc",
+	"a7653f36-7f90-48e4-b78f-af997de14261",
+	'associatedEvents',
+	"aaaaf95e-25e6-4109-8dd4-851559d4e638",
+	0,
+	'',
+	"8b4ac98e-2148-4537-98f2-64245f743dc2",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("aaaaf95e-25e6-4109-8dd4-851559d4e638",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of intraJobInvDataStructure',
+	'',
+	'',
+	'../../Shared/Shared.xtuml');
+INSERT INTO PE_PE
+	VALUES ("a7653f36-7f90-48e4-b78f-af997de14261",
+	1,
+	"f745c3da-aec7-48b9-b505-23762deb7dd3",
+	"00000000-0000-0000-0000-000000000000",
+	1);
 INSERT INTO PE_PE
 	VALUES ("f745c3da-aec7-48b9-b505-23762deb7dd3",
 	1,
