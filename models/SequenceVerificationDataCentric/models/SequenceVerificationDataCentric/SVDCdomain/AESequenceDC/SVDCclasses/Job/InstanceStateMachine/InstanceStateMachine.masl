@@ -378,11 +378,13 @@ begin
       elsif theConstraintDefn.constraintType = XOR then
         //XOR Constraint logic
         theConstrainedSeqPairDefns := theConstraintDefn -> R16.AEInSequencePairDefn;
+        // Find the constrained event pairs - the graph edges after the XOR node - in this Job
+        theConstrainedAuditEventPairs := (theConstrainedSeqPairDefns -> R15) intersection theAuditEventPairs;
+        // Find the preceding XOR graph nodes
+        thePreviousAuditEvents := theConstrainedAuditEventPairs -> R4.has_previous.AuditEvent;
         // Check that the number of branches after an XOR fork is the same as the number
         // of XOR fork audit events. This is a sound check since exactly one branch will
         // follow each XOR fork audit event.
-        theConstrainedAuditEventPairs := theConstrainedSeqPairDefns -> R15;
-        thePreviousAuditEvents := theConstrainedAuditEventPairs -> R4.has_previous.AuditEvent;
         if theConstrainedAuditEventPairs'length /= thePreviousAuditEvents'length then
           validatedConstraint := false;
         end if;
