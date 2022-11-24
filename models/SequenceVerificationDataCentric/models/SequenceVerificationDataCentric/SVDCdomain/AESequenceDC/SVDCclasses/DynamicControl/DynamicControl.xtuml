@@ -114,10 +114,13 @@ INSERT INTO O_ATTR
 	VALUES ("d45e975a-c290-40bc-b1e4-23d70604b141",
 	"b2cdbfc9-c190-45dc-8a48-3869b4331b4a",
 	"e0048716-aa59-40f1-8328-5e37167c90e2",
-	'dynamicControlValue',
+	'expectedDynamicControlValue',
+	'This is the value received in the Audit Event Data that specifies either the 
+number of branches to expect at a fork or the number of executions of a loop to expect.
+This is compared with the currentDynamicControlValue when the Job completes to ensure
+that the Job has behaved as expected.',
 	'',
-	'',
-	'dynamicControlValue',
+	'expectedDynamicControlValue',
 	0,
 	"ba5eda7a-def5-0000-0000-000000000002",
 	'',
@@ -165,6 +168,74 @@ INSERT INTO O_ATTR
 	VALUES ("d36fc6c4-7c8a-4238-aff9-c6450c34e7f3",
 	"b2cdbfc9-c190-45dc-8a48-3869b4331b4a",
 	"d45e975a-c290-40bc-b1e4-23d70604b141",
+	'AuditEventId',
+	'',
+	'',
+	'AuditEventId',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("dfb700b5-8d5b-4599-8659-1576b3cac477",
+	"b2cdbfc9-c190-45dc-8a48-3869b4331b4a");
+INSERT INTO O_BATTR
+	VALUES ("dfb700b5-8d5b-4599-8659-1576b3cac477",
+	"b2cdbfc9-c190-45dc-8a48-3869b4331b4a");
+INSERT INTO O_ATTR
+	VALUES ("dfb700b5-8d5b-4599-8659-1576b3cac477",
+	"b2cdbfc9-c190-45dc-8a48-3869b4331b4a",
+	"d36fc6c4-7c8a-4238-aff9-c6450c34e7f3",
+	'currentDynamicControlValue',
+	'This is the value of the number of branches seen at a fork or the number of executions 
+of a loop observed at runtime during the execution of the Job.
+This is compared with the expectedDynamicControlValue when the Job completes to ensure
+that the Job has behaved as expected.',
+	'',
+	'currentDynamicControlValue',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("b2cdbfc9-c190-45dc-8a48-3869b4331b4a",
+	"7e831fac-934c-4ee1-8003-366fd55296b2",
+	0,
+	"1717e0b4-093d-483f-9598-adbe78f63a7e",
+	"be18fac7-7da6-45ab-b5ae-bf09eb4fd85d",
+	"429d0449-0c5a-4e71-b817-9da2aa522fb5",
+	"4f3a5197-d872-4af0-8ab1-b43462e4a041",
+	"048a2171-40c3-4a88-977c-c78720e3dbb2",
+	"b666a07b-fd0a-41e1-ae46-3e1217e4ef1f",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AuditEvent',
+	'AuditEventId',
+	'R34.''is_incremented_by''');
+INSERT INTO R_RGO_PROXY
+	VALUES ("b2cdbfc9-c190-45dc-8a48-3869b4331b4a",
+	"be18fac7-7da6-45ab-b5ae-bf09eb4fd85d",
+	"429d0449-0c5a-4e71-b817-9da2aa522fb5",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("1717e0b4-093d-483f-9598-adbe78f63a7e",
+	"7e831fac-934c-4ee1-8003-366fd55296b2",
+	0,
+	"be18fac7-7da6-45ab-b5ae-bf09eb4fd85d",
+	"4f3a5197-d872-4af0-8ab1-b43462e4a041",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("048a2171-40c3-4a88-977c-c78720e3dbb2",
+	"b2cdbfc9-c190-45dc-8a48-3869b4331b4a",
+	"1717e0b4-093d-483f-9598-adbe78f63a7e",
+	"7e831fac-934c-4ee1-8003-366fd55296b2",
+	1,
+	'AuditEventId');
+INSERT INTO O_ATTR
+	VALUES ("048a2171-40c3-4a88-977c-c78720e3dbb2",
+	"b2cdbfc9-c190-45dc-8a48-3869b4331b4a",
+	"dfb700b5-8d5b-4599-8659-1576b3cac477",
 	'AuditEventId',
 	'',
 	'',
