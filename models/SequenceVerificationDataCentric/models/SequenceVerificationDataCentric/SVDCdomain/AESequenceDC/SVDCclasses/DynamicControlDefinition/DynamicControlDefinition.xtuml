@@ -1,0 +1,417 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	'DynamicControlDefinition',
+	21,
+	'DCD',
+	'This supports dynamic controls such as loop counts and branch counts. 
+The Dynamic Control Definition specifies which Audit Event (Occurrence strictly speaking)
+provides the Dynamic Control value and which Audit Event (again Occurrence strictly)
+consumes it. For example an audit event early in the sequence may provide a dynamic control
+branch count of 10 stating that it applies to event type F. When event type F is seen at runtime
+it would be expected to be followed by 10 branches (i.e. 10 different audit events all refering
+to a single audit event of type F as their previous event). The dynamic control check will be 
+made at the end of the Job and any deviation from 10 branches would be an error.',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_NBATTR
+	VALUES ("7f70b9d3-62bd-4461-a096-75b098e2cc79",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e");
+INSERT INTO O_BATTR
+	VALUES ("7f70b9d3-62bd-4461-a096-75b098e2cc79",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e");
+INSERT INTO O_ATTR
+	VALUES ("7f70b9d3-62bd-4461-a096-75b098e2cc79",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"00000000-0000-0000-0000-000000000000",
+	'dynamicControlName',
+	'',
+	'',
+	'dynamicControlName',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("73c39a83-714a-4d40-a6a6-21e865c2f52c",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e");
+INSERT INTO O_BATTR
+	VALUES ("73c39a83-714a-4d40-a6a6-21e865c2f52c",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e");
+INSERT INTO O_ATTR
+	VALUES ("73c39a83-714a-4d40-a6a6-21e865c2f52c",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"915e7c7a-9b4a-4940-bdb2-7d90aa34c1b8",
+	'dynamicControlType',
+	'',
+	'',
+	'dynamicControlType',
+	0,
+	"1191cb6c-01c6-484f-8709-fb6275d17a64",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("1191cb6c-01c6-484f-8709-fb6275d17a64",
+	"00000000-0000-0000-0000-000000000000",
+	'dynamicControlTypeEnum',
+	'',
+	'',
+	'../../../Shared/Shared.xtuml');
+INSERT INTO O_REF
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"02c33df1-4d1f-456b-9bac-742494402ca2",
+	"b116ff24-9c1d-4d70-af4d-5d2c6c1c8af7",
+	"21e25fb9-9622-4553-b97d-15a73ae941d5",
+	"78950ef8-da1c-44ca-80fc-96f8e32532cd",
+	"7f65e1bc-bbf3-4598-b39f-8ac3d9d943c7",
+	"8d9a685b-5762-4064-aec2-5f0ea1d0ed14",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AEOccurrenceInSequenceDefinition',
+	'AESequenceId',
+	'R30.''is_sourced_by''');
+INSERT INTO R_RGO_PROXY
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"b116ff24-9c1d-4d70-af4d-5d2c6c1c8af7",
+	"21e25fb9-9622-4553-b97d-15a73ae941d5",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("02c33df1-4d1f-456b-9bac-742494402ca2",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"b116ff24-9c1d-4d70-af4d-5d2c6c1c8af7",
+	"78950ef8-da1c-44ca-80fc-96f8e32532cd",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("7f65e1bc-bbf3-4598-b39f-8ac3d9d943c7",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
+	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
+	1,
+	'AESequenceId');
+INSERT INTO O_BATTR_PROXY
+	VALUES ("3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
+	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
+	'../AESequenceDefinition/AESequenceDefinition.xtuml');
+INSERT INTO O_ATTR
+	VALUES ("7f65e1bc-bbf3-4598-b39f-8ac3d9d943c7",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"73c39a83-714a-4d40-a6a6-21e865c2f52c",
+	'AESequenceId',
+	'',
+	'',
+	'AESequenceId',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"8870d996-1b24-4198-b5bd-937fc9fa34e6",
+	"b116ff24-9c1d-4d70-af4d-5d2c6c1c8af7",
+	"21e25fb9-9622-4553-b97d-15a73ae941d5",
+	"78950ef8-da1c-44ca-80fc-96f8e32532cd",
+	"404bf04e-0459-4d96-8b88-355af31dfde6",
+	"1af760b9-e709-45bc-8ce4-f325b9a43cf2",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AEOccurrenceInSequenceDefinition',
+	'AEDefinitionId',
+	'R30.''is_sourced_by''');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("8870d996-1b24-4198-b5bd-937fc9fa34e6",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"b116ff24-9c1d-4d70-af4d-5d2c6c1c8af7",
+	"78950ef8-da1c-44ca-80fc-96f8e32532cd",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("404bf04e-0459-4d96-8b88-355af31dfde6",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"3b9ee9b0-cec2-4ede-9713-4b6c16e5130b",
+	"45e436a1-9cef-4a7a-8ad9-a784c5b33269",
+	1,
+	'AEDefinitionId');
+INSERT INTO O_BATTR_PROXY
+	VALUES ("3b9ee9b0-cec2-4ede-9713-4b6c16e5130b",
+	"45e436a1-9cef-4a7a-8ad9-a784c5b33269",
+	'../AuditEventDefinition/AuditEventDefinition.xtuml');
+INSERT INTO O_ATTR
+	VALUES ("404bf04e-0459-4d96-8b88-355af31dfde6",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"7f65e1bc-bbf3-4598-b39f-8ac3d9d943c7",
+	'AEDefinitionId',
+	'',
+	'',
+	'AEDefinitionId',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"e081ddcf-0460-42f3-b290-6273bd587e49",
+	"b116ff24-9c1d-4d70-af4d-5d2c6c1c8af7",
+	"21e25fb9-9622-4553-b97d-15a73ae941d5",
+	"78950ef8-da1c-44ca-80fc-96f8e32532cd",
+	"024013d0-e2c6-448d-b970-a5ca8ce674f7",
+	"2a466aac-413c-4d68-9df6-8f22136818cc",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AEOccurrenceInSequenceDefinition',
+	'occurrenceNumberInSequence',
+	'R30.''is_sourced_by''');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("e081ddcf-0460-42f3-b290-6273bd587e49",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"b116ff24-9c1d-4d70-af4d-5d2c6c1c8af7",
+	"78950ef8-da1c-44ca-80fc-96f8e32532cd",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("024013d0-e2c6-448d-b970-a5ca8ce674f7",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"e081ddcf-0460-42f3-b290-6273bd587e49",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	1,
+	'occurrenceNumberInSequence');
+INSERT INTO O_BATTR_PROXY
+	VALUES ("e081ddcf-0460-42f3-b290-6273bd587e49",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	'../AEOccurrenceInSequenceDefinition/AEOccurrenceInSequenceDefinition.xtuml');
+INSERT INTO O_ATTR
+	VALUES ("024013d0-e2c6-448d-b970-a5ca8ce674f7",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"404bf04e-0459-4d96-8b88-355af31dfde6",
+	'occurrenceNumberInSequence',
+	'',
+	'',
+	'occurrenceNumberInSequence',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"02c33df1-4d1f-456b-9bac-742494402ca2",
+	"0702326d-8588-4ce8-bc09-7a3905d6f301",
+	"c041e0d7-c79e-45d4-92e8-f0c1d364d7a3",
+	"bc7a3c3e-749f-433a-9909-1517fdf6bf47",
+	"31ba8347-e4f8-4001-a986-ade57cd5ba16",
+	"ca05ba18-2b41-4b8f-9271-4fc4c50c0a38",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AEOccurrenceInSequenceDefinition',
+	'AESequenceId',
+	'R31.''is_used_by''');
+INSERT INTO R_RGO_PROXY
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"0702326d-8588-4ce8-bc09-7a3905d6f301",
+	"c041e0d7-c79e-45d4-92e8-f0c1d364d7a3",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("02c33df1-4d1f-456b-9bac-742494402ca2",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"0702326d-8588-4ce8-bc09-7a3905d6f301",
+	"bc7a3c3e-749f-433a-9909-1517fdf6bf47",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("31ba8347-e4f8-4001-a986-ade57cd5ba16",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
+	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
+	1,
+	'AESequenceId');
+INSERT INTO O_ATTR
+	VALUES ("31ba8347-e4f8-4001-a986-ade57cd5ba16",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"024013d0-e2c6-448d-b970-a5ca8ce674f7",
+	'AESequenceId',
+	'',
+	'',
+	'AESequenceId',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"8870d996-1b24-4198-b5bd-937fc9fa34e6",
+	"0702326d-8588-4ce8-bc09-7a3905d6f301",
+	"c041e0d7-c79e-45d4-92e8-f0c1d364d7a3",
+	"bc7a3c3e-749f-433a-9909-1517fdf6bf47",
+	"281246d4-aed9-48ed-a8cf-b8d080133c42",
+	"f4461d8a-d917-446a-9762-da7d6529f9c4",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AEOccurrenceInSequenceDefinition',
+	'AEDefinitionId',
+	'R31.''is_used_by''');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("8870d996-1b24-4198-b5bd-937fc9fa34e6",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"0702326d-8588-4ce8-bc09-7a3905d6f301",
+	"bc7a3c3e-749f-433a-9909-1517fdf6bf47",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("281246d4-aed9-48ed-a8cf-b8d080133c42",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"3b9ee9b0-cec2-4ede-9713-4b6c16e5130b",
+	"45e436a1-9cef-4a7a-8ad9-a784c5b33269",
+	1,
+	'AEDefinitionId');
+INSERT INTO O_ATTR
+	VALUES ("281246d4-aed9-48ed-a8cf-b8d080133c42",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"31ba8347-e4f8-4001-a986-ade57cd5ba16",
+	'AEDefinitionId',
+	'',
+	'',
+	'AEDefinitionId',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"e081ddcf-0460-42f3-b290-6273bd587e49",
+	"0702326d-8588-4ce8-bc09-7a3905d6f301",
+	"c041e0d7-c79e-45d4-92e8-f0c1d364d7a3",
+	"bc7a3c3e-749f-433a-9909-1517fdf6bf47",
+	"9c4ce28d-4bfe-4df5-b2d4-63722c7235ba",
+	"45f90dee-7021-4a1e-8208-2f5d1e5aa863",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AEOccurrenceInSequenceDefinition',
+	'occurrenceNumberInSequence',
+	'R31.''is_used_by''');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("e081ddcf-0460-42f3-b290-6273bd587e49",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	0,
+	"0702326d-8588-4ce8-bc09-7a3905d6f301",
+	"bc7a3c3e-749f-433a-9909-1517fdf6bf47",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("9c4ce28d-4bfe-4df5-b2d4-63722c7235ba",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"e081ddcf-0460-42f3-b290-6273bd587e49",
+	"464ee09b-8ffa-435a-b114-a408b02b1dc4",
+	1,
+	'occurrenceNumberInSequence');
+INSERT INTO O_ATTR
+	VALUES ("9c4ce28d-4bfe-4df5-b2d4-63722c7235ba",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"281246d4-aed9-48ed-a8cf-b8d080133c42",
+	'occurrenceNumberInSequence',
+	'',
+	'',
+	'occurrenceNumberInSequence',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	0,
+	"ce51957e-3e87-424e-85c3-75c022e6c476",
+	"0fd69fa6-a522-4f41-8612-f9f64cb2dc3b",
+	"278f0ae9-d7a1-455b-a87e-bfa83597f7a1",
+	"ac012dfb-06c8-4e0b-b9c9-a2cdfea98db3",
+	"915e7c7a-9b4a-4940-bdb2-7d90aa34c1b8",
+	"26f4d807-9ff0-4f21-bc2d-1200497b3eda",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'JobDefinition',
+	'jobName',
+	'R32.''is_in_context_of''');
+INSERT INTO R_RGO_PROXY
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"0fd69fa6-a522-4f41-8612-f9f64cb2dc3b",
+	"278f0ae9-d7a1-455b-a87e-bfa83597f7a1",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("ce51957e-3e87-424e-85c3-75c022e6c476",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	0,
+	"0fd69fa6-a522-4f41-8612-f9f64cb2dc3b",
+	"ac012dfb-06c8-4e0b-b9c9-a2cdfea98db3",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("915e7c7a-9b4a-4940-bdb2-7d90aa34c1b8",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"ce51957e-3e87-424e-85c3-75c022e6c476",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	1,
+	'jobName');
+INSERT INTO O_BATTR_PROXY
+	VALUES ("ce51957e-3e87-424e-85c3-75c022e6c476",
+	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
+	'../JobDefinition/JobDefinition.xtuml');
+INSERT INTO O_ATTR
+	VALUES ("915e7c7a-9b4a-4940-bdb2-7d90aa34c1b8",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	"7f70b9d3-62bd-4461-a096-75b098e2cc79",
+	'jobName',
+	'',
+	'',
+	'jobName',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_ID
+	VALUES (0,
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e");
+INSERT INTO O_OIDA
+	VALUES ("7f70b9d3-62bd-4461-a096-75b098e2cc79",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	0,
+	'dynamicControlName');
+INSERT INTO O_OIDA
+	VALUES ("915e7c7a-9b4a-4940-bdb2-7d90aa34c1b8",
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	0,
+	'jobName');
+INSERT INTO O_ID
+	VALUES (1,
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e");
+INSERT INTO O_ID
+	VALUES (2,
+	"b87c5f51-9aeb-453b-81e0-ac59e55fef8e");
+INSERT INTO PE_PE
+	VALUES ("b87c5f51-9aeb-453b-81e0-ac59e55fef8e",
+	1,
+	"77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
+	"00000000-0000-0000-0000-000000000000",
+	"be1840aa-9d3d-4f55-baec-da45c54219a5",
+	'SVDCclasses',
+	'',
+	0,
+	'../SVDCclasses.xtuml');
