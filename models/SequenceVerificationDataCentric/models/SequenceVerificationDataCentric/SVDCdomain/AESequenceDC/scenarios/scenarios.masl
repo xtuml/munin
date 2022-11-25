@@ -1785,7 +1785,36 @@ begin
   eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LCError",1,previousEventTypes,false,false);
   previousEventTypes := ("LD",1,"","") & ("LCError",1,"","");
   eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LE",1,previousEventTypes,false,true);
+  //
+  //
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '350faa6c-e997-4e01-bafb-7c7806492dd0' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitLoopCountDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job LoopCountJob, Sequence LoopCountSequence
+  // 
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLA",1,previousEventTypes,true,false);
+  previousEventTypes := ("LCLA",1,"","") & ("LCLD",1,"","");
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLB",1,previousEventTypes,false,false);
+  previousEventTypes := ("LCLB",1,"","");
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLC",1,previousEventTypes,false,false);
+  previousEventTypes := ("LCLC",1,"CFork","XOR");
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLD",1,previousEventTypes,false,false);
+  previousEventTypes := ("LCLC",1,"CFork","XOR");
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLCError",1,previousEventTypes,false,false);
+  previousEventTypes := ("LCLD",1,"","") & ("LCLCError",1,"","");
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLE",1,previousEventTypes,false,true);
+
+  dynamicControlDefinition("LoopCountJob", "Counter_1", dynamicControlTypeEnum.LOOPCOUNT, "LCLA",1,"LCLB",1);
 //
 //
 end service;

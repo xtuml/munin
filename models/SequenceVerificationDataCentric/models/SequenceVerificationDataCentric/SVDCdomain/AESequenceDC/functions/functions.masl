@@ -389,3 +389,30 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '14010743-d12c-4236-a031-cc9825948007' DO NOT EDIT THIS LINE.
+private service AESequenceDC::dynamicControlDefinition ( jobName : in string,
+                                                        dynamicControlName : in string,
+                                                        dynamicControlType : in dynamicControlTypeEnum,
+                                                        sourceEventType : in string,
+                                                        sourceOccurrenceId : in integer,
+                                                        userEventType : in string,
+                                                        userOccurrenceId : in integer ) is
+// This function defines the dynamic control, which is a loop count or a branch count, together with the event
+// that provides it and the event that uses it. This function could be split such that the dynamic control is
+// set up with just the source event and the user event linked in later on in a different call to a different 
+// function.
+begin
+  DynamicControlDefinition.createDynamicControlDefinition (jobName,
+  	                                                       dynamicControlName,
+  	                                                       dynamicControlType,
+  	                                                       sourceEventType,
+  	                                                       sourceOccurrenceId);
+  DynamicControlDefinition.linkUserEventDefn (jobName,
+  	                                          dynamicControlName,
+  	                                          dynamicControlType,
+  	                                          userEventType,
+  	                                          userOccurrenceId);
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
