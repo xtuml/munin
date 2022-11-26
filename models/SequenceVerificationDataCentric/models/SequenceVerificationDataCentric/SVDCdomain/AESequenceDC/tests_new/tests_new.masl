@@ -120,13 +120,34 @@ theSequences : set of instance of Sequence;
 theAuditEvents : set of instance of AuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
+theDynamicControlDefn : instance of DynamicControlDefinition;
+sourceOccurrence: instance of AEOccurrenceInSequenceDefinition;
+userOccurrence: instance of AEOccurrenceInSequenceDefinition;
+theJobDefn : instance of JobDefinition;
+theDynamicControl : instance of DynamicControl;
+theDynamicControls : set of instance of DynamicControl;
 
 begin
+  // initial Test of Definitions
+  theDynamicControlDefn := find_one DynamicControlDefinition (dynamicControlName = "Counter_1");
+  sourceOccurrence := theDynamicControlDefn -> R30;
+  userOccurrence := theDynamicControlDefn -> R31;
+  theJobDefn := theDynamicControlDefn -> R32;
+  
+  Assertions::assertTrue(theDynamicControlDefn.dynamicControlName = "Counter_1", "Loop Counter not created as expected: " & theDynamicControlDefn.dynamicControlName);
+  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType);
+//  Assertions::assertTrue((theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType = "LCLB", "User Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType);
+  Assertions::assertTrue(theJobDefn.jobName = "LoopCountJob", "Job not created as expected: " & theJobDefn.jobName);
+  
+  
   // This test covers 1 Jobs with 1 sequences based on a looped path definition - 4 full iterations of the loop
   // followed by an error which cause the loop to be exited.
   // This test does not reveal any erroneous behaviour of the twin
   //
+  
+  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "Counter_1", "5");
   acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
   acceptOrderedEvent ("1620920002","Test-0001","LCLC","Job_LoopCount_1","Ev302","Ev303",theAuditEventData);
   acceptOrderedEvent ("1620920003","Test-0001","LCLD","Job_LoopCount_1","Ev303","Ev304",theAuditEventData);
@@ -152,6 +173,9 @@ begin
   theJobs := find Job ();
   theSequences := theJobs -> R10;
   theAuditEvents := theSequences -> R11;
+  theDynamicControls := theJobs -> R35;
+  //
+  Assertions::assertTrue(theDynamicControls'length = 1, "Wrong number of Dynamic Controls created: " & (theDynamicControls'length)'image);
   //
   Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);

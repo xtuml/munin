@@ -23,6 +23,9 @@ theSourceExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theUserExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theSourceExtraJobInvariant : instance of PersistedInvariant;
 theUserExtraJobInvariant : instance of TransientInvariant;
+theDynamicControlDefn : instance of DynamicControlDefinition;
+newDynamicControl : instance of DynamicControl;
+loopCount : integer;
 logMessage : string;
 creationErrorMessage : string;
 
@@ -137,6 +140,32 @@ begin
                
               end if;
                      
+            when aeDataKindEnum.LOOPCONSTRAINT =>  
+              // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
+              theDynamicControlDefn := theAeOccInSequenceDef -> R30;
+              if (theDynamicControlDefn /= null) and (theDynamicControlDefn.dynamicControlName = aeDataElement.aedName) then
+                //Check that the invariant value is not empty
+                if aeDataElement.aedValue /= "" then
+                  // Convert the provided string value to an integer
+                  loopCount := integer'parse(aeDataElement.aedValue);
+                  newDynamicControl := create DynamicControl (jobID => newJob.jobID, 
+                  	                                          dynamicControlName => aeDataElement.aedName, 
+                  	                                          expectedDynamicControlValue => loopCount);
+                  link newDynamicControl R29 theDynamicControlDefn;
+                  link newDynamicControl R35 newJob;
+                else
+                  // No Loop Count value provided
+                  newJob.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+                end if;
+              else
+                // This Loop Count not expected to be provided on this audit event
+                newJob.failJob("Loop count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+              end if;
+              
+              //exception - if the integer conversion function above fails does it raise an exception?
+                
+            when aeDataKindEnum.BRANCHCONSTRAINT =>  
+
             when others =>
               // Log warning: Unsupported audit event data type
   	          logMessage := "The audit event data type provided for jobId = " & jobId & " is an unsupported type of audit event data = " & aeDataElement.aedKind'image;
