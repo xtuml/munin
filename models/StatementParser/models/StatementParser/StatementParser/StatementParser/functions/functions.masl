@@ -3,6 +3,7 @@ public service StatementParser::validateStatements ( jobId : in integer,
                                                     plusStatements : in string ) is
 logMessage : string;
 seperator : character := '\n';
+lineNum : integer := 1;
 line : instance of Line;
 lineToken : instance of LineToken;
 prevLine : instance of Line;
@@ -26,7 +27,7 @@ begin
 		
 		for lineText in Strings::tokenize(plusStatements, seperator) loop
 			if (Strings::trim(lineText))'length > 0 then 
-				line := create unique Line(lineText => lineText);
+				line := create Line(lineId => lineNum, lineText => lineText);
 				if job -> R12.Line = null then
 					link job R12 line;
 				end if;
@@ -71,7 +72,7 @@ begin
 					end if;
 				end if;
 				
-				for token in Strings::tokenize(line.lineText) loop
+				for token in Strings::tokenize_quoted(Strings::squeeze(line.lineText), " \t\f\n\r") loop
 					// only process the token if it does not start with a # as the # indicates a display directive
 					tmpToken := Strings::squeeze(token);
 					if Strings::contains(tmpToken, ".") then
@@ -97,6 +98,7 @@ begin
 				end if;
 				prevLine := line;
 			end if;
+			lineNum := lineNum + 1;
 		end loop;
 		
 		// iterate over the lines and identify the valid statements
@@ -128,6 +130,7 @@ end service;
 public service StatementParser::getJobAndApps ( jobId : in integer ) is
 logMessage : string;
 job : instance of Job;
+jobNameGrammarItems : sequence of instance of GrammarItem;
 jobNameGrammarItem : instance of GrammarItem;
 jobName : string := "Unknown";
 applicationNames : set of string;
@@ -141,7 +144,8 @@ begin
 	if job /= null then
 		
 		// find the job name
-		jobNameGrammarItem := find_one (job -> R11.Line -> R5.GrammarItem)(grammarName = "jobName");
+		jobNameGrammarItems := find (job -> R11.Line -> R5.GrammarItem)(grammarName = "jobName") reverse_ordered_by (lineId);
+		jobNameGrammarItem := jobNameGrammarItems[jobNameGrammarItems'first];
 		if jobNameGrammarItem /= null then
 			jobName := jobNameGrammarItem.itemValue;
 		end if;
