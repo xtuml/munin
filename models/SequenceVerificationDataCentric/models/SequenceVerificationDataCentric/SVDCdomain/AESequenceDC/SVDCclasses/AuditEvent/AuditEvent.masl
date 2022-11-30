@@ -153,6 +153,9 @@ begin
                   	                                          expectedDynamicControlValue => loopCount);
                   link newDynamicControl R29 theDynamicControlDefn;
                   link newDynamicControl R35 newJob;
+                  // TODO Remove debug message
+  	              logMessage := "Dynamic Control added for jobId = " & jobId & " is of type = " & aeDataElement.aedKind'image & " and value = " & aeDataElement.aedValue'image;
+	              Logger::log(Logger::Information, "AESequenceDC", logMessage);
                 else
                   // No Loop Count value provided
                   newJob.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);

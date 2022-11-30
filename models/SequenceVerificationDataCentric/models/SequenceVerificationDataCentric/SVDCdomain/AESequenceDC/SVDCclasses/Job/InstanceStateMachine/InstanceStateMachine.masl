@@ -33,6 +33,12 @@ theSourceExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theUserExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theSourceExtraJobInvariant : instance of PersistedInvariant;
 theUserExtraJobInvariant : instance of TransientInvariant;
+theDynamicControlDefn : instance of DynamicControlDefinition;
+newDynamicControl : instance of DynamicControl;
+theUserDynamicControlDefn : instance of DynamicControlDefinition;
+theUserDynamicControl : instance of DynamicControl;
+thisJobsDynamicControl : set of instance of DynamicControl;
+loopCount : integer;
 empty : sequence of string;
 emptyPrevId : sequence of string:= empty & "";
 logMessage : string;
@@ -122,6 +128,46 @@ begin
                     // Note that the previous Audit Event has now been seen as a previous audit event       
                     prevEvent.seenAsPreviousEvent := true;
               
+                    // Add logic for incrementing Loop Count or Branch Count
+                    theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
+                    if theUserDynamicControlDefn /= null then
+                    
+                          // TODO Remove temporary debug message
+                          logMessage := "Dynamic Control Definition for User Event " & theUserDynamicControlDefn.dynamicControlName & " of type " & theUserDynamicControlDefn.dynamicControlType'image & " exists for " & this.jobID;
+	                      Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	                      
+                      thisJobsDynamicControl := this -> R35;
+                      if thisJobsDynamicControl /= null then
+                        theUserDynamicControl := find_one thisJobsDynamicControl (dynamicControlName = theUserDynamicControlDefn.dynamicControlName);
+                        if theUserDynamicControl /= null then
+                    
+                          // TODO Remove temporary debug message
+                          logMessage := "Dynamic Control Instance for User Event " & theUserDynamicControl.dynamicControlName & " has expected value " & theUserDynamicControl.expectedDynamicControlValue'image & " and current value " & theUserDynamicControl.currentDynamicControlValue'image;
+	                      Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	                      
+                          case theUserDynamicControlDefn.dynamicControlType is
+                            when dynamicControlTypeEnum.LOOPCOUNT =>
+                              if theUserDynamicControl.expectedDynamicControlValue > 0 then
+                                theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
+                              end if;  
+                            when dynamicControlTypeEnum.BRANCHCOUNT =>
+                              if theUserDynamicControl.expectedDynamicControlValue > 0 then
+                                theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
+                              end if;  
+                         
+                            when others => 
+                              // Log error as no other are currently supported
+                          end case;  
+                          // TODO Remove temporary debug message
+                          logMessage := "Dynamic Control " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID & " has current value = " & theUserDynamicControl.currentDynamicControlValue'image;
+	                      Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	                    else
+	                    end if;  
+	                  else
+	                  end if;  
+	                else 
+	                end if;  
+                    
                   else
                     //Log Job failure: Previous event is valid but is part of a broken sequence
                     this.sequencingFailed := true;
@@ -306,6 +352,31 @@ begin
               this.failJob("EXTRAJOBINV Audit event data sent on the event type is not the expected audit event data - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);               
                 
             end if;
+            
+            when aeDataKindEnum.LOOPCONSTRAINT =>  
+              // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
+              theDynamicControlDefn := theAeOccInSequenceDef -> R30;
+              if (theDynamicControlDefn /= null) and (theDynamicControlDefn.dynamicControlName = aeDataElement.aedName) then
+                //Check that the invariant value is not empty
+                if aeDataElement.aedValue /= "" then
+                  // Convert the provided string value to an integer
+                  loopCount := integer'parse(aeDataElement.aedValue);
+                  newDynamicControl := create DynamicControl (jobID => this.jobID, 
+                  	                                          dynamicControlName => aeDataElement.aedName, 
+                  	                                          expectedDynamicControlValue => loopCount);
+                  link newDynamicControl R29 theDynamicControlDefn;
+                  link newDynamicControl R35 this;
+                else
+                  // No Loop Count value provided
+                  this.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+                end if;
+              else
+                // This Loop Count not expected to be provided on this audit event
+                this.failJob("Loop count not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+              end if;
+              
+              //exception - if the integer conversion function above fails does it raise an exception?
+            
           when others =>
             // Log warning: Unsupported audit event data type
             this.failJob("The audit event data type provided for jobId = " & this.jobID & " is an unsupported type of audit event data = " & aeDataElement.aedName'image);               

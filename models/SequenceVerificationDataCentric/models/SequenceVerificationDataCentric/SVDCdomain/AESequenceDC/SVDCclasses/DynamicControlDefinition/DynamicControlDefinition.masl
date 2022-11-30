@@ -16,7 +16,7 @@ sourceAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
 begin
   theJobDefn := find_one JobDefinition (jobName = jobName);
   if theJobDefn /= null then
-    newDynamicControlDefn := create DynamicControlDefinition (jobName => jobName, dynamicControlName => dynamicControlName);
+    newDynamicControlDefn := create DynamicControlDefinition (jobName => jobName, dynamicControlName => dynamicControlName, dynamicControlType => dynamicControlType);
     link newDynamicControlDefn R32 theJobDefn;
     
     // Find the source AEOccurrenceInSequenceDefinition
@@ -77,7 +77,7 @@ begin
         userAEOccurrenceDefn := find_one userAEOccurrenceDefns (occurrenceNumberInSequence = userOccurrenceId);
         if userAEOccurrenceDefn /= null then
           //link R31
-          link theDynamicControlDefn R30 userAEOccurrenceDefn;
+          link theDynamicControlDefn R31 userAEOccurrenceDefn;
         else
           // The specified Audit Event Occurrence Definition was not found
         end if;  

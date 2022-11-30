@@ -11,6 +11,7 @@ RUN SCENARIO AESequenceDC 8 "InitEventDefinitionForInclusiveOR"
 RUN SCENARIO AESequenceDC 9 "InitLoopBreakEventDefinition"
 RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
 
+
 # run normal path tests
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test01NormalPath 1001 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test02NormalPath 1002 CleanUpAllJobs 64]
