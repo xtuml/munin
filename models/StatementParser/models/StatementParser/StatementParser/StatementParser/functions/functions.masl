@@ -2,14 +2,14 @@
 public service StatementParser::validateStatements ( jobId : in integer,
                                                     directory : in Filesystem::filename,
                                                     filename : in Filesystem::filename ) is
-logMessage : string;
+logMessage : anonymous string;
 job : instance of Job;
 sourceFile : instance of SequenceFile;
 valid : boolean := true;
 failureReason : string;
 begin
 	
-	logMessage := "StatementParser::validateStatements";
+	logMessage := "StatementParser::validateStatements directory=" & directory & ", filename=" & filename;
 	Logger::log(Logger::Information, "StatementParser", logMessage);
 	
 	if find_one Job(jobId = jobId) = null then
@@ -26,8 +26,8 @@ begin
 	else
 		valid := false;
 		failureReason := "Job already exists, jobId = " & jobId'image;
+	    Consumer~>fileVerified(jobId, valid, failureReason);
 	end if;
-	Consumer~>fileVerified(jobId, valid, failureReason);
 exception
 	when others =>
 		Consumer~>fileVerified(jobId, false, "Unexpected error.");	

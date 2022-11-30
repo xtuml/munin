@@ -111,6 +111,7 @@ begin
 		failureReason := "No job name defined, jobId = " & jobId'image;
 	end if;
 		
+	Consumer~>fileVerified(jobId, valid, failureReason);
 exception
 	when others =>
 		Consumer~>fileVerified(jobId, false, "Unexpected error.");
