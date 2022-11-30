@@ -16,7 +16,7 @@ begin
 	Logger::log(Logger::Information, "SequenceProcessor", logMessage);
 	
 	for filename in Filesystem::list_directory(Filesystem::filename(this.dataDirectory)) loop
-		if Strings::ends_with(string(filename), ".puml") then
+		if Strings::ends_with(string(filename), ".puml") and not Strings::starts_with(string(filename), "_") then
 			sequenceFile := create unique SequenceFile(fileName => this.dataDirectory & "/" & string(filename), 
 				                                       loadComplete => false, currentSequenceName => "UNKNOWN", Current_State => Created
 			);

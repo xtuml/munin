@@ -12,4 +12,5 @@ services:
       - "40000:40000"
     volumes:
       - "./sequenceFiles:/root/sequenceFiles"
+      - "./schedule:/root/schedule"
     command: "-source sequenceFiles/ -output sequenceFiles/output/ -postinit schedule/startup.sch -util Inspector -inspector-port 0"

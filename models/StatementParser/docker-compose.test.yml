@@ -14,5 +14,6 @@ services:
     volumes:
       - "./test_results:/root/test_results"
       - "./testFiles:/root/testFiles"
+      - "./schedule:/root/schedule"
     entrypoint: ["/usr/bin/timeout", "180s", "StatementParser_transient_standalone"]
-    command: "-log-level Debug -util Inspector -inspector-port 0"
+    command: "-log-level Debug -postinit schedule/test.sch  -util Inspector -inspector-port 0"

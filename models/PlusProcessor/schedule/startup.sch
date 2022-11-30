@@ -1,6 +1,6 @@
 $TESTSCHEDULE
 
-RUN SCENARIO StatementParser 1 "init"
-RUN SCENARIO SequenceProcessor 1 "init"
+RUN SCENARIO StatementParser   1 "populateDomain"
+RUN SCENARIO SequenceProcessor 1 "populateDomain"
 
 $ENDTESTSCHEDULE
