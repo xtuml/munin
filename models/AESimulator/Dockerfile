@@ -22,7 +22,7 @@ ADD CMakeLists.txt /root/CMakeLists.txt
 FROM levistarrett/masl-base:v1 AS install-base
 
 # copy config and schedules
-#ADD config /root/config
+ADD config /root/config
 ADD schedule /root/schedule
 
 # set up test folders

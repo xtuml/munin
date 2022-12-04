@@ -5,6 +5,7 @@ jobSpec : instance of JobSpec;
 testDefinition : instance of TestDefinition;
 testJobSpec : instance of TestJobSpec;
 eventDispatchOrder : instance of EventDispatchOrder;
+previousEventDispatchOrder : instance of EventDispatchOrder;
 deployedEvents : sequence of instance of DeployedEvent;
 eventToDispatch : instance of DeployedEvent;
 eventDefinition : instance of EventDefinition;
@@ -23,6 +24,7 @@ begin
 			eventDispatchOrder := testJobSpec -> R12.EventDispatchOrder;
 		else
 			// locate the next event to be dispatched
+			previousEventDispatchOrder := eventDispatchOrder;
 			unlink testJobSpec R15 eventDispatchOrder;
 			eventDispatchOrder := eventDispatchOrder -> R13.nextEvent;
 		end if;
@@ -40,14 +42,15 @@ begin
 					generate DeployedEvent.dispatchEvent() to eventToDispatch;
 				end if;
 			else
+				unlink testJobSpec R15;
 				generate Job.jobComplete() to this;
 			end if;
 		else
+			unlink testJobSpec R15;
 			generate Job.jobComplete() to this;
-			logMessage := "AESimulator::Job.selectEventToDispatch - job failed test name = " & testDefinition.testName & ", job spec name = " & jobSpec.jobSpecName;
-			Logger::log(Logger::Error, "AESimulator", logMessage);
 		end if;
 	else
+		unlink testJobSpec R15;
 		generate Job.jobComplete() to this;
 		logMessage := "AESimulator::Job.selectEventToDispatch - job failed test name = " & testDefinition.testName & ", job spec name = " & jobSpec.jobSpecName;
 		Logger::log(Logger::Error, "AESimulator", logMessage);

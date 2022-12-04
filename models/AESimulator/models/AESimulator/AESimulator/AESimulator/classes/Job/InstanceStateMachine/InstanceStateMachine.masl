@@ -10,54 +10,71 @@ state AESimulator::Job.JobStarted () is
 logMessage : string;
 eventDefinition : instance of EventDefinition;
 deployedEvent : instance of DeployedEvent;
+testSpec : instance of TestSpec;
+auditEventFile : instance of AuditEventFile;
+eventFileForJob : instance of EventFileForJob;
 jobSpec : instance of JobSpec;
 epochDate : timestamp;
 epochEventTime : integer;
+epochEventDispatchTime : integer;
 
 begin
 	
 	logMessage := "AESimulator::Job.JobStarted";
 	Logger::log(Logger::Information, "AESimulator", logMessage);
 	
+	testSpec := find_one TestSpec();
+	if testSpec.oneFilePerJob = true then
+		auditEventFile := create AuditEventFile(isActive => true, fileId => this.jobId, Current_State => Created);
+	else
+		auditEventFile := find_one AuditEventFile(isActive = true);
+	end if;
+	eventFileForJob := create EventFileForJob(auditEventFileId => auditEventFile.auditEventFileId, jobId => this.jobId);
+	link this R17 auditEventFile using eventFileForJob;
 	jobSpec := this -> R3.JobSpec;
-	eventDefinition := jobSpec -> R2.EventDefinition;
-	epochEventTime := (timestamp'now - epochDate)'seconds;
-	deployedEvent := create DeployedEvent(eventId => UUID::generate_formatted(), epochEventTime => epochEventTime, deployed => false, Current_State => Created);
-	link deployedEvent R5 eventDefinition;
-	link this R6 deployedEvent;
-	generate DeployedEvent.evaluateDispatch() to deployedEvent;
-	
+	for eventDefinition in jobSpec -> R2.EventDefinition loop
+		epochEventTime := (timestamp'now - epochDate)'seconds;
+		epochEventDispatchTime := epochEventTime + eventDefinition.delayDuration'seconds;
+		deployedEvent := create DeployedEvent(eventId => UUID::generate_formatted(), epochEventCreationTime => epochEventTime, epochEventDispatchTime => epochEventDispatchTime, deployed => false, Current_State => Created);
+		link deployedEvent R5 eventDefinition;
+		link this R6 deployedEvent;
+		generate DeployedEvent.evaluateDispatch() to deployedEvent;
+	end loop;
+		
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'f989cd9b-5f45-4cea-9d9e-9def7e782712' '9fb52ec7-ee07-4a8a-88a1-914ba55f98fc' DO NOT EDIT THIS LINE.
 state AESimulator::Job.JobFinished () is
 logMessage : string;
-testDefinition : instance of TestDefinition;
+testSpec : instance of TestSpec;
 destinationFilename : string;
 events  : sequence of instance of DeployedEvent;
+auditEventFile : instance of AuditEventFile;
+eventFileForJob : instance of EventFileForJob;
+jobSpec : instance of JobSpec;
+testDefinition : instance of TestDefinition;
+testJobSpec : instance of TestJobSpec;
 
 begin
 	
 	logMessage := "AESimulator::Job.JobFinished";
 	Logger::log(Logger::Information, "AESimulator", logMessage);
+	testSpec := find_one TestSpec();
+	jobSpec := this -> R3.JobSpec;
 	testDefinition := this -> R7.TestDefinition;
-	if testDefinition.generateTestFiles = true then
-		// write the file
-		destinationFilename := testDefinition.testFileDestination & "/" & string(this.jobId);
-		Filesystem::write_file(Filesystem::filename(destinationFilename), JSON::dump(this.auditEvents));
+	testJobSpec := jobSpec with testDefinition -> R8.TestJobSpec;
+	unlink testJobSpec R15;
+
+	auditEventFile := find_one (this -> R17.AuditEventFile)(isActive = true);
+	if testSpec.oneFilePerJob = true then
+		generate AuditEventFile.generateFile() to auditEventFile;
 	end if;
 	
-	events := this -> R6.DeployedEvent;
-	unlink events R6;
-	unlink events R10;
-	unlink events R5;
-	delete events;
-	
-	unlink this R3;
-	unlink this R7;
-	delete this;
-	
+	eventFileForJob := this with auditEventFile -> R17.EventFileForJob; 
+	unlink this R17 auditEventFile using eventFileForJob;
+	delete eventFileForJob;
+		
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

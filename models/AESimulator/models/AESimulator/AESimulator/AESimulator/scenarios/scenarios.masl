@@ -16,183 +16,224 @@ end service;
 //! ACTIVITY BEGIN. '1e02e3af-a8f5-4c29-b7d2-09120da69fd6' DO NOT EDIT THIS LINE.
 private service AESimulator::initialise () is
 logMessage : string;
-configFilePath : string;
-configData : string;
-configLines : sequence of string;
-configLine : string;
-configElements : sequence of string;
-seperator : character := '=';
+testSpec : instance of TestSpec;
+configFileName : Filesystem::filename;
+configJSONString : string;
+configJSONElement : JSON::JSONElement;
+configJSONObject : JSON::JSONObject;
+testDefJSONObject : JSON::JSONObject;
+testId : integer;
+testName : string;
+totalTests : integer;
+testJobSpecJSONObject : JSON::JSONObject;
+testJobSpecName : string;
+jobSpecFileName : Filesystem::filename;
+jobSpecJSONString : string;
+jobSpecJSONElement : JSON::JSONElement;
+jobSpecJSONObject : JSON::JSONObject;
+eventDefinitionObject : JSON::JSONObject;
+eventDataDefinitionObject : JSON::JSONObject;
+eventDataName : string;
+eventDataValue : string;
 testDefinition : instance of TestDefinition;
-testDefinitions : sequence of instance of TestDefinition;
-job : instance of Job;
 eventDefinition : instance of EventDefinition;
 prevEventDefinition : instance of EventDefinition;
-testId : integer;
 jobSpecName : string;
 jobSpec : instance of JobSpec;
-eventTypeName : string;
-eventElements : sequence of string;
-nodeName : string;
-applicationName : string;
-delayDuration : duration;
-eventId : string;
-prevEventId : string;
-sequenceStart : boolean;
-testJobSpecName : string;
 testJobSpec : instance of TestJobSpec;
 eventDispatchOrder : instance of EventDispatchOrder;
 eventDispatchIdList : sequence of string;
 emptyEventDispatchIdList : sequence of string;
 eventDefintions : sequence of instance of EventDefinition;
 prevEventDispatchOrder : instance of EventDispatchOrder;
+eventData : instance of EventData;
+auditEventFile : instance of AuditEventFile;
 
 begin
   
-  logMessage := "AESimulator::initialise";
-  Logger::log(Logger::Information, "AESimulator", logMessage);
+	logMessage := "AESimulator::initialise";
+	Logger::log(Logger::Information, "AESimulator", logMessage);
   
-  // check the config file has not been removed
-  configFilePath := CommandLine::get_option_value("-test-config");
+	// check the config file has not been removed
+	configFileName := Filesystem::filename(CommandLine::get_option_value("-test-config"));
+	testSpec := create unique TestSpec();
   
-  if Filesystem::file_exists(Filesystem::filename(configFilePath)) then
-    // read the contents of the config file - t
-    configData := Filesystem::read_file(Filesystem::filename(configFilePath));
-    configLines := Strings::tokenize(configData, '\n');
-    for line in configLines loop
-      configLine := Strings::trim(line);
-      if configLine = "" then
-        null;  // Ignore blank lines
-      elsif configLine = "Test" then
-        testDefinition := null;
-      elsif configLine = "TestJobSpec" then
-        eventDispatchOrder := null;
-      elsif configLine = "Job" then
-        job := null;
-        eventDefinition := null;
-        prevEventDefinition := null;
-      elsif configLine = "EventDefinition" then
-        eventDefinition := null;
-      else
-        configElements := Strings::tokenize(configLine, seperator);
-        if configElements[configElements'first] = "TestId" then
-          testId := integer'parse(configElements[configElements'last]);
-          testDefinition := find_one TestDefinition(testId = testId);;
-          if testDefinition = null then
-            testDefinition := create unique TestDefinition(testId => testId, testCount => 0, Current_State => Created);
-            testDefinitions := testDefinitions & testDefinition;
-          else
-            logMessage := "AESimulator::initialise - invalid configuration file duplicate test id = " & testId'image;
-            Logger::log(Logger::Error, "AESimulator", logMessage);
-            raise program_error;
-          end if;
-        elsif configElements[configElements'first] = "TestName" then
-          testDefinition.testName := configElements[configElements'last];
-        elsif configElements[configElements'first] = "GenerateEventFiles" then
-          testDefinition.generateTestFiles := boolean'parse(configElements[configElements'last]);
-        elsif configElements[configElements'first] = "TestFileLocation" then
-          testDefinition.testFileLocation := configElements[configElements'last];
-        elsif configElements[configElements'first] = "TestFileDestination" then
-          testDefinition.testFileDestination := configElements[configElements'last];
-        elsif configElements[configElements'first] = "TotalTests" then
-          testDefinition.totalTests := integer'parse(configElements[configElements'last]);
-        elsif configElements[configElements'first] = "TestFrequency" then
-          testDefinition.testFrequency := duration'parse(configElements[configElements'last]);
-        elsif configElements[configElements'first] = "TestJobSpecName" then
-          testJobSpecName := configElements[configElements'last];
-          jobSpec := find_one JobSpec(jobSpecName = testJobSpecName);
-          testJobSpec := testDefinition with jobSpec -> R8.TestJobSpec;
-          if jobSpec /= null and testJobSpec = null then
-            testJobSpec := create TestJobSpec(testId => testDefinition.testId, jobSpecName => jobSpec.jobSpecName);
-            link jobSpec R8 testDefinition using testJobSpec;
-          else
-		    logMessage := "AESimulator::initialise, failed to find job spec for test, job spec name = " & jobSpecName & " testId = " & testDefinition.testId'image;
-		    Logger::log(Logger::Error, "AESimulator", logMessage);
-		    raise program_error;
-          end if;
-        elsif configElements[configElements'first] = "EventDispatchOrder" then
-          eventDispatchIdList := emptyEventDispatchIdList;
-          prevEventDispatchOrder := null;
-          eventDispatchIdList := Strings::tokenize(configElements[configElements'last], ',');
-          eventDefintions := jobSpec -> R9.EventDefinition;
-          testJobSpec := testDefinition with jobSpec -> R8.TestJobSpec;
-          for eventDispatchId in eventDispatchIdList loop
-          	eventDefinition := find_one eventDefintions(eventDefinitionId = eventDispatchId and jobSpecName = testJobSpec.jobSpecName);;
-          	if eventDefinition /= null then
-          		eventDispatchOrder := eventDefinition with testDefinition -> R14.EventDispatchOrder;
-          		if eventDispatchOrder = null then
-          			eventDispatchOrder := create EventDispatchOrder(eventDefinitionId => eventDispatchId, 
-          				                                            jobSpecName => testJobSpec.jobSpecName,
-          				                                            testId => testDefinition.testId);
-          			link eventDefinition R14 testDefinition using eventDispatchOrder;
-          			if testJobSpec -> R12.EventDispatchOrder = null then
-          				link testJobSpec R12 eventDispatchOrder;
-          			end if;
-          			if prevEventDispatchOrder /= null then
-          				link eventDispatchOrder R13.previousEvent prevEventDispatchOrder;
-          			end if;
-          			prevEventDispatchOrder := eventDispatchOrder; 
-          		else
-		            logMessage := "AESimulator::initialise - invalid configuration duplicate event definition for EventDispatchOrder, eventDispacthId = " & eventDispatchId & "job spec name = " & jobSpecName;
-		            Logger::log(Logger::Error, "AESimulator", logMessage);
-          		end if;
-          	else
-	            logMessage := "AESimulator::initialise - invalid configuration failed to find event definition for EventDispatchOrder, eventDispacthId = " & eventDispatchId & "job spec name = " & jobSpecName;
-	            Logger::log(Logger::Error, "AESimulator", logMessage);
-	            raise program_error;
-          	end if;
-          end loop;
-        elsif configElements[configElements'first] = "JobSpecName" then
-          jobSpecName := configElements[configElements'last];
-          jobSpec := find_one JobSpec(jobSpecName = jobSpecName);
-          if jobSpec = null then
-            jobSpec := create JobSpec(jobSpecName => jobSpecName);
-          else
-            logMessage := "AESimulator::initialise - invalid configuration file duplicate job spec name = " & jobSpecName;
-            Logger::log(Logger::Error, "AESimulator", logMessage);
-            raise program_error;
-          end if;
-        elsif configElements[configElements'first] = "EventName" then
-          eventElements := Strings::tokenize(configElements[configElements'last], ',');
-          eventId := eventElements[eventElements'first];
-          eventTypeName := eventElements[eventElements'first + 1];
-          nodeName := eventElements[eventElements'first + 2];
-          applicationName := eventElements[eventElements'first + 3];
-          delayDuration := duration'parse(eventElements[eventElements'first + 4]);
-          sequenceStart := boolean'parse(eventElements[eventElements'first + 5]);
-          if eventElements'length = (eventElements'first + 6) then
-            prevEventId := eventElements[eventElements'first + 6];
-          end if;
-          eventDefinition := create EventDefinition(eventDefinitionId => eventId, jobSpecName => jobSpec.jobSpecName, eventTypeName => eventTypeName, nodeName=> nodeName, 
-                                                  applicationName => applicationName, delayDuration => delayDuration, prevId => prevEventId, sequenceStart => sequenceStart);
-          link jobSpec R9 eventDefinition;
-          prevEventDefinition := find_one (jobSpec -> R9.EventDefinition)(eventDefinitionId = prevEventId);
-          if prevEventDefinition /= null then
-            link eventDefinition R1.follows prevEventDefinition;
-          else
-            link jobSpec R2 eventDefinition;
-          end if;
-        end if;
-      end if;
-    end loop;
+	if Filesystem::file_exists(Filesystem::filename(configFileName)) then
+	    // read the contents of the config file - t
+	    configJSONString := Filesystem::read_file(configFileName);
+	    configJSONElement := JSON::parse(configJSONString);
+	    // TODO configValidationResult := JSONValidation::validate(configJSONElement, #PROP["orderingConfigSchema"]#);
+	    // TODO if JSON::get_boolean(configValidationResult["valid"]) then
+	            // extract the spec data items
+	        configJSONObject := JSON::get_object(configJSONElement);
+	        if configJSONObject'contains("OneFilePerJob") then
+	        	testSpec.oneFilePerJob := boolean'parse(JSON::get_string(configJSONObject["OneFilePerJob"]));
+	        end if;
+	        if configJSONObject'contains("MaxEventsPerFile") then
+	        	testSpec.maxEventsPerFile := JSON::get_integer(configJSONObject["MaxEventsPerFile"]);
+	        end if;
+	        if configJSONObject'contains("FileTimoutPeriod") then
+	        	testSpec.fileTimeOutPeriod := duration'parse(JSON::get_string(configJSONObject["FileTimoutPeriod"]));
+	        end if;
+	        if configJSONObject'contains("JobSpecificationLocation") then
+	            testSpec.jobSpecificationLocation := JSON::get_string(configJSONObject["JobSpecificationLocation"]);
+	        end if;
+	        if configJSONObject'contains("TestFileLocation") then
+	            testSpec.testFileLocation := JSON::get_string(configJSONObject["TestFileLocation"]);
+	        end if;
+	        if configJSONObject'contains("TestFileDestination") then
+	            testSpec.testFileDestination := JSON::get_string(configJSONObject["TestFileDestination"]);
+	        end if;
+	        
+	        // read in the test definitions
+	        if configJSONObject'contains("Tests") and configJSONObject["Tests"].kind = JSON::Array then
+	            for testDefinitionElement in JSON::get_array(configJSONObject["Tests"]) loop
+	                testDefJSONObject := JSON::get_object(testDefinitionElement);
+	            	testDefinition := create unique TestDefinition(testId => JSON::get_integer(testDefJSONObject["TestId"]), 
+	            		                                           testName => JSON::get_string(testDefJSONObject["TestName"]),
+	            		                                           totalTests => JSON::get_integer(testDefJSONObject["TotalTests"]),
+	            		                                           testFrequency => duration'parse(JSON::get_string(testDefJSONObject["TestFrequency"])),
+	            		                                           testCount => 0, Current_State => Created);
+	                for testJobSpecElement in JSON::get_array(testDefJSONObject["TestJobSpec"]) loop
+		                testJobSpecJSONObject := JSON::get_object(testJobSpecElement);
+	                	testJobSpecName := JSON::get_string(testJobSpecJSONObject["TestJobSpecName"]);
+	                	eventDispatchIdList := emptyEventDispatchIdList;
+	                	eventDispatchIdList := Strings::tokenize(JSON::get_string(testJobSpecJSONObject["EventDispatchOrder"]), ',');
+	                	// find the job specification and if it does not exist read it in
+	                	jobSpec := find_one JobSpec(jobSpecName = testJobSpecName);
+	                	if jobSpec = null then
+		                    // load in the audit eventTypes
+		                    jobSpecFileName := Filesystem::filename(testSpec.jobSpecificationLocation & "/" & testJobSpecName & ".json");
+		                    if Filesystem::file_exists(jobSpecFileName) then
+							    jobSpecJSONString := Filesystem::read_file(jobSpecFileName);
+							    jobSpecJSONElement := JSON::parse(jobSpecJSONString);
+						        jobSpecJSONObject := JSON::get_object(jobSpecJSONElement);
+						        if jobSpecJSONObject'contains("JobSpecName") then
+						        	jobSpec := create JobSpec(jobSpecName => JSON::get_string(jobSpecJSONObject["JobSpecName"]));
+					                for eventDefinitionElement in JSON::get_array(jobSpecJSONObject["EventDefinition"]) loop
+						                eventDefinitionObject := JSON::get_object(eventDefinitionElement);				                	
+					                	eventDefinition := create EventDefinition(eventDefinitionId => JSON::get_string(eventDefinitionObject["EventId"]), 
+					                		                                      jobSpecName => jobSpec.jobSpecName, 
+					                		                                      eventTypeName => JSON::get_string(eventDefinitionObject["EventName"]), 
+					                		                                      nodeName=> JSON::get_string(eventDefinitionObject["NodeName"]), 
+					                		                                      applicationName => JSON::get_string(eventDefinitionObject["ApplicationName"]), 
+					                		                                      delayDuration => @PT0S@, 
+					                		                                      prevId => "", 
+					                		                                      sequenceStart => false);
+						                if eventDefinitionObject'contains("EventData") then
+							                for eventDataDefinitionElement in JSON::get_array(eventDefinitionObject["EventData"]) loop
+								                eventDataDefinitionObject := JSON::get_object(eventDataDefinitionElement);
+												eventDataName := "";
+												if eventDataDefinitionObject'contains("DataName") then
+													eventDataName := JSON::get_string(eventDataDefinitionObject["DataName"]);
+												end if;
+												eventDataValue := "";
+												if eventDataDefinitionObject'contains("DataValue") then
+													eventDataValue := JSON::get_string(eventDataDefinitionObject["DataValue"]);
+												end if;
+												if eventDataName /= "" then
+													eventData := create unique EventData(eventDataName => eventDataName, eventDataValue => eventDataValue);
+													link eventData R16 eventDefinition;
+												end if;
+							                end loop;
+							            end if;
+										if eventDefinitionObject'contains("DispatchDelay") then
+											eventDefinition.delayDuration := duration'parse(JSON::get_string(eventDefinitionObject["DispatchDelay"]));
+										end if;
+										if eventDefinitionObject'contains("PreviousEventId") then
+											eventDefinition.prevId := JSON::get_string(eventDefinitionObject["PreviousEventId"]);
+										end if;
+										if eventDefinitionObject'contains("SequenceStart") then
+											eventDefinition.sequenceStart := boolean'parse(JSON::get_string(eventDefinitionObject["SequenceStart"]));
+										end if;
+										link jobSpec R9 eventDefinition;
+										prevEventDefinition := find_one (jobSpec -> R9.EventDefinition)(eventDefinitionId = eventDefinition.prevId);
+										if prevEventDefinition /= null then
+										  link eventDefinition R1.follows prevEventDefinition;
+										else
+										  link jobSpec R2 eventDefinition;
+										end if;
+									end loop;
+						        else
+								    logMessage := "AESimulator::initialise, job spec has no name. Specified file = " & string(testJobSpecName);
+								    Logger::log(Logger::Error, "AESimulator", logMessage);
+			                    	raise program_error;
+						        end if;
+		                    else
+							    logMessage := "AESimulator::initialise, failed to locate job spec file. Specified file = " & string(testJobSpecName);
+							    Logger::log(Logger::Error, "AESimulator", logMessage);
+		                    	raise program_error;
+		                    end if;
+	                	end if;
+						testJobSpec := testDefinition with jobSpec -> R8.TestJobSpec;
+	                	if testJobSpec = null then
+	                		testJobSpec := create TestJobSpec(testId => testDefinition.testId, jobSpecName => jobSpec.jobSpecName);
+	                		link testDefinition R8 jobSpec using testJobSpec;
+	                	end if;
+	                    // create the event delivery order
+	                    prevEventDispatchOrder := null;
+						eventDefintions := jobSpec -> R9.EventDefinition;
+						for eventDispatchId in eventDispatchIdList loop
+						  	eventDefinition := find_one eventDefintions(eventDefinitionId = eventDispatchId and jobSpecName = testJobSpec.jobSpecName);;
+						  	if eventDefinition /= null then
+						  		eventDispatchOrder := eventDefinition with testDefinition -> R14.EventDispatchOrder;
+						  		if eventDispatchOrder = null then
+						  			eventDispatchOrder := create EventDispatchOrder(eventDefinitionId => eventDispatchId, 
+						  				                                            jobSpecName => testJobSpec.jobSpecName,
+						  				                                            testId => testDefinition.testId);
+						  			link eventDefinition R14 testDefinition using eventDispatchOrder;
+						  			if testJobSpec -> R12.EventDispatchOrder = null then
+						  				link testJobSpec R12 eventDispatchOrder;
+						  			end if;
+						  			if prevEventDispatchOrder /= null then
+						  				link eventDispatchOrder R13.previousEvent prevEventDispatchOrder;
+						  			end if;
+									prevEventDispatchOrder := eventDispatchOrder; 
+						  		else
+									logMessage := "AESimulator::initialise - invalid configuration duplicate event definition for EventDispatchOrder, eventDispacthId = " & eventDispatchId & "job spec name = " & jobSpecName;
+									Logger::log(Logger::Error, "AESimulator", logMessage);
+								end if;
+							else
+								logMessage := "AESimulator::initialise - invalid configuration failed to find event definition for EventDispatchOrder, eventDispacthId = " & eventDispatchId & "job spec name = " & jobSpecName;
+								Logger::log(Logger::Error, "AESimulator", logMessage);
+								raise program_error;
+							end if;
+						end loop;
+	                end loop;
+	            end loop;
+	        end if;
+	
+		// TODO
+		//else
+	        //	Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
+	        //	raise JSON::JSONException("Config file invalid");
+		//end if;
     
-    // now the config is loaded start the jobs
-    for testDefinition in testDefinitions loop
-      generate TestDefinition.startTest() to testDefinition;
-    end loop;
+		// now the config is loaded start the jobs
+		if testSpec.oneFilePerJob = false then
+			auditEventFile := create unique AuditEventFile(numberOfEvents => 0, isActive => true, fileId => UUID::generate_formatted(), Current_State => Created);
+			schedule auditEventFile.fileTimer generate AuditEventFile.generateFile() to auditEventFile delay testSpec.fileTimeOutPeriod;
+		end if;
+		
+		for testDefinition in find TestDefinition() loop
+		  generate TestDefinition.startTest() to testDefinition;
+		end loop;
     
-  else
-    logMessage := "AESimulator::initialise, failed to locate config file. Specified file = " & configFilePath;
-    Logger::log(Logger::Error, "AESimulator", logMessage);
-    raise program_error;
-  end if;
+	else
+	    logMessage := "AESimulator::initialise, failed to locate config file. Specified file = " & string(configFileName);
+	    Logger::log(Logger::Error, "AESimulator", logMessage);
+	    raise program_error;
+	end if;
   
 exception
   when program_error =>
+    logMessage := "AESimulator::initialise, failed to load configuration file";
+    Logger::log(Logger::Error, "AESimulator", logMessage);
     raise program_error;
   when others =>   
     logMessage := "AESimulator::initialise, failed to load configuration file";
     Logger::log(Logger::Error, "AESimulator", logMessage);
-    
+    raise program_error;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
