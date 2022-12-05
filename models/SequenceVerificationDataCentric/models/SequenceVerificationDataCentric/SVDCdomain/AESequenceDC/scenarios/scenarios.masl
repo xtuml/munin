@@ -1822,3 +1822,33 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. 'b2a89ee5-ce3a-4f03-9959-deef8e5335e0' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitBranchCountDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job LoopCountJob, Sequence LoopCountSequence
+  // 
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFA",1,previousEventTypes,true,false);
+  previousEventTypes := ("BCFA",1,"","");
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFB",1,previousEventTypes,false,false);
+  previousEventTypes := ("BCFB",1,"","");
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFC",1,previousEventTypes,false,false);
+  previousEventTypes := ("BCFC",1,"","");
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFD",1,previousEventTypes,false,false);
+  previousEventTypes := ("BCFD",1,"","");
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFE",1,previousEventTypes,false,false);
+  previousEventTypes := ("BCFE",1,"","");
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true);
+
+  dynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
+//
+//
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
