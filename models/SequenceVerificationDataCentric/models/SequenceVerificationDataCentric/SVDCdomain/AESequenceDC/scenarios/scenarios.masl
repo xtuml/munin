@@ -1793,3 +1793,98 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. 'b63e3b1b-d3d9-4068-a82d-3d9b72a6e65a' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitComplexEventSequence1Definition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job CyclicJob, Sequence CyclicSequence 
+  //
+  // Initial events at start of sequence (initially no loop constraint 'sources' defined on these events)...
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-A",1,previousEventTypes,true,false);  
+  previousEventTypes := ("CS1-A",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-B",1,previousEventTypes,false,false); 
+  previousEventTypes := ("CS1-B",1,"","");
+  eventDefinition ("CyclicJob","CyclicSequence","CS1-C",1,previousEventTypes,false,false);
+  
+  // First branch in sequence definition (initially no loop constraints on the two loops in this branch)...
+  previousEventTypes := ("CS1-C",1,"","") & ("CS1-F",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-D",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-D",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-E",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-E",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-F",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-F",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-G",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-G",1,"","") & ("CS1-F",2,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-D",2,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-D",2,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-E",2,previousEventTypes,false,false);
+  // Future XOR Fork on CS1-E,2" - not included yet - will require constraint definitions
+  //previousEventTypes := ("CS1-E",2,"","");
+  //eventDefinition ("ComplexJob","ComplexSequence","CS1-T",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-E",2,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-F",2,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-F",2,"","") & ("CS1-M",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-H",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-H",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-J",1,previousEventTypes,false,true);
+  //
+  // Second branch in sequence definition...
+  previousEventTypes := ("CS1-C",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-K",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-K",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-L",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-L",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-M",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-M",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-N",1,previousEventTypes,false,true);
+  //
+  // Third branch in sequence definition...
+  previousEventTypes := ("CS1-C",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-P",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-P",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-Q",1,previousEventTypes,false,true);
+  //
+  // Fourth branch in sequence definition...
+  previousEventTypes := ("CS1-C",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-R",1,previousEventTypes,false,true);
+  //
+  // Fifth branch in sequence...
+  previousEventTypes := ("CS1-C",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-C",2,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-C",2,"","") & ("CS1-E",3,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-D",3,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-D",3,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-E",3,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-E",3,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-F",3,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-F",3,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-D",4,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-D",4,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-G",2,previousEventTypes,false,true);
+  //
+  // Sixth branch in sequence (initially no loop constraint on the loop in this branch)...
+  previousEventTypes := ("CS1-C",1,"","") & ("CS1-S",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-S",1,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-S",1,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-D",5,previousEventTypes,false,false);
+  previousEventTypes := ("CS1-D",5,"","");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-E",4,previousEventTypes,false,true);
+//
+///
+end service;
+//
+//previousEventTypes := ("A",1,"","") & ("C",1,"","");
+//  eventDefinition ("ComplexJob","CyclicSequence","B",1,previousEventTypes,false,false);
+//  
+//  previousEventTypes := ("B",1,"","");
+//  
+//  eventDefinition ("CyclicJob","CyclicSequence","C",1,previousEventTypes,false,false);
+//  previousEventTypes := ("C",1,"","");
+//  eventDefinition ("CyclicJob","CyclicSequence","D",1,previousEventTypes,false,true);
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
