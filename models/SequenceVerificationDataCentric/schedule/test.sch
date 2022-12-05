@@ -78,7 +78,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test57MissingInvariants 1057 CleanU
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test58InvalidUserExtraJobInvariant 1058 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test59InvalidUserExtraJobInvariant 1059 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test60StalePersistedInvariant 1060 CleanUpAllJobs 64]
-
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test70ComplexSequence_SunnyDay1 1070 CleanUpAllJobs 64]
 
 
 
