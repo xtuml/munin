@@ -4132,3 +4132,160 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '47d45e9f-59a6-4ca4-85f9-574742100c4a' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test70ComplexSequence_SunnyDay1 () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+previousEvents : sequence of string;
+empty : sequence of string;
+logMessage : string;
+
+begin
+  // This test delivers events for each branch for the complex sequence defined in InitComplexEventSequence1Definition in an
+  // order that is acceptable (remember that the ordering of events in different branches are independent). In this test case
+  // the all the events for a given branch are delivered before the events for the next branch are delivered - until all events
+  // for all branches have been delivered. All AND branches are taken. 
+  // NOTE: Some events will reference previousEvents that have not been delivered, but will arrive later.
+  //
+  // Starting with the initial 3 events in sequence...
+  previousEvents := empty;
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
+  previousEvents := ("Event25");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
+  previousEvents := ("Event59");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event13",theAuditEventData);
+  //
+  // ...then the events for the first branch...
+  previousEvents := ("Event13");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event60",theAuditEventData);
+  previousEvents := ("Event60");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event11",theAuditEventData);
+  previousEvents := ("Event11");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event17",theAuditEventData);
+  previousEvents := ("Event17");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event29",theAuditEventData);
+  previousEvents := ("Event29");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event33",theAuditEventData);
+  previousEvents := ("Event33");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event41",theAuditEventData);
+  previousEvents := ("Event41");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event63",theAuditEventData);
+  previousEvents := ("Event63");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event19",theAuditEventData);
+  previousEvents := ("Event19");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event23",theAuditEventData);
+  previousEvents := ("Event23");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event16",theAuditEventData);
+  previousEvents := ("Event16");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event27",theAuditEventData);
+  previousEvents := ("Event27");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event70",theAuditEventData);
+  previousEvents := ("Event70");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event18",theAuditEventData);
+  previousEvents := ("Event18");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event36",theAuditEventData);
+  previousEvents := ("Event36");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Even66",theAuditEventData);
+  previousEvents := ("Event66");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event55",theAuditEventData);
+  previousEvents := empty & "Event55" & "Event14";
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-H","ComplexSunnyDay1",previousEvents,"Event15",theAuditEventData);
+  previousEvents := ("Event15");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-J","ComplexSunnyDay1",previousEvents,"Event44",theAuditEventData);
+  //
+  // ...and now the events for the second branch...
+  //previousEvents := ("Event13");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-K","ComplexSunnyDay1",previousEvents,"Event61",theAuditEventData);
+  //previousEvents := ("Event61");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event62",theAuditEventData);
+  //previousEvents := ("Event61");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event56",theAuditEventData);
+  //previousEvents := ("Event61");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event57",theAuditEventData);
+  //previousEvents := ("Event61");
+  //theAuditEventData := empty & "Event62" & "Event56" & "Event57";
+  //acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-M","ComplexSunnyDay1",previousEvents,"Event14",theAuditEventData);
+  //
+  // At this point this second branch merges with the first branch at Event15 (defined above).
+  //
+  // ...and now the events for the third branch...
+  //previousEvents := ("Event13");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexSunnyDay1",previousEvents,"Event20",theAuditEventData);
+  //previousEvents := ("Event20");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexSunnyDay1",previousEvents,"Event10",theAuditEventData);
+  //
+  // ...and now the single event for the fourth branch...
+  //previousEvents := ("Event13");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246815","ProtProc-0001","CS1-R","ComplexSunnyDay1",previousEvents,"Event26",theAuditEventData);
+  //
+  // ...and now the events for the fifth branch...
+  //previousEvents := ("Event13");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event64",theAuditEventData);
+  //previousEvents := ("Event64");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event30",theAuditEventData);
+  //previousEvents := ("Event30");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event16",theAuditEventData);
+  //previousEvents := ("Event16");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event45",theAuditEventData);
+  //previousEvents := ("Event45");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event21",theAuditEventData);
+  //previousEvents := ("Event21");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event24",theAuditEventData);
+  //previousEvents := ("Event24");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event39",theAuditEventData);
+  //previousEvents := ("Event13");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event34",theAuditEventData);
+  //
+  // ...and finally, the events for the sixth branch.
+  //previousEvents := ("Event13");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event42",theAuditEventData);
+  //previousEvents := ("Event42");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event31",theAuditEventData);//previousEvents := ("Event13");
+  //previousEvents := ("Event31");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event22",theAuditEventData);
+  //previousEvents := ("Event22");
+  //theAuditEventData := emptyAuditEventData;
+  //acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event32",theAuditEventData);
+  //
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
