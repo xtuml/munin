@@ -79,7 +79,8 @@ public service AESequenceDC::eventDefinition ( jobName : in string,
                                               occurrenceId : in integer,
                                               previousEventTypes : in sequence of eventStructure,
                                               isSequenceStart : in boolean,
-                                              isSequenceEnd : in boolean ) is
+                                              isSequenceEnd : in boolean,
+                                              isBreak : in boolean ) is
 theJobDefn : instance of JobDefinition;
 theSequenceDefn : instance of AESequenceDefinition;
 theEventDefn : instance of AuditEventDefinition;
@@ -125,8 +126,8 @@ begin
     	                                                            AESequenceId => theSequenceDefn.AESequenceId, 
     	                                                            occurrenceNumberInSequence => occurrenceId, 
     	                                                            isSequenceStart => isSequenceStart, 
-    	                                                            isSequenceEnd => isSequenceEnd
-                                                                    );
+    	                                                            isSequenceEnd => isSequenceEnd,
+                                                                    isBreak => isBreak);
     link theEventOccInSeqDef R12 theEventInSeqDef;
   else
     // The event definition has been seen before which could indicate the repetition of an event type in a sequence
@@ -149,8 +150,11 @@ begin
                                                                       );
         link theEventInSeqDef R12 theEventOccInSeqDef;
       else
-        // It is a placeholder so now we've seen it for real we can clear the isPlaceholder flag
+        // It is a placeholder so now we've seen it for real we can clear the isPlaceholder flag and set the other flags according to input data
         thePlaceholderEventOccInSeqDef.isPlaceholder := false;
+        thePlaceholderEventOccInSeqDef.isSequenceEnd := isSequenceStart;
+        thePlaceholderEventOccInSeqDef.isSequenceEnd := isSequenceEnd;
+        thePlaceholderEventOccInSeqDef.isBreak := isBreak;
         theEventOccInSeqDef := thePlaceholderEventOccInSeqDef;
       end if;  
     else  
@@ -166,43 +170,68 @@ begin
         thePrevEventInSeqDefn :=  thePrevEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
         existingEventOccurrencesInSeqDefn := thePrevEventInSeqDefn -> R12;
         thePrevEventOccInSeqDefn := find_one existingEventOccurrencesInSeqDefn (occurrenceNumberInSequence = previousEventType.occurrenceId);
-        newEventInSeqPairDef := create AEInSequencePairDefn (
+        if thePrevEventOccInSeqDefn /= null then
+          newEventInSeqPairDef := create AEInSequencePairDefn (
         	                                                 AESequenceId => theSequenceDefn.AESequenceId, 
         	                                                 followingAEDefinitionId => theEventOccInSeqDef.AEDefinitionId, 
         	                                                 precedingAEDefinitionId => thePrevEventOccInSeqDefn.AEDefinitionId, 
         	                                                 followingoccurrenceNumberInSequence => theEventOccInSeqDef.occurrenceNumberInSequence, 
         	                                                 precedingoccurrenceNumberInSequence => thePrevEventOccInSeqDefn.occurrenceNumberInSequence
                                                              );
-        link thePrevEventOccInSeqDefn R6.precedes theEventOccInSeqDef using newEventInSeqPairDef;
-        theConstraintDefn := find_one ConstraintDefinition (constraintDefnId = previousEventType.constraintDefId and jobName = theJobDefn.jobName);
-        if theConstraintDefn /= null and (theConstraintDefn.constraintType'image = previousEventType.constraintValue) then
-          // This is an existing known constraint so this is an additional event pair in that constraint
-          link newEventInSeqPairDef R16 theConstraintDefn;
-        elsif previousEventType.constraintDefId /= "" then
-          // This is a new constraint
-          if previousEventType.constraintValue = "AND" then
-            theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => AND );
-          elsif previousEventType.constraintValue = "XOR" then
-            theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => XOR );
-          elsif previousEventType.constraintValue = "LOOPCOUNT" then
-            theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => LOOPCOUNT );
-          elsif previousEventType.constraintValue = "BRANCHCOUNT" then
-            theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => BRANCHCOUNT );
+          link thePrevEventOccInSeqDefn R6.precedes theEventOccInSeqDef using newEventInSeqPairDef;
+          theConstraintDefn := find_one ConstraintDefinition (constraintDefnId = previousEventType.constraintDefId and jobName = theJobDefn.jobName);
+          if theConstraintDefn /= null and (theConstraintDefn.constraintType'image = previousEventType.constraintValue) then
+            // This is an existing known constraint so this is an additional event pair in that constraint
+            link newEventInSeqPairDef R16 theConstraintDefn;
+          elsif previousEventType.constraintDefId /= "" then
+            // This is a new constraint
+            if previousEventType.constraintValue = "AND" then
+              theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => AND );
+            elsif previousEventType.constraintValue = "XOR" then
+              theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => XOR );
+            elsif previousEventType.constraintValue = "LOOPCOUNT" then
+              theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => LOOPCOUNT );
+            elsif previousEventType.constraintValue = "BRANCHCOUNT" then
+              theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => BRANCHCOUNT );
+            else
+              logMessage := "Invalid Constraint Value provided : " & previousEventType.constraintValue & "in Job Name = " & jobName;
+	          Logger::log(Logger::Error, "AESequenceDC", logMessage);            
+            end if;
+            if theConstraintDefn /= null then
+              link theConstraintDefn R17 theJobDefn;
+              link newEventInSeqPairDef R16 theConstraintDefn;
+            end if;  
+          elsif previousEventType.constraintDefId = "" then
+            // No constraint specified which is valid
           else
-            logMessage := "Invalid Constraint Value provided : " & previousEventType.constraintValue & "in Job Name = " & jobName;
+            logMessage := "Invalid Constraint Definition provided : " & previousEventType.constraintDefId & "in Job Name = " & jobName;
 	        Logger::log(Logger::Error, "AESequenceDC", logMessage);            
           end if;
-          if theConstraintDefn /= null then
-            link theConstraintDefn R17 theJobDefn;
-            link newEventInSeqPairDef R16 theConstraintDefn;
-          end if;  
-        elsif previousEventType.constraintDefId = "" then
-          // No constraint specified which is valid
         else
-          logMessage := "Invalid Constraint Definition provided : " & previousEventType.constraintDefId & "in Job Name = " & jobName;
-	      Logger::log(Logger::Error, "AESequenceDC", logMessage);            
-        end if;
+          // We have a reference to a forward event which is possible in the case of cyclic sequences so create a placeholder event
+          // In this case the event definition has been seen before but not this referenced occurrence number
+          thePlaceholderEventDefn := thePrevEventDefn; 
+          thePlaceholderEventInSeqDef := thePlaceholderEventDefn with theSequenceDefn -> R1;
+          thePlaceholderEventOccInSeqDef := create AEOccurrenceInSequenceDefinition (
+    	                                                            AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, 
+    	                                                            AESequenceId => theSequenceDefn.AESequenceId, 
+    	                                                            occurrenceNumberInSequence => previousEventType.occurrenceId, 
+    	                                                            //isSequenceStart => isSequenceStart, 
+    	                                                            //isSequenceEnd => isSequenceEnd,
+    	                                                            isPlaceholder => true
+                                                                    );
+          link thePlaceholderEventOccInSeqDef R12 thePlaceholderEventInSeqDef;
+          newEventInSeqPairDef := create AEInSequencePairDefn (
+        	                                                 AESequenceId => theSequenceDefn.AESequenceId, 
+        	                                                 followingAEDefinitionId => theEventOccInSeqDef.AEDefinitionId, 
+        	                                                 precedingAEDefinitionId => thePlaceholderEventOccInSeqDef.AEDefinitionId, 
+        	                                                 followingoccurrenceNumberInSequence => theEventOccInSeqDef.occurrenceNumberInSequence, 
+        	                                                 precedingoccurrenceNumberInSequence => thePlaceholderEventOccInSeqDef.occurrenceNumberInSequence
+                                                             );
+          link thePlaceholderEventOccInSeqDef R6.precedes theEventOccInSeqDef using newEventInSeqPairDef;
         
+        
+        end if;
       else
         // We have a reference to a forward event which is possible in the case of cyclic sequences so create a placeholder event
         thePlaceholderEventDefn := create unique AuditEventDefinition (AEType => previousEventType.eventTypeName); 
@@ -225,6 +254,7 @@ begin
         	                                                 precedingoccurrenceNumberInSequence => thePlaceholderEventOccInSeqDef.occurrenceNumberInSequence
                                                              );
         link thePlaceholderEventOccInSeqDef R6.precedes theEventOccInSeqDef using newEventInSeqPairDef;
+        
         
         // The previous event definition provided is unknown
         //logMessage := "Previous event types provided in the initialisation data are unknown, Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType& ", Previous event type = " & previousEventType.eventTypeName;
@@ -385,6 +415,33 @@ begin
   end loop;
   IntraJobInvariantDefn.createIntraJobInvariantDefn(jobDefnName, auditEventDataName, invariantEventTypes);
 
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '14010743-d12c-4236-a031-cc9825948007' DO NOT EDIT THIS LINE.
+public service AESequenceDC::dynamicControlDefinition ( jobName : in string,
+                                                       dynamicControlName : in string,
+                                                       dynamicControlType : in dynamicControlTypeEnum,
+                                                       sourceEventType : in string,
+                                                       sourceOccurrenceId : in integer,
+                                                       userEventType : in string,
+                                                       userOccurrenceId : in integer ) is
+// This function defines the dynamic control, which is a loop count or a branch count, together with the event
+// that provides it and the event that uses it. This function could be split such that the dynamic control is
+// set up with just the source event and the user event linked in later on in a different call to a different 
+// function.
+begin
+  DynamicControlDefinition.createDynamicControlDefinition (jobName,
+  	                                                       dynamicControlName,
+  	                                                       dynamicControlType,
+  	                                                       sourceEventType,
+  	                                                       sourceOccurrenceId);
+  DynamicControlDefinition.linkUserEventDefn (jobName,
+  	                                          dynamicControlName,
+  	                                          dynamicControlType,
+  	                                          userEventType,
+  	                                          userOccurrenceId);
   
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

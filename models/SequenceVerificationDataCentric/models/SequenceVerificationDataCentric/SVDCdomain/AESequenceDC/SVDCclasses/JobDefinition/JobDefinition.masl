@@ -22,6 +22,8 @@ theConstraintDefinition : instance of ConstraintDefinition;
 theIntraJobInvariantDefn : instance of IntraJobInvariantDefn;
 theExtraJobInvariantDefns : set of instance of ExtraJobInvariantDefn;
 theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+theDynamicControlDefns : set of instance of DynamicControlDefinition;
+theDynamicControlDefn : instance of DynamicControlDefinition;
 theJobs: set of instance of Job;
 theJob: instance of Job;
 logMessage : string;
@@ -60,6 +62,17 @@ begin
       delete theExtraJobInvariantDefn;
     end loop;  
     
+    theDynamicControlDefns := this -> R32;
+    for theDynamicControlDefn in theDynamicControlDefns loop
+      if (theDynamicControlDefn -> R30) /= null then
+        unlink (theDynamicControlDefn -> R30) R30 theDynamicControlDefn;
+      end if;
+      if (theDynamicControlDefn -> R31) /= null then
+        unlink (theDynamicControlDefn -> R31) R31 theDynamicControlDefn;
+      end if;
+      unlink this R32 theDynamicControlDefn;
+      delete theDynamicControlDefn;
+    end loop;
     // Delete the Sequences and their associated audit event definitions
     
     theSequenceDefns := this -> R7; 
