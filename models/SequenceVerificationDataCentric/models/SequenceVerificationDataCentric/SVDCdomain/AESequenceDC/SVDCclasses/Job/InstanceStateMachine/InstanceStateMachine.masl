@@ -36,9 +36,11 @@ theUserExtraJobInvariant : instance of TransientInvariant;
 theDynamicControlDefn : instance of DynamicControlDefinition;
 newDynamicControl : instance of DynamicControl;
 theUserDynamicControlDefn : instance of DynamicControlDefinition;
+theCurrentDynamicControlDefn : instance of DynamicControlDefinition;
 theUserDynamicControl : instance of DynamicControl;
-thisJobsDynamicControl : set of instance of DynamicControl;
+thisJobsDynamicControl : instance of DynamicControl;
 thisJobsDynamicControls : set of instance of DynamicControl;
+theCurrentDynamicControls : set of instance of DynamicControl;
 thePrevUserDynamicControlDefn : instance of DynamicControlDefinition;
 thePrevUserDynamicControl : instance of DynamicControl;
 loopCount : integer;
@@ -184,9 +186,16 @@ begin
 	                  Logger::log(Logger::Information, "AESequenceDC", logMessage);	                
 	                end if;
 
-
-
-
+                    // Check to see if this is a break event causing us to exit a loop and cancel the loop count
+                    if theAeOccInSequenceDef.isBreak = true then
+                      theCurrentDynamicControls := find DynamicControl (expectedDynamicControlValue > 0);
+                      for theCurrentDynamicControl in theCurrentDynamicControls loop
+                        theCurrentDynamicControlDefn := theCurrentDynamicControl -> R29;
+                        if theCurrentDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
+                          theCurrentDynamicControl.expectedDynamicControlValue := 0;
+                        end if;
+                      end loop;
+                    end if;
                     
                   else
                     //Log Job failure: Previous event is valid but is part of a broken sequence
