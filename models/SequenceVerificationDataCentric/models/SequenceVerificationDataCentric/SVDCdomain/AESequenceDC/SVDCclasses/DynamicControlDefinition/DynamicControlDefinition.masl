@@ -32,16 +32,16 @@ begin
           //link R30
           link newDynamicControlDefn R30 sourceAEOccurrenceDefn;
         else
-          // The specified Audit Event Occurrence Definition was not found
+          // TODO Add error handling for the specified Audit Event Occurrence Definition was not found
         end if;  
       else
-        // The Sequence Definition corresponding to this Audit Event was not found
+        // TODO Add error handling for the Sequence Definition corresponding to this Audit Event was not found
       end if;    
     else
-      // The sourceEventType specified is invalid
+      // TODO Add error handling for the sourceEventType specified is invalid
     end if;    
   else
-    //Error Job Definition Unknown
+    //TODO Add error handling for Error Job Definition Unknown
   end if;  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
