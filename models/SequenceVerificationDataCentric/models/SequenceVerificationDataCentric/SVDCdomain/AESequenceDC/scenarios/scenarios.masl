@@ -1808,17 +1808,20 @@ begin
   previousEventTypes := ("CS1-A",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-B",1,previousEventTypes,false,false); 
   previousEventTypes := ("CS1-B",1,"","");
-  eventDefinition ("CyclicJob","CyclicSequence","CS1-C",1,previousEventTypes,false,false);
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-C",1,previousEventTypes,false,false);
   
   // First branch in sequence definition (initially no loop constraints on the two loops in this branch)...
+  // Start of first loop in branch
   previousEventTypes := ("CS1-C",1,"","") & ("CS1-F",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-D",1,previousEventTypes,false,false);
   previousEventTypes := ("CS1-D",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-E",1,previousEventTypes,false,false);
   previousEventTypes := ("CS1-E",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-F",1,previousEventTypes,false,false);
+  //end of first loop in branch
   previousEventTypes := ("CS1-F",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-G",1,previousEventTypes,false,false);
+  //start of second loop in branch
   previousEventTypes := ("CS1-G",1,"","") & ("CS1-F",2,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-D",2,previousEventTypes,false,false);
   previousEventTypes := ("CS1-D",2,"","");
@@ -1828,6 +1831,7 @@ begin
   //eventDefinition ("ComplexJob","ComplexSequence","CS1-T",1,previousEventTypes,false,false);
   previousEventTypes := ("CS1-E",2,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-F",2,previousEventTypes,false,false);
+  // end of second loop in branch
   previousEventTypes := ("CS1-F",2,"","") & ("CS1-M",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-H",1,previousEventTypes,false,false);
   previousEventTypes := ("CS1-H",1,"","");
@@ -1877,14 +1881,5 @@ begin
 //
 ///
 end service;
-//
-//previousEventTypes := ("A",1,"","") & ("C",1,"","");
-//  eventDefinition ("ComplexJob","CyclicSequence","B",1,previousEventTypes,false,false);
-//  
-//  previousEventTypes := ("B",1,"","");
-//  
-//  eventDefinition ("CyclicJob","CyclicSequence","C",1,previousEventTypes,false,false);
-//  previousEventTypes := ("C",1,"","");
-//  eventDefinition ("CyclicJob","CyclicSequence","D",1,previousEventTypes,false,true);
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

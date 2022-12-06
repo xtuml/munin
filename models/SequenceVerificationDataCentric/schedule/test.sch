@@ -9,6 +9,7 @@ RUN SCENARIO AESequenceDC 5 "InitIntraJobInvariantDefinition"
 RUN SCENARIO AESequenceDC 7 "InitPersistentInvariantAuthAndBankTransferDefinition"
 RUN SCENARIO AESequenceDC 8 "InitEventDefinitionForInclusiveOR"
 RUN SCENARIO AESequenceDC 9 "InitLoopBreakEventDefinition"
+RUN SCENARIO AESequenceDC 501 "InitComplexEventSequence1Definition"
 
 # run normal path tests
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test01NormalPath 1001 CleanUpAllJobs 64]
@@ -39,6 +40,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test22NormalSourceExtraJobInvariant
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test23NormalUserExtraJobInvariant 1023 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test24MultipleInForcePersistentInvariant 1024 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test25NormalLoopWithBreakPath 1025 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test70ComplexSequence_SunnyDay1 1070 CleanUpAllJobs 64]
 
 
 
@@ -78,7 +80,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test57MissingInvariants 1057 CleanU
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test58InvalidUserExtraJobInvariant 1058 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test59InvalidUserExtraJobInvariant 1059 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test60StalePersistedInvariant 1060 CleanUpAllJobs 64]
-RUN SCENARIO Test 1 "run_test" [AESequenceDC Test70ComplexSequence_SunnyDay1 1070 CleanUpAllJobs 64]
+
 
 
 
