@@ -1,0 +1,191 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("5602af71-42af-43fe-9dff-2ddc121e50f0",
+	'AuditEventFile',
+	10,
+	'AuditEventFile',
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_NBATTR
+	VALUES ("c54f61f3-f1fa-4863-b2f0-94b50a51d823",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_BATTR
+	VALUES ("c54f61f3-f1fa-4863-b2f0-94b50a51d823",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_ATTR
+	VALUES ("c54f61f3-f1fa-4863-b2f0-94b50a51d823",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0",
+	"00000000-0000-0000-0000-000000000000",
+	'auditEventFileId',
+	'',
+	'',
+	'auditEventFileId',
+	0,
+	"ad037aa9-1571-4ae8-b823-dff44db842cc",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("ad037aa9-1571-4ae8-b823-dff44db842cc",
+	"00000000-0000-0000-0000-000000000000",
+	'MASLunique',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("17ddcc06-6e25-474e-9670-48110901d6e8",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_BATTR
+	VALUES ("17ddcc06-6e25-474e-9670-48110901d6e8",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_ATTR
+	VALUES ("17ddcc06-6e25-474e-9670-48110901d6e8",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0",
+	"c54f61f3-f1fa-4863-b2f0-94b50a51d823",
+	'auditEvents',
+	'The audit events that need to be written to the audit event file.',
+	'',
+	'auditEvents',
+	0,
+	"5129efe2-217d-4ec6-803f-57526e310a5c",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("5129efe2-217d-4ec6-803f-57526e310a5c",
+	"00000000-0000-0000-0000-000000000000",
+	'JSON::JSONArray',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("f634dd60-3d86-4a39-a8f5-cf6dedb52008",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_BATTR
+	VALUES ("f634dd60-3d86-4a39-a8f5-cf6dedb52008",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_ATTR
+	VALUES ("f634dd60-3d86-4a39-a8f5-cf6dedb52008",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0",
+	"17ddcc06-6e25-474e-9670-48110901d6e8",
+	'numberOfEvents',
+	'The current number of events that have been written to the file. Only used when one file per job is false.',
+	'',
+	'numberOfEvents',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("470f7fec-af81-4a96-ae66-f13450264a5d",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_BATTR
+	VALUES ("470f7fec-af81-4a96-ae66-f13450264a5d",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_ATTR
+	VALUES ("470f7fec-af81-4a96-ae66-f13450264a5d",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0",
+	"f634dd60-3d86-4a39-a8f5-cf6dedb52008",
+	'fileTimer',
+	'A timer used to write events to the audit event file when expired. Only used when one file per job is false.',
+	'',
+	'fileTimer',
+	0,
+	"ec4b915d-30f4-4c2f-8363-0fafbfea9a45",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("ec4b915d-30f4-4c2f-8363-0fafbfea9a45",
+	"00000000-0000-0000-0000-000000000000",
+	'timer',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("e94cb25b-9f4b-483a-835b-6c15fadc922d",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_BATTR
+	VALUES ("e94cb25b-9f4b-483a-835b-6c15fadc922d",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_ATTR
+	VALUES ("e94cb25b-9f4b-483a-835b-6c15fadc922d",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0",
+	"470f7fec-af81-4a96-ae66-f13450264a5d",
+	'isActive',
+	'If set to true indictes that this is the active audit event file. Only used when one file per job is false and if in use there should only ever be one active audit event file.',
+	'',
+	'isActive',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000001",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("a59a34f2-13e6-4ee5-97d9-9dd18403b52c",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_BATTR
+	VALUES ("a59a34f2-13e6-4ee5-97d9-9dd18403b52c",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_ATTR
+	VALUES ("a59a34f2-13e6-4ee5-97d9-9dd18403b52c",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0",
+	"65a8dcd9-23f2-41d2-a094-cc61f2b8af7d",
+	'current_state',
+	'',
+	'',
+	'current_state',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000006",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("65a8dcd9-23f2-41d2-a094-cc61f2b8af7d",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_BATTR
+	VALUES ("65a8dcd9-23f2-41d2-a094-cc61f2b8af7d",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_ATTR
+	VALUES ("65a8dcd9-23f2-41d2-a094-cc61f2b8af7d",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0",
+	"e94cb25b-9f4b-483a-835b-6c15fadc922d",
+	'fileId',
+	'',
+	'',
+	'fileId',
+	0,
+	"eeab6809-3afb-4f84-83a0-aa40658fbf99",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("eeab6809-3afb-4f84-83a0-aa40658fbf99",
+	"00000000-0000-0000-0000-000000000000",
+	'UUID::formatted_uuid',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_ID
+	VALUES (0,
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_OIDA
+	VALUES ("c54f61f3-f1fa-4863-b2f0-94b50a51d823",
+	"5602af71-42af-43fe-9dff-2ddc121e50f0",
+	0,
+	'auditEventFileId');
+INSERT INTO O_ID
+	VALUES (1,
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO O_ID
+	VALUES (2,
+	"5602af71-42af-43fe-9dff-2ddc121e50f0");
+INSERT INTO PE_PE
+	VALUES ("5602af71-42af-43fe-9dff-2ddc121e50f0",
+	1,
+	"2c28acec-f7ce-483b-8ff9-2389d6c60fc0",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("2c28acec-f7ce-483b-8ff9-2389d6c60fc0",
+	"00000000-0000-0000-0000-000000000000",
+	"38f2bebf-e367-4b1e-99fe-7229b8de474b",
+	'classes',
+	'',
+	0,
+	'../classes.xtuml');
