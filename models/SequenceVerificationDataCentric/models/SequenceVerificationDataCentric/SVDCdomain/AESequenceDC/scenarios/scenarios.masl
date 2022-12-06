@@ -1793,66 +1793,6 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '350faa6c-e997-4e01-bafb-7c7806492dd0' DO NOT EDIT THIS LINE.
-private service AESequenceDC::InitLoopCountDefinition () is
-// Initialisation goes here.
-previousEventTypes : sequence of eventStructure;
-empty : sequence of eventStructure;
-
-begin
-  //
-  // Job LoopCountJob, Sequence LoopCountSequence
-  // 
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLA",1,previousEventTypes,true,false,false);
-  previousEventTypes := ("LCLA",1,"","") & ("LCLD",1,"","");
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLB",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("LCLB",1,"","");
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLC",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("LCLC",1,"CFork","XOR");
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLD",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("LCLC",1,"CFork","XOR");
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLCError",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("LCLD",1,"","") & ("LCLCError",1,"","");
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLE",1,previousEventTypes,false,true,false);
-
-  dynamicControlDefinition("LoopCountJob", "Counter_1", dynamicControlTypeEnum.LOOPCOUNT, "LCLA",1,"LCLB",1);
-//
-//
-end service;
-//
-//
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'b2a89ee5-ce3a-4f03-9959-deef8e5335e0' DO NOT EDIT THIS LINE.
-private service AESequenceDC::InitBranchCountDefinition () is
-// Initialisation goes here.
-previousEventTypes : sequence of eventStructure;
-empty : sequence of eventStructure;
-
-begin
-  //
-  // Job LoopCountJob, Sequence LoopCountSequence
-  // 
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFA",1,previousEventTypes,true,false,false);
-  previousEventTypes := ("BCFA",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFB",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("BCFB",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFC",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("BCFC",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFD",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("BCFD",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFE",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("BCFE",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false);
-
-  dynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
-//
-//
-end service;
-//
-//
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
 //! ACTIVITY BEGIN. 'b63e3b1b-d3d9-4068-a82d-3d9b72a6e65a' DO NOT EDIT THIS LINE.
 private service AESequenceDC::InitComplexEventSequence1Definition () is
 // Initialisation goes here.
@@ -1939,7 +1879,67 @@ begin
   previousEventTypes := ("CS1-D",5,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-E",4,previousEventTypes,false,true);
 //
-///
+//
 end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '350faa6c-e997-4e01-bafb-7c7806492dd0' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitLoopCountDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job LoopCountJob, Sequence LoopCountSequence
+  // 
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLA",1,previousEventTypes,true,false,false);
+  previousEventTypes := ("LCLA",1,"","") & ("LCLD",1,"","");
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLB",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("LCLB",1,"","");
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLC",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("LCLC",1,"CFork","XOR");
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLD",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("LCLC",1,"CFork","XOR");
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLCError",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("LCLD",1,"","") & ("LCLCError",1,"","");
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLE",1,previousEventTypes,false,true,false);
+
+  dynamicControlDefinition("LoopCountJob", "Counter_1", dynamicControlTypeEnum.LOOPCOUNT, "LCLA",1,"LCLB",1);
+//
+//
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b2a89ee5-ce3a-4f03-9959-deef8e5335e0' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitBranchCountDefinition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // Job LoopCountJob, Sequence LoopCountSequence
+  // 
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFA",1,previousEventTypes,true,false,false);
+  previousEventTypes := ("BCFA",1,"","");
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFB",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("BCFB",1,"","");
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFC",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("BCFC",1,"","");
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFD",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("BCFD",1,"","");
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFE",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("BCFE",1,"","");
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false);
+
+  dynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
+//
+//
+end service;
+//
+//
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
