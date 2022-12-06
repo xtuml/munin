@@ -4214,6 +4214,9 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-J","ComplexSunnyDay1",previousEvents,"Event44",theAuditEventData);
   //
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  //
   // ...and now the events for the second branch...
   //previousEvents := ("Event13");
   //theAuditEventData := emptyAuditEventData;
