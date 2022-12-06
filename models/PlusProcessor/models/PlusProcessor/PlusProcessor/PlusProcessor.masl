@@ -9,10 +9,11 @@ end service;
 
 //! ACTIVITY BEGIN. '9c0892d2-f435-4c12-b39d-51103e70fb1a' DO NOT EDIT THIS LINE.
 public service SequenceProcessor::StatementParser~>validateStatements ( jobId : in integer,
-                                                                       plusStatements : in string ) is
+                                                                       directory : in Filesystem::filename,
+                                                                       filename : in Filesystem::filename ) is
 begin
 
-	StatementParser::validateStatements(jobId, plusStatements);
+	StatementParser::validateStatements(jobId, directory, filename);
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

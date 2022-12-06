@@ -49,15 +49,13 @@ end state;
 //! ACTIVITY BEGIN. 'e7d4fa65-d657-4f04-bb02-f970353f2293' 'a7ee88b0-db2d-4b13-8d12-3d879ac41bd1' DO NOT EDIT THIS LINE.
 state SequenceProcessor::SequenceFile.ParsingFile () is
 logMessage : string;
-plusStatement : string;
 
 begin
 	
-	logMessage := "SequenceProcessor::SequenceFile.ParsingFile";
+	logMessage := "SequenceProcessor::SequenceFile.ParsingFile this.fileName=" & this.fileName;
 	Logger::log(Logger::Information, "SequenceProcessor", logMessage);
 	
-	plusStatement :=  Filesystem::read_file(Filesystem::filename(this.fileName));
-	StatementParser~>validateStatements(this.jobId, plusStatement);
+	StatementParser~>validateStatements(this.jobId, Filesystem::get_directory(Filesystem::filename(this.fileName)), Filesystem::get_basename(Filesystem::filename(this.fileName)));
 	
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
