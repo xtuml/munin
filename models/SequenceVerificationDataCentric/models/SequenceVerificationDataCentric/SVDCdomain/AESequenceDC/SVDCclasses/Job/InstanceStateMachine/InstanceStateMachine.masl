@@ -73,8 +73,8 @@ begin
       // ...and then check that just one of these matches with an event occurrence that is expected for the previous event
       if (prevAEIds /= empty) and (prevAEIds /= emptyPrevId) then
         // Log info: Event has previous event ids
-        logMessage := "Follow on event for existing Job received - jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
-	    Logger::log(Logger::Information, "AESequenceDC", logMessage);   
+        //logMessage := "Follow on event for existing Job received - jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
+	    //Logger::log(Logger::Information, "AESequenceDC", logMessage);   
 
         for aPrevEventId in prevAEIds loop //NEW INSERT
           // Need to locate the previous event as defined in the event parameter
@@ -119,7 +119,7 @@ begin
                 newEvent.TestPreviousEventIsValid (prevEvent, prevEventIsValid); 
                 if prevEventIsValid then
                   // Previous event is valid 
-                  logMessage := "Previous event is valid - jobId = " & this.jobID & ", audit event sequence = " & theSequenceDef.sequenceDefinitionName & ", current event type = " & theEventType.AEType;
+                  logMessage := "Previous event is valid - jobId = " & this.jobID & ", audit event sequence = " & theSequenceDef.sequenceDefinitionName & ", current event type = " & theEventType.AEType & ", Occurrence Id " & theAeOccInSequenceDef.occurrenceNumberInSequence'image;
 	              Logger::log(Logger::Information, "AESequenceDC", logMessage);    
                   // The new event is a follow on event to the previous event so we know it is part of the same sequence as the previous event
                   currentSequence := prevEvent -> R11;
