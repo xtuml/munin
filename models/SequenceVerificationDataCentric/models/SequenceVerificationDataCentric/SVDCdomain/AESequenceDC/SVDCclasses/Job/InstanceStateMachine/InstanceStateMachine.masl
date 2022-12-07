@@ -304,6 +304,8 @@ begin
         end if; 
       end if;           
 
+    declare
+    begin
       // Capture any audit event data associated with this audit event
       theAeOccInSequenceDef := newEvent -> R13;
       for aeDataElement in aeData loop
@@ -432,7 +434,13 @@ begin
             // Log warning: Unsupported audit event data type
             this.failJob("The audit event data type provided for jobId = " & this.jobID & " is an unsupported type of audit event data = " & aeDataElement.aedName'image);               
         end case;  
-      end loop;      
+      end loop;
+      
+      exception
+        when program_error =>
+          this.failJob("Program Error in Audit Event Data part of Job.JobInProgress in " & this.jobID & " possibly caused by a non-integer loop or branch count in the audit event data : " & aeDataElement.aedValue);               
+                
+      end;      
       
   
       // Check to see if the received event marks an end point in the current sequence and if so check whether or

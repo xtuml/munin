@@ -71,7 +71,10 @@ begin
           newJob.sequencingFailed := true;
           newJob.failJob("First event for new Job is not a valid event type to start a sequence - Job Id = " & newJob.jobID & " Event Type = " & newEventType.AEType);
         end if;
-    
+        
+      declare
+      
+      begin
         // Capture any audit event data associated with this audit event
         for aeDataElement in aeData loop
           case aeDataElement.aedKind is
@@ -196,6 +199,12 @@ begin
 	          Logger::log(Logger::Information, "AESequenceDC", logMessage);
           end case;  
         end loop;
+        
+      exception
+        when program_error =>
+          newJob.failJob("Program Error in Audit Event Data part of Job.JobInProgress in " & newJob.jobID & " possibly caused by a non-integer loop or branch count in the audit event data : " & aeDataElement.aedValue);                          
+      end;      
+        
       else
         newJob.failJob("Invalid audit event definition for a start event in job definition = " & theJobDef.jobName & " since the occurrenceNumberInSequence is expected to be 1");    
       end if;  
