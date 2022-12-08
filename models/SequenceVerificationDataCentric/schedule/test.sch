@@ -6,11 +6,11 @@ RUN SCENARIO AESequenceDC 2 "InitCyclicTopologyEventDefinition"
 RUN SCENARIO AESequenceDC 3 "InitSystemSpec"
 RUN SCENARIO AESequenceDC 4 "InitForkAndMergeTopologyEventDefinition"
 RUN SCENARIO AESequenceDC 5 "InitIntraJobInvariantDefinition"
-RUN SCENARIO AESequenceDC 6 "InitBranchCountDefinition"
 RUN SCENARIO AESequenceDC 7 "InitPersistentInvariantAuthAndBankTransferDefinition"
 RUN SCENARIO AESequenceDC 8 "InitEventDefinitionForInclusiveOR"
 RUN SCENARIO AESequenceDC 9 "InitLoopBreakEventDefinition"
 RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
+RUN SCENARIO AESequenceDC 901 "InitBranchCountDefinition"
 
 
 # run normal path tests
