@@ -10,8 +10,12 @@ state AESimulator::DeployedEvent.Dispatched () is
 logMessage : string;
 job : instance of Job;
 eventDefinition : instance of EventDefinition;
-testDefinition : instance of TestDefinition;
+testSpec : instance of TestSpec;
 audit_event: JSON::JSONObject;
+auditEventFile : instance of AuditEventFile;
+newAuditEventFile : instance of AuditEventFile;
+eventFileForJob : instance of EventFileForJob;
+epochDate : timestamp;
 
 begin
 	
@@ -20,27 +24,43 @@ begin
 	
 	job := this -> R6.Job;
 	eventDefinition := this -> R5.EventDefinition;
-	testDefinition := job -> R7.TestDefinition;
+	testSpec := find_one TestSpec();;
 	this.deployed := true;
-	if testDefinition.generateTestFiles = true then
-		
-//		logMessage := "jobId = " & string(job.jobId) & ", eventTypeName = " & eventDefinition.eventTypeName &
-//		              ", id = " & string(this.eventId) & ", prevId = " & this.prevEventId;
-//		Logger::log(Logger::Information, "AESimulator", logMessage);
-		job.auditEvents := job.auditEvents & JSON::to_json(eventDefinition.nodeName);
-		
-		audit_event["time"] := JSON::to_json(this.epochEventTime);
+	auditEventFile := find_one (job -> R17.AuditEventFile)(isActive = true);
+	if auditEventFile /= null then			
+		auditEventFile.auditEvents := auditEventFile.auditEvents & JSON::to_json(eventDefinition.nodeName);
+		audit_event["time"] := JSON::to_json(this.epochEventCreationTime);
 		audit_event["app"] := JSON::to_json(eventDefinition.applicationName);
 		audit_event["jobId"] := JSON::to_json(string(job.jobId));
 		audit_event["type"] := JSON::to_json(eventDefinition.eventTypeName);
 		audit_event["id"] := JSON::to_json(string(this.eventId));
+		for eventData in eventDefinition -> R16.EventData loop
+			audit_event[eventData.eventDataName] := JSON::to_json(eventData.eventDataValue);
+		end loop;
 		if this.prevEventId /= "" and eventDefinition.sequenceStart = false then
 		  audit_event["prev"] := JSON::to_json(this.prevEventId);
 		end if;
-		job.auditEvents := job.auditEvents & JSON::to_json(audit_event);
-
+		auditEventFile.auditEvents := auditEventFile.auditEvents & JSON::to_json(audit_event);
+		auditEventFile.numberOfEvents := auditEventFile.numberOfEvents + 1;
+		if testSpec.oneFilePerJob = false and auditEventFile.numberOfEvents >= testSpec.maxEventsPerFile then
+			generate AuditEventFile.generateFile() to auditEventFile;
+			// make this audit file inactive and create a new audit file
+			auditEventFile.isActive := false;
+			newAuditEventFile := create unique AuditEventFile(numberOfEvents => 0, isActive => true, fileId => UUID::generate_formatted(), Current_State => Created);
+			schedule newAuditEventFile.fileTimer generate AuditEventFile.generateFile() to newAuditEventFile delay testSpec.fileTimeOutPeriod;
+			for job in auditEventFile -> R17.Job loop
+				eventFileForJob := job with auditEventFile -> R17.EventFileForJob;
+				unlink auditEventFile R17 job using eventFileForJob;
+				delete eventFileForJob;
+				if testSpec.oneFilePerJob = false then
+					eventFileForJob := create EventFileForJob(auditEventFileId => newAuditEventFile.auditEventFileId, jobId => job.jobId);
+					link job R17 newAuditEventFile using eventFileForJob;
+				end if;
+			end loop;
+		end if;
 	else
-	  // TODO
+		logMessage := "AESimulator::DeployedEvent.Dispatched - Failed to find active Audit Event File";
+		Logger::log(Logger::Information, "AESimulator", logMessage);
 	end if;
 	link this R10 job;
 	generate Job.eventDispatched() to job;
@@ -67,7 +87,8 @@ begin
 	eventDefinition := this -> R5.EventDefinition;
 	for nextEventDefinition in eventDefinition -> R1.isFollowedBy.EventDefinition loop
 		epochEventTime := (timestamp'now - epochDate)'seconds;
-		deployedEvent := create DeployedEvent(eventId => UUID::generate_formatted(), epochEventTime => epochEventTime, prevEventId => string(this.eventId), deployed => false, Current_State => Created);
+		epochEventDispatchTime := epochEventTime + nextEventDefinition.delayDuration'seconds;
+		deployedEvent := create DeployedEvent(eventId => UUID::generate_formatted(), epochEventCreationTime => epochEventTime, epochEventDispatchTime => epochEventDispatchTime, prevEventId => string(this.eventId), deployed => false, Current_State => Created);
 		link deployedEvent R5 nextEventDefinition;
 		link job R6 deployedEvent;
 		generate DeployedEvent.evaluateDispatch() to deployedEvent;

@@ -1,35 +1,104 @@
 //! ACTIVITY BEGIN. 'b82014bd-59c5-4b44-92c8-d395bc5adc1f' DO NOT EDIT THIS LINE.
 private service StatementParser::testParser () is
-logMessage : string;
-plusStatements : string;
-fileName : Filesystem::filename := "test.puml";
-jobId : integer := 1;
-statementType : string := "START";
-reportedStatement :  instance of _TEST_Consumer_nextStatement;
-fileVerified :  instance of _TEST_Consumer_fileVerified;
-
+plusStatements: string;
+directory: Filesystem::filename := "testFiles";
+fileName: Filesystem::filename := "Job1.puml";
+jobId: integer := 1;
+reportedStatement:  instance of _TEST_Consumer_nextStatement;
+fileVerified:  instance of _TEST_Consumer_fileVerified;
+reportedStatements: set of instance of _TEST_Consumer_nextStatement;
 begin
 
-	if Filesystem::file_exists(fileName) then
-		plusStatements := Filesystem::read_file(fileName);
-		validateStatements(jobId, plusStatements);
-		fileVerified := find_one _TEST_Consumer_fileVerified();
-		if fileVerified.validFile = true then
-			getJobAndApps(jobId);
-			getNextStatement(jobId);
-			reportedStatement := find_one _TEST_Consumer_nextStatement(allStatementsProcessed = true);
-			while reportedStatement = null loop
-				getNextStatement(jobId);
-				reportedStatement := find_one _TEST_Consumer_nextStatement(allStatementsProcessed = true);
-			end loop;
-		else
-			logMessage := "StatementParser::testParser - file verification failed " & string(fileName) & ", failure reason = " & fileVerified.failureReason;
-			Logger::log(Logger::Information, "StatementParser", logMessage);
-		end if;
-	else
-		logMessage := "StatementParser::testParser - file does not exist " & string(fileName);
-		Logger::log(Logger::Information, "StatementParser", logMessage);
-	end if;
+
+    Assertions::assertTrue(Filesystem::file_exists(directory & "/" & fileName), "StatementParser::testParser - file does not exist " & string(fileName));
+	validateStatements(jobId, directory, fileName);
+
+    Test::service_event_queue();
+
+	fileVerified := find_one _TEST_Consumer_fileVerified();
+	Assertions::assertTrue(fileVerified.validFile, "StatementParser::testParser - file verification failed " & string(fileName) & ", failure reason = " & fileVerified.failureReason);
+    getJobAndApps(jobId);
+    getNextStatement(jobId);
+    reportedStatement := find_one _TEST_Consumer_nextStatement(allStatementsProcessed = true);
+    while reportedStatement = null loop
+        getNextStatement(jobId);
+        reportedStatement := find_one _TEST_Consumer_nextStatement(allStatementsProcessed = true);
+    end loop;
+    reportedStatements := find _TEST_Consumer_nextStatement();
+    Assertions::assertTrue(reportedStatements'length = 21, "Wrong number of statements parsed: " & reportedStatements'length'image);
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '4047f116-e94f-4e99-ab1a-f8aeaa73e82d' DO NOT EDIT THIS LINE.
+private service StatementParser::testInclude () is
+directory: Filesystem::filename := "testFiles";
+controlFileName: Filesystem::filename := "BankDepositFull.puml";
+controlJobId: integer := 2;
+controlFileVerified: instance of _TEST_Consumer_fileVerified;
+controlJobAndApps: instance of _TEST_Consumer_jobAndApps;
+controlReportedStatements: sequence of instance of _TEST_Consumer_nextStatement;
+testFileName: Filesystem::filename := "BankDeposit.puml";
+testJobId: integer := 3;
+testFileVerified: instance of _TEST_Consumer_fileVerified;
+testJobAndApps: instance of _TEST_Consumer_jobAndApps;
+testReportedStatements: sequence of instance of _TEST_Consumer_nextStatement;
+begin
+
+    // parse the control file
+    Logger::log(Logger::Debug, "StatementParser", "Parsing control sequence");
+    Assertions::assertTrue(Filesystem::file_exists(directory & "/" & controlFileName), "StatementParser::testParser - file does not exist " & string(controlFileName));
+	validateStatements(controlJobId, directory, controlFileName);
+	
+    Test::service_event_queue();
+
+	controlFileVerified := find_one _TEST_Consumer_fileVerified(jobId = controlJobId);
+	Assertions::assertTrue(controlFileVerified.validFile, "StatementParser::testParser - file verification failed " & string(controlFileName) & ", failure reason = " & controlFileVerified.failureReason);
+    getJobAndApps(controlJobId);
+	controlJobAndApps := find_one _TEST_Consumer_jobAndApps(jobId = controlJobId);
+	Assertions::assertEquals("BankDeposit", controlJobAndApps.jobName);
+	Assertions::assertTrue(controlJobAndApps.applications'length = 4, "Wrong number of participants: " & controlJobAndApps.applications'length'image);
+    while find_one _TEST_Consumer_nextStatement(jobId = controlJobId and allStatementsProcessed = true) = null loop
+        getNextStatement(controlJobId);
+    end loop;
+    controlReportedStatements := find _TEST_Consumer_nextStatement(jobId = controlJobId) ordered_by (_TEST_call_time);
+    Assertions::assertTrue(controlReportedStatements'length = 11, "Wrong number of statements parsed: " & controlReportedStatements'length'image);
+    Logger::log(Logger::Debug, "StatementParser", "Done parsing control sequence");
+    
+    // parse file with "include" statements
+    Logger::log(Logger::Debug, "StatementParser", "Parsing test sequence");
+    Assertions::assertTrue(Filesystem::file_exists(directory & "/" & testFileName), "StatementParser::testParser - file does not exist " & string(testFileName));
+	validateStatements(testJobId, directory, testFileName);
+	
+    Test::service_event_queue();
+
+	testFileVerified := find_one _TEST_Consumer_fileVerified(jobId = testJobId);
+	Assertions::assertTrue(testFileVerified.validFile, "StatementParser::testParser - file verification failed " & string(testFileName) & ", failure reason = " & testFileVerified.failureReason);
+    getJobAndApps(testJobId);
+	testJobAndApps := find_one _TEST_Consumer_jobAndApps(jobId = testJobId);
+	Assertions::assertEquals("BankDeposit", testJobAndApps.jobName);
+	Assertions::assertTrue(testJobAndApps.applications'length = 4, "Wrong number of participants: " & testJobAndApps.applications'length'image);
+    while find_one _TEST_Consumer_nextStatement(jobId = testJobId and allStatementsProcessed = true) = null loop
+        getNextStatement(testJobId);
+    end loop;
+    testReportedStatements := find _TEST_Consumer_nextStatement(jobId = testJobId) ordered_by (_TEST_call_time);
+    Assertions::assertTrue(testReportedStatements'length = 11, "Wrong number of statements parsed: " & testReportedStatements'length'image);
+    Logger::log(Logger::Debug, "StatementParser", "Done parsing test sequence");
+    
+    // compare the results
+    Logger::log(Logger::Debug, "StatementParser", "Comparing the results");
+    for i in controlReportedStatements'range loop
+      Assertions::assertEquals(controlReportedStatements[i].statementType, testReportedStatements[i].statementType);
+      Assertions::assertEquals(controlReportedStatements[i].sequenceName, testReportedStatements[i].sequenceName);
+      Assertions::assertEquals(controlReportedStatements[i].applicationName, testReportedStatements[i].applicationName);
+      Assertions::assertEquals(controlReportedStatements[i].controlType, testReportedStatements[i].controlType);
+      Assertions::assertEquals(controlReportedStatements[i].eventName, testReportedStatements[i].eventName);
+      Assertions::assertEquals(controlReportedStatements[i].isStartEvent, testReportedStatements[i].isStartEvent);
+      Assertions::assertEquals(controlReportedStatements[i].isEndEvent, testReportedStatements[i].isEndEvent);
+      Assertions::assertTrue(controlReportedStatements[i].occurrenceId = testReportedStatements[i].occurrenceId, "occurrenceId does not match");
+      Assertions::assertEquals(controlReportedStatements[i].allStatementsProcessed, testReportedStatements[i].allStatementsProcessed);
+    end loop;
+    Logger::log(Logger::Debug, "StatementParser", "Done comparing the results");
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

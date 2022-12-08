@@ -1,0 +1,16 @@
+@startuml(id=Part1)
+title BankDeposit (part 1)
+participant Customer
+participant Teller
+participant System
+Customer -> Teller : SendCheck
+Customer -> Teller : SendDepositSlip
+Teller -> Teller : ScanDocuments
+Teller -> Teller : EnterInformation
+Teller -> System : SubmitForReview
+@enduml
+@startuml(id=Part3)
+participant Teller
+participant Customer
+Teller -> Customer : GiveReceipt
+@enduml

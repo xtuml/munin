@@ -1,0 +1,36 @@
+@startuml
+title Job1
+
+box "Sequence1" #LightBlue
+participant participant1
+participant participant2
+participant participant3
+participant participant4
+participant1 -> participant1: Event1
+participant1 -> participant1: Event2
+participant1 -> participant3: Event3
+participant3 -> participant2: Event4
+participant2 -> participant2: Event5
+participant2 -> participant2: Event6
+participant2 -> participant3: Event7
+participant3 -> participant3: Event8
+participant3 -> participant3: Event9
+participant3 -> participant3: Event10
+participant3 -> participant4: Event11
+participant4 -> participant4: Event12
+participant4 -> participant4: Event13
+end box
+
+box "Sequence2" #LightBlue
+participant participant4.
+participant4. -> participant4.: Event14
+participant4. -> participant4.: Event15
+end box
+
+box "Sequence3" #LightBlue
+participant participant5
+participant5 -> participant5: Event16
+participant5 -> participant5: Event17
+end box
+
+@enduml
