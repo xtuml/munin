@@ -1,0 +1,164 @@
+= PLUS User Guide
+
+== Introduction
+
+The Munin protocol verifier is dynamically configured using UML sequence
+diagrams as input for defining valid sequences of events. A subset of the
+PlantUML syntax forms a DSL for defining these sequences and PlantUML can be
+used as a visualization tool.
+
+== Specification
+
+=== General Parsing Rules
+
+The PLUS processor operates on a line by line basis. Each statement must be
+fully contained on a single line. Blank lines are ignored.
+
+Each line is split into tokens by whitespace. Extra whitespace characters are
+ignored. Element names may not have spaces in them unless they are wrapped by
+double quotes (`""`).
+
+Display directives prepended with hash (`#`) or found inside square brackets
+(`[]`) are ignored.
+
+PLUS does not directly support code comments, however any line that does not
+match one of the supported statements is silently ignored. PlantUML single line
+comments (start with a single `'`) will work. PlantUML block comments
+(surrounded by `/' ... '/`) will work as long as no valid statements are
+contained in the block.
+
+=== File Structure and Preprocessing
+
+PLUS job definitions are defined in files with the `.puml` extension. Each
+definition file must contain at least one UML block. The start of a UML block is
+denoted by the `@startuml` statement on a line by itself and the end of the UML
+block is denoted by the `@enduml` statement on a line by itself. There may be
+more than one UML block defined in a single file. Optionally, an identifier can
+be associated with a UML block. (TODO allow spaces between tokens in identifier
+specification)
+
+Ex:
+
+----
+@startuml
+...
+@enduml
+
+@startuml(id=block2)
+...
+@enduml
+
+@startuml(id=block3)
+...
+@enduml
+----
+
+When a job definition file is processed, the first UML block is taken to be the
+definition of the top level block and subsequent UML blocks are skipped. In
+typical usage, a job definition file will either contain one default UML block
+(top level job definition file) or one to many labeled UML blocks intended to be
+`!include` -ed elsewhere.
+
+PLUS supports the `!include` PlantUML statement during a preprocessor step using
+the following syntax:
+
+----
+!include <filepath>!<block_identifier>
+----
+
+`<filepath>` is a valid relative filesystem path which refers to the `.puml`
+file where the target UML block is defined. The path is relative to the location
+of the original source file being processed. By convention, definition files
+should start with an underscore (`_`) if they are not intended to be processed
+as a top level job definition.
+
+Includes are handled during preprocessing and simply inject the statements from
+the target UML block in the place of the `!include` statement itself.
+
+=== Statements
+
+==== Job Name
+
+The job name is defined by the `title` statement. Every top level job definition
+_must_ have a name defined. If multiple `title` statements are encountered, the
+last one wins.
+
+Ex:
+
+----
+title MyJob
+title "My Job With Spaces"
+----
+
+==== Application/Participant
+
+All participants in the sequence diagram must be pre-declared. This is done with
+the `participant` statement.
+
+Ex:
+
+----
+participant Participant1
+participant Participant2
+participant "Participant with Spaces"
+----
+
+==== Sequence Start/End
+
+TODO
+
+==== Start/End Sequence Definition
+
+A job consists of one or more disjoint sequences of events. A sequence can be
+defined by surrounding a set of statements with a `box` definition. Statements
+not surrounded by a `box` definition will be assigned to a sequence with an
+arbitrary default name. (TODO this needs to be checked)
+
+Ex:
+
+----
+box Sequence1 #LightBlue
+...
+end box
+----
+
+==== Audit Event
+
+Actual audit events in sequences are defined using the message statement. The
+message must be defined between two pre-declared participants in the diagram.
+The name of the message is the event name and uniquely identifies the event type
+in the job. An additional occurrence number is used in some cases to identify
+the instance of the event in the job definition.
+
+Ex:
+
+----
+teller -> customer: "Print Receipt"
+----
+
+==== Start/Stop/Resume Numbering
+
+In cases where the same event is used in multiple places in a single job
+definition, it is necessary to include an additional numeric value to identify
+the occurrence of an event in a job sequence. Numbering can be controlled by the
+following statements:
+
+`autonumber` causes the processor to start automatically attaching occurrence
+numbers to audit events with sequentially increasing integers starting at 1.
+
+`autonumber stop` causes the processor to stop attaching occurrence numbers to
+audit events. `autonumber stop` is not valid before an instance of `autonumber`
+or `autonumber resume`.
+
+`autonumber resume` causes the processor to restart attaching occurrence numbers
+starting at the last number plus 1. `autonumber resume` is not valid before an
+instance of `autonumber stop`
+
+
+==== Alt/Else (TODO not currently supported)
+
+TODO
+
+==== Loop/Loop End (TODO not currently supported)
+
+TODO
