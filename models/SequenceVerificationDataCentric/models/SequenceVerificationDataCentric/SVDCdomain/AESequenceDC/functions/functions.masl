@@ -210,15 +210,16 @@ begin
         else
           // We have a reference to a forward event which is possible in the case of cyclic sequences so create a placeholder event
           // In this case the event definition has been seen before but not this referenced occurrence number
+          logMessage := "Info: There is a forward reference to an event so create a Placeholder for event: " & thePrevEventDefn.AEType & "in Job Name = " & jobName;
+	      Logger::log(Logger::Information, "AESequenceDC", logMessage);            
+          
           thePlaceholderEventDefn := thePrevEventDefn; 
           thePlaceholderEventInSeqDef := thePlaceholderEventDefn with theSequenceDefn -> R1;
           thePlaceholderEventOccInSeqDef := create AEOccurrenceInSequenceDefinition (
     	                                                            AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, 
     	                                                            AESequenceId => theSequenceDefn.AESequenceId, 
     	                                                            occurrenceNumberInSequence => previousEventType.occurrenceId, 
-    	                                                            //isSequenceStart => isSequenceStart, 
-    	                                                            //isSequenceEnd => isSequenceEnd,
-    	                                                            isPlaceholder => true
+   	                                                                isPlaceholder => true
                                                                     );
           link thePlaceholderEventOccInSeqDef R12 thePlaceholderEventInSeqDef;
           newEventInSeqPairDef := create AEInSequencePairDefn (
@@ -431,6 +432,7 @@ public service AESequenceDC::dynamicControlDefinition ( jobName : in string,
 // that provides it and the event that uses it. This function could be split such that the dynamic control is
 // set up with just the source event and the user event linked in later on in a different call to a different 
 // function.
+//
 begin
   DynamicControlDefinition.createDynamicControlDefinition (jobName,
   	                                                       dynamicControlName,
