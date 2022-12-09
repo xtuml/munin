@@ -26,27 +26,46 @@ private service AEOrdering::testConfigTestData () is
 reportEventDefinition :  instance of _TEST_Req_IF_Verification_eventDefinition;
 intraEventDataDef : instance of _TEST_Req_IF_Verification_intraJobInvariantDefinition;
 extraEventDataDef : instance of _TEST_Req_IF_Verification_extraJobInvariantDefinition;
+dynamicControlDefinition : instance of _TEST_Req_IF_Verification_dynamicControlDefinition;
 
 begin
 	
 	// When the domain has started it should report the details of the event definitions to verifications
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "aaa" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = aaa and occurrenceId = 1");
+    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "aaa" and occurrenceId = 1 and isSequenceStart = true and isSequenceEnd = false and isBreak = false);
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = aaa and occurrenceId = 1 and isSequenceStart = true and isSequenceEnd = false and isBreak = false");
+    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 0), "Unexepected previous event types eventType = aaa");
 
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "bbb" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = bbb and occurrenceId = 1");
+    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "bbb" and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = true);
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = bbb and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = true");
+    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = bbb");
+	for previousEventType in reportEventDefinition.previousEventTypes loop
+		Assertions::assertTrue((previousEventType.previousEventTypeName = "aaa" and previousEventType.occurrenceId = 1), "");
+	end loop;
 	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "ccc" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = ccc and occurrenceId = 1");
+    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "ccc" and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = false);
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = ccc and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = false");
+    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = ccc");
+	for previousEventType in reportEventDefinition.previousEventTypes loop
+		Assertions::assertTrue((previousEventType.previousEventTypeName = "bbb" and previousEventType.occurrenceId = 1 and previousEventType.constraintDefinitionId = "cccEventXOR" and previousEventType.constraintValue = "XOR"), "");
+	end loop;
 	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "ddd" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = ddd and occurrenceId = 1");
+    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "ddd" and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = false);
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = ddd and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = false");
+    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = ddd");
+	for previousEventType in reportEventDefinition.previousEventTypes loop
+		Assertions::assertTrue((previousEventType.previousEventTypeName = "ccc" and previousEventType.occurrenceId = 1), "");
+	end loop;
 	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "eee" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = eee and occurrenceId = 1");
+    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "eee" and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = true and isBreak = false);
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = eee and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = true and isBreak = false");
+    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = eee");
+	for previousEventType in reportEventDefinition.previousEventTypes loop
+		Assertions::assertTrue((previousEventType.previousEventTypeName = "ddd" and previousEventType.occurrenceId = 1), "");
+	end loop;
 	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE2" and eventType = "fff" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = fff and occurrenceId = 1");
+    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE2" and eventType = "fff" and occurrenceId = 1 and isSequenceStart = true and isSequenceEnd = true and isBreak = false);
+    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = fff and occurrenceId = 1 and isSequenceStart = true and isSequenceEnd = true and isBreak = false");
+    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 0), "Unexepected previous event types eventType = fff");
 	
 	extraEventDataDef := find_one _TEST_Req_IF_Verification_extraJobInvariantDefinition(auditEventDataName = "Data1" and sourceJobDefnName = "AEOrdering-Test" and sourceEventType = "aaa" and sourceOccurrenceId = 1);
     Assertions::assertTrue((extraEventDataDef /= null), "Test Config Test Data: Failed to find extra job invariant event data definition auditEventDataName = Data1, jobName = AEOrdering-Test, sourceEventType = aaa and occurrenceId = 1");
@@ -83,7 +102,11 @@ begin
     		Assertions::assertTrue((false), "Test Config Test Data: Failed to find intra job invariant event data definition user events auditEventDataName = Data2, jobName = AEOrdering-Test");
 		end if;
 	end loop;
-
+	
+	dynamicControlDefinition := find_one _TEST_Req_IF_Verification_dynamicControlDefinition(jobTypeName = "AEOrdering-Test" and dynamicControlName = "cccLOOPCOUNT" and dynamicControlType = DynamicControlTypeEnum.LOOPCOUNT and 
+		                                                                                sourceEventType = "bbb" and sourceOccurrenceId = 1 and userEventType = "ccc" and userOccurrenceId = 1);
+    Assertions::assertTrue((dynamicControlDefinition /= null), "Test Config Test Data: Failed to find dynamic control definition definition jobTypeName = AEOrdering-Test and dynamicControlName = cccLOOPCOUNT and dynamicControlType = DynamicControlTypeEnum.LOOPCOUNT and sourceEventType = bbb and sourceOccurrenceId = 1 and userEventType = ccc and userOccurrenceId = 1");
+	
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

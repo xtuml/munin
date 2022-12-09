@@ -386,15 +386,15 @@ INSERT INTO D_TSPARM
 	VALUES ("63bcc75e-50bf-4e31-933d-3831cf7d4e61",
 	"27271bd8-3231-4485-ad4b-0fb06b0e061b",
 	'reportableAuditEventDataItems',
-	"7ea0de2a-2a65-4fee-a5a0-29e2cf005309",
+	"c07535fb-d002-4c9b-9364-b84a42cfc0c3",
 	0,
 	'',
 	"e9396060-0111-4b4b-880f-ced8cb335120",
 	'');
 INSERT INTO S_DT_PROXY
-	VALUES ("7ea0de2a-2a65-4fee-a5a0-29e2cf005309",
+	VALUES ("c07535fb-d002-4c9b-9364-b84a42cfc0c3",
 	"00000000-0000-0000-0000-000000000000",
-	'sequence of ReportableAuditEventDataType',
+	'AEOrdering::sequence of ReportableAuditEventDataType',
 	'',
 	'',
 	'./Shared/Shared.xtuml');
@@ -504,15 +504,15 @@ INSERT INTO D_TSPARM
 	VALUES ("4d20f782-2b66-4bc3-ac18-b6c2eb906099",
 	"23fc86c0-2ce3-4f23-a826-870f4c216c2b",
 	'previousEventTypes',
-	"96f74b56-c038-4b3a-8097-45ed9b22fb95",
+	"663a3d7c-dd4f-4d42-baaa-fe6d4aa58ff2",
 	0,
 	'',
 	"a7a61aac-f32b-4333-a2b2-b3c3d01dec84",
 	'');
 INSERT INTO S_DT_PROXY
-	VALUES ("96f74b56-c038-4b3a-8097-45ed9b22fb95",
+	VALUES ("663a3d7c-dd4f-4d42-baaa-fe6d4aa58ff2",
 	"00000000-0000-0000-0000-000000000000",
-	'sequence of PreviousEventType',
+	'AEOrdering::sequence of PreviousEventType',
 	'',
 	'',
 	'./Shared/Shared.xtuml');
@@ -540,6 +540,15 @@ INSERT INTO D_TSPARM
 	0,
 	'',
 	"e0028f39-983e-45df-bb22-8b98322a6d90",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("3ee01c62-a2ad-4110-a293-bec98edc2261",
+	"23fc86c0-2ce3-4f23-a826-870f4c216c2b",
+	'isBreak',
+	"2b094fdb-3f22-4f15-9434-bb59a063e0d2",
+	0,
+	'',
+	"ae042374-b2ea-4fa4-b57d-0ae56b4c1f3c",
 	'');
 INSERT INTO D_TSVC
 	VALUES ("d5a3bab6-d999-49ff-99ef-2cc78192eb89",
@@ -598,15 +607,15 @@ INSERT INTO D_TSPARM
 	VALUES ("5e3c923f-46dc-4ff4-8345-c95744435c2c",
 	"6dbf6567-2587-433c-a961-eb1b2269ba85",
 	'associatedEvents',
-	"12c700ba-e9b3-457b-b4e8-1325504eae07",
+	"58a6536f-e048-45f4-931e-70b7e2f2f87c",
 	0,
 	'',
 	"4bfb3aee-7742-40b9-a36b-2b04c70d858c",
 	'');
 INSERT INTO S_DT_PROXY
-	VALUES ("12c700ba-e9b3-457b-b4e8-1325504eae07",
+	VALUES ("58a6536f-e048-45f4-931e-70b7e2f2f87c",
 	"00000000-0000-0000-0000-000000000000",
-	'sequence of IntraJobInvDataType',
+	'AEOrdering::sequence of IntraJobInvDataType',
 	'',
 	'',
 	'./Shared/Shared.xtuml');
@@ -663,18 +672,101 @@ INSERT INTO D_TSPARM
 	VALUES ("06bc172f-432f-42e4-bfd0-1e029503aeeb",
 	"6f608352-3395-4805-9adc-b151bf40f633",
 	'userEvents',
-	"f8bbdc7a-91e2-425c-96ec-f7066d8d2f5d",
+	"bf25574a-40d4-4728-b1e4-301ab6bbcfe9",
 	0,
 	'',
 	"f5b03338-afec-418f-94ef-612f875980ec",
 	'');
 INSERT INTO S_DT_PROXY
-	VALUES ("f8bbdc7a-91e2-425c-96ec-f7066d8d2f5d",
+	VALUES ("bf25574a-40d4-4728-b1e4-301ab6bbcfe9",
 	"00000000-0000-0000-0000-000000000000",
-	'sequence of UserEventDataType',
+	'AEOrdering::sequence of UserEventDataType',
 	'',
 	'',
 	'./Shared/Shared.xtuml');
+INSERT INTO D_TSVC
+	VALUES ("634a9963-4b30-4794-99c4-cf002b0b95b7",
+	"c1049413-7cad-49ac-9c56-3485f8fe8d19",
+	'dynamicControlDefinition',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	0,
+	0,
+	8);
+INSERT INTO D_TSPARM
+	VALUES ("3ba9230a-752d-4fbc-a9f3-4fcfa5ca9f57",
+	"634a9963-4b30-4794-99c4-cf002b0b95b7",
+	'jobTypeName',
+	"76dece4a-4b48-4900-9c2f-4be1d5ec7c37",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("f9174707-9a81-49e1-b142-352194bb52d2",
+	"634a9963-4b30-4794-99c4-cf002b0b95b7",
+	'dynamicControlName',
+	"76dece4a-4b48-4900-9c2f-4be1d5ec7c37",
+	0,
+	'',
+	"3ba9230a-752d-4fbc-a9f3-4fcfa5ca9f57",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("91550d87-e53b-4706-a308-7d23427ec6e1",
+	"634a9963-4b30-4794-99c4-cf002b0b95b7",
+	'dynamicControlType',
+	"6af01c32-be68-4daf-88c2-823764f8d97b",
+	0,
+	'',
+	"f9174707-9a81-49e1-b142-352194bb52d2",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("6af01c32-be68-4daf-88c2-823764f8d97b",
+	"00000000-0000-0000-0000-000000000000",
+	'AEOrdering::DynamicControlTypeEnum',
+	'',
+	'',
+	'./Shared/Shared.xtuml');
+INSERT INTO D_TSPARM
+	VALUES ("67a507c9-e169-4f3b-b3ac-5c1a0b9ba072",
+	"634a9963-4b30-4794-99c4-cf002b0b95b7",
+	'sourceEventType',
+	"76dece4a-4b48-4900-9c2f-4be1d5ec7c37",
+	0,
+	'',
+	"91550d87-e53b-4706-a308-7d23427ec6e1",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("0af65e2a-bcf0-4182-a14f-86a88f6b680f",
+	"634a9963-4b30-4794-99c4-cf002b0b95b7",
+	'sourceOccurrenceId',
+	"ba5eda7a-def5-0000-0000-000000000002",
+	0,
+	'',
+	"67a507c9-e169-4f3b-b3ac-5c1a0b9ba072",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("57cc7e9b-5a17-4006-8165-24a54153884d",
+	"634a9963-4b30-4794-99c4-cf002b0b95b7",
+	'userEventType',
+	"76dece4a-4b48-4900-9c2f-4be1d5ec7c37",
+	0,
+	'',
+	"0af65e2a-bcf0-4182-a14f-86a88f6b680f",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("7944cc1c-619a-4016-937e-6ff2336a1f16",
+	"634a9963-4b30-4794-99c4-cf002b0b95b7",
+	'userOccurrenceId',
+	"ba5eda7a-def5-0000-0000-000000000002",
+	0,
+	'',
+	"57cc7e9b-5a17-4006-8165-24a54153884d",
+	'');
 INSERT INTO D_TERM
 	VALUES ("e37884f3-90eb-481c-9a8d-d5d615824abb",
 	"d0bb6f73-bd7b-40f3-9ccb-9f73b016c657",
