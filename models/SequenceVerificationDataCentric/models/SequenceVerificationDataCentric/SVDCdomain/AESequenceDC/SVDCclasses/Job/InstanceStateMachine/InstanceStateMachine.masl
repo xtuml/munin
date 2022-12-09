@@ -33,6 +33,18 @@ theSourceExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theUserExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theSourceExtraJobInvariant : instance of PersistedInvariant;
 theUserExtraJobInvariant : instance of TransientInvariant;
+theDynamicControlDefn : instance of DynamicControlDefinition;
+newDynamicControl : instance of DynamicControl;
+theUserDynamicControlDefn : instance of DynamicControlDefinition;
+theCurrentDynamicControlDefn : instance of DynamicControlDefinition;
+theUserDynamicControl : instance of DynamicControl;
+thisJobsDynamicControl : instance of DynamicControl;
+thisJobsDynamicControls : set of instance of DynamicControl;
+theCurrentDynamicControls : set of instance of DynamicControl;
+thePrevUserDynamicControlDefn : instance of DynamicControlDefinition;
+thePrevUserDynamicControl : instance of DynamicControl;
+loopCount : integer;
+branchCount : integer;
 empty : sequence of string;
 emptyPrevId : sequence of string:= empty & "";
 logMessage : string;
@@ -122,6 +134,69 @@ begin
                     // Note that the previous Audit Event has now been seen as a previous audit event       
                     prevEvent.seenAsPreviousEvent := true;
               
+                    // Add logic for incrementing Loop Count
+                    theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
+                    if theUserDynamicControlDefn /= null then                      
+                      thisJobsDynamicControls := this -> R35;
+                      
+                      theUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = theUserDynamicControlDefn.dynamicControlName);
+                      if theUserDynamicControl /= null then
+                    
+                        if theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
+                          if theUserDynamicControl.expectedDynamicControlValue > 0 then
+                            theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
+                          end if;  
+                        end if;  
+	                  else
+                        logMessage := "There is no event using a Dynamic Control of type" & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+	                    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	                  end if;  
+	                  
+	                else 
+	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
+	                end if;  
+
+                    // Add logic for incrementing Branch Count - to count branches from a fork we have to look to see if the previous event was the fork event with a branch count on it.
+                    prevAeOccInSequenceDef := prevEvent -> R13;
+                    if prevAeOccInSequenceDef /= null then
+	                      
+                    thePrevUserDynamicControlDefn := prevAeOccInSequenceDef -> R31;                    
+                      if thePrevUserDynamicControlDefn /= null then
+                    
+                        thisJobsDynamicControls := this -> R35;
+                        thePrevUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = thePrevUserDynamicControlDefn.dynamicControlName);
+                        if thePrevUserDynamicControl /= null then
+                    
+                          if thePrevUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then  
+                            if thePrevUserDynamicControl.expectedDynamicControlValue > 0 then
+                              thePrevUserDynamicControl.currentDynamicControlValue := thePrevUserDynamicControl.currentDynamicControlValue + 1;
+                            end if;  
+                         
+                          end if;  
+	                    else
+                          logMessage := "There is no event using a Dynamic Control of type" & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+	                      Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	                    end if;  
+  
+	                  else 
+	                    // This event doesn't have a previous event that has a branch count defined on it and so can be ignored
+	                  end if;  
+	                else
+                      logMessage := "The previous event has no associated definition " & prevEvent.AuditEventId & " for " & this.jobID;
+	                  Logger::log(Logger::Information, "AESequenceDC", logMessage);	                
+	                end if;
+
+                    // Check to see if this is a break event causing us to exit a loop and cancel the loop count
+                    if theAeOccInSequenceDef.isBreak = true then
+                      theCurrentDynamicControls := find DynamicControl (expectedDynamicControlValue > 0);
+                      for theCurrentDynamicControl in theCurrentDynamicControls loop
+                        theCurrentDynamicControlDefn := theCurrentDynamicControl -> R29;
+                        if theCurrentDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
+                          theCurrentDynamicControl.expectedDynamicControlValue := 0;
+                        end if;
+                      end loop;
+                    end if;
+                    
                   else
                     //Log Job failure: Previous event is valid but is part of a broken sequence
                     this.sequencingFailed := true;
@@ -229,6 +304,8 @@ begin
         end if; 
       end if;           
 
+    declare
+    begin
       // Capture any audit event data associated with this audit event
       theAeOccInSequenceDef := newEvent -> R13;
       for aeDataElement in aeData loop
@@ -306,11 +383,64 @@ begin
               this.failJob("EXTRAJOBINV Audit event data sent on the event type is not the expected audit event data - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);               
                 
             end if;
+            
+            when aeDataKindEnum.LOOPCONSTRAINT =>  
+              // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
+              theDynamicControlDefn := theAeOccInSequenceDef -> R30;
+              if (theDynamicControlDefn /= null) and (theDynamicControlDefn.dynamicControlName = aeDataElement.aedName) then
+                //Check that the invariant value is not empty
+                if aeDataElement.aedValue /= "" then
+                  // Convert the provided string value to an integer
+                  loopCount := integer'parse(aeDataElement.aedValue);
+                  newDynamicControl := create DynamicControl (jobID => this.jobID, 
+                  	                                          dynamicControlName => aeDataElement.aedName, 
+                  	                                          expectedDynamicControlValue => loopCount);
+                  link newDynamicControl R29 theDynamicControlDefn;
+                  link newDynamicControl R35 this;
+                else
+                  // No Loop Count value provided
+                  this.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+                end if;
+              else
+                // This Loop Count not expected to be provided on this audit event
+                this.failJob("Loop count not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+              end if;
+             
+            when aeDataKindEnum.BRANCHCONSTRAINT =>  
+              // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
+              theDynamicControlDefn := theAeOccInSequenceDef -> R30;
+              if (theDynamicControlDefn /= null) and (theDynamicControlDefn.dynamicControlName = aeDataElement.aedName) then
+                //Check that the invariant value is not empty
+                if aeDataElement.aedValue /= "" then
+                  // Convert the provided string value to an integer
+                  branchCount := integer'parse(aeDataElement.aedValue);
+                  newDynamicControl := create DynamicControl (jobID => this.jobID, 
+                  	                                          dynamicControlName => aeDataElement.aedName, 
+                  	                                          expectedDynamicControlValue => branchCount);
+                  link newDynamicControl R29 theDynamicControlDefn;
+                  link newDynamicControl R35 this;
+                else
+                  // No Branch Count value provided
+                  this.failJob("No valid branch count value provided on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+                end if;
+              else
+                // This Branch Count not expected to be provided on this audit event
+                this.failJob("Branch count not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+              end if;
+              
+              //exception - if the integer conversion function above fails does it raise an exception?
+            
           when others =>
             // Log warning: Unsupported audit event data type
             this.failJob("The audit event data type provided for jobId = " & this.jobID & " is an unsupported type of audit event data = " & aeDataElement.aedName'image);               
         end case;  
-      end loop;      
+      end loop;
+      
+      exception
+        when program_error =>
+          this.failJob("Program Error in Audit Event Data part of Job.JobInProgress in " & this.jobID & " possibly caused by a non-integer loop or branch count in the audit event data : " & aeDataElement.aedValue);               
+                
+      end;      
       
   
       // Check to see if the received event marks an end point in the current sequence and if so check whether or
@@ -389,17 +519,46 @@ begin
           validatedConstraint := false;
         end if;
         
-      elsif theConstraintDefn.constraintType = LOOPCOUNT then
-        //TODO Add loop count logic here  
-    
-      elsif theConstraintDefn.constraintType = BRANCHCOUNT then    
-        //TODO Add loop count logic here  
       else
         logMessage := "Unsupported Constraint Type for Job = " & this.jobID;
         Logger::log(Logger::Information, "AESequenceDC", logMessage);    
       end if;
     end if;  
   end loop;
+  
+  // Also check that loop constraints are satisfied
+  declare
+    theDynamicControls : set of instance of DynamicControl;
+    theDynamicControlDefn : instance of DynamicControlDefinition;
+    
+  begin
+    theDynamicControls := this -> R35;
+    for theDynamicControl in theDynamicControls loop
+      theDynamicControlDefn := theDynamicControl -> R29;
+      if theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
+        if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
+          validatedConstraint := false;    
+          // TODO Remove debug log message      
+          logMessage := "Loop Count check failed for Job = " & this.jobID & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
+          Logger::log(Logger::Information, "AESequenceDC", logMessage);    
+        else
+          logMessage := "Loop Count check passed for Job = " & this.jobID & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
+          Logger::log(Logger::Information, "AESequenceDC", logMessage);              
+        end if;
+      elsif theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then
+        if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
+          validatedConstraint := false;    
+          // TODO Remove debug log message      
+          logMessage := "Branch Count check failed for Job = " & this.jobID & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
+          Logger::log(Logger::Information, "AESequenceDC", logMessage);    
+        else
+          logMessage := "Branch Count check passed for Job = " & this.jobID & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
+          Logger::log(Logger::Information, "AESequenceDC", logMessage);              
+        end if;
+      
+      end if;
+    end loop;
+  end;
   
   if validatedConstraint = false then
     failureReason := "Constraint Failed";

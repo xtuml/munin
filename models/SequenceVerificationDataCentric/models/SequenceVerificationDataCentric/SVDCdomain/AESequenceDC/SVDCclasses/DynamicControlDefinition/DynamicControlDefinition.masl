@@ -1,0 +1,117 @@
+//! ACTIVITY BEGIN. 'b3c55334-2f4c-4778-b915-f281fc35d7f0' DO NOT EDIT THIS LINE.
+public service AESequenceDC::DynamicControlDefinition.createDynamicControlDefinition ( jobName : in string,
+                                                                                      dynamicControlName : in string,
+                                                                                      dynamicControlType : in dynamicControlTypeEnum,
+                                                                                      sourceEventType : in string,
+                                                                                      sourceOccurrenceId : in integer ) is
+theJobDefn : instance of JobDefinition;
+newDynamicControlDefn : instance of DynamicControlDefinition;
+sourceAuditEventDefn : instance of AuditEventDefinition;
+sourceSequenceDefn : instance of AESequenceDefinition;
+sourceAEInSequenceDefn : instance of AEInSequenceDefinition;
+sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
+sourceAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
+logMessage : string;
+
+
+begin
+  theJobDefn := find_one JobDefinition (jobName = jobName);
+  if theJobDefn /= null then
+    newDynamicControlDefn := create DynamicControlDefinition (jobName => jobName, dynamicControlName => dynamicControlName, dynamicControlType => dynamicControlType);
+    link newDynamicControlDefn R32 theJobDefn;
+    
+    // Find the source AEOccurrenceInSequenceDefinition
+    sourceAuditEventDefn := find_one AuditEventDefinition (AEType = sourceEventType);
+    if sourceAuditEventDefn /= null then
+      // TODO: The following line will need to change if Audit Event Names are not unique across all Job Definitions
+      sourceSequenceDefn := sourceAuditEventDefn -> R1.AESequenceDefinition;
+      if sourceSequenceDefn /= null then
+        sourceAEInSequenceDefn := sourceAuditEventDefn with sourceSequenceDefn -> R1.AEInSequenceDefinition;
+        sourceAEOccurrenceDefns := sourceAEInSequenceDefn -> R12;
+        sourceAEOccurrenceDefn := find_one sourceAEOccurrenceDefns (occurrenceNumberInSequence = sourceOccurrenceId);
+        if sourceAEOccurrenceDefn /= null then
+          //link R30
+          link newDynamicControlDefn R30 sourceAEOccurrenceDefn;
+        else
+          // Error handling for the specified Audit Event Occurrence Definition was not found
+          logMessage := "There is no known Audit Event Occurrence Definition with Audit Event Definition name " & sourceEventType & " Occurrence Id " & sourceOccurrenceId'image & "corresponding to the source event specified for Dynamic Control Definition";
+	      Logger::log(Logger::Information, "AESequenceDC", logMessage);
+        end if;  
+      else
+        // Error handling for the Sequence Definition corresponding to this Audit Event was not found
+        logMessage := "There is no known Sequence Definition associated with Audit Event Definition named " & sourceEventType & "corresponding to the source event specified for Dynamic Control Definition";
+	    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+      end if;    
+    else
+      // Error handling for the sourceEventType specified is invalid
+      logMessage := "There is no known Audit Event Definition with name " & sourceEventType & "corresponding to the source event specified for Dynamic Control Definition";
+	  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+    end if;    
+  else
+    // Error handling for Error Job Definition Unknown
+    logMessage := "There is no known Job Definition with name " & jobName & "corresponding to the source event specified for Dynamic Control Definition";
+	Logger::log(Logger::Information, "AESequenceDC", logMessage);
+    
+  end if;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '0fb3e6b3-46d1-4b82-835b-a97e063e17ba' DO NOT EDIT THIS LINE.
+public service AESequenceDC::DynamicControlDefinition.linkUserEventDefn ( jobName : in string,
+                                                                         dynamicControlName : in string,
+                                                                         dynamicControlType : in dynamicControlTypeEnum,
+                                                                         userEventType : in string,
+                                                                         userOccurrenceId : in integer ) is
+theJobDefn : instance of JobDefinition;
+theDynamicControlDefn : instance of DynamicControlDefinition;
+userAuditEventDefn : instance of AuditEventDefinition;
+userSequenceDefn : instance of AESequenceDefinition;
+userAEInSequenceDefn : instance of AEInSequenceDefinition;
+userAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
+userAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
+logMessage : string;
+
+
+begin
+  theDynamicControlDefn := find_one DynamicControlDefinition (jobName = jobName and 
+  	                                                          dynamicControlName = dynamicControlName and
+                                                              dynamicControlType = dynamicControlType );
+  if theDynamicControlDefn /= null then
+    // Find the source AEOccurrenceInSequenceDefinition
+    userAuditEventDefn := find_one AuditEventDefinition (AEType = userEventType);
+    if userAuditEventDefn /= null then
+      // TODO: The following line will need to change if Audit Event Names are not unique across all Job Definitions
+      userSequenceDefn := userAuditEventDefn -> R1.AESequenceDefinition;
+      if userSequenceDefn /= null then
+        userAEInSequenceDefn := userAuditEventDefn with userSequenceDefn -> R1.AEInSequenceDefinition;
+        userAEOccurrenceDefns := userAEInSequenceDefn -> R12;
+        userAEOccurrenceDefn := find_one userAEOccurrenceDefns (occurrenceNumberInSequence = userOccurrenceId);
+        if userAEOccurrenceDefn /= null then
+          //link R31
+          link theDynamicControlDefn R31 userAEOccurrenceDefn;
+        else
+          // Error handling for the specified Audit Event Occurrence Definition was not found
+          logMessage := "There is no known Audit Event Occurrence Definition with Audit Event Definition name " & userEventType & " Occurrence Id " & userOccurrenceId'image & "corresponding to the user event specified for Dynamic Control Definition";
+	      Logger::log(Logger::Information, "AESequenceDC", logMessage);
+        end if;  
+      else
+        // Error handling for the Sequence Definition corresponding to this Audit Event was not found
+        logMessage := "There is no known Sequence Definition associated with Audit Event Definition named " & userEventType & "corresponding to the user event specified for Dynamic Control Definition";
+	    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+      end if;    
+    else
+      // Error handling for the userEventType specified is invalid
+      logMessage := "There is no known Audit Event Definition with name " & userEventType & "corresponding to the user event specified for Dynamic Control Definition";
+	  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+    end if;    
+    
+  else
+    //Error handling for the specified Dynamic Control Definition instance was not found
+    logMessage := "There is no known Job Definition with name " & jobName & "corresponding to the user event specified for Dynamic Control Definition";
+	Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  end if;
+
+    
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
