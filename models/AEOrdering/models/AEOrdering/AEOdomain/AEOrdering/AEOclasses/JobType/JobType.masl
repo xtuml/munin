@@ -6,18 +6,28 @@ eventTypeJSONElement : JSON::JSONElement;
 eventDefJSONObject : JSON::JSONObject;
 prevEventTypeJSONElement : JSON::JSONElement;
 prevEventDefJSONObject : JSON::JSONObject;
+dynamicControlJSONObject : JSON::JSONObject;
 eventTypeName : string;
 sequenceName : string;
 occurrenceId : integer;
 applicationName : string;
 sequenceStart : boolean;
 sequenceEnd : boolean;
+isBreak : boolean;
 emptyPreviousEventTypes : sequence of PreviousEventType;
 previousEventTypes : sequence of PreviousEventType;
 previousEventName : string;
 previousEventOccurrenceId : integer;
 application : instance of Application;
 eventType : instance of AuditEventType;
+constraintDefinitionId : string;
+constraintValue : string;
+hasDynamicControl : boolean := false;
+dynamicControl : instance of DynamicControl;
+dynamicControlName : string;
+dynamicControlType : DynamicControlTypeEnum;
+userEventType : string;
+userOccurrenceId : integer;
 
 begin
 	
@@ -35,6 +45,8 @@ begin
 				applicationName := "";
 				sequenceStart := false;
 				sequenceEnd := false;
+				isBreak := false;
+				hasDynamicControl := false;
 				previousEventTypes := emptyPreviousEventTypes;
 				eventDefJSONObject := JSON::get_object(eventTypeJSONElement);
 				eventTypeName := JSON::get_string(eventDefJSONObject["EventName"]);
@@ -47,6 +59,20 @@ begin
 				if eventDefJSONObject'contains("SequenceEnd") then
 					sequenceEnd := JSON::get_boolean(eventDefJSONObject["SequenceEnd"]);
 				end if;
+				if eventDefJSONObject'contains("IsBreak") then
+					isBreak := JSON::get_boolean(eventDefJSONObject["IsBreak"]);
+				end if;
+				// check for any dynamic controls
+				if eventDefJSONObject'contains("DynamicControl") and eventDefJSONObject["DynamicControl"].kind = JSON::Object then
+					dynamicControlJSONObject := JSON::get_object(eventDefJSONObject["DynamicControl"]);
+					if dynamicControlJSONObject'contains("DynamicControlName") and dynamicControlJSONObject'contains("DynamicControlType") and dynamicControlJSONObject'contains("UserEventType") and dynamicControlJSONObject'contains("UserOccurrenceId") then
+						hasDynamicControl := true;
+						dynamicControlName := JSON::get_string(dynamicControlJSONObject["DynamicControlName"]);
+						dynamicControlType := DynamicControlTypeEnum'value(JSON::get_string(dynamicControlJSONObject["DynamicControlType"]));
+						userEventType := JSON::get_string(dynamicControlJSONObject["UserEventType"]);
+						userOccurrenceId := JSON::get_integer(dynamicControlJSONObject["UserOccurrenceId"]); 
+					end if;
+				end if;
 				if eventDefJSONObject'contains("PreviousEvents") and eventDefJSONObject["PreviousEvents"].kind = JSON::Array then
 					for prevEventTypeJSONElement in JSON::get_array(eventDefJSONObject["PreviousEvents"]) loop
 						previousEventName := "";
@@ -54,7 +80,13 @@ begin
 						prevEventDefJSONObject := JSON::get_object(prevEventTypeJSONElement);
 						previousEventName := JSON::get_string(prevEventDefJSONObject["PreviousEventName"]);
 						previousEventOccurrenceId := JSON::get_integer(prevEventDefJSONObject["PreviousOccurrenceId"]);
-						previousEventTypes := previousEventTypes & (previousEventName, previousEventOccurrenceId);
+						constraintDefinitionId := "";
+						constraintValue := "";
+						if prevEventDefJSONObject'contains("ConstraintDefinitionId") and prevEventDefJSONObject'contains("ConstraintValue") then
+							constraintDefinitionId := JSON::get_string(prevEventDefJSONObject["ConstraintDefinitionId"]);
+							constraintValue := JSON::get_string(prevEventDefJSONObject["ConstraintValue"]);
+						end if;
+						previousEventTypes := previousEventTypes & (previousEventName, previousEventOccurrenceId, constraintDefinitionId, constraintValue);
 					end loop;
 				end if;
 				// now we have extracted the data create the event
@@ -70,7 +102,7 @@ begin
 						                               isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
 						                               staleAuditEventDuration => this.staleAuditEventDuration, 
 						                               blockedAuditEventDuration => this.blockedAuditEventDuration, 
-						                               previousEventTypes => previousEventTypes);
+						                               previousEventTypes => previousEventTypes, isBreak => isBreak);
 					link eventType R6 application;
 					link eventType R12 this;
 				else
@@ -79,6 +111,18 @@ begin
 					eventType.previousEventTypes := previousEventTypes;
 				end if;				
 				
+				// check if there is a dynamic control and if not create one
+				dynamicControl := eventType -> R19.DynamicControl;
+				if hasDynamicControl = true then
+					if dynamicControl = null then
+						dynamicControl := create unique DynamicControl();
+						link eventType R19 dynamicControl;
+					end if;
+					dynamicControl.dynamicControlName := dynamicControlName;
+					dynamicControl.controlType := dynamicControlType;
+					dynamicControl.userEventType := userEventType;
+					dynamicControl.userOccurrenceId := userOccurrenceId;
+				end if;
 			end loop;
 		end if;
 	else

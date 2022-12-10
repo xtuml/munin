@@ -57,7 +57,8 @@ public service AEOrdering::Req_IF_Verification~>eventDefinition ( jobName : in s
                                                                  occurrenceId : in integer,
                                                                  previousEventTypes : in sequence of PreviousEventType,
                                                                  isSequenceStart : in boolean,
-                                                                 isSequenceEnd : in boolean ) is
+                                                                 isSequenceEnd : in boolean,
+                                                                 isBreak : in boolean ) is
 begin
   null;
 end service;
@@ -85,6 +86,19 @@ public service AEOrdering::Req_IF_Verification~>extraJobInvariantDefinition ( au
                                                                              sourceEventType : in string,
                                                                              sourceOccurrenceId : in integer,
                                                                              userEvents : in sequence of UserEventDataType ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '36ba89ad-64aa-4fc7-85dc-c9d22ae2f8f8' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>dynamicControlDefinition ( jobTypeName : in string,
+                                                                          dynamicControlName : in string,
+                                                                          dynamicControlType : in DynamicControlTypeEnum,
+                                                                          sourceEventType : in string,
+                                                                          sourceOccurrenceId : in integer,
+                                                                          userEventType : in string,
+                                                                          userOccurrenceId : in integer ) is
 begin
   null;
 end service;

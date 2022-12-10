@@ -21,6 +21,7 @@ state AEOrdering::JobType.JobTypeExpired () is
 jobs : set of instance of Job;
 application : instance of Application;
 node : instance of Node;
+dynamicControl : instance of DynamicControl;
 
 begin
 	
@@ -53,12 +54,18 @@ begin
 			dataItemType.deleteDataItemType();
 		end loop;
 				
+		dynamicControl :=  auditEventType -> R19.DynamicControl;
+		if dynamicControl /= null then
+			unlink auditEventType R19 dynamicControl;
+			delete dynamicControl;
+		end if;
+		
 		unlink auditEventType R12;
 		unlink auditEventType R7;
 		delete auditEventType;
 		
 	end loop;
-	
+		
 	for dataItemType in this -> R14.DataItemType loop
 		dataItemType.deleteDataItemType();
 	end loop;
