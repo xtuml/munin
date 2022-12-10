@@ -200,7 +200,7 @@ begin
                   else
                     //Log Job failure: Previous event is valid but is part of a broken sequence
                     this.sequencingFailed := true;
-                    this.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
+                    this.failJob("The previous event is valid but has no known current sequence - Event Type = " & (prevEvent -> R2).AEType);
                   end if;  
           
                 else
@@ -217,13 +217,13 @@ begin
             elsif possibleAeOccInSequenceDef'length = 0 then
               // There is no available definition for this situation so the sequence is broken.
               this.sequencingFailed := true;
-              this.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
+              this.failJob("The previous event is valid but is part of a broken sequence - Previous Event Type = " & (prevEvent -> R2).AEType);
         
             else
               // There are multiple possible Audit Event Occurrences In the Sequence Definition 
               // TODO What does this circumstance imply and what can we do about it.
               this.sequencingFailed := true;
-              this.failJob("The are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
+              this.failJob("There are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
             end if;
           else
             // The previous event id provided in the audit event data is not recognised as a previous event 
@@ -581,8 +581,8 @@ begin
   this.jobCompleted := false;
   
   // Log info: Audit Event Sequence Verification has been informed of Job failure
-  logMessage := "Job Failed - jobId = " & this.jobID & " due to " & failureReason;
-  Logger::log(Logger::Information, "Monitored System Failure", logMessage); 
+  logMessage := "Job Failed - jobId = " & this.jobID & " due to: " & failureReason;
+  Logger::log(Logger::Information, "Monitored System Failure:", logMessage); 
   
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
