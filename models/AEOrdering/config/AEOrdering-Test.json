@@ -18,7 +18,14 @@
       "SequenceName": "SEQUENCE1",
       "EventName": "bbb",
       "OccurrenceId": 1,
-      "Application": "app1"
+      "Application": "app1",
+      "IsBreak": true,
+      "DynamicControl" : {
+        "DynamicControlName" : "cccLOOPCOUNT",
+        "DynamicControlType" : "LOOPCOUNT",
+        "UserEventType" : "ccc",
+        "UserOccurrenceId" : 1
+      }
     },
     {
       "EventName": "ccc",
@@ -26,7 +33,9 @@
       "PreviousEvents": [
         {
           "PreviousEventName": "bbb",
-          "PreviousOccurrenceId": 1
+          "PreviousOccurrenceId": 1,
+          "ConstraintDefinitionId" : "cccEventXOR",
+          "ConstraintValue" : "XOR"
         }
       ],
       "OccurrenceId": 1,

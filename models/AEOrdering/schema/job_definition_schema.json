@@ -49,6 +49,34 @@
           "description": "A flag denoting whether or not this event is the last event in a sequence",
           "type": "boolean"
         },
+        "IsBreak": {
+          "description": "A flag denoting whether or not this event is used to break out of a control e.g. loop",
+          "type": "boolean"
+        },
+        "DynamicControl" : {
+          "type": "object",
+          "properties": {
+            "DynamicControlName": {
+              "description": "The name of the control that is to be applied",
+              "type": "string"
+            },
+            "DynamicControlType": {
+              "description": "The type of the control that is to be applied",
+              "type": "string"
+            },
+            "UserEventType": {
+              "description": "The first user event type that the control operates on",
+              "type": "string"
+            },
+            "UserOccurrenceId": {
+              "description": "TODO",
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["DynamicControlName", "DynamicControlType", "UserEventType", "UserOccurrenceId"],
+          "additionalProperties": false
+        },
         "PreviousEvents": {
           "type": "array",
           "items": {
@@ -62,6 +90,14 @@
                 "description": "TODO",
                 "type": "integer",
                 "exclusiveMinimum": 0
+              },
+              "ConstraintDefinitionId": {
+                "description": "An identifier assigned to the constraint",
+                "type": "string"
+              },
+              "ConstraintValue": {
+                "description": "The value associated with the constraint, e.g. XOR",
+                "type": "string"
               }
             },
             "required": ["PreviousEventName", "PreviousOccurrenceId"],
