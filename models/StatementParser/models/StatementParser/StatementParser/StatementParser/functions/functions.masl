@@ -12,6 +12,8 @@ begin
 	logMessage := "StatementParser::validateStatements directory=" & directory & ", filename=" & filename;
 	Logger::log(Logger::Information, "StatementParser", logMessage);
 	
+	// Since the pre-processor needs to run, most validation occurs in Job.Populated
+	
 	if find_one Job(jobId = jobId) = null then
 		if Filesystem::file_exists(directory & "/" & filename) then
 		  job := create Job(jobId => jobId, occurrenceIdIncEnabled => false, currentOccurrenceId => 1, sequenceEnabled => false, Current_State => Created);

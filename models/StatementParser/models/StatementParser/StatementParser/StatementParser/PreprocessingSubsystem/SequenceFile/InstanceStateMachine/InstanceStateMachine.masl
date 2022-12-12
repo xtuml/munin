@@ -21,9 +21,9 @@ begin
   for lineNum in this.lines'range loop
     line := Strings::squeeze(this.lines[lineNum]);
     if Strings::starts_with(line, "@startuml") then
-      if Strings::contains(line, "id=") then
+      if Strings::contains(line, "id=") or Strings::contains(line, "id =") then
         tokens := Strings::tokenize(line, "(=)");
-        blockId := tokens[tokens'first + 2];
+        blockId := Strings::trim(tokens[tokens'first + 2]);
       else
         blockId := "default";
       end if;
