@@ -35,9 +35,7 @@ denoted by the `@startuml` statement on a line by itself and the end of the UML
 block is denoted by the `@enduml` statement on a line by itself. There may be
 more than one UML block defined in a single file. Optionally, an identifier can
 be associated with a UML block. (TODO allow spaces between tokens in identifier
-specification)
-
-Ex:
+specification):
 
 ----
 @startuml
@@ -81,9 +79,7 @@ the target UML block in the place of the `!include` statement itself.
 
 The job name is defined by the `title` statement. Every top level job definition
 _must_ have a name defined. If multiple `title` statements are encountered, the
-last one wins.
-
-Ex:
+last one wins:
 
 ----
 title MyJob
@@ -92,10 +88,8 @@ title "My Job With Spaces"
 
 ==== Application/Participant
 
-All participants in the sequence diagram must be pre-declared. This is done with
-the `participant` statement.
-
-Ex:
+All participants in the sequence must be pre-declared. This is done with the
+`participant` statement:
 
 ----
 participant Participant1
@@ -103,18 +97,12 @@ participant Participant2
 participant "Participant with Spaces"
 ----
 
-==== Sequence Start/End
-
-TODO
-
 ==== Start/End Sequence Definition
 
 A job consists of one or more disjoint sequences of events. A sequence can be
-defined by surrounding a set of statements with a `box` definition. Statements
-not surrounded by a `box` definition will be assigned to a sequence with an
-arbitrary default name. (TODO this needs to be checked)
-
-Ex:
+defined by surrounding a set of statements with a `box` definition. All audit
+event statements must be defined with a sequence. (TODO throw error if this is
+not the case):
 
 ----
 box Sequence1 #LightBlue
@@ -122,19 +110,37 @@ box Sequence1 #LightBlue
 end box
 ----
 
+==== Sequence Start/End
+
+Sequences can have multiple valid starting and ending points. The first event in
+a sequence is automatically considered to be a sequence start event. Likewise,
+the last event in a sequence is automatically considered to be a sequence end
+event. Other start and events can be defined by sending messages between an
+external "actor" and "participant" in the sequence diagram. An actor is defined
+with the `actor` statement:
+
+----
+actor User
+actor System
+actor "Actor with Spaces"
+----
+
+Like participants, actors must be pre-declared. The name of the actor is not
+used by the PLUS and is simply for documentation purposes.
+
 ==== Audit Event
 
 Actual audit events in sequences are defined using the message statement. The
 message must be defined between two pre-declared participants in the diagram.
 The name of the message is the event name and uniquely identifies the event type
 in the job. An additional occurrence number is used in some cases to identify
-the instance of the event in the job definition.
-
-Ex:
+the instance of the event in the job definition:
 
 ----
 teller -> customer: "Print Receipt"
 ----
+
+image::ae.png[Audit Event]
 
 ==== Start/Stop/Resume Numbering
 
@@ -154,11 +160,92 @@ or `autonumber resume`.
 starting at the last number plus 1. `autonumber resume` is not valid before an
 instance of `autonumber stop`
 
+----
+alice -> bob: "A"
+autonumber
+alice -> bob: "B"
+alice -> bob: "C"
+autonumber stop
+alice -> bob: "D"
+alice -> bob: "E"
+autonumber resume
+alice -> bob: "F"
+alice -> bob: "G"
+autonumber stop
+alice -> bob: "H"
+alice -> bob: "I"
+alice -> bob: "J"
+autonumber
+alice -> bob: "K"
+alice -> bob: "L"
+alice -> bob: "M"
+----
 
-==== Alt/Else (TODO not currently supported)
+image::autonumber.png[Autonumber]
 
-TODO
+==== Alt/Else
 
-==== Loop/Loop End (TODO not currently supported)
+Valid sequence definitions can branch into multiple distinct paths. This can be
+specified using the `alt` and `else` groupings.
 
-TODO
+----
+teller -> system: "Request withdrawal"
+alt
+system -> teller: "Report insufficient balance"
+else
+system -> teller: "Report success"
+end
+----
+
+image::alt.png[Alt/else]
+
+Each alt/else collection starts with a single `alt` statement followed by a
+series of statements. An `else` statement can follow along with additional
+statements. The whole collection is terminated by an `end` statement. There may
+be any number of `else` branches. An `else` or `end` statement is invalid
+without a preceding `alt` statement. Every `alt` statement must be terminated
+with an `end` statement.
+
+==== Loop
+
+Valid sequences may have subsequences of events that occur repeatedly in a loop.
+This can be  specified using the `loop` grouping.
+
+----
+client -> server: "Request file"
+loop
+server -> server: "Prepare packet"
+server -> client: "Send packet"
+end
+server -> client: "Transfer complete"
+----
+
+image::loop.png[Loop]
+
+===== Breaking from a loop
+
+A loop can be constrained to a specific number of iterations or it can be
+unconstrained. The sequence can also specify an event which breaks the loop
+early. This is done by adding the word "break" as the secondary group label of
+the branch of an `alt`:
+
+----
+client -> server: "Request file"
+loop
+alt
+server -> server: "Prepare packet"
+else break
+server -> server: "Internal error"
+end
+server -> client: "Send packet"
+end
+server -> client: "Transfer result"
+----
+
+image::loopbreak.png[Loop with break]
+
+The last event an alt branch marked with "break" is considered to be a break
+event. The next event expected after a "break" event is the first event after
+the end of the loop. There is currently no support for breaking from the outer
+loop of a nested loop.
+
