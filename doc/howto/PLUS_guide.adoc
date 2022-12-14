@@ -34,8 +34,7 @@ definition file must contain at least one UML block. The start of a UML block is
 denoted by the `@startuml` statement on a line by itself and the end of the UML
 block is denoted by the `@enduml` statement on a line by itself. There may be
 more than one UML block defined in a single file. Optionally, an identifier can
-be associated with a UML block. (TODO allow spaces between tokens in identifier
-specification):
+be associated with a UML block:
 
 ----
 @startuml
@@ -52,7 +51,7 @@ specification):
 ----
 
 When a job definition file is processed, the first UML block is taken to be the
-definition of the top level block and subsequent UML blocks are skipped. In
+definition of the top level block, and subsequent UML blocks are skipped. In
 typical usage, a job definition file will either contain one default UML block
 (top level job definition file) or one to many labeled UML blocks intended to be
 `!include` -ed elsewhere.
@@ -73,6 +72,73 @@ as a top level job definition.
 Includes are handled during preprocessing and simply inject the statements from
 the target UML block in the place of the `!include` statement itself.
 
+Example:
+
+._BankDeposit1.puml
+----
+@startuml(id=Part1)
+title BankDeposit (part 1)
+participant Customer
+participant Teller
+participant System
+Customer -> Teller : SendCheck
+Customer -> Teller : SendDepositSlip
+Teller -> Teller : ScanDocuments
+Teller -> Teller : EnterInformation
+Teller -> System : SubmitForReview
+@enduml
+
+@startuml(id=Part3)
+title BankDeposit (part 3)
+participant Teller
+participant Customer
+Teller -> Customer : GiveReceipt
+@enduml
+----
+
+image::_BankDeposit1.png[BankDeposit (part 1)]
+
+image::_BankDeposit1_001.png[BankDeposit (part 3)]
+
+._BankDeposit2.puml
+----
+@startuml(id=Part2)
+title BankDeposit (part 2)
+participant System
+participant Auditor
+System -> System : VerifyAmount
+System -> System : VerifyAccountNumber
+System -> Auditor : RequestFraudCheck
+Auditor -> System: FraudCheckResponse
+@enduml
+----
+
+image::_BankDeposit2.png[BankDeposit (part 2)]
+
+.BankDeposit.puml
+----
+@startuml
+box Sequence #LightBlue
+
+# note the included files begin with "_"
+!include _BankDeposit1.puml!Part1
+!include _BankDeposit2.puml!Part2
+!include _BankDeposit1.puml!Part3
+
+# participants restated here to control display order
+participant Customer
+participant Teller
+participant System
+participant Auditor
+end box
+
+# title restated at the end to ensure it is the last title statement
+title BankDeposit
+@enduml
+----
+
+image::BankDeposit.png[BankDeposit]
+
 === Statements
 
 ==== Job Name
@@ -86,6 +152,22 @@ title MyJob
 title "My Job With Spaces"
 ----
 
+If a job definition is composed of many `!include` statements, the `title`
+statement should come _after_ the `!includes` to assure it is the last `title`
+statement processed for the job definition:
+
+==== Start/End Sequence Definition
+
+A job consists of one or more disjoint sequences of events. A sequence is
+defined by surrounding a set of statements with a `box` definition. All audit
+event statements and participant declarations must be defined within a sequence:
+
+----
+box Sequence1 #LightBlue
+...
+end box
+----
+
 ==== Application/Participant
 
 All participants in the sequence must be pre-declared. This is done with the
@@ -97,25 +179,12 @@ participant Participant2
 participant "Participant with Spaces"
 ----
 
-==== Start/End Sequence Definition
-
-A job consists of one or more disjoint sequences of events. A sequence can be
-defined by surrounding a set of statements with a `box` definition. All audit
-event statements must be defined with a sequence. (TODO throw error if this is
-not the case):
-
-----
-box Sequence1 #LightBlue
-...
-end box
-----
-
 ==== Sequence Start/End
 
 Sequences can have multiple valid starting and ending points. The first event in
 a sequence is automatically considered to be a sequence start event. Likewise,
 the last event in a sequence is automatically considered to be a sequence end
-event. Other start and events can be defined by sending messages between an
+event. Other start and end events can be defined by sending messages between an
 external "actor" and "participant" in the sequence diagram. An actor is defined
 with the `actor` statement:
 
@@ -125,16 +194,17 @@ actor System
 actor "Actor with Spaces"
 ----
 
-Like participants, actors must be pre-declared. The name of the actor is not
-used by the PLUS and is simply for documentation purposes.
+Like participants, actors must be pre-declared. Actors must be declared
+_outside_ the sequence definitions.
 
 ==== Audit Event
 
 Actual audit events in sequences are defined using the message statement. The
-message must be defined between two pre-declared participants in the diagram.
-The name of the message is the event name and uniquely identifies the event type
-in the job. An additional occurrence number is used in some cases to identify
-the instance of the event in the job definition:
+message must be defined between a pre-declared actor or participant and another
+participant in the diagram. The name of the message is the event name and
+uniquely identifies the event type in the job. An additional occurrence number
+is used in some cases to identify the instance of the event in the job
+definition:
 
 ----
 teller -> customer: "Print Receipt"
@@ -144,10 +214,10 @@ image::ae.png[Audit Event]
 
 ==== Start/Stop/Resume Numbering
 
-In cases where the same event is used in multiple places in a single job
-definition, it is necessary to include an additional numeric value to identify
-the occurrence of an event in a job sequence. Numbering can be controlled by the
-following statements:
+In cases where an event or set of events is used in multiple places in a single
+job definition, it is necessary to include an additional numeric value to
+identify the occurrence of an event in a job sequence. Numbering can be
+controlled by the following statements:
 
 `autonumber` causes the processor to start automatically attaching occurrence
 numbers to audit events with sequentially increasing integers starting at 1.
@@ -194,7 +264,7 @@ alt
 system -> teller: "Report insufficient balance"
 else
 system -> teller: "Report success"
-end
+end alt
 ----
 
 image::alt.png[Alt/else]
@@ -216,7 +286,7 @@ client -> server: "Request file"
 loop
 server -> server: "Prepare packet"
 server -> client: "Send packet"
-end
+end loop
 server -> client: "Transfer complete"
 ----
 
@@ -236,9 +306,9 @@ alt
 server -> server: "Prepare packet"
 else break
 server -> server: "Internal error"
-end
+end alt
 server -> client: "Send packet"
-end
+end loop
 server -> client: "Transfer result"
 ----
 
