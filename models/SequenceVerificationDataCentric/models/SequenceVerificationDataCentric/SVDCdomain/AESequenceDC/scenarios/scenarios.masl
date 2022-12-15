@@ -1828,7 +1828,7 @@ begin
   eventDefinition ("ComplexJob","ComplexSequence","CS1-E",2,previousEventTypes,false,false,false);
   // Future XOR Fork on CS1-E,2" - not included yet - will require constraint definitions
   //previousEventTypes := ("CS1-E",2,"","");
-  //eventDefinition ("ComplexJob","ComplexSequence","CS1-T",1,previousEventTypes,false,false);
+  //eventDefinition ("ComplexJob","ComplexSequence","CS1-T",1,previousEventTypes,false,true,false);
   previousEventTypes := ("CS1-E",2,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-F",2,previousEventTypes,false,false,false);
   // end of second loop in branch
@@ -1879,7 +1879,11 @@ begin
   previousEventTypes := ("CS1-D",5,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-E",4,previousEventTypes,false,true,false);
 //
-//
+// Now set up the dynamic control definitions...
+  dynamicControlDefinition("ComplexJob", "LC1", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-E",1);
+//  dynamicControlDefinition("ComplexJob", "LC2", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-D",2);
+  dynamicControlDefinition("ComplexJob", "LC3", dynamicControlTypeEnum.LOOPCOUNT, "CS1-A",1,"CS1-S",1);
+  dynamicControlDefinition("ComplexJob", "BC1", dynamicControlTypeEnum.BRANCHCOUNT, "CS1-C",1,"CS1-K",1);
 //
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
