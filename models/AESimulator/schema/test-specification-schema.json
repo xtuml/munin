@@ -1,45 +1,72 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "test-specification-schema.json",
+  "title": "Test Specification",
+  "description": "Configuration and test specifcation for AE Simulator",
   "type": "object",
   "properties": {
-    "GenerateEventFiles": {
-      "type": "string"
+    "OneFilePerJob": {
+      "description": "If set true then all events for a job are put into one event file for an execution of a job. Once all events have been added the event file is made available. If set to false events from any in progress Job will be put in the event file and the simulator will use the MaxEventsPerFile and FileTimeoutPeriod to determine when the event file should be made available.",
+      "type": "boolean"
+    },
+    "MaxEventsPerFile": {
+      "description": "When the OneFilePerJob is set to false this is the maximum number of events that shall be added to an event file.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "FileTimoutPeriod": {
+      "description": "When the OneFilePerJob is set to false this is the maximum amount of time that shall pass before the event flies made available.",
+      "type": "string",
+      "format": "duration"
     },
     "JobSpecificationLocation": {
+      "description": "The details of the events that are to be generated for a job are captured in a Job Specification. This value identifies the location of these files.",
       "type": "string"
     },
     "TestFileLocation": {
+      "description": "This is the directory where the files should be created.",
       "type": "string"
     },
     "TestFileDestination": {
+      "description": "This directory the files should be moved to once created.",
       "type": "string"
     },
     "Tests": {
+      "description": "",
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
           "TestId": {
+            "description": "This provides a unique id for the test specification.",
             "type": "number"
           },
           "TestName": {
+            "description": "The name that has been assigned to the test.",
             "type": "string"
           },
           "TotalTests": {
+            "description": "This defines the total number of times this test is to be executed.",
             "type": "number"
+            "minimum": 0
           },
           "TestFrequency": {
+            "description": "A duration that specifies the frequency that the test should be run e.g. PT1S is every second.",
             "type": "string"
+            "format": "duration"
           },
           "TestJobSpec": {
+            "description": " This is an array of the test job specifications that should be executed for this test. The following provides an explanation of the json elements in a test job specification.",
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
                 "TestJobSpecName": {
+                  "description": "This the name of the json file for the test job specification e.g., EndToEndHappyPathJob.json that should be found in *JobSpecificationLocation*. A test job specification indicates the events that are to be produced when the job is executed for the test. Note that this is may not be a valid set of events for a given job that is to be validated by the Protocol Processor but is simulating a set of events in a scenario that needs to be tested",
                   "type": "string"
                 },
                 "EventDispatchOrder": {
+                  "description": "Each event specified in the job specification has a unique identifier. This element allows the tester to specify the order that the events are to be dispatched for this test.",
                   "type": "string"
                 }
               },

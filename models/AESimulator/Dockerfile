@@ -13,6 +13,8 @@ WORKDIR /build
 ADD masl /root/masl
 ADD CMakeLists.txt /root/CMakeLists.txt
 
+# copy configuration
+ADD schema /root/schema
 
 
 ################################################################################

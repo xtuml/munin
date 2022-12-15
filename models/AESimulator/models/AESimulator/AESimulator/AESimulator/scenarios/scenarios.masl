@@ -20,6 +20,7 @@ testSpec : instance of TestSpec;
 configFileName : Filesystem::filename;
 configJSONString : string;
 configJSONElement : JSON::JSONElement;
+configValidationResult : JSON::JSONObject;
 configJSONObject : JSON::JSONObject;
 testDefJSONObject : JSON::JSONObject;
 testId : integer;
@@ -62,9 +63,9 @@ begin
 	    // read the contents of the config file - t
 	    configJSONString := Filesystem::read_file(configFileName);
 	    configJSONElement := JSON::parse(configJSONString);
-	    // TODO configValidationResult := JSONValidation::validate(configJSONElement, #PROP["orderingConfigSchema"]#);
-	    // TODO if JSON::get_boolean(configValidationResult["valid"]) then
-	            // extract the spec data items
+	    configValidationResult := JSONValidation::validate(configJSONElement, #PROP["testSpecificationSchema"]#);
+	    if JSON::get_boolean(configValidationResult["valid"]) then
+	        // extract the spec data items
 	        configJSONObject := JSON::get_object(configJSONElement);
 	        if configJSONObject'contains("OneFilePerJob") then
 	        	testSpec.oneFilePerJob := boolean'parse(JSON::get_string(configJSONObject["OneFilePerJob"]));
@@ -107,58 +108,64 @@ begin
 		                    if Filesystem::file_exists(jobSpecFileName) then
 							    jobSpecJSONString := Filesystem::read_file(jobSpecFileName);
 							    jobSpecJSONElement := JSON::parse(jobSpecJSONString);
-						        jobSpecJSONObject := JSON::get_object(jobSpecJSONElement);
-						        if jobSpecJSONObject'contains("JobSpecName") then
-						        	jobSpec := create JobSpec(jobSpecName => JSON::get_string(jobSpecJSONObject["JobSpecName"]));
-					                for eventDefinitionElement in JSON::get_array(jobSpecJSONObject["EventDefinition"]) loop
-						                eventDefinitionObject := JSON::get_object(eventDefinitionElement);				                	
-					                	eventDefinition := create EventDefinition(eventDefinitionId => JSON::get_string(eventDefinitionObject["EventId"]), 
-					                		                                      jobSpecName => jobSpec.jobSpecName, 
-					                		                                      eventTypeName => JSON::get_string(eventDefinitionObject["EventName"]), 
-					                		                                      nodeName=> JSON::get_string(eventDefinitionObject["NodeName"]), 
-					                		                                      applicationName => JSON::get_string(eventDefinitionObject["ApplicationName"]), 
-					                		                                      delayDuration => @PT0S@, 
-					                		                                      prevId => "", 
-					                		                                      sequenceStart => false);
-						                if eventDefinitionObject'contains("EventData") then
-							                for eventDataDefinitionElement in JSON::get_array(eventDefinitionObject["EventData"]) loop
-								                eventDataDefinitionObject := JSON::get_object(eventDataDefinitionElement);
-												eventDataName := "";
-												if eventDataDefinitionObject'contains("DataName") then
-													eventDataName := JSON::get_string(eventDataDefinitionObject["DataName"]);
-												end if;
-												eventDataValue := "";
-												if eventDataDefinitionObject'contains("DataValue") then
-													eventDataValue := JSON::get_string(eventDataDefinitionObject["DataValue"]);
-												end if;
-												if eventDataName /= "" then
-													eventData := create unique EventData(eventDataName => eventDataName, eventDataValue => eventDataValue);
-													link eventData R16 eventDefinition;
-												end if;
-							                end loop;
-							            end if;
-										if eventDefinitionObject'contains("DispatchDelay") then
-											eventDefinition.delayDuration := duration'parse(JSON::get_string(eventDefinitionObject["DispatchDelay"]));
-										end if;
-										if eventDefinitionObject'contains("PreviousEventId") then
-											eventDefinition.prevId := JSON::get_string(eventDefinitionObject["PreviousEventId"]);
-										end if;
-										if eventDefinitionObject'contains("SequenceStart") then
-											eventDefinition.sequenceStart := boolean'parse(JSON::get_string(eventDefinitionObject["SequenceStart"]));
-										end if;
-										link jobSpec R9 eventDefinition;
-										prevEventDefinition := find_one (jobSpec -> R9.EventDefinition)(eventDefinitionId = eventDefinition.prevId);
-										if prevEventDefinition /= null then
-										  link eventDefinition R1.follows prevEventDefinition;
-										else
-										  link jobSpec R2 eventDefinition;
-										end if;
-									end loop;
-						        else
-								    logMessage := "AESimulator::initialise, job spec has no name. Specified file = " & string(testJobSpecName);
-								    Logger::log(Logger::Error, "AESimulator", logMessage);
-			                    	raise program_error;
-						        end if;
+							    configValidationResult := JSONValidation::validate(configJSONElement, #PROP["testJobSpecificationSchema"]#);
+							    if JSON::get_boolean(configValidationResult["valid"]) then
+							        jobSpecJSONObject := JSON::get_object(jobSpecJSONElement);
+							        if jobSpecJSONObject'contains("JobSpecName") then
+							        	jobSpec := create JobSpec(jobSpecName => JSON::get_string(jobSpecJSONObject["JobSpecName"]));
+						                for eventDefinitionElement in JSON::get_array(jobSpecJSONObject["EventDefinition"]) loop
+							                eventDefinitionObject := JSON::get_object(eventDefinitionElement);				                	
+						                	eventDefinition := create EventDefinition(eventDefinitionId => JSON::get_string(eventDefinitionObject["EventId"]), 
+						                		                                      jobSpecName => jobSpec.jobSpecName, 
+						                		                                      eventTypeName => JSON::get_string(eventDefinitionObject["EventName"]), 
+						                		                                      nodeName=> JSON::get_string(eventDefinitionObject["NodeName"]), 
+						                		                                      applicationName => JSON::get_string(eventDefinitionObject["ApplicationName"]), 
+						                		                                      delayDuration => @PT0S@, 
+						                		                                      prevId => "", 
+						                		                                      sequenceStart => false);
+							                if eventDefinitionObject'contains("EventData") then
+								                for eventDataDefinitionElement in JSON::get_array(eventDefinitionObject["EventData"]) loop
+									                eventDataDefinitionObject := JSON::get_object(eventDataDefinitionElement);
+													eventDataName := "";
+													if eventDataDefinitionObject'contains("DataName") then
+														eventDataName := JSON::get_string(eventDataDefinitionObject["DataName"]);
+													end if;
+													eventDataValue := "";
+													if eventDataDefinitionObject'contains("DataValue") then
+														eventDataValue := JSON::get_string(eventDataDefinitionObject["DataValue"]);
+													end if;
+													if eventDataName /= "" then
+														eventData := create unique EventData(eventDataName => eventDataName, eventDataValue => eventDataValue);
+														link eventData R16 eventDefinition;
+													end if;
+								                end loop;
+								            end if;
+											if eventDefinitionObject'contains("DispatchDelay") then
+												eventDefinition.delayDuration := duration'parse(JSON::get_string(eventDefinitionObject["DispatchDelay"]));
+											end if;
+											if eventDefinitionObject'contains("PreviousEventId") then
+												eventDefinition.prevId := JSON::get_string(eventDefinitionObject["PreviousEventId"]);
+											end if;
+											if eventDefinitionObject'contains("SequenceStart") then
+												eventDefinition.sequenceStart := boolean'parse(JSON::get_string(eventDefinitionObject["SequenceStart"]));
+											end if;
+											link jobSpec R9 eventDefinition;
+											prevEventDefinition := find_one (jobSpec -> R9.EventDefinition)(eventDefinitionId = eventDefinition.prevId);
+											if prevEventDefinition /= null then
+											  link eventDefinition R1.follows prevEventDefinition;
+											else
+											  link jobSpec R2 eventDefinition;
+											end if;
+										end loop;
+							        else
+									    logMessage := "AESimulator::initialise, job spec has no name. Specified file = " & string(testJobSpecName);
+									    Logger::log(Logger::Error, "AESimulator", logMessage);
+				                    	raise program_error;
+							        end if;
+								else
+							        Logger::log(Logger::Debug, "AESimulator::initialise", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
+							        raise JSON::JSONException("Config file invalid");
+								end if;
 		                    else
 							    logMessage := "AESimulator::initialise, failed to locate job spec file. Specified file = " & string(testJobSpecName);
 							    Logger::log(Logger::Error, "AESimulator", logMessage);
@@ -203,11 +210,10 @@ begin
 	            end loop;
 	        end if;
 	
-		// TODO
-		//else
-	        //	Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
-	        //	raise JSON::JSONException("Config file invalid");
-		//end if;
+		else
+	        Logger::log(Logger::Debug, "AESimulator::initialise", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
+	        raise JSON::JSONException("Config file invalid");
+		end if;
     
 		// now the config is loaded start the jobs
 		if testSpec.oneFilePerJob = false then
