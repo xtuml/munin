@@ -188,11 +188,11 @@ sVDCDynamicControlType : AESequenceDC::dynamicControlTypeEnum;
 begin
   if dynamicControlType = AEOrdering::DynamicControlTypeEnum.BRANCHCOUNT then
   	sVDCDynamicControlType := AESequenceDC::dynamicControlTypeEnum.BRANCHCOUNT;
-  elsif dynamicControlType = AEOrdering::DynamicControlTypeEnum.LOOPCOUNTCOUNT then
+  elsif dynamicControlType = AEOrdering::DynamicControlTypeEnum.LOOPCOUNT then
   	sVDCDynamicControlType := AESequenceDC::dynamicControlTypeEnum.LOOPCOUNT;
   end if;
   
-  AESequenceDC::dynamicControlDefinition(jobTypeName, dynamicControlName, dynamicControlType, sourceEventType, sourceOccurrenceId, userEventType, userOccurrenceId);
+  AESequenceDC::dynamicControlDefinition(jobTypeName, dynamicControlName, sVDCDynamicControlType, sourceEventType, sourceOccurrenceId, userEventType, userOccurrenceId);
   
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
