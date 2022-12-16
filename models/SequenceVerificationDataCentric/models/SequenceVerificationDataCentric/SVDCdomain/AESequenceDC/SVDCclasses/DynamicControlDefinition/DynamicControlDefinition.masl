@@ -11,6 +11,7 @@ sourceSequenceDefn : instance of AESequenceDefinition;
 sourceAEInSequenceDefn : instance of AEInSequenceDefinition;
 sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 sourceAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
+logMessage : string;
 
 
 begin
@@ -32,16 +33,25 @@ begin
           //link R30
           link newDynamicControlDefn R30 sourceAEOccurrenceDefn;
         else
-          // TODO Add error handling for the specified Audit Event Occurrence Definition was not found
+          // Error handling for the specified Audit Event Occurrence Definition was not found
+          logMessage := "There is no known Audit Event Occurrence Definition with Audit Event Definition name " & sourceEventType & " Occurrence Id " & sourceOccurrenceId'image & "corresponding to the source event specified for Dynamic Control Definition";
+	      Logger::log(Logger::Information, "AESequenceDC", logMessage);
         end if;  
       else
-        // TODO Add error handling for the Sequence Definition corresponding to this Audit Event was not found
+        // Error handling for the Sequence Definition corresponding to this Audit Event was not found
+        logMessage := "There is no known Sequence Definition associated with Audit Event Definition named " & sourceEventType & "corresponding to the source event specified for Dynamic Control Definition";
+	    Logger::log(Logger::Information, "AESequenceDC", logMessage);
       end if;    
     else
-      // TODO Add error handling for the sourceEventType specified is invalid
+      // Error handling for the sourceEventType specified is invalid
+      logMessage := "There is no known Audit Event Definition with name " & sourceEventType & "corresponding to the source event specified for Dynamic Control Definition";
+	  Logger::log(Logger::Information, "AESequenceDC", logMessage);
     end if;    
   else
-    //TODO Add error handling for Error Job Definition Unknown
+    // Error handling for Error Job Definition Unknown
+    logMessage := "There is no known Job Definition with name " & jobName & "corresponding to the source event specified for Dynamic Control Definition";
+	Logger::log(Logger::Information, "AESequenceDC", logMessage);
+    
   end if;  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -59,6 +69,7 @@ userSequenceDefn : instance of AESequenceDefinition;
 userAEInSequenceDefn : instance of AEInSequenceDefinition;
 userAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 userAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
+logMessage : string;
 
 
 begin
@@ -79,17 +90,25 @@ begin
           //link R31
           link theDynamicControlDefn R31 userAEOccurrenceDefn;
         else
-          // TODO Add error handling for the specified Audit Event Occurrence Definition was not found
+          // Error handling for the specified Audit Event Occurrence Definition was not found
+          logMessage := "There is no known Audit Event Occurrence Definition with Audit Event Definition name " & userEventType & " Occurrence Id " & userOccurrenceId'image & "corresponding to the user event specified for Dynamic Control Definition";
+	      Logger::log(Logger::Information, "AESequenceDC", logMessage);
         end if;  
       else
-        // TODO Add error handling for the Sequence Definition corresponding to this Audit Event was not found
+        // Error handling for the Sequence Definition corresponding to this Audit Event was not found
+        logMessage := "There is no known Sequence Definition associated with Audit Event Definition named " & userEventType & "corresponding to the user event specified for Dynamic Control Definition";
+	    Logger::log(Logger::Information, "AESequenceDC", logMessage);
       end if;    
     else
-      // TODO Add error handling for the sourceEventType specified is invalid
+      // Error handling for the userEventType specified is invalid
+      logMessage := "There is no known Audit Event Definition with name " & userEventType & "corresponding to the user event specified for Dynamic Control Definition";
+	  Logger::log(Logger::Information, "AESequenceDC", logMessage);
     end if;    
     
   else
-    // TODO Add error handling for the specified Dynamic Control Definition instance was not found
+    //Error handling for the specified Dynamic Control Definition instance was not found
+    logMessage := "There is no known Job Definition with name " & jobName & "corresponding to the user event specified for Dynamic Control Definition";
+	Logger::log(Logger::Information, "AESequenceDC", logMessage);
   end if;
 
     

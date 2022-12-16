@@ -6,12 +6,12 @@ RUN SCENARIO AESequenceDC 2 "InitCyclicTopologyEventDefinition"
 RUN SCENARIO AESequenceDC 3 "InitSystemSpec"
 RUN SCENARIO AESequenceDC 4 "InitForkAndMergeTopologyEventDefinition"
 RUN SCENARIO AESequenceDC 5 "InitIntraJobInvariantDefinition"
-RUN SCENARIO AESequenceDC 6 "InitBranchCountDefinition"
 RUN SCENARIO AESequenceDC 7 "InitPersistentInvariantAuthAndBankTransferDefinition"
 RUN SCENARIO AESequenceDC 8 "InitEventDefinitionForInclusiveOR"
 RUN SCENARIO AESequenceDC 9 "InitLoopBreakEventDefinition"
 RUN SCENARIO AESequenceDC 501 "InitComplexEventSequence1Definition"
 RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
+RUN SCENARIO AESequenceDC 901 "InitBranchCountDefinition"
 
 
 # run normal path tests
@@ -46,8 +46,8 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test25NormalLoopWithBreakPath 1025 
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test26NormalLoopWithLoopCount 1026 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test27NormalInstanceForkWithBranchCount 1027 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test28NormalLoopWithBreakNotTaken 1028 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test29NormalBranchCountWithSameSourceAndUserEvent 1029 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test70ComplexSequence_SunnyDay1 1070 CleanUpAllJobs 64]
-
 
 # Suspend & Reactivate JobDefinition test cases
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test20StartOfNewJobForSuspendedJobDefinition 1020 CleanUpAllJobs 64]
@@ -87,6 +87,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test59InvalidUserExtraJobInvariant 
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test60StalePersistedInvariant 1060 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test61InvalidInstanceForkWithBranchCount 1061 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test62InvalidLoopWithLoopCount 1062 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test63InvalidLoopWithNonIntegerLoopCount 1063 CleanUpAllJobs 64]
 
 
 

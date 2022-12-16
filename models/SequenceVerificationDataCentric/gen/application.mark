@@ -3,7 +3,6 @@ SVDCdomain::AESequenceDC::scenarios::void InitCyclicTopologyEventDefinition,scen
 SVDCdomain::AESequenceDC::scenarios::void InitSystemSpec,scenario,Function,3
 SVDCdomain::AESequenceDC::scenarios::void InitForkAndMergeTopologyEventDefinition,scenario,Function,4
 SVDCdomain::AESequenceDC::scenarios::void InitIntraJobInvariantDefinition,scenario,Function,5
-SVDCdomain::AESequenceDC::scenarios::void InitBranchCountDefinition,scenario,Function,6
 SVDCdomain::AESequenceDC::scenarios::void InitPersistentInvariantAuthAndBankTransferDefinition,scenario,Function,7
 SVDCdomain::AESequenceDC::scenarios::void InitEventDefinitionForInclusiveOR,scenario,Function,8
 SVDCdomain::AESequenceDC::scenarios::void InitLoopBreakEventDefinition,scenario,Function,9
@@ -100,6 +99,7 @@ SVDCdomain::AESequenceDC::scenarios::void TestInsertIllegalSequenceEndEvents04to
 SVDCdomain::AESequenceDC::scenarios::void TestInsertSplitFandMJobEvents01to05,scenario,Function,350
 SVDCdomain::AESequenceDC::scenarios::void TestInsertSplitFandMJobEvents06to10,scenario,Function,351
 SVDCdomain::AESequenceDC::scenarios::void TestInsertSplitInstanceFandMJobEvents01to21,scenario,Function,352
+SVDCdomain::AESequenceDC::scenarios_cbc::void InitBranchCountDefinitionEnhanced,scenario,Function,901
 SVDCdomain::AESequenceDC::test_cases::void Test01NormalPath,scenario,Function,1001
 SVDCdomain::AESequenceDC::test_cases::void Test01NormalPath,test_only,Function,true
 SVDCdomain::AESequenceDC::test_cases::void Test03NormalPath,scenario,Function,1003
@@ -165,6 +165,8 @@ SVDCdomain::AESequenceDC::tests_new::void Test27NormalInstanceForkWithBranchCoun
 SVDCdomain::AESequenceDC::tests_new::void Test27NormalInstanceForkWithBranchCount,test_only,Function,true
 SVDCdomain::AESequenceDC::tests_new::void Test28NormalLoopWithBreakNotTaken,scenario,Function,1028
 SVDCdomain::AESequenceDC::tests_new::void Test28NormalLoopWithBreakNotTaken,test_only,Function,true
+SVDCdomain::AESequenceDC::tests_cbc::void Test29NormalBranchCountWithSameSourceAndUserEvent,scenario,Function,1029
+SVDCdomain::AESequenceDC::tests_cbc::void Test29NormalBranchCountWithSameSourceAndUserEvent,test_only,Function,true
 SVDCdomain::AESequenceDC::test_cases::void Test36ErrorDetection,scenario,Function,1036
 SVDCdomain::AESequenceDC::test_cases::void Test36ErrorDetection,test_only,Function,true
 SVDCdomain::AESequenceDC::test_cases::void Test37ErrorDetection,scenario,Function,1037
@@ -221,6 +223,7 @@ SVDCdomain::AESequenceDC::tests_new::void Test61InvalidInstanceForkWithBranchCou
 SVDCdomain::AESequenceDC::tests_new::void Test61InvalidInstanceForkWithBranchCount,test_only,Function,true
 SVDCdomain::AESequenceDC::tests_new::void Test62InvalidLoopWithLoopCount,scenario,Function,1062
 SVDCdomain::AESequenceDC::tests_new::void Test62InvalidLoopWithLoopCount,test_only,Function,true
+SVDCdomain::AESequenceDC::tests_cbc::void Test63InvalidLoopWithNonIntegerLoopCount,scenario,Function,1063
+SVDCdomain::AESequenceDC::tests_cbc::void Test63InvalidLoopWithNonIntegerLoopCount,test_only,Function,true
 SVDCdomain::AESequenceDC::tests_pdf::void Test70ComplexSequence_SunnyDay1,scenario,Function,1070
 SVDCdomain::AESequenceDC::tests_pdf::void Test70ComplexSequence_SunnyDay1,test_only,Function,true
-

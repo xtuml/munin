@@ -1,0 +1,120 @@
+//! ACTIVITY BEGIN. 'a9d5c545-33e3-4748-b1a1-573d4b4d559a' '2ad43240-c63d-4428-9c9d-36d0fd0f46f4' DO NOT EDIT THIS LINE.
+state StatementParser::Job.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a9d5c545-33e3-4748-b1a1-573d4b4d559a' '7d6272de-cc27-4bc7-b85a-81137d80020e' DO NOT EDIT THIS LINE.
+state StatementParser::Job.Populated () is
+lineNum : integer := 1;
+line : instance of Line;
+lineToken : instance of LineToken;
+prevLine : instance of Line;
+prevLineToken : instance of LineToken;
+pos : integer := -1;
+endPos : integer := -1;
+tmpLineText : string;
+tmpToken : string;
+valid : boolean := true;
+failureReason : string;
+tmp : integer;
+sourceFile : instance of SequenceFile;
+begin
+	for lineText in (this -> R17.SequenceFile).lines loop
+		if (Strings::trim(lineText))'length > 0 then 
+			line := create Line(jobId => this.jobId, lineId => lineNum, lineText => Strings::trim(lineText));
+			if this -> R12.Line = null then
+				link this R12 line;
+			end if;
+			link this R11 line;
+			
+			// before extracting the tokens remove any directive contained in [] e.g., [#Red]
+			if Strings::contains(line.lineText, "[") then
+				tmpLineText := line.lineText;
+				pos := Strings::search_first(tmpLineText, "[");
+				while pos /= 0 loop
+					endPos := Strings::search_first(tmpLineText, "]");
+					if endPos /= 0 then
+						line.lineText := tmpLineText[tmpLineText'first .. pos - 1];
+						line.lineText := line.lineText & tmpLineText[endPos + 1 .. tmpLineText'last];
+					else
+						exit;
+					end if;
+					tmpLineText := line.lineText;
+					pos := Strings::search_next(tmpLineText, "[", endPos);
+				end loop;
+			end if;
+			
+			// before extracting the tokens check for "end " and if it is then remove the space
+			if Strings::contains(line.lineText, "end ") then
+				tmpLineText := Strings::trim_leading(line.lineText);
+				line.lineText := Strings::erase_first(tmpLineText, " ");
+			end if;
+			if Strings::contains(line.lineText, "autonumber ") then
+				tmpLineText := Strings::trim_leading(line.lineText);
+				line.lineText := Strings::erase_first(tmpLineText, " ");
+			end if;
+			// if this is an event indicated by "->" ensure that all the tokens on the line have a space prior to tokenizing the line
+			pos := Strings::search_first(line.lineText, "->");
+			if pos /= 0 then
+				tmpLineText := line.lineText;
+				line.lineText := tmpLineText[tmpLineText'first .. pos - 1] & " ";
+				line.lineText := line.lineText & "-> " & tmpLineText[pos + 2 .. tmpLineText'last];
+				pos := Strings::search_first(line.lineText, ":");
+				if pos /= 0 then
+					tmpLineText := line.lineText;
+					line.lineText := line.lineText[line.lineText'first .. pos - 1] & " : " & tmpLineText[pos + 1 .. tmpLineText'last];
+				end if;
+			end if;
+			
+			for token in Strings::tokenize_quoted(Strings::squeeze(line.lineText), " \t\f\n\r") loop
+				// only process the token if it does not start with a # as the # indicates a display directive
+				tmpToken := Strings::squeeze(token);
+				if Strings::contains(tmpToken, ".") then
+					tmpToken := Strings::erase_all(tmpToken, ".");
+				end if;
+				if Strings::contains(tmpToken, "\"") then
+					tmpToken := Strings::erase_all(tmpToken, "\"");
+				end if;
+				if token[tmpToken'first] /= '#' then
+					lineToken := create unique LineToken(token => tmpToken);
+					link lineToken R1 line;
+					if line -> R13.LineToken = null then
+						link line R13 lineToken;
+					end if;
+					if prevLineToken /= null then
+						link lineToken R10.follows prevLineToken;
+					end if;
+					prevLineToken := lineToken;
+				end if;
+			end loop;
+			if prevLine /= null then
+				link line R9.follows prevLine;
+			end if;
+			prevLine := line;
+		end if;
+		lineNum := lineNum + 1;
+	end loop;
+	
+	// iterate over the lines and identify the valid statements
+	line := this -> R12.Line;
+	while valid and line /= null loop
+		line.processLine(valid, failureReason);
+		exit when valid = false;
+		line := line -> R9.isFollowedBy.Line;
+	end loop;
+	
+	// verify that the job name has been defined
+	if valid = true and find_one (this -> R11.Line -> R5.GrammarItem)(grammarName = "jobName") = null then
+		valid := false;
+		failureReason := "No job name defined, jobId = " & jobId'image;
+	end if;
+		
+	Consumer~>fileVerified(jobId, valid, failureReason);
+exception
+	when others =>
+		Consumer~>fileVerified(jobId, false, "Unexpected error.");
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

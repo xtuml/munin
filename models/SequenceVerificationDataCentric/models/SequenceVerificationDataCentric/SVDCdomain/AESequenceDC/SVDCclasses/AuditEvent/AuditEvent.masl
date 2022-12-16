@@ -23,6 +23,7 @@ theSourceExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theUserExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theSourceExtraJobInvariant : instance of PersistedInvariant;
 theUserExtraJobInvariant : instance of TransientInvariant;
+theDynamicControlDefns : set of instance of DynamicControlDefinition;
 theDynamicControlDefn : instance of DynamicControlDefinition;
 newDynamicControl : instance of DynamicControl;
 loopCount : integer;
@@ -71,7 +72,10 @@ begin
           newJob.sequencingFailed := true;
           newJob.failJob("First event for new Job is not a valid event type to start a sequence - Job Id = " & newJob.jobID & " Event Type = " & newEventType.AEType);
         end if;
-    
+        
+      declare
+      
+      begin
         // Capture any audit event data associated with this audit event
         for aeDataElement in aeData loop
           case aeDataElement.aedKind is
@@ -143,52 +147,56 @@ begin
                      
             when aeDataKindEnum.LOOPCONSTRAINT =>  
               // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
-              theDynamicControlDefn := theAeOccInSequenceDef -> R30;
-              if (theDynamicControlDefn /= null) and (theDynamicControlDefn.dynamicControlName = aeDataElement.aedName) then
-                //Check that the invariant value is not empty
-                if aeDataElement.aedValue /= "" then
-                  // Convert the provided string value to an integer
-                  loopCount := integer'parse(aeDataElement.aedValue);
-                  newDynamicControl := create DynamicControl (jobID => newJob.jobID, 
+              theDynamicControlDefns := theAeOccInSequenceDef -> R30;
+              for theDynamicControlDefn in theDynamicControlDefns loop 
+                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
+                  //Check that the invariant value is not empty
+                  if aeDataElement.aedValue /= "" then
+                    // Convert the provided string value to an integer
+                    loopCount := integer'parse(aeDataElement.aedValue);
+                    newDynamicControl := create DynamicControl (jobID => newJob.jobID, 
                   	                                          dynamicControlName => aeDataElement.aedName, 
                   	                                          expectedDynamicControlValue => loopCount);
-                  link newDynamicControl R29 theDynamicControlDefn;
-                  link newDynamicControl R35 newJob;
-                  // TODO Remove debug message
-  	              logMessage := "Dynamic Control added for jobId = " & jobId & " is of type = " & aeDataElement.aedKind'image & " and value = " & aeDataElement.aedValue'image;
-	              Logger::log(Logger::Information, "AESequenceDC", logMessage);
+                    link newDynamicControl R29 theDynamicControlDefn;
+                    link newDynamicControl R35 newJob;
+                    // TODO Remove debug message
+  	                logMessage := "Dynamic Control added for jobId = " & jobId & " is of type = " & aeDataElement.aedKind'image & " and value = " & aeDataElement.aedValue'image;
+	                Logger::log(Logger::Information, "AESequenceDC", logMessage);
+                  else
+                    // No Loop Count value provided
+                    newJob.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+                  end if;
                 else
-                  // No Loop Count value provided
-                  newJob.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+                  // This Loop Count not expected to be provided on this audit event
+                  newJob.failJob("Loop count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);                   
                 end if;
-              else
-                // This Loop Count not expected to be provided on this audit event
-                newJob.failJob("Loop count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
-              end if;
+             end loop;
               
               //exception - if the integer conversion function above fails does it raise an exception?
                 
             when aeDataKindEnum.BRANCHCONSTRAINT =>  
               // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
-              theDynamicControlDefn := theAeOccInSequenceDef -> R30;
-              if (theDynamicControlDefn /= null) and (theDynamicControlDefn.dynamicControlName = aeDataElement.aedName) then
-                //Check that the invariant value is not empty
-                if aeDataElement.aedValue /= "" then
-                  // Convert the provided string value to an integer
-                  branchCount := integer'parse(aeDataElement.aedValue);
-                  newDynamicControl := create DynamicControl (jobID => newJob.jobID, 
+              theDynamicControlDefns := theAeOccInSequenceDef -> R30;
+              for theDynamicControlDefn in theDynamicControlDefns loop 
+                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
+                  //Check that the invariant value is not empty
+                  if aeDataElement.aedValue /= "" then
+                    // Convert the provided string value to an integer
+                    branchCount := integer'parse(aeDataElement.aedValue);
+                    newDynamicControl := create DynamicControl (jobID => newJob.jobID, 
                   	                                          dynamicControlName => aeDataElement.aedName, 
                   	                                          expectedDynamicControlValue => branchCount);
-                  link newDynamicControl R29 theDynamicControlDefn;
-                  link newDynamicControl R35 newJob;
+                    link newDynamicControl R29 theDynamicControlDefn;
+                    link newDynamicControl R35 newJob;
+                  else
+                    // No Branch Count value provided
+                    newJob.failJob("No valid branch count value provided on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+                  end if;
                 else
-                  // No Branch Count value provided
-                  newJob.failJob("No valid branch count value provided on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+                  // This Branch Count not expected to be provided on this audit event
+                  newJob.failJob("Branch count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
                 end if;
-              else
-                // This Branch Count not expected to be provided on this audit event
-                newJob.failJob("Branch count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
-              end if;
+              end loop;  
 
             when others =>
               // Log warning: Unsupported audit event data type
@@ -196,6 +204,12 @@ begin
 	          Logger::log(Logger::Information, "AESequenceDC", logMessage);
           end case;  
         end loop;
+        
+      exception
+        when program_error =>
+          newJob.failJob("Program Error in Audit Event Data part of Job.JobInProgress in " & newJob.jobID & " possibly caused by a non-integer loop or branch count in the audit event data : " & aeDataElement.aedValue);                          
+      end;      
+        
       else
         newJob.failJob("Invalid audit event definition for a start event in job definition = " & theJobDef.jobName & " since the occurrenceNumberInSequence is expected to be 1");    
       end if;  

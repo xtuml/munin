@@ -1,0 +1,52 @@
+{
+  "OneFilePerJob" : "true",
+  "MaxEventsPerFile" : 100,
+  "FileTimoutPeriod" : "PT10S",
+  "JobSpecificationLocation" : "config/test-job-specification",
+  "TestFileLocation" : "test-files/generated",
+  "TestFileDestination" : "test-files/incoming",
+  "Tests" : [{
+      "TestId" : 1,
+      "TestName" : "EndToEndHappyPathJob",
+      "TotalTests" : 10,
+      "TestFrequency" : "PT1S",
+      "TestJobSpec" : [{
+          "TestJobSpecName" : "EndToEndHappyPathJob",
+          "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17"
+        },
+        {
+            "TestJobSpecName" : "EndToEndAlternatePathJob",
+            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9,10,11,12,13"
+          }]
+      },
+      {
+        "TestId" : 2,
+        "TestName" : "MissingEventJob",
+        "TotalTests" : 10,
+        "TestFrequency" : "PT10S",
+        "TestJobSpec" : [{
+            "TestJobSpecName" : "EndToEndHappyPathJob",
+            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17"
+          }]
+      },
+      {
+        "TestId" : 3,
+        "TestName" : "ReverseEndToEndOrderedJob",
+        "TotalTests" : 10,
+        "TestFrequency" : "PT2S",
+        "TestJobSpec" : [{
+            "TestJobSpecName" : "EndToEndHappyPathJob",
+            "EventDispatchOrder" : "17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1"
+          }]
+      },
+      {
+        "TestId" : 4,
+        "TestName" : "MixedEndToEndOrderedJob",
+        "TotalTests" : 10,
+        "TestFrequency" : "PT5S",
+        "TestJobSpec" : [{
+            "TestJobSpecName" : "EndToEndHappyPathJob",
+            "EventDispatchOrder" : "3,16,7,14,1,12,6,10,9,8,15,11,5,4,17,2,13"
+          }]
+      }]
+}

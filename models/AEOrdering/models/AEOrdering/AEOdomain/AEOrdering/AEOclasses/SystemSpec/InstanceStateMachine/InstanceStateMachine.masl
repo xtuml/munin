@@ -163,7 +163,12 @@ begin
         // report the latest set of events to the sequence domain
         for job in find JobType() loop
             for auditEventType in (job -> R12.AuditEventType() ordered_by (auditEventTypeId)) loop
-                Req_IF_Verification~>eventDefinition(auditEventType.jobTypeName, auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd);
+                Req_IF_Verification~>eventDefinition(auditEventType.jobTypeName, auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, 
+                	                                 auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd, auditEventType.isBreak);
+            end loop;
+            // report any dynamic controls
+            for dynamicControl in (job -> R12.AuditEventType -> R19.DynamicControl) loop
+            	Req_IF_Verification~>dynamicControlDefinition(job.jobTypeName, dynamicControl.dynamicControlName, dynamicControl.controlType, dynamicControl.eventType, dynamicControl.occurrenceId, dynamicControl.userEventType, dynamicControl.userOccurrenceId);
             end loop;
         end loop;
         
