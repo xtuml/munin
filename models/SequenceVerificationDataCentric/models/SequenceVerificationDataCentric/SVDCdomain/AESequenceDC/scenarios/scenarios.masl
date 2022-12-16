@@ -1821,16 +1821,15 @@ begin
   //end of first loop in branch
   previousEventTypes := ("CS1-F",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-G",1,previousEventTypes,false,false,false);
-  //start of second loop in branch
+  //start of second loop in branch - this loop includes a break-out alternative at event CS1-E
   previousEventTypes := ("CS1-G",1,"","") & ("CS1-F",2,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-D",2,previousEventTypes,false,false,false);
   previousEventTypes := ("CS1-D",2,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-E",2,previousEventTypes,false,false,false);
-  // Future XOR Fork on CS1-E,2" - not included yet - will require constraint definitions
-  //previousEventTypes := ("CS1-E",2,"","");
-  //eventDefinition ("ComplexJob","ComplexSequence","CS1-T",1,previousEventTypes,false,true,false);
-  previousEventTypes := ("CS1-E",2,"","");
+  previousEventTypes := ("CS1-E",2,"LoopBreakout-1","XOR");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-F",2,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS1-E",2,"LoopBreakout-1","XOR");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-T",1,previousEventTypes,false,true,true);
   // end of second loop in branch
   previousEventTypes := ("CS1-F",2,"","") & ("CS1-M",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-H",1,previousEventTypes,false,false,false);
