@@ -34,6 +34,7 @@ theUserExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theSourceExtraJobInvariant : instance of PersistedInvariant;
 theUserExtraJobInvariant : instance of TransientInvariant;
 theDynamicControlDefn : instance of DynamicControlDefinition;
+theDynamicControlDefns : set of instance of DynamicControlDefinition;
 newDynamicControl : instance of DynamicControl;
 theUserDynamicControlDefn : instance of DynamicControlDefinition;
 theCurrentDynamicControlDefn : instance of DynamicControlDefinition;
@@ -375,7 +376,10 @@ begin
 	                Logger::log(Logger::Information, "AESequenceDC", logMessage); 
 	              else
                     this.failJob("Empty Invariant Value provided for this Job = " & this.jobID & " and Event Type = " & theEventType.AEType);        
-	              end if;                 
+	              end if; 
+	            else                  
+                  // This Invariant not expected to be provided on this audit event
+                  this.failJob("Extra Job Invariant not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
                 end if;
             
             else
@@ -386,47 +390,51 @@ begin
             
             when aeDataKindEnum.LOOPCONSTRAINT =>  
               // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
-              theDynamicControlDefn := theAeOccInSequenceDef -> R30;
-              if (theDynamicControlDefn /= null) and (theDynamicControlDefn.dynamicControlName = aeDataElement.aedName) then
+              theDynamicControlDefns := theAeOccInSequenceDef -> R30;
+              for theDynamicControlDefn in theDynamicControlDefns loop 
+                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
                 //Check that the invariant value is not empty
-                if aeDataElement.aedValue /= "" then
-                  // Convert the provided string value to an integer
-                  loopCount := integer'parse(aeDataElement.aedValue);
-                  newDynamicControl := create DynamicControl (jobID => this.jobID, 
+                  if aeDataElement.aedValue /= "" then
+                    // Convert the provided string value to an integer
+                    loopCount := integer'parse(aeDataElement.aedValue);
+                    newDynamicControl := create DynamicControl (jobID => this.jobID, 
                   	                                          dynamicControlName => aeDataElement.aedName, 
                   	                                          expectedDynamicControlValue => loopCount);
-                  link newDynamicControl R29 theDynamicControlDefn;
-                  link newDynamicControl R35 this;
+                    link newDynamicControl R29 theDynamicControlDefn;
+                    link newDynamicControl R35 this;
+                  else
+                    // No Loop Count value provided
+                    this.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+                  end if;
                 else
-                  // No Loop Count value provided
-                  this.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+                  // This Loop Count not expected to be provided on this audit event
+                  this.failJob("Loop count not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
                 end if;
-              else
-                // This Loop Count not expected to be provided on this audit event
-                this.failJob("Loop count not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
-              end if;
+              end loop;  
              
             when aeDataKindEnum.BRANCHCONSTRAINT =>  
               // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
-              theDynamicControlDefn := theAeOccInSequenceDef -> R30;
-              if (theDynamicControlDefn /= null) and (theDynamicControlDefn.dynamicControlName = aeDataElement.aedName) then
-                //Check that the invariant value is not empty
-                if aeDataElement.aedValue /= "" then
-                  // Convert the provided string value to an integer
-                  branchCount := integer'parse(aeDataElement.aedValue);
-                  newDynamicControl := create DynamicControl (jobID => this.jobID, 
+              theDynamicControlDefns := theAeOccInSequenceDef -> R30;
+              for theDynamicControlDefn in theDynamicControlDefns loop 
+                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
+                  //Check that the invariant value is not empty
+                  if aeDataElement.aedValue /= "" then
+                    // Convert the provided string value to an integer
+                    branchCount := integer'parse(aeDataElement.aedValue);
+                    newDynamicControl := create DynamicControl (jobID => this.jobID, 
                   	                                          dynamicControlName => aeDataElement.aedName, 
                   	                                          expectedDynamicControlValue => branchCount);
-                  link newDynamicControl R29 theDynamicControlDefn;
-                  link newDynamicControl R35 this;
+                    link newDynamicControl R29 theDynamicControlDefn;
+                    link newDynamicControl R35 this;
+                  else
+                    // No Branch Count value provided
+                    this.failJob("No valid branch count value provided on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+                  end if;
                 else
-                  // No Branch Count value provided
-                  this.failJob("No valid branch count value provided on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
+                  // This Branch Count not expected to be provided on this audit event
+                  this.failJob("Branch count not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
                 end if;
-              else
-                // This Branch Count not expected to be provided on this audit event
-                this.failJob("Branch count not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
-              end if;
+              end loop;  
               
               //exception - if the integer conversion function above fails does it raise an exception?
             
