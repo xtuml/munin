@@ -48,6 +48,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test27NormalInstanceForkWithBranchC
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test28NormalLoopWithBreakNotTaken 1028 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test29NormalBranchCountWithSameSourceAndUserEvent 1029 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test70ComplexSequence_SunnyDay1 1070 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test71ComplexSequence_SunnyDay2 1071 CleanUpAllJobs 64]
 
 # Suspend & Reactivate JobDefinition test cases
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test20StartOfNewJobForSuspendedJobDefinition 1020 CleanUpAllJobs 64]

@@ -25,13 +25,11 @@ begin
   previousEvents := empty;
   // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2)
   theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC3", "2");
-  //theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
-  // Event occurrence 'CS1-B,1' in the sequence is the source of loop constraint 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3)
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC1", "3");
-  //theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC1", "3") & (aeDataKindEnum.LOOPCONSTRAINT, "LC2", "2");
-  //theAuditEventData := emptyAuditEventData;
+  // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
+  // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
+  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC1", "3") & (aeDataKindEnum.LOOPCONSTRAINT, "LC2", "2");
   acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
   // Event occurrence 'CS1-C,1' in the sequence is the source of branch constraint 'BC1' (which constrains the instance forking at event occurrence 'CS1-K,1' to 3)
@@ -195,8 +193,8 @@ begin
   Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
   Assertions::assertTrue(theAuditEvents'length = 41, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
-  Assertions::assertTrue(theDynamicControls'length = 3, "Wrong number of dynamic controls created: " & (theDynamicControls'length)'image);
-  Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 2, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
+  Assertions::assertTrue(theDynamicControls'length = 4, "Wrong number of dynamic controls created: " & (theDynamicControls'length)'image);
+  Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 3, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
   Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 1, "Wrong number of BRANCHCOUNT control definitions created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
   //
   for theJob in theJobs loop
@@ -211,7 +209,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '10d28c1d-4ee7-4f07-ac7b-0900ec62522e' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test70ComplexSequence_SunnyDay2 () is
+private service AESequenceDC::Test71ComplexSequence_SunnyDay2 () is
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 previousEvents : sequence of string;
@@ -229,7 +227,7 @@ logMessage : string;
 begin
   // This test delivers events for each branch for the complex sequence defined in InitComplexEventSequence1Definition in an
   // order that is acceptable (remember that the ordering of events in different branches are independent). In this test case
-  // the all the events for a given branch are delivered before the events for the next branch are delivered - until all events
+  // all the events for a given branch are delivered before the events for the next branch are delivered - until all events
   // for all branches have been delivered. All AND branches are taken. 
   // NOTE: Some events will reference previousEvents that have not been delivered, but will arrive later.
   //
@@ -240,10 +238,9 @@ begin
   //theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
-  // Event occurrence 'CS1-B,1' in the sequence is the source of loop constraint 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3)
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC1", "3");
-  //theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC1", "3") & (aeDataKindEnum.LOOPCONSTRAINT, "LC2", "2");
-  //theAuditEventData := emptyAuditEventData;
+  // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
+  // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
+  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC1", "3") & (aeDataKindEnum.LOOPCONSTRAINT, "LC2", "2");
   acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
   // Event occurrence 'CS1-C,1' in the sequence is the source of branch constraint 'BC1' (which constrains the instance forking at event occurrence 'CS1-K,1' to 3)
@@ -321,9 +318,14 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexSunnyDay1",previousEvents,"Event14",theAuditEventData);
   //
-  // At this point this second branch merges with the first branch at Event15, so deliver the remaining events up to the end point
+  // At this point this second branch ends with an event of type CS1-N.
   //
-  previousEvents := empty & "Event55" & "Event14";
+  previousEvents := ("Event14");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-N","ComplexSunnyDay1",previousEvents,"Event46",theAuditEventData);
+  //
+  //... and the the first branch resumes at event CS1-H
+  previousEvents := ("Event55");
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexSunnyDay1",previousEvents,"Event15",theAuditEventData);
   previousEvents := ("Event15");
@@ -406,9 +408,9 @@ begin
   //
   Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
-  Assertions::assertTrue(theAuditEvents'length = 41, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
-  Assertions::assertTrue(theDynamicControls'length = 3, "Wrong number of dynamic controls created: " & (theDynamicControls'length)'image);
-  Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 2, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 42, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theDynamicControls'length = 4, "Wrong number of dynamic controls created: " & (theDynamicControls'length)'image);
+  Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 3, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
   Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 1, "Wrong number of BRANCHCOUNT control definitions created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
   //
   for theJob in theJobs loop

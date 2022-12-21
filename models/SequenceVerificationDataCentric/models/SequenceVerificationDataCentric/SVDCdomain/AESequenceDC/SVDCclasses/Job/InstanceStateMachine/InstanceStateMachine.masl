@@ -35,6 +35,7 @@ theSourceExtraJobInvariant : instance of PersistedInvariant;
 theUserExtraJobInvariant : instance of TransientInvariant;
 theDynamicControlDefn : instance of DynamicControlDefinition;
 theDynamicControlDefns : set of instance of DynamicControlDefinition;
+dynamicControlDefinitionFound : boolean;
 newDynamicControl : instance of DynamicControl;
 theUserDynamicControlDefn : instance of DynamicControlDefinition;
 theCurrentDynamicControlDefn : instance of DynamicControlDefinition;
@@ -389,12 +390,16 @@ begin
             end if;
             
             when aeDataKindEnum.LOOPCONSTRAINT =>  
-              // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
+              // For this Audit Event Occurrence only the following DynamicControlDefinitions are allowed...
               theDynamicControlDefns := theAeOccInSequenceDef -> R30;
+              // Initialise exit condition for 'for' loop
+              dynamicControlDefinitionFound = false;
+              // Now check to see if the name of the event data element matches one of the allowed Dynamic Control Definitions...
               for theDynamicControlDefn in theDynamicControlDefns loop 
                 if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
-                //Check that the invariant value is not empty
-                  if aeDataElement.aedValue /= "" then
+                  // A matching Dynamic Control Definition has been identified - check that its loop count value is not empty
+                    dynamicControlDefinitionFound := true;
+                    if aeDataElement.aedValue /= "" then
                     // Convert the provided string value to an integer
                     loopCount := integer'parse(aeDataElement.aedValue);
                     newDynamicControl := create DynamicControl (jobID => this.jobID, 
@@ -413,7 +418,7 @@ begin
               end loop;  
              
             when aeDataKindEnum.BRANCHCONSTRAINT =>  
-              // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
+              // For this Audit Event Occurrence only the following DynamicControlDefinitions are allowed...
               theDynamicControlDefns := theAeOccInSequenceDef -> R30;
               for theDynamicControlDefn in theDynamicControlDefns loop 
                 if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
