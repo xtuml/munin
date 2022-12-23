@@ -1,0 +1,196 @@
+= Munin Preliminary Scaling
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note identifies potential for concurrency and points of contention in
+the Protocol Verifier.  Alternatives are analysed for scaling the
+application to higher throughput.  A path forward is proposed.
+
+== 2 Introduction and Background
+
+In Munin Phase 1 the scalability of the Protocol Verifier application is
+explored.  The purpose of the exploration is to prove that the application
+can be scaled to production volumes of data throughput in Phase 2.
+
+At the end of stage 3 of development, the Protocol Verifier is composed of
+three interacting domains operating much like a serial pipe.  AEReception
+receives the audit event data and passes it to AEOrdering.  AEOrdering
+sequences the audit events and passes them to Sequence Verification which
+enforces rules of topology and constraints.
+
+== 3 Requirements
+
+=== 3.1 Throughput as Audit Events per Unit Time
+
+The primary performance requirement is the ability to process many audit
+events per unit time.  These audit events will be associated with multiple
+concurrent jobs.
+
+=== 3.2 Minimise Contention
+
+The Protocol Verifier must enforce constraints that span jobs.
+Constraints that require persistence of elements must operate across
+multiple jobs.
+
+== 4 Analysis
+
+=== 4.1 General Nature of the Workflow
+
+Any particular _Job_ is largely a sequential process.  Opportunities for
+concurrency within a job are minimal and more challenging to leverage.
+However, a single job is a relatively small task and can run mostly
+independently of other jobs.
+
+The primary opportunity for concurrency is to support the processing of
+multiple concurrent jobs.
+
+=== 4.2 Workflow Partioning by Job
+
+Audit events arriving at the Protocol Verifier may be partitioned into
+separate streams.  Let us call this process 'mulitiplexing'.  A single
+logical stream of audit events may by multiplexed into several separate
+streams of audit events.  It is critical that all audit events for any
+single job are multiplexed into the same stream.
+
+As a simple example, consider multiplexing a stream of audit events into two
+separate streams based upon the value of the JobID.  All audit events
+carrying JobIDs with an _even_ value are output into one stream; all audit
+events carrying JobIDs with an _odd_ value are output into another stream.
+This would result in two streams which could be processed by two largely
+independent Protocol Verifier instances.  This same process could be used
+to multiplex an incoming stream of audit events into an arbitrary number of
+separate streams.
+
+The number of multiplexed audit event streams shall be configurable.
+
+This is the primary strategy for partioning the processing and leverages
+the <<4.1 General Nature of the Workflow>>.
+
+==== 4.2.1 Audit Event Multiplexing
+
+Audit events arrive from the monitored system into a single incoming
+filesystem directory called 'pvincoming'.  The (new) Audit Event
+Multiplexor reads these files and writes to N separate output folders
+named 'pvevents<n>' using the multiplexing strategy described above.
+Inside the 'pvevents<n>' directory, the multiplexer writes files named
+uniquely within the context of the given folder.  The quantity of events
+written is configurable as is the amount of time any file is kept open.
+These configuration values tune the size and frequency of the data
+arriving to each instance of Protocol Verifier.
+
+Each 'pvevents<n>' folder serves as the incoming events directory for an
+instance of Protocol Verifier.
+
+=== 4.3 Persistence and Contention
+
+Two requirements which imply persistence and contention are identified.
+Firstly, the Protocol Verifier must detect the reuse of a JobID.  To
+accomplish this, JobIDs must be persisted and queried in future jobs.
+Secondly, the Protocol Verifier must enforce constraints involving
+__extra-job invariants__, values carried in one job that must match values
+carried in other jobs.  This also implies that these values are persisted
+so that they may be queried later in time and across separately
+multiplexed streams of audit events.
+
+==== 4.3.1 JobID Store and Invariant Store
+
+Two persistent stores are needed to maintain JobIDs and invariants across
+time and concurrent processing.  A simple filesystem-based approach should
+be sufficient using techniques to minimise contention.
+
+==== 4.3.2 Contention Management
+
+The JobID and invariant stores must serialise access to data contained
+within them.  Contention shall be minimised by multiplexing the values
+within multiple files, thus dividing the probability of one process having
+to wait on another by the number of files used to store the JobID or
+invariant.
+
+The JobID store will use a technique similar to that used to multiplex the
+audit event stream.  The JobID store will persist JobIDs into files based
+upon the value of the JobID.  As a starting point, the number of JobID
+files will be based upon the number of multiplexed audit event streams as
+described in <<4.2 Workflow Partioning by Job>>.  This value will be
+configurable.
+
+==== 4.3.3 Reading and Writing Persistent Stores
+
+===== 4.3.3.1 Reading and Writing the JobID Store
+
+The JobID store is a filesystem directory named 'pvjobids' containing N1
+(configured) files holding JobIDs.  A JobID file is named with a number.
+It contains only JobID strings, one per line.
+
+When Sequence Verification detects the (almost) completion of a job
+(successful or unsuccessful), it queries the appropriate JobID file.  If
+the JobID does not exist, it appends it.  If the JobID does exist, a JobID
+reuse error is reported.
+
+Alternatively, the JobID file could be queried earlier in the processing
+of the job.  This query could even be done upstream in AEOrdering or
+AEReception.  Earlier queries have the advantage of detecting reuse
+sooner.  However, earlier queries may require multiple accesses to the
+JobID file.  An end-of-job access minimises contention in the JobID store.
+
+===== 4.3.3.2 Reading and Writing the Invariant Store
+
+The invariant store is a filesystem directory named 'pvinvariants'.  An
+invariant file is named by the invariant value and contains the invariant
+label and other properties.  Alternatively, these could be grouped by
+"least significant digit" and contain several in a single file.  It is yet
+to be determined how many invariants will be seen by a running Protocol
+Verifier.
+
+When Sequence Verification detects the definition of an invariant, it
+writes the properties into the invariant file.
+
+When Sequence Verification detects the usage of an extra-job invariant and
+does not find it in its own cache, it queries the appropriate invariant
+file.  If it finds it, it caches it.  If it does not it reports an error.
+
+=== 4.4 Assumptions
+
+==== 4.x.1 JobID Uniqueness and Randomness
+
+Each job is identified with a `JobID`.
+At this stage of the work, an assumption is made that JobIDs are unique
+between different jobs.  And, in fact, it is an error to see the same
+JobID on more than one job.
+
+It is also assumed that JobIDs have relatively random values (UUIDs) or
+that they are monotonic in nature.
+
+== 5 Work Required
+
+=== 5.1 Audit Event Multiplexer
+
+Create an application that multiplexes audit events.
+
+----
+aemux -d <input directory> -o <output directory> -n <number of output streams> -t <file close time>
+----
+
+=== 5.2 JobID Store
+
+Update Sequence Verifier to write and read a JobID store.
+
+=== 5.3 Invariant Store
+
+Update Sequence Verifier to write and read an invariant store.
+
+
+== 6 Acceptance Test
+
+=== 6.1 Throughput
+
+. Using the AESimulator, produce a known volume of audit events large
+  enough to require at least 5 minutes of processing time.
+. Run and time the Protocol Verifier and calculate the throughput.
+
+
+== 7 Document References
+
+. [[dr-1]] https://onefact.atlassian.net/browse/MUN-151[Draft scaling plan.]
+
