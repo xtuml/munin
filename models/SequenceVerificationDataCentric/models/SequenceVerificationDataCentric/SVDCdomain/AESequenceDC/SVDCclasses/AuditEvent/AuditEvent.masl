@@ -23,6 +23,7 @@ theSourceExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theUserExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theSourceExtraJobInvariant : instance of PersistedInvariant;
 theUserExtraJobInvariant : instance of TransientInvariant;
+dynamicControlDefinitionFound : boolean;
 theDynamicControlDefns : set of instance of DynamicControlDefinition;
 theDynamicControlDefn : instance of DynamicControlDefinition;
 newDynamicControl : instance of DynamicControl;
@@ -148,39 +149,50 @@ begin
             when aeDataKindEnum.LOOPCONSTRAINT =>  
               // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
               theDynamicControlDefns := theAeOccInSequenceDef -> R30;
+              // Initialise exit condition for 'for' loop
+              dynamicControlDefinitionFound := false;
+              // Now check to see if the name of the event data element matches one of the allowed Dynamic Control Definitions...
               for theDynamicControlDefn in theDynamicControlDefns loop 
                 if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
-                  //Check that the invariant value is not empty
+                  // A matching Dynamic Control Definition has been identified - check that its branch count value is not empty
+                  dynamicControlDefinitionFound := true;
                   if aeDataElement.aedValue /= "" then
                     // Convert the provided string value to an integer
                     loopCount := integer'parse(aeDataElement.aedValue);
                     newDynamicControl := create DynamicControl (jobID => newJob.jobID, 
-                  	                                          dynamicControlName => aeDataElement.aedName, 
-                  	                                          expectedDynamicControlValue => loopCount);
+                  	                                            dynamicControlName => aeDataElement.aedName, 
+                  	                                            expectedDynamicControlValue => loopCount);
                     link newDynamicControl R29 theDynamicControlDefn;
                     link newDynamicControl R35 newJob;
                     // TODO Remove debug message
-  	                //logMessage := "Dynamic Control added for jobId = " & jobId & " is of type = " & aeDataElement.aedKind'image & " and value = " & aeDataElement.aedValue'image;
-  	                logMessage := "Dynamic Control added for jobId = " & jobId & " is of type = " & aeDataElement.aedKind'image & " with name = " & aeDataElement.aedName & " and value = " & aeDataElement.aedValue'image;
+  	                logMessage := "Dynamic Control added for jobId = " & newJob.jobID & " is of type = " & aeDataElement.aedKind'image & " with name = " & aeDataElement.aedName & " and value = " & aeDataElement.aedValue'image;
 	                Logger::log(Logger::Information, "AESequenceDC", logMessage);
                   else
                     // No Loop Count value provided
                     newJob.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
                   end if;
+                  exit when dynamicControlDefinitionFound = true;
                 else
-                  // This Loop Count not expected to be provided on this audit event
-                  newJob.failJob("Loop count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);                   
+                  // The event data element name did not match the name of theDynamicControlDefn, so try the next allowable one.
                 end if;
-             end loop;
+              end loop;
+              if dynamicControlDefinitionFound = false then
+                // This Loop Count not expected to be provided on this audit event
+                newJob.failJob("Loop count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);                   
+              end if;
               
               //exception - if the integer conversion function above fails does it raise an exception?
                 
             when aeDataKindEnum.BRANCHCONSTRAINT =>  
-              // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
+              // For this Audit Event Occurrence only the following DynamicControlDefinitions are allowed...
               theDynamicControlDefns := theAeOccInSequenceDef -> R30;
+              // Initialise exit condition for 'for' loop
+              dynamicControlDefinitionFound := false;
+              // Now check to see if the name of the event data element matches one of the allowed Dynamic Control Definitions...
               for theDynamicControlDefn in theDynamicControlDefns loop 
                 if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
-                  //Check that the invariant value is not empty
+                  // A matching Dynamic Control Definition has been identified - check that its branch count value is not empty
+                  dynamicControlDefinitionFound := true;
                   if aeDataElement.aedValue /= "" then
                     // Convert the provided string value to an integer
                     branchCount := integer'parse(aeDataElement.aedValue);
@@ -189,15 +201,22 @@ begin
                   	                                          expectedDynamicControlValue => branchCount);
                     link newDynamicControl R29 theDynamicControlDefn;
                     link newDynamicControl R35 newJob;
+                    // TODO Remove debug message
+  	                logMessage := "Dynamic Control added for jobId = " & newJob.jobID & " is of type = " & aeDataElement.aedKind'image & " with name = " & aeDataElement.aedName & " and value = " & aeDataElement.aedValue'image;
+	                Logger::log(Logger::Information, "AESequenceDC", logMessage);
                   else
                     // No Branch Count value provided
                     newJob.failJob("No valid branch count value provided on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
                   end if;
+                  exit when dynamicControlDefinitionFound = true;
                 else
-                  // This Branch Count not expected to be provided on this audit event
-                  newJob.failJob("Branch count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+                  // The event data element name did not match the name of theDynamicControlDefn, so try the next allowable one.
                 end if;
-              end loop;  
+              end loop;
+              if dynamicControlDefinitionFound = false then
+                // This Branch Count not expected to be provided on this audit event
+                newJob.failJob("Branch count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+              end if;  
 
             when others =>
               // Log warning: Unsupported audit event data type

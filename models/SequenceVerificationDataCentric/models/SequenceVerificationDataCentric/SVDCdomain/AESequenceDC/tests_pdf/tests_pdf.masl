@@ -16,15 +16,13 @@ logMessage : string;
 
 begin
   // This test delivers events for each branch for the complex sequence defined in InitComplexEventSequence1Definition in an
-  // order that is acceptable (remember that the ordering of events in different branches are independent). In this test case
-  // the all the events for a given branch are delivered before the events for the next branch are delivered - until all events
-  // for all branches have been delivered. All AND branches are taken. 
-  // NOTE: Some events will reference previousEvents that have not been delivered, but will arrive later.
+  // order that is acceptable (remember that the ordering of events in different branches are independent).
   //
-  // Starting with the initial 3 events in sequence...
+  // Starting with the initial 3 events of section 1 of the sequence...
   previousEvents := empty;
-  // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2)
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC3", "2");
+  // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
+  // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
+  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC3", "2") & (aeDataKindEnum.BRANCHCONSTRAINT, "BC2", "3");
   acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
   // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
@@ -32,12 +30,12 @@ begin
   theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC1", "3") & (aeDataKindEnum.LOOPCONSTRAINT, "LC2", "2");
   acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
-  // Event occurrence 'CS1-C,1' in the sequence is the source of branch constraint 'BC1' (which constrains the instance forking at event occurrence 'CS1-K,1' to 3)
+  // Event occurrence 'CS1-C,1' in the sequence is the source of branch constraint 'BC1' (which constrains the number of instance branches at 'CS1-K,1' to 3)
   theAuditEventData := (aeDataKindEnum.BRANCHCONSTRAINT, "BC1", "3");
   //theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event13",theAuditEventData);
   //
-  // ...then the events for the first branch (up until Event55 which is just before the Type Merge at Event15)...
+  // ...then the events for the second section of the sequence (up until Event55 which is just before the Type Merge at Event15)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event60",theAuditEventData);
@@ -87,7 +85,7 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event55",theAuditEventData);
   //
-  // ...and now the events for the second branch (which includes an instance fork and merge)...
+  // ...and now the events for the third section of the sequence (which includes an instance fork and merge)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexSunnyDay1",previousEvents,"Event61",theAuditEventData);
@@ -107,7 +105,8 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexSunnyDay1",previousEvents,"Event14",theAuditEventData);
   //
-  // At this point this second branch merges with the first branch at Event15, so deliver the remaining events up to the end point
+  // At this point the third section in the sequence merges with the second section in the sequence at Event15, so deliver the remaining 
+  // events up to the end point in the second section of the sequence.
   //
   previousEvents := empty & "Event55" & "Event14";
   theAuditEventData := emptyAuditEventData;
@@ -116,7 +115,35 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexSunnyDay1",previousEvents,"Event44",theAuditEventData);
   //
-  // ...and now the events for the third branch...
+  // ...and now the events for section 4 of the sequence...
+  previousEvents := ("Event13");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexSunnyDay1",previousEvents,"Event80",theAuditEventData);
+  // An instance fork starts here - with 3 instances of CS1-L
+  previousEvents := ("Event80");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event81",theAuditEventData);
+  previousEvents := ("Event80");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event82",theAuditEventData);
+  previousEvents := ("Event80");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event83",theAuditEventData);
+  //
+  // ...at this point two of the three branches of the instance fork merge at Event84 and then ends at Event85...
+  previousEvents := empty & "Event81" & "Event82";
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexSunnyDay1",previousEvents,"Event84",theAuditEventData);
+  previousEvents := ("Event84");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-N","ComplexSunnyDay1",previousEvents,"Event85",theAuditEventData);
+  //
+  // ...whilst the third branch of the instance fork takes a different direction ending immediately at Event86
+  previousEvents := ("Event83");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-N","ComplexSunnyDay1",previousEvents,"Event86",theAuditEventData);
+  //
+  // ...and now the events for section 5 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexSunnyDay1",previousEvents,"Event20",theAuditEventData);
@@ -124,12 +151,12 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexSunnyDay1",previousEvents,"Event10",theAuditEventData);
   //
-  // ...and now the single event for the fourth branch...
+  // ...and now the events for section 6 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246815","ProtProc-0001","CS1-R","ComplexSunnyDay1",previousEvents,"Event26",theAuditEventData);
   //
-  // ...and now the events for the fifth branch...
+  // ...and now the events for section 7 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event64",theAuditEventData);
@@ -155,7 +182,7 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event34",theAuditEventData);
   //
-  // ...and finally, the events for the sixth branch.
+  // ...and finally, the events for section 8 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event42",theAuditEventData);
@@ -192,10 +219,10 @@ begin
   //
   Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
-  Assertions::assertTrue(theAuditEvents'length = 41, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
-  Assertions::assertTrue(theDynamicControls'length = 4, "Wrong number of dynamic controls created: " & (theDynamicControls'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 48, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theDynamicControls'length = 5, "Wrong number of dynamic controls created: " & (theDynamicControls'length)'image);
   Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 3, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
-  Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 1, "Wrong number of BRANCHCOUNT control definitions created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
+  Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 2, "Wrong number of BRANCHCOUNT control definitions created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
   //
   for theJob in theJobs loop
     Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
