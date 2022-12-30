@@ -40,7 +40,9 @@ shutdown/restart cycles.
 .Stream Splitting, JobID Store, Invariant Store
 image::scaling.png[Stream Splitting, JobID Store, Invariant Store]
 
-NOTE:  Proposal is that JobID Store is accessed from SVDC.
+NOTE:  Proposal is that JobID Store is accessed from SVDC. 
+
+*GA - Why would SVDC need to do this rather than AEReception?*
 
 == 4 Analysis
 
@@ -93,6 +95,8 @@ Verification).
 Each 'pvevents<n>' folder serves as the incoming events directory for an
 instance of AEOrdering + Sequence Verification.
 
+*GA - We may need to use working directories and then move the files when we want to release them to the next stage as this will ensure that we do not get contention with file access between the two processes*
+
 === 4.3 Persistence and Contention
 
 Two requirements which imply persistence and contention are identified.
@@ -121,7 +125,7 @@ invariant.
 
 The JobID store will use a technique similar to that used to split the
 audit event stream.  The JobID store will persist JobIDs into files based
-upon the value of the JobID.  As a starting point, the number of JobID
+upon the value of the JobID. *GA - Not sure we sould have one file per JobID if that is what you mean?*  As a starting point, the number of JobID
 files will be based upon the number of split audit event streams as
 described in <<4.2 Workflow Partitioning by Job>>.  This value will be
 configurable.
@@ -159,7 +163,7 @@ writes the properties into the invariant file.
 
 When Sequence Verification detects the usage of an extra-job invariant and
 does not find it in its own cache, it queries the appropriate invariant
-file.  If it finds it, it caches it.  If it does not it reports an error.
+file.  If it finds it, it caches it.  If it does not it reports an error. 
 
 === 4.4 Assumptions
 
@@ -178,7 +182,7 @@ It is noted that there may be a requirement in the future to deal with
 === 4.5 Notes
 
 . As noted above, the dependence on form and multiplicity of JobID may be
-  endangering this design to be brittle.
+  endangering this design to be brittle. 
 . Some research and analysis should be done to understand the impact of
   audit event stream splitting and persistent store partitioning.  How many
   streams it too many?  How many files in a folder is too many?
