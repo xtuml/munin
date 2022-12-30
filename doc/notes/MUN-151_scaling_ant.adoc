@@ -11,7 +11,7 @@ scaling the application to higher throughput.  A path forward is proposed.
 == 2 Introduction and Background
 
 In Munin Phase 1 the scalability of the Protocol Verifier application is
-explored.  The purpose of the exploration is to prove that the application
+explored.  The purpose of the exploration is to demonstrate that the application
 can be scaled to production volumes of data throughput in Munin Phase 2.
 
 At the end of Phase 1 Stage 3 of development, the Protocol Verifier is
@@ -39,10 +39,6 @@ shutdown/restart cycles.
 
 .Stream Splitting, JobID Store, Invariant Store
 image::scaling.png[Stream Splitting, JobID Store, Invariant Store]
-
-NOTE:  Proposal is that JobID Store is accessed from SVDC. 
-
-*GA - Why would SVDC need to do this rather than AEReception?*
 
 == 4 Analysis
 
@@ -78,6 +74,11 @@ The number of split audit event streams shall be configurable.
 This is the primary strategy for partitioning the processing and leverages
 the <<4.1 General Nature of the Workflow>>.
 
+It is noted that a job may fail for multiple reasons.  It is desireable
+that the detection of JobID reuse is reported even for jobs that fail for
+other reasons.  It seems that repeatedly failing duplicate jobs could be
+indication of some sort of "flooding" and will be important to detect.
+
 ==== 4.2.1 Audit Event Stream Splitting
 
 Audit events arrive from the monitored system into a single incoming
@@ -95,7 +96,11 @@ Verification).
 Each 'pvevents<n>' folder serves as the incoming events directory for an
 instance of AEOrdering + Sequence Verification.
 
-*GA - We may need to use working directories and then move the files when we want to release them to the next stage as this will ensure that we do not get contention with file access between the two processes*
+Working directories may be necessary.  Files are moved when released
+to the next stage to avoid contention between multiple processes.
+
+.Protocol Verifier Workspace
+image::pvworkspace.png[Protocol Verifier Workspace]
 
 === 4.3 Persistence and Contention
 
@@ -106,7 +111,7 @@ processing of future jobs.  Secondly, the Protocol Verifier must enforce
 constraints involving __extra-job invariants__, values carried in one job
 that must match values carried in other jobs.  This also implies that
 these values are persisted so that they may be queried later in time and
-across separately split streams of audit events.
+across separately split streams of audit events and separate processes.
 
 ==== 4.3.1 JobID Store and Invariant Store
 
@@ -125,29 +130,51 @@ invariant.
 
 The JobID store will use a technique similar to that used to split the
 audit event stream.  The JobID store will persist JobIDs into files based
-upon the value of the JobID. *GA - Not sure we sould have one file per JobID if that is what you mean?*  As a starting point, the number of JobID
+upon the value of the JobID.  The number of JobID
 files will be based upon the number of split audit event streams as
-described in <<4.2 Workflow Partitioning by Job>>.  This value will be
-configurable.
+described in <<4.2 Workflow Partitioning by Job>>.  This will reduce (or
+eliminate) contention on the JobID files.
+
+NOTE:  Note that if the JobID store is divided in a manner congruent to
+       the way the event stream is split, then there will be no
+       inter-process contention for the JobID store.  However, let us keep
+       the design flexible to allow for a different scheme of JobID file
+       partitioning.
 
 ==== 4.3.3 Reading and Writing Persistent Stores
 
 ===== 4.3.3.1 Reading and Writing the JobID Store
 
-The JobID store is a filesystem directory named 'pvjobids' containing N1
+The JobID store is a filesystem directory named (say) 'pvjobids' containing N1
 (configured) files holding JobIDs.  A JobID file is named with a number.
 It contains only JobID (sets of) strings, one (set) per line.
 
-When Sequence Verification detects the completion of a job (successful or
-unsuccessful), it queries the appropriate JobID file.  If the JobID does
-not exist, it appends it.  If the JobID does exist, a JobID reuse error is
-reported.
+It is desireable to detect the duplicate JobID as soon in the processing
+as feasible without requiring the JobID store to be queried more than once
+per job (for throughput and contention reasons).
 
-Alternatively, the JobID file could be queried earlier in the processing
-of the job.  This query could even be done upstream in AEOrdering or
-AEReception.  Earlier queries have the advantage of detecting reuse
-sooner.  However, earlier queries may require multiple accesses to the
-JobID file.  An end-of-job access minimises contention in the JobID store.
+JobID detection could be implemented in AEReception, however this would
+require querying the JobID store once for each event received.  This
+would have negative consequences of reduced throughput and aggravated
+contention within the persistent store.
+
+JobID detection could be implemented in Sequence Verification.  However,
+this poses a couple of disadvantages.  Firstly, Sequence Verification is
+relatively late in the processing of the job.  Secondly, this introduces
+the complication of potentially needing to report multiple reasons for a
+job failure.
+
+This leaves detecting duplicate JobIDs in AEOrdering.  AEOrdering is
+relatively early in the processing and yet after the job stream splitting
+step, thus guaranteed to see all events with a particular JobID.  Like
+Sequence Verification, AEOrdering is able to detect reuse with a single
+query per job to the JobID persistent store.  AEOrdering also will detect
+JobID reuse before other (secondary) errors would be detected.
+
+The mechanics of the check are as follows.  At the start of any new job,
+Protocol Verifier (in AEOrdering) queries the appropriate JobID file.  If
+the JobID does not exist, it adds it.  If the JobID does exist, a JobID
+reuse error is reported.
 
 ===== 4.3.3.2 Reading and Writing the Invariant Store
 
@@ -163,7 +190,7 @@ writes the properties into the invariant file.
 
 When Sequence Verification detects the usage of an extra-job invariant and
 does not find it in its own cache, it queries the appropriate invariant
-file.  If it finds it, it caches it.  If it does not it reports an error. 
+file.  If it finds it, it caches it.  If it does not, it reports an error.
 
 === 4.4 Assumptions
 
@@ -182,11 +209,13 @@ It is noted that there may be a requirement in the future to deal with
 === 4.5 Notes
 
 . As noted above, the dependence on form and multiplicity of JobID may be
-  endangering this design to be brittle. 
+  endangering this design to be brittle.
 . Some research and analysis should be done to understand the impact of
   audit event stream splitting and persistent store partitioning.  How many
-  streams it too many?  How many files in a folder is too many?
-
+  streams is too many?  How many files in a folder is too many?
+. The technique used to validate schemas may be important.  Schema
+  validation in AEReception could prove to be a bottleneck.  This should
+  be measured.
 
 == 5 Work Required
 
@@ -223,9 +252,13 @@ mechanism.
 === 6.1 Throughput
 
 . Using the AESimulator, produce a known volume of audit events large
-  enough to require at least 5 minutes of processing time.
-. Configured as a single instance, run and time the Protocol Verifier and
-  calculate the throughput.
+  enough to require at least 5 minutes of Protocol Verifier processing time.
+. Configured as a single instance, run and time AEReception alone to
+  understand its own independent throughput and capacity.
+. Configured as a single instance, run and time AEO+SVDC alone to
+  understand its own independent throughput and capacity.
+. Configured as a single instance, run and time the Protocol Verifier (AER
+  and AEO+SVDC) and calculate the throughput.
 . Configured as concurrent instances, run and time the Protocol Verifier
   and calculate the throughput.
 
