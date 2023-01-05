@@ -16,7 +16,7 @@ can be scaled to production volumes of data throughput in Munin Phase 2.
 
 At the end of Phase 1 Stage 3 of development, the Protocol Verifier is
 composed of three interacting domains operating much like a serial pipe.
-AEReception receives the audit event data and passes it to AEOrdering.
+AEReception receives the audit events and passes them to AEOrdering.
 AEOrdering sequences the audit events and passes them to Sequence
 Verification which enforces rules of topology and constraints.
 
@@ -49,7 +49,7 @@ concurrency within a job are minimal and more challenging to leverage.
 However, a single job is a relatively small task and can run mostly
 independently of other jobs.
 
-The primary opportunity for concurrency is to support the processing of
+The primary opportunity for parallelism is to support the processing of
 multiple concurrent jobs.
 
 === 4.2 Workflow Partitioning by Job
@@ -87,14 +87,16 @@ read these files, validate their format against a schema and write to N
 separate output folders named (say) 'pvevents<n>' using the splitting
 strategy described above.  Inside the 'pvevents<n>' directory, the
 splitter writes files named uniquely within the context of the given
-folder.  The quantity of events written to a particular file is
+folder.  The quantity of audit events written to a particular file is
 configurable as is the amount of time any file is kept open.  These
 configuration values tune the size and frequency of the data arriving to
 each instance of the Protocol Verifier back end (AEOrdering + Sequence
 Verification).
 
 Each 'pvevents<n>' folder serves as the incoming events directory for an
-instance of AEOrdering + Sequence Verification.
+instance of AEOrdering + Sequence Verification.  This implies that
+AEO+SVDC will always come in pairs and will likely be a single combined
+runtime application.
 
 Working directories may be necessary.  Files are moved when released
 to the next stage to avoid contention between multiple processes.
@@ -115,9 +117,9 @@ across separately split streams of audit events and separate processes.
 
 ==== 4.3.1 JobID Store and Invariant Store
 
-Two persistent stores are needed to maintain JobIDs and invariants across
+Two separate persistent stores are needed to maintain JobIDs and invariants across
 time and concurrent processing.  A simple filesystem-based approach is
-likely sufficient using techniques to minimise contention.  However, other
+likely to be sufficient using techniques to minimise contention.  However, other
 persistence mechanisms may be explored.
 
 ==== 4.3.2 Contention Management
@@ -135,8 +137,15 @@ files will be based upon the number of split audit event streams as
 described in <<4.2 Workflow Partitioning by Job>>.  This will reduce (or
 eliminate) contention on the JobID files.
 
+This design proposal would result in there being:
+
+* a separate deployment of the AEOrdering/Sequence Verification executable
+  for each instance of the incoming job folders (the 'pvevents' folders)
+* One instance of the JobID store (file) per deployment of the
+  AEOrdering + Sequence Verification (AEO+SVDC) executable.
+
 NOTE:  Note that if the JobID store is divided in a manner congruent to
-       the way the event stream is split, then there will be no
+       the way the audit event stream is split, then there will be no
        inter-process contention for the JobID store.  However, let us keep
        the design flexible to allow for a different scheme of JobID file
        partitioning.
@@ -153,9 +162,9 @@ It is desireable to detect the duplicate JobID as soon in the processing
 as feasible without requiring the JobID store to be queried more than once
 per job (for throughput and contention reasons).
 
-JobID detection could be implemented in AEReception, however this would
-require querying the JobID store once for each event received.  This
-would have negative consequences of reduced throughput and aggravated
+Duplicate JobID detection could be implemented in AEReception, however this would
+require querying the JobID store once for each audit event received.  This
+would have the negative consequences of reduced throughput and aggravated
 contention within the persistent store.
 
 JobID detection could be implemented in Sequence Verification.  However,
@@ -166,7 +175,7 @@ job failure.
 
 This leaves detecting duplicate JobIDs in AEOrdering.  AEOrdering is
 relatively early in the processing and yet after the job stream splitting
-step, thus guaranteed to see all events with a particular JobID.  Like
+step, thus guaranteed to see all audit events with a particular JobID.  Like
 Sequence Verification, AEOrdering is able to detect reuse with a single
 query per job to the JobID persistent store.  AEOrdering also will detect
 JobID reuse before other (secondary) errors would be detected.
@@ -192,6 +201,13 @@ When Sequence Verification detects the usage of an extra-job invariant and
 does not find it in its own cache, it queries the appropriate invariant
 file.  If it finds it, it caches it.  If it does not, it reports an error.
 
+===== 4.3.3.3 Expiring and Pruning
+
+Persistent stores will need to be pruned in some configurable manner.  No
+specific requirements for pruning or JobID expiration are established in
+Munin Phase 1.  However, configurability will be kept in mind during this
+early development.
+
 === 4.4 Assumptions
 
 ==== 4.4.1 JobID Uniqueness and Randomness
@@ -205,6 +221,24 @@ that they are monotonic in nature.
 
 It is noted that there may be a requirement in the future to deal with
 "sets" of JobIDs and "correlation IDs".
+
+==== 4.4.2 Duplication versus Retry
+
+The Protocol Verifier understands no concept of 'retry'.  The Protocol
+Verifier knows only about jobs and the successful or unsuccessful
+completion of them.  It is assumed that a job that is being retried
+(re-submmitted at the application level) carries a new and unique JobID.
+
+==== 4.4.3 No Dynamic Scaling
+
+In Munin Phase 1 there will be no consideration of _dynamically_ scaling
+the throughput of the Protocol Verifier.  __Dyanmic scaling__ would allow
+the number of running instances of AER and AEO+SVDC to change during
+runtime perhaps based on the load of the system.  This is a desirable
+feature.  However, this is not to be supported in Phase 1.
+
+It is noted that the strategy for stream splitting must be revisted if
+dynamic scaling is to be supported.
 
 === 4.5 Notes
 
@@ -228,22 +262,22 @@ It is noted that there may be a requirement in the future to deal with
 . Update the integration build process.
 . Do this step first and test an integration build.
 
-=== 5.3 Enhance AEReception to Perform Audit Event Stream Splitting
+=== 5.2 Enhance AEReception to Perform Audit Event Stream Splitting
 
 . Add support for a configurable number of output audit event streams
   including the capability to write files based on number of audit events
   and/or duration of time.
-. Isolate the algorithm used to split the event streams, so that
+. Isolate the algorithm used to split the audit event streams, so that
   alternative algorithms can be easily implemented in the future.
 
 === 5.3 JobID Store
 
-Update Sequence Verifier to write and read a JobID store.  Use an approach
+Update AEOrdering to write and read a JobID store.  Use an approach
 that insulates the application from the underlying persistence mechanism.
 
 === 5.4 Invariant Store
 
-Update Sequence Verifier to write and read an invariant store.  Use an
+Update Sequence Verification to write and read an invariant store.  Use an
 approach that insulates the application from the underlying persistence
 mechanism.
 
