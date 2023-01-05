@@ -4,17 +4,17 @@ group **SequenceDefinition** MainSequence
 
 #green:A,1;
 note right 
-  LoopConstraint Name=LC1 Source=A,1 User=S,2
+  LoopCount Name=LC1 Source=A,1 User=S,2
 end note  
 :B,1;
 note right 
-  LoopConstraint Name=LC2 Source=B,1 User=D,2
-  LoopConstraint Name=LC3 Source=B,1 User=E,1
+  LoopCount Name=LC2 Source=B,1 User=D,2
+  LoopCount Name=LC3 Source=B,1 User=E,1
   IntraJobInvariant Name=IJI1 Source=B,1
 end note  
 :C,1;
 note right 
-  BranchConstraint Name=BC1 Source=C,1 User=K,1
+  BranchCount Name=BC1 Source=C,1 User=K,1
 end note  
 if (XOR) then (error)
   #red:R,1;
