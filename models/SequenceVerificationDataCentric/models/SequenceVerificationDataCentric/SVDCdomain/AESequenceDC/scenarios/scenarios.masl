@@ -1810,27 +1810,29 @@ begin
   previousEventTypes := ("CS1-B",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-C",1,previousEventTypes,false,false,false);
   // Event definitions for section 2 of sequence...
-  // Start of first loop in section 2 branch
+  // Start of first loop in section 2.
   previousEventTypes := ("CS1-C",1,"MultiWayANDFork","AND") & ("CS1-F",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-D",1,previousEventTypes,false,false,false);
   previousEventTypes := ("CS1-D",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-E",1,previousEventTypes,false,false,false);
   previousEventTypes := ("CS1-E",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-F",1,previousEventTypes,false,false,false);
-  //Definition of events in first loop for section 2 branch now completed.
+  // End of first loop of events in section 2.
   previousEventTypes := ("CS1-F",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-G",1,previousEventTypes,false,false,false);
-  //start of second loop in branch - this loop includes an XOR break-out alternative at event CS1-E
+  // Start of second loop in section 2 of sequence - this loop includes an XOR break-out alternative at event CS1-E
   previousEventTypes := ("CS1-G",1,"","") & ("CS1-F",2,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-D",2,previousEventTypes,false,false,false);
   previousEventTypes := ("CS1-D",2,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-E",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS1-E",2,"LoopBreakout-1","XOR");
+  previousEventTypes := ("CS1-E",2,"LoopBreakoutAtCS1-E2","XOR");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-F",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS1-E",2,"LoopBreakout-1","XOR");
+  // End of second loop in section2 of sequence
+  //
+  // ...and now the remaining event definitions for section 2 of sequence.
+  previousEventTypes := ("CS1-E",2,"LoopBreakoutAtCS1-E2","XOR");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-T",1,previousEventTypes,false,false,true);
-  // end of second loop in branch
-  previousEventTypes := ("CS1-F",2,"","") & ("CS1-M",1,"","");
+  previousEventTypes := ("CS1-F",2,"","") & ("CS1-T",1,"","") & ("CS1-M",1,"ErrorAtCS1-M1","XOR");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-H",1,previousEventTypes,false,false,false);
   previousEventTypes := ("CS1-H",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-J",1,previousEventTypes,false,true,false);
@@ -1847,27 +1849,11 @@ begin
   //
   // Event definitions for section 4 of sequence...
   previousEventTypes := ("CS1-C",1,"MultiWayANDFork","AND");
-  eventDefinition ("ComplexJob","ComplexSequence","CS1-K",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS1-K",2,"","");
-  eventDefinition ("ComplexJob","ComplexSequence","CS1-L",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS1-L",2,"","");
-  eventDefinition ("ComplexJob","ComplexSequence","CS1-M",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS1-M",2,"","");
-  eventDefinition ("ComplexJob","ComplexSequence","CS1-N",2,previousEventTypes,false,true,false);
-  previousEventTypes := ("CS1-L",2,"ErrorAtCS1-L2","XOR");
-  eventDefinition ("ComplexJob","ComplexSequence","CS1-N",3,previousEventTypes,false,true,false);
-  //
-  // Event definitions for section 5 of sequence...
-  previousEventTypes := ("CS1-C",1,"MultiWayANDFork","AND");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-P",1,previousEventTypes,false,false,false);
   previousEventTypes := ("CS1-P",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-Q",1,previousEventTypes,false,true,false);
   //
-  // Event definitions for section 6 of sequence...
-  previousEventTypes := ("CS1-C",1,"ErrorAtCS1-C1","XOR");
-  eventDefinition ("ComplexJob","ComplexSequence","CS1-R",1,previousEventTypes,false,true,false);
-  //
-  // Event definitions for section 7 of sequence...
+  // Event definitions for section 5 of sequence...
   previousEventTypes := ("CS1-C",1,"MultiWayANDFork","AND");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-C",2,previousEventTypes,false,false,false);
   previousEventTypes := ("CS1-C",2,"","") & ("CS1-E",3,"","");
@@ -1881,20 +1867,24 @@ begin
   previousEventTypes := ("CS1-D",4,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-G",2,previousEventTypes,false,true,false);
   //
-  // Event definitions for section 8 of sequence...
+  // Event definitions for section 6 of sequence...
   previousEventTypes := ("CS1-C",1,"MultiWayANDFork","AND") & ("CS1-S",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-S",1,previousEventTypes,false,false,false);
   previousEventTypes := ("CS1-S",1,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-D",5,previousEventTypes,false,false,false);
   previousEventTypes := ("CS1-D",5,"","");
   eventDefinition ("ComplexJob","ComplexSequence","CS1-E",4,previousEventTypes,false,true,false);
-//
+  //
+  // Event definitions for section 7 of sequence...
+  previousEventTypes := ("CS1-C",1,"ErrorAtCS1-C1","XOR");
+  eventDefinition ("ComplexJob","ComplexSequence","CS1-R",1,previousEventTypes,false,true,false);
+  //
 // Finally, set up the dynamic control definitions...
   dynamicControlDefinition("ComplexJob", "LC1", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-E",1);
   dynamicControlDefinition("ComplexJob", "LC2", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-D",2);
   dynamicControlDefinition("ComplexJob", "LC3", dynamicControlTypeEnum.LOOPCOUNT, "CS1-A",1,"CS1-S",1);
-  dynamicControlDefinition("ComplexJob", "BC1", dynamicControlTypeEnum.BRANCHCOUNT, "CS1-C",1,"CS1-K",1);
-  dynamicControlDefinition("ComplexJob", "BC2", dynamicControlTypeEnum.BRANCHCOUNT, "CS1-A",1,"CS1-K",2);
+  dynamicControlDefinition("ComplexJob", "BC1", dynamicControlTypeEnum.BRANCHCOUNT, "CS1-F",3,"CS1-F",3);
+  dynamicControlDefinition("ComplexJob", "BC2", dynamicControlTypeEnum.BRANCHCOUNT, "CS1-A",1,"CS1-K",1);
 //
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

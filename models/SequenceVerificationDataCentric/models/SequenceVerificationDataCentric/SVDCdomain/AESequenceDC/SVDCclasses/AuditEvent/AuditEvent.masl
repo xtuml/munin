@@ -215,7 +215,7 @@ begin
               end loop;
               if dynamicControlDefinitionFound = false then
                 // This Branch Count not expected to be provided on this audit event
-                newJob.failJob("Branch count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
+                newJob.failJob("Branch Count not expected on this audit event data type for - Job Id = " & newJob.jobID & " and Event Type = " & newEventType.AEType);
               end if;  
 
             when others =>
