@@ -12,7 +12,7 @@ begin
   // followed by an error which cause the loop to be exited.
   // This test does not reveal any erroneous behaviour of the twin
   //
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "Counter_L1", "10");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_L1", "10");
   acceptOrderedEvent ("1620920000","Test-0001","LA","Job_LoopBreak_1","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920001","Test-0001","LB","Job_LoopBreak_1","Ev301","Ev302",theAuditEventData);
@@ -66,7 +66,7 @@ begin
   // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 10 branches
   // This test does not reveal any erroneous behaviour of the twin
   //
-  theAuditEventData := (aeDataKindEnum.BRANCHCONSTRAINT, "Branch_Counter_1", "10");
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_1", "10");
   acceptOrderedEvent ("1620920000","Test-0001","BCFA","Branch_Count_Job",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData :=  emptyAuditEventData;
   previousEvents := ("Ev301");
@@ -149,7 +149,7 @@ begin
   // This test does not reveal any erroneous behaviour of the twin
   //
   
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "Counter_1", "5");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "5");
   acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
@@ -207,7 +207,7 @@ begin
   // This test does reveals any erroneous behaviour of the twin since the Branch Count is specified as 12 
   // but only 10 branches are subsequently seen
   //
-  theAuditEventData := (aeDataKindEnum.BRANCHCONSTRAINT, "Branch_Counter_1", "12");
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_1", "12");
   acceptOrderedEvent ("1620920000","Test-0001","BCFA","Branch_Count_Job",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData :=  emptyAuditEventData;
   previousEvents := ("Ev301");
@@ -286,7 +286,7 @@ begin
   // This test does not reveal any erroneous behaviour of the twin
   //
   
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "Counter_1", "4");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "4");
   acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
@@ -336,7 +336,7 @@ begin
   // followed by an error which cause the loop to be exited.
   // This test does not reveal any erroneous behaviour of the twin
   //
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "Counter_L1", "10");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_L1", "10");
   acceptOrderedEvent ("1620920000","Test-0001","LA","Job_LoopBreak_1","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920001","Test-0001","LB","Job_LoopBreak_1","Ev301","Ev302",theAuditEventData);
