@@ -395,6 +395,8 @@ invariantEventType : eventStructure;
 begin
   sourceInvariantEventType := (sourceEventType,sourceOccurrenceId,"","");
   ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn(sourceJobDefnName,auditEventDataName, sourceInvariantEventType, @P1D@);
+  // TODO - the lifetime of the extra job invariant is currently fixed at 1 day (see last parameter in previous function call). This needs 
+  // to be user-configurable and will require a change to the interface for the function 'extraJobInvaiantDefinition'.
 
   for userEvent in userEvents loop
     invariantEventType := (userEvent.auditEventType,userEvent.occurrenceId,"","");
