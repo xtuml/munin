@@ -190,11 +190,6 @@ begin
               theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => AND );
             elsif previousEventType.constraintValue = "XOR" then
               theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => XOR );
-            // TODO Loop Count and Branch Count are not handled here. Remove these in due course.
-            //elsif previousEventType.constraintValue = "LOOPCOUNT" then
-            //  theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => LOOPCOUNT );
-            //elsif previousEventType.constraintValue = "BRANCHCOUNT" then
-            //  theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => BRANCHCOUNT );
             else
               logMessage := "Invalid Constraint Value provided : " & previousEventType.constraintValue & "in Job Name = " & jobName;
 	          Logger::log(Logger::Error, "AESequenceDC", logMessage);            

@@ -31,7 +31,7 @@ begin
   // This test does  reveal any erroneous behaviour of the twin
   //
   // Loop count should be an integer. Here is it replaced by the string "FIVE" to provoke an error
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "Counter_1", "FIVE");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "FIVE");
   acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
@@ -83,7 +83,7 @@ begin
   // This test does not reveal any erroneous behaviour of the twin but does demonstrate use of the same source and user event
   //
   acceptOrderedEvent ("1620920000","Test-0001","SSUFA","Branch_Count_Job_SSU",previousEvents,"Ev301",theAuditEventData);
-  theAuditEventData := (aeDataKindEnum.BRANCHCONSTRAINT, "Branch_SameSourceAndUser_1", "10");
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_SameSourceAndUser_1", "10");
   previousEvents := ("Ev301");
   acceptOrderedEvent ("1620920001","Test-0001","SSUFB","Branch_Count_Job_SSU",previousEvents,"Ev302",theAuditEventData);
   theAuditEventData :=  emptyAuditEventData;

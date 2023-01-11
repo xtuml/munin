@@ -35,7 +35,6 @@ theSourceExtraJobInvariant : instance of PersistedInvariant;
 theUserExtraJobInvariant : instance of TransientInvariant;
 theDynamicControlDefn : instance of DynamicControlDefinition;
 theDynamicControlDefns : set of instance of DynamicControlDefinition;
-dynamicControlDefinitionFound : boolean;
 newDynamicControl : instance of DynamicControl;
 theUserDynamicControlDefn : instance of DynamicControlDefinition;
 theCurrentDynamicControlDefn : instance of DynamicControlDefinition;
@@ -75,8 +74,8 @@ begin
       // ...and then check that just one of these matches with an event occurrence that is expected for the previous event
       if (prevAEIds /= empty) and (prevAEIds /= emptyPrevId) then
         // Log info: Event has previous event ids
-        //logMessage := "Follow on event for existing Job received - jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
-	    //Logger::log(Logger::Information, "AESequenceDC", logMessage);   
+        logMessage := "Follow on event for existing Job received - jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
+	    Logger::log(Logger::Information, "AESequenceDC", logMessage);   
 
         for aPrevEventId in prevAEIds loop //NEW INSERT
           // Need to locate the previous event as defined in the event parameter
@@ -121,8 +120,8 @@ begin
                 newEvent.TestPreviousEventIsValid (prevEvent, prevEventIsValid); 
                 if prevEventIsValid then
                   // Previous event is valid 
-                  logMessage := "Previous event is valid - jobId = " & this.jobID & ", audit event sequence = " & theSequenceDef.sequenceDefinitionName & ", current event type = " & theEventType.AEType & ", Occurrence Id " & theAeOccInSequenceDef.occurrenceNumberInSequence'image;
-	              Logger::log(Logger::Information, "AESequenceDC", logMessage);    
+                  //logMessage := "Previous event is valid - jobId = " & this.jobID & ", audit event sequence = " & theSequenceDef.sequenceDefinitionName & ", current event type = " & theEventType.AEType;
+	              //Logger::log(Logger::Information, "AESequenceDC", logMessage);    
                   // The new event is a follow on event to the previous event so we know it is part of the same sequence as the previous event
                   currentSequence := prevEvent -> R11;
                   if currentSequence /= null then
@@ -150,7 +149,7 @@ begin
                           end if;  
                         end if;  
 	                  else
-                        logMessage := "There is no event using a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+                        logMessage := "There is no event using a Dynamic Control of type" & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
 	                    Logger::log(Logger::Information, "AESequenceDC", logMessage);
 	                  end if;  
 	                  
@@ -176,7 +175,7 @@ begin
                          
                           end if;  
 	                    else
-                          logMessage := "There is no event using a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+                          logMessage := "There is no event using a Dynamic Control of type" & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
 	                      Logger::log(Logger::Information, "AESequenceDC", logMessage);
 	                    end if;  
   
@@ -202,7 +201,7 @@ begin
                   else
                     //Log Job failure: Previous event is valid but is part of a broken sequence
                     this.sequencingFailed := true;
-                    this.failJob("The previous event is valid but has no known current sequence - Event Type = " & (prevEvent -> R2).AEType);
+                    this.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
                   end if;  
           
                 else
@@ -219,13 +218,13 @@ begin
             elsif possibleAeOccInSequenceDef'length = 0 then
               // There is no available definition for this situation so the sequence is broken.
               this.sequencingFailed := true;
-              this.failJob("The previous event is valid but is part of a broken sequence - Previous Event Type = " & (prevEvent -> R2).AEType);
+              this.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
         
             else
               // There are multiple possible Audit Event Occurrences In the Sequence Definition 
               // TODO What does this circumstance imply and what can we do about it.
               this.sequencingFailed := true;
-              this.failJob("There are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
+              this.failJob("The are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
             end if;
           else
             // The previous event id provided in the audit event data is not recognised as a previous event 
@@ -304,175 +303,12 @@ begin
           this.sequencingFailed := true;
           this.failJob("An event starting a new sequence has been received but there is no matching start event definition for Job = " & this.jobID & ", with audit event type = " & theEventType.AEType);
         end if; 
-      end if;           
-
-    declare
-    begin
-      // Capture any audit event data associated with this audit event
-      theAeOccInSequenceDef := newEvent -> R13;
-      for aeDataElement in aeData loop
-        case aeDataElement.aedKind is
-          when aeDataKindEnum.INTRAJOBINV =>  
-            // For this Audit Event Occurrence only the following IntraJobInvarinatDefinition is allowed
-            theIntraJobInvariantDefn := theAeOccInSequenceDef -> R19;
-            // Check that the provided invariant name matches the expected invariant name
-            if theIntraJobInvariantDefn /= null then
-              if theIntraJobInvariantDefn.intraJobInvName = aeDataElement.aedName then
-                //Check that the invariant value is not empty
-                if aeDataElement.aedValue /= "" then
-                  newIntraJobInvariant := create TransientInvariant (AuditEventId => newEvent.AuditEventId, invariantName => aeDataElement.aedName, invariantValue => aeDataElement.aedValue);
-                  link newIntraJobInvariant R23 newEvent;
-//                  newIntraJobInvariant := create IntraJobInvariant (AuditEventId => newEvent.AuditEventId, invariantName => aeDataElement.aedName);
-//                  link newIntraJobInvariant R25 newInvariant;
-                  link newIntraJobInvariant R26 theIntraJobInvariantDefn;
-                  // Log info: Audit event data provided with this audit event has been captured
-	              logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & this.jobID & " has been added for this type of audit event = " & theEventType.AEType;
-	              Logger::log(Logger::Information, "AESequenceDC", logMessage); 
-	            else
-                  this.failJob("Empty Invariant Value provided for this Job = " & this.jobID & " and Event Type = " & theEventType.AEType);        
-	            end if;                 
-              else
-                // Log warning: The audit event data type provided with this audit event is of a disallowed type for this type of audit event
-	            logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & this.jobID & " is disallowed for this type of audit event = " & theEventType.AEType;
-	            Logger::log(Logger::Information, "AESequenceDC", logMessage);                
-                this.failJob("Invalid audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
-              end if;
-            else
-               this.failJob("INTRAJOBINV Audit event data sent on an event type is not the expected audit event data - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);               
-            end if;  
-          when aeDataKindEnum.EXTRAJOBINV =>  
-            // For this Audit Event Occurrence only the following ExtraJobInvarinatDefinition is allowed
-            theSourceExtraJobInvariantDefn := theAeOccInSequenceDef -> R20;
-            theUserExtraJobInvariantDefn := theAeOccInSequenceDef -> R21;
-            if theSourceExtraJobInvariantDefn /= null then
-              // We have the source event that provided a new Extra Job Invariant
-              // Check the name matches
-              if theSourceExtraJobInvariantDefn.extraJobInvName = aeDataElement.aedName then
-                // We have a match between the name in the definition and the name in the audit event data
-                theSourceExtraJobInvariant := PersistedInvariant.createSourceExtraJobInvariant(theSourceExtraJobInvariantDefn,
-               	                                                                            aeDataElement.aedName,
-               	                                                                            aeDataElement.aedValue,
-               	                                                                            creationErrorMessage );
-               	if theSourceExtraJobInvariant /= null then                                                                            
-                  link theSourceExtraJobInvariant R27 newEvent;
-                else
-                  this.failJob(creationErrorMessage);
-                end if;    
-              else
-                this.failJob("Invalid audit event data - the name of the audit event data does not match that expected - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
-                    
-              end if;
-              // We have the source event that provided a new Extra Job Invariant
-              //ExtraJobInvariant.createSourceExtraJobInvariant(theSourceExtraJobInvariant);
-            elsif theUserExtraJobInvariantDefn /= null then
-              // We have a user event that references an existing Extra Job Invariant
-                if theUserExtraJobInvariantDefn.extraJobInvName = aeDataElement.aedName then
-                  // We have a match between the name in the definition and the name in the audit event data
-                  if aeDataElement.aedValue /= "" then
-                    theUserExtraJobInvariant := create TransientInvariant (AuditEventId => newEvent.AuditEventId, invariantName => aeDataElement.aedName, invariantValue => aeDataElement.aedValue);
-                    link theUserExtraJobInvariant R23 newEvent;
-                    link theUserExtraJobInvariant R28 theUserExtraJobInvariantDefn;
-                    // Log info: Audit event data provided with this audit event has been captured
-	                logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & this.jobID & " has been added for this type of audit event = " & theEventType.AEType;
-	                Logger::log(Logger::Information, "AESequenceDC", logMessage); 
-	              else
-                    this.failJob("Empty Invariant Value provided for this Job = " & this.jobID & " and Event Type = " & theEventType.AEType);        
-	              end if; 
-	            else                  
-                  // This Invariant not expected to be provided on this audit event
-                  this.failJob("Extra Job Invariant not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
-                end if;
-            
-            else
-              // The definition does not match the audit event data seen so this is an error condition
-              this.failJob("EXTRAJOBINV Audit event data sent on the event type is not the expected audit event data - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);               
-                
-            end if;
-            
-            when aeDataKindEnum.LOOPCONSTRAINT =>  
-              // For this Audit Event Occurrence only the following DynamicControlDefinitions are allowed...
-              theDynamicControlDefns := theAeOccInSequenceDef -> R30;
-              // Initialise exit condition for 'for' loop
-              dynamicControlDefinitionFound := false;
-              // Now check to see if the name of the event data element matches one of the allowed Dynamic Control Definitions...
-              for theDynamicControlDefn in theDynamicControlDefns loop 
-                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
-                  // A matching Dynamic Control Definition has been identified - check that its loop count value is not empty
-                  dynamicControlDefinitionFound := true;
-                  if aeDataElement.aedValue /= "" then
-                    // Convert the provided string value to an integer
-                    loopCount := integer'parse(aeDataElement.aedValue);
-                    newDynamicControl := create DynamicControl (jobID => this.jobID, 
-                  	                                            dynamicControlName => aeDataElement.aedName, 
-                  	                                            expectedDynamicControlValue => loopCount);
-                    link newDynamicControl R29 theDynamicControlDefn;
-                    link newDynamicControl R35 this;
-                    // TODO Remove debug message
-  	                logMessage := "Dynamic Control added for jobId = " & this.jobID & " is of type = " & aeDataElement.aedKind'image & " with name = " & aeDataElement.aedName & " and value = " & aeDataElement.aedValue'image;
-	                Logger::log(Logger::Information, "AESequenceDC", logMessage);
-                  else
-                    // No Loop Count value provided
-                    this.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
-                  end if;
-                  exit when dynamicControlDefinitionFound = true;
-                else
-                  // The event data element name did not match the name of theDynamicControlDefn, so try the next allowable one.
-                end if;
-              end loop; 
-              if dynamicControlDefinitionFound = false then
-                // This Loop Count not expected to be provided on this audit event
-                this.failJob("Loop count not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
-              end if;
-             
-            when aeDataKindEnum.BRANCHCONSTRAINT =>  
-              // For this Audit Event Occurrence only the following DynamicControlDefinitions are allowed...
-              theDynamicControlDefns := theAeOccInSequenceDef -> R30;
-              // Initialise exit condition for 'for' loop
-              dynamicControlDefinitionFound := false;
-              // Now check to see if the name of the event data element matches one of the allowed Dynamic Control Definitions...
-              for theDynamicControlDefn in theDynamicControlDefns loop 
-                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
-                  // A matching Dynamic Control Definition has been identified - check that its branch count value is not empty
-                  dynamicControlDefinitionFound := true;
-                  if aeDataElement.aedValue /= "" then
-                    // Convert the provided string value to an integer
-                    branchCount := integer'parse(aeDataElement.aedValue);
-                    newDynamicControl := create DynamicControl (jobID => this.jobID, 
-                  	                                            dynamicControlName => aeDataElement.aedName, 
-                  	                                            expectedDynamicControlValue => branchCount);
-                    link newDynamicControl R29 theDynamicControlDefn;
-                    link newDynamicControl R35 this;
-                    // TODO Remove debug message
-  	                logMessage := "Dynamic Control added for jobId = " & this.jobID & " is of type = " & aeDataElement.aedKind'image & " with name = " & aeDataElement.aedName & " and value = " & aeDataElement.aedValue'image;
-	                Logger::log(Logger::Information, "AESequenceDC", logMessage);
-                  else
-                    // No Branch Count value provided
-                    this.failJob("No valid branch count value provided on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
-                  end if;
-                  exit when dynamicControlDefinitionFound = true;
-                else
-                  // The event data element name did not match the name of theDynamicControlDefn, so try the next allowable one.
-                end if;
-              end loop;
-              if dynamicControlDefinitionFound = false then
-                // This Branch Count not expected to be provided on this audit event
-                this.failJob("Branch count not expected on this audit event data type for - Job Id = " & this.jobID & " and Event Type = " & theEventType.AEType);
-              end if;  
+      end if;    
+ 
               
-              // TODO: exception - if the integer conversion function above fails does it raise an exception?
-            
-          when others =>
-            // Log warning: Unsupported audit event data type
-            this.failJob("The audit event data type provided for jobId = " & this.jobID & " is an unsupported type of audit event data = " & aeDataElement.aedName'image);               
-        end case;  
-      end loop;
-      
-      exception
-        when program_error =>
-          this.failJob("Program Error in Audit Event Data part of Job.JobInProgress in " & this.jobID & " possibly caused by a non-integer loop or branch count in the audit event data : " & aeDataElement.aedValue);               
-                
-      end;      
-      
+      // Process the audit event data for this new event
+      newEvent.ProcessAuditEventData (aeData);
+ 
   
       // Check to see if the received event marks an end point in the current sequence and if so check whether or
       // not it completes the sequence (note that sequences can have multiple end points due to branching)
@@ -620,8 +456,8 @@ begin
   this.jobCompleted := false;
   
   // Log info: Audit Event Sequence Verification has been informed of Job failure
-  logMessage := "Job Failed - jobId = " & this.jobID & " due to: " & failureReason;
-  Logger::log(Logger::Information, "Monitored System Failure:", logMessage); 
+  logMessage := "Job Failed - jobId = " & this.jobID & " due to " & failureReason;
+  Logger::log(Logger::Information, "Monitored System Failure", logMessage); 
   
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
