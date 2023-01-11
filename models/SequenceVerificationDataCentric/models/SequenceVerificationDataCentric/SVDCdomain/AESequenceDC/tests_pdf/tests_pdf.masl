@@ -13,11 +13,12 @@ theDynamicControlDefinitions : set of instance of DynamicControlDefinition;
 theLOOPCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
 theBRANCHCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
 theIntraJobInvariantDefinitions : set of instance of IntraJobInvariantDefn;
-theIntraJobInvariantUsageDefinitions : set of instance of TransientInvariant;
-theExtraJobInvariantDefinitions : set of instance of ExtraJobInvariantDefn;
-thePersistedInvariants : set of instance of PersistedInvariant;
-thePersistedInvariantsDeliveredAsSourcesOfExtraJobInvariant : set of instance of PersistedInvariant; // As delivered on an AuditEvent
-theTransientInvariantsDeliveredAsUsagesOfExtraJobInvariant : set of instance of TransientInvariant; // As delivered on an AuditEvent
+theTransientInvariantsForIntraJobInvariants : set of instance of TransientInvariant;
+theUsagesOfTransientInvariant : set of instance of TransientInvariant;
+theSourcesOfExtraJobInvariant : set of instance of PersistedInvariant;   // As delivered by an AuditEvent in this test
+theUsageOfTransientInvariant : instance of TransientInvariant;           // As delivered by an AuditEvent in this test
+theExtraJobInvariantDefnForTransientInvariantUsage : instance of ExtraJobInvariantDefn;
+theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn : integer;
 logMessage : string;
 
 begin
@@ -66,12 +67,12 @@ begin
   previousEvents := empty;
   // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
   // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC3", "2") & (aeDataKindEnum.BRANCHCONSTRAINT, "BC2", "3");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC3", "2") & (aeDataKindEnum.BRANCHCOUNT, "BC2", "3");
   acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
   // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
   // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC1", "3") & (aeDataKindEnum.LOOPCONSTRAINT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC1", "3") & (aeDataKindEnum.LOOPCOUNT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
   acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
   theAuditEventData := emptyAuditEventData;
@@ -186,7 +187,7 @@ begin
   //
   // Event occurrence 'CS1-F,3' in the sequence is the source of branch constraint 'BC1' (which constrains the number of instance branches at 'CS1-F,3' to 2)
   previousEvents := ("Event21");
-  theAuditEventData := (aeDataKindEnum.BRANCHCONSTRAINT, "BC1", "2");
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BC1", "2");
   acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event24",theAuditEventData);
   //
   // Event occurrence 'CS1-D,4' in the sequence is a user of the Extra Job Invariant 'AUTH_TOKEN_A'.
@@ -198,7 +199,7 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event34",theAuditEventData);
   previousEvents := ("Event24");
-  theAuditEventData := emptyAuditEventData;
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
   acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event46",theAuditEventData);
   previousEvents := ("Event46");
   theAuditEventData := emptyAuditEventData;
@@ -244,11 +245,16 @@ begin
   theLOOPCOUNTcontrolDefinitions := find theDynamicControlDefinitions (dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT);
   theBRANCHCOUNTcontrolDefinitions := find theDynamicControlDefinitions (dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT);
   theIntraJobInvariantDefinitions := theJobs -> R8 -> R22;
-  theIntraJobInvariantUsageDefinitions := theAuditEvents -> R23;
-  //theExtraJobInvariantDefinitions := find ExtraJobInvariantDefn();
-  thePersistedInvariants := theExtraJobInvariantDefinitions -> R24;
-  thePersistedInvariantsDeliveredAsSourcesOfExtraJobInvariant := theAuditEvents -> R27;
-  theTransientInvariantsDeliveredAsUsagesOfExtraJobInvariant := theAuditEvents -> R23;
+  theTransientInvariantsForIntraJobInvariants := theIntraJobInvariantDefinitions -> R26;
+  theSourcesOfExtraJobInvariant := theAuditEvents -> R27;
+  theUsagesOfTransientInvariant := theAuditEvents -> R23;
+  theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn := 0;
+  for theUsageOfTransientEvent in theUsagesOfTransientInvariant loop
+    theExtraJobInvariantDefnForTransientInvariantUsage := theUsageOfTransientEvent -> R28;
+    if theExtraJobInvariantDefnForTransientInvariantUsage /= null then
+      theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn := theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn + 1;
+    end if;
+  end loop;
   //
   Assertions::assertTrue(theJobs'length = 2, "Wrong number of jobs created: " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 2, "Wrong number of sequences created: " & (theSequences'length)'image);
@@ -257,11 +263,10 @@ begin
   Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 3, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
   Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 2, "Wrong number of BRANCHCOUNT control definitions created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
   Assertions::assertTrue(theIntraJobInvariantDefinitions'length = 1, "Wrong number of Intra-Job Invariant definitions created: " & (theIntraJobInvariantDefinitions'length)'image);
-  Assertions::assertTrue(theIntraJobInvariantUsageDefinitions'length = 9, "Wrong number of Intra-Job Invariant usage definitions created: " & (theIntraJobInvariantUsageDefinitions'length)'image);
- // Assertions::assertTrue(theExtraJobInvariantDefinitions'length = 2, "Wrong number of Extra-Job Invariant definitions created: " & (theExtraJobInvariantDefinitions'length)'image);
-  Assertions::assertTrue(thePersistedInvariants'length = 1, "Wrong number of Persisted Invariants created: " & (thePersistedInvariants'length)'image);
-  Assertions::assertTrue(thePersistedInvariantsDeliveredAsSourcesOfExtraJobInvariant'length = 1, "Wrong number of audit events providing a source of a PersistedInvariant : " & (thePersistedInvariantsDeliveredAsSourcesOfExtraJobInvariant'length)'image);
-  Assertions::assertTrue(theTransientInvariantsDeliveredAsUsagesOfExtraJobInvariant'length = 7, "Wrong number of audit events using an Extra-Job Invariant : " & (theTransientInvariantsDeliveredAsUsagesOfExtraJobInvariant'length)'image);
+  Assertions::assertTrue(theTransientInvariantsForIntraJobInvariants'length = 2, "Wrong number of Transient Invariants created for IntraJob Invariants: " & (theTransientInvariantsForIntraJobInvariants'length)'image);
+  Assertions::assertTrue(theSourcesOfExtraJobInvariant'length = 1, "Wrong number of audit events acting as source of a PersistedInvariant : " & (theSourcesOfExtraJobInvariant'length)'image);
+  Assertions::assertTrue(theUsagesOfTransientInvariant'length = 10, "Wrong number of audit events making usage of a TransientInvariant : " & (theUsagesOfTransientInvariant'length)'image);
+  Assertions::assertTrue(theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn = 8, "Wrong number of audit events using an Extra-Job Invariant : " & (theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn)'image);
   //
   for theJob in theJobs loop
     Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
@@ -342,12 +347,12 @@ begin
   previousEvents := empty;
   // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
   // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC3", "2") & (aeDataKindEnum.BRANCHCONSTRAINT, "BC2", "3");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC3", "2") & (aeDataKindEnum.BRANCHCOUNT, "BC2", "3");
   acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
   // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
   // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "LC1", "3") & (aeDataKindEnum.LOOPCONSTRAINT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC1", "3") & (aeDataKindEnum.LOOPCOUNT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
   acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
   theAuditEventData := emptyAuditEventData;
@@ -459,7 +464,7 @@ begin
   //
   // Event occurrence 'CS1-F,3' in the sequence is the source of branch constraint 'BC1' (which constrains the number of instance branches at 'CS1-F,3' to 2)
   previousEvents := ("Event21");
-  theAuditEventData := (aeDataKindEnum.BRANCHCONSTRAINT, "BC1", "2");
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BC1", "2");
   acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event24",theAuditEventData);
   //
   // Event occurrence 'CS1-D,4' in the sequence is a user of the Extra Job Invariant 'AUTH_TOKEN_A'.
