@@ -41,6 +41,7 @@ begin
   end if;
   //
   //
+  //
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -385,10 +386,17 @@ public service AESequenceDC::extraJobInvariantDefinition ( auditEventDataName : 
                                                           userEvents : in sequence of userEventDataStructure ) is
 sourceInvariantEventType : eventStructure;
 invariantEventType : eventStructure;
+logMessage : string;
 
 begin
+  // TODO - remove the following log message (added for testing purposes).
+  logMessage := "Extra Job Invariant Definition added for "& auditEventDataName;
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+
   sourceInvariantEventType := (sourceEventType,sourceOccurrenceId,"","");
   ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn(sourceJobDefnName,auditEventDataName, sourceInvariantEventType, @P1D@);
+  // TODO - the lifetime of the extra job invariant is currently fixed at 1 day (see last parameter in previous function call). This needs 
+  // to be user-configurable and will require a change to the interface for the function 'extraJobInvaiantDefinition'.
 
   for userEvent in userEvents loop
     invariantEventType := (userEvent.auditEventType,userEvent.occurrenceId,"","");
