@@ -1,0 +1,26 @@
+/'
+
+Tutorial - Inclusive OR Fork Topology
+  
+'/
+
+@startuml 
+partition "**JobDefinition** Incl OR Fork" {
+group **SequenceDefinition** Incl OR Fork
+      #green:A;
+      :B;
+  if (IOR) then (optional branch name) 
+      :C;
+      :E;
+      :F;
+      :G;
+      :K;
+      #red:L;
+      detach
+  else (other optional branch name)
+      #red:D;
+  endif
+      detach
+end group
+}      
+@enduml

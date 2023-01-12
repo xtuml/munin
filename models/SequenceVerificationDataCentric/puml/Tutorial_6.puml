@@ -1,0 +1,25 @@
+/'
+
+Tutorial - Fork and Merge Topology
+  
+'/
+
+@startuml 
+partition "**JobDefinition** AND Fork and Merge" {
+group **SequenceDefinition** AND Fork and Merge
+      #green:A;
+      :B;
+  split
+      :C;
+      :G;
+  split again
+      :D;
+      :H;
+      :J;
+  end split   
+      :K;
+      #red:L;
+      detach      
+end group
+}      
+@enduml

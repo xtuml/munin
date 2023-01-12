@@ -1,0 +1,27 @@
+/'
+
+Tutorial - And Fork Topology
+  
+'/
+
+@startuml 
+partition "**JobDefinition** AND Fork" {
+group **SequenceDefinition** AND Fork
+      #green:A;
+      :B;
+  split
+      :C;
+      :E;
+      :F;
+      :G;
+      :K;
+      #red:L;
+      detach
+  split again
+      #red:D;
+
+      detach
+  end split    
+end group
+}      
+@enduml
