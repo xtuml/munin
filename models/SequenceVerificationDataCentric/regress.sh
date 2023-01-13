@@ -1,0 +1,10 @@
+antlr4-parse plus/PlusAct.g4 plusdefn -tree < puml/Tutorial_1.puml
+antlr4-parse plus/PlusAct.g4 plusdefn -tree < puml/Tutorial_2.puml
+antlr4-parse plus/PlusAct.g4 plusdefn -tree < puml/Tutorial_3.puml
+antlr4-parse plus/PlusAct.g4 plusdefn -tree < puml/Tutorial_4.puml
+antlr4-parse plus/PlusAct.g4 plusdefn -tree < puml/Tutorial_5.puml
+antlr4-parse plus/PlusAct.g4 plusdefn -tree < puml/Tutorial_6.puml
+antlr4-parse plus/PlusAct.g4 plusdefn -tree < puml/Tutorial_7.puml
+antlr4-parse plus/PlusAct.g4 plusdefn -tree < puml/Tutorial_8.puml
+antlr4-parse plus/PlusAct.g4 plusdefn -tree < puml/Tutorial_9.puml
+antlr4-parse plus/PlusAct.g4 plusdefn -tree < puml/Tutorial_10.puml
