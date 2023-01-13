@@ -1,4 +1,8 @@
-@startuml ( id = "block" )
+/'
+  multi-line
+  comment
+'/
+@startuml ( id = "empty block" )
 
 @enduml
 @startuml
@@ -6,6 +10,9 @@ partition "Job with Simple Sequence" {
   group "Straight Line Sequence"
     #red:A;
     :B;
+    note right
+      note message text
+    end note
     :C;
   end group
 }
