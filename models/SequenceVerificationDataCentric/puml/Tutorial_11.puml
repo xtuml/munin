@@ -1,8 +1,12 @@
 @startuml
-#green:A,1;
-repeat
-  :B,1;
-  :C,1;
-repeat while
-#red:D,1;
+#green:A;
+partition "Looping Job" {
+  group "Sequence with Loop"
+    repeat
+      :B;
+      :C;
+    repeat while
+    #red:D;
+  end group
+}
 @enduml

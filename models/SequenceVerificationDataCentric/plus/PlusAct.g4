@@ -21,12 +21,14 @@ statement      : ( audit_event
                  | break
                  | detach
                  | if
+                 | loop
                  | split
                  | // empty line
                  ) NEWLINE
                ;
 
-audit_event    : ':' identifier ';' // TODO:  add attribute value pairs
+audit_event    : ( HIDE NEWLINE )?
+                 ':' identifier ';' // TODO:  add attribute value pairs
                ;
 
 break          : BREAK
@@ -43,6 +45,11 @@ if             : IF '(' condition ')' THEN ( '(' identifier ')' )? NEWLINE
                ;
 
 condition      : ( IOR | XOR ) // TODO:  There will likely be an enumerated list of conditions.
+               ;
+
+loop           : REPEAT NEWLINE
+                 statement+
+                 REPEAT WHILE
                ;
 
 split          : SPLIT NEWLINE
@@ -71,13 +78,16 @@ ENDIF          : 'endif' | 'end if';
 ENDSPLIT       : 'end split';
 ENDUML         : '@enduml';
 GROUP          : 'group';
+HIDE           : '-[hidden]->';
 IF             : 'if';
 IOR            : 'ior' | 'IOR';
 PARTITION      : 'partition';
+REPEAT         : 'repeat';
 SPLITAGAIN     : 'split again';
 SPLIT          : 'split';
 STARTUML       : '@startuml';
 THEN           : 'then';
+WHILE          : 'while';
 XOR            : 'xor' | 'XOR';
 
 NEWLINE        : [\r\n];

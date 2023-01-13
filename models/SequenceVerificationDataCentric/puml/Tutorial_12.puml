@@ -5,30 +5,29 @@ Tutorial - Bank Transfer Example
 '/
 
 @startuml 
-partition "**JobDefinition** Split Type Fork and Merge" {
-group **SequenceDefinition** P
-      #green:A,1;
-      :B,1;
+partition "Split Type Fork and Merge" {
+group "P"
+  #green:A;
+  :B;
   split    
-      #red:C,1;
+      #red:C;
       detach
   split again    
-      #red:D,1;
+      #red:D;
       detach
   end split
  end group
- detach
-group **SequenceDefinition** Q
+group "Q"
   split
       -[hidden]->
-      #green:G,1;
+      #green:G;
   split again
       -[hidden]->
-      #green:J,1;
+      #green:J;
   end split    
-      :K,1;
-      #red:L,1;
-      detach
+  :K;
+  #red:L;
+  detach
 end group
 }      
 @enduml
