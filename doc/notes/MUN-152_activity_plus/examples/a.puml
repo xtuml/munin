@@ -1,0 +1,17 @@
+@startuml
+
+participant Stockboy
+participant Truck
+participant Warehouse
+
+Truck -> Stockboy : "arrive at warehouse"
+Stockboy -> Truck : "open door"
+loop
+Stockboy -> Truck : "remove box"
+Stockboy -> Warehouse : "stow box"
+end
+Stockboy -> Truck : "unloading complete"
+Truck -> Stockboy : "depart warehouse"
+
+title "Unloading a Truck"
+@enduml

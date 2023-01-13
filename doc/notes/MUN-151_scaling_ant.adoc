@@ -44,7 +44,7 @@ image::scaling.png[Stream Splitting, JobID Store, Invariant Store]
 
 === 4.1 General Nature of the Workflow
 
-Any particular _Job_ is largely a sequential process.  Opportunities for
+Any particular _Job_ is a largely sequential process.  Opportunities for
 concurrency within a job are minimal and more challenging to leverage.
 However, a single job is a relatively small task and can run mostly
 independently of other jobs.
@@ -56,7 +56,7 @@ multiple concurrent jobs.
 
 Audit events arriving at the Protocol Verifier may be partitioned into
 separate streams.  Let us call this process 'stream splitting'.  A single
-stream of audit events may by split into several separate streams of audit
+stream of audit events may be split into several separate streams of audit
 events.  It is critical that all audit events for any single job are split
 into the same stream.
 
@@ -140,12 +140,12 @@ eliminate) contention on the JobID files.
 This design proposal would result in there being:
 
 * a separate deployment of the AEOrdering/Sequence Verification executable
-  for each instance of the incoming job folders (the 'pvevents' folders)
-* One instance of the JobID store (file) per deployment of the
+  for each instance of the incoming job folders (the 'pvevents' folders).
+* one instance of the JobID store (file) per deployment of the
   AEOrdering + Sequence Verification (AEO+SVDC) executable.
 
 NOTE:  Note that if the JobID store is divided in a manner congruent to
-       the way the audit event stream is split, then there will be no
+       the way the audit event stream is split, then there will be *zero*
        inter-process contention for the JobID store.  However, let us keep
        the design flexible to allow for a different scheme of JobID file
        partitioning.
@@ -187,14 +187,14 @@ reuse error is reported.
 
 ===== 4.3.3.2 Reading and Writing the Invariant Store
 
-The invariant store is a filesystem directory named (say) 'pvinvariants'.
+The extra-job invariant store is a filesystem directory named (say) 'pvinvariants'.
 An invariant file is named by the invariant value and contains the
 invariant label and other properties.  Alternatively, these could be
 grouped by "least significant digit" and contain several in a single file.
-It is yet to be determined how many invariants will be seen by a running
+It is yet to be determined how many extra-job invariants will be seen by a running
 Protocol Verifier.
 
-When Sequence Verification detects the definition of an invariant, it
+When Sequence Verification detects the definition of an extra-job invariant, it
 writes the properties into the invariant file.
 
 When Sequence Verification detects the usage of an extra-job invariant and
@@ -216,11 +216,13 @@ Each job is identified with a `JobID`.  At this stage of the work, an
 assumption is made that JobIDs are unique between different jobs.  And, in
 fact, it is an error to see the same JobID on more than one job.
 
-It is also assumed that JobIDs have relatively random values (UUIDs) or
-that they are monotonic in nature.
+It is also assumed that JobIDs have relatively random values (UUIDs) *or*
+that they are monotonic in nature.  The stream-splitting strategy depends
+upon this assumption.
 
 It is noted that there may be a requirement in the future to deal with
-"sets" of JobIDs and "correlation IDs".
+"sets" of JobIDs and "correlation IDs".  This potential requirement is
+not addressed in the Phase 1 work, but is being kept in mind.
 
 ==== 4.4.2 Duplication versus Retry
 
@@ -246,9 +248,10 @@ dynamic scaling is to be supported.
   endangering this design to be brittle.
 . Some research and analysis should be done to understand the impact of
   audit event stream splitting and persistent store partitioning.  How many
-  streams is too many?  How many files in a folder is too many?
+  streams is too many?  How many files in a folder is too many?  How many
+  events should be written to any single audit event file?
 . The technique used to validate schemas may be important.  Schema
-  validation in AEReception could prove to be a bottleneck.  This should
+  validation in AEReception could prove to be a bottleneck.  This will need to
   be measured.
 
 == 5 Work Required

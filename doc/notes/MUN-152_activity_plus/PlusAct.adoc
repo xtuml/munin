@@ -1,0 +1,38 @@
+= PLUS PlantUML Activity Mapping
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+== 2 Introduction and Background
+
+== 3 Requirements
+
+In tabular form, list mapping of PlantUML to PLUS DSL.
+
+== 4 Analysis
+
+=== 4.1 Token Mapping
+
+.PLUS Subset of PlantUML
+[cols="1,1,1a",options="header"]
+|===
+| description                    |  PlantUML                            | notes
+| block of UML                   |  @startuml ( id = <reference name> ) | The parenthesised identifier is optional.
+|                                |  ...                                 |
+|                                |  @enduml                             |
+| audit event sequence container |  partition <sequence title>          |
+|===
+
+=== 4.2 Questions
+
+* I think 'partition' means 'job', so we do not need a **Job Definition** key.
+* I think 'group' means 'sequence', so we do not need a **Sequence Definition** key.
+* Double-quotes should wrap multi-word identifiers.
+* Instead of using a note for invariants, let us simply add comma separated values to the event.
+  ** :A,invariant:name=X,user=G;
+* I suggest that we define branch counts only on the event where the branch occurs.
+  ** :B,branchcount name=X;
+* How is the source of a loopcount useful?
+* I suggest that we define loop counts only on the first event inside the loop.
+  ** :B,loopcount name=X;
