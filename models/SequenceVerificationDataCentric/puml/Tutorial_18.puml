@@ -1,8 +1,10 @@
 @startuml
+partition "foo" {
+  group "bar"
 #green:A,1;
 note right 
   LoopCount Name=X Source=A,1 User=C,1
-end note  
+end note
 repeat
   :B,1;
   :C,1;
@@ -14,4 +16,6 @@ repeat
   endif
 repeat while
 #red:E,1;
+  end group
+}
 @enduml

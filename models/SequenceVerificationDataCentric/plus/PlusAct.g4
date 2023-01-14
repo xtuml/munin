@@ -28,7 +28,11 @@ statement      : ( audit_event
                ;
 
 audit_event    : ( HIDE NEWLINE )?
-                 ':' identifier ';' // TODO:  add attribute value pairs
+                 ':' identifier
+                 (
+                   ',' ( IINV | EINV | BCNT | LCNT ) ',' ( SRC | USER ) ( ',' identifier '=' identifier )*
+                 )?
+                 ';'
                ;
 
 break          : BREAK
@@ -70,23 +74,29 @@ number         : IDENT
                ;
 
 // keywords
+BCNT           : 'bcnt' | 'BCNT'; // branch count
 BREAK          : 'break';
 DETACH         : 'detach';
+EINV           : 'einv' | 'EINV'; // extra-job invariant
 ELSE           : 'else';
 ENDGROUP       : 'end group';
 ENDIF          : 'endif' | 'end if';
 ENDSPLIT       : 'end split';
 ENDUML         : '@enduml';
-GROUP          : 'group';
+GROUP          : 'group';         // sequence
 HIDE           : '-[hidden]->';
 IF             : 'if';
+IINV           : 'iinv' | 'IINV'; // intra-job invariant
 IOR            : 'ior' | 'IOR';
-PARTITION      : 'partition';
+LCNT           : 'lcnt' | 'LCNT'; // loop count
+PARTITION      : 'partition';     // job
 REPEAT         : 'repeat';
 SPLITAGAIN     : 'split again';
 SPLIT          : 'split';
+SRC            : 'src' | 'SRC';
 STARTUML       : '@startuml';
 THEN           : 'then';
+USER           : 'user' | 'USER';
 WHILE          : 'while';
 XOR            : 'xor' | 'XOR';
 

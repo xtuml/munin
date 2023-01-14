@@ -1,12 +1,25 @@
 @startuml
-#green:A,1;
-note right 
-  LoopCount Name=X Source=A,1 User=C,1
-end note  
-repeat
-  :B,1;
-  :C,1;
-  :D,1;
-repeat while
-#red:E,1;
+partition "Job with Loop Count Definition" {
+  group "Sequence with Loop"
+    #green:A,LCNT,SRC,name=X;
+    note right 
+      Define the loop count
+      on the event preceding
+      the loop.
+    end note
+    repeat
+      :B,LCNT,USER,name=X;
+      note right 
+        Mark the user of the
+        loop count inside the
+        loop, preferrably on
+        The first event inside
+        the loop.
+      end note
+      :C;
+      :D;
+    repeat while
+    #red:E;
+end group
+}
 @enduml
