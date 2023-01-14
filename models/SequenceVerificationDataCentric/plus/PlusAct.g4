@@ -30,7 +30,7 @@ statement      : ( audit_event
 audit_event    : ( HIDE NEWLINE )?
                  ':' identifier
                  (
-                   ',' ( IINV | EINV | BCNT | LCNT ) ',' ( SRC | USER ) ( ',' identifier '=' identifier )*
+                   ',' ( IINV | EINV | BCNT | LCNT ) ',' ( SRC | USER ) ( ',' ( identifier | USER ) '=' identifier )*
                  )?
                  ';'
                ;

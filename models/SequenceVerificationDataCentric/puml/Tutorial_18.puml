@@ -1,21 +1,22 @@
 @startuml
-partition "foo" {
-  group "bar"
-#green:A,1;
-note right 
-  LoopCount Name=X Source=A,1 User=C,1
-end note
-repeat
-  :B,1;
-  :C,1;
-  if (XOR) then (error)
-    :CError,1;
-    break
-  else (normal)
-    :D,1;
-  endif
-repeat while
-#red:E,1;
+partition "Job with Loop and Break" {
+  group "Example of Loop with Break"
+    #green:A,LCNT,SRC,user=B,name=X;
+    note right 
+      loop with counter
+      and defined user
+    end note
+    repeat
+      :B;
+      :C;
+      if (XOR) then (error)
+        :CError;
+        break
+      else (normal)
+        :D;
+      endif
+    repeat while
+    #red:E;
   end group
 }
 @enduml
