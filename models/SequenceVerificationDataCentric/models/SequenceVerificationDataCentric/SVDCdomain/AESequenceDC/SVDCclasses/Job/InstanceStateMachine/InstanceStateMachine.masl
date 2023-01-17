@@ -354,6 +354,7 @@ theConstrainedAuditEventPairs : sequence of instance of AuditEventPair;
 thePreviousAuditEvents : set of instance of AuditEvent;
 theFollowingAuditEventPairs : sequence of instance of AuditEventPair;
 validatedConstraint : boolean;
+validatedDynamicControl : boolean;
 logMessage : string;
 failureReason: string;
 
@@ -403,13 +404,13 @@ begin
     theDynamicControlDefn : instance of DynamicControlDefinition;
     
   begin
+    validatedDynamicControl := true;
     theDynamicControls := this -> R35;
     for theDynamicControl in theDynamicControls loop
       theDynamicControlDefn := theDynamicControl -> R29;
       if theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
         if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
-          validatedConstraint := false;    
-          // TODO Remove debug log message      
+          validatedDynamicControl := false;          
           logMessage := "Loop Count check failed for Job = " & this.jobID & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
           Logger::log(Logger::Information, "AESequenceDC", logMessage);    
         else
@@ -418,8 +419,7 @@ begin
         end if;
       elsif theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then
         if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
-          validatedConstraint := false;    
-          // TODO Remove debug log message      
+          validatedDynamicControl := false;          
           logMessage := "Branch Count check failed for Job = " & this.jobID & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
           Logger::log(Logger::Information, "AESequenceDC", logMessage);    
         else
@@ -431,16 +431,40 @@ begin
     end loop;
   end;
   
-  if validatedConstraint = false then
-    failureReason := "Constraint Failed";
-    generate Job.jobFailed(failureReason) to this;
+  if (validatedConstraint = false) or (validatedDynamicControl = false) then
+    // One or more of the checks has failed - determine which ones and act accordingly
+    if (validatedConstraint = false) and (validatedDynamicControl = true) then
+      // Only the constraint checks have failed
+      failureReason := "one or more constraint checks have failed";
+      generate Job.jobFailed(failureReason) to this;
+    else
+      if (validatedConstraint = true) and (validatedDynamicControl = false) then
+        // Only the dynamic control checks have failed
+        failureReason := "one or more dynamic control checks have failed";
+        generate Job.jobFailed(failureReason) to this;
+      else
+        // Both checks must have failed
+        failureReason := "one or more constraint checks AND one or more dynamic control checks have failed";
+      end if;
+    end if;
   else
-    logMessage := "Constraint check passed for - jobId = " & this.jobID;
+    // All constraint and dynamic control checks have passed for this Job
+    logMessage := "Constraint and dynamic control checks passed for - jobId = " & this.jobID;
     Logger::log(Logger::Information, "AESequenceDC", logMessage);
     generate Job.constraintCheckSuccessful() to this;
   end if;
+  
+//  if validatedConstraint = false then
+//    failureReason := "Constraint Failed";
+//    generate Job.jobFailed(failureReason) to this;
+//  else
+//    logMessage := "Constraint check passed for - jobId = " & this.jobID;
+//    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+//    generate Job.constraintCheckSuccessful() to this;
+//  end if;
 //
 end state;
+//
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
