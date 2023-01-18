@@ -1,0 +1,50 @@
+@startuml
+|Requester|
+#green:TransferRequest;
+if (Valid Request) then (true)
+|Transfer Service|
+  :TransferAccepted;
+  :RequestData;
+|Source|
+  if (Source Data Available) then (true)
+    :DataAvailable;
+|Transfer Service|
+    :SendData;
+|Source|
+    repeat
+      :DataPacket;
+    repeat while (NumberOfPackets)
+|Transfer Service|
+    :AllDataReceived;
+    :TransferAccepted;
+    :TransferRequest;
+|Destination|
+    if (Valid Request) then (true)
+      :TransferAccepted;
+|Transfer Service|
+      repeat
+        :DataPacket;
+      repeat while (NumberOfPackets)
+|Destination|
+      :AllDataReceived;
+|Transfer Service|
+      #red:TransferComplete;
+      detach
+|Destination|
+    else (false)
+      #red:TransferRejected;
+      detach
+    endif  
+|Source|
+  else (false)
+    :DataUnavailable;
+|Transfer Service|
+    #red:SourceRejected;
+    detach
+   endif     
+else (false)
+|Transfer Service|
+  #red:Transfer Rejected;
+  detach
+endif
+@enduml

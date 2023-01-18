@@ -352,6 +352,7 @@ theConstrainedSeqPairDefns : sequence of instance of AEInSequencePairDefn;
 eachConstrainedSeqPairDefn : instance of AEInSequencePairDefn;
 theConstrainedAuditEventPairs : sequence of instance of AuditEventPair;
 thePreviousAuditEvents : set of instance of AuditEvent;
+theFollowingAuditEventPairs : sequence of instance of AuditEventPair;
 validatedConstraint : boolean;
 logMessage : string;
 failureReason: string;
@@ -370,6 +371,8 @@ begin
           // Check that every element within the AND constraint is present
           if ((eachConstrainedSeqPairDefn -> R15) intersection theAuditEventPairs)'length = 0 then
             validatedConstraint := false;
+            logMessage := "AND Constraint failed for Job = " & this.jobID;
+            Logger::log(Logger::Information, "AESequenceDC", logMessage);    
           end if;
         end loop;
       elsif theConstraintDefn.constraintType = XOR then
@@ -379,12 +382,17 @@ begin
         theConstrainedAuditEventPairs := (theConstrainedSeqPairDefns -> R15) intersection theAuditEventPairs;
         // Find the preceding XOR graph nodes
         thePreviousAuditEvents := theConstrainedAuditEventPairs -> R4.has_previous.AuditEvent;
-        // Check that the number of branches after an XOR fork is the same as the number
-        // of XOR fork audit events. This is a sound check since exactly one branch will
+        // Check that after an XOR fork event there is a single branch.       
+        // This is a sound check since exactly one branch will
         // follow each XOR fork audit event.
-        if theConstrainedAuditEventPairs'length /= thePreviousAuditEvents'length then
-          validatedConstraint := false;
-        end if;
+        for thePreviousAuditEvent in thePreviousAuditEvents loop
+          theFollowingAuditEventPairs := thePreviousAuditEvent -> R4.has_next.AuditEventPair;
+          if theFollowingAuditEventPairs'length /= 1 then
+            validatedConstraint := false;
+            logMessage := "XOR Constraint failed for Job = " & this.jobID & " at event " & (thePreviousAuditEvent -> R2).AEType & " with " & theFollowingAuditEventPairs'length'image & " branches following the XOR node";
+            Logger::log(Logger::Information, "AESequenceDC", logMessage);    
+          end if;
+        end loop;
         
       else
         logMessage := "Unsupported Constraint Type for Job = " & this.jobID;
@@ -403,15 +411,17 @@ begin
     for theDynamicControl in theDynamicControls loop
       theDynamicControlDefn := theDynamicControl -> R29;
       if theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
-        if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
-          validatedConstraint := false;    
-          // TODO Remove debug log message      
-          logMessage := "Loop Count check failed for Job = " & this.jobID & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
-          Logger::log(Logger::Information, "AESequenceDC", logMessage);    
-        else
-          logMessage := "Loop Count check passed for Job = " & this.jobID & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
-          Logger::log(Logger::Information, "AESequenceDC", logMessage);              
-        end if;
+        if theDynamicControl.expectedDynamicControlValue > 0 then
+          if theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue then
+            validatedConstraint := false;    
+            // TODO Remove debug log message      
+            logMessage := "Loop Count check failed for Job = " & this.jobID & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
+            Logger::log(Logger::Information, "AESequenceDC", logMessage);    
+          else
+            logMessage := "Loop Count check passed for Job = " & this.jobID & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
+            Logger::log(Logger::Information, "AESequenceDC", logMessage);              
+          end if;
+        end if;  
       elsif theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then
         if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
           validatedConstraint := false;    

@@ -1,0 +1,43 @@
+@startuml
+partition "**JobDefinition** Transfer" {
+group **SequenceDefinition** Sequence 1
+#green:TransferRequest;
+if (Valid Request) then (true)
+  :TransferAccepted;
+  :RequestData;
+  if (Source Data Available) then (true)
+    :DataAvailable;
+    :SendData;
+    repeat
+      :DataPacket;
+    repeat while (Loop For NumberOfPackets)
+    :AllDataReceived;
+    #red:TransferAccepted;
+    detach    
+group **SequenceDefinition** Sequence 2
+    #green:TransferRequest;
+    if (Valid Request) then (true)
+      :TransferAccepted;
+      repeat
+        :DataPacket;
+      repeat while (Loop For NumberOfPackets)
+      :AllDataReceived;
+      #red:TransferComplete;
+      detach
+    else (false)
+      #red:TransferRejected;
+      detach
+    endif 
+end group     
+  else (false)
+    :DataUnavailable;
+    #red:SourceRejected;
+    detach
+   endif     
+else (false)
+  #red:Transfer Rejected;
+  detach
+endif
+end group
+}
+@enduml
