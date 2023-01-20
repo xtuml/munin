@@ -4,22 +4,26 @@ plusdefn       : NEWLINE* umlblock+
                ;
 
 umlblock       : STARTUML ( '(' 'id' '=' identifier ')' )? NEWLINE
-                 ( job | sequence | statement | NEWLINE )+
+                 ( job_defn      // primary use case defining full job
+                 | sequence_defn // sequence to be referenced from elsewhere
+                 | statement+    // simple grouping of statements to be !included
+                 )
                  ENDUML NEWLINE?
                ;
 
-job            : partition
+job_defn       : PARTITION job_name '{' NEWLINE sequence_defn* '}' NEWLINE
                ;
 
-partition      : PARTITION identifier '{' NEWLINE sequence* '}' NEWLINE
+job_name       : identifier
                ;
 
-sequence       : GROUP identifier NEWLINE statement* ENDGROUP NEWLINE
+sequence_defn  : GROUP sequence_name NEWLINE statement* ENDGROUP NEWLINE
                ;
 
-statement      : ( audit_event
-                 | break
-                 | detach
+sequence_name  : identifier
+               ;
+
+statement      : ( event_defn
                  | if
                  | loop
                  | split
@@ -27,12 +31,23 @@ statement      : ( audit_event
                  ) NEWLINE
                ;
 
-audit_event    : ( HIDE NEWLINE )?
-                 ':' identifier
+event_defn     : ( HIDE NEWLINE )?
+                 ':' event_name
                  (
-                   ',' ( IINV | EINV | BCNT | LCNT ) ',' ( SRC | USER ) ( ',' ( identifier | USER ) '=' identifier )*
+                   ',' ( IINV | EINV | BCNT | LCNT ) ',' ( SRC | USER )
+                   ( ',' ( USER '=' event_parm
+                           | NAME '=' identifier
+                         )
+                   )*
                  )?
                  ';'
+                 ( NEWLINE ( break | detach ) )?
+               ;
+
+event_name     : identifier ( '(' NUMBER ')' )?
+               ;
+
+event_parm     : identifier ( '(' NUMBER ')' )?
                ;
 
 break          : BREAK
@@ -43,12 +58,14 @@ detach         : DETACH
 
 if             : IF '(' condition ')' THEN ( '(' identifier ')' )? NEWLINE
                  statement*
+                 ( ELSEIF ( '(' identifier ')' )? NEWLINE )?
+                 statement*
                  ( ELSE ( '(' identifier ')' )? NEWLINE )?
                  statement*
                  ENDIF
                ;
 
-condition      : ( IOR | XOR ) // TODO:  There will likely be an enumerated list of conditions.
+condition      : ( IOR | XOR )
                ;
 
 loop           : REPEAT NEWLINE
@@ -70,15 +87,13 @@ StringLiteral  : '"' ( ~('\\'|'"') )* '"'
                ;
 
 
-number         : IDENT
-               ;
-
 // keywords
 BCNT           : 'bcnt' | 'BCNT'; // branch count
 BREAK          : 'break';
 DETACH         : 'detach';
 EINV           : 'einv' | 'EINV'; // extra-job invariant
 ELSE           : 'else';
+ELSEIF         : 'elseif';
 ENDGROUP       : 'end group';
 ENDIF          : 'endif' | 'end if';
 ENDSPLIT       : 'end split';
@@ -89,6 +104,7 @@ IF             : 'if';
 IINV           : 'iinv' | 'IINV'; // intra-job invariant
 IOR            : 'ior' | 'IOR';
 LCNT           : 'lcnt' | 'LCNT'; // loop count
+NAME           : 'name' | 'NAME'; // marking target event
 PARTITION      : 'partition';     // job
 REPEAT         : 'repeat';
 SPLITAGAIN     : 'split again';
@@ -104,10 +120,11 @@ NEWLINE        : [\r\n];
 
 NOTE           : 'note' .*? 'end note' NEWLINE -> channel(HIDDEN);
 COLOR          : '#' LABEL -> channel(HIDDEN);
+NUMBER         : DIGIT+;
 IDENT          : NONDIGIT ( NONDIGIT | DIGIT )*;
 LABEL          : ( NONDIGIT | DIGIT )+;
 COMMENT        : ( '\'' .*? NEWLINE | '/\'' .*? '\'/' NEWLINE ) -> channel(HIDDEN);
-WS             : [ ]+ -> skip ; // toss out whitespace
+WS             : [ \t]+ -> skip ; // toss out whitespace
 
 //=========================================================
 // Fragments

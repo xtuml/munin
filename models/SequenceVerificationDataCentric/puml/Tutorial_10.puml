@@ -7,15 +7,15 @@ Tutorial - Simple Sequence Definition
 @startuml 
 partition "Job with multiple event occurrences" {
   group "Sequence with split with multiple event occurrences"
-      #green:A_1;
-      :B_1;
-      :C_1;
+      #green:A;
+      :B;
+      :C;
       split
-        :B_2;
-        #red:C_2;
+        :B(1);
+        #red:C(1);
         detach
       split again
-        #red:D_1;
+        #red:D;
         detach
       end split
   end group

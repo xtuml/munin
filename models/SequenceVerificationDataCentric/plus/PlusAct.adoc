@@ -24,15 +24,184 @@ In tabular form, list mapping of PlantUML to PLUS DSL.
 | audit event sequence container |  partition <sequence title>          |
 |===
 
-=== 4.2 Questions
+=== 4.2 Notes
 
-* I think 'partition' means 'job', so we do not need a **Job Definition** key.
-* I think 'group' means 'sequence', so we do not need a **Sequence Definition** key.
+* 'partition' means 'job', so we do not need a **Job Definition** key.
+* 'group' means 'sequence', so we do not need a **Sequence Definition** key.
 * Double-quotes should wrap multi-word identifiers.
-* Instead of using a note for invariants, let us simply add comma separated values to the event.
-  ** :A,invariant:name=X,user=G;
-* I suggest that we define branch counts only on the event where the branch occurs.
-  ** :B,branchcount name=X;
+* Event data can be supplied as attributes to the event.
+* Event occurrence IDs (indexes) shall be supplied only when necessary.
+  Occurrence 0 is assumed unless explicitly stated.
+* For clarity, branch counts shall be supplied on the branch where the branch occurs.
+* LC1 and LC2 in Paul's test case demonstrates the need for occurrence in 'user'.
+
+=== 4.3 Questions
+
+* Can sequences (groups) be side-by-side?
 * How is the source of a loopcount useful?
-* I suggest that we define loop counts only on the first event inside the loop.
-  ** :B,loopcount name=X;
+* Should event data be loose or tight?
+  ** Should we simply have string key/value pairs in job definition file (schema)?
+
+
+----
+grammar PlusAct;
+
+plusdefn       : // Initialize data structures.
+                    job_defn ( *name )
+                      sequence_defn ( parent_job, *name )
+                        event_defn ( parent_sequence, *name, *occ, prev, prev_types[], app, isStart, isEnd, isBreak
+                          event_data ( parent_event, 
+                          dynamic_control ( *name, type, user_name, user_occ )
+                    current_job_defn
+                    current_seqquence_defn
+                    current_event_defn
+                    fork_point_event
+                    branch_point_event
+               ;
+
+umlblock       : STARTUML ( '(' 'id' '=' identifier ')' )? NEWLINE
+                 ( job           // primary use case defining full job
+                 | sequence      // sequence to be referenced from elsewhere
+                 | statement+    // simple grouping of statements to be !included
+                 )
+                 ENDUML NEWLINE?
+               ;
+
+job_defn       : partition
+               ;
+
+partition      : PARTITION identifier '{' NEWLINE sequence* '}' NEWLINE
+                 // Create the job_defn.
+                 // job_defn.name = ctx.identifer
+                 // current_job_defn = job_defn
+                 // Visit and link each child sequence to the job_defn.
+                 // current_job_defn = null
+               ;
+
+sequence_defn  : GROUP identifier NEWLINE statement* ENDGROUP NEWLINE
+                 // Create a sequence_defn.
+                 // sequence_defn.name = ctx.identifer
+                 // current_sequence_defn = sequence_defn
+                 // Visit statements.
+                 // current_sequence_defn = null
+                 // current_event_defn = null
+               ;
+
+statement      : ( event_defn
+                 | break
+                 | detach
+                 | if
+                 | loop
+                 | split
+                 | // empty line
+                 ) NEWLINE
+               ;
+
+event_defn     : ( HIDE NEWLINE )?
+                 ':' event_name
+                 (
+                   ',' ( IINV | EINV | BCNT | LCNT ) ',' ( SRC | USER )
+                   ( ',' ( USER '=' event_name
+                           | identifier '=' identifier
+                         )
+                   )*
+                 )?
+                 ';'
+                 // if ( ctx.BCNT ) branch_point_event = current_event_defn
+               ;
+
+event_name     : identifier ( '(' NUMBER ')' )?
+                 // Create event_defn.
+                 // event_defn.name = ctx.identifier
+                 // event_defn.occ = ( ctx.NUMBER ) ? ctx.NUMBER : 0
+                 // current_event_defn = event_defn
+               ;
+
+break          : BREAK
+                 // Turn on isBreak in the directly preceding event.
+               ;
+
+detach         : DETACH
+                 // current_event_defn = null
+               ;
+
+if             : IF '(' condition ')' THEN ( '(' identifier ')' )? NEWLINE
+                 statement*
+                 ( ELSEIF ( '(' identifier ')' )? NEWLINE )?
+                 statement*
+                 ( ELSE ( '(' identifier ')' )? NEWLINE )?
+                 statement*
+                 ENDIF
+               ;
+
+condition      : ( IOR | XOR )
+               ;
+
+loop           : REPEAT NEWLINE
+                 statement+
+                 REPEAT WHILE
+               ;
+
+split          : SPLIT NEWLINE
+                 statement+
+                 ( SPLITAGAIN NEWLINE statement+ )+
+                 ENDSPLIT
+                 // fork_point_event = current_event_defn
+               ;
+
+identifier     : IDENT
+               | StringLiteral // allowing blanks delimited with double-quotes
+               ;
+
+StringLiteral  : '"' ( ~('\\'|'"') )* '"'
+               ;
+
+
+// keywords
+BCNT           : 'bcnt' | 'BCNT'; // branch count
+BREAK          : 'break';
+DETACH         : 'detach';
+EINV           : 'einv' | 'EINV'; // extra-job invariant
+ELSE           : 'else';
+ELSEIF         : 'elseif';
+ENDGROUP       : 'end group';
+ENDIF          : 'endif' | 'end if';
+ENDSPLIT       : 'end split';
+ENDUML         : '@enduml';
+GROUP          : 'group';         // sequence
+HIDE           : '-[hidden]->';
+IF             : 'if';
+IINV           : 'iinv' | 'IINV'; // intra-job invariant
+IOR            : 'ior' | 'IOR';
+LCNT           : 'lcnt' | 'LCNT'; // loop count
+PARTITION      : 'partition';     // job
+REPEAT         : 'repeat';
+SPLITAGAIN     : 'split again';
+SPLIT          : 'split';
+SRC            : 'src' | 'SRC';
+STARTUML       : '@startuml';
+THEN           : 'then';
+USER           : 'user' | 'USER';
+WHILE          : 'while';
+XOR            : 'xor' | 'XOR';
+
+NEWLINE        : [\r\n];
+
+NOTE           : 'note' .*? 'end note' NEWLINE -> channel(HIDDEN);
+COLOR          : '#' LABEL -> channel(HIDDEN);
+NUMBER         : DIGIT+;
+IDENT          : NONDIGIT ( NONDIGIT | DIGIT )*;
+LABEL          : ( NONDIGIT | DIGIT )+;
+COMMENT        : ( '\'' .*? NEWLINE | '/\'' .*? '\'/' NEWLINE ) -> channel(HIDDEN);
+WS             : [ \t]+ -> skip ; // toss out whitespace
+
+//=========================================================
+// Fragments
+//=========================================================
+fragment NONDIGIT : [_a-zA-Z*];
+fragment DIGIT :  [0-9];
+fragment UNSIGNED_INTEGER : DIGIT+;
+
+
+
+----
