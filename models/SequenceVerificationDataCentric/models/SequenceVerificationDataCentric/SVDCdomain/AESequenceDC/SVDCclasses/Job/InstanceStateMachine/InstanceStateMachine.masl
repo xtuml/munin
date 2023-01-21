@@ -445,6 +445,7 @@ begin
       else
         // Both checks must have failed
         failureReason := "one or more constraint checks AND one or more dynamic control checks have failed";
+        generate Job.jobFailed(failureReason) to this;
       end if;
     end if;
   else

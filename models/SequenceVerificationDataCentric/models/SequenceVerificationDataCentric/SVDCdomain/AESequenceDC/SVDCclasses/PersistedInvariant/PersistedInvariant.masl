@@ -14,16 +14,18 @@ begin
   // so set validFrom to now and ValidUntil to now plus lifetime
   
   newExtraJobInvariant := create unique PersistedInvariant (invariantName => invariantName,
-  	                                         invariantValue => invariantValue,
-  	                                         validFrom => timestamp'now, 
-  	                                         validUntil => endTime, 
-  	                                         Current_State => Pending );
+  	                                                        invariantValue => invariantValue,
+  	                                                        validFrom => timestamp'now, 
+  	                                                        validUntil => endTime, 
+  	                                                        Current_State => Pending );
   	                                         
   link newExtraJobInvariant R24 extraJobInvDefn;
   generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
 
   return newExtraJobInvariant;
 end service;
+//
+//
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '2869fcaf-8e75-459e-8a4b-c88648b57c5f' DO NOT EDIT THIS LINE.
