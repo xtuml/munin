@@ -42,6 +42,24 @@ In tabular form, list mapping of PlantUML to PLUS DSL.
 * Should event data be loose or tight?
   ** Should we simply have string key/value pairs in job definition file (schema)?
 
+current_event:
+
+previous_events:
+
+. get current_event when current_event is non-empty
+. get split_stack when first event in 'split again', 'elseif' or 'else'
+. get merge_stack when first event after 'end split' or 'endif'
+
+split_stack:
+
+. append current_event when 'split' or 'if' is encountered
+. pop when 'end split' or 'end if' is encountered
+. copy top of split stack to current_event when 'split again', 'elseif' or 'else' is encountered
+
+merge_stack:
+
+. append current_event when 'split again', 'elseif' or 'else' is encountered (UNLESS DETACH?) (NEEDS TO BE SET)
+. copy to current_event when 'end split' or 'end if' is encountered
 
 ----
 grammar PlusAct;

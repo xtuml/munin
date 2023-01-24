@@ -58,11 +58,17 @@ detach         : DETACH
 
 if             : IF '(' condition ')' THEN ( '(' identifier ')' )? NEWLINE
                  statement*
-                 ( ELSEIF ( '(' identifier ')' )? NEWLINE )?
-                 statement*
-                 ( ELSE ( '(' identifier ')' )? NEWLINE )?
-                 statement*
+                 elseif*
+                 else?
                  ENDIF
+               ;
+
+elseif         : ELSEIF ( '(' identifier ')' )? NEWLINE
+                 statement*
+               ;
+
+else           : ELSE ( '(' identifier ')' )? NEWLINE
+                 statement*
                ;
 
 condition      : ( IOR | XOR )
@@ -75,8 +81,11 @@ loop           : REPEAT NEWLINE
 
 split          : SPLIT NEWLINE
                  statement+
-                 ( SPLITAGAIN NEWLINE statement+ )+
+                 split_again+
                  ENDSPLIT
+               ;
+
+split_again    : SPLITAGAIN NEWLINE statement+
                ;
 
 identifier     : IDENT
