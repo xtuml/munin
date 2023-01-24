@@ -5,23 +5,25 @@ from PlusActParser import PlusActParser
 from PlusActListener import PlusActListener
 
 # TODO
-# Add 'end split' and 'end if' rules.
-# Automatically set incrementing occurrence.
-# Use stack for current event?
+# Use stack for current event, merge_stack and split_stack.
+# Be sure to check for multiple occurrences when explicitly referencing an event.
 
 # data structures for arranging output JSON
 class JobDefn:
     population = []                                        # instance population (pattern for all)
     def __init__(self, name):
         self.JobDefinitionName = name                      # created when the name is encountered
+        self.sequences = []                                # job may contain multiple peer sequences
         self.population.append(self)
 
 class Sequence:
     population = []
     current_sequence = []                                  # set at creation, emptied at exit
     def __init__(self, name):
-        self.job_defn = JobDefn.population[-1]
         self.SequenceName = name                           # created when the name is encountered
+        self.job_defn = JobDefn.population[-1]
+        self.job_defn.sequences.append(self)
+        self.audit_events = []                             # appended with each new event encountered
         self.start_events = []                             # start_events get added by the first event
                                                            # ... that sees an empty list
                                                            # ... and by any event preceded by HIDE
@@ -41,11 +43,20 @@ class AuditEvent:
                                                            # and 'end if'
     def __init__(self, name, occurrence):
         self.EventName = name
-        self.OccurrenceId = occurrence
+        self.sequence = Sequence.current_sequence[-1]
+        if ( occurrence ):
+            if any( ae for ae in self.sequence.audit_events if ae.EventName == name and ae.OccurrenceId == occurrence[-1] ):
+                print( "ERROR:  duplicate audit event detected:", name + "(" + occurrence[-1] + ")" )
+                exit()
+            self.OccurrenceId = occurrence[-1]
+        else:
+            # here, we count previous occurrences and assign an incremented value
+            items = [ae for ae in self.sequence.audit_events if ae.EventName == name]
+            self.OccurrenceId = str( len(items) ) 
         self.isBreak = False                               # set when 'break' follows
         self.SequenceEnd = False                           # set when 'detach' follows
         self.SequenceStart = False                         # set when 'HIDE' precedes
-        self.sequence = Sequence.current_sequence[-1]
+        self.sequence.audit_events.append(self)
         if ( not self.sequence.start_events ):             # ... or when no starting event, yet
             self.sequence.start_events.append( self )
             self.SequenceStart = True
@@ -66,14 +77,15 @@ class PlusActRun(PlusActListener):
         Sequence(ctx.identifier().getText())
 
     def exitSequence_defn(self, ctx:PlusActParser.Sequence_defnContext):
-        AuditEvent.current_events[-1].SequenceEnd = True
-        Sequence.current_sequence.clear()
+        if ( AuditEvent.current_events ):
+            AuditEvent.current_events[-1].SequenceEnd = True # in case we did not 'detach'
+        Sequence.current_sequence.pop()
         AuditEvent.current_events.clear()
 
     def exitEvent_name(self, ctx:PlusActParser.Event_nameContext):
-        n = "0"
+        n = []
         if ( ctx.NUMBER() ):
-            n = ctx.NUMBER().getText()
+            n.append( ctx.NUMBER().getText() )
         AuditEvent(ctx.identifier().getText(), n)
 
     def exitEvent_defn(self, ctx:PlusActParser.Event_defnContext):
@@ -85,18 +97,20 @@ class PlusActRun(PlusActListener):
 
     def enterDetach(self, ctx:PlusActParser.DetachContext):
         AuditEvent.current_events[-1].SequenceEnd = True
-        #AuditEvent.current_events.pop()
+        AuditEvent.current_events.pop()
 
     def enterSplit(self, ctx:PlusActParser.SplitContext):
         AuditEvent.split_stack.append( AuditEvent.current_events[-1] )
 
     def enterSplit_again(self, ctx:PlusActParser.Split_againContext):
-        AuditEvent.merge_stack.append( AuditEvent.current_events.pop() )
+        if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
+            AuditEvent.merge_stack.append( AuditEvent.current_events.pop() )
         AuditEvent.current_events.append( AuditEvent.split_stack[-1] ) # Get event from top of split_stack.
 
     def exitSplit(self, ctx:PlusActParser.SplitContext):
         AuditEvent.split_stack.pop()
-        #AuditEvent.current_events.clear()
+        # Extend the current_events with the contents of the merge_stack
+        # without removing the most recent current_event.
         AuditEvent.current_events.extend( AuditEvent.merge_stack )
         AuditEvent.merge_stack.clear()
 
@@ -104,11 +118,13 @@ class PlusActRun(PlusActListener):
         AuditEvent.split_stack.append( AuditEvent.current_events[-1] ) # Copy top of current_events to split_stack.
 
     def enterElseif(self, ctx:PlusActParser.ElseifContext):
-        AuditEvent.merge_stack.append( AuditEvent.current_events.pop() )
+        if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
+            AuditEvent.merge_stack.append( AuditEvent.current_events.pop() )
         AuditEvent.current_events.append( AuditEvent.split_stack[-1] ) # Get event from top of split_stack.
 
     def enterElse(self, ctx:PlusActParser.ElseContext):
-        AuditEvent.merge_stack.append( AuditEvent.current_events.pop() )
+        if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
+            AuditEvent.merge_stack.append( AuditEvent.current_events.pop() )
         AuditEvent.current_events.append( AuditEvent.split_stack[-1] ) # Get event from top of split_stack.
 
     def exitIf(self, ctx:PlusActParser.IfContext):
@@ -120,22 +136,25 @@ class PlusActRun(PlusActListener):
     def exitJob_defn(self, ctx:PlusActParser.Job_defnContext):
         for job_defn in JobDefn.population:
             print("job defn:", job_defn.JobDefinitionName)
-        for seq in Sequence.population:
-            print("sequence:", seq.SequenceName)
-        for ae in AuditEvent.population:
-            b = ""
-            if ( ae.isBreak ):
-              b = "isBreak"
-            ss = ""
-            if ( ae.SequenceStart ):
-              ss = "SequenceStart"
-            se = ""
-            if ( ae.SequenceEnd ):
-              se = "SequenceEnd"
-            prev_aes = ""
-            for prev_ae in ae.previous_events:
-                prev_aes = prev_aes + prev_ae.EventName + "(" + prev_ae.OccurrenceId + ")"
-            print(ae.sequence.SequenceName, ae.EventName + "(" + ae.OccurrenceId + ")", b, ss, se, prev_aes)
+            for seq in job_defn.sequences:
+                print("sequence:", seq.SequenceName)
+                for ae in seq.audit_events:
+                    b = "       "
+                    if ( ae.isBreak ):
+                        b = "isBreak"
+                    ss = "             "
+                    if ( ae.SequenceStart ):
+                        ss = "SequenceStart"
+                    se = ""
+                    se = "           "
+                    if ( ae.SequenceEnd ):
+                        se = "SequenceEnd"
+                    prev_aes = ""
+                    delim = ""
+                    for prev_ae in ae.previous_events:
+                        prev_aes = prev_aes + delim + prev_ae.EventName + "(" + prev_ae.OccurrenceId + ")"
+                        delim = ","
+                    print(ae.EventName + "(" + ae.OccurrenceId + ")", ss, se, b, prev_aes)
 
 
 def main(argv):
