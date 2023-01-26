@@ -33,13 +33,9 @@ statement      : ( event_defn
 
 event_defn     : ( HIDE NEWLINE )?
                  ':' event_name
-                 (
-                   ',' ( IINV | EINV | BCNT | LCNT ) ',' ( SRC | USER )
-                   ( ',' ( USER '=' event_parm
-                           | NAME '=' identifier
-                         )
-                   )*
-                 )?
+                   ( branch_count
+                   | invariant
+                   )?
                  ';'
                  ( NEWLINE ( break | detach ) )?
                ;
@@ -50,13 +46,22 @@ event_name     : identifier ( '(' NUMBER ')' )?
 event_parm     : identifier ( '(' NUMBER ')' )?
                ;
 
+branch_count   : ',' BCNT ( ',' SRC )? ',' NAME '=' identifier
+               ;
+
+invariant      : ',' ( IINV | EINV ) ','
+                 ( SRC ( ',' USER '=' event_parm )?
+                 | USER
+                 ) ',' NAME '=' identifier
+               ;
+
 break          : BREAK
                ;
 
 detach         : DETACH
                ;
 
-if             : IF '(' condition ')' THEN ( '(' identifier ')' )? NEWLINE
+if             : IF '(' if_condition ')' THEN ( '(' identifier ')' )? NEWLINE
                  statement*
                  elseif*
                  else?
@@ -71,12 +76,16 @@ else           : ELSE ( '(' identifier ')' )? NEWLINE
                  statement*
                ;
 
-condition      : ( IOR | XOR )
+if_condition   : ( IOR | XOR )
                ;
 
 loop           : REPEAT NEWLINE
                  statement+
                  REPEAT WHILE
+                 ( '(' loop_condition ')' )?
+               ;
+
+loop_condition : LCNT '=' identifier
                ;
 
 split          : SPLIT NEWLINE
@@ -127,7 +136,7 @@ XOR            : 'xor' | 'XOR';
 
 NEWLINE        : [\r\n];
 
-NOTE           : 'note' .*? 'end note' NEWLINE -> channel(HIDDEN);
+NOTE           : ( 'floating' )? ' '+ 'note' .*? 'end note' NEWLINE -> channel(HIDDEN);
 COLOR          : '#' LABEL -> channel(HIDDEN);
 NUMBER         : DIGIT+;
 IDENT          : NONDIGIT ( NONDIGIT | DIGIT )*;

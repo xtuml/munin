@@ -1,14 +1,9 @@
 @startuml
 partition "Job with Loop and Break" {
   group "Example of Loop with Break"
-    #green:A,LCNT,SRC,user=B,name=X;
-    note right 
-      loop with counter
-      and defined user
-    end note
+    #green:A;
     repeat
       :B;
-      :B(1);
       :C;
       if (XOR) then (error)
         :CError;
@@ -16,7 +11,7 @@ partition "Job with Loop and Break" {
       else (normal)
         :D;
       endif
-    repeat while
+    repeat while (LCNT=X)
     #red:E;
   end group
 }

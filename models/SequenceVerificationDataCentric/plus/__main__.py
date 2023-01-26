@@ -5,8 +5,11 @@ from PlusActParser import PlusActParser
 from PlusActListener import PlusActListener
 
 # TODO
-# Use stack for current event, merge_stack and split_stack.
-# Be sure to check for multiple occurrences when explicitly referencing an event.
+# Nesting.  Use stack for current event, merge_stack and split_stack.
+# Check for multiple occurrences when explicitly referencing an event.
+# What comes out with XOR and IOR?
+# Deal with multiple event decorations per event.
+# !include
 
 # data structures for arranging output JSON
 class JobDefn:
@@ -65,7 +68,18 @@ class AuditEvent:
         if ( self.current_events ):                        # TODO and by loops and merges and stuff
             self.previous_events.extend( self.current_events )
             self.current_events.clear()
+        # detect loop
+        # if it exists but has no starting event, add this one
+        if ( Loop.population and not Loop.population[-1].start_event ):
+            Loop.population[-1].start_event.append( self )
         self.current_events.append(self)
+        self.population.append(self)
+
+class Loop:
+    population = []
+    scope = 0
+    def __init__(self):
+        self.start_event = []                              # first event encountered
         self.population.append(self)
 
 # tree-walk listener
@@ -100,15 +114,18 @@ class PlusActRun(PlusActListener):
         AuditEvent.current_events.pop()
 
     def enterSplit(self, ctx:PlusActParser.SplitContext):
-        AuditEvent.split_stack.append( AuditEvent.current_events[-1] )
+        if ( AuditEvent.current_events ): # We may be starting with HIDE.
+            AuditEvent.split_stack.append( AuditEvent.current_events[-1] )
 
     def enterSplit_again(self, ctx:PlusActParser.Split_againContext):
         if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
             AuditEvent.merge_stack.append( AuditEvent.current_events.pop() )
-        AuditEvent.current_events.append( AuditEvent.split_stack[-1] ) # Get event from top of split_stack.
+        if ( AuditEvent.split_stack ):
+            AuditEvent.current_events.append( AuditEvent.split_stack[-1] ) # Get event from top of split_stack.
 
     def exitSplit(self, ctx:PlusActParser.SplitContext):
-        AuditEvent.split_stack.pop()
+        if ( AuditEvent.split_stack ):
+            AuditEvent.split_stack.pop()
         # Extend the current_events with the contents of the merge_stack
         # without removing the most recent current_event.
         AuditEvent.current_events.extend( AuditEvent.merge_stack )
@@ -129,9 +146,17 @@ class PlusActRun(PlusActListener):
 
     def exitIf(self, ctx:PlusActParser.IfContext):
         AuditEvent.split_stack.pop()
-        #AuditEvent.current_events.clear()
+        # Extend the current_events with the contents of the merge_stack
+        # without removing the most recent current_event.
         AuditEvent.current_events.extend( AuditEvent.merge_stack )
         AuditEvent.merge_stack.clear()
+
+    def enterLoop(self, ctx:PlusActParser.LoopContext):
+        Loop()
+
+    def exitLoop(self, ctx:PlusActParser.LoopContext):
+        Loop.population[-1].start_event[-1].previous_events.append( AuditEvent.current_events[-1] )
+        Loop.population.pop()
 
     def exitJob_defn(self, ctx:PlusActParser.Job_defnContext):
         for job_defn in JobDefn.population:
