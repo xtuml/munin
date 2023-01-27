@@ -5,10 +5,10 @@ Tutorial - Fork and Merge Topology
 '/
 
 @startuml 
-partition "**JobDefinition** AND Fork and Merge" {
-group **SequenceDefinition** AND Fork and Merge
-      #green:A;
-      :B;
+partition "AND Fork and Merge" {
+group "AND Fork and Merge"
+  #green:A;
+  :B;
   split
       :C;
       :G;
@@ -17,9 +17,9 @@ group **SequenceDefinition** AND Fork and Merge
       :H;
       :J;
   end split   
-      :K;
-      #red:L;
-      detach      
+  :K;
+  #red:L;
+  detach      
 end group
 }      
 @enduml

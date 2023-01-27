@@ -5,11 +5,11 @@ Tutorial - Mixed Logic Fork with possible Merge Topology
 '/
 
 @startuml 
-partition "**JobDefinition** Mixed Logic Fork" {
-group **SequenceDefinition** Mixed Logic Fork
+partition "Mixed Logic Fork" {
+group "Mixed Logic Fork"
       #green:A;
       :B;
-  if (XOR) then (e.g. normal)
+  if (XOR) then ("e.g. normal")
     split
       :C;
     split again  
@@ -18,12 +18,13 @@ group **SequenceDefinition** Mixed Logic Fork
       :F;
     end split  
       :G;
-  else (e.g. error)
+  else ("e.g. error")
       #red:D;
       detach
   endif
       :K;
       #red:L;
+      detach
 end group
 }      
 @enduml

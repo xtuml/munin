@@ -1,12 +1,28 @@
+/'
+
+  Tutorial - Constrained Loop
+
+'/
+
 @startuml
-#green:A,1;
-note right 
-  LoopCount Name=X Source=A,1 User=C,1
-end note  
-repeat
-  :B,1;
-  :C,1;
-  :D,1;
-repeat while
-#red:E,1;
+partition "Job with Loop Count Definition" {
+  group "Sequence with Loop"
+    #green:A;
+    repeat
+      :B;
+      :C;
+      :D;
+    repeat while (LCNT=X)
+    floating note
+      Name 'LCNT' in the loop
+      condition.  PLUS will
+      deliver the constraint
+      as src event data on an
+      event ahead of the loop
+      and as user event data on
+      an event inside the loop.
+    end note
+    #red:E;
+end group
+}
 @enduml

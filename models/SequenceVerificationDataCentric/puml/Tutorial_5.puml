@@ -5,11 +5,11 @@ Tutorial - Exclusive OR Fork Topology
 '/
 
 @startuml 
-partition "**JobDefinition** XOR Fork" {
-group **SequenceDefinition** XOR Fork
+partition "XOR Fork" {
+group "XOR Fork"
       #green:A;
       :B;
-  if (XOR) then (e.g. normal)
+  if (XOR) then ("e.g. normal")
       :C;
       :E;
       :F;
@@ -17,10 +17,10 @@ group **SequenceDefinition** XOR Fork
       :K;
       #red:L;
       detach
-  else (e.g. error)
+  else ("e.g. error")
       #red:D;
-  endif
       detach
+  endif
 end group
 }      
 @enduml
