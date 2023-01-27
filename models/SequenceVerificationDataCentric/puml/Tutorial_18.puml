@@ -1,7 +1,15 @@
 @startuml
 partition "Job with Loop and Break" {
   group "Example of Loop with Break"
-    #green:A;
+    #green:A,LCNT,SRC=A,USER=C,name=X;
+    note right
+      A is explicitly the source
+      of a loop constraint and
+      explicitly identifying an
+      user event _not_ in a
+      conditional section of
+      the contained loop.
+    end note
     repeat
       :B;
       :C;
@@ -11,7 +19,7 @@ partition "Job with Loop and Break" {
       else (normal)
         :D;
       endif
-    repeat while (LCNT=X)
+    repeat while ("constrained loop")
     #red:E;
   end group
 }
