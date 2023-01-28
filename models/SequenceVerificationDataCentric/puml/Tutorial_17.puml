@@ -7,21 +7,17 @@
 @startuml
 partition "Job with Loop Count Definition" {
   group "Sequence with Loop"
-    #green:A;
+    #green:A,LCNT,user=B,name=X;
+    note right
+      A is the source
+      of the loop counter
+      applied against B.
+    end note
     repeat
       :B;
       :C;
       :D;
-    repeat while (LCNT=X)
-    floating note
-      Name 'LCNT' in the loop
-      condition.  PLUS will
-      deliver the constraint
-      as src event data on an
-      event ahead of the loop
-      and as user event data on
-      an event inside the loop.
-    end note
+    repeat while ("constrained loop")
     #red:E;
 end group
 }
