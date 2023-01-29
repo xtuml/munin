@@ -1,48 +1,98 @@
 grammar PlusAct;
 
-plusdefn       : umlblock+
+plusdefn       : NEWLINE* umlblock+
                ;
 
-umlblock       : '@startuml' ( '(' 'id' '=' identifier ')' )? NEWLINE
-                 ( job | sequence | statement | NEWLINE )+
-                 '@enduml' NEWLINE?
+umlblock       : STARTUML ( '(' 'id' '=' identifier ')' )? NEWLINE
+                 ( job_defn      // primary use case defining full job
+                 | sequence_defn // sequence to be referenced from elsewhere
+                 | statement+    // simple grouping of statements to be !included
+                 )
+                 ENDUML NEWLINE?
                ;
 
-job            : partition
+job_defn       : PARTITION job_name '{' NEWLINE sequence_defn* '}' NEWLINE
                ;
 
-partition      : 'partition' identifier '{' NEWLINE sequence* '}' NEWLINE
+job_name       : identifier
                ;
 
-sequence       : 'group' identifier NEWLINE statement* 'end group' NEWLINE
+sequence_defn  : GROUP sequence_name NEWLINE statement* ENDGROUP NEWLINE
                ;
 
-statement      : ( audit_event
-                 | break
+sequence_name  : identifier
+               ;
+
+statement      : ( event_defn
                  | if
+                 | loop
                  | split
+                 | // empty line
                  ) NEWLINE
                ;
 
-audit_event    : ':' identifier ';' // TODO:  add attribute value pairs
+event_defn     : ( HIDE NEWLINE )?
+                 ':' event_name
+                   ( branch_count
+                   | loop_count
+                   | invariant
+                   )?
+                 ( ';' | '<' | '>' | ']' )
+                 ( NEWLINE ( break | detach ) )?
                ;
 
-break          : 'break'
+event_name     : identifier ( '(' NUMBER ')' )?
                ;
 
-if             : 'if' '(' condition ')' 'then' ( '(' identifier ')' )? NEWLINE
+event_parm     : identifier ( '(' NUMBER ')' )?
+               ;
+
+branch_count   : ',' BCNT ( ',' SRC ( '=' source=event_parm )? )? ( ',' USER ( '=' target=event_parm )? )? ',' NAME '=' identifier
+               ;
+
+loop_count     : ',' LCNT ( ',' SRC ( '=' source=event_parm )? )? ( ',' USER ( '=' target=event_parm )? )? ',' NAME '=' identifier
+               ;
+
+invariant      : ',' ( IINV | EINV ) ( ',' SRC ( '=' source=event_parm )? )? ( ',' USER ( '=' target=event_parm )? )? ',' NAME '=' identifier
+               ;
+
+break          : BREAK
+               ;
+
+detach         : DETACH
+               ;
+
+if             : IF '(' if_condition ')' THEN ( '(' identifier ')' )? NEWLINE
                  statement*
-                 ( 'else' ( '(' identifier ')' )? NEWLINE )?
+                 elseif*
+                 else?
+                 ENDIF
+               ;
+
+elseif         : ELSEIF ( '(' identifier ')' )? NEWLINE
                  statement*
-                 'end if'
                ;
 
-condition      : identifier // TODO:  There will likely be an enumerated list of conditions.
+else           : ELSE ( '(' identifier ')' )? NEWLINE
+                 statement*
                ;
 
-split          : 'split' NEWLINE statement* 'detach' NEWLINE
-                 ( 'split again' NEWLINE statement* 'detach' NEWLINE )+
-                 'end split'
+if_condition   : ( IOR | XOR )
+               ;
+
+loop           : REPEAT NEWLINE
+                 statement+
+                 REPEAT WHILE
+                 ( '(' identifier ')' )?
+               ;
+
+split          : SPLIT NEWLINE
+                 statement+
+                 split_again+
+                 ENDSPLIT
+               ;
+
+split_again    : SPLITAGAIN NEWLINE statement+
                ;
 
 identifier     : IDENT
@@ -53,17 +103,44 @@ StringLiteral  : '"' ( ~('\\'|'"') )* '"'
                ;
 
 
-number         : IDENT
-               ;
+// keywords
+BCNT           : 'bcnt' | 'BCNT'; // branch count
+BREAK          : 'break';
+DETACH         : 'detach';
+EINV           : 'einv' | 'EINV'; // extra-job invariant
+ELSE           : 'else';
+ELSEIF         : 'elseif';
+ENDGROUP       : 'end group';
+ENDIF          : 'endif' | 'end if';
+ENDSPLIT       : 'end split';
+ENDUML         : '@enduml';
+GROUP          : 'group';         // sequence
+HIDE           : '-[hidden]->';
+IF             : 'if';
+IINV           : 'iinv' | 'IINV'; // intra-job invariant
+IOR            : 'ior' | 'IOR';
+LCNT           : 'lcnt' | 'LCNT'; // loop count
+NAME           : 'name' | 'NAME'; // marking target event
+PARTITION      : 'partition';     // job
+REPEAT         : 'repeat';
+SPLITAGAIN     : 'split again';
+SPLIT          : 'split';
+SRC            : 'src' | 'SRC';
+STARTUML       : '@startuml';
+THEN           : 'then';
+USER           : 'user' | 'USER';
+WHILE          : 'while';
+XOR            : 'xor' | 'XOR';
 
 NEWLINE        : [\r\n];
 
-NOTE           : 'note' .*? 'end note' NEWLINE -> channel(HIDDEN);
+NOTE           : ( 'floating' )? ' '+ 'note' .*? 'end note' NEWLINE -> channel(HIDDEN);
 COLOR          : '#' LABEL -> channel(HIDDEN);
+NUMBER         : DIGIT+;
 IDENT          : NONDIGIT ( NONDIGIT | DIGIT )*;
 LABEL          : ( NONDIGIT | DIGIT )+;
 COMMENT        : ( '\'' .*? NEWLINE | '/\'' .*? '\'/' NEWLINE ) -> channel(HIDDEN);
-WS             : [ ]+ -> skip ; // toss out whitespace
+WS             : [ \t]+ -> skip ; // toss out whitespace
 
 //=========================================================
 // Fragments
