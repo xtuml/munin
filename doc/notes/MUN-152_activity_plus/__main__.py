@@ -5,9 +5,9 @@ from PlusActParser import PlusActParser
 from PlusActListener import PlusActListener
 
 # TODO
+# Use better name than split_stack and merge_stack.  Consider 'fork_point' and 'merge_tips' points.
 # Nesting.  Use stack for current event, merge_stack and split_detection_stack.
 # Check for multiple occurrences when explicitly referencing an event.
-# What comes out with XOR and IOR?
 # Deal with multiple event decorations per event.
 # !include
 # Use a notational mark and some data to indicate where instance forks occur.
@@ -159,14 +159,12 @@ class PlusActRun(PlusActListener):
         if ( not ctx.SRC() and not ctx.USER() ):
             # source of branch_count with no target
             source = AuditEvent.current_events[-1].EventName
-            print( "default source of branch_count with no target:", source, name )
         elif ( ctx.SRC() and not ctx.USER() ):
             # source of branch_count with no target
             if ( ctx.source ):
                 source = ctx.source.getText()
             else:
                 source = AuditEvent.current_events[-1].EventName
-            print( "source of branch_count with no target:", source, name )
         elif ( not ctx.SRC() and ctx.USER() ):
             # target of branch_count with no source
             if ( ctx.target ):
@@ -174,7 +172,6 @@ class PlusActRun(PlusActListener):
                 source = AuditEvent.current_events[-1].EventName
             else:
                 target = AuditEvent.current_events[-1].EventName
-            print( "target of branch_count with no source:", target, name )
         elif ( ctx.SRC() and ctx.USER() ):
             # both source of branch_count and target
             if ( ctx.source ):
@@ -185,10 +182,9 @@ class PlusActRun(PlusActListener):
                 target = ctx.target.getText()
             else:
                 target = AuditEvent.current_events[-1].EventName
-            print( "both source of branch_count and target:", source, target, name )
         else:
             # ERROR
-            print( " ERROR" )
+            print( " ERROR:  malformed branch count -", name )
         if ( ctx.BCNT() ):
             AuditEvent.current_events[-1].branch_count_source = source
             AuditEvent.current_events[-1].branch_count_user = target
@@ -203,14 +199,12 @@ class PlusActRun(PlusActListener):
         if ( not ctx.SRC() and not ctx.USER() ):
             # source of loop_count with no target
             source = AuditEvent.current_events[-1].EventName
-            print( "default source of loop_count with no target:", source, name )
         elif ( ctx.SRC() and not ctx.USER() ):
             # source of loop_count with no target
             if ( ctx.source ):
                 source = ctx.source.getText()
             else:
                 source = AuditEvent.current_events[-1].EventName
-            print( "source of loop_count with no target:", source, name )
         elif ( not ctx.SRC() and ctx.USER() ):
             # target of loop_count with no source
             if ( ctx.target ):
@@ -218,7 +212,6 @@ class PlusActRun(PlusActListener):
                 source = AuditEvent.current_events[-1].EventName
             else:
                 target = AuditEvent.current_events[-1].EventName
-            print( "target of loop_count with no source:", target, name )
         elif ( ctx.SRC() and ctx.USER() ):
             # both source of loop_count and target
             if ( ctx.source ):
@@ -229,10 +222,9 @@ class PlusActRun(PlusActListener):
                 target = ctx.target.getText()
             else:
                 target = AuditEvent.current_events[-1].EventName
-            print( "both source of loop_count and target:", source, target, name )
         else:
             # ERROR
-            print( " ERROR" )
+            print( " ERROR:  malformed loop count -", name )
         if ( ctx.LCNT() ):
             AuditEvent.current_events[-1].loop_count_source = source
             AuditEvent.current_events[-1].loop_count_user = target
@@ -248,14 +240,12 @@ class PlusActRun(PlusActListener):
         if ( not ctx.SRC() and not ctx.USER() ):
             # source of invariant with no target
             source = AuditEvent.current_events[-1].EventName
-            print( "default source of invariant with no target:", source, name )
         elif ( ctx.SRC() and not ctx.USER() ):
             # source of invariant with no target
             if ( ctx.source ):
                 source = ctx.source.getText()
             else:
                 source = AuditEvent.current_events[-1].EventName
-            print( "source of invariant with no target:", source, name )
         elif ( not ctx.SRC() and ctx.USER() ):
             # target of invariant with no source
             if ( ctx.target ):
@@ -263,7 +253,6 @@ class PlusActRun(PlusActListener):
                 source = AuditEvent.current_events[-1].EventName
             else:
                 target = AuditEvent.current_events[-1].EventName
-            print( "target of invariant with no source:", target, name )
         elif ( ctx.SRC() and ctx.USER() ):
             # both source of invariant and target
             if ( ctx.source ):
@@ -274,10 +263,9 @@ class PlusActRun(PlusActListener):
                 target = ctx.target.getText()
             else:
                 target = AuditEvent.current_events[-1].EventName
-            print( "both source of invariant and target:", source, target, name )
         else:
             # ERROR
-            print( " ERROR" )
+            print( " ERROR:  malformed invariant -", name )
         if ( ctx.IINV() ):
             AuditEvent.current_events[-1].intrajob_invariant_source = source
             AuditEvent.current_events[-1].intrajob_invariant_user = target
@@ -302,7 +290,7 @@ class PlusActRun(PlusActListener):
         AuditEvent.current_events.pop()
 
     def enterSplit(self, ctx:PlusActParser.SplitContext):
-# instead of current_event, I might need to copy the split_detection_stack
+        # instead of current_event, I might need to copy the split_detection_stack
         if ( AuditEvent.current_events ): # We may be starting with HIDE.
             AuditEvent.split_detection_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
             AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
@@ -365,56 +353,113 @@ class PlusActRun(PlusActListener):
         Loop.population.pop()
 
     def exitJob_defn(self, ctx:PlusActParser.Job_defnContext):
-        for job_defn in JobDefn.population:
-            print("job defn:", job_defn.JobDefinitionName)
-            for seq in job_defn.sequences:
-                print("sequence:", seq.SequenceName)
-                for ae in seq.audit_events:
-                    b = "       "
-                    if ( ae.isBreak ):
-                        b = "isBreak"
-                    ss = "             "
-                    if ( ae.SequenceStart ):
-                        ss = "SequenceStart"
-                    se = ""
-                    se = "           "
-                    if ( ae.SequenceEnd ):
-                        se = "SequenceEnd"
-                    prev_aes = ""
-                    bcnts = "   "
-                    if ( "" != ae.branch_count_source ):
-                        bcnts = ae.branch_count_source + "bcs" + ":" + ae.branch_count_name
-                    bcntu = "   "
-                    if ( "" != ae.branch_count_user ):
-                        bcntu = ae.branch_count_user + "bcu" + ":" + ae.branch_count_name
-                    lcnts = "   "
-                    if ( "" != ae.loop_count_source ):
-                        bcnts = ae.loop_count_source + "lcs" + ":" + ae.loop_count_name
-                    lcntu = "   "
-                    if ( "" != ae.loop_count_user ):
-                        bcntu = ae.loop_count_user + "lcu" + ":" + ae.loop_count_name
-                    iinvs = "   "
-                    if ( "" != ae.intrajob_invariant_source ):
-                        iinvs = ae.intrajob_invariant_source + "is" + ":" + ae.intrajob_invariant_name
-                    iinvu = "   "
-                    if ( "" != ae.intrajob_invariant_user ):
-                        iinvu = ae.intrajob_invariant_user + "iu" + ":" + ae.intrajob_invariant_name
-                    einvs = "   "
-                    if ( "" != ae.extrajob_invariant_source ):
-                        einvs = ae.extrajob_invariant_source + "es" + ":" + ae.extrajob_invariant_name
-                    einvu = "   "
-                    if ( "" != ae.extrajob_invariant_user ):
-                        einvs = ae.extrajob_invariant_user + "eu" + ":" + ae.extrajob_invariant_name
-                    prev_aes = ""
-                    delim = ""
-                    for prev_ae in ae.previous_events:
-                        prev_aes = ( prev_aes + delim + prev_ae.previous_event.EventName +
-                                     "(" + prev_ae.previous_event.OccurrenceId + ")" +
-                                     prev_ae.constraint
-                                   )
-                        delim = ","
-                    print(ae.EventName + "(" + ae.OccurrenceId + ")", ss, se, b, bcnts, bcntu, lcnts, lcntu, iinvs, iinvu, einvs, einvu, prev_aes)
+        if ( "-print" in sys.argv ):
+            print_job_legibly()
+        else:
+            output_JSON()
 
+def output_JSON():
+    json = ""
+    for job_defn in JobDefn.population:
+        json += "{ \"JobDefinitionName\":" + job_defn.JobDefinitionName + ",\n"
+        json += "\"Events\": [\n"
+        for seq in job_defn.sequences:
+            aedelim = ""
+            for ae in seq.audit_events:
+                json += aedelim
+                aedelim = ",\n"
+                json += "{ \"EventName\": \"" + ae.EventName + "\","
+                json += "\"OccurrenceId\": " + ae.OccurrenceId + ","
+                json += "\"SequenceName\": " + seq.SequenceName + ","
+                if ( ae.SequenceStart ):
+                    json += "\"SequenceStart\": true,"
+                if ( ae.SequenceEnd ):
+                    json += "\"SequenceEnd\": true,"
+                if ( ae.isBreak ):
+                    json += "\"isBreak\": true,"
+                prev_aes = ""
+                pdelim = ""
+                for prev_ae in ae.previous_events:
+                    constraint = "" if ( "" == prev_ae.constraint ) else ", \"Constraint\": \"" + prev_ae.constraint + "\""
+                    prev_aes = ( prev_aes + pdelim +
+                          "{ \"PreviousEventName\": \"" + prev_ae.previous_event.EventName + "\","
+                          "\"PreviousOccurrenceId\": " + prev_ae.previous_event.OccurrenceId +
+                          constraint +
+                          " }"
+                        )
+                    pdelim = ","
+                if ( "" != prev_aes ):
+                    json += "\"PreviousEvents\": [ " + prev_aes + "],"
+                if ( "" != ae.branch_count_source ):
+                    bcnts = ae.branch_count_source + "bcs" + ":" + ae.branch_count_name
+                if ( "" != ae.branch_count_user ):
+                    bcntu = ae.branch_count_user + "bcu" + ":" + ae.branch_count_name
+                if ( "" != ae.loop_count_source ):
+                    bcnts = ae.loop_count_source + "lcs" + ":" + ae.loop_count_name
+                if ( "" != ae.loop_count_user ):
+                    bcntu = ae.loop_count_user + "lcu" + ":" + ae.loop_count_name
+                if ( "" != ae.intrajob_invariant_source ):
+                    iinvs = ae.intrajob_invariant_source + "is" + ":" + ae.intrajob_invariant_name
+                if ( "" != ae.intrajob_invariant_user ):
+                    iinvu = ae.intrajob_invariant_user + "iu" + ":" + ae.intrajob_invariant_name
+                if ( "" != ae.extrajob_invariant_source ):
+                    einvs = ae.extrajob_invariant_source + "es" + ":" + ae.extrajob_invariant_name
+                if ( "" != ae.extrajob_invariant_user ):
+                    einvs = ae.extrajob_invariant_user + "eu" + ":" + ae.extrajob_invariant_name
+                json += "\"Application\": \"\""
+                json += "}"
+            json += "\n]"
+    json += "\n}\n"
+    print( json )
+
+def print_job_legibly():
+    for job_defn in JobDefn.population:
+        print("job defn:", job_defn.JobDefinitionName)
+        for seq in job_defn.sequences:
+            print("sequence:", seq.SequenceName)
+            for ae in seq.audit_events:
+                b = "       "
+                if ( ae.isBreak ):
+                    b = "isBreak"
+                ss = "             "
+                if ( ae.SequenceStart ):
+                    ss = "SequenceStart"
+                se = "           "
+                if ( ae.SequenceEnd ):
+                    se = "SequenceEnd"
+                bcnts = "   "
+                if ( "" != ae.branch_count_source ):
+                    bcnts = ae.branch_count_source + "bcs" + ":" + ae.branch_count_name
+                bcntu = "   "
+                if ( "" != ae.branch_count_user ):
+                    bcntu = ae.branch_count_user + "bcu" + ":" + ae.branch_count_name
+                lcnts = "   "
+                if ( "" != ae.loop_count_source ):
+                    bcnts = ae.loop_count_source + "lcs" + ":" + ae.loop_count_name
+                lcntu = "   "
+                if ( "" != ae.loop_count_user ):
+                    bcntu = ae.loop_count_user + "lcu" + ":" + ae.loop_count_name
+                iinvs = "   "
+                if ( "" != ae.intrajob_invariant_source ):
+                    iinvs = ae.intrajob_invariant_source + "is" + ":" + ae.intrajob_invariant_name
+                iinvu = "   "
+                if ( "" != ae.intrajob_invariant_user ):
+                    iinvu = ae.intrajob_invariant_user + "iu" + ":" + ae.intrajob_invariant_name
+                einvs = "   "
+                if ( "" != ae.extrajob_invariant_source ):
+                    einvs = ae.extrajob_invariant_source + "es" + ":" + ae.extrajob_invariant_name
+                einvu = "   "
+                if ( "" != ae.extrajob_invariant_user ):
+                    einvs = ae.extrajob_invariant_user + "eu" + ":" + ae.extrajob_invariant_name
+                prev_aes = ""
+                delim = ""
+                for prev_ae in ae.previous_events:
+                    prev_aes = ( prev_aes + delim + prev_ae.previous_event.EventName +
+                                 "(" + prev_ae.previous_event.OccurrenceId + ")" +
+                                 prev_ae.constraint
+                               )
+                    delim = ","
+                print(f'{ae.EventName+"("+ae.OccurrenceId+")":{9}}', ss, se, b, f'{bcnts:{8}}', f'{bcntu:{8}}', lcnts, lcntu, iinvs, iinvu, einvs, einvu, prev_aes)
 
 def main(argv):
     input_stream = FileStream(argv[1])
