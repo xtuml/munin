@@ -5,8 +5,8 @@ Tutorial - Bank Transfer Example
 '/
 
 @startuml 
-partition "**JobDefinition** Bank Transfer" {
-group **SequenceDefinition** Near Side Bank Transfer
+partition "Bank Transfer" {
+group "Near Side Bank Transfer"
       #green:A;
       :B;
       :C;
@@ -26,13 +26,12 @@ group **SequenceDefinition** Near Side Bank Transfer
       detach
   end split    
 end group
-detach
-group **SequenceDefinition** Mid Sequence
+group "Mid Sequence"
       #green:N;
       #red:P;
+      detach
 end group
-detach
-group **SequenceDefinition** Low Catcher Sequence
+group "Low Catcher Sequence"
       #green:Q;
       #red:R;
 end group

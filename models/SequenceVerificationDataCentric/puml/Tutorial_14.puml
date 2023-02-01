@@ -5,11 +5,15 @@ Tutorial - Extra Job Invariant Source Definition
 '/
 
 @startuml 
-      #green:H,1;
-      :I,1;
-      #red:J,1;
+partition "Job sourcing Extra-Job Invariant" {
+  group "Sequence with EINV Source"
+      #green:H;
+      :I;
+      #red:J,EINV,SRC,name=Q;
       note right 
-        ExtraJobInvariant Name=Q Source=J,1
+        J defines extra-job
+        invariant named Q.
       end note
-      
+  end group
+}
 @enduml

@@ -5,12 +5,17 @@ Tutorial - Branch Count Definition
 '/
 
 @startuml 
-      #green:A,1;
+partition "Job with Branch Count Definition" {
+  group "Sequence with Branch"
+      #green:A;
+      :B,BCNT,name=Y;
       note right 
-        BranchCount Name=Y Source=A,1 User=B,1
-      end note  
-      :B,1;
-      :C,1;
-      :D,1;
-      #red:E,1;
+        B will branch by a
+        run-time value times.
+      end note
+      :C;
+      :D;
+      #red:E;
+  end group
+}
 @enduml

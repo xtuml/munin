@@ -1,12 +1,24 @@
+/'
+
+  Tutorial - Constrained Loop
+
+'/
+
 @startuml
-#green:A,1;
-note right 
-  LoopCount Name=X Source=A,1 User=C,1
-end note  
-repeat
-  :B,1;
-  :C,1;
-  :D,1;
-repeat while
-#red:E,1;
+partition "Job with Loop Count Definition" {
+  group "Sequence with Loop"
+    #green:A,LCNT,user=B,name=X;
+    note right
+      A is the source
+      of the loop counter
+      applied against B.
+    end note
+    repeat
+      :B;
+      :C;
+      :D;
+    repeat while ("constrained loop")
+    #red:E;
+end group
+}
 @enduml
