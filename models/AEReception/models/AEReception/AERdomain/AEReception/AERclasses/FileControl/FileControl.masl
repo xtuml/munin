@@ -1,0 +1,32 @@
+//! ACTIVITY BEGIN. 'c0b5880a-c62e-4193-8c8f-da10ee7f02d8' DO NOT EDIT THIS LINE.
+public instance service AEReception::FileControl.assignFile ( unassignedEventFile : in instance of EventFile ) return boolean is
+assigned : boolean := false;
+fileToBeProcessed : string;
+receptionSpec : instance of ReceptionSpec;
+logMessage : string;
+
+begin
+	
+	
+	receptionSpec := find_one ReceptionSpec();
+	unassignedEventFile.assigned := true;
+	fileToBeProcessed := receptionSpec.processingDirectory & "/" & unassignedEventFile.fileName;
+	if Filesystem::file_exists(Filesystem::filename(receptionSpec.incomingDirectory & "/" & unassignedEventFile.fileName)) then
+		Filesystem::move_file( Filesystem::filename(receptionSpec.incomingDirectory & "/" & unassignedEventFile.fileName), Filesystem::filename(fileToBeProcessed));
+		logMessage := "AEReception::FileControl.assignFile - moved file " & receptionSpec.incomingDirectory & "/" & unassignedEventFile.fileName & " to " & fileToBeProcessed;
+		Logger::log(Logger::Information, "AEReception", logMessage);
+		// verify that the move worked
+		if Filesystem::file_exists(Filesystem::filename(fileToBeProcessed)) then
+			generate FileControl.allocateFile(unassignedEventFile) to this;
+			logMessage := "AEReception::FileControl.assignFile - assigning file " & unassignedEventFile.fileName;
+			Logger::log(Logger::Information, "AEReception", logMessage);
+			assigned := true;
+		end if;
+	end if;
+	return assigned;
+exception
+	when others => 
+		return false;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

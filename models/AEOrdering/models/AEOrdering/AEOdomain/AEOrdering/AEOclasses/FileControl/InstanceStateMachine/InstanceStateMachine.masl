@@ -1,0 +1,126 @@
+//! ACTIVITY BEGIN. 'c5b8ad9d-e9ce-4075-8084-ce66a1716c9b' '3b672bd6-f40b-4796-8fd7-ccb4a3a10001' DO NOT EDIT THIS LINE.
+state AEOrdering::FileControl.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c5b8ad9d-e9ce-4075-8084-ce66a1716c9b' '7b83b719-a786-49d9-8acd-b742f485e0b8' DO NOT EDIT THIS LINE.
+state AEOrdering::FileControl.FileSelected () is
+logMessage : string;
+systemSpec : instance of SystemSpec;
+fileNames : sequence of Filesystem::filename;
+fileToBeProcessed : Filesystem::filename;
+directoryToProcess : Filesystem::filename;
+
+begin
+
+	// find a file to process
+	systemSpec := find_one SystemSpec();
+	
+	directoryToProcess := Filesystem::filename(systemSpec.incomingDirectory) & "/" & Format::format_based_integer(this.currentJobGroup, false, 16, Format::base_case.upper, Format::justify.right, 2, '0');
+	if Filesystem::file_exists(Filesystem::filename(directoryToProcess)) then
+		fileNames := Filesystem::list_directory(directoryToProcess);
+		if fileNames'length > 0 then
+			fileToBeProcessed := Filesystem::filename(systemSpec.processingDirectory) & "/" & fileNames[fileNames'first];
+			Filesystem::move_file( directoryToProcess & "/" & fileNames[fileNames'first], Filesystem::filename(fileToBeProcessed));
+			if Filesystem::file_exists(Filesystem::filename(fileToBeProcessed)) then
+				generate FileControl.processFile(fileToBeProcessed) to this;
+			else
+				schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
+			end if;
+		else
+			schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
+		end if;
+	else
+		schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
+	end if;
+	this.currentJobGroup := this.currentJobGroup + 1;
+	if this.currentJobGroup > this.endJobGroup then
+		this.currentJobGroup := this.startJobGroup;
+	end if;
+		
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c5b8ad9d-e9ce-4075-8084-ce66a1716c9b' '44eb60f2-3a4e-4724-85bf-056f511a4466' DO NOT EDIT THIS LINE.
+state AEOrdering::FileControl.FileProcessed ( fileToProcess : in Filesystem::filename ) is
+logMessage : string;
+json_string: string;
+json_element: JSON::JSONElement;
+eventJsonArray : JSON::JSONArray;
+eventJsonObject : JSON::JSONObject;
+
+begin
+	logMessage := "AEReception::Reception.parsing";
+	Logger::log(Logger::Information, "AEReception", logMessage);
+
+    // Read the file and parse
+    json_string := Filesystem::read_file(fileToProcess);
+    json_element := JSON::parse(json_string);
+    eventJsonArray := JSON::get_array(json_element);
+    for eventJSONElement in eventJsonArray loop
+
+
+	    if eventJSONElement.kind = JSON::Object then
+	        eventJsonObject := JSON::get_object(eventJSONElement);
+            declare
+                jobId: string;
+                node : string;
+                application: string;
+                auditEventType: string;
+                auditEventId: string;
+                auditEventTime: string;
+                prevAuditEventIds: sequence of string;
+                auditEventData: AuditEventDataType;
+            begin
+                // extract the data from the JSON structure
+                jobId := JSON::get_string(eventJsonObject["jobId"]);
+                node := JSON::get_string(eventJsonObject["node"]);
+                auditEventType := JSON::get_string(eventJsonObject["eventType"]);
+                auditEventId := JSON::get_string(eventJsonObject["eventId"]);
+                auditEventTime := JSON::get_string(eventJsonObject["timestamp"]);
+                application := JSON::get_string(eventJsonObject["applicationName"]);
+
+                if eventJsonObject'contains("previousEventIds") then
+                    if eventJsonObject["previousEventIds"].kind = JSON::String then
+                        prevAuditEventIds := prevAuditEventIds & JSON::get_string(eventJsonObject["previousEventIds"]);
+                    elsif eventJsonObject["previousEventIds"].kind = JSON::Array then
+                        for prev_id in JSON::get_array(eventJsonObject["previousEventIds"]) loop
+                            prevAuditEventIds := prevAuditEventIds & JSON::get_string(prev_id);
+                        end loop;
+                    end if;
+                end if;
+                // Any other key is an event data item
+                for eventDataName in eventJsonObject'keys loop
+                    if eventDataName /= "jobId" and
+                       eventDataName /= "node" and
+                       eventDataName /= "eventType" and
+                       eventDataName /= "eventId" and
+                       eventDataName /= "timestamp" and
+                       eventDataName /= "applicationName" and
+                       eventDataName /= "previousEventIds" then
+                        declare
+                            eventDataItem: JSON::JSONObject;
+                        begin
+                            eventDataItem := JSON::get_object(eventJsonObject[eventDataName]);
+                            if eventDataItem["value"].kind = JSON::Integer then
+                                auditEventData.dataItems[eventDataName] := JSON::get_integer(eventDataItem["value"])'image;
+                            elsif eventDataItem["value"].kind = JSON::String then
+                                auditEventData.dataItems[eventDataName] := JSON::get_string(eventDataItem["value"]);
+                            end if;
+                        end;
+                    end if;
+                end loop;
+                
+                // we have now read the event so process it
+                AEOrdering::AcceptEvent(jobId, node, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData);
+            end;
+	     end if;
+    end loop;
+    
+	schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

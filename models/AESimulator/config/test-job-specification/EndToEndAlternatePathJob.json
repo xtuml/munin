@@ -1,5 +1,6 @@
 {
   "JobSpecName" : "EndToEndAlternativePathJob",
+  "JobName" : "TransferRequest",
   "EventDefinition": [{
     "EventId": "1",
     "EventName": "NearInput",
@@ -12,11 +13,13 @@
     "EventId": "2",
     "EventName": "NearPartWrite",
     "EventData" : [{
-        "DataName" : "PersistentInvariant",
-        "DataValue" : "someDataValue"
+      "EventDataType" : "invariant",
+      "DataName" : "EXTRAJOBINV",
+      "DataValue" : "someDataValue"
     },
     {
-      "DataName" : "SomeOtherDataName",
+      "EventDataType" : "invariant",
+      "DataName" : "EXTRAJOBINV",
       "DataValue" : "someOtherDataValue"
     }],
     "NodeName": "Input",

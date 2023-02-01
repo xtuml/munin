@@ -12,6 +12,7 @@ job : instance of Job;
 eventDefinition : instance of EventDefinition;
 testSpec : instance of TestSpec;
 audit_event: JSON::JSONObject;
+auditEventData: JSON::JSONObject;
 auditEventFile : instance of AuditEventFile;
 newAuditEventFile : instance of AuditEventFile;
 eventFileForJob : instance of EventFileForJob;
@@ -29,16 +30,23 @@ begin
 	auditEventFile := find_one (job -> R17.AuditEventFile)(isActive = true);
 	if auditEventFile /= null then			
 		auditEventFile.auditEvents := auditEventFile.auditEvents & JSON::to_json(eventDefinition.nodeName);
-		audit_event["time"] := JSON::to_json(this.epochEventCreationTime);
-		audit_event["app"] := JSON::to_json(eventDefinition.applicationName);
+		audit_event["timestamp"] := JSON::to_json(this.eventTime'image);
+		audit_event["applicationName"] := JSON::to_json(eventDefinition.applicationName);
 		audit_event["jobId"] := JSON::to_json(string(job.jobId));
-		audit_event["type"] := JSON::to_json(eventDefinition.eventTypeName);
-		audit_event["id"] := JSON::to_json(string(this.eventId));
+		audit_event["jobName"] := JSON::to_json(string(job.jobSpecName));
+		audit_event["eventType"] := JSON::to_json(eventDefinition.eventTypeName);
+		audit_event["eventId"] := JSON::to_json(string(this.eventId));
 		for eventData in eventDefinition -> R16.EventData loop
-			audit_event[eventData.eventDataName] := JSON::to_json(eventData.eventDataValue);
+			auditEventData["dataItemType"] := JSON::to_json(eventData.eventDataName);
+			if eventData.eventDataName = "LOOPCOUNT" or eventData.eventDataName = "BRANCHCOUNT" then
+				auditEventData["value"] := JSON::to_json(integer'parse(eventData.eventDataValue));
+			else
+				auditEventData["value"] := JSON::to_json(eventData.eventDataValue);
+			end if;
+			audit_event[eventData.eventDataType] := JSON::to_json(auditEventData);
 		end loop;
 		if this.prevEventId /= "" and eventDefinition.sequenceStart = false then
-		  audit_event["prev"] := JSON::to_json(this.prevEventId);
+		  audit_event["previousEventIds"] := JSON::to_json(this.prevEventId);
 		end if;
 		auditEventFile.auditEvents := auditEventFile.auditEvents & JSON::to_json(audit_event);
 		auditEventFile.numberOfEvents := auditEventFile.numberOfEvents + 1;
@@ -77,6 +85,7 @@ deployedEvent : instance of DeployedEvent;
 jobSpec : instance of JobSpec;
 epochDate : timestamp;
 epochEventTime : integer;
+eventTime : timestamp;
 
 begin
 	
@@ -86,9 +95,10 @@ begin
 	job := this -> R6.Job;
 	eventDefinition := this -> R5.EventDefinition;
 	for nextEventDefinition in eventDefinition -> R1.isFollowedBy.EventDefinition loop
-		epochEventTime := (timestamp'now - epochDate)'seconds;
+		eventTime := timestamp'now;
+		epochEventTime := (eventTime - epochDate)'seconds;
 		epochEventDispatchTime := epochEventTime + nextEventDefinition.delayDuration'seconds;
-		deployedEvent := create DeployedEvent(eventId => UUID::generate_formatted(), epochEventCreationTime => epochEventTime, epochEventDispatchTime => epochEventDispatchTime, prevEventId => string(this.eventId), deployed => false, Current_State => Created);
+		deployedEvent := create DeployedEvent(eventId => UUID::generate_formatted(), epochEventCreationTime => epochEventTime, epochEventDispatchTime => epochEventDispatchTime, prevEventId => string(this.eventId), deployed => false, eventTime => eventTime, Current_State => Created);
 		link deployedEvent R5 nextEventDefinition;
 		link job R6 deployedEvent;
 		generate DeployedEvent.evaluateDispatch() to deployedEvent;

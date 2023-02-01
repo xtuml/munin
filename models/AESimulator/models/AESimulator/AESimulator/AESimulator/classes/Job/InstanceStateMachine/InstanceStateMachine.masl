@@ -17,6 +17,7 @@ jobSpec : instance of JobSpec;
 epochDate : timestamp;
 epochEventTime : integer;
 epochEventDispatchTime : integer;
+eventTime : timestamp;
 
 begin
 	
@@ -33,9 +34,10 @@ begin
 	link this R17 auditEventFile using eventFileForJob;
 	jobSpec := this -> R3.JobSpec;
 	for eventDefinition in jobSpec -> R2.EventDefinition loop
-		epochEventTime := (timestamp'now - epochDate)'seconds;
+		eventTime := timestamp'now;
+		epochEventTime := (eventTime - epochDate)'seconds;
 		epochEventDispatchTime := epochEventTime + eventDefinition.delayDuration'seconds;
-		deployedEvent := create DeployedEvent(eventId => UUID::generate_formatted(), epochEventCreationTime => epochEventTime, epochEventDispatchTime => epochEventDispatchTime, deployed => false, Current_State => Created);
+		deployedEvent := create DeployedEvent(eventId => UUID::generate_formatted(), epochEventCreationTime => epochEventTime, epochEventDispatchTime => epochEventDispatchTime, deployed => false, eventTime => eventTime, Current_State => Created);
 		link deployedEvent R5 eventDefinition;
 		link this R6 deployedEvent;
 		generate DeployedEvent.evaluateDispatch() to deployedEvent;

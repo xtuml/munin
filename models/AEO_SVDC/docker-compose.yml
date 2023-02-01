@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  aer_aeo_svdc:
+    image: "ghcr.io/xtuml/aer_aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    volumes:
+      - "./config:/root/config"
+      - "../test-files/verifier-incoming:/root/incoming"
+      - "../test-files/verifier-processing:/root/processing"
+      - "../test-files/verifier-processed:/root/processed"
+    command: "-configPath config/ -preinit schedule/startup.sch  -startJobGroup 00 -endJobGroup FF -util Inspector -inspector-port 0"

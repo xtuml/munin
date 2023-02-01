@@ -35,6 +35,7 @@ eventDefinitionObject : JSON::JSONObject;
 eventDataDefinitionObject : JSON::JSONObject;
 eventDataName : string;
 eventDataValue : string;
+eventDataType : string;
 testDefinition : instance of TestDefinition;
 eventDefinition : instance of EventDefinition;
 prevEventDefinition : instance of EventDefinition;
@@ -48,6 +49,7 @@ eventDefintions : sequence of instance of EventDefinition;
 prevEventDispatchOrder : instance of EventDispatchOrder;
 eventData : instance of EventData;
 auditEventFile : instance of AuditEventFile;
+configValidationResult : JSON::JSONObject;
 
 begin
   
@@ -62,9 +64,9 @@ begin
 	    // read the contents of the config file - t
 	    configJSONString := Filesystem::read_file(configFileName);
 	    configJSONElement := JSON::parse(configJSONString);
-	    // TODO configValidationResult := JSONValidation::validate(configJSONElement, #PROP["orderingConfigSchema"]#);
-	    // TODO if JSON::get_boolean(configValidationResult["valid"]) then
-	            // extract the spec data items
+//	    configValidationResult := JSONValidation::validate(configJSONElement, #PROP["simulatorConfigSchema"]#);
+//	    if JSON::get_boolean(configValidationResult["valid"]) then
+	        // extract the spec data items
 	        configJSONObject := JSON::get_object(configJSONElement);
 	        if configJSONObject'contains("OneFilePerJob") then
 	        	testSpec.oneFilePerJob := boolean'parse(JSON::get_string(configJSONObject["OneFilePerJob"]));
@@ -109,7 +111,8 @@ begin
 							    jobSpecJSONElement := JSON::parse(jobSpecJSONString);
 						        jobSpecJSONObject := JSON::get_object(jobSpecJSONElement);
 						        if jobSpecJSONObject'contains("JobSpecName") then
-						        	jobSpec := create JobSpec(jobSpecName => JSON::get_string(jobSpecJSONObject["JobSpecName"]));
+						        	jobSpec := create JobSpec(jobSpecName => JSON::get_string(jobSpecJSONObject["JobSpecName"]),
+						        		                      jobName => JSON::get_string(jobSpecJSONObject["JobName"]));
 					                for eventDefinitionElement in JSON::get_array(jobSpecJSONObject["EventDefinition"]) loop
 						                eventDefinitionObject := JSON::get_object(eventDefinitionElement);				                	
 					                	eventDefinition := create EventDefinition(eventDefinitionId => JSON::get_string(eventDefinitionObject["EventId"]), 
@@ -124,15 +127,22 @@ begin
 							                for eventDataDefinitionElement in JSON::get_array(eventDefinitionObject["EventData"]) loop
 								                eventDataDefinitionObject := JSON::get_object(eventDataDefinitionElement);
 												eventDataName := "";
+												if eventDataDefinitionObject'contains("EventDataType") then
+													eventDataType := JSON::get_string(eventDataDefinitionObject["EventDataType"]);
+												end if;
 												if eventDataDefinitionObject'contains("DataName") then
 													eventDataName := JSON::get_string(eventDataDefinitionObject["DataName"]);
 												end if;
 												eventDataValue := "";
 												if eventDataDefinitionObject'contains("DataValue") then
-													eventDataValue := JSON::get_string(eventDataDefinitionObject["DataValue"]);
+													if eventDataName = "LOOPCOUNT" or eventDataName = "BRANCHCOUNT" then
+														eventDataValue := JSON::get_integer(eventDataDefinitionObject["DataValue"])'image;
+													else
+														eventDataValue := JSON::get_string(eventDataDefinitionObject["DataValue"]);
+													end if;
 												end if;
-												if eventDataName /= "" then
-													eventData := create unique EventData(eventDataName => eventDataName, eventDataValue => eventDataValue);
+												if eventDataName /= "" and eventDataType /= "" then
+													eventData := create unique EventData(eventDataName => eventDataName, eventDataValue => eventDataValue, eventDataType => eventDataType);
 													link eventData R16 eventDefinition;
 												end if;
 							                end loop;
@@ -203,11 +213,10 @@ begin
 	            end loop;
 	        end if;
 	
-		// TODO
-		//else
-	        //	Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
-	        //	raise JSON::JSONException("Config file invalid");
-		//end if;
+//		else
+//	       	Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
+//	       	raise JSON::JSONException("Config file invalid");
+//		end if;
     
 		// now the config is loaded start the jobs
 		if testSpec.oneFilePerJob = false then

@@ -1,0 +1,21 @@
+project AEO_SVDC is
+  
+  domain JSONValidation is
+  end domain;
+  
+  domain JSON is
+  end domain;
+  
+  domain AESequenceDC is
+    terminator JobAdmin is
+    end terminator;
+  end domain;
+  
+  domain AEOrdering is
+    terminator Req_IF_Audited is
+    end terminator;
+    terminator Req_IF_Verification is
+    end terminator;
+  end domain;
+  
+end project;

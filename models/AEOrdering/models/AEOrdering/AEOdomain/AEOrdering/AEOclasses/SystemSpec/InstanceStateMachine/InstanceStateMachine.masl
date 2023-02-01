@@ -93,6 +93,27 @@ begin
             if configJSONObject'contains("JobCompletePeriod") then
                 this.jobCompletePeriod := duration'parse(JSON::get_string(configJSONObject["JobCompletePeriod"]));
             end if;
+            if configJSONObject'contains("IncomingDirectory") then
+                this.incomingDirectory := JSON::get_string(configJSONObject["IncomingDirectory"]);
+                // check if the directory exists and if not create it
+				if Filesystem::file_exists(Filesystem::filename(this.incomingDirectory)) = false then
+					Filesystem::create_directory(Filesystem::filename(this.incomingDirectory));
+				end if;
+            end if;
+            if configJSONObject'contains("ProcessingDirectory") then
+                this.processingDirectory := JSON::get_string(configJSONObject["ProcessingDirectory"]);
+                // check if the directory exists and if not create it
+				if Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) = false then
+					Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
+				end if;
+            end if;
+            if configJSONObject'contains("ProcessedDirectory") then
+                this.processedDirectory := JSON::get_string(configJSONObject["ProcessedDirectory"]);
+                // check if the directory exists and if not create it
+				if Filesystem::file_exists(Filesystem::filename(this.processedDirectory)) = false then
+					Filesystem::create_directory(Filesystem::filename(this.processedDirectory));
+				end if;
+            end if;
             // read in the jobs that we expect to process
             if configJSONObject'contains("Jobs") and configJSONObject["Jobs"].kind = JSON::Array then
                 for jobDefinitionElement in JSON::get_array(configJSONObject["Jobs"]) loop

@@ -1386,3 +1386,43 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '60138ace-c525-4185-9443-4b3374de7bdb' DO NOT EDIT THIS LINE.
+private service AEOrdering::testFileInjest () is
+systemSpec : instance of SystemSpec;
+configFile : string := "config0.json";
+testFileDir : Filesystem::filename := "test-files/";
+incomingDir :  Filesystem::filename := "test-files/incoming/";
+targetDirectory : Filesystem::filename := "test-files/incoming/01/";
+testFile1 : Filesystem::filename := "FileRequest_HappyPath.json";
+reportedEventDefinitions : sequence of instance of _TEST_Req_IF_Verification_eventDefinition;
+reportEventDefinition :  instance of _TEST_Req_IF_Verification_eventDefinition;
+verificationAuditEvents : sequence of instance of _TEST_Req_IF_Verification_audit_event;
+verificationAuditEvent : instance of _TEST_Req_IF_Verification_audit_event;
+
+begin
+	
+	AEOrdering::clearDomain(true, true);
+	reportedEventDefinitions := find _TEST_Req_IF_Verification_eventDefinition();
+	delete reportedEventDefinitions;
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    delete verificationAuditEvents;
+	systemSpec := find_one SystemSpec();
+	systemSpec.configFile := configFile;
+	Filesystem::touch_file(Filesystem::filename(systemSpec.configFilePath & configFile));
+    
+	// fire the timer to check the config file
+	generate SystemSpec.checkConfigUpdate() to systemSpec;
+	Test::service_event_queue();
+	
+	// move the first test file into the correct incoming directory
+	Filesystem::copy_file(testFileDir & testFile1, incomingDir & testFile1);
+	Filesystem::move_file(incomingDir & testFile1, targetDirectory & testFile1);
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+	Assertions::assertTrue(verificationAuditEvents'length = 9, "wrong number of audit events, expected 9 found: " & (verificationAuditEvents'length)'image);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
