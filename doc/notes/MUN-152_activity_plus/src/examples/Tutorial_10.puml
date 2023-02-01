@@ -1,0 +1,23 @@
+/'
+
+Tutorial - Multiple Event Occurrences
+  
+'/
+
+@startuml 
+partition "Job with multiple event occurrences" {
+  group "Sequence with split with multiple event occurrences"
+      #green:A(0);
+      :B(0);
+      :C(0);
+      split
+        :B(1);
+        #red:C(1);
+        detach
+      split again
+        #red:D(0);
+        detach
+      end split
+  end group
+}
+@enduml
