@@ -1,9 +1,9 @@
-# plusact
+# plus2json
 
 ### Install
 
 ```
-pip install plusact
+pip install plus2json
 ```
 
 ### Usage
@@ -11,9 +11,9 @@ pip install plusact
 ```
 Usage
 =====
-  python plusact.pyz <PlusAct PlantUML file> [options]
+  python plus2json.pyz <PLUS PlantUML file> [options]
 
-  With no options, plusact will check the syntax of the input PlantUML file.
+  With no options, plus2json will check the syntax of the input PlantUML file.
 
 Options
 =======
@@ -25,22 +25,22 @@ Options
 Example:
 
 ```
-python -m plusact examples/Tutorial_1.puml -json                   # convert Tutorial_1.puml into JSON
-python -m plusact examples/Tutorial_1.puml -p                      # show job in human readable view
+python plus2json.pyz examples/Tutorial_1.puml -json        # convert Tutorial_1.puml into JSON
+python -m plus2json examples/Tutorial_1.puml -p           # show job in human readable view
 ```
 
 ### Interesting Files
 
+src/plus2json.g4 - anltr4 grammar for PLUS
+src/PlusJobDefn.py - primary source for the tree walker JSON generator
 src/__main__.py
-src/PlusActJobDefn.py - primary source for the tree walker JSON generator
-src/PlusAct.g4 - anltr4 grammar for PLUS
 
 ### Package for release
 
 ```
-from src folder:  antlr4 -Dlanguage=Python3 PlusAct.g4
+from src folder:  antlr4 -Dlanguage=Python3 plus2json.g4
 python -m pip install -r requirements.txt --target src
-python -m zipapp src -p "/usr/bin/env python3" -o plusact.pyz -c
+python -m zipapp src -p "/usr/bin/env python3" -o plus2json.pyz -c
 after learning how to publish:
 python setup.py sdist
 twine upload dist/*

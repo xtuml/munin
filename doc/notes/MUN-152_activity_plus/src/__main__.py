@@ -1,9 +1,9 @@
 import sys
 from antlr4 import *
-from PlusActJobDefn import *
-from PlusActLexer import PlusActLexer
-from PlusActParser import PlusActParser
-from PlusActListener import PlusActListener
+from PlusJobDefn import *
+from plus2jsonLexer import plus2jsonLexer
+from plus2jsonParser import plus2jsonParser
+from plus2jsonListener import plus2jsonListener
 
 def main(argv):
 
@@ -11,7 +11,7 @@ def main(argv):
         print("""
 Usage
 =====
-  python3 plusact.pyz <PlusAct PlantUML file> [options]
+  python3 plus2json.pyz <PLUS PlantUML file> [options]
 
   With no options, plusact will check the syntax of the input PlantUML file.
 
@@ -24,12 +24,12 @@ Options
         exit()
 
     input_stream = FileStream(argv[1])
-    lexer = PlusActLexer(input_stream)
+    lexer = plus2jsonLexer(input_stream)
     stream = CommonTokenStream(lexer)
-    parser = PlusActParser(stream)
+    parser = plus2jsonParser(stream)
     tree = parser.plusdefn()
     if ( "--print" in argv or "-p" in argv or "--json" in argv or "-j" in argv ):
-        run = PlusActRun() # custom listener
+        run = plus2jsonRun() # custom listener
         walker = ParseTreeWalker()
         walker.walk(run, tree)
  

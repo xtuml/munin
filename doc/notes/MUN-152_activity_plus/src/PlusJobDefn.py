@@ -1,8 +1,10 @@
 import sys
-from PlusActListener import PlusActListener
-from PlusActParser import PlusActParser
+from plus2jsonListener import plus2jsonListener
+from plus2jsonParser import plus2jsonParser
 
 # TODO
+# Add ID generator and fork constraint names.
+# Need to add AND constraint value.
 # Use better name than split_stack and merge_stack.  Consider 'fork_point' and 'merge_tips' points.
 # Nesting.  Use stack for current event, merge_stack and split_detection_stack.
 # Check for multiple occurrences when explicitly referencing an event.
@@ -16,7 +18,7 @@ class JobDefn:
     def __init__(self, name):
         self.JobDefinitionName = name                      # created when the name is encountered
         self.sequences = []                                # job may contain multiple peer sequences
-        self.population.append(self)
+        JobDefn.population.append(self)
 
 class Sequence:
     population = []
@@ -29,8 +31,8 @@ class Sequence:
         self.start_events = []                             # start_events get added by the first event
                                                            # ... that sees an empty list
                                                            # ... and by any event preceded by HIDE
-        self.current_sequence.append(self)
-        self.population.append(self)
+        Sequence.current_sequence.append(self)
+        Sequence.population.append(self)
 
 class AuditEvent:
     population = []
@@ -44,8 +46,11 @@ class AuditEvent:
                                                            # 'split end', 'elsif', 'else' or 'endif' entered
     merge_usage = []                                       # used for previous events after 'end split'
                                                            # and 'end if'
+    longest_name = 0                                       # Keep longest name for pretty printing.
     def __init__(self, name, occurrence):
         self.EventName = name
+        if ( len( name ) > AuditEvent.longest_name ):
+            AuditEvent.longest_name = len( name )
         self.sequence = Sequence.current_sequence[-1]
         if ( occurrence ):
             if any( ae for ae in self.sequence.audit_events if ae.EventName == name and ae.OccurrenceId == occurrence[-1] ):
@@ -77,21 +82,21 @@ class AuditEvent:
             self.SequenceStart = True
         self.previous_events = []                          # extended at creation when current_events exists
                                                            # emptied at sequence exit
-        if ( self.split_usage ):                           # get split (or if) previous event
-            self.previous_events.append( self.split_usage.pop() )
-        if ( self.merge_usage ):                           # get merge previous event
-            self.previous_events.extend( self.merge_usage )
-            self.merge_usage.clear()                       # TODO:  need better stack
-        if ( self.current_events ):
-            for ce in self.current_events:
+        if ( AuditEvent.split_usage ):                     # get split (or if) previous event
+            self.previous_events.append( AuditEvent.split_usage.pop() )
+        if ( AuditEvent.merge_usage ):                     # get merge previous event
+            self.previous_events.extend( AuditEvent.merge_usage )
+            AuditEvent.merge_usage.clear()                 # TODO:  need better stack
+        if ( AuditEvent.current_events ):
+            for ce in AuditEvent.current_events:
                 self.previous_events.append( PreviousAuditEvent( ce ) )
-        self.current_events.clear()
+        AuditEvent.current_events.clear()
         # detect loop
         # if it exists but has no starting event, add this one
         if ( Loop.population and not Loop.population[-1].start_event ):
             Loop.population[-1].start_event.append( self )
-        self.current_events.append(self)
-        self.population.append(self)
+        AuditEvent.current_events.append(self)
+        AuditEvent.population.append(self)
 
 # A previous audit event contains a reference to the previous event
 # but may also contain attributes decoration the "edge" from the
@@ -100,55 +105,55 @@ class PreviousAuditEvent:
     population = []
     def __init__(self, ae):
         self.previous_event = ae
-        self.constraint = ""
-        self.population.append(self)
+        self.ConstraintValue = ""
+        PreviousAuditEvent.population.append(self)
 
 class IntrajobInvariant:
     population = []
     def __init__(self, name):
-        self.population.append(self)
+        IntrajobInvariant.population.append(self)
 
 # Capture the XOR condition of an if statement.
-# NOTE:  We are not presently capturing AND and IOR but treating them as defaults.
+# NOTE:  We are not presently capturing AND but treating them as defaults.
 class Fork:
     population = []
     scope = 0
     def __init__(self, flavor):
         self.flavor = flavor                               # blank or XOR or IOR (or AND)
-        self.population.append(self)
+        Fork.population.append(self)
 
 class Loop:
     population = []
     scope = 0
     def __init__(self):
         self.start_event = []                              # first event encountered
-        self.population.append(self)
+        Loop.population.append(self)
 
 # tree-walk listener
-class PlusActRun(PlusActListener):     
-    def exitJob_name(self, ctx:PlusActParser.Job_nameContext):
+class plus2jsonRun(plus2jsonListener):     
+    def exitJob_name(self, ctx:plus2jsonParser.Job_nameContext):
         JobDefn(ctx.identifier().getText())
 
-    def exitSequence_name(self, ctx:PlusActParser.Sequence_nameContext):
+    def exitSequence_name(self, ctx:plus2jsonParser.Sequence_nameContext):
         Sequence(ctx.identifier().getText())
 
-    def exitSequence_defn(self, ctx:PlusActParser.Sequence_defnContext):
+    def exitSequence_defn(self, ctx:plus2jsonParser.Sequence_defnContext):
         if ( AuditEvent.current_events ):
             AuditEvent.current_events[-1].SequenceEnd = True # in case we did not 'detach'
         Sequence.current_sequence.pop()
         AuditEvent.current_events.clear()
 
-    def exitEvent_name(self, ctx:PlusActParser.Event_nameContext):
+    def exitEvent_name(self, ctx:plus2jsonParser.Event_nameContext):
         n = []
         if ( ctx.NUMBER() ):
             n.append( ctx.NUMBER().getText() )
         AuditEvent(ctx.identifier().getText(), n)
 
-    def exitEvent_defn(self, ctx:PlusActParser.Event_defnContext):
+    def exitEvent_defn(self, ctx:plus2jsonParser.Event_defnContext):
         if ( ctx.HIDE() ):
             AuditEvent.current_events[-1].SequenceStart = True
 
-    def exitBranch_count(self, ctx:PlusActParser.Branch_countContext):
+    def exitBranch_count(self, ctx:plus2jsonParser.Branch_countContext):
         # The default of source or target is the event definition carrying
         # the branch_count parameters.
         source = ""
@@ -188,7 +193,7 @@ class PlusActRun(PlusActListener):
             AuditEvent.current_events[-1].branch_count_user = target
             AuditEvent.current_events[-1].branch_count_name = name
 
-    def exitLoop_count(self, ctx:PlusActParser.Loop_countContext):
+    def exitLoop_count(self, ctx:plus2jsonParser.Loop_countContext):
         # The default of source or target is the event definition carrying
         # the loop_count parameters.
         source = ""
@@ -228,7 +233,7 @@ class PlusActRun(PlusActListener):
             AuditEvent.current_events[-1].loop_count_user = target
             AuditEvent.current_events[-1].loop_count_name = name
 
-    def exitInvariant(self, ctx:PlusActParser.InvariantContext):
+    def exitInvariant(self, ctx:plus2jsonParser.InvariantContext):
         # The default of source or target is the event definition carrying
         # the invariant parameters.
         # The target user may be left undefined (until a user comes later).
@@ -273,21 +278,21 @@ class PlusActRun(PlusActListener):
             AuditEvent.current_events[-1].extrajob_invariant_user = target
             AuditEvent.current_events[-1].extrajob_invariant_name = name
 
-    def enterBreak(self, ctx:PlusActParser.BreakContext):
+    def enterBreak(self, ctx:plus2jsonParser.BreakContext):
         AuditEvent.current_events[-1].isBreak = True
 
-    def enterDetach(self, ctx:PlusActParser.DetachContext):
+    def enterDetach(self, ctx:plus2jsonParser.DetachContext):
         AuditEvent.current_events[-1].SequenceEnd = True
         AuditEvent.current_events.pop()
 
-    def enterBreak(self, ctx:PlusActParser.BreakContext):
+    def enterBreak(self, ctx:plus2jsonParser.BreakContext):
         AuditEvent.current_events[-1].isBreak = True
 
-    def enterDetach(self, ctx:PlusActParser.DetachContext):
+    def enterDetach(self, ctx:plus2jsonParser.DetachContext):
         AuditEvent.current_events[-1].SequenceEnd = True
         AuditEvent.current_events.pop()
 
-    def enterSplit(self, ctx:PlusActParser.SplitContext):
+    def enterSplit(self, ctx:plus2jsonParser.SplitContext):
         # instead of current_event, I might need to copy the split_detection_stack
         if ( AuditEvent.current_events ): # We may be starting with HIDE.
             AuditEvent.split_detection_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
@@ -298,59 +303,59 @@ class PlusActRun(PlusActListener):
                 AuditEvent.split_detection_stack.append( AuditEvent.split_usage[-1] )
                 AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
 
-    def enterSplit_again(self, ctx:PlusActParser.Split_againContext):
+    def enterSplit_again(self, ctx:plus2jsonParser.Split_againContext):
         if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
             AuditEvent.merge_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
         if ( AuditEvent.split_detection_stack ):
             AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
 
-    def exitSplit(self, ctx:PlusActParser.SplitContext):
+    def exitSplit(self, ctx:plus2jsonParser.SplitContext):
         if ( AuditEvent.split_detection_stack ): # The split stack can be empty here due to HIDE.
             AuditEvent.split_detection_stack.pop()
         AuditEvent.merge_usage.extend( AuditEvent.merge_stack )
         AuditEvent.merge_stack.clear() # TODO:  better stack
 
-    def enterIf(self, ctx:PlusActParser.IfContext):
+    def enterIf(self, ctx:plus2jsonParser.IfContext):
 # instead of current_event, I might need to copy the split_detection_stack
         AuditEvent.split_detection_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
         AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
 
-    def exitIf_condition(self, ctx:PlusActParser.If_conditionContext):
+    def exitIf_condition(self, ctx:plus2jsonParser.If_conditionContext):
         if ( ctx.IOR() ):
             Fork( "IOR" )
-            AuditEvent.split_detection_stack[-1].constraint = "IOR"
+            AuditEvent.split_detection_stack[-1].ConstraintValue = "IOR"
         elif ( ctx.XOR() ):
             Fork( "XOR" )
-            AuditEvent.split_detection_stack[-1].constraint = "XOR"
+            AuditEvent.split_detection_stack[-1].ConstraintValue = "XOR"
         else:
             Fork( "" )
 
-    def enterElseif(self, ctx:PlusActParser.ElseifContext):
+    def enterElseif(self, ctx:plus2jsonParser.ElseifContext):
         if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
             AuditEvent.merge_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
         AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
 
-    def enterElse(self, ctx:PlusActParser.ElseContext):
+    def enterElse(self, ctx:plus2jsonParser.ElseContext):
         if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
             AuditEvent.merge_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
         AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
 
-    def exitIf(self, ctx:PlusActParser.IfContext):
+    def exitIf(self, ctx:plus2jsonParser.IfContext):
         AuditEvent.split_detection_stack.pop()
         AuditEvent.merge_usage.extend( AuditEvent.merge_stack )
         AuditEvent.merge_stack.clear()
         # Pop a scope of Fork
         Fork.population.pop()
 
-    def enterLoop(self, ctx:PlusActParser.LoopContext):
+    def enterLoop(self, ctx:plus2jsonParser.LoopContext):
         Loop()
 
     # Link the last event in the loop as a previous event to the first event in the loop.
-    def exitLoop(self, ctx:PlusActParser.LoopContext):
+    def exitLoop(self, ctx:plus2jsonParser.LoopContext):
         Loop.population[-1].start_event[-1].previous_events.append( PreviousAuditEvent( AuditEvent.current_events[-1] ) )
         Loop.population.pop()
 
-    def exitJob_defn(self, ctx:PlusActParser.Job_defnContext):
+    def exitJob_defn(self, ctx:plus2jsonParser.Job_defnContext):
         if ( "--print" in sys.argv or "-p" in sys.argv ):
             print_job_legibly()
         elif ( "--json" in sys.argv or "-j" in sys.argv ):
@@ -378,7 +383,7 @@ def output_JSON():
                 prev_aes = ""
                 pdelim = ""
                 for prev_ae in ae.previous_events:
-                    constraint = "" if ( "" == prev_ae.constraint ) else ", \"ConstraintValue\": \"" + prev_ae.constraint + "\""
+                    constraint = "" if ( "" == prev_ae.ConstraintValue ) else ", \"ConstraintValue\": \"" + prev_ae.ConstraintValue + "\""
                     prev_aes = ( prev_aes + pdelim +
                           "{ \"PreviousEventName\": \"" + prev_ae.previous_event.EventName + "\","
                           "\"PreviousOccurrenceId\": " + prev_ae.previous_event.OccurrenceId +
@@ -416,15 +421,15 @@ def print_job_legibly():
         for seq in job_defn.sequences:
             print("sequence:", seq.SequenceName)
             for ae in seq.audit_events:
-                b = "       "
-                if ( ae.isBreak ):
-                    b = "isBreak"
-                ss = "             "
+                ss = ""
                 if ( ae.SequenceStart ):
-                    ss = "SequenceStart"
-                se = "           "
+                    ss = "start"
+                se = ""
                 if ( ae.SequenceEnd ):
-                    se = "SequenceEnd"
+                    se = "end"
+                b = "     "
+                if ( ae.isBreak ):
+                    b = "break"
                 bcnts = "   "
                 if ( "" != ae.branch_count_source ):
                     bcnts = ae.branch_count_source + "bcs" + ":" + ae.branch_count_name
@@ -454,8 +459,8 @@ def print_job_legibly():
                 for prev_ae in ae.previous_events:
                     prev_aes = ( prev_aes + delim + prev_ae.previous_event.EventName +
                                  "(" + prev_ae.previous_event.OccurrenceId + ")" +
-                                 prev_ae.constraint
+                                 prev_ae.ConstraintValue
                                )
                     delim = ","
-                print(f'{ae.EventName+"("+ae.OccurrenceId+")":{9}}', ss, se, b, f'{bcnts:{8}}', f'{bcntu:{8}}', lcnts, lcntu, iinvs, iinvu, einvs, einvu, prev_aes)
+                print(f'{ae.EventName+"("+ae.OccurrenceId+")":{AuditEvent.longest_name+3}}', f'{ss:{5}}', f'{se:{3}}', b, prev_aes, f'{bcnts:{8}}', f'{bcntu:{8}}', lcnts, lcntu, iinvs, iinvu, einvs, einvu)
 
