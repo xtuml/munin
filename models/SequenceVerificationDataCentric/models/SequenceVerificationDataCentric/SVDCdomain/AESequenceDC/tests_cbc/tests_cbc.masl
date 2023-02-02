@@ -132,3 +132,75 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '4f40861d-adb9-4b43-868e-8d6225259141' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test64InvalidLoopWithLoopCountExceedingExpectedValue () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+theDynamicControlDefn : instance of DynamicControlDefinition;
+sourceOccurrence: instance of AEOccurrenceInSequenceDefinition;
+userOccurrence: instance of AEOccurrenceInSequenceDefinition;
+theJobDefn : instance of JobDefinition;
+theDynamicControl : instance of DynamicControl;
+theDynamicControls : set of instance of DynamicControl;
+
+begin
+  // initial Test of Definitions
+  theDynamicControlDefn := find_one DynamicControlDefinition (dynamicControlName = "Counter_1");
+  sourceOccurrence := theDynamicControlDefn -> R30;
+  userOccurrence := theDynamicControlDefn -> R31;
+  theJobDefn := theDynamicControlDefn -> R32;
+  
+  Assertions::assertTrue(theDynamicControlDefn.dynamicControlName = "Counter_1", "Loop Counter not created as expected: " & theDynamicControlDefn.dynamicControlName);
+  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType);
+//  Assertions::assertTrue((theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType = "LCLB", "User Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType);
+  Assertions::assertTrue(theJobDefn.jobName = "LoopCountJob", "Job not created as expected: " & theJobDefn.jobName);
+  
+  
+  // This test covers 1 Jobs with 1 sequences based on a looped path definition - 4 full iterations of the loop
+  // followed by an error which cause the loop to be exited.
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "5");
+  acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","LCLC","Job_LoopCount_1","Ev302","Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","LCLD","Job_LoopCount_1","Ev303","Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","LCLB","Job_LoopCount_1","Ev304","Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","LCLC","Job_LoopCount_1","Ev305","Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920006","Test-0001","LCLD","Job_LoopCount_1","Ev306","Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920007","Test-0001","LCLB","Job_LoopCount_1","Ev307","Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920008","Test-0001","LCLC","Job_LoopCount_1","Ev308","Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920009","Test-0001","LCLD","Job_LoopCount_1","Ev309","Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920010","Test-0001","LCLB","Job_LoopCount_1","Ev310","Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920011","Test-0001","LCLC","Job_LoopCount_1","Ev311","Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920012","Test-0001","LCLD","Job_LoopCount_1","Ev312","Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920013","Test-0001","LCLB","Job_LoopCount_1","Ev313","Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920014","Test-0001","LCLC","Job_LoopCount_1","Ev314","Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920015","Test-0001","LCLD","Job_LoopCount_1","Ev315","Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920016","Test-0001","LCLB","Job_LoopCount_1","Ev316","Ev317",theAuditEventData);
+  acceptOrderedEvent ("1620920017","Test-0001","LCLC","Job_LoopCount_1","Ev317","Ev318",theAuditEventData);
+  acceptOrderedEvent ("1620920018","Test-0001","LCLD","Job_LoopCount_1","Ev318","Ev319",theAuditEventData);
+  acceptOrderedEvent ("1620920019","Test-0001","LCLE","Job_LoopCount_1","Ev319","Ev320",theAuditEventData);
+
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  theDynamicControls := theJobs -> R35;
+  //
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed even though loop count exceeded the expected value: " & theJob.jobID);
+ end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
