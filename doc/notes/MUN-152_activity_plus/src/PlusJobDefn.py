@@ -4,9 +4,8 @@ from plus2jsonParser import plus2jsonParser
 
 # TODO
 # Add ID generator and fork constraint names.
-# Need to add AND constraint value.
 # Use better name than split_stack and merge_stack.  Consider 'fork_point' and 'merge_tips' points.
-# Nesting.  Use stack for current event, merge_stack and split_detection_stack.
+# Nesting.  Use stack for current event, merge_stack and fork_point_stack.
 # Check for multiple occurrences when explicitly referencing an event.
 # Deal with multiple event decorations per event.
 # !include
@@ -37,15 +36,16 @@ class Sequence:
 class AuditEvent:
     population = []
     current_events = []                                    # set at creation, emptied at sequence exit
-    split_detection_stack = []                             # current_events pushed as PreviousAuditEvent
-                                                           # when 'split' or 'if' encountered
-                                                           # popped at 'end split' or 'endif'
-    split_usage = []                                       # cached here each time 'split again', 'elsif'
-                                                           # or 'else' encountered
+    fork_point_stack = []                                  # current_events pushed as PreviousAuditEvent
+                                                           # when 'split', 'fork' or 'if' encountered
+                                                           # popped at 'end split', 'end merge' or 'endif'
+    fork_point_usage = []                                  # cached here each time 'split again', 'fork again',
+                                                           # 'elsif' or 'else' encountered
     merge_stack = []                                       # current_events pushed when 'split again',
-                                                           # 'split end', 'elsif', 'else' or 'endif' entered
-    merge_usage = []                                       # used for previous events after 'end split'
-                                                           # and 'end if'
+                                                           # 'split end', 'fork again', 'end merge',
+                                                           # 'elsif', 'else' or 'endif' entered
+    merge_usage = []                                       # used for previous events after 'end split',
+                                                           # 'end merge' and 'end if'
     longest_name = 0                                       # Keep longest name for pretty printing.
     def __init__(self, name, occurrence):
         self.EventName = name
@@ -82,8 +82,8 @@ class AuditEvent:
             self.SequenceStart = True
         self.previous_events = []                          # extended at creation when current_events exists
                                                            # emptied at sequence exit
-        if ( AuditEvent.split_usage ):                     # get split (or if) previous event
-            self.previous_events.append( AuditEvent.split_usage.pop() )
+        if ( AuditEvent.fork_point_usage ):                # get split (or if) previous event
+            self.previous_events.append( AuditEvent.fork_point_usage.pop() )
         if ( AuditEvent.merge_usage ):                     # get merge previous event
             self.previous_events.extend( AuditEvent.merge_usage )
             AuditEvent.merge_usage.clear()                 # TODO:  need better stack
@@ -293,55 +293,57 @@ class plus2jsonRun(plus2jsonListener):
         AuditEvent.current_events.pop()
 
     def enterSplit(self, ctx:plus2jsonParser.SplitContext):
-        # instead of current_event, I might need to copy the split_detection_stack
+        # instead of current_event, I might need to copy the fork_point_stack
         if ( AuditEvent.current_events ): # We may be starting with HIDE.
-            AuditEvent.split_detection_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
-            AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
+            AuditEvent.fork_point_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
+            AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
         else:
             # detecting a double-split (combined if and split)
-            if ( AuditEvent.split_usage ):
-                AuditEvent.split_detection_stack.append( AuditEvent.split_usage[-1] )
-                AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
+            if ( AuditEvent.fork_point_usage ):
+                AuditEvent.fork_point_stack.append( AuditEvent.fork_point_usage[-1] )
+                AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
 
     def enterSplit_again(self, ctx:plus2jsonParser.Split_againContext):
         if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
             AuditEvent.merge_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
-        if ( AuditEvent.split_detection_stack ):
-            AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
+        if ( AuditEvent.fork_point_stack ):
+            AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
 
     def exitSplit(self, ctx:plus2jsonParser.SplitContext):
-        if ( AuditEvent.split_detection_stack ): # The split stack can be empty here due to HIDE.
-            AuditEvent.split_detection_stack.pop()
+        AuditEvent.fork_point_stack[-1].ConstraintValue = "AND"
+        if ( AuditEvent.fork_point_stack ): # The split stack can be empty here due to HIDE.
+            AuditEvent.fork_point_stack.pop()
         AuditEvent.merge_usage.extend( AuditEvent.merge_stack )
         AuditEvent.merge_stack.clear() # TODO:  better stack
+        Fork( "AND" )
 
     def enterIf(self, ctx:plus2jsonParser.IfContext):
-# instead of current_event, I might need to copy the split_detection_stack
-        AuditEvent.split_detection_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
-        AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
+        # TODO - instead of current_event, I might need to copy the fork_point_stack
+        AuditEvent.fork_point_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
+        AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
 
     def exitIf_condition(self, ctx:plus2jsonParser.If_conditionContext):
         if ( ctx.IOR() ):
             Fork( "IOR" )
-            AuditEvent.split_detection_stack[-1].ConstraintValue = "IOR"
+            AuditEvent.fork_point_stack[-1].ConstraintValue = "IOR"
         elif ( ctx.XOR() ):
             Fork( "XOR" )
-            AuditEvent.split_detection_stack[-1].ConstraintValue = "XOR"
+            AuditEvent.fork_point_stack[-1].ConstraintValue = "XOR"
         else:
             Fork( "" )
 
     def enterElseif(self, ctx:plus2jsonParser.ElseifContext):
         if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
             AuditEvent.merge_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
-        AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
+        AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
 
     def enterElse(self, ctx:plus2jsonParser.ElseContext):
         if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
             AuditEvent.merge_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
-        AuditEvent.split_usage.append( AuditEvent.split_detection_stack[-1] )
+        AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
 
     def exitIf(self, ctx:plus2jsonParser.IfContext):
-        AuditEvent.split_detection_stack.pop()
+        AuditEvent.fork_point_stack.pop()
         AuditEvent.merge_usage.extend( AuditEvent.merge_stack )
         AuditEvent.merge_stack.clear()
         # Pop a scope of Fork
