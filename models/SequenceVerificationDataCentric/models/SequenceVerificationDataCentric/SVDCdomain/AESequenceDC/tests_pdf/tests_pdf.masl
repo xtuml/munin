@@ -23,8 +23,8 @@ logMessage : string;
 
 begin
   // This test delivers events for two jobs:
-  //    (1) 'AuthGen-0001' of type 'GenerateAuthorisationTokenJob'
-  //    (2) 'ProtProc-0001' of type 'ComplexJob'
+  //    (1) 'GenToken1' of type 'GenerateAuthorisationTokenJob'
+  //    (2) 'ComplexSunnyDay1' of type 'ComplexJob'
   // The first of these two jobs is the source of an Extra Job Invariant that is used several times within the second job.
   //
   // This test delivers events compliant with the two job definitions (as defined in the scenario 'InitComplexEventSequence1Definition'
@@ -291,8 +291,8 @@ logMessage : string;
 begin
   // ******************************************************************************
   // This test delivers events for two jobs:
-  //    (1) 'AuthGen-0001' of type 'GenerateAuthorisationTokenJob'
-  //    (2) 'ProtProc-0001' of type 'ComplexJob'
+  //    (1) 'GenToken1' of type 'GenerateAuthorisationTokenJob'
+  //    (2) 'ComplexSunnyDay1' of type 'ComplexJob'
   // The first of these two jobs is the source of an Extra Job Invariant that is used several times within the second job.
   //
   // This test delivers events compliant with the two job definitions (as defined in the scenario 'InitComplexEventSequence1Definition'
@@ -554,12 +554,12 @@ logMessage : string;
 
 begin
   // This test delivers events for two jobs:
-  //    (1) 'AuthGen-0001' of type 'GenerateAuthorisationTokenJob'
-  //    (2) 'ProtProc-0001' of type 'ComplexJob'
+  //    (1) 'GenToken1' of type 'GenerateAuthorisationTokenJob'
+  //    (2) 'ComplexRainyDay1' of type 'ComplexJob'
   // The first of these two jobs is the source of an Extra Job Invariant that is used several times within the second job.
   //
-  // This test delivers events compliant with the two job definitions (as defined in the scenario 'InitComplexEventSequence1Definition'
-  // and does not result in any errors being expected.
+  // This test is designed to check whether the Sequence Verification domain can detect when an XOR branch is taken as well
+  // as other branches at the same fork point - in this case at Event13.
   //
   // Firstly, deliver a set of events for the 'GenerateAuthorisationTokenJob'
   previousEvents := empty;
@@ -599,172 +599,172 @@ begin
   // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
   // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC3", "2") & (aeDataKindEnum.BRANCHCOUNT, "BC2", "3");
-  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
+  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexRainyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
   // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
   // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC1", "3") & (aeDataKindEnum.LOOPCOUNT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
+  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexRainyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event13",theAuditEventData);
+  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event13",theAuditEventData);
   //
   // ...then the events for the second section of the sequence (up until Event55 which is just before the Type Merge at Event15)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event60",theAuditEventData);
+  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event60",theAuditEventData);
   previousEvents := ("Event60");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event11",theAuditEventData);
+  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event11",theAuditEventData);
   previousEvents := ("Event11");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event17",theAuditEventData);
+  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event17",theAuditEventData);
   previousEvents := ("Event17");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event29",theAuditEventData);
+  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event29",theAuditEventData);
   previousEvents := ("Event29");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event33",theAuditEventData);
+  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event33",theAuditEventData);
   previousEvents := ("Event33");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event41",theAuditEventData);
+  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event41",theAuditEventData);
   previousEvents := ("Event41");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event63",theAuditEventData);
+  acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event63",theAuditEventData);
   previousEvents := ("Event63");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event19",theAuditEventData);
+  acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event19",theAuditEventData);
   previousEvents := ("Event19");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event23",theAuditEventData);
+  acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event23",theAuditEventData);
   previousEvents := ("Event23");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event16",theAuditEventData);
+  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event16",theAuditEventData);
   previousEvents := ("Event16");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event27",theAuditEventData);
+  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event27",theAuditEventData);
   previousEvents := ("Event27");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event70",theAuditEventData);
+  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event70",theAuditEventData);
   previousEvents := ("Event70");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event18",theAuditEventData);
+  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event18",theAuditEventData);
   previousEvents := ("Event18");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event36",theAuditEventData);
+  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event36",theAuditEventData);
   previousEvents := ("Event36");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event66",theAuditEventData);
+  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event66",theAuditEventData);
   previousEvents := ("Event66");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event55",theAuditEventData);
+  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event55",theAuditEventData);
   //
   // ...and now the events for the third section of the sequence (which includes an instance fork and merge)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexSunnyDay1",previousEvents,"Event61",theAuditEventData);
+  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexRainyDay1",previousEvents,"Event61",theAuditEventData);
   // An instance fork starts here - with 3 instances of CS1-L
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event62",theAuditEventData);
+  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event62",theAuditEventData);
   previousEvents := ("Event61");
   //theAuditEventData := emptyAuditEventData;
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event56",theAuditEventData);
+  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event56",theAuditEventData);
   previousEvents := ("Event61");
   //theAuditEventData := emptyAuditEventData;
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event57",theAuditEventData);
+  acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event57",theAuditEventData);
   //
   // ...and the INSTANCE fork merges here at the CS1-M event
   previousEvents := empty & "Event62" & "Event56" & "Event57";
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexSunnyDay1",previousEvents,"Event14",theAuditEventData);
+  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexRainyDay1",previousEvents,"Event14",theAuditEventData);
   //
   // At this point the third section in the sequence merges with the second section in the sequence at Event15, so deliver the remaining 
   // events up to the end point in the second section of the sequence.
   //
   previousEvents := empty & "Event55" & "Event14";
   theAuditEventData := (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexSunnyDay1",previousEvents,"Event15",theAuditEventData);
+  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexRainyDay1",previousEvents,"Event15",theAuditEventData);
   previousEvents := ("Event15");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexSunnyDay1",previousEvents,"Event44",theAuditEventData);
+  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexRainyDay1",previousEvents,"Event44",theAuditEventData);
   //
   // ...and now the events for section 4 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexSunnyDay1",previousEvents,"Event20",theAuditEventData);
+  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexRainyDay1",previousEvents,"Event20",theAuditEventData);
   previousEvents := ("Event20");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexSunnyDay1",previousEvents,"Event10",theAuditEventData);
+  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexRainyDay1",previousEvents,"Event10",theAuditEventData);
   //
   // ...and now the events for section 5 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event64",theAuditEventData);
+  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event64",theAuditEventData);
   previousEvents := ("Event64");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event30",theAuditEventData);
+  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event30",theAuditEventData);
   previousEvents := ("Event30");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event32",theAuditEventData);
+  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event32",theAuditEventData);
   previousEvents := ("Event32");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event45",theAuditEventData);
+  acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event45",theAuditEventData);
   previousEvents := ("Event45");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event21",theAuditEventData);
+  acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event21",theAuditEventData);
   //
   // Event occurrence 'CS1-F,3' in the sequence is the source of branch constraint 'BC1' (which constrains the number of instance branches at 'CS1-F,3' to 2)
   previousEvents := ("Event21");
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BC1", "2");
-  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event24",theAuditEventData);
+  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event24",theAuditEventData);
   //
   // Event occurrence 'CS1-D,4' in the sequence is a user of the Extra Job Invariant 'AUTH_TOKEN_A'.
   previousEvents := ("Event24"); 
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event39",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event39",theAuditEventData);
   //
   previousEvents := ("Event39");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event34",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event34",theAuditEventData);
   previousEvents := ("Event24");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event46",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event46",theAuditEventData);
   previousEvents := ("Event46");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event47",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event47",theAuditEventData);
   //
   // ...and now the events for section 6 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event42",theAuditEventData);
+  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event42",theAuditEventData);
   previousEvents := ("Event42");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event31",theAuditEventData);
+  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event31",theAuditEventData);
   previousEvents := ("Event31");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event22",theAuditEventData);
+  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event22",theAuditEventData);
   previousEvents := ("Event22");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event28",theAuditEventData);
+  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event28",theAuditEventData);
   //
   // ...and finally the events for section 7 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246815","ProtProc-0001","CS1-R","ComplexSunnyDay1",previousEvents,"Event26",theAuditEventData);
+  acceptOrderedEvent ("1670246815","ProtProc-0001","CS1-R","ComplexRainyDay1",previousEvents,"Event26",theAuditEventData);
   //
   //
-  // Process all the events on the event queue - note that the job 'ComplexSunnyDay1' should be in the 'CheckingSequenceCompletion' state after this.
+  // Process all the events on the event queue - note that the job 'ComplexRainyDay1' should be in the 'CheckingSequenceCompletion' state after this.
   Test::service_event_queue();
   //
-  // Fire the jobEventTimer to move the 'ComplexSunnyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  // Fire the jobEventTimer to move the 'ComplexRainyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Test::fire_timer(theJob.jobEventTimer);
   //
   // Service the event queue again to process any events placed on queue resulting from  
-  // the jobEventTimer for Job 'ComplexSunnyDay1' being fired.
+  // the jobEventTimer for Job 'ComplexRainyDay1' being fired.
   Test::service_event_queue();
   //
   // ...and now check that the state of the model is as expected.
@@ -801,7 +801,7 @@ begin
   //
   theJob := find_only Job(jobID = "GenToken1");
   Assertions::assertTrue(theJob.jobCompleted, "ERROR - Job is incomplete: " & theJob.jobID);
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Assertions::assertTrue(theJob.jobCompleted = false, "ERROR Job has completed : " & theJob.jobID);
   
 end service;
@@ -833,13 +833,18 @@ theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn : integer;
 logMessage : string;
 
 begin
+  // *******************************************************************************
   // This test delivers events for two jobs:
-  //    (1) 'AuthGen-0001' of type 'GenerateAuthorisationTokenJob'
-  //    (2) 'ProtProc-0001' of type 'ComplexJob'
+  //    (1) 'GenToken1' of type 'GenerateAuthorisationTokenJob'
+  //    (2) 'ComplexSunnyDay1' of type 'ComplexJob'
   // The first of these two jobs is the source of an Extra Job Invariant that is used several times within the second job.
   //
   // This test delivers events compliant with the two job definitions (as defined in the scenario 'InitComplexEventSequence1Definition'
   // and does not result in any errors being expected.
+  //
+  // The only difference between this test and Test70ComplexSequence_SunnyDay1 is that the second of two loops in section 2 of the
+  // sequence breaks out of the loop after Event66 on the 2nd occurrence of event 'E,2'.
+  // *******************************************************************************
   //
   // Firstly, deliver a set of events for the 'GenerateAuthorisationTokenJob'
   previousEvents := empty;
@@ -1108,11 +1113,11 @@ logMessage : string;
 
 begin
   // This test delivers events for two jobs:
-  //    (1) 'AuthGen-0001' of type 'GenerateAuthorisationTokenJob'
-  //    (2) 'ProtProc-0001' of type 'ComplexJob'
+  //    (1) 'GenToken1' of type 'GenerateAuthorisationTokenJob'
+  //    (2) 'ComplexRainyDay1' of type 'ComplexJob'
   // The first of these two jobs is the source of an Extra Job Invariant that is used several times within the second job.
   //
-  // This test is designed to test whether the Sequence Verification domain can detect the incorrect number of
+  // This test is designed to check whether the Sequence Verification domain can detect the incorrect number of
   // instance forks being taken at CS1-K,1 (Event61) and CS1-F,3 (Event2) of Job 'ComplexSequence'. This test checks that the
   // BRANCHCOUNT controls are adhered to correctly and result in a job failure of not.
   //
@@ -1154,171 +1159,171 @@ begin
   // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
   // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC3", "2") & (aeDataKindEnum.BRANCHCOUNT, "BC2", "3");
-  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
+  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexRainyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
   // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
   // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC1", "3") & (aeDataKindEnum.LOOPCOUNT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
+  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexRainyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event13",theAuditEventData);
+  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event13",theAuditEventData);
   //
   // ...then the events for the second section of the sequence (up until Event55 which is just before the Type Merge at Event15)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event60",theAuditEventData);
+  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event60",theAuditEventData);
   previousEvents := ("Event60");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event11",theAuditEventData);
+  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event11",theAuditEventData);
   previousEvents := ("Event11");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event17",theAuditEventData);
+  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event17",theAuditEventData);
   previousEvents := ("Event17");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event29",theAuditEventData);
+  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event29",theAuditEventData);
   previousEvents := ("Event29");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event33",theAuditEventData);
+  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event33",theAuditEventData);
   previousEvents := ("Event33");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event41",theAuditEventData);
+  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event41",theAuditEventData);
   previousEvents := ("Event41");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event63",theAuditEventData);
+  acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event63",theAuditEventData);
   previousEvents := ("Event63");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event19",theAuditEventData);
+  acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event19",theAuditEventData);
   previousEvents := ("Event19");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event23",theAuditEventData);
+  acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event23",theAuditEventData);
   previousEvents := ("Event23");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event16",theAuditEventData);
+  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event16",theAuditEventData);
   previousEvents := ("Event16");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event27",theAuditEventData);
+  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event27",theAuditEventData);
   previousEvents := ("Event27");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event70",theAuditEventData);
+  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event70",theAuditEventData);
   previousEvents := ("Event70");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event18",theAuditEventData);
+  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event18",theAuditEventData);
   previousEvents := ("Event18");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event36",theAuditEventData);
+  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event36",theAuditEventData);
   previousEvents := ("Event36");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event66",theAuditEventData);
+  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event66",theAuditEventData);
   previousEvents := ("Event66");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event55",theAuditEventData);
+  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event55",theAuditEventData);
   //
   // ...and now the events for the third section of the sequence (which includes an instance fork and merge)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexSunnyDay1",previousEvents,"Event61",theAuditEventData);
+  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexRainyDay1",previousEvents,"Event61",theAuditEventData);
   // An instance fork starts here - with 2 instances of CS1-L (should be 3 to be compliant with sequence spec - Event57 commented out)
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event62",theAuditEventData);
+  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event62",theAuditEventData);
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event56",theAuditEventData);
+  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event56",theAuditEventData);
   // Here's where one of the expected instance branches has been commented out for testing purposes
   //previousEvents := ("Event61");
   //theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  //acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event57",theAuditEventData);
+  //acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event57",theAuditEventData);
   //
   // ...and the INSTANCE fork merges here at the CS1-M event
   previousEvents := empty & "Event62" & "Event56";
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexSunnyDay1",previousEvents,"Event14",theAuditEventData);
+  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexRainyDay1",previousEvents,"Event14",theAuditEventData);
   //
   // At this point the third section in the sequence merges with the second section in the sequence at Event15, so deliver the remaining 
   // events up to the end point in the second section of the sequence.
   //
   previousEvents := empty & "Event55" & "Event14";
   theAuditEventData := (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexSunnyDay1",previousEvents,"Event15",theAuditEventData);
+  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexRainyDay1",previousEvents,"Event15",theAuditEventData);
   previousEvents := ("Event15");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexSunnyDay1",previousEvents,"Event44",theAuditEventData);
+  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexRainyDay1",previousEvents,"Event44",theAuditEventData);
   //
   // ...and now the events for section 4 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexSunnyDay1",previousEvents,"Event20",theAuditEventData);
+  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexRainyDay1",previousEvents,"Event20",theAuditEventData);
   previousEvents := ("Event20");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexSunnyDay1",previousEvents,"Event10",theAuditEventData);
+  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexRainyDay1",previousEvents,"Event10",theAuditEventData);
   //
   // ...and now the events for section 5 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event64",theAuditEventData);
+  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event64",theAuditEventData);
   previousEvents := ("Event64");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event30",theAuditEventData);
+  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event30",theAuditEventData);
   previousEvents := ("Event30");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event32",theAuditEventData);
+  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event32",theAuditEventData);
   previousEvents := ("Event32");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event45",theAuditEventData);
+  acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event45",theAuditEventData);
   previousEvents := ("Event45");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event21",theAuditEventData);
+  acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event21",theAuditEventData);
   //
   // Event occurrence 'CS1-F,3' in the sequence is the source of branch constraint 'BC1' (which constrains the number of instance branches at 'CS1-F,3' to 2)
   previousEvents := ("Event21");
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BC1", "2");
-  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event24",theAuditEventData);
+  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event24",theAuditEventData);
   //
   // Each instance of event occurrence 'CS1-D,4' in the sequence is a user of the Extra Job Invariant 'AUTH_TOKEN_A'.
   // Further, an instance fork starts here - with 3 instances of CS1-L (should be 2 to be compliant with sequence spec - Event78 & Event79 added)
   previousEvents := ("Event24"); 
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event39",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event39",theAuditEventData);
   previousEvents := ("Event39");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event34",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event34",theAuditEventData);
   previousEvents := ("Event24");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event46",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event46",theAuditEventData);
   previousEvents := ("Event46");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event47",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event47",theAuditEventData);
   previousEvents := ("Event24");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event78",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event78",theAuditEventData);
   previousEvents := ("Event78");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event79",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event79",theAuditEventData);
   //
   // ...and finally the events for section 6 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event42",theAuditEventData);
+  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event42",theAuditEventData);
   previousEvents := ("Event42");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event31",theAuditEventData);
+  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event31",theAuditEventData);
   previousEvents := ("Event31");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event22",theAuditEventData);
+  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event22",theAuditEventData);
   previousEvents := ("Event22");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event28",theAuditEventData);
+  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event28",theAuditEventData);
   //
-  // Process all the events on the event queue - note that the job 'ComplexSunnyDay1' should be in the 'CheckingSequenceCompletion' state after this.
+  // Process all the events on the event queue - note that the job 'ComplexRainyDay1' should be in the 'CheckingSequenceCompletion' state after this.
   Test::service_event_queue();
   //
-  // Fire the jobEventTimer to move the 'ComplexSunnyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  // Fire the jobEventTimer to move the 'ComplexRainyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Test::fire_timer(theJob.jobEventTimer);
   //
   // Service the event queue again to process any events placed on queue resulting from  
-  // the jobEventTimer for Job 'ComplexSunnyDay1' being fired.
+  // the jobEventTimer for Job 'ComplexRainyDay1' being fired.
   Test::service_event_queue();
   //
   // ...and now check that the state of the model is as expected.
@@ -1355,7 +1360,7 @@ begin
   //
   theJob := find_only Job(jobID = "GenToken1");
   Assertions::assertTrue(theJob.jobCompleted, "ERROR - Job is incomplete: " & theJob.jobID);
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Assertions::assertTrue(theJob.jobCompleted = false, "ERROR Job has completed : " & theJob.jobID);
   //
 end service;
@@ -1388,8 +1393,8 @@ logMessage : string;
 
 begin
   // This test delivers events for two jobs:
-  //    (1) 'AuthGen-0001' of type 'GenerateAuthorisationTokenJob'
-  //    (2) 'ProtProc-0001' of type 'ComplexJob'
+  //    (1) 'GenToken1' of type 'GenerateAuthorisationTokenJob'
+  //    (2) 'ComplexRainyDay1' of type 'ComplexJob'
   // The first of these two jobs is the source of an Extra Job Invariant that is used several times within the second job.
   //
   // This test is designed to test whether the Sequence Verification domain can detect the incorrect number of times a loop 
@@ -1436,181 +1441,181 @@ begin
   // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
   // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC3", "2") & (aeDataKindEnum.BRANCHCOUNT, "BC2", "3");
-  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
+  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexRainyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
   // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
   // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC1", "3") & (aeDataKindEnum.LOOPCOUNT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
+  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexRainyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event13",theAuditEventData);
+  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event13",theAuditEventData);
   //
   // ...then the events for the second section of the sequence (up until Event55 which is just before the Type Merge at Event15)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event60",theAuditEventData);
+  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event60",theAuditEventData);
   previousEvents := ("Event60");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event11",theAuditEventData);
+  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event11",theAuditEventData);
   previousEvents := ("Event11");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event17",theAuditEventData);
+  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event17",theAuditEventData);
   previousEvents := ("Event17");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event29",theAuditEventData);
+  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event29",theAuditEventData);
   previousEvents := ("Event29");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event33",theAuditEventData);
+  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event33",theAuditEventData);
   previousEvents := ("Event33");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event41",theAuditEventData);
+  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event41",theAuditEventData);
   // Here's where one expected lap round the loop has been commented out for testing purposes
   //previousEvents := ("Event41");
   //theAuditEventData := emptyAuditEventData;
-  //acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event63",theAuditEventData);
+  //acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event63",theAuditEventData);
   //previousEvents := ("Event63");
   //theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  //acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event19",theAuditEventData);
+  //acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event19",theAuditEventData);
   //previousEvents := ("Event19");
   //theAuditEventData := emptyAuditEventData;
-  //acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event23",theAuditEventData);
+  //acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event23",theAuditEventData);
   previousEvents := ("Event41");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event16",theAuditEventData);
+  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event16",theAuditEventData);
   previousEvents := ("Event16");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event27",theAuditEventData);
+  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event27",theAuditEventData);
   previousEvents := ("Event27");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event70",theAuditEventData);
+  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event70",theAuditEventData);
   previousEvents := ("Event70");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event18",theAuditEventData);
+  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event18",theAuditEventData);
   previousEvents := ("Event18");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event36",theAuditEventData);
+  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event36",theAuditEventData);
   previousEvents := ("Event36");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event66",theAuditEventData);
+  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event66",theAuditEventData);
   previousEvents := ("Event66");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event55",theAuditEventData);
+  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event55",theAuditEventData);
   // Here's where the additional go round the loop has been inserted
   previousEvents := ("Event55");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event71",theAuditEventData);
+  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event71",theAuditEventData);
   previousEvents := ("Event71");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event72",theAuditEventData);
+  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event72",theAuditEventData);
   previousEvents := ("Event72");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event73",theAuditEventData);
+  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event73",theAuditEventData);
   // End of extra go around the loop.
   //
   // ...and now the events for the third section of the sequence (which includes an instance fork and merge)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexSunnyDay1",previousEvents,"Event61",theAuditEventData);
+  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexRainyDay1",previousEvents,"Event61",theAuditEventData);
   // An instance fork starts here - with 3 instances of CS1-L
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event62",theAuditEventData);
+  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event62",theAuditEventData);
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event56",theAuditEventData);
+  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event56",theAuditEventData);
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event57",theAuditEventData);
+  acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event57",theAuditEventData);
   //
   // ...and the INSTANCE fork merges here at the CS1-M event
   previousEvents := empty & "Event62" & "Event56" & "Event57";
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexSunnyDay1",previousEvents,"Event14",theAuditEventData);
+  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexRainyDay1",previousEvents,"Event14",theAuditEventData);
   //
   // At this point the third section in the sequence merges with the second section in the sequence at Event15, so deliver the remaining 
   // events up to the end point in the second section of the sequence.
   //
   previousEvents := empty & "Event73" & "Event14";
   theAuditEventData := (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexSunnyDay1",previousEvents,"Event15",theAuditEventData);
+  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexRainyDay1",previousEvents,"Event15",theAuditEventData);
   previousEvents := ("Event15");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexSunnyDay1",previousEvents,"Event44",theAuditEventData);
+  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexRainyDay1",previousEvents,"Event44",theAuditEventData);
   //
   // ...and now the events for section 4 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexSunnyDay1",previousEvents,"Event20",theAuditEventData);
+  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexRainyDay1",previousEvents,"Event20",theAuditEventData);
   previousEvents := ("Event20");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexSunnyDay1",previousEvents,"Event10",theAuditEventData);
+  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexRainyDay1",previousEvents,"Event10",theAuditEventData);
   //
   // ...and now the events for section 5 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event64",theAuditEventData);
+  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event64",theAuditEventData);
   previousEvents := ("Event64");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event30",theAuditEventData);
+  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event30",theAuditEventData);
   previousEvents := ("Event30");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event32",theAuditEventData);
+  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event32",theAuditEventData);
   // Here's where one expected lap round the loop has been commented out for testing purposes
   //previousEvents := ("Event32");
   //theAuditEventData := emptyAuditEventData;
-  //acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event45",theAuditEventData);
+  //acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event45",theAuditEventData);
   //previousEvents := ("Event45");
   //theAuditEventData := emptyAuditEventData;
-  //acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event21",theAuditEventData);
+  //acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event21",theAuditEventData);
   //
   // Event occurrence 'CS1-F,3' in the sequence is the source of branch constraint 'BC1' (which constrains the number of instance branches at 'CS1-F,3' to 2)
   previousEvents := ("Event32");
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BC1", "2");
-  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event24",theAuditEventData);
+  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event24",theAuditEventData);
   //
   // Event occurrence 'CS1-D,4' in the sequence is a user of the Extra Job Invariant 'AUTH_TOKEN_A'.
   previousEvents := ("Event24"); 
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event39",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event39",theAuditEventData);
   //
   previousEvents := ("Event39");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event34",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event34",theAuditEventData);
   previousEvents := ("Event24");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event46",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event46",theAuditEventData);
   previousEvents := ("Event46");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event47",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event47",theAuditEventData);
   //
   // ...and finally the events for section 6 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event42",theAuditEventData);
+  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event42",theAuditEventData);
   previousEvents := ("Event42");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event31",theAuditEventData);
+  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event31",theAuditEventData);
   // Here's where the additional go round the loop has been inserted
   previousEvents := ("Event31");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event35",theAuditEventData);
+  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event35",theAuditEventData);
   previousEvents := ("Event35");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event22",theAuditEventData);
+  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event22",theAuditEventData);
   previousEvents := ("Event22");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event28",theAuditEventData);
+  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event28",theAuditEventData);
   //
-  // Process all the events on the event queue - note that the job 'ComplexSunnyDay1' should be in the 'CheckingSequenceCompletion' state after this.
+  // Process all the events on the event queue - note that the job 'ComplexRainyDay1' should be in the 'CheckingSequenceCompletion' state after this.
   Test::service_event_queue();
   //
-  // Fire the jobEventTimer to move the 'ComplexSunnyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  // Fire the jobEventTimer to move the 'ComplexRainyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Test::fire_timer(theJob.jobEventTimer);
   //
   // Service the event queue again to process any events placed on queue resulting from  
-  // the jobEventTimer for Job 'ComplexSunnyDay1' being fired.
+  // the jobEventTimer for Job 'ComplexRainyDay1' being fired.
   Test::service_event_queue();
   //
   // ...and now check that the state of the model is as expected.
@@ -1647,7 +1652,7 @@ begin
   //
   theJob := find_only Job(jobID = "GenToken1");
   Assertions::assertTrue(theJob.jobCompleted, "ERROR - Job is incomplete: " & theJob.jobID);
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Assertions::assertTrue(theJob.jobCompleted = false, "ERROR Job has completed : " & theJob.jobID);
   //
 end service;
@@ -1680,8 +1685,8 @@ logMessage : string;
 
 begin
   // This test delivers events for two jobs:
-  //    (1) 'AuthGen-0001' of type 'GenerateAuthorisationTokenJob'
-  //    (2) 'ProtProc-0001' of type 'ComplexJob'
+  //    (1) 'GenToken1' of type 'GenerateAuthorisationTokenJob'
+  //    (2) 'ComplexRainyDay1' of type 'ComplexJob'
   // The first of these two jobs is the source of an Extra Job Invariant that is used several times within the second job.
   //
   // This test is designed to test whether the Sequence Verification domain can detect when BOTH (a) an incorrect number of times a loop 
@@ -1733,187 +1738,187 @@ begin
   // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
   // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC3", "2") & (aeDataKindEnum.BRANCHCOUNT, "BC2", "3");
-  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
+  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexRainyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
   // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
   // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC1", "3") & (aeDataKindEnum.LOOPCOUNT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
+  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexRainyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event13",theAuditEventData);
+  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event13",theAuditEventData);
   //
   // ...then the events for the second section of the sequence (up until Event55 which is just before the Type Merge at Event15)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event60",theAuditEventData);
+  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event60",theAuditEventData);
   previousEvents := ("Event60");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event11",theAuditEventData);
+  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event11",theAuditEventData);
   previousEvents := ("Event11");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event17",theAuditEventData);
+  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event17",theAuditEventData);
   previousEvents := ("Event17");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event29",theAuditEventData);
+  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event29",theAuditEventData);
   previousEvents := ("Event29");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event33",theAuditEventData);
+  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event33",theAuditEventData);
   previousEvents := ("Event33");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event41",theAuditEventData);
+  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event41",theAuditEventData);
   // Here's where one expected lap round the loop has been commented out for testing purposes
   //previousEvents := ("Event41");
   //theAuditEventData := emptyAuditEventData;
-  //acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event63",theAuditEventData);
+  //acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event63",theAuditEventData);
   //previousEvents := ("Event63");
   //theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  //acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event19",theAuditEventData);
+  //acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event19",theAuditEventData);
   //previousEvents := ("Event19");
   //theAuditEventData := emptyAuditEventData;
-  //acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event23",theAuditEventData);
+  //acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event23",theAuditEventData);
   previousEvents := ("Event41");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event16",theAuditEventData);
+  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event16",theAuditEventData);
   previousEvents := ("Event16");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event27",theAuditEventData);
+  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event27",theAuditEventData);
   previousEvents := ("Event27");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event70",theAuditEventData);
+  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event70",theAuditEventData);
   previousEvents := ("Event70");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event18",theAuditEventData);
+  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event18",theAuditEventData);
   previousEvents := ("Event18");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event36",theAuditEventData);
+  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event36",theAuditEventData);
   previousEvents := ("Event36");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event66",theAuditEventData);
+  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event66",theAuditEventData);
   previousEvents := ("Event66");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event55",theAuditEventData);
+  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event55",theAuditEventData);
   // Here's where the additional go round the loop has been inserted
   previousEvents := ("Event55");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event71",theAuditEventData);
+  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event71",theAuditEventData);
   previousEvents := ("Event71");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event72",theAuditEventData);
+  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event72",theAuditEventData);
   previousEvents := ("Event72");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event73",theAuditEventData);
+  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event73",theAuditEventData);
   // End of extra go around the loop.
   //
   // ...and now the events for the third section of the sequence (which includes an instance fork and merge)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexSunnyDay1",previousEvents,"Event61",theAuditEventData);
+  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexRainyDay1",previousEvents,"Event61",theAuditEventData);
   // An instance fork starts here - with 3 instances of CS1-L
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event62",theAuditEventData);
+  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event62",theAuditEventData);
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event56",theAuditEventData);
+  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event56",theAuditEventData);
   // Here's where one of the expected instance branches has been commented out for testing purposes
   //previousEvents := ("Event61");
   //theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  //acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event57",theAuditEventData);
+  //acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event57",theAuditEventData);
   //
   // ...and the INSTANCE fork merges here at the CS1-M event
   previousEvents := empty & "Event62" & "Event56";
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexSunnyDay1",previousEvents,"Event14",theAuditEventData);
+  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexRainyDay1",previousEvents,"Event14",theAuditEventData);
   //
   // At this point the third section in the sequence merges with the second section in the sequence at Event15, so deliver the remaining 
   // events up to the end point in the second section of the sequence.
   //
   previousEvents := empty & "Event73" & "Event14";
   theAuditEventData := (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexSunnyDay1",previousEvents,"Event15",theAuditEventData);
+  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexRainyDay1",previousEvents,"Event15",theAuditEventData);
   previousEvents := ("Event15");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexSunnyDay1",previousEvents,"Event44",theAuditEventData);
+  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexRainyDay1",previousEvents,"Event44",theAuditEventData);
   //
   // ...and now the events for section 4 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexSunnyDay1",previousEvents,"Event20",theAuditEventData);
+  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexRainyDay1",previousEvents,"Event20",theAuditEventData);
   previousEvents := ("Event20");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexSunnyDay1",previousEvents,"Event10",theAuditEventData);
+  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexRainyDay1",previousEvents,"Event10",theAuditEventData);
   //
   // ...and now the events for section 5 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event64",theAuditEventData);
+  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event64",theAuditEventData);
   previousEvents := ("Event64");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event30",theAuditEventData);
+  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event30",theAuditEventData);
   previousEvents := ("Event30");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event32",theAuditEventData);
+  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event32",theAuditEventData);
   previousEvents := ("Event32");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event45",theAuditEventData);
+  acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event45",theAuditEventData);
   previousEvents := ("Event45");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event21",theAuditEventData);
+  acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event21",theAuditEventData);
   //
   // Event occurrence 'CS1-F,3' in the sequence is the source of branch constraint 'BC1' (which constrains the number of instance branches at 'CS1-F,3' to 2)
   previousEvents := ("Event21");
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BC1", "2");
-  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event24",theAuditEventData);
+  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event24",theAuditEventData);
   //
   // Each instance of event occurrence 'CS1-D,4' in the sequence is a user of the Extra Job Invariant 'AUTH_TOKEN_A'.
   // Further, an instance fork starts here - with 3 instances of CS1-L (should be 2 to be compliant with sequence spec - Event78 & Event79 added)
   previousEvents := ("Event24"); 
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event39",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event39",theAuditEventData);
   previousEvents := ("Event39");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event34",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event34",theAuditEventData);
   previousEvents := ("Event24");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event46",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event46",theAuditEventData);
   previousEvents := ("Event46");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event47",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event47",theAuditEventData);
   previousEvents := ("Event24");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event78",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event78",theAuditEventData);
   previousEvents := ("Event78");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event79",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event79",theAuditEventData);
   //
   // ...and finally the events for section 6 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event42",theAuditEventData);
+  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event42",theAuditEventData);
   previousEvents := ("Event42");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event31",theAuditEventData);
+  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event31",theAuditEventData);
   // Here's where the additional go round the loop has been inserted
   previousEvents := ("Event31");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event35",theAuditEventData);
+  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event35",theAuditEventData);
   previousEvents := ("Event35");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event22",theAuditEventData);
+  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event22",theAuditEventData);
   previousEvents := ("Event22");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event28",theAuditEventData);
+  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event28",theAuditEventData);
   //
-  // Process all the events on the event queue - note that the job 'ComplexSunnyDay1' should be in the 'CheckingSequenceCompletion' state after this.
+  // Process all the events on the event queue - note that the job 'ComplexRainyDay1' should be in the 'CheckingSequenceCompletion' state after this.
   Test::service_event_queue();
   //
-  // Fire the jobEventTimer to move the 'ComplexSunnyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  // Fire the jobEventTimer to move the 'ComplexRainyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Test::fire_timer(theJob.jobEventTimer);
   //
   // Service the event queue again to process any events placed on queue resulting from  
-  // the jobEventTimer for Job 'ComplexSunnyDay1' being fired.
+  // the jobEventTimer for Job 'ComplexRainyDay1' being fired.
   Test::service_event_queue();
   //
   // ...and now check that the state of the model is as expected.
@@ -1950,7 +1955,7 @@ begin
   //
   theJob := find_only Job(jobID = "GenToken1");
   Assertions::assertTrue(theJob.jobCompleted, "ERROR - Job is incomplete: " & theJob.jobID);
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Assertions::assertTrue(theJob.jobCompleted = false, "ERROR Job has completed : " & theJob.jobID);
   //
 end service;
@@ -1983,8 +1988,8 @@ logMessage : string;
 
 begin
   // This test delivers events for two jobs:
-  //    (1) 'AuthGen-0001' of type 'GenerateAuthorisationTokenJob'
-  //    (2) 'ProtProc-0001' of type 'ComplexJob'
+  //    (1) 'GenToken1' of type 'GenerateAuthorisationTokenJob'
+  //    (2) 'ComplexRainyDay1' of type 'ComplexJob'
   // The first of these two jobs is the source of an Extra Job Invariant that is used several times within the second job.
   //
   // This test is designed to test whether the Sequence Verification domain can detect when :
@@ -1992,7 +1997,7 @@ begin
   //    AND
   //    (b) an incorrect number of instance forks are taken within a sequence.
   //    AND
-  //     (c) situations where multiple branches are taken when an XOR constraint has been specified.
+  //    (c) situations where multiple branches are taken when an XOR constraint has been specified.
   //
   // Specifically, the tests are for the LOOPCOUNT controls within Job 'ComplexSequence':
   //     (1) Name = LC1 used at event occurrence 'CS1-E,1'
@@ -2043,192 +2048,192 @@ begin
   // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
   // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC3", "2") & (aeDataKindEnum.BRANCHCOUNT, "BC2", "3");
-  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
+  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexRainyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
   // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
   // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC1", "3") & (aeDataKindEnum.LOOPCOUNT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
+  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexRainyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event13",theAuditEventData);
+  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event13",theAuditEventData);
   //
   // ...then the events for the second section of the sequence (up until Event55 which is just before the Type Merge at Event15)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event60",theAuditEventData);
+  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event60",theAuditEventData);
   previousEvents := ("Event60");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event11",theAuditEventData);
+  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event11",theAuditEventData);
   previousEvents := ("Event11");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event17",theAuditEventData);
+  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event17",theAuditEventData);
   previousEvents := ("Event17");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event29",theAuditEventData);
+  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event29",theAuditEventData);
   previousEvents := ("Event29");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event33",theAuditEventData);
+  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event33",theAuditEventData);
   previousEvents := ("Event33");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event41",theAuditEventData);
+  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event41",theAuditEventData);
   // Here's where one expected lap round the loop has been commented out for testing purposes
   //previousEvents := ("Event41");
   //theAuditEventData := emptyAuditEventData;
-  //acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event63",theAuditEventData);
+  //acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event63",theAuditEventData);
   //previousEvents := ("Event63");
   //theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  //acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event19",theAuditEventData);
+  //acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event19",theAuditEventData);
   //previousEvents := ("Event19");
   //theAuditEventData := emptyAuditEventData;
-  //acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event23",theAuditEventData);
+  //acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event23",theAuditEventData);
   previousEvents := ("Event41");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event16",theAuditEventData);
+  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event16",theAuditEventData);
   previousEvents := ("Event16");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event27",theAuditEventData);
+  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event27",theAuditEventData);
   previousEvents := ("Event27");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event70",theAuditEventData);
+  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event70",theAuditEventData);
   previousEvents := ("Event70");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event18",theAuditEventData);
+  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event18",theAuditEventData);
   previousEvents := ("Event18");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event36",theAuditEventData);
+  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event36",theAuditEventData);
   previousEvents := ("Event36");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event66",theAuditEventData);
+  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event66",theAuditEventData);
   previousEvents := ("Event66");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event55",theAuditEventData);
+  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event55",theAuditEventData);
   // Here's where the additional go round the loop has been inserted
   previousEvents := ("Event55");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event71",theAuditEventData);
+  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event71",theAuditEventData);
   previousEvents := ("Event71");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event72",theAuditEventData);
+  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event72",theAuditEventData);
   previousEvents := ("Event72");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event73",theAuditEventData);
+  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event73",theAuditEventData);
   // End of extra go around the loop.
   //
   // ...and now the events for the third section of the sequence (which includes an instance fork and merge)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexSunnyDay1",previousEvents,"Event61",theAuditEventData);
+  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexRainyDay1",previousEvents,"Event61",theAuditEventData);
   // An instance fork starts here - with 3 instances of CS1-L
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event62",theAuditEventData);
+  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event62",theAuditEventData);
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event56",theAuditEventData);
+  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event56",theAuditEventData);
   // Here's where one of the expected instance branches has been commented out for testing purposes
   //previousEvents := ("Event61");
   //theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  //acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event57",theAuditEventData);
+  //acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event57",theAuditEventData);
   //
   // ...and the INSTANCE fork merges here at the CS1-M event
   previousEvents := empty & "Event62" & "Event56";
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexSunnyDay1",previousEvents,"Event14",theAuditEventData);
+  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexRainyDay1",previousEvents,"Event14",theAuditEventData);
   // At this point an unexpected occurrence of event occurrence 'CS1-N' follows the previous event - which will cause an
   // XOR violation because the XOR branches should be exclusive.
   previousEvents := ("Event14");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-N","ComplexSunnyDay1",previousEvents,"Event69",theAuditEventData);
+  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-N","ComplexRainyDay1",previousEvents,"Event69",theAuditEventData);
   //
   // At this point the third section in the sequence merges with the second section in the sequence at Event15, so deliver the remaining 
   // events up to the end point in the second section of the sequence.
   //
   previousEvents := empty & "Event73" & "Event14";
   theAuditEventData := (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexSunnyDay1",previousEvents,"Event15",theAuditEventData);
+  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexRainyDay1",previousEvents,"Event15",theAuditEventData);
   previousEvents := ("Event15");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexSunnyDay1",previousEvents,"Event44",theAuditEventData);
+  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexRainyDay1",previousEvents,"Event44",theAuditEventData);
   //
   // ...and now the events for section 4 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexSunnyDay1",previousEvents,"Event20",theAuditEventData);
+  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexRainyDay1",previousEvents,"Event20",theAuditEventData);
   previousEvents := ("Event20");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexSunnyDay1",previousEvents,"Event10",theAuditEventData);
+  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexRainyDay1",previousEvents,"Event10",theAuditEventData);
   //
   // ...and now the events for section 5 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event64",theAuditEventData);
+  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event64",theAuditEventData);
   previousEvents := ("Event64");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event30",theAuditEventData);
+  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event30",theAuditEventData);
   previousEvents := ("Event30");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event32",theAuditEventData);
+  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event32",theAuditEventData);
   previousEvents := ("Event32");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event45",theAuditEventData);
+  acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event45",theAuditEventData);
   previousEvents := ("Event45");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event21",theAuditEventData);
+  acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event21",theAuditEventData);
   //
   // Event occurrence 'CS1-F,3' in the sequence is the source of branch constraint 'BC1' (which constrains the number of instance branches at 'CS1-F,3' to 2)
   previousEvents := ("Event21");
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BC1", "2");
-  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event24",theAuditEventData);
+  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event24",theAuditEventData);
   //
   // Each instance of event occurrence 'CS1-D,4' in the sequence is a user of the Extra Job Invariant 'AUTH_TOKEN_A'.
   // Further, an instance fork starts here - with 3 instances of CS1-L (should be 2 to be compliant with sequence spec - Event78 & Event79 added)
   previousEvents := ("Event24"); 
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event39",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event39",theAuditEventData);
   previousEvents := ("Event39");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event34",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event34",theAuditEventData);
   previousEvents := ("Event24");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event46",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event46",theAuditEventData);
   previousEvents := ("Event46");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event47",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event47",theAuditEventData);
   previousEvents := ("Event24");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event78",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event78",theAuditEventData);
   previousEvents := ("Event78");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event79",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event79",theAuditEventData);
   //
   // ...and finally the events for section 6 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event42",theAuditEventData);
+  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event42",theAuditEventData);
   previousEvents := ("Event42");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event31",theAuditEventData);
+  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event31",theAuditEventData);
   // Here's where the additional go round the loop has been inserted
   previousEvents := ("Event31");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event35",theAuditEventData);
+  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event35",theAuditEventData);
   previousEvents := ("Event35");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event22",theAuditEventData);
+  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event22",theAuditEventData);
   previousEvents := ("Event22");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event28",theAuditEventData);
+  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event28",theAuditEventData);
   //
-  // Process all the events on the event queue - note that the job 'ComplexSunnyDay1' should be in the 'CheckingSequenceCompletion' state after this.
+  // Process all the events on the event queue - note that the job 'ComplexRainyDay1' should be in the 'CheckingSequenceCompletion' state after this.
   Test::service_event_queue();
   //
-  // Fire the jobEventTimer to move the 'ComplexSunnyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  // Fire the jobEventTimer to move the 'ComplexRainyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Test::fire_timer(theJob.jobEventTimer);
   //
   // Service the event queue again to process any events placed on queue resulting from  
-  // the jobEventTimer for Job 'ComplexSunnyDay1' being fired.
+  // the jobEventTimer for Job 'ComplexRainyDay1' being fired.
   Test::service_event_queue();
   //
   // ...and now check that the state of the model is as expected.
@@ -2265,7 +2270,7 @@ begin
   //
   theJob := find_only Job(jobID = "GenToken1");
   Assertions::assertTrue(theJob.jobCompleted, "ERROR - Job is incomplete: " & theJob.jobID);
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Assertions::assertTrue(theJob.jobCompleted = false, "ERROR Job has completed : " & theJob.jobID);
   //
 end service;
@@ -2298,14 +2303,14 @@ logMessage : string;
 
 begin
   // This test delivers events for two jobs:
-  //    (1) 'AuthGen-0001' of type 'GenerateAuthorisationTokenJob'
-  //    (2) 'ProtProc-0001' of type 'ComplexJob'
+  //    (1) 'GenToken1' of type 'GenerateAuthorisationTokenJob'
+  //    (2) 'ComplexRainyDay1' of type 'ComplexJob'
   // The first of these two jobs is the source of an Extra Job Invariant that is used several times within the second job.
   //
   // This test delivers events compliant with the two job definitions (as defined in the scenario 'InitComplexEventSequence1Definition'.
   //
   // This test is designed to check whether the Sequence Verification domain can detect when an event instance within a loop uses an invalid
-  // value of an ExtraJob Invariant (even though it has the correct name).
+  // VALUE of an ExtraJob Invariant (even though it has the correct name).
   //
   // Firstly, deliver a set of events for the 'GenerateAuthorisationTokenJob'
   previousEvents := empty;
@@ -2345,165 +2350,165 @@ begin
   // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
   // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC3", "2") & (aeDataKindEnum.BRANCHCOUNT, "BC2", "3");
-  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
+  acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexRainyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
   // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
   // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC1", "3") & (aeDataKindEnum.LOOPCOUNT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexSunnyDay1",previousEvents,"Event59",theAuditEventData);
+  acceptOrderedEvent ("1670246787","ProtProc-0001","CS1-B","ComplexRainyDay1",previousEvents,"Event59",theAuditEventData);
   previousEvents := ("Event59");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event13",theAuditEventData);
+  acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event13",theAuditEventData);
   //
   // ...then the events for the second section of the sequence (up until Event55 which is just before the Type Merge at Event15)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event60",theAuditEventData);
+  acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event60",theAuditEventData);
   previousEvents := ("Event60");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event11",theAuditEventData);
+  acceptOrderedEvent ("1670246790","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event11",theAuditEventData);
   previousEvents := ("Event11");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event17",theAuditEventData);
+  acceptOrderedEvent ("1670246791","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event17",theAuditEventData);
   previousEvents := ("Event17");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event29",theAuditEventData);
+  acceptOrderedEvent ("1670246792","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event29",theAuditEventData);
   previousEvents := ("Event29");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event33",theAuditEventData);
+  acceptOrderedEvent ("1670246793","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event33",theAuditEventData);
   previousEvents := ("Event33");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event41",theAuditEventData);
+  acceptOrderedEvent ("1670246794","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event41",theAuditEventData);
   previousEvents := ("Event41");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event63",theAuditEventData);
+  acceptOrderedEvent ("1670246795","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event63",theAuditEventData);
   // This next event in the loop uses an incorrect value for its usage of an Extra Job Invariant
   previousEvents := ("Event63");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A2");
-  acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event19",theAuditEventData);
+  acceptOrderedEvent ("1670246796","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event19",theAuditEventData);
   previousEvents := ("Event19");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event23",theAuditEventData);
+  acceptOrderedEvent ("1670246797","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event23",theAuditEventData);
   previousEvents := ("Event23");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event16",theAuditEventData);
+  acceptOrderedEvent ("1670246798","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event16",theAuditEventData);
   previousEvents := ("Event16");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event27",theAuditEventData);
+  acceptOrderedEvent ("1670246799","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event27",theAuditEventData);
   previousEvents := ("Event27");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event70",theAuditEventData);
+  acceptOrderedEvent ("1670246800","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event70",theAuditEventData);
   previousEvents := ("Event70");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event18",theAuditEventData);
+  acceptOrderedEvent ("1670246801","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event18",theAuditEventData);
   previousEvents := ("Event18");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event36",theAuditEventData);
+  acceptOrderedEvent ("1670246802","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event36",theAuditEventData);
   previousEvents := ("Event36");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event66",theAuditEventData);
+  acceptOrderedEvent ("1670246803","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event66",theAuditEventData);
   previousEvents := ("Event66");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event55",theAuditEventData);
+  acceptOrderedEvent ("1670246804","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event55",theAuditEventData);
   //
   // ...and now the events for the third section of the sequence (which includes an instance fork and merge)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexSunnyDay1",previousEvents,"Event61",theAuditEventData);
+  acceptOrderedEvent ("1670246805","ProtProc-0001","CS1-K","ComplexRainyDay1",previousEvents,"Event61",theAuditEventData);
   // An instance fork starts here - with 3 instances of CS1-L
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event62",theAuditEventData);
+  acceptOrderedEvent ("1670246806","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event62",theAuditEventData);
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event56",theAuditEventData);
+  acceptOrderedEvent ("1670246807","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event56",theAuditEventData);
   previousEvents := ("Event61");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexSunnyDay1",previousEvents,"Event57",theAuditEventData);
+  acceptOrderedEvent ("1670246808","ProtProc-0001","CS1-L","ComplexRainyDay1",previousEvents,"Event57",theAuditEventData);
   //
   // ...and the INSTANCE fork merges here at the CS1-M event
   previousEvents := empty & "Event62" & "Event56" & "Event57";
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexSunnyDay1",previousEvents,"Event14",theAuditEventData);
+  acceptOrderedEvent ("1670246809","ProtProc-0001","CS1-M","ComplexRainyDay1",previousEvents,"Event14",theAuditEventData);
   //
   // At this point the third section in the sequence merges with the second section in the sequence at Event15, so deliver the remaining 
   // events up to the end point in the second section of the sequence.
   //
   previousEvents := empty & "Event55" & "Event14";
   theAuditEventData := (aeDataKindEnum.INTRAJOBINV, "InvariantA", "AAAAA");
-  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexSunnyDay1",previousEvents,"Event15",theAuditEventData);
+  acceptOrderedEvent ("1670246810","ProtProc-0001","CS1-H","ComplexRainyDay1",previousEvents,"Event15",theAuditEventData);
   previousEvents := ("Event15");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexSunnyDay1",previousEvents,"Event44",theAuditEventData);
+  acceptOrderedEvent ("1670246811","ProtProc-0001","CS1-J","ComplexRainyDay1",previousEvents,"Event44",theAuditEventData);
   //
   // ...and now the events for section 4 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexSunnyDay1",previousEvents,"Event20",theAuditEventData);
+  acceptOrderedEvent ("1670246812","ProtProc-0001","CS1-P","ComplexRainyDay1",previousEvents,"Event20",theAuditEventData);
   previousEvents := ("Event20");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexSunnyDay1",previousEvents,"Event10",theAuditEventData);
+  acceptOrderedEvent ("1670246813","ProtProc-0001","CS1-Q","ComplexRainyDay1",previousEvents,"Event10",theAuditEventData);
   //
   // ...and now the events for section 5 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexSunnyDay1",previousEvents,"Event64",theAuditEventData);
+  acceptOrderedEvent ("1670246816","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event64",theAuditEventData);
   previousEvents := ("Event64");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event30",theAuditEventData);
+  acceptOrderedEvent ("1670246817","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event30",theAuditEventData);
   previousEvents := ("Event30");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event32",theAuditEventData);
+  acceptOrderedEvent ("1670246818","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event32",theAuditEventData);
   previousEvents := ("Event32");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event45",theAuditEventData);
+  acceptOrderedEvent ("1670246819","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event45",theAuditEventData);
   previousEvents := ("Event45");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event21",theAuditEventData);
+  acceptOrderedEvent ("1670246890","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event21",theAuditEventData);
   //
   // Event occurrence 'CS1-F,3' in the sequence is the source of branch constraint 'BC1' (which constrains the number of instance branches at 'CS1-F,3' to 2)
   previousEvents := ("Event21");
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BC1", "2");
-  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexSunnyDay1",previousEvents,"Event24",theAuditEventData);
+  acceptOrderedEvent ("1670246891","ProtProc-0001","CS1-F","ComplexRainyDay1",previousEvents,"Event24",theAuditEventData);
   //
   // Event occurrence 'CS1-D,4' in the sequence is a user of the Extra Job Invariant 'AUTH_TOKEN_A'.
   previousEvents := ("Event24"); 
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event39",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event39",theAuditEventData);
   //
   previousEvents := ("Event39");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event34",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event34",theAuditEventData);
   previousEvents := ("Event24");
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
-  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event46",theAuditEventData);
+  acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event46",theAuditEventData);
   previousEvents := ("Event46");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event47",theAuditEventData);
+  acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexRainyDay1",previousEvents,"Event47",theAuditEventData);
   //
   // ...and finally the events for section 6 of the sequence...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event42",theAuditEventData);
+  acceptOrderedEvent ("1670246894","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event42",theAuditEventData);
   previousEvents := ("Event42");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexSunnyDay1",previousEvents,"Event31",theAuditEventData);
+  acceptOrderedEvent ("1670246895","ProtProc-0001","CS1-S","ComplexRainyDay1",previousEvents,"Event31",theAuditEventData);
   previousEvents := ("Event31");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event22",theAuditEventData);
+  acceptOrderedEvent ("1670246896","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event22",theAuditEventData);
   previousEvents := ("Event22");
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexSunnyDay1",previousEvents,"Event28",theAuditEventData);
+  acceptOrderedEvent ("1670246897","ProtProc-0001","CS1-E","ComplexRainyDay1",previousEvents,"Event28",theAuditEventData);
   //
-  // Process all the events on the event queue - note that the job 'ComplexSunnyDay1' should be in the 'CheckingSequenceCompletion' state after this.
+  // Process all the events on the event queue - note that the job 'ComplexRainyDay1' should be in the 'CheckingSequenceCompletion' state after this.
   Test::service_event_queue();
   //
-  // Fire the jobEventTimer to move the 'ComplexSunnyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  // Fire the jobEventTimer to move the 'ComplexRainyDay1' job (which thinks it's complete) through to the state for checking constraints & invariants
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Test::fire_timer(theJob.jobEventTimer);
   //
   // Service the event queue again to process any events placed on queue resulting from  
-  // the jobEventTimer for Job 'ComplexSunnyDay1' being fired.
+  // the jobEventTimer for Job 'ComplexRainyDay1' being fired.
   Test::service_event_queue();
   //
   // ...and now check that the state of the model is as expected.
@@ -2540,7 +2545,7 @@ begin
   //
   theJob := find_only Job(jobID = "GenToken1");
   Assertions::assertTrue(theJob.jobCompleted, "ERROR - Job is incomplete: " & theJob.jobID);
-  theJob := find_only Job(jobID = "ComplexSunnyDay1");
+  theJob := find_only Job(jobID = "ComplexRainyDay1");
   Assertions::assertTrue(theJob.jobCompleted = false, "ERROR Job has completed : " & theJob.jobID);
   //
 end service;

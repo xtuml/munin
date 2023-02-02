@@ -13,15 +13,18 @@ begin
   //TODO Is this adequate for setting the validity period? Currently not known if timestamps are available
   // so set validFrom to now and ValidUntil to now plus lifetime
   
-  newExtraJobInvariant := create unique PersistedInvariant (invariantName => invariantName,
-  	                                                        invariantValue => invariantValue,
-  	                                                        validFrom => timestamp'now, 
-  	                                                        validUntil => endTime, 
-  	                                                        Current_State => Pending );
+  if invariantValue /= "" then
+    newExtraJobInvariant := create unique PersistedInvariant (invariantName => invariantName,
+  	                                                          invariantValue => invariantValue,
+  	                                                          validFrom => timestamp'now, 
+  	                                                          validUntil => endTime, 
+  	                                                          Current_State => Pending );
   	                                         
-  link newExtraJobInvariant R24 extraJobInvDefn;
-  generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
-
+    link newExtraJobInvariant R24 extraJobInvDefn;
+    generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
+  else
+    errorReason := "Empty Invariant Value provided for this ExtraJob Invariant = " & invariantName;
+  end if;
   return newExtraJobInvariant;
 end service;
 //
