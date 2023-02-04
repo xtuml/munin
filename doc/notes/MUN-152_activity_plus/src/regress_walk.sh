@@ -1,20 +1,20 @@
 echo "starting"
-python __main__.py examples/Tutorial_1.puml
-python __main__.py examples/Tutorial_2.puml
-python __main__.py examples/Tutorial_3.puml
-python __main__.py examples/Tutorial_4.puml
-python __main__.py examples/Tutorial_5.puml
-python __main__.py examples/Tutorial_6.puml
-python __main__.py examples/Tutorial_7.puml
-python __main__.py examples/Tutorial_8.puml
-python __main__.py examples/Tutorial_9.puml
-python __main__.py examples/Tutorial_10.puml
-python __main__.py examples/Tutorial_11.puml
-python __main__.py examples/Tutorial_12.puml
-python __main__.py examples/Tutorial_13.puml
-python __main__.py examples/Tutorial_14.puml
-python __main__.py examples/Tutorial_15.puml
-python __main__.py examples/Tutorial_16.puml
-python __main__.py examples/Tutorial_17.puml
-python __main__.py examples/Tutorial_18.puml
+python __main__.py ../tests/Tutorial_1.puml -p
+python __main__.py ../tests/Tutorial_2.puml -p
+python __main__.py ../tests/Tutorial_3.puml -p
+python __main__.py ../tests/Tutorial_4.puml -p
+python __main__.py ../tests/Tutorial_5.puml -p
+python __main__.py ../tests/Tutorial_6.puml -p
+python __main__.py ../tests/Tutorial_7.puml -p
+python __main__.py ../tests/Tutorial_8.puml -p
+python __main__.py ../tests/Tutorial_9.puml -p
+python __main__.py ../tests/Tutorial_10.puml -p
+python __main__.py ../tests/Tutorial_11.puml -p
+python __main__.py ../tests/Tutorial_12.puml -p
+python __main__.py ../tests/Tutorial_13.puml -p
+python __main__.py ../tests/Tutorial_14.puml -p
+python __main__.py ../tests/Tutorial_15.puml -p
+python __main__.py ../tests/Tutorial_16.puml -p
+python __main__.py ../tests/Tutorial_17.puml -p
+python __main__.py ../tests/Tutorial_18.puml -p
 echo "finished"

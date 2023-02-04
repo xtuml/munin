@@ -132,7 +132,7 @@ USER           : 'user' | 'USER';
 WHILE          : 'while';
 XOR            : 'xor' | 'XOR';
 
-NEWLINE        : [\r\n];
+NEWLINE        : [\r\n]+;
 
 NOTE           : ( 'floating' )? ' '+ 'note' .*? 'end note' NEWLINE -> channel(HIDDEN);
 COLOR          : '#' LABEL -> channel(HIDDEN);

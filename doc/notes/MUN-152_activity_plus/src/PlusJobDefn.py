@@ -3,9 +3,8 @@ from plus2jsonListener import plus2jsonListener
 from plus2jsonParser import plus2jsonParser
 
 # TODO
+# Deal with merge-in-merge with no event in between.  This may require joining 2 merge usages.
 # Add ID generator and fork constraint names.
-# Use better name than split_stack and merge_stack.  Consider 'fork_point' and 'merge_tips' points.
-# Nesting.  Use stack for current event, merge_stack and fork_point_stack.
 # Check for multiple occurrences when explicitly referencing an event.
 # Deal with multiple event decorations per event.
 # !include
@@ -36,16 +35,6 @@ class Sequence:
 class AuditEvent:
     population = []
     current_events = []                                    # set at creation, emptied at sequence exit
-    fork_point_stack = []                                  # current_events pushed as PreviousAuditEvent
-                                                           # when 'split', 'fork' or 'if' encountered
-                                                           # popped at 'end split', 'end merge' or 'endif'
-    fork_point_usage = []                                  # cached here each time 'split again', 'fork again',
-                                                           # 'elsif' or 'else' encountered
-    merge_stack = []                                       # current_events pushed when 'split again',
-                                                           # 'split end', 'fork again', 'end merge',
-                                                           # 'elsif', 'else' or 'endif' entered
-    merge_usage = []                                       # used for previous events after 'end split',
-                                                           # 'end merge' and 'end if'
     longest_name = 0                                       # Keep longest name for pretty printing.
     def __init__(self, name, occurrence):
         self.EventName = name
@@ -82,11 +71,12 @@ class AuditEvent:
             self.SequenceStart = True
         self.previous_events = []                          # extended at creation when current_events exists
                                                            # emptied at sequence exit
-        if ( AuditEvent.fork_point_usage ):                # get split (or if) previous event
-            self.previous_events.append( AuditEvent.fork_point_usage.pop() )
-        if ( AuditEvent.merge_usage ):                     # get merge previous event
-            self.previous_events.extend( AuditEvent.merge_usage )
-            AuditEvent.merge_usage.clear()                 # TODO:  need better stack
+        if ( Fork.population ):                            # get fork, split or if previous event
+            if ( Fork.population[-1].fork_point_usage ):
+                self.previous_events.append( Fork.population[-1].fork_point_usage.pop() )
+            if ( Fork.population[-1].merge_usage ):        # get merge previous events
+                self.previous_events.extend( Fork.population[-1].merge_usage )
+                Fork.population.pop()                      # done with this Fork
         if ( AuditEvent.current_events ):
             for ce in AuditEvent.current_events:
                 self.previous_events.append( PreviousAuditEvent( ce ) )
@@ -113,14 +103,51 @@ class IntrajobInvariant:
     def __init__(self, name):
         IntrajobInvariant.population.append(self)
 
-# Capture the XOR condition of an if statement.
-# NOTE:  We are not presently capturing AND but treating them as defaults.
+def print_fork():
+    print( "Fork" )
+    for f in Fork.population:
+        mis = ""
+        mus = ""
+        fp = "" if ( not f.fork_point ) else f.fork_point[-1].previous_event.EventName + f.fork_point[-1].ConstraintValue
+        fu = "" if ( not f.fork_point_usage ) else f.fork_point_usage[-1].previous_event.EventName + f.fork_point[-1].ConstraintValue
+        if ( f.merge_inputs ):
+            for mi in f.merge_inputs:
+                mis += mi.previous_event.EventName + mi.ConstraintValue
+        if ( f.merge_usage ):
+            for mu in f.merge_usage:
+                mus += mu.previous_event.EventName + mu.ConstraintValue
+        print( "Fork:", Fork.scope, f.flavor, "fp:" + fp, "fu:" + fu, "mis:" + mis, "mus:" + mus )
+
 class Fork:
     population = []
-    scope = 0
+    scope = -1
     def __init__(self, flavor):
-        self.flavor = flavor                               # blank or XOR or IOR (or AND)
+        self.flavor = flavor                               # AND, XOR or IOR
+        self.fork_point = []                               # current_events pushed as PreviousAuditEvent
+                                                           # when 'split', 'fork' or 'if' encountered
+                                                           # popped at 'end split', 'end merge' or 'endif'
+        self.fork_point_usage = []                         # cached here each time 'split again', 'fork again',
+                                                           # 'elsif' or 'else' encountered
+        self.merge_inputs = []                             # current_events pushed when 'split again',
+                                                           # 'split end', 'fork again', 'end merge',
+                                                           # 'elsif', 'else' or 'endif' entered
+        self.merge_usage = []                              # used for previous events after 'end split',
+                                                           # 'end merge' and 'end if'
+        Fork.scope += 1
         Fork.population.append(self)
+    def __del__(self):
+        mis = ""
+        mus = ""
+        fp = "" if ( not self.fork_point ) else self.fork_point[-1].previous_event.EventName
+        fu = "" if ( not self.fork_point_usage ) else self.fork_point_usage[-1].previous_event.EventName
+        if ( self.merge_inputs ):
+            for mi in self.merge_inputs:
+                mis += mi.previous_event.EventName
+        if ( self.merge_usage ):
+            for mu in self.merge_usage:
+                mus += mu.previous_event.EventName
+        #print( "Fork:", Fork.scope, "fp:" + fp, "fu:" + fu, "mis:" + mis, "mus:" + mus )
+        Fork.scope -= 1
 
 class Loop:
     population = []
@@ -285,76 +312,88 @@ class plus2jsonRun(plus2jsonListener):
         AuditEvent.current_events[-1].SequenceEnd = True
         AuditEvent.current_events.pop()
 
-    def enterBreak(self, ctx:plus2jsonParser.BreakContext):
-        AuditEvent.current_events[-1].isBreak = True
-
-    def enterDetach(self, ctx:plus2jsonParser.DetachContext):
-        AuditEvent.current_events[-1].SequenceEnd = True
-        AuditEvent.current_events.pop()
-
     def enterSplit(self, ctx:plus2jsonParser.SplitContext):
-        # instead of current_event, I might need to copy the fork_point_stack
+        Fork("AND")
+        # instead of current_event, I might need to copy from the fork_point stack
         if ( AuditEvent.current_events ): # We may be starting with HIDE.
-            AuditEvent.fork_point_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
-            AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
+            Fork.population[-1].fork_point.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
+            Fork.population[-1].fork_point[-1].ConstraintValue = "AND"
+            Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
         else:
-            # detecting a double-split (combined if and split)
-            if ( AuditEvent.fork_point_usage ):
-                AuditEvent.fork_point_stack.append( AuditEvent.fork_point_usage[-1] )
-                AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
+            # detecting a nested fork (combined split, fork and/or if)
+            # Look to the previous (outer scope) fork in the stack.
+            if ( Fork.population[Fork.scope-1].fork_point_usage ):
+                Fork.population[-1].fork_point.append( PreviousAuditEvent( Fork.population[Fork.scope-1].fork_point_usage[-1].previous_event ) )
+                Fork.population[-1].fork_point[-1].ConstraintValue = "AND"
+                Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
 
     def enterSplit_again(self, ctx:plus2jsonParser.Split_againContext):
         if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
-            AuditEvent.merge_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
-        if ( AuditEvent.fork_point_stack ):
-            AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
+        if ( Fork.population[-1].fork_point ):
+            Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
 
     def exitSplit(self, ctx:plus2jsonParser.SplitContext):
-        AuditEvent.fork_point_stack[-1].ConstraintValue = "AND"
-        if ( AuditEvent.fork_point_stack ): # The split stack can be empty here due to HIDE.
-            AuditEvent.fork_point_stack.pop()
-        AuditEvent.merge_usage.extend( AuditEvent.merge_stack )
-        AuditEvent.merge_stack.clear() # TODO:  better stack
-        Fork( "AND" )
+        if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
+        Fork.population[-1].merge_usage.extend( Fork.population[-1].merge_inputs )
+        Fork.population[-1].merge_inputs.clear()
+        Fork.population[-1].fork_point_usage.clear()
 
     def enterIf(self, ctx:plus2jsonParser.IfContext):
-        # TODO - instead of current_event, I might need to copy the fork_point_stack
-        AuditEvent.fork_point_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
-        AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
+        Fork("XOR")
+        if ( AuditEvent.current_events ): # may be nested within a fork or split
+            Fork.population[-1].fork_point.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
+            Fork.population[-1].fork_point[-1].ConstraintValue = "XOR"
+            Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
+        else:
+            # detecting a nested fork (combined split, fork and/or if)
+            if ( Fork.population[Fork.scope-1].fork_point_usage ):
+                Fork.population[-1].fork_point.append( Fork.population[Fork.scope-1].fork_point_usage[-1] )
+                Fork.population[-1].fork_point[-1].ConstraintValue = "XOR"
+                Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
 
     def exitIf_condition(self, ctx:plus2jsonParser.If_conditionContext):
-        if ( ctx.IOR() ):
-            Fork( "IOR" )
-            AuditEvent.fork_point_stack[-1].ConstraintValue = "IOR"
-        elif ( ctx.XOR() ):
-            Fork( "XOR" )
-            AuditEvent.fork_point_stack[-1].ConstraintValue = "XOR"
+        if ( ctx.XOR() ):
+            #Fork.population[-1].fork_point[-1].ConstraintValue = "XOR"
+            a = True # nop
+        elif ( ctx.IOR() ):
+            Fork.population[-1].fork_point[-1].ConstraintValue = "IOR"
         else:
-            Fork( "" )
+            print( "ERROR:  malformed if condition" )
 
     def enterElseif(self, ctx:plus2jsonParser.ElseifContext):
         if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
-            AuditEvent.merge_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
-        AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
+        Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
 
     def enterElse(self, ctx:plus2jsonParser.ElseContext):
         if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
-            AuditEvent.merge_stack.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
-        AuditEvent.fork_point_usage.append( AuditEvent.fork_point_stack[-1] )
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
+        if ( Fork.population[-1].fork_point ):
+            Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
 
     def exitIf(self, ctx:plus2jsonParser.IfContext):
-        AuditEvent.fork_point_stack.pop()
-        AuditEvent.merge_usage.extend( AuditEvent.merge_stack )
-        AuditEvent.merge_stack.clear()
-        # Pop a scope of Fork
-        Fork.population.pop()
+        if ( AuditEvent.current_events ): # We may have 'detach'd and have no current_events.
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
+        Fork.population[-1].merge_usage.extend( Fork.population[-1].merge_inputs )
+        Fork.population[-1].merge_inputs.clear()
+        Fork.population[-1].fork_point_usage.clear()
 
     def enterLoop(self, ctx:plus2jsonParser.LoopContext):
         Loop()
 
     # Link the last event in the loop as a previous event to the first event in the loop.
     def exitLoop(self, ctx:plus2jsonParser.LoopContext):
-        Loop.population[-1].start_event[-1].previous_events.append( PreviousAuditEvent( AuditEvent.current_events[-1] ) )
+        if ( AuditEvent.current_events ): # We may be following a fork/merge.
+            Loop.population[-1].start_event[-1].previous_events.append( PreviousAuditEvent( AuditEvent.current_events[-1] ) )
+        else:
+            # ended the loop with a merge
+            if ( Fork.population[-1].merge_usage ):
+                for mu_pe in Fork.population[-1].merge_usage:
+                    # omit break events
+                    if ( not mu_pe.previous_event.isBreak ):
+                        Loop.population[-1].start_event[-1].previous_events.append( mu_pe )
         Loop.population.pop()
 
     def exitJob_defn(self, ctx:plus2jsonParser.Job_defnContext):
