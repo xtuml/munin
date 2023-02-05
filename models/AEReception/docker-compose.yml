@@ -6,10 +6,10 @@ services:
       context: .
       args:
         EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
-    ports:
-      - "20000:20000"
-      - "30000:30000"
-      - "40000:40000"
+#    ports:
+#      - "20000:20000"
+#      - "30000:30000"
+#      - "40000:40000"
     volumes:
       - "./config:/root/config"
       - "../test-files/aer-incoming:/root/incoming"

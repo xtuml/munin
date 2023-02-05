@@ -1,5 +1,5 @@
 $TESTSCHEDULE
-PAUSE
+
 RUN SCENARIO AEOrdering 1 "init"
 RUN SCENARIO AESequenceDC 3 "InitSystemSpec"
 

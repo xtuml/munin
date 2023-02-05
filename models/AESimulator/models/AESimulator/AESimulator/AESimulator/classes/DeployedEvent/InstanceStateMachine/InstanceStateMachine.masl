@@ -25,7 +25,7 @@ begin
 	
 	job := this -> R6.Job;
 	eventDefinition := this -> R5.EventDefinition;
-	testSpec := find_one TestSpec();;
+	testSpec := find_one TestSpec();
 	this.deployed := true;
 	auditEventFile := find_one (job -> R17.AuditEventFile)(isActive = true);
 	if auditEventFile /= null then			

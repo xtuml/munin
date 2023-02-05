@@ -7,40 +7,40 @@
   "TestFileDestination" : "test-files/incoming",
   "Tests" : [{
       "TestId" : 1,
-      "TestName" : "FileRequest_HappyPath",
-      "TotalTests" : 10,
+      "TestName" : "FileRequest_Test1",
+      "TotalTests" : 20000,
       "TestFrequency" : "PT1S",
       "TestJobSpec" : [{
-          "TestJobSpecName" : "FileRequest_HappyPath",
-          "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9,"
+            "TestJobSpecName" : "FileRequest_HappyPath",
+            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9,"
         },
         {
-            "TestJobSpecName" : "FileRequest_HappyPath",
-            "EventDispatchOrder" : "9,8,7,6,5,4,3,2,1"
+            "TestJobSpecName" : "FileRequest_LoopConstraintViolation",
+            "EventDispatchOrder" : "1,2,3,4,5,6,7"
           },
           {
-              "TestJobSpecName" : "FileRequest_HappyPath",
-              "EventDispatchOrder" : "2,9,5,8,7,1,4,6,3"
+            "TestJobSpecName" : "FileRequest_ValidEarlyBreak",
+            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9"
             }]
       },
       {
         "TestId" : 2,
-        "TestName" : "FileRequest_LoopConstraintViolation",
-        "TotalTests" : 6,
-        "TestFrequency" : "PT10S",
+        "TestName" : "FileRequest_Test2",
+        "TotalTests" : 10000,
+        "TestFrequency" : "PT2S",
         "TestJobSpec" : [{
-            "TestJobSpecName" : "FileRequest_LoopConstraintViolation",
-            "EventDispatchOrder" : "1,2,3,4,5,6,7"
+            "TestJobSpecName" : "FileRequest_HappyPath",
+            "EventDispatchOrder" : "9,8,7,6,5,4,3,2,1"
           }]
       },
       {
         "TestId" : 3,
-        "TestName" : "FileRequest_ValidEarlyBreak",
-        "TotalTests" : 8,
+        "TestName" : "FileRequest_Test3",
+        "TotalTests" : 10000,
         "TestFrequency" : "PT2S",
         "TestJobSpec" : [{
-            "TestJobSpecName" : "FileRequest_ValidEarlyBreak",
-            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9"
+            "TestJobSpecName" : "FileRequest_HappyPath",
+            "EventDispatchOrder" : "2,9,5,8,7,1,4,6,3"
           }]
       }]
 }

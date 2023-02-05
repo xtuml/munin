@@ -76,7 +76,12 @@ begin
 	eventFileForJob := this with auditEventFile -> R17.EventFileForJob; 
 	unlink this R17 auditEventFile using eventFileForJob;
 	delete eventFileForJob;
-		
+	events := this -> R10.DeployedEvent;
+	unlink events R6;
+	unlink events R5;
+	unlink events R10;
+	delete events;
+	
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

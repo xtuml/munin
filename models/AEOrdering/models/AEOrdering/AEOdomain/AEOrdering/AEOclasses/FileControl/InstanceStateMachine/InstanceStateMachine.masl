@@ -18,11 +18,12 @@ begin
 	// find a file to process
 	systemSpec := find_one SystemSpec();
 	
-	directoryToProcess := Filesystem::filename(systemSpec.incomingDirectory) & "/" & Format::format_based_integer(this.currentJobGroup, false, 16, Format::base_case.upper, Format::justify.right, 2, '0');
+	directoryToProcess := Filesystem::filename(systemSpec.incomingDirectory) & "/" & Format::format_based_integer(this.currentJobGroup, false, 16, Format::base_case.lower, Format::justify.right, 2, '0');
 	if Filesystem::file_exists(Filesystem::filename(directoryToProcess)) then
 		fileNames := Filesystem::list_directory(directoryToProcess);
 		if fileNames'length > 0 then
-			fileToBeProcessed := Filesystem::filename(systemSpec.processingDirectory) & "/" & fileNames[fileNames'first];
+			this.currentFile := fileNames[fileNames'first];
+			fileToBeProcessed := Filesystem::filename(systemSpec.processingDirectory) & "/" & this.currentFile;
 			Filesystem::move_file( directoryToProcess & "/" & fileNames[fileNames'first], Filesystem::filename(fileToBeProcessed));
 			if Filesystem::file_exists(Filesystem::filename(fileToBeProcessed)) then
 				generate FileControl.processFile(fileToBeProcessed) to this;
@@ -50,6 +51,7 @@ json_string: string;
 json_element: JSON::JSONElement;
 eventJsonArray : JSON::JSONArray;
 eventJsonObject : JSON::JSONObject;
+systemSpec : instance of SystemSpec;
 
 begin
 	logMessage := "AEReception::Reception.parsing";
@@ -118,6 +120,8 @@ begin
             end;
 	     end if;
     end loop;
+	systemSpec := find_one SystemSpec();
+	Filesystem::move_file( fileToProcess, Filesystem::filename(systemSpec.processedDirectory & "/") & this.currentFile);
     
 	schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
 	
