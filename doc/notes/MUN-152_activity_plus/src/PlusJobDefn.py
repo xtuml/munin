@@ -3,6 +3,7 @@ from plus2jsonListener import plus2jsonListener
 from plus2jsonParser import plus2jsonParser
 
 # TODO
+# Consider changing current_events to current_event (or last event), since it is probably singular.
 # Deal with merge-in-merge with no event in between.  This may require joining 2 merge usages.
 # Add ID generator and fork constraint names.
 # Check for multiple occurrences when explicitly referencing an event.
@@ -96,6 +97,7 @@ class PreviousAuditEvent:
     def __init__(self, ae):
         self.previous_event = ae
         self.ConstraintValue = ""
+        self.ConstraintDefinitionId = ""
         PreviousAuditEvent.population.append(self)
 
 class IntrajobInvariant:
@@ -108,8 +110,8 @@ def print_fork():
     for f in Fork.population:
         mis = ""
         mus = ""
-        fp = "" if ( not f.fork_point ) else f.fork_point[-1].previous_event.EventName + f.fork_point[-1].ConstraintValue
-        fu = "" if ( not f.fork_point_usage ) else f.fork_point_usage[-1].previous_event.EventName + f.fork_point[-1].ConstraintValue
+        fp = "" if ( not f.fork_point ) else f.fork_point[-1].previous_event.EventName + "-" + f.fork_point[-1].ConstraintDefinitionId + "-" + f.fork_point[-1].ConstraintValue
+        fu = "" if ( not f.fork_point_usage ) else f.fork_point_usage[-1].previous_event.EventName + "-" + f.fork_point_usage[-1].ConstraintDefinitionId + "-" + f.fork_point[-1].ConstraintValue
         if ( f.merge_inputs ):
             for mi in f.merge_inputs:
                 mis += mi.previous_event.EventName + mi.ConstraintValue
@@ -121,8 +123,11 @@ def print_fork():
 class Fork:
     population = []
     scope = -1
+    number = 1
     def __init__(self, flavor):
         self.flavor = flavor                               # AND, XOR or IOR
+        self.id = "fork" + str( Fork.number )              # ID factory for ConstraintDefinitionId
+        Fork.number += 1
         self.fork_point = []                               # current_events pushed as PreviousAuditEvent
                                                            # when 'split', 'fork' or 'if' encountered
                                                            # popped at 'end split', 'end merge' or 'endif'
@@ -136,6 +141,7 @@ class Fork:
         Fork.scope += 1
         Fork.population.append(self)
     def __del__(self):
+        print_fork()
         mis = ""
         mus = ""
         fp = "" if ( not self.fork_point ) else self.fork_point[-1].previous_event.EventName
@@ -318,6 +324,7 @@ class plus2jsonRun(plus2jsonListener):
         if ( AuditEvent.current_events ): # We may be starting with HIDE.
             Fork.population[-1].fork_point.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
             Fork.population[-1].fork_point[-1].ConstraintValue = "AND"
+            Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
             Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
         else:
             # detecting a nested fork (combined split, fork and/or if)
@@ -325,6 +332,7 @@ class plus2jsonRun(plus2jsonListener):
             if ( Fork.population[Fork.scope-1].fork_point_usage ):
                 Fork.population[-1].fork_point.append( PreviousAuditEvent( Fork.population[Fork.scope-1].fork_point_usage[-1].previous_event ) )
                 Fork.population[-1].fork_point[-1].ConstraintValue = "AND"
+                Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
                 Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
 
     def enterSplit_again(self, ctx:plus2jsonParser.Split_againContext):
@@ -345,20 +353,23 @@ class plus2jsonRun(plus2jsonListener):
         if ( AuditEvent.current_events ): # may be nested within a fork or split
             Fork.population[-1].fork_point.append( PreviousAuditEvent( AuditEvent.current_events.pop() ) )
             Fork.population[-1].fork_point[-1].ConstraintValue = "XOR"
+            Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
             Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
         else:
             # detecting a nested fork (combined split, fork and/or if)
             if ( Fork.population[Fork.scope-1].fork_point_usage ):
                 Fork.population[-1].fork_point.append( Fork.population[Fork.scope-1].fork_point_usage[-1] )
                 Fork.population[-1].fork_point[-1].ConstraintValue = "XOR"
+                Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
                 Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
 
     def exitIf_condition(self, ctx:plus2jsonParser.If_conditionContext):
         if ( ctx.XOR() ):
-            #Fork.population[-1].fork_point[-1].ConstraintValue = "XOR"
-            a = True # nop
+            Fork.population[-1].fork_point[-1].ConstraintValue = "XOR"
+            Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
         elif ( ctx.IOR() ):
             Fork.population[-1].fork_point[-1].ConstraintValue = "IOR"
+            Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
         else:
             print( "ERROR:  malformed if condition" )
 
@@ -424,11 +435,12 @@ def output_JSON():
                 prev_aes = ""
                 pdelim = ""
                 for prev_ae in ae.previous_events:
+                    constraintid = "" if ( "" == prev_ae.ConstraintDefinitionId ) else ", \"ConstraintDefinitionId\": \"" + prev_ae.ConstraintDefinitionId + "\""
                     constraint = "" if ( "" == prev_ae.ConstraintValue ) else ", \"ConstraintValue\": \"" + prev_ae.ConstraintValue + "\""
                     prev_aes = ( prev_aes + pdelim +
                           "{ \"PreviousEventName\": \"" + prev_ae.previous_event.EventName + "\","
                           "\"PreviousOccurrenceId\": " + prev_ae.previous_event.OccurrenceId +
-                          constraint +
+                          constraintid + constraint +
                           " }"
                         )
                     pdelim = ","
@@ -500,6 +512,7 @@ def print_job_legibly():
                 for prev_ae in ae.previous_events:
                     prev_aes = ( prev_aes + delim + prev_ae.previous_event.EventName +
                                  "(" + prev_ae.previous_event.OccurrenceId + ")" +
+                                 prev_ae.ConstraintDefinitionId +
                                  prev_ae.ConstraintValue
                                )
                     delim = ","
