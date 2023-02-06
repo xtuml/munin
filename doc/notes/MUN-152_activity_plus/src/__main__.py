@@ -1,6 +1,6 @@
 import sys
 from antlr4 import *
-from PlusJobDefn import *
+from plus_job_defn import *
 from plus2jsonLexer import plus2jsonLexer
 from plus2jsonParser import plus2jsonParser
 from plus2jsonListener import plus2jsonListener
