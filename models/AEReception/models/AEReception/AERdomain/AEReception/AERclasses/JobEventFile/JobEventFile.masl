@@ -44,7 +44,11 @@ receptionSpec : instance of ReceptionSpec;
 begin
 	receptionSpec := find_one ReceptionSpec();	
 	Filesystem::write_file(Filesystem::filename(receptionSpec.processedDirectory & "/" & this.jobEventFileName), JSON::dump(this.auditEvents));
-	Filesystem::move_file(Filesystem::filename(receptionSpec.processedDirectory & "/" & this.jobEventFileName), Filesystem::filename(this.jobEventFileLocation & "/" & this.jobEventFileName));
+	if Filesystem::file_exists(Filesystem::filename(receptionSpec.processedDirectory & "/" & this.jobEventFileName)) and Filesystem::file_exists(Filesystem::filename(this.jobEventFileLocation & "/")) then
+		Filesystem::move_file(Filesystem::filename(receptionSpec.processedDirectory & "/" & this.jobEventFileName), Filesystem::filename(this.jobEventFileLocation & "/" & this.jobEventFileName));
+	else
+		raise program_error;
+	end if;
 	this.jobEventFileGenerated := true;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
