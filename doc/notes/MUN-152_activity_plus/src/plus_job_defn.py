@@ -20,7 +20,7 @@ from plus2jsonParser import plus2jsonParser
 class SequenceDefn:
     """PLUS Sequence Definition"""
     population = []
-    c_current_sequence = []                                # set at creation, emptied at exit
+    c_current_sequence = None                              # set at creation, emptied at exit
     def __init__(self, name):
         self.SequenceName = name                           # created when the name is encountered
         if any( s.SequenceName == name for s in SequenceDefn.population ):
@@ -31,19 +31,19 @@ class SequenceDefn:
         self.start_events = []                             # start_events get added by the first event
                                                            # ... that sees an empty list
                                                            # ... and by any event preceded by HIDE
-        SequenceDefn.c_current_sequence.append(self)
+        SequenceDefn.c_current_sequence = self
         SequenceDefn.population.append(self)
 
 class AuditEvent:
     """PLUS Audit Event Definition"""
     population = []
-    c_current_event = []                                   # set at creation, emptied at sequence exit
+    c_current_event = None                                 # set at creation, emptied at sequence exit
     c_longest_name_length = 0                              # Keep longest name length for pretty printing.
     def __init__(self, name, occurrence):
         self.EventName = name
         if len( name ) > AuditEvent.c_longest_name_length:
             AuditEvent.c_longest_name_length = len( name )
-        self.sequence = SequenceDefn.c_current_sequence[-1]
+        self.sequence = SequenceDefn.c_current_sequence
         if occurrence:
             if any( ae for ae in self.sequence.audit_events if ae.EventName == name and ae.OccurrenceId == occurrence[-1] ):
                 print( "ERROR:  duplicate audit event detected:", name + "(" + occurrence[-1] + ")" )
@@ -62,9 +62,6 @@ class AuditEvent:
         self.extrajob_invariant_name = ""
         self.extrajob_invariant_source = ""                # EINV source of this name
         self.extrajob_invariant_user = ""                  # EINV user of this name
-        self.branch_count_name = ""
-        self.branch_count_source = ""                      # BCNT source of this name
-        self.branch_count_user = ""                        # BCNT user of this name
         self.loop_count_name = ""
         self.loop_count_source = ""                        # LCNT source of this name
         self.loop_count_user = ""                          # LCNT user of this name
@@ -76,18 +73,19 @@ class AuditEvent:
                                                            # emptied at sequence exit
         if Fork.population:                                # get fork, split or if previous event
             if Fork.population[-1].fork_point_usage:
-                self.previous_events.append( Fork.population[-1].fork_point_usage.pop() )
+                self.previous_events.append( Fork.population[-1].fork_point_usage )
+                Fork.population[-1].fork_point_usage = None
             if Fork.population[-1].merge_usage:            # get merge previous events
                 self.previous_events.extend( Fork.population[-1].merge_usage )
                 Fork.population.pop()                      # done with this Fork
         if AuditEvent.c_current_event:
-            self.previous_events.append( PreviousAuditEvent( AuditEvent.c_current_event[-1] ) )
-            AuditEvent.c_current_event.pop()
+            self.previous_events.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
+            AuditEvent.c_current_event = None
         # detect loop
         # if it exists but has no starting event, add this one
         if Loop.population and not Loop.population[-1].start_events:
             Loop.population[-1].start_events.append( self )
-        AuditEvent.c_current_event.append(self)
+        AuditEvent.c_current_event = self
         AuditEvent.population.append(self)
 
 # A previous audit event contains a reference to the previous event
@@ -111,10 +109,10 @@ class Fork:
         self.id = "fork" + str( Fork.c_number )            # ID factory for ConstraintDefinitionId
         Fork.c_number += 1
         self.flavor = flavor                               # AND, XOR or IOR
-        self.fork_point = []                               # c_current_event pushed as PreviousAuditEvent
+        self.fork_point = None                             # c_current_event pushed as PreviousAuditEvent
                                                            # when 'split', 'fork' or 'if' encountered
                                                            # popped at 'end split', 'end merge' or 'endif'
-        self.fork_point_usage = []                         # cached here each time 'split again', 'fork again',
+        self.fork_point_usage = None                       # cached here each time 'split again', 'fork again',
                                                            # 'elsif' or 'else' encountered
         self.merge_inputs = []                             # c_current_event pushed when 'split again',
                                                            # 'split end', 'fork again', 'end merge',
@@ -132,13 +130,13 @@ class Fork:
         fp = ""
         fu = ""
         if self.fork_point:
-            fp = ( self.fork_point[-1].previous_event.EventName +
-                   "-" + self.fork_point[-1].ConstraintDefinitionId +
-                   "-" + self.fork_point[-1].ConstraintValue )
+            fp = ( self.fork_point.previous_event.EventName +
+                   "-" + self.fork_point.ConstraintDefinitionId +
+                   "-" + self.fork_point.ConstraintValue )
         if self.fork_point_usage:
-            fu = ( self.fork_point_usage[-1].previous_event.EventName +
-                   "-" + self.fork_point_usage[-1].ConstraintDefinitionId +
-                   "-" + self.fork_point[-1].ConstraintValue )
+            fu = ( self.fork_point_usage.previous_event.EventName +
+                   "-" + self.fork_point_usage.ConstraintDefinitionId +
+                   "-" + self.fork_point.ConstraintValue )
         if self.merge_inputs:
             for mi in self.merge_inputs:
                 merge_inputs += mi.previous_event.EventName + mi.ConstraintValue
@@ -151,7 +149,25 @@ class Fork:
         for f in Fork.population:
             f.print_fork()
 
+class DynamicControl:
+    """branch and loop information"""
+    population = []
+    def __init__(self, name, control_type):
+        if any( dc.DynamicControlName == name for dc in DynamicControl.population ):
+            print( "ERROR:  duplicate dynamic control detected:", name )
+            sys.exit()
+        self.DynamicControlName = name                     # unique name
+        if ( "BRANCHCOUNT" == control_type or "LOOPCOUNT" == control_type ):
+            self.DynamicControlType = control_type         # branch or loop
+        else:
+            print( "ERROR:  invalid dynamic control type:", control_type, "with name:", name )
+            sys.exit()
+        self.source_event = []                             # audit event hosting the control
+        self.user_event = []                               # audit event to be dynamically tested
+        DynamicControl.population.append(self)
+
 class Loop:
+    """data collected from PLUS repeat loop"""
     population = []
     c_scope = 0
     def __init__(self):
@@ -159,6 +175,7 @@ class Loop:
         Loop.population.append(self)
 
 class IntrajobInvariant:
+    """invariant information used within a single job"""
     population = []
     def __init__(self, name):
         IntrajobInvariant.population.append(self)
@@ -183,9 +200,9 @@ class plus2jsonRun(plus2jsonListener):
 
     def exitSequence_defn(self, ctx:plus2jsonParser.Sequence_defnContext):
         if AuditEvent.c_current_event:
-            AuditEvent.c_current_event[-1].SequenceEnd = True # in case we did not 'detach'
-        SequenceDefn.c_current_sequence.pop()
-        AuditEvent.c_current_event.clear()
+            AuditEvent.c_current_event.SequenceEnd = True # in case we did not 'detach'
+        SequenceDefn.c_current_sequence = None
+        AuditEvent.c_current_event = None
 
     def exitEvent_name(self, ctx:plus2jsonParser.Event_nameContext):
         n = []
@@ -195,7 +212,7 @@ class plus2jsonRun(plus2jsonListener):
 
     def exitEvent_defn(self, ctx:plus2jsonParser.Event_defnContext):
         if ctx.HIDE():
-            AuditEvent.c_current_event[-1].SequenceStart = True
+            AuditEvent.c_current_event.SequenceStart = True
 
     def exitBranch_count(self, ctx:plus2jsonParser.Branch_countContext):
         # The default of source or target is the event definition carrying
@@ -203,39 +220,38 @@ class plus2jsonRun(plus2jsonListener):
         source = ""
         target = ""
         name = ctx.identifier().getText()
+        dynamic_control = DynamicControl( name, "BRANCHCOUNT" )
         if not ctx.SRC() and not ctx.USER():
-            # source of branch_count with no target
-            source = AuditEvent.c_current_event[-1].EventName
+            # tacitly assume source and user are the current event
+            dynamic_control.source_event.append( AuditEvent.c_current_event )
+            dynamic_control.user_event.append( AuditEvent.c_current_event )
         elif ctx.SRC() and not ctx.USER():
             # source of branch_count with no target
             if ctx.source:
                 source = ctx.source.getText()
             else:
-                source = AuditEvent.c_current_event[-1].EventName
+                source = AuditEvent.c_current_event.EventName
         elif not ctx.SRC() and ctx.USER():
             # target of branch_count with no source
             if ctx.target:
                 target = ctx.target.getText()
-                source = AuditEvent.c_current_event[-1].EventName
+                source = AuditEvent.c_current_event.EventName
             else:
-                target = AuditEvent.c_current_event[-1].EventName
+                target = AuditEvent.c_current_event.EventName
         elif ctx.SRC() and ctx.USER():
             # both source of branch_count and target
             if ctx.source:
                 source = ctx.source.getText()
             else:
-                source = AuditEvent.c_current_event[-1].EventName
+                source = AuditEvent.c_current_event.EventName
             if ctx.target:
                 target = ctx.target.getText()
             else:
-                target = AuditEvent.c_current_event[-1].EventName
+                target = AuditEvent.c_current_event.EventName
         else:
             # ERROR
             print( " ERROR:  malformed branch count -", name )
-        if ctx.BCNT():
-            AuditEvent.c_current_event[-1].branch_count_source = source
-            AuditEvent.c_current_event[-1].branch_count_user = target
-            AuditEvent.c_current_event[-1].branch_count_name = name
+            sys.exit()
 
     def exitLoop_count(self, ctx:plus2jsonParser.Loop_countContext):
         # The default of source or target is the event definition carrying
@@ -245,37 +261,37 @@ class plus2jsonRun(plus2jsonListener):
         name = ctx.identifier().getText()
         if not ctx.SRC() and not ctx.USER():
             # source of loop_count with no target
-            source = AuditEvent.c_current_event[-1].EventName
+            source = AuditEvent.c_current_event.EventName
         elif ctx.SRC() and not ctx.USER():
             # source of loop_count with no target
             if ctx.source:
                 source = ctx.source.getText()
             else:
-                source = AuditEvent.c_current_event[-1].EventName
+                source = AuditEvent.c_current_event.EventName
         elif not ctx.SRC() and ctx.USER():
             # target of loop_count with no source
             if ctx.target:
                 target = ctx.target.getText()
-                source = AuditEvent.c_current_event[-1].EventName
+                source = AuditEvent.c_current_event.EventName
             else:
-                target = AuditEvent.c_current_event[-1].EventName
+                target = AuditEvent.c_current_event.EventName
         elif ctx.SRC() and ctx.USER():
             # both source of loop_count and target
             if ctx.source:
                 source = ctx.source.getText()
             else:
-                source = AuditEvent.c_current_event[-1].EventName
+                source = AuditEvent.c_current_event.EventName
             if ctx.target:
                 target = ctx.target.getText()
             else:
-                target = AuditEvent.c_current_event[-1].EventName
+                target = AuditEvent.c_current_event.EventName
         else:
-            # ERROR
             print( " ERROR:  malformed loop count -", name )
+            sys.exit()
         if ctx.LCNT():
-            AuditEvent.c_current_event[-1].loop_count_source = source
-            AuditEvent.c_current_event[-1].loop_count_user = target
-            AuditEvent.c_current_event[-1].loop_count_name = name
+            AuditEvent.c_current_event.loop_count_source = source
+            AuditEvent.c_current_event.loop_count_user = target
+            AuditEvent.c_current_event.loop_count_name = name
 
     def exitInvariant(self, ctx:plus2jsonParser.InvariantContext):
         # The default of source or target is the event definition carrying
@@ -286,121 +302,129 @@ class plus2jsonRun(plus2jsonListener):
         name = ctx.identifier().getText()
         if not ctx.SRC() and not ctx.USER():
             # source of invariant with no target
-            source = AuditEvent.c_current_event[-1].EventName
+            source = AuditEvent.c_current_event.EventName
         elif ctx.SRC() and not ctx.USER():
             # source of invariant with no target
             if ctx.source:
                 source = ctx.source.getText()
             else:
-                source = AuditEvent.c_current_event[-1].EventName
+                source = AuditEvent.c_current_event.EventName
         elif not ctx.SRC() and ctx.USER():
             # target of invariant with no source
             if ctx.target:
                 target = ctx.target.getText()
-                source = AuditEvent.c_current_event[-1].EventName
+                source = AuditEvent.c_current_event.EventName
             else:
-                target = AuditEvent.c_current_event[-1].EventName
+                target = AuditEvent.c_current_event.EventName
         elif ctx.SRC() and ctx.USER():
             # both source of invariant and target
             if ctx.source:
                 source = ctx.source.getText()
             else:
-                source = AuditEvent.c_current_event[-1].EventName
+                source = AuditEvent.c_current_event.EventName
             if ctx.target:
                 target = ctx.target.getText()
             else:
-                target = AuditEvent.c_current_event[-1].EventName
+                target = AuditEvent.c_current_event.EventName
         else:
-            # ERROR
             print( " ERROR:  malformed invariant -", name )
+            sys.exit()
         if ctx.IINV():
-            AuditEvent.c_current_event[-1].intrajob_invariant_source = source
-            AuditEvent.c_current_event[-1].intrajob_invariant_user = target
-            AuditEvent.c_current_event[-1].intrajob_invariant_name = name
+            AuditEvent.c_current_event.intrajob_invariant_source = source
+            AuditEvent.c_current_event.intrajob_invariant_user = target
+            AuditEvent.c_current_event.intrajob_invariant_name = name
         if ctx.EINV():
-            AuditEvent.c_current_event[-1].extrajob_invariant_source = source
-            AuditEvent.c_current_event[-1].extrajob_invariant_user = target
-            AuditEvent.c_current_event[-1].extrajob_invariant_name = name
+            AuditEvent.c_current_event.extrajob_invariant_source = source
+            AuditEvent.c_current_event.extrajob_invariant_user = target
+            AuditEvent.c_current_event.extrajob_invariant_name = name
 
     def enterBreak(self, ctx:plus2jsonParser.BreakContext):
-        AuditEvent.c_current_event[-1].isBreak = True
+        AuditEvent.c_current_event.isBreak = True
 
     def enterDetach(self, ctx:plus2jsonParser.DetachContext):
-        AuditEvent.c_current_event[-1].SequenceEnd = True
-        AuditEvent.c_current_event.pop()
+        AuditEvent.c_current_event.SequenceEnd = True
+        AuditEvent.c_current_event = None
 
     def enterSplit(self, ctx:plus2jsonParser.SplitContext):
         Fork("AND")
         # instead of c_current_event, I might need to copy from the fork_point stack
         if AuditEvent.c_current_event: # We may be starting with HIDE.
-            Fork.population[-1].fork_point.append( PreviousAuditEvent( AuditEvent.c_current_event.pop() ) )
-            Fork.population[-1].fork_point[-1].ConstraintValue = "AND"
-            Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
-            Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
+            Fork.population[-1].fork_point = PreviousAuditEvent( AuditEvent.c_current_event )
+            AuditEvent.c_current_event = None
+            Fork.population[-1].fork_point.ConstraintValue = "AND"
+            Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
+            Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
         else:
             # detecting a nested fork (combined split, fork and/or if)
             # Look to the previous (outer scope) fork in the stack.
             if Fork.population[Fork.c_scope-1].fork_point_usage:
-                Fork.population[-1].fork_point.append( PreviousAuditEvent( Fork.population[Fork.c_scope-1].fork_point_usage[-1].previous_event ) )
-                Fork.population[-1].fork_point[-1].ConstraintValue = "AND"
-                Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
-                Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
+                Fork.population[-1].fork_point = PreviousAuditEvent( Fork.population[Fork.c_scope-1].fork_point_usage.previous_event )
+                Fork.population[-1].fork_point.ConstraintValue = "AND"
+                Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
+                Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
 
     def enterSplit_again(self, ctx:plus2jsonParser.Split_againContext):
         if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
-            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event.pop() ) )
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
+            AuditEvent.c_current_event = None
         if Fork.population[-1].fork_point:
-            Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
+            Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
 
     def exitSplit(self, ctx:plus2jsonParser.SplitContext):
         if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
-            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event.pop() ) )
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
+            AuditEvent.c_current_event = None
         Fork.population[-1].merge_usage.extend( Fork.population[-1].merge_inputs )
         Fork.population[-1].merge_inputs.clear()
-        Fork.population[-1].fork_point_usage.clear()
+        Fork.population[-1].fork_point_usage = None
 
     def enterIf(self, ctx:plus2jsonParser.IfContext):
         Fork("XOR")
         if AuditEvent.c_current_event: # may be nested within a fork or split
-            Fork.population[-1].fork_point.append( PreviousAuditEvent( AuditEvent.c_current_event.pop() ) )
-            Fork.population[-1].fork_point[-1].ConstraintValue = "XOR"
-            Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
-            Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
+            Fork.population[-1].fork_point = PreviousAuditEvent( AuditEvent.c_current_event )
+            AuditEvent.c_current_event = None
+            Fork.population[-1].fork_point.ConstraintValue = "XOR"
+            Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
+            Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
         else:
             # detecting a nested fork (combined split, fork and/or if)
             if Fork.population[Fork.c_scope-1].fork_point_usage:
-                Fork.population[-1].fork_point.append( Fork.population[Fork.c_scope-1].fork_point_usage[-1] )
-                Fork.population[-1].fork_point[-1].ConstraintValue = "XOR"
-                Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
-                Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
+                Fork.population[-1].fork_point = Fork.population[Fork.c_scope-1].fork_point_usage
+                Fork.population[-1].fork_point.ConstraintValue = "XOR"
+                Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
+                Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
 
     def exitIf_condition(self, ctx:plus2jsonParser.If_conditionContext):
         if ctx.XOR():
-            Fork.population[-1].fork_point[-1].ConstraintValue = "XOR"
-            Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
+            Fork.population[-1].fork_point.ConstraintValue = "XOR"
+            Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
         elif ctx.IOR():
-            Fork.population[-1].fork_point[-1].ConstraintValue = "IOR"
-            Fork.population[-1].fork_point[-1].ConstraintDefinitionId = Fork.population[-1].id
+            Fork.population[-1].fork_point.ConstraintValue = "IOR"
+            Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
         else:
             print( "ERROR:  malformed if condition" )
+            sys.exit()
 
     def enterElseif(self, ctx:plus2jsonParser.ElseifContext):
         if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
-            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event.pop() ) )
-        Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
+            AuditEvent.c_current_event = None
+        Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
 
     def enterElse(self, ctx:plus2jsonParser.ElseContext):
         if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
-            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event.pop() ) )
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
+            AuditEvent.c_current_event = None
         if Fork.population[-1].fork_point:
-            Fork.population[-1].fork_point_usage.append( Fork.population[-1].fork_point[-1] )
+            Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
 
     def exitIf(self, ctx:plus2jsonParser.IfContext):
         if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
-            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event.pop() ) )
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
+            AuditEvent.c_current_event = None
         Fork.population[-1].merge_usage.extend( Fork.population[-1].merge_inputs )
         Fork.population[-1].merge_inputs.clear()
-        Fork.population[-1].fork_point_usage.clear()
+        Fork.population[-1].fork_point_usage = None
 
     def enterLoop(self, ctx:plus2jsonParser.LoopContext):
         Loop()
@@ -408,7 +432,7 @@ class plus2jsonRun(plus2jsonListener):
     # Link the last event in the loop as a previous event to the first event in the loop.
     def exitLoop(self, ctx:plus2jsonParser.LoopContext):
         if AuditEvent.c_current_event: # We may be following a fork/merge.
-            Loop.population[-1].start_events[-1].previous_events.append( PreviousAuditEvent( AuditEvent.c_current_event[-1] ) )
+            Loop.population[-1].start_events[-1].previous_events.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
         else:
             # ended the loop with a merge
             if Fork.population[-1].merge_usage:
@@ -453,10 +477,12 @@ def output_json():
                           " }" )
                     pdelim = ","
                 if "" != prev_aes: json += "\"PreviousEvents\": [ " + prev_aes + "],"
-                if "" != ae.branch_count_source:
-                    bcnts = ae.branch_count_source + "bcs" + ":" + ae.branch_count_name
-                if "" != ae.branch_count_user:
-                    bcntu = ae.branch_count_user + "bcu" + ":" + ae.branch_count_name
+                bcnts = ""
+                if any( ae is dc.source_event[-1] for dc in DynamicControl.population ):
+                    bcnts = "bs-" + ae.EventName + "(" + ae.OccurrenceId + ")"
+                bcntu = ""
+                if any( ae is dc.user_event[-1] for dc in DynamicControl.population ):
+                    bcntu = "bu-" + ae.EventName + "(" + ae.OccurrenceId + ")"
                 if "" != ae.loop_count_source:
                     lcnts = ae.loop_count_source + "lcs" + ":" + ae.loop_count_name
                 if "" != ae.loop_count_user:
@@ -481,11 +507,15 @@ def pretty_print_job():
         for seq in job_defn.sequences:
             print("sequence:", seq.SequenceName)
             for ae in seq.audit_events:
+                bcnts = ""
+                if any( ae is dc.source_event[-1] for dc in DynamicControl.population ):
+                    bcnts = "bs-" + ae.EventName + "(" + ae.OccurrenceId + ")"
+                bcntu = ""
+                if any( ae is dc.user_event[-1] for dc in DynamicControl.population ):
+                    bcntu = "bu-" + ae.EventName + "(" + ae.OccurrenceId + ")"
                 ss = "start" if ae.SequenceStart else ""
                 se = "end" if ae.SequenceEnd else ""
                 b = "break" if ae.isBreak else "     "
-                bcnts = "" if "" == ae.branch_count_source else ae.branch_count_source + "bcs" + ":" + ae.branch_count_name
-                bcntu = "" if "" == ae.branch_count_user else ae.branch_count_user + "bcu" + ":" + ae.branch_count_name
                 lcnts = "   " if "" == ae.loop_count_source else ae.loop_count_source + "lcs" + ":" + ae.loop_count_name
                 lcntu = "   " if "" == ae.loop_count_user else ae.loop_count_user + "lcu" + ":" + ae.loop_count_name
                 iinvs = "   " if "" == ae.intrajob_invariant_source else ae.intrajob_invariant_source + "is" + ":" + ae.intrajob_invariant_name
@@ -501,5 +531,5 @@ def pretty_print_job():
                                )
                     delim = ","
                 print( f'{ae.EventName+"("+ae.OccurrenceId+")":{AuditEvent.c_longest_name_length+3}}',
-                       f'{ss:{5}}', f'{se:{3}}', b, prev_aes, f'{bcnts:{8}}', f'{bcntu:{8}}',
+                       f'{ss:{5}}', f'{se:{3}}', b, prev_aes, bcnts, bcntu,
                        lcnts, lcntu, iinvs, iinvu, einvs, einvu )
