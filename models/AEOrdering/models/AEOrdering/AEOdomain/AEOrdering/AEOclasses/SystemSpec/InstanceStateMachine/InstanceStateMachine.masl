@@ -150,7 +150,7 @@ begin
                               jobType.updateAuditEventDurations(JSON::get_array(jobDefJSONObject["EventRules"]));
                             end if;
                         else
-                            Logger::log(Logger::Debug, "AEReception", "Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true));
+                            Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true));
                             raise JSON::JSONException("Config file invalid");
                         end if;
                     else

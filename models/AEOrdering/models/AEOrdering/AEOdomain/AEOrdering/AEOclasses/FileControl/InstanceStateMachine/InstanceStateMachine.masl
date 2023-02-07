@@ -23,13 +23,18 @@ begin
 		fileNames := Filesystem::list_directory(directoryToProcess);
 		if fileNames'length > 0 then
 			this.currentFile := fileNames[fileNames'first];
-			fileToBeProcessed := Filesystem::filename(systemSpec.processingDirectory) & "/" & this.currentFile;
-			Filesystem::move_file( directoryToProcess & "/" & fileNames[fileNames'first], Filesystem::filename(fileToBeProcessed));
-			if Filesystem::file_exists(Filesystem::filename(fileToBeProcessed)) then
-				generate FileControl.processFile(fileToBeProcessed) to this;
-			else
-				schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
-			end if;
+			begin
+				fileToBeProcessed := Filesystem::filename(systemSpec.processingDirectory) & "/" & this.currentFile;
+				Filesystem::move_file( directoryToProcess & "/" & fileNames[fileNames'first], Filesystem::filename(fileToBeProcessed));
+				if Filesystem::file_exists(Filesystem::filename(fileToBeProcessed)) then
+					generate FileControl.processFile(fileToBeProcessed) to this;
+				else
+					schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
+				end if;
+			exception
+				when others =>
+					schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
+			end ;
 		else
 			schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
 		end if;
@@ -54,10 +59,11 @@ eventJsonObject : JSON::JSONObject;
 systemSpec : instance of SystemSpec;
 
 begin
-	logMessage := "AEReception::Reception.parsing";
-	Logger::log(Logger::Information, "AEReception", logMessage);
+	logMessage := "AEOrdering::FileControl.FileProcessed";
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 
     // Read the file and parse
+	systemSpec := find_one SystemSpec();
     json_string := Filesystem::read_file(fileToProcess);
     json_element := JSON::parse(json_string);
     eventJsonArray := JSON::get_array(json_element);
@@ -120,11 +126,13 @@ begin
             end;
 	     end if;
     end loop;
-	systemSpec := find_one SystemSpec();
 	Filesystem::move_file( fileToProcess, Filesystem::filename(systemSpec.processedDirectory & "/") & this.currentFile);
-    
 	schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
 	
+exception
+	when others => 
+		Logger::log(Logger::Information, "AEOrdering", "File to process = " & string(fileToProcess) & ", Processed file = " & systemSpec.processedDirectory & "/" & string(this.currentFile));
+		schedule this.fileTimer generate FileControl.selectFile() to this delay @PT0S@;
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

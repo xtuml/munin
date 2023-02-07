@@ -6,14 +6,14 @@ services:
       context: .
       args:
         EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
-#    ports:
-#      - "20000:20000"
-#      - "30000:30000"
-#      - "40000:40000"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
     volumes:
       - "./config:/root/config"
       - "../test-files/verifier-incoming:/root/incoming"
-      - "../test-files/verifier-processing:/root/processing"
+#      - "../test-files/verifier-processing:/root/processing"
       - "../test-files/verifier-processed:/root/processed"
     command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 7F -util Inspector -inspector-port 0"
   aeo_svdc-2:
@@ -22,13 +22,13 @@ services:
       context: .
       args:
         EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
-#    ports:
-#      - "20000:20000"
-#      - "30000:30000"
-#      - "40000:40000"
+    ports:
+      - "20110:20110"
+      - "30110:30110"
+      - "40110:40110"
     volumes:
       - "./config:/root/config"
       - "../test-files/verifier-incoming:/root/incoming"
-      - "../test-files/verifier-processing:/root/processing"
+#      - "../test-files/verifier-processing:/root/processing"
       - "../test-files/verifier-processed:/root/processed"
-    command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup 80 -endJobGroup FF -util Inspector -inspector-port 0"
+    command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup 80 -endJobGroup FF -util Inspector -inspector-port 110"

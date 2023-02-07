@@ -1,5 +1,5 @@
 {
-  "OneFilePerJob" : "true",
+  "OneFilePerJob" : "false",
   "MaxEventsPerFile" : 100,
   "FileTimoutPeriod" : "PT10S",
   "JobSpecificationLocation" : "config/file-request-spec",
@@ -8,8 +8,8 @@
   "Tests" : [{
       "TestId" : 1,
       "TestName" : "FileRequest_Test1",
-      "TotalTests" : 20000,
-      "TestFrequency" : "PT1S",
+      "TotalTests" : 200,
+      "TestFrequency" : "PT0.1S",
       "TestJobSpec" : [{
             "TestJobSpecName" : "FileRequest_HappyPath",
             "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9,"
@@ -26,8 +26,8 @@
       {
         "TestId" : 2,
         "TestName" : "FileRequest_Test2",
-        "TotalTests" : 10000,
-        "TestFrequency" : "PT2S",
+        "TotalTests" : 200,
+        "TestFrequency" : "PT0.1S",
         "TestJobSpec" : [{
             "TestJobSpecName" : "FileRequest_HappyPath",
             "EventDispatchOrder" : "9,8,7,6,5,4,3,2,1"
@@ -36,8 +36,8 @@
       {
         "TestId" : 3,
         "TestName" : "FileRequest_Test3",
-        "TotalTests" : 10000,
-        "TestFrequency" : "PT2S",
+        "TotalTests" : 200,
+        "TestFrequency" : "PT0.11S",
         "TestJobSpec" : [{
             "TestJobSpecName" : "FileRequest_HappyPath",
             "EventDispatchOrder" : "2,9,5,8,7,1,4,6,3"

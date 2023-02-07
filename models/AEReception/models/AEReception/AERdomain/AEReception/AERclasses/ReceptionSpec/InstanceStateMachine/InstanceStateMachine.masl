@@ -95,7 +95,7 @@ begin
 		if not Filesystem::file_exists(Filesystem::filename(this.outgoingDirectory)) then
 			Filesystem::create_directory(Filesystem::filename(this.outgoingDirectory));
 		end if;
-		generate FileControl.checkCapacity() to fileControl;
+		schedule fileControl.fileControlTimer generate FileControl.checkCapacity() to fileControl delay @PT0S@;
 	end if;
 	
 exception

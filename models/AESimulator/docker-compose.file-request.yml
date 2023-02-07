@@ -6,10 +6,10 @@ services:
       context: .
       args:
         EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
-    ports:
-      - "20000:20010"
-      - "30000:30010"
-      - "40000:40010"
+#    ports:
+#      - "20000:20010"
+#      - "30000:30010"
+#      - "40000:40010"
     volumes:
       - "../test-files/aer-incoming:/root/test-files/incoming"
     command: "-test-config config/file-request-test-spec/filerequest-test-specification.json -postinit schedule/startup.sch -util Inspector -inspector-port 10 -util MetaData"

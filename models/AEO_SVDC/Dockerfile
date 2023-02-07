@@ -2,7 +2,7 @@
 # BASE BUILD                                                                   #
 ################################################################################
 
-FROM levistarrett/masl-base:v1 AS build-base
+FROM levistarrett/masl-base:v2 AS build-base
 
 ARG EXTRA_MASL_ARGS=
 

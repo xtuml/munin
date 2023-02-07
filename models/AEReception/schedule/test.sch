@@ -1,5 +1,5 @@
 $TESTSCHEDULE
-PAUSE
+
 # initialize domain
 RUN SCENARIO AEReception 1 "init"
 
