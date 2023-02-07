@@ -44,16 +44,22 @@ event_defn     : ( HIDE NEWLINE )?
 event_name     : identifier ( '(' NUMBER ')' )?
                ;
 
-event_parm     : identifier ( '(' NUMBER ')' )?
+branch_count   : ',' BCNT
+                 ( ',' SRC ( '=' sname=identifier ( '(' socc=NUMBER ')' )? )? )?
+                 ( ',' USER ( '=' uname=identifier ( '(' uocc=NUMBER ')' )? )? )?
+                 ',' NAME '=' bcname=identifier
                ;
 
-branch_count   : ',' BCNT ( ',' SRC ( '=' source=event_parm )? )? ( ',' USER ( '=' target=event_parm )? )? ',' NAME '=' identifier
+loop_count     : ',' LCNT
+                 ( ',' SRC ( '=' sname=identifier ( '(' socc=NUMBER ')' )? )? )?
+                 ( ',' USER ( '=' uname=identifier ( '(' uocc=NUMBER ')' )? )? )?
+                 ',' NAME '=' lcname=identifier
                ;
 
-loop_count     : ',' LCNT ( ',' SRC ( '=' source=event_parm )? )? ( ',' USER ( '=' target=event_parm )? )? ',' NAME '=' identifier
-               ;
-
-invariant      : ',' ( IINV | EINV ) ( ',' SRC ( '=' source=event_parm )? )? ( ',' USER ( '=' target=event_parm )? )? ',' NAME '=' identifier
+invariant      : ',' ( IINV | EINV )
+                 ( ',' SRC ( '=' sname=identifier ( '(' socc=NUMBER ')' )? )? )?
+                 ( ',' USER ( '=' uname=identifier ( '(' uocc=NUMBER ')' )? )? )?
+                 ',' NAME '=' invname=identifier
                ;
 
 break          : BREAK

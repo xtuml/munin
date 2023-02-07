@@ -29,7 +29,7 @@ Options
     parser = plus2jsonParser(stream)
     tree = parser.plusdefn()
     if ( "--print" in argv or "-p" in argv or "--json" in argv or "-j" in argv ):
-        run = plus2jsonRun() # custom listener
+        run = plus2json_run() # custom listener
         walker = ParseTreeWalker()
         walker.walk(run, tree)
  
