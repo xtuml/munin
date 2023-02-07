@@ -1,0 +1,39 @@
+/'
+
+Tutorial - Bank Transfer Example
+  
+'/
+
+@startuml 
+partition "Bank Transfer" {
+group "Near Side Bank Transfer"
+      #green:A;
+      :B;
+      :C;
+      :D;
+      :E;
+      :F;
+      :G;
+      :H;
+  split
+      :I;
+      :J;
+      :K;
+      #red:L;
+      detach
+  split again
+      #red:M;
+      detach
+  end split    
+end group
+group "Mid Sequence"
+      #green:N;
+      #red:P;
+      detach
+end group
+group "Low Catcher Sequence"
+      #green:Q;
+      #red:R;
+end group
+}      
+@enduml
