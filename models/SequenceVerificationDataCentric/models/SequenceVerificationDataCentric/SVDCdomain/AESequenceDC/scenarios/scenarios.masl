@@ -1973,3 +1973,55 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. 'cd37ff08-52a8-4efe-874b-6f12f52c3966' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitComplexEventSequence2Definition () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+//userEventOccurrences : sequence of userEventDataStructure;
+
+begin
+  // *****************************************************************************************************************
+  // This scenario sets up the definitions for two Job types - 'ComplexInstanceForkJob1' and 'ComplexInstanceForkJob2'
+  // *****************************************************************************************************************
+  // 
+  // Firstly the event definitions for Job: ComplexInstanceForkJob1, Sequence: MultipleEventsInEachInstanceBranch 
+  //
+  previousEventTypes := empty;
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-U",1,previousEventTypes,true,false,false);  
+  previousEventTypes := ("CS2-U",1,"","");
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-V",1,previousEventTypes,false,false,false); 
+  previousEventTypes := ("CS2-V",1,"","");
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-W",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS2-W",1,"MultiWayANDFork","AND") & ("CS1-F",1,"","");
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-X",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS2-X",1,"","");
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-Y",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS2-Y",1,"","");
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-Z",1,previousEventTypes,false,true,false);
+  
+  // Now, set up the dynamic control definitions for 'ComplexInstanceForkJob1'...
+  dynamicControlDefinition("ComplexInstanceForkJob1", "BCV1", dynamicControlTypeEnum.BRANCHCOUNT, "CS2-U",1,"CS2-V",1);
+  //
+  // Now the event definitions for Job: ComplexInstanceForkJob2, Sequence: NestedInstanceForks
+  //
+  previousEventTypes := empty;
+  eventDefinition ("ComplexInstanceForkJob2","MultipleEventsInEachInstanceBranch","CS3-U",2,previousEventTypes,true,false,false);  
+  previousEventTypes := ("CS3-U",2,"","");
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS3-V",2,previousEventTypes,false,false,false); 
+  previousEventTypes := ("CS3-V",2,"","");
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS3-W",2,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS3-W",2,"MultiWayANDFork","AND") & ("CS1-F",1,"","");
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS3-X",2,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS3-X",2,"","");
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS3-Y",2,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS3-Y",2,"","");
+  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS3-Z",2,previousEventTypes,false,true,false);
+  
+  // Now, set up the dynamic control definitions for 'ComplexInstanceForkJob2'...
+  dynamicControlDefinition("ComplexInstanceForkJob2", "BCV2", dynamicControlTypeEnum.BRANCHCOUNT, "CS3-U",2,"CS3-V",2);
+  dynamicControlDefinition("ComplexInstanceForkJob2", "BCW2", dynamicControlTypeEnum.BRANCHCOUNT, "CS3-U",2,"CS3-W",2);
+  //
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

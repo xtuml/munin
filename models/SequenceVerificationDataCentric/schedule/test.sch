@@ -10,6 +10,7 @@ RUN SCENARIO AESequenceDC 7 "InitPersistentInvariantAuthAndBankTransferDefinitio
 RUN SCENARIO AESequenceDC 8 "InitEventDefinitionForInclusiveOR"
 RUN SCENARIO AESequenceDC 9 "InitLoopBreakEventDefinition"
 RUN SCENARIO AESequenceDC 501 "InitComplexEventSequence1Definition"
+RUN SCENARIO AESequenceDC 502 "InitComplexEventSequence2Definition"
 RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
 RUN SCENARIO AESequenceDC 901 "InitBranchCountDefinition"
 
