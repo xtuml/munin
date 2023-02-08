@@ -99,6 +99,9 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test102ComplexSequence_RainyDay3_LO
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test103ComplexSequence_RainyDay4_LOOPCOUNTandBRANCHCOUNTviolation 1103 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test104ComplexSequence_RainyDay5_LOOPCOUNTandBRANCHCOUNTandXORviolation 1104 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test105ComplexSequence_RainyDay6_InvalidExtraJobInvariantValueUsedInLoop 1105 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test106ComplexSequence_RainyDay7_InvalidExtraJobInvariantValueUsedInInstanceFork 1106 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test107ComplexSequence_RainyDay8_InvalidExtraJobInvariantNameUsedInLoop 1107 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test108ComplexSequence_RainyDay9_InvalidExtraJobInvariantNameUsedInInstanceFork 1108 CleanUpAllJobs 64]
 
 
 # The following Tests will delete some or all of the JobDefinitions so beware!!!!

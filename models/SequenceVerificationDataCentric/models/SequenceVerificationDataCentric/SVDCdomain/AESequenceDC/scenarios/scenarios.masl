@@ -1993,7 +1993,7 @@ begin
   eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-V",1,previousEventTypes,false,false,false); 
   previousEventTypes := ("CS2-V",1,"","");
   eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-W",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-W",1,"MultiWayANDFork","AND") & ("CS1-F",1,"","");
+  previousEventTypes := ("CS2-W",1,"","");
   eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-X",1,previousEventTypes,false,false,false);
   previousEventTypes := ("CS2-X",1,"","");
   eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-Y",1,previousEventTypes,false,false,false);
@@ -2006,17 +2006,17 @@ begin
   // Now the event definitions for Job: ComplexInstanceForkJob2, Sequence: NestedInstanceForks
   //
   previousEventTypes := empty;
-  eventDefinition ("ComplexInstanceForkJob2","MultipleEventsInEachInstanceBranch","CS3-U",2,previousEventTypes,true,false,false);  
+  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-U",2,previousEventTypes,true,false,false);  
   previousEventTypes := ("CS3-U",2,"","");
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS3-V",2,previousEventTypes,false,false,false); 
+  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-V",2,previousEventTypes,false,false,false); 
   previousEventTypes := ("CS3-V",2,"","");
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS3-W",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS3-W",2,"MultiWayANDFork","AND") & ("CS1-F",1,"","");
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS3-X",2,previousEventTypes,false,false,false);
+  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-W",2,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS3-W",2,"","");
+  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-X",2,previousEventTypes,false,false,false);
   previousEventTypes := ("CS3-X",2,"","");
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS3-Y",2,previousEventTypes,false,false,false);
+  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-Y",2,previousEventTypes,false,false,false);
   previousEventTypes := ("CS3-Y",2,"","");
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS3-Z",2,previousEventTypes,false,true,false);
+  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-Z",2,previousEventTypes,false,true,false);
   
   // Now, set up the dynamic control definitions for 'ComplexInstanceForkJob2'...
   dynamicControlDefinition("ComplexInstanceForkJob2", "BCV2", dynamicControlTypeEnum.BRANCHCOUNT, "CS3-U",2,"CS3-V",2);

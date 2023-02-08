@@ -255,7 +255,7 @@ creationErrorMessage : string;
 	            end if; 
 	          else                  
                 // This Invariant not expected to be provided on this audit event
-                theJob.failJob("Extra Job Invariant not expected on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
+                theJob.failJob("Extra Job Invariant: " & aeDataElement.aedName & " not expected on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
               end if;
             
             else
