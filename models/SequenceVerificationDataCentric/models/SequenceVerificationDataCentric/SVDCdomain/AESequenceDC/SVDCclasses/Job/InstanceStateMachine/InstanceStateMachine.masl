@@ -224,7 +224,7 @@ begin
               // There are multiple possible Audit Event Occurrences In the Sequence Definition 
               // TODO What does this circumstance imply and what can we do about it.
               this.sequencingFailed := true;
-              this.failJob("The are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
+              this.failJob("There are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
             end if;
           else
             // The previous event id provided in the audit event data is not recognised as a previous event 
@@ -485,7 +485,7 @@ begin
   this.jobCompleted := false;
   
   // Log info: Audit Event Sequence Verification has been informed of Job failure
-  logMessage := "Job Failed - jobId = " & this.jobID & " due to " & failureReason;
+  logMessage := "Job Failed - jobId = " & this.jobID & " due to: " & failureReason;
   Logger::log(Logger::Information, "Monitored System Failure", logMessage); 
   
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
