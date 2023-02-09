@@ -407,6 +407,16 @@ class plus2json_run(plus2jsonListener):
     def exitIf(self, ctx:plus2jsonParser.IfContext):
         Fork.population[-1].end()
 
+    def enterSwitch(self, ctx:plus2jsonParser.SwitchContext):
+        f = Fork("XOR")
+        f.begin()
+
+    def enterCase(self, ctx:plus2jsonParser.CaseContext):
+        Fork.population[-1].again()
+
+    def exitSwitch(self, ctx:plus2jsonParser.SwitchContext):
+        Fork.population[-1].end()
+
     def enterFork(self, ctx:plus2jsonParser.ForkContext):
         f = Fork("AND")
         f.begin()

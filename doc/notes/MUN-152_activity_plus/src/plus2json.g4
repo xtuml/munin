@@ -25,6 +25,7 @@ sequence_name  : identifier
 
 statement      : ( event_defn
                  | if
+                 | switch
                  | fork
                  | split
                  | loop
@@ -69,22 +70,31 @@ break          : BREAK
 detach         : DETACH
                ;
 
-if             : IF '(' if_condition ')' THEN ( '(' identifier ')' )? NEWLINE
-                 statement*
+if             : IF '(' condition ')' THEN ( '(' identifier ')' )? NEWLINE
+                 statement+
                  elseif*
                  else?
                  ENDIF
                ;
 
 elseif         : ELSEIF ( '(' identifier ')' )? NEWLINE
-                 statement*
+                 statement+
                ;
 
 else           : ELSE ( '(' identifier ')' )? NEWLINE
-                 statement*
+                 statement+
                ;
 
-if_condition   : ( identifier )
+condition      : identifier
+               ;
+
+switch         : SWITCH '(' condition ')' NEWLINE
+                 case+
+                 ENDSWITCH
+               ;
+
+case           : CASE '(' condition ')' NEWLINE
+                 statement+
                ;
 
 loop           : REPEAT NEWLINE
@@ -122,6 +132,7 @@ StringLiteral  : '"' ( ~('\\'|'"') )* '"'
 // keywords
 BCNT           : 'bcnt' | 'BCNT'; // branch count
 BREAK          : 'break';
+CASE           : 'case';
 DETACH         : 'detach';
 EINV           : 'einv' | 'EINV'; // extra-job invariant
 ELSE           : 'else';
@@ -130,6 +141,7 @@ ENDFORK        : 'end fork';
 ENDGROUP       : 'end group';
 ENDIF          : 'endif' | 'end if';
 ENDSPLIT       : 'end split';
+ENDSWITCH      : 'endswitch';
 ENDUML         : '@enduml';
 FORKAGAIN      : 'fork again';
 FORK           : 'fork';
@@ -145,6 +157,7 @@ SPLITAGAIN     : 'split again';
 SPLIT          : 'split';
 SRC            : 'src' | 'SRC';
 STARTUML       : '@startuml';
+SWITCH         : 'switch';
 THEN           : 'then';
 USER           : 'user' | 'USER';
 WHILE          : 'while';
