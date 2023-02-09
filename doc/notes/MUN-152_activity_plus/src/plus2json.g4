@@ -25,8 +25,9 @@ sequence_name  : identifier
 
 statement      : ( event_defn
                  | if
-                 | loop
+                 | fork
                  | split
+                 | loop
                  | // empty line
                  ) NEWLINE
                ;
@@ -83,13 +84,22 @@ else           : ELSE ( '(' identifier ')' )? NEWLINE
                  statement*
                ;
 
-if_condition   : ( IOR | XOR )
+if_condition   : ( identifier )
                ;
 
 loop           : REPEAT NEWLINE
                  statement+
                  REPEAT WHILE
                  ( '(' identifier ')' )?
+               ;
+
+fork           : FORK NEWLINE
+                 statement+
+                 fork_again+
+                 ENDFORK
+               ;
+
+fork_again     : FORKAGAIN NEWLINE statement+
                ;
 
 split          : SPLIT NEWLINE
@@ -116,15 +126,17 @@ DETACH         : 'detach';
 EINV           : 'einv' | 'EINV'; // extra-job invariant
 ELSE           : 'else';
 ELSEIF         : 'elseif';
+ENDFORK        : 'end fork';
 ENDGROUP       : 'end group';
 ENDIF          : 'endif' | 'end if';
 ENDSPLIT       : 'end split';
 ENDUML         : '@enduml';
+FORKAGAIN      : 'fork again';
+FORK           : 'fork';
 GROUP          : 'group';         // sequence
 HIDE           : '-[hidden]->';
 IF             : 'if';
 IINV           : 'iinv' | 'IINV'; // intra-job invariant
-IOR            : 'ior' | 'IOR';
 LCNT           : 'lcnt' | 'LCNT'; // loop count
 NAME           : 'name' | 'NAME'; // marking target event
 PARTITION      : 'partition';     // job
@@ -136,7 +148,6 @@ STARTUML       : '@startuml';
 THEN           : 'then';
 USER           : 'user' | 'USER';
 WHILE          : 'while';
-XOR            : 'xor' | 'XOR';
 
 NEWLINE        : [\r\n]+;
 

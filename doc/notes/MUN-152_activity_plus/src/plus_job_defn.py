@@ -113,7 +113,7 @@ class Fork:
     c_scope = -1
     c_number = 1
     def __init__(self, flavor):
-        self.id = "fork" + str( Fork.c_number )            # ID factory for ConstraintDefinitionId
+        self.id = flavor.lower() + "fork" + str( Fork.c_number )            # ID factory for ConstraintDefinitionId
         Fork.c_number += 1
         self.flavor = flavor                               # AND, XOR or IOR
         self.fork_point = None                             # c_current_event pushed as PreviousAuditEvent
@@ -131,6 +131,38 @@ class Fork:
     def __del__(self):
         #Fork.print_forks()
         Fork.c_scope -= 1
+    def begin(self):
+        # instead of c_current_event, I might need to copy from the fork_point stack
+        if AuditEvent.c_current_event: # We may be starting with HIDE.
+            Fork.population[-1].fork_point = PreviousAuditEvent( AuditEvent.c_current_event )
+            AuditEvent.c_current_event = None
+            Fork.population[-1].fork_point.ConstraintValue = self.flavor
+            Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
+            Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
+        else:
+            # detecting a nested fork (combined split, fork and/or if)
+            # Look to the previous (outer scope) fork in the stack.
+            if Fork.population[Fork.c_scope-1].fork_point_usage:
+                Fork.population[-1].fork_point = PreviousAuditEvent( Fork.population[Fork.c_scope-1].fork_point_usage.previous_event )
+                Fork.population[-1].fork_point.ConstraintValue = self.flavor
+                Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
+                Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
+            else:
+                print( "ERROR:  malformed fork stack at scope:", Fork.c_scope )
+                sys.exit()
+    def again(self):
+        if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
+            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
+            AuditEvent.c_current_event = None
+        if Fork.population[-1].fork_point:
+            Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
+    def end(self):
+        if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
+            self.merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
+            AuditEvent.c_current_event = None
+        self.merge_usage.extend( Fork.population[-1].merge_inputs )
+        self.merge_inputs.clear()
+        self.fork_point_usage = None
     def print_fork(self):
         merge_inputs = ""
         merge_usages = ""
@@ -362,86 +394,38 @@ class plus2json_run(plus2jsonListener):
         AuditEvent.c_current_event.SequenceEnd = True
         AuditEvent.c_current_event = None
 
-    def enterSplit(self, ctx:plus2jsonParser.SplitContext):
-        Fork("AND")
-        # instead of c_current_event, I might need to copy from the fork_point stack
-        if AuditEvent.c_current_event: # We may be starting with HIDE.
-            Fork.population[-1].fork_point = PreviousAuditEvent( AuditEvent.c_current_event )
-            AuditEvent.c_current_event = None
-            Fork.population[-1].fork_point.ConstraintValue = "AND"
-            Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
-            Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
-        else:
-            # detecting a nested fork (combined split, fork and/or if)
-            # Look to the previous (outer scope) fork in the stack.
-            if Fork.population[Fork.c_scope-1].fork_point_usage:
-                Fork.population[-1].fork_point = PreviousAuditEvent( Fork.population[Fork.c_scope-1].fork_point_usage.previous_event )
-                Fork.population[-1].fork_point.ConstraintValue = "AND"
-                Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
-                Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
-
-    def enterSplit_again(self, ctx:plus2jsonParser.Split_againContext):
-        if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
-            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
-            AuditEvent.c_current_event = None
-        if Fork.population[-1].fork_point:
-            Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
-
-    def exitSplit(self, ctx:plus2jsonParser.SplitContext):
-        if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
-            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
-            AuditEvent.c_current_event = None
-        Fork.population[-1].merge_usage.extend( Fork.population[-1].merge_inputs )
-        Fork.population[-1].merge_inputs.clear()
-        Fork.population[-1].fork_point_usage = None
-
     def enterIf(self, ctx:plus2jsonParser.IfContext):
-        Fork("XOR")
-        if AuditEvent.c_current_event: # may be nested within a fork or split
-            Fork.population[-1].fork_point = PreviousAuditEvent( AuditEvent.c_current_event )
-            AuditEvent.c_current_event = None
-            Fork.population[-1].fork_point.ConstraintValue = "XOR"
-            Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
-            Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
-        else:
-            # detecting a nested fork (combined split, fork and/or if)
-            if Fork.population[Fork.c_scope-1].fork_point_usage:
-                Fork.population[-1].fork_point = Fork.population[Fork.c_scope-1].fork_point_usage
-                Fork.population[-1].fork_point.ConstraintValue = "XOR"
-                Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
-                Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
-
-    def exitIf_condition(self, ctx:plus2jsonParser.If_conditionContext):
-        if ctx.XOR():
-            Fork.population[-1].fork_point.ConstraintValue = "XOR"
-            Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
-        elif ctx.IOR():
-            Fork.population[-1].fork_point.ConstraintValue = "IOR"
-            Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
-        else:
-            print( "ERROR:  malformed if condition" )
-            sys.exit()
+        f = Fork("XOR")
+        f.begin()
 
     def enterElseif(self, ctx:plus2jsonParser.ElseifContext):
-        if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
-            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
-            AuditEvent.c_current_event = None
-        Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
+        Fork.population[-1].again()
 
     def enterElse(self, ctx:plus2jsonParser.ElseContext):
-        if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
-            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
-            AuditEvent.c_current_event = None
-        if Fork.population[-1].fork_point:
-            Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
+        Fork.population[-1].again()
 
     def exitIf(self, ctx:plus2jsonParser.IfContext):
-        if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
-            Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
-            AuditEvent.c_current_event = None
-        Fork.population[-1].merge_usage.extend( Fork.population[-1].merge_inputs )
-        Fork.population[-1].merge_inputs.clear()
-        Fork.population[-1].fork_point_usage = None
+        Fork.population[-1].end()
+
+    def enterFork(self, ctx:plus2jsonParser.ForkContext):
+        f = Fork("AND")
+        f.begin()
+
+    def enterFork_again(self, ctx:plus2jsonParser.Fork_againContext):
+        Fork.population[-1].again()
+
+    def exitFork(self, ctx:plus2jsonParser.ForkContext):
+        Fork.population[-1].end()
+
+    def enterSplit(self, ctx:plus2jsonParser.SplitContext):
+        f = Fork("IOR")
+        f.begin()
+
+    def enterSplit_again(self, ctx:plus2jsonParser.Split_againContext):
+        Fork.population[-1].again()
+
+    def exitSplit(self, ctx:plus2jsonParser.SplitContext):
+        Fork.population[-1].end()
 
     def enterLoop(self, ctx:plus2jsonParser.LoopContext):
         Loop()
@@ -484,6 +468,15 @@ def output_json():
                 if ae.SequenceStart: json += "\"SequenceStart\": true,"
                 if ae.SequenceEnd: json += "\"SequenceEnd\": true,"
                 if ae.isBreak: json += "\"isBreak\": true,"
+                # look for linked DynamicControl
+                dc = [dc for dc in DynamicControl.population if dc.source_event is ae]
+                if dc:
+                    json += "\"DynamicControl\": {"
+                    json += "\"DynamicControlName\": \"" + dc[-1].DynamicControlName + "\","
+                    json += "\"DynamicControlType\": \"" + dc[-1].DynamicControlType + "\","
+                    json += "\"UserEventType\": \"" + dc[-1].user_evt_txt + "\","
+                    json += "\"UserOccurrenceId\": " + dc[-1].user_occ_txt
+                    json += "},"
                 prev_aes = ""
                 pdelim = ""
                 for prev_ae in ae.previous_events:
@@ -496,30 +489,6 @@ def output_json():
                           " }" )
                     pdelim = ","
                 if "" != prev_aes: json += "\"PreviousEvents\": [ " + prev_aes + "],"
-                bcnts = ""
-                if any( ae is dc.source_event for dc in DynamicControl.population ):
-                    bcnts = "bs-" + ae.EventName + "(" + ae.OccurrenceId + ")"
-                bcntu = ""
-                if any( ae is dc.user_event for dc in DynamicControl.population ):
-                    bcntu = "bu-" + ae.EventName + "(" + ae.OccurrenceId + ")"
-                lcnts = ""
-                if any( ae is dc.source_event for dc in DynamicControl.population ):
-                    lcnts = "ls-" + ae.EventName + "(" + ae.OccurrenceId + ")"
-                lcntu = ""
-                if any( ae is dc.user_event for dc in DynamicControl.population ):
-                    lcntu = "lu-" + ae.EventName + "(" + ae.OccurrenceId + ")"
-                if "" != ae.loop_count_source:
-                    lcnts = ae.loop_count_source + "lcs" + ":" + ae.loop_count_name
-                if "" != ae.loop_count_user:
-                    lcntu = ae.loop_count_user + "lcu" + ":" + ae.loop_count_name
-                if "" != ae.intrajob_invariant_source:
-                    iinvs = ae.intrajob_invariant_source + "is" + ":" + ae.intrajob_invariant_name
-                if "" != ae.intrajob_invariant_user:
-                    iinvu = ae.intrajob_invariant_user + "iu" + ":" + ae.intrajob_invariant_name
-                if "" != ae.extrajob_invariant_source:
-                    einvs = ae.extrajob_invariant_source + "es" + ":" + ae.extrajob_invariant_name
-                if "" != ae.extrajob_invariant_user:
-                    einvs = ae.extrajob_invariant_user + "eu" + ":" + ae.extrajob_invariant_name
                 json += "\"Application\": \"\""
                 json += "}"
             json += "\n]"
@@ -540,14 +509,12 @@ def pretty_print_job():
                 lcnt = ""
                 dc = [dc for dc in DynamicControl.population if dc.source_event is ae]
                 if dc:
+                    su = "s=" + dc[-1].src_evt_txt + "(" + dc[-1].src_occ_txt + ")"
+                    su += "u=" + dc[-1].user_evt_txt + "(" + dc[-1].user_occ_txt + ")"
                     if dc[-1].DynamicControlType == "BRANCHCOUNT":
-                        bcnt = "bc:" + dc[-1].DynamicControlName + "-"
-                        bcnt += "s=" + dc[-1].src_evt_txt + "(" + dc[-1].src_occ_txt + ")"
-                        bcnt += "u=" + dc[-1].user_evt_txt + "(" + dc[-1].user_occ_txt + ")"
+                        bcnt = "bc:" + dc[-1].DynamicControlName + "-" + su
                     elif dc[-1].DynamicControlType == "LOOPCOUNT":
-                        lcnt = "lc:" + dc[-1].DynamicControlName + "-"
-                        lcnt += "s=" + dc[-1].src_evt_txt + "(" + dc[-1].src_occ_txt + ")"
-                        lcnt += "u=" + dc[-1].user_evt_txt + "(" + dc[-1].user_occ_txt + ")"
+                        lcnt = "lc:" + dc[-1].DynamicControlName + "-" + su
                     else:
                         print( "ERROR:  malformed dynamic control" )
                         sys.exit()
@@ -556,27 +523,20 @@ def pretty_print_job():
                 iinv = ""
                 inv = [inv for inv in Invariant.population if inv.source_event is ae]
                 if inv:
+                    su = "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
+                    su += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
                     if inv[-1].Type == "EINV":
-                        einv = "einv:" + inv[-1].Name + "-"
-                        einv += "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
-                        einv += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
+                        einv = "einv:" + inv[-1].Name + "-" + su
                     elif inv[-1].Type == "IINV":
-                        iinv = "iinv:" + inv[-1].Name + "-"
-                        iinv += "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
-                        iinv += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
-                    else:
-                        print( "ERROR:  malformed invariant type" )
-                        sys.exit()
+                        iinv = "iinv:" + inv[-1].Name + "-" + su
                 inv = [inv for inv in Invariant.population if ae in inv.user_events]
                 if inv:
+                    su = "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
+                    su += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
                     if inv[-1].Type == "EINV":
-                        einv = "einv:" + inv[-1].Name + "-"
-                        einv += "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
-                        einv += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
+                        einv = "einv:" + inv[-1].Name + "-" + su
                     elif inv[-1].Type == "IINV":
-                        iinv = "iinv:" + inv[-1].Name + "-"
-                        iinv += "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
-                        iinv += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
+                        iinv = "iinv:" + inv[-1].Name + "-" + su
                     else:
                         print( "ERROR:  malformed invariant type" )
                         sys.exit()
