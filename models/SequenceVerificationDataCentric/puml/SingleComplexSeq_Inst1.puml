@@ -1,0 +1,62 @@
+@startuml
+  #green:25,A,LC3=2,BC2=3;
+  :59,B,25,LC1=3,LC2=2,InvariantA=AAAAA;
+  :13,C,59,BC1=3;
+  split
+    :60,D,13;
+    :11,E,60,AUTH_TOKEN_A=ProtectFact_A1;
+    :17,F,11;
+    :29,D,17;
+    :33,E,29,AUTH_TOKEN_A=ProtectFact_A1;
+    :41,F,33;
+    :63,D,41;
+    :19,E,63,AUTH_TOKEN_A=ProtectFact_A1;
+    :23,F,19;
+    :16,G,23;
+    :27,D,16;
+    :70,E,27;
+    :18,F,70;
+    :36,D,18;
+    :66,E,36;
+    :55,F,66;
+  split again
+    :61,K,13;
+    split
+      :62,L,61,AUTH_TOKEN_A=ProtectFact_A1;
+    split again  
+      :56,L,61,AUTH_TOKEN_A=ProtectFact_A1;
+    split again  
+      :57,L,61,AUTH_TOKEN_A=ProtectFact_A1;
+    end split  
+    :14,M,62,56,57;
+  split again
+    :20,P,13;
+    #red:10,Q,20;
+    detach
+  split again
+    :64,C,13;
+    :30,D,64;
+    :32,E,30;
+    :45,D,32;
+    :21,E,45;
+    :24,F,21;
+    split  
+      :39,D,24,AUTH_TOKEN_A=ProtectFact_A1;
+      #red:34,G,39;
+      detach
+    split again
+      :46,D,24,AUTH_TOKEN_A=ProtectFact_A1;
+      #red:47,G,46;
+      detach    
+    end split  
+  split again
+    :42,S,13;
+    :31,S,42;
+    :22,D,31;
+    #red:28,E,22;
+    detach
+  end split
+    :15,H,55,14,InvariantA=AAAAA;
+    #red:44,J,15;
+    detach
+@enduml

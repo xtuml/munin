@@ -113,7 +113,7 @@ begin
                   link newAuditEventPair R15 theAeInSequencePairDefn;
                 else
                     this.sequencingFailed := true;
-                    this.failJob("The previous event has been repeated with this event which is an error - This Event Id = " & newEvent.AuditEventId & " and Previous Event Id = " & prevEvent.AuditEventId );              
+                    this.failJob("The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId & " and Previous Event Id = " & prevEvent.AuditEventId );              
                 end if;  
              
                 // Now test to see if this is a valid event sequence
@@ -145,7 +145,11 @@ begin
                     
                         if theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
                           if theUserDynamicControl.expectedDynamicControlValue > 0 then
-                            theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
+                            if theUserDynamicControl.currentDynamicControlValue < theUserDynamicControl.expectedDynamicControlValue then
+                              theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
+                            else
+                              this.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
+                            end if;               
                           end if;  
                         end if;  
 	                  else

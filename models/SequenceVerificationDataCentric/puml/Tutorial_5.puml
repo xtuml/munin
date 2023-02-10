@@ -1,0 +1,26 @@
+/'
+
+Tutorial - Exclusive OR Fork Topology
+  
+'/
+
+@startuml 
+partition "XOR Fork" {
+group "XOR Fork"
+      #green:A;
+      :B;
+  if (XOR) then ("e.g. normal")
+      :C;
+      :E;
+      :F;
+      :G;
+      :K;
+      #red:L;
+      detach
+  else ("e.g. error")
+      #red:D;
+      detach
+  endif
+end group
+}      
+@enduml

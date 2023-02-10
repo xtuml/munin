@@ -1,0 +1,25 @@
+/'
+
+Tutorial - Fork and Merge Topology
+  
+'/
+
+@startuml 
+partition "AND Fork and Merge" {
+group "AND Fork and Merge"
+  #green:A;
+  :B;
+  split
+      :C;
+      :G;
+  split again
+      :D;
+      :H;
+      :J;
+  end split   
+  :K;
+  #red:L;
+  detach      
+end group
+}      
+@enduml

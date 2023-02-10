@@ -1,0 +1,33 @@
+/'
+
+Tutorial - Split Type Fork and Merge
+  
+'/
+
+@startuml 
+partition "Split Type Fork and Merge" {
+  group "P"
+    #green:A;
+    :B;
+    split
+      #red:C;
+      detach
+    split again
+      #red:D;
+      detach
+    end split
+  end group
+  group "Q"
+    split
+      -[hidden]->
+      #green:G;
+    split again
+      -[hidden]->
+      #green:J;
+    end split
+    :K;
+    #red:L;
+    detach
+  end group
+}
+@enduml

@@ -92,6 +92,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test60StalePersistedInvariant 1060 
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test61InvalidInstanceForkWithBranchCount 1061 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test62InvalidLoopWithLoopCount 1062 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test63InvalidLoopWithNonIntegerLoopCount 1063 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test64InvalidLoopWithLoopCountExceedingExpectedValue 1064 CleanUpAllJobs 64]
 # Errors in complex sequences
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test100ComplexSequence_RainyDay1_XORconstraintViolation 1100 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test101ComplexSequence_RainyDay2_InstanceForkViolation 1101 CleanUpAllJobs 64]
