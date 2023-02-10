@@ -12,7 +12,7 @@ begin
   // followed by an error which cause the loop to be exited.
   // This test does not reveal any erroneous behaviour of the twin
   //
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "Counter_L1", "10");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_L1", "10");
   acceptOrderedEvent ("1620920000","Test-0001","LA","Job_LoopBreak_1","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920001","Test-0001","LB","Job_LoopBreak_1","Ev301","Ev302",theAuditEventData);
@@ -52,7 +52,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '2b1e9030-e7d0-4035-a6dc-55e9f163e6d6' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test27NormalInstanceForkWithBranchCount () is
+private service AESequenceDC::Test200NormalInstanceForkWithBranchAndMergeCount () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
@@ -66,7 +66,7 @@ begin
   // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 10 branches
   // This test does not reveal any erroneous behaviour of the twin
   //
-  theAuditEventData := (aeDataKindEnum.BRANCHCONSTRAINT, "Branch_Counter_1", "10");
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_1", "10");
   acceptOrderedEvent ("1620920000","Test-0001","BCFA","Branch_Count_Job",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData :=  emptyAuditEventData;
   previousEvents := ("Ev301");
@@ -117,7 +117,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'fbcf1aed-8b9c-41f5-964b-59be6ae1710e' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test26NormalLoopWithLoopCount () is
+private service AESequenceDC::Test64InvalidLoopWithLoopCountExceedingExpectedValue () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
@@ -149,7 +149,7 @@ begin
   // This test does not reveal any erroneous behaviour of the twin
   //
   
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "Counter_1", "5");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "5");
   acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
@@ -207,7 +207,7 @@ begin
   // This test does reveals any erroneous behaviour of the twin since the Branch Count is specified as 12 
   // but only 10 branches are subsequently seen
   //
-  theAuditEventData := (aeDataKindEnum.BRANCHCONSTRAINT, "Branch_Counter_1", "12");
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_1", "12");
   acceptOrderedEvent ("1620920000","Test-0001","BCFA","Branch_Count_Job",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData :=  emptyAuditEventData;
   previousEvents := ("Ev301");
@@ -286,7 +286,7 @@ begin
   // This test does not reveal any erroneous behaviour of the twin
   //
   
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "Counter_1", "4");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "4");
   acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
@@ -336,7 +336,7 @@ begin
   // followed by an error which cause the loop to be exited.
   // This test does not reveal any erroneous behaviour of the twin
   //
-  theAuditEventData := (aeDataKindEnum.LOOPCONSTRAINT, "Counter_L1", "10");
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_L1", "10");
   acceptOrderedEvent ("1620920000","Test-0001","LA","Job_LoopBreak_1","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920001","Test-0001","LB","Job_LoopBreak_1","Ev301","Ev302",theAuditEventData);
