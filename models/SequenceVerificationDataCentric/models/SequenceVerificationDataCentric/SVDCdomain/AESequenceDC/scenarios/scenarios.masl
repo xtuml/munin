@@ -1,5 +1,5 @@
 //! ACTIVITY BEGIN. '794dcdbe-ccbe-4597-96a4-6e18a2f8ec79' DO NOT EDIT THIS LINE.
-private service AESequenceDC::InitialisationData () is
+private service AESequenceDC::OLD_InitialisationData () is
 // Initialisation data for specification classes
 
 
@@ -1944,10 +1944,11 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'b2a89ee5-ce3a-4f03-9959-deef8e5335e0' DO NOT EDIT THIS LINE.
-private service AESequenceDC::InitBranchCountDefinition () is
+private service AESequenceDC::OLD_InitBranchCountDefinition () is
 // Initialisation goes here.
 previousEventTypes : sequence of eventStructure;
 empty : sequence of eventStructure;
+logMessage : string;
 
 begin
   //
@@ -1965,7 +1966,13 @@ begin
   previousEventTypes := ("BCFE",1,"","");
   eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false);
 
+  logMessage := "DEBUG: InitBranchCountDefinition scenario - Call for Merge Count follows";
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);                       
+  dynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
+  logMessage := "DEBUG: InitBranchCountDefinition scenario - Call for Branch Count follows";
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);                       
   dynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
+  
 //
 //
 end service;

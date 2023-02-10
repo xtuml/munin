@@ -5,26 +5,27 @@ Tutorial - Split Type Fork and Merge
 '/
 
 @startuml 
-partition "Split Type Fork and Merge" {
+partition "Type AND Fork and Merge in separate sequences" {
   group "P"
     #green:A;
     :B;
-    split
+    fork
       #red:C;
       detach
-    split again
+    fork again
       #red:D;
       detach
-    end split
+    end fork
+    -[hidden]->
   end group
   group "Q"
-    split
+    fork
       -[hidden]->
       #green:G;
-    split again
+    fork again
       -[hidden]->
       #green:J;
-    end split
+    end fork
     :K;
     #red:L;
     detach

@@ -9,18 +9,18 @@ partition "AND Fork" {
 group "AND Fork"
       #green:A;
       :B;
-  split
+  fork
       :C;
+  fork again
+      #red:D;
+      detach
+  end fork    
       :E;
       :F;
       :G;
       :K;
       #red:L;
       detach
-  split again
-      #red:D;
-      detach
-  end split    
 end group
 }      
 @enduml

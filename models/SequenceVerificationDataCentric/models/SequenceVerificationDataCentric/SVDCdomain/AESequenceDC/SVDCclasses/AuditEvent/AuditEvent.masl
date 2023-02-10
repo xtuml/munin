@@ -177,6 +177,7 @@ thePrevUserDynamicControlDefn : instance of DynamicControlDefinition;
 thePrevUserDynamicControl : instance of DynamicControl;
 loopCount : integer;
 branchCount : integer;    
+mergeCount : integer;
 dynamicControlDefinitionFound : boolean;
 logMessage : string;
 creationErrorMessage : string;
@@ -270,7 +271,7 @@ creationErrorMessage : string;
               dynamicControlDefinitionFound := false;
               // Now check to see if the name of the dynamic control element matches one of the dynamic control definitions
               for theDynamicControlDefn in theDynamicControlDefns loop 
-                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
+                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName and theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
                   //A matching dynamic control definition has been identified.
                   dynamicControlDefinitionFound := true;
                   //Check that the loop count value is not empty
@@ -303,8 +304,8 @@ creationErrorMessage : string;
               dynamicControlDefinitionFound := false;
               // Now check to see if the name of the dynamic control element matches one of the dynamic control definitions
               for theDynamicControlDefn in theDynamicControlDefns loop 
-                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName then
-                  //A matching dynamic control definition has been identified.
+                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName and theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then
+                  //A matching dynamic control definition has been identified and its of the right type.
                   dynamicControlDefinitionFound := true;
                   //Check that the branch count value is not empty
                   if aeDataElement.aedValue /= "" then
@@ -329,6 +330,39 @@ creationErrorMessage : string;
                 theJob.failJob("Branch count not expected on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
               end if;
                
+            when aeDataKindEnum.MERGECOUNT =>  
+              // For this Audit Event Occurrence only the following DynamicControlDefinition is allowed
+              theDynamicControlDefns := theAeOccInSequenceDef -> R30;
+              // Initialise exit condition for for loop
+              dynamicControlDefinitionFound := false;
+              // Now check to see if the name of the dynamic control element matches one of the dynamic control definitions
+              for theDynamicControlDefn in theDynamicControlDefns loop 
+                if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName and theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.MERGECOUNT then
+                  //A matching dynamic control definition has been identified and its of the right type.
+                  dynamicControlDefinitionFound := true;
+                  //Check that the branch count value is not empty
+                  if aeDataElement.aedValue /= "" then
+                    // Convert the provided string value to an integer (a non-integer input value causes the Program Error exception caught below)
+                    mergeCount := integer'parse(aeDataElement.aedValue);
+                    newDynamicControl := create DynamicControl (jobID => theJob.jobID, 
+                  	                                          dynamicControlName => aeDataElement.aedName, 
+                  	                                          expectedDynamicControlValue => mergeCount);
+                    link newDynamicControl R29 theDynamicControlDefn;
+                    link newDynamicControl R35 theJob;
+                  else
+                    // No Merge Count value provided
+                    theJob.failJob("No valid merge count value provided on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
+                  end if;
+                  exit when dynamicControlDefinitionFound = true;
+                else
+                 // The data element name did not match the name of theDynamicControlDefn, try the next allowable one
+                end if;
+              end loop;  
+              if dynamicControlDefinitionFound = false then    
+                // This Merge Count not expected to be provided on this audit event
+                theJob.failJob("Merge count not expected on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
+              end if;
+
           when others =>
             // Log warning: Unsupported audit event data type
             theJob.failJob("The audit event data type provided for jobId = " & theJob.jobID & " is an unsupported type of audit event data = " & aeDataElement.aedName'image);               

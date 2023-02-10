@@ -5,18 +5,18 @@ Tutorial - Mixed Logic Fork with possible Merge Topology
 '/
 
 @startuml 
-partition "Mixed Logic Fork" {
-group "Mixed Logic Fork"
+partition "Mixed AND and XOR Logic Fork" {
+group "Mixed AND and XOR Logic Fork"
       #green:A;
       :B;
   if (XOR) then ("e.g. normal")
-    split
+    fork
       :C;
-    split again  
+    fork again  
       :E;
-    split again  
+    fork again  
       :F;
-    end split  
+    end fork  
       :G;
   else ("e.g. error")
       #red:D;
