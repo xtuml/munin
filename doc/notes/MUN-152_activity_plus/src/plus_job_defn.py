@@ -26,6 +26,12 @@ class JobDefn:
         self.JobDefinitionName = name                      # created when the name is encountered
         self.sequences = []                                # job may contain multiple peer sequences
         JobDefn.population.append(self)
+    def play(self):
+        """interpret the job"""
+        print( "job:", self.JobDefinitionName )
+        for seq in self.sequences:
+            seq.play()
+
 
 class SequenceDefn:
     """PLUS Sequence Definition"""
@@ -43,6 +49,12 @@ class SequenceDefn:
                                                            # ... and by any event preceded by HIDE
         SequenceDefn.c_current_sequence = self
         SequenceDefn.population.append(self)
+    def play(self):
+        """interpret the sequence"""
+        print( "seq:", self.SequenceName )
+        for start_event in self.start_events:
+            start_event.play()
+
 
 class AuditEvent:
     """PLUS Audit Event Definition"""
@@ -66,12 +78,6 @@ class AuditEvent:
         self.SequenceStart = False                         # set when 'HIDE' precedes
         self.SequenceEnd = False                           # set when 'detach' follows
         self.isBreak = False                               # set when 'break' follows
-        self.intrajob_invariant_name = ""
-        self.intrajob_invariant_source = ""                # IINV source of this name
-        self.intrajob_invariant_user = ""                  # IINV user of this name
-        self.extrajob_invariant_name = ""
-        self.extrajob_invariant_source = ""                # EINV source of this name
-        self.extrajob_invariant_user = ""                  # EINV user of this name
         self.sequence.audit_events.append(self)
         if not self.sequence.start_events:                 # ... or when no starting event, yet
             self.sequence.start_events.append( self )
@@ -94,6 +100,26 @@ class AuditEvent:
             Loop.population[-1].start_events.append( self )
         AuditEvent.c_current_event = self
         AuditEvent.population.append(self)
+    def play(self):
+        """interpret the event"""
+        print( self.EventName + "(" + self.OccurrenceId + ")" )
+        # Find all audit events in this sequence that have this event as a previous_event.
+        next_aes = []
+        for next_ae in self.sequence.audit_events:
+            paes = [pae for pae in next_ae.previous_events if pae.previous_event is self]
+            # TODO:  Check AND, IOR, XOR edges on the paes.
+            if paes:
+                # Here we check the edge types (X/I/A) and add them accordingly.
+                # Here we check branch counts and choose a random (not very big) number.
+                # Consider recognizing a loop going backwards based on the index of the event (less than).
+                # We do not care about the source of dynamic control, only the user.
+                # BCNT, LCNT
+                # When edges are XOR, choose 1.
+                # When edges are IOR, choose a random number of the available.
+                # When edges are AND, select them all.
+                next_aes.append( next_ae )
+        for ae in next_aes:
+            ae.interpret()
 
 # A previous audit event contains a reference to the previous event
 # but may also contain attributes that decorate the "edge" from the
@@ -117,15 +143,15 @@ class Fork:
         Fork.c_number += 1
         self.flavor = flavor                               # AND, XOR or IOR
         self.fork_point = None                             # c_current_event pushed as PreviousAuditEvent
-                                                           # when 'split', 'fork' or 'if' encountered
-                                                           # popped at 'end split', 'end merge' or 'endif'
+                                                           # when 'split', 'fork', 'if' or 'switch' encountered
+                                                           # popped at 'end split', 'end merge', 'endif' or 'endswitch'
         self.fork_point_usage = None                       # cached here each time 'split again', 'fork again',
                                                            # 'elsif' or 'else' encountered
-        self.merge_inputs = []                             # c_current_event pushed when 'split again',
-                                                           # 'split end', 'fork again', 'end merge',
+        self.merge_inputs = []                             # c_current_event pushed when 'split again', 'fork again',
+                                                           # 'case', 'end split', 'end fork', 'endswitch',
                                                            # 'elsif', 'else' or 'endif' entered
         self.merge_usage = []                              # used for previous events after 'end split',
-                                                           # 'end merge' and 'end if'
+                                                           # 'end fork', 'endswitch' and 'end if'
         Fork.c_scope += 1
         Fork.population.append(self)
     def __del__(self):
@@ -460,6 +486,9 @@ class plus2json_run(plus2jsonListener):
             pretty_print_job()
         elif "--json" in sys.argv or "-j" in sys.argv:
             output_json()
+        elif "--interpret" in sys.argv or "-i" in sys.argv:
+            pretty_print_job()
+            JobDefn.population[-1].interpret()
 
 # output routines (JSON and pretty-printed)
 def output_json():

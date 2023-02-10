@@ -13,13 +13,14 @@ Usage
 =====
   python3 plus2json.pyz <PLUS PlantUML file> [options]
 
-  With no options, plusact will check the syntax of the input PlantUML file.
+  With no options, plus2json will check the syntax of the input PlantUML file.
 
 Options
 =======
---help, -h                 show this help message and exit
---json, -j                 output PLUS Job Definition (JSON)    default: off
---print, -p                print human readable output          default: off
+--help, -h        show this help message and exit
+--json, -j        output PLUS Job Definition (JSON)      default: off
+--print, -p       print human readable output            default: off
+--play            interpret the job and produce events   default: off
         """)
         exit()
 
@@ -28,7 +29,7 @@ Options
     stream = CommonTokenStream(lexer)
     parser = plus2jsonParser(stream)
     tree = parser.plusdefn()
-    if ( "--print" in argv or "-p" in argv or "--json" in argv or "-j" in argv ):
+    if ( "--print" in argv or "-p" in argv or "--json" in argv or "-j" in argv or "--interpret" in argv or "-i" in argv ):
         run = plus2json_run() # custom listener
         walker = ParseTreeWalker()
         walker.walk(run, tree)
