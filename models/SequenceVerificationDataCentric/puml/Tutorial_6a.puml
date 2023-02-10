@@ -5,18 +5,18 @@ Tutorial - Fork and Merge Topology
 '/
 
 @startuml 
-partition "AND Fork and Merge" {
-group "AND Fork and Merge"
+partition "IOR Fork and Merge" {
+group "IOR Fork and Merge"
   #green:A;
   :B;
-  fork
+  split
       :C;
       :G;
-  fork again
+  split again
       :D;
       :H;
       :J;
-  end fork   
+  end split   
   :K;
   #red:L;
   detach      

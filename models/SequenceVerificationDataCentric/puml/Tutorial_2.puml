@@ -15,16 +15,16 @@ group "Near Side Bank Transfer"
       :F;
       :G;
       :H;
-  split
+  fork
       :I;
+  fork again
+      #red:M;
+      detach
+  end fork    
       :J;
       :K;
       #red:L;
       detach
-  split again
-      #red:M;
-      detach
-  end split    
 end group
 group "Mid Sequence"
       #green:N;

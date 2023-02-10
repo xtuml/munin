@@ -5,22 +5,20 @@ Tutorial - Inclusive OR Fork Topology
 '/
 
 @startuml 
-partition "Incl OR Fork" {
-group "Incl OR Fork"
+partition "Incl OR Fork and Merge" {
+group "Incl OR Fork and Merge"
       #green:A;
       :B;
   split 
       :C;
       :E;
       :F;
+  split again
+      :D;
+  end split
       :G;
       :K;
       #red:L;
-      detach
-  split again
-      #red:D;
-      detach
-  end split
 end group
 }      
 @enduml
