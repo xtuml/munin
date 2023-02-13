@@ -17,10 +17,11 @@ Usage
 
 Options
 =======
---help, -h        show this help message and exit
---json, -j        output PLUS Job Definition (JSON)      default: off
---print, -p       print human readable output            default: off
---play            interpret the job and produce events   default: off
+--help, -h               show this help message and exit
+--json, -j               output PLUS Job Definition (JSON)      default: off
+--audit_event_data, -d   output PLUS audit event data           default: off
+--print, -p              print human readable output            default: off
+--play                   interpret the job and produce events   default: off
         """)
         exit()
 
@@ -29,7 +30,8 @@ Options
     stream = CommonTokenStream(lexer)
     parser = plus2jsonParser(stream)
     tree = parser.plusdefn()
-    if ( "--print" in argv or "-p" in argv or "--json" in argv or "-j" in argv or "--play" in argv ):
+    if ( "--print" in argv or "-p" in argv or "--json" in argv or "-j" in argv or
+         "--audit_event_data" in argv or "-d" in argv or "--play" in argv ):
         run = plus2json_run() # custom listener
         walker = ParseTreeWalker()
         walker.walk(run, tree)

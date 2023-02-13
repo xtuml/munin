@@ -17,10 +17,11 @@ Usage
 
 Options
 =======
---help, -h        show this help message and exit
---json, -j        output PLUS Job Definition (JSON)      default: off
---print, -p       print human readable output            default: off
---play            interpret the job and produce events   default: off
+--help, -h               show this help message and exit
+--json, -j               output PLUS Job Definition (JSON)      default: off
+--audit_event_data, -d   output PLUS audit event data           default: off
+--print, -p              print human readable output            default: off
+--play                   interpret the job and produce events   default: off
 ```
 
 Example:

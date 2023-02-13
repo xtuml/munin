@@ -10,14 +10,10 @@ from plus2jsonParser import plus2jsonParser
 
 # TODO
 # Deal with merge-in-merge with no event in between.  This may require joining 2 merge usages.
-# Check for multiple occurrences when explicitly referencing an event.
-# Deal with multiple event decorations per event.
 # !include
 # Use a notational mark and some data to indicate where instance forks occur.
 # What if a loop surrounds a sequence with multiple start events (HIDE)?  In such a case,
 # the collection of start_events may need to be plural.
-# There is a limitation to 1 DynamicControl per event.  Fix or enforce this.
-# Invariants are not quite complete.  Need rules on when user or source is empty.
 
 class JobDefn:
     """PLUS Job Definition"""
@@ -493,6 +489,8 @@ class plus2json_run(plus2jsonListener):
             pretty_print_job()
         elif "--json" in sys.argv or "-j" in sys.argv:
             output_json()
+        elif "--audit_event_data" in sys.argv or "-d" in sys.argv:
+            output_audit_event_data()
         elif "--play" in sys.argv:
             pretty_print_job()
             JobDefn.population[-1].play()
@@ -515,13 +513,13 @@ def output_json():
                 if ae.SequenceEnd: json += "\"SequenceEnd\": true,"
                 if ae.isBreak: json += "\"isBreak\": true,"
                 # look for linked DynamicControl
-                dc = [dc for dc in DynamicControl.population if dc.source_event is ae]
-                if dc:
+                dcs = [dc for dc in DynamicControl.population if dc.source_event is ae]
+                for dc in dcs: # preparing for when multiple DynamicControls are allowed.
                     json += "\"DynamicControl\": {"
-                    json += "\"DynamicControlName\": \"" + dc[-1].DynamicControlName + "\","
-                    json += "\"DynamicControlType\": \"" + dc[-1].DynamicControlType + "\","
-                    json += "\"UserEventType\": \"" + dc[-1].user_evt_txt + "\","
-                    json += "\"UserOccurrenceId\": " + dc[-1].user_occ_txt
+                    json += "\"DynamicControlName\": \"" + dc.DynamicControlName + "\","
+                    json += "\"DynamicControlType\": \"" + dc.DynamicControlType + "\","
+                    json += "\"UserEventType\": \"" + dc.user_evt_txt + "\","
+                    json += "\"UserOccurrenceId\": " + dc.user_occ_txt
                     json += "},"
                 prev_aes = ""
                 pdelim = ""
@@ -540,6 +538,23 @@ def output_json():
             json += "\n]"
     json += "\n}\n"
     print( json )
+
+def output_audit_event_data():
+    # Output invariants separately.
+    ijson = "{ \"Invariants\": ["
+    idelim = ""
+    for invariant in Invariant.population:
+        ijson += idelim + "\n{"
+        ijson += "\"Name\": \"" + invariant.Name + "\","
+        ijson += "\"Type\": \"" + invariant.Type + "\","
+        ijson += "\"SourceEventName\": \"" + invariant.src_evt_txt + "\","
+        ijson += "\"SourceOccurrenceId\": " + invariant.src_occ_txt + ","
+        ijson += "\"UserEventName\": \"" + invariant.user_evt_txt + "\","
+        ijson += "\"UserOccurrenceId\": " + invariant.user_occ_txt
+        ijson += "}"
+        idelim = ","
+    ijson += "\n] }\n"
+    print( ijson )
 
 def pretty_print_job():
     for job_defn in JobDefn.population:
