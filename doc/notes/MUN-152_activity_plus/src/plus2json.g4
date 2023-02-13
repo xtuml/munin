@@ -44,30 +44,30 @@ event_defn     : ( HIDE NEWLINE )?
                  ( NEWLINE ( break | detach ) )?
                ;
 
-event_name     : identifier ( '(' NUMBER ')' )?
+event_name     : identifier ( '(' number ')' )?
                ;
 
 branch_count   : ',' BCNT
-                 ( ',' SRC ( '=' sname=identifier ( '(' socc=NUMBER ')' )? )? )?
-                 ( ',' USER ( '=' uname=identifier ( '(' uocc=NUMBER ')' )? )? )?
+                 ( ',' SRC ( '=' sname=identifier ( '(' socc=number ')' )? )? )?
+                 ( ',' USER ( '=' uname=identifier ( '(' uocc=number ')' )? )? )?
                  ',' NAME '=' bcname=identifier
                ;
 
 merge_count    : ',' MCNT
-                 ( ',' SRC ( '=' sname=identifier ( '(' socc=NUMBER ')' )? )? )?
-                 ( ',' USER ( '=' uname=identifier ( '(' uocc=NUMBER ')' )? )? )?
+                 ( ',' SRC ( '=' sname=identifier ( '(' socc=number ')' )? )? )?
+                 ( ',' USER ( '=' uname=identifier ( '(' uocc=number ')' )? )? )?
                  ',' NAME '=' mcname=identifier
                ;
 
 loop_count     : ',' LCNT
-                 ( ',' SRC ( '=' sname=identifier ( '(' socc=NUMBER ')' )? )? )?
-                 ( ',' USER ( '=' uname=identifier ( '(' uocc=NUMBER ')' )? )? )?
+                 ( ',' SRC ( '=' sname=identifier ( '(' socc=number ')' )? )? )?
+                 ( ',' USER ( '=' uname=identifier ( '(' uocc=number ')' )? )? )?
                  ',' NAME '=' lcname=identifier
                ;
 
 invariant      : ',' ( IINV | EINV )
-                 ( ',' SRC ( '=' sname=identifier ( '(' socc=NUMBER ')' )? )? )?
-                 ( ',' USER ( '=' uname=identifier ( '(' uocc=NUMBER ')' )? )? )?
+                 ( ',' SRC ( '=' sname=identifier ( '(' socc=number ')' )? )? )?
+                 ( ',' USER ( '=' uname=identifier ( '(' uocc=number ')' )? )? )?
                  ',' NAME '=' invname=identifier
                ;
 
@@ -130,6 +130,9 @@ split_again    : SPLITAGAIN NEWLINE statement+
 
 identifier     : IDENT
                | StringLiteral // allowing blanks delimited with double-quotes
+               ;
+
+number         : NUMBER
                ;
 
 StringLiteral  : '"' ( ~('\\'|'"') )* '"'

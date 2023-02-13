@@ -250,6 +250,11 @@ class DynamicControl:
             else:
                 print( "ERROR:  unresolved USER event in dynamic control:", dc.DynamicControlName, "with name:", dc.user_evt_txt  )
                 sys.exit()
+    @classmethod
+    def print_dynamic_control(cls):
+        print( "Print Dynamic Control" )
+        for dc in DynamicControl.population:
+            print( "dc:", dc.DynamicControlName, "src:", dc.src_evt_txt, "src_occ:", dc.src_occ_txt, "user:", dc.user_evt_txt, "uocc:", dc.user_occ_txt  )
 
 # Invariants must deal with forward references.
 # During the walk, capture the audit EventNames and OccurrenceIds as text.
@@ -320,8 +325,8 @@ class plus2json_run(plus2jsonListener):
 
     def exitEvent_name(self, ctx:plus2jsonParser.Event_nameContext):
         n = []
-        if ctx.NUMBER():
-            n.append( ctx.NUMBER().getText() )
+        if ctx.number():
+            n.append( ctx.number().getText() )
         AuditEvent(ctx.identifier().getText(), n)
 
     def exitEvent_defn(self, ctx:plus2jsonParser.Event_defnContext):
@@ -372,13 +377,13 @@ class plus2json_run(plus2jsonListener):
             if ctx.sname:
                 dynamic_control.src_evt_txt = ctx.sname.getText()
             if ctx.socc:
-                dynamic_control.src_evt_occ = ctx.socc.getText()
+                dynamic_control.src_occ_txt = ctx.socc.getText()
         if ctx.USER():
             # explicit user event
             if ctx.uname:
                 dynamic_control.user_evt_txt = ctx.uname.getText()
             if ctx.uocc:
-                dynamic_control.user_evt_occ = ctx.uocc.getText()
+                dynamic_control.user_occ_txt = ctx.uocc.getText()
 
     def exitInvariant(self, ctx:plus2jsonParser.InvariantContext):
         # The default of source or target is the event definition carrying
