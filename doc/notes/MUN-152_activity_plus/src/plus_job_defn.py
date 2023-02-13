@@ -119,7 +119,7 @@ class AuditEvent:
                 # When edges are AND, select them all.
                 next_aes.append( next_ae )
         for ae in next_aes:
-            ae.interpret()
+            ae.play()
 
 # A previous audit event contains a reference to the previous event
 # but may also contain attributes that decorate the "edge" from the
@@ -488,9 +488,9 @@ class plus2json_run(plus2jsonListener):
             pretty_print_job()
         elif "--json" in sys.argv or "-j" in sys.argv:
             output_json()
-        elif "--interpret" in sys.argv or "-i" in sys.argv:
+        elif "--play" in sys.argv:
             pretty_print_job()
-            JobDefn.population[-1].interpret()
+            JobDefn.population[-1].play()
 
 # output routines (JSON and pretty-printed)
 def output_json():

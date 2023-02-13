@@ -29,7 +29,7 @@ Options
     stream = CommonTokenStream(lexer)
     parser = plus2jsonParser(stream)
     tree = parser.plusdefn()
-    if ( "--print" in argv or "-p" in argv or "--json" in argv or "-j" in argv or "--interpret" in argv or "-i" in argv ):
+    if ( "--print" in argv or "-p" in argv or "--json" in argv or "-j" in argv or "--play" in argv ):
         run = plus2json_run() # custom listener
         walker = ParseTreeWalker()
         walker.walk(run, tree)

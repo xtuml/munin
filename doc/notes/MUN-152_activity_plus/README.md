@@ -17,15 +17,16 @@ Usage
 
 Options
 =======
---help, -h                 show this help message and exit
---json, -j                 output PLUS Job Definition (JSON)    default: off
---print, -p                print human readable output          default: off
+--help, -h        show this help message and exit
+--json, -j        output PLUS Job Definition (JSON)      default: off
+--print, -p       print human readable output            default: off
+--play            interpret the job and produce events   default: off
 ```
 
 Example:
 
 ```
-python plus2json.pyz examples/Tutorial_1.puml -json        # convert Tutorial_1.puml into JSON
+python plus2json.pyz examples/Tutorial_1.puml -json       # convert Tutorial_1.puml into JSON
 python -m plus2json examples/Tutorial_1.puml -p           # show job in human readable view
 ```
 
