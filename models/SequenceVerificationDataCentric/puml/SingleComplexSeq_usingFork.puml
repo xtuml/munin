@@ -3,7 +3,7 @@ partition "Single Complex Job" {
 group "Single Sequence"
 
   #green:A,LCNT,user=S,name=LC3,BCNT,user=K,name=BC2;
-  :B,LCNT,user=E_0,name=LC1,LCNT,user=D_1,name=LC2,IINV,name=InvariantA;
+  :B,LCNT,user=E(0),name=LC1,LCNT,user=D(1),name=LC2,IINV,name=InvariantA;
   :C;
   if (XOR) then ("error")
     #red:R;

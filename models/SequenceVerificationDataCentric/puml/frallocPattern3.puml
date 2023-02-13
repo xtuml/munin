@@ -1,0 +1,23 @@
+@startuml
+#green:FrallocStart;
+if (XOR) then (normal)
+  :chmint;
+  if (XOR) then (normal)
+    :ehmint;
+    if (XOR) then (normal)
+      :frallocEval;
+      if (XOR) then (normal)
+        #red:frallocOK;
+        detach
+      else (error)
+      endif
+    else (error)
+      :ehmintError;
+    endif  
+  else (error)
+    :chmintError;    
+  endif 
+else (error)   
+endif
+#red:frallocError;  
+@enduml
