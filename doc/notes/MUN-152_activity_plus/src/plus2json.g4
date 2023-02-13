@@ -17,7 +17,7 @@ job_defn       : PARTITION job_name '{' NEWLINE sequence_defn* '}' NEWLINE
 job_name       : identifier
                ;
 
-sequence_defn  : GROUP sequence_name NEWLINE statement* ENDGROUP NEWLINE
+sequence_defn  : GROUP sequence_name NEWLINE statement* ( HIDE NEWLINE )? ENDGROUP NEWLINE
                ;
 
 sequence_name  : identifier
@@ -36,9 +36,10 @@ statement      : ( event_defn
 event_defn     : ( HIDE NEWLINE )?
                  ':' event_name
                    ( branch_count
+                   | merge_count
                    | loop_count
                    | invariant
-                   )?
+                   )*
                  ( ';' | '<' | '>' | ']' )
                  ( NEWLINE ( break | detach ) )?
                ;
@@ -50,6 +51,12 @@ branch_count   : ',' BCNT
                  ( ',' SRC ( '=' sname=identifier ( '(' socc=NUMBER ')' )? )? )?
                  ( ',' USER ( '=' uname=identifier ( '(' uocc=NUMBER ')' )? )? )?
                  ',' NAME '=' bcname=identifier
+               ;
+
+merge_count    : ',' MCNT
+                 ( ',' SRC ( '=' sname=identifier ( '(' socc=NUMBER ')' )? )? )?
+                 ( ',' USER ( '=' uname=identifier ( '(' uocc=NUMBER ')' )? )? )?
+                 ',' NAME '=' mcname=identifier
                ;
 
 loop_count     : ',' LCNT
@@ -150,6 +157,7 @@ HIDE           : '-[hidden]->';
 IF             : 'if';
 IINV           : 'iinv' | 'IINV'; // intra-job invariant
 LCNT           : 'lcnt' | 'LCNT'; // loop count
+MCNT           : 'mcnt' | 'MCNT'; // merge count
 NAME           : 'name' | 'NAME'; // marking target event
 PARTITION      : 'partition';     // job
 REPEAT         : 'repeat';

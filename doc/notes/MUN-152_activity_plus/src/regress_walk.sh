@@ -3,8 +3,10 @@ python __main__.py ../tests/Tutorial_1.puml -p
 python __main__.py ../tests/Tutorial_2.puml -p
 python __main__.py ../tests/Tutorial_3.puml -p
 python __main__.py ../tests/Tutorial_4.puml -p
+python __main__.py ../tests/Tutorial_4a.puml -p
 python __main__.py ../tests/Tutorial_5.puml -p
 python __main__.py ../tests/Tutorial_6.puml -p
+python __main__.py ../tests/Tutorial_6a.puml -p
 python __main__.py ../tests/Tutorial_7.puml -p
 python __main__.py ../tests/Tutorial_8.puml -p
 python __main__.py ../tests/Tutorial_9.puml -p

@@ -13,13 +13,13 @@ partition "Job with Loop and Break" {
     repeat
       :B;
       :C;
-      if (XOR) then (error)
+      if (XOR) then ("error")
         :CError;
         break
-      else (normal)
+      else ("normal")
         :D;
       endif
-    repeat while ("constrained loop")
+    repeat while
     #red:E;
   end group
 }

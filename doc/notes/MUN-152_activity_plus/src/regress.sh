@@ -3,8 +3,10 @@ antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_1.puml
 antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_2.puml
 antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_3.puml
 antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_4.puml
+antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_4a.puml
 antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_5.puml
 antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_6.puml
+antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_6a.puml
 antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_7.puml
 antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_8.puml
 antlr4-parse plus2json.g4 plusdefn < ../tests/Tutorial_9.puml

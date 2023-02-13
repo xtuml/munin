@@ -173,9 +173,6 @@ class Fork:
                 Fork.population[-1].fork_point.ConstraintValue = self.flavor
                 Fork.population[-1].fork_point.ConstraintDefinitionId = Fork.population[-1].id
                 Fork.population[-1].fork_point_usage = Fork.population[-1].fork_point
-            else:
-                print( "ERROR:  malformed fork stack at scope:", Fork.c_scope )
-                sys.exit()
     def again(self):
         if AuditEvent.c_current_event: # We may have 'detach'd and have no c_current_event.
             Fork.population[-1].merge_inputs.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
@@ -225,15 +222,16 @@ class DynamicControl:
             print( "ERROR:  duplicate dynamic control detected:", name )
             sys.exit()
         self.DynamicControlName = name                     # unique name
-        if control_type in ('BRANCHCOUNT', 'LOOPCOUNT'):
+        if control_type in ('BRANCHCOUNT', 'MERGECOUNT', 'LOOPCOUNT'):
             self.DynamicControlType = control_type         # branch or loop
         else:
             print( "ERROR:  invalid dynamic control type:", control_type, "with name:", name )
             sys.exit()
-        self.src_evt_txt = ""                              # SRC event textual EventName
-        self.src_occ_txt = "0"                             # SRC event textual OccurrenceId (default)
-        self.user_evt_txt = ""                             # USER event textual EventName
-        self.user_occ_txt = "0"                            # USER event textual OccurrenceId (default)
+        # Default source and user event to be the host audit event.  Adjustments will be made by SRC/USER.
+        self.src_evt_txt = AuditEvent.c_current_event.EventName
+        self.src_occ_txt = AuditEvent.c_current_event.OccurrenceId
+        self.user_evt_txt = AuditEvent.c_current_event.EventName
+        self.user_occ_txt = AuditEvent.c_current_event.OccurrenceId
         self.source_event = None                           # audit event hosting the control
         self.user_event = None                             # audit event to be dynamically tested
         DynamicControl.population.append(self)
@@ -283,9 +281,6 @@ class Invariant:
             sae = [ae for ae in AuditEvent.population if ae.EventName == inv.src_evt_txt and ae.OccurrenceId == inv.src_occ_txt]
             if sae:
                 inv.source_event = sae[-1]
-            else:
-                print( "ERROR:  unresolved SRC event in invariant:", inv.Name, "with name:", inv.src_evt_txt  )
-                sys.exit()
             uaes = [ae for ae in AuditEvent.population if ae.EventName == inv.user_evt_txt and ae.OccurrenceId == inv.user_occ_txt]
             if uaes:
                 # We can have more than one user for an invariant.
@@ -334,15 +329,10 @@ class plus2json_run(plus2jsonListener):
             AuditEvent.c_current_event.SequenceStart = True
 
     def exitBranch_count(self, ctx:plus2jsonParser.Branch_countContext):
-        """almost the same as exitLoop_count"""
+        """almost the same as Loop and Merge"""
         # The default of source or target is the event definition carrying
         # the branch_count parameters.
         dynamic_control = DynamicControl( ctx.bcname.getText(), "BRANCHCOUNT" )
-        # default to the hosting event where the BCNT is found
-        dynamic_control.src_evt_txt = AuditEvent.c_current_event.EventName
-        dynamic_control.src_occ_txt = AuditEvent.c_current_event.OccurrenceId
-        dynamic_control.user_evt_txt = AuditEvent.c_current_event.EventName
-        dynamic_control.user_occ_txt = AuditEvent.c_current_event.OccurrenceId
         if ctx.SRC():
             # explicit source event
             dynamic_control.src_evt_txt = ctx.sname.getText()
@@ -354,16 +344,29 @@ class plus2json_run(plus2jsonListener):
             if ctx.uocc:
                 dynamic_control.user_evt_occ = ctx.uocc.getText()
 
+    def exitMerge_count(self, ctx:plus2jsonParser.Merge_countContext):
+        """almost the same as Branch and Loop"""
+        # The default of source or target is the event definition carrying
+        # the loop_count parameters.
+        dynamic_control = DynamicControl( ctx.mcname.getText(), "MERGECOUNT" )
+        if ctx.SRC():
+            # explicit source event
+            if ctx.sname:
+                dynamic_control.src_evt_txt = ctx.sname.getText()
+            if ctx.socc:
+                dynamic_control.src_evt_occ = ctx.socc.getText()
+        if ctx.USER():
+            # explicit user event
+            if ctx.uname:
+                dynamic_control.user_evt_txt = ctx.uname.getText()
+            if ctx.uocc:
+                dynamic_control.user_evt_occ = ctx.uocc.getText()
+
     def exitLoop_count(self, ctx:plus2jsonParser.Loop_countContext):
-        """almost the same as exitBranch_count"""
+        """almost the same as Branch and Merge"""
         # The default of source or target is the event definition carrying
         # the loop_count parameters.
         dynamic_control = DynamicControl( ctx.lcname.getText(), "LOOPCOUNT" )
-        # default to the hosting event where the LCNT is found
-        dynamic_control.src_evt_txt = AuditEvent.c_current_event.EventName
-        dynamic_control.src_occ_txt = AuditEvent.c_current_event.OccurrenceId
-        dynamic_control.user_evt_txt = AuditEvent.c_current_event.EventName
-        dynamic_control.user_occ_txt = AuditEvent.c_current_event.OccurrenceId
         if ctx.SRC():
             # explicit source event
             if ctx.sname:
@@ -387,11 +390,6 @@ class plus2json_run(plus2jsonListener):
             invariant = invariants[-1]
         else:
             invariant = Invariant( name, "EINV" if ctx.EINV() else "IINV" )
-            # default to the hosting event where the LCNT is found
-            invariant.src_evt_txt = AuditEvent.c_current_event.EventName
-            invariant.src_occ_txt = AuditEvent.c_current_event.OccurrenceId
-            invariant.user_evt_txt = AuditEvent.c_current_event.EventName
-            invariant.user_occ_txt = AuditEvent.c_current_event.OccurrenceId
         if ctx.SRC():
             # explicit source event
             if ctx.sname:
@@ -412,6 +410,10 @@ class plus2json_run(plus2jsonListener):
                 invariant.user_occ_occ = ctx.uocc.getText()
             else:
                 invariant.user_occ_txt = AuditEvent.c_current_event.OccurrenceId
+        # neither SRC nor USER defaults source to host
+        if not ctx.SRC() and not ctx.USER():
+            invariant.src_evt_txt = AuditEvent.c_current_event.EventName
+            invariant.src_occ_txt = AuditEvent.c_current_event.OccurrenceId
 
     def enterBreak(self, ctx:plus2jsonParser.BreakContext):
         AuditEvent.c_current_event.isBreak = True
@@ -543,17 +545,20 @@ def pretty_print_job():
                 ss = "start" if ae.SequenceStart else ""
                 se = "end" if ae.SequenceEnd else ""
                 b = "break" if ae.isBreak else "     "
-                # look for linked DynamicControl
+                # look for linked DynamicControls
                 bcnt = ""
                 lcnt = ""
-                dc = [dc for dc in DynamicControl.population if dc.source_event is ae]
-                if dc:
-                    su = "s=" + dc[-1].src_evt_txt + "(" + dc[-1].src_occ_txt + ")"
-                    su += "u=" + dc[-1].user_evt_txt + "(" + dc[-1].user_occ_txt + ")"
-                    if dc[-1].DynamicControlType == "BRANCHCOUNT":
-                        bcnt = "bc:" + dc[-1].DynamicControlName + "-" + su
-                    elif dc[-1].DynamicControlType == "LOOPCOUNT":
-                        lcnt = "lc:" + dc[-1].DynamicControlName + "-" + su
+                mcnt = ""
+                dcs = [dc for dc in DynamicControl.population if dc.source_event is ae]
+                for dc in dcs:
+                    su = "s=" + dc.src_evt_txt + "(" + dc.src_occ_txt + ")"
+                    su += "u=" + dc.user_evt_txt + "(" + dc.user_occ_txt + ")"
+                    if dc.DynamicControlType == "BRANCHCOUNT":
+                        bcnt += "bc:" + dc.DynamicControlName + "-" + su
+                    elif dc.DynamicControlType == "MERGECOUNT":
+                        mcnt += "mc:" + dc.DynamicControlName + "-" + su
+                    elif dc.DynamicControlType == "LOOPCOUNT":
+                        lcnt += "lc:" + dc.DynamicControlName + "-" + su
                     else:
                         print( "ERROR:  malformed dynamic control" )
                         sys.exit()
@@ -562,16 +567,22 @@ def pretty_print_job():
                 iinv = ""
                 inv = [inv for inv in Invariant.population if inv.source_event is ae]
                 if inv:
-                    su = "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
-                    su += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
+                    su = ""
+                    if "" != inv[-1].src_evt_txt:
+                        su += "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
+                    if "" != inv[-1].user_evt_txt:
+                        su += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
                     if inv[-1].Type == "EINV":
                         einv = "einv:" + inv[-1].Name + "-" + su
                     elif inv[-1].Type == "IINV":
                         iinv = "iinv:" + inv[-1].Name + "-" + su
                 inv = [inv for inv in Invariant.population if ae in inv.user_events]
                 if inv:
-                    su = "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
-                    su += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
+                    su = ""
+                    if "" != inv[-1].src_evt_txt:
+                        su += "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
+                    if "" != inv[-1].user_evt_txt:
+                        su += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
                     if inv[-1].Type == "EINV":
                         einv = "einv:" + inv[-1].Name + "-" + su
                     elif inv[-1].Type == "IINV":
@@ -588,5 +599,4 @@ def pretty_print_job():
                                )
                     delim = ","
                 print( f'{ae.EventName+"("+ae.OccurrenceId+")":{AuditEvent.c_longest_name_length+3}}',
-                       f'{ss:{5}}', f'{se:{3}}', b, prev_aes, bcnt,
-                       lcnt, einv, iinv )
+                       f'{ss:{5}}', f'{se:{3}}', b, prev_aes, bcnt, mcnt, lcnt, einv, iinv )

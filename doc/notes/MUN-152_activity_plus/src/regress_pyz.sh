@@ -3,8 +3,10 @@ python ../plus2json.pyz ../tests/Tutorial_1.puml -p
 python ../plus2json.pyz ../tests/Tutorial_2.puml -p
 python ../plus2json.pyz ../tests/Tutorial_3.puml -p
 python ../plus2json.pyz ../tests/Tutorial_4.puml -p
+python ../plus2json.pyz ../tests/Tutorial_4a.puml -p
 python ../plus2json.pyz ../tests/Tutorial_5.puml -p
 python ../plus2json.pyz ../tests/Tutorial_6.puml -p
+python ../plus2json.pyz ../tests/Tutorial_6a.puml -p
 python ../plus2json.pyz ../tests/Tutorial_7.puml -p
 python ../plus2json.pyz ../tests/Tutorial_8.puml -p
 python ../plus2json.pyz ../tests/Tutorial_9.puml -p

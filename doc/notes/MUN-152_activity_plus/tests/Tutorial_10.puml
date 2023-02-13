@@ -6,18 +6,17 @@ Tutorial - Multiple Event Occurrences
 
 @startuml 
 partition "Job with multiple event occurrences" {
-  group "Sequence with split with multiple event occurrences"
+  group "Sequence with AND fork & multiple event occurrences"
       #green:A(0);
       :B(0);
       :C(0);
-      split
+      fork
         :B(1);
-        #red:C(1);
-        detach
-      split again
+      fork again
         #red:D(0);
         detach
-      end split
+      end fork
+      #red:C(1);
   end group
 }
 @enduml
