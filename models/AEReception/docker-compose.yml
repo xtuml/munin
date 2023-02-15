@@ -13,7 +13,8 @@ services:
     volumes:
       - "./config:/root/config"
       - "../test-files/aer-incoming:/root/incoming"
-      - "../test-files/aer-processing:/root/processing"
-      - "../test-files/aer-processed:/root/processed"
+#      - "../test-files/aer-processing:/root/processing"
+#      - "../test-files/aer-processed:/root/processed"
       - "../test-files/verifier-incoming:/root/outgoing"
+    restart: on-failure
     command: "-configPath config/ -preinit schedule/startup.sch -util Inspector -inspector-port 0"
