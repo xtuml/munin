@@ -9,7 +9,6 @@ from plus2jsonListener import plus2jsonListener
 from plus2jsonParser import plus2jsonParser
 
 # TODO
-# Fix loop start_events -> start_event.
 # Deal with merge-in-merge with no event in between.  This may require joining 2 merge usages.
 # !include
 # Use a notational mark and some data to indicate where instance forks occur.
@@ -68,7 +67,7 @@ class SequenceDefn:
 class AuditEvent:
     """PLUS Audit Event Definition"""
     population = []
-    c_current_event = None                                 # set at creation, emptied at sequence exit
+    c_current_event = None                                 # set at creation, reset at sequence exit
     c_longest_name_length = 0                              # Keep longest name length for pretty printing.
     def __init__(self, name, occurrence):
         self.EventName = name
@@ -76,10 +75,10 @@ class AuditEvent:
             AuditEvent.c_longest_name_length = len( name )
         self.sequence = SequenceDefn.c_current_sequence
         if occurrence:
-            if any( ae for ae in self.sequence.audit_events if ae.EventName == name and ae.OccurrenceId == occurrence[-1] ):
-                print( "ERROR:  duplicate audit event detected:", name + "(" + occurrence[-1] + ")" )
+            if any( ae for ae in self.sequence.audit_events if ae.EventName == name and ae.OccurrenceId == occurrence ):
+                print( "ERROR:  duplicate audit event detected:", name + "(" + occurrence + ")" )
                 sys.exit()
-            self.OccurrenceId = occurrence[-1]
+            self.OccurrenceId = occurrence
         else:
             # here, we count previous occurrences and assign an incremented value
             items = [ae for ae in self.sequence.audit_events if ae.EventName == name]
@@ -114,11 +113,44 @@ class AuditEvent:
     def play(self):
         """interpret the event"""
         self.visit_count += 1
-        # Find all audit events in this sequence that have this event as a previous_event.
         next_aes = []
+        eligible_next_aes = []
         xor_included = False
         ior_included = False # TODO:  need to select at least one
+        # Find the next event(s) to play if they exist.
+        # This requires collecting all events in the sequence that carry this event (self)
+        # as a previous event.  The list needs to be reduced based upon the following rules:
+        # (Note that contraints may be marked on the edges leading to next events.)
+        #   default:  If there is only one next event with no constraints on the edge, play it.
+        #   XOR:  for next events with XOR on the edge, select only one.
+        #   IOR:  for next events with IOR on the edge, select only one.
+        #   AND:  for next events with AND on the edge, select all of them.
+        #   loop:  for exactly 2 next events with one of them having a lower index, prefer
+        #          the lower index event (loop back) until a count has reached a threshold,
+        #          then select the event following the loop.
         for next_ae in self.sequence.audit_events:
+            paes = [pae for pae in next_ae.previous_events if pae.previous_event is self]
+            if paes:
+                eligible_next_aes.append( next_ae )
+        # loop detection
+        if len( eligible_next_aes ) == 2:
+            if AuditEvent.population.index( eligible_next_aes[0] ) < AuditEvent.population.index( self ):
+                # loop detected in 0 event
+                if self.visit_count < 4:
+                    # Loop back by selecting the lower index event.  Clear the go forward event.
+                    eligible_next_aes.remove( eligible_next_aes[1] )
+                else:
+                    # Carry on.
+                    eligible_next_aes.remove( eligible_next_aes[0] )
+            elif AuditEvent.population.index( eligible_next_aes[1] ) < AuditEvent.population.index( self ):
+                # loop detected in 1 event
+                if self.visit_count < 4:
+                    # Loop back by selecting the lower index event.  Clear the go forward event.
+                    eligible_next_aes.remove( eligible_next_aes[0] )
+                else:
+                    # Carry on.
+                    eligible_next_aes.remove( eligible_next_aes[1] )
+        for next_ae in eligible_next_aes:
             paes = [pae for pae in next_ae.previous_events if pae.previous_event is self]
             if paes:
                 for pae in paes:
@@ -132,18 +164,7 @@ class AuditEvent:
                         next_aes.append( next_ae )
                         ior_included = True
                     elif "" == pae.ConstraintValue:
-                        # Loop detected here.  Go backwards N times and then choose the larger event.
-                        if ( AuditEvent.population.index( next_ae ) < AuditEvent.population.index( self ) and
-                             next_ae.visit_count < 4 ):
-                            next_aes.clear()
-                            next_aes.append( next_ae )
-                            break
-                        else:
-                            if next_ae.visit_count < 5:
-                                next_aes.append( next_ae )
-                else:
-                    continue
-                break
+                        next_aes.append( next_ae )
         # Give some indication that we are forking.
         fork_count = len( next_aes )
         fork_text = "" if fork_count < 2 else "f" + str( fork_count )
@@ -167,6 +188,7 @@ class PreviousAuditEvent:
 
 class Fork:
     """A Fork keeps linkages to fork and merge points."""
+    # Instances of Fork are stacked to allow nesting.
     population = []
     c_scope = -1
     c_number = 1

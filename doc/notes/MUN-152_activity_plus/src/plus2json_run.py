@@ -29,10 +29,7 @@ class plus2json_run(plus2jsonListener):
         AuditEvent.c_current_event = None
 
     def exitEvent_name(self, ctx:plus2jsonParser.Event_nameContext):
-        n = []
-        if ctx.number():
-            n.append( ctx.number().getText() )
-        AuditEvent(ctx.identifier().getText(), n)
+        AuditEvent( ctx.identifier().getText(), "" if not ctx.number() else ctx.number().getText() )
 
     def exitEvent_defn(self, ctx:plus2jsonParser.Event_defnContext):
         if ctx.HIDE():
