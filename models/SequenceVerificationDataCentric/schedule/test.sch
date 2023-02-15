@@ -33,12 +33,12 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test11NormalPath 1011 CleanUpAllJob
 
 # Fork and Merge normal test cases
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test12NormalForkAndMergePath 1012 CleanUpAllJobs 64]
-# Tests 13, 15 and 16 are currently invalid as we enforce a Branch Count which these tests don't have
-#RUN SCENARIO Test 1 "run_test" [AESequenceDC Test13NormalInstanceForkAndMergePath 1013 CleanUpAllJobs 64]
+# Tests 13, 15 and 16 have been updated to include branch count which is now enforced
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test13NormalInstanceForkAndMergePath 1013 CleanUpAllJobs 64]
 # The following test is now invalid because invariants have been added to the defintions
 #RUN SCENARIO Test 1 "run_test" [AESequenceDC Test14NormalSplitForkAndMergePath 1014 CleanUpAllJobs 64]
-#RUN SCENARIO Test 1 "run_test" [AESequenceDC Test15NormalSplitInstanceForkAndMergePath 1015 CleanUpAllJobs 64]
-#RUN SCENARIO Test 1 "run_test" [AESequenceDC Test16NormalInstanceAndTypeForkAndMergePath 1016 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test15NormalSplitInstanceForkAndMergePath 1015 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test16NormalInstanceAndTypeForkAndMergePath 1016 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test17NormalXORConstraint 1017 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test21NormalIntraJobInvariant 1021 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test22NormalSourceExtraJobInvariant 1022 CleanUpAllJobs 64]
@@ -94,6 +94,10 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test61InvalidInstanceForkWithBranch
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test62InvalidLoopWithLoopCount 1062 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test63InvalidLoopWithNonIntegerLoopCount 1063 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test64InvalidLoopWithLoopCountExceedingExpectedValue 1064 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test250IllegalInstanceForkAndMergePath 1250 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test251IllegalSplitInstanceForkAndMergePath 1251 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test252IllegalInstanceAndTypeForkAndMergePath 1252 CleanUpAllJobs 64]
+
 # Errors in complex sequences
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test100ComplexSequence_RainyDay1_XORconstraintViolation 1100 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test101ComplexSequence_RainyDay2_InstanceForkViolation 1101 CleanUpAllJobs 64]
