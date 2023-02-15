@@ -3,13 +3,13 @@ partition "Single Complex Job" {
 group "Single Sequence"
 
   #green:A,LCNT,user=S,name=LC3,BCNT,user=K,name=BC2;
-  :B,LCNT,user=E(0),name=LC1,LCNT,user=D(1),name=LC2,IINV,name=InvariantA;
+  :B,LCNT,user=E,name=LC1,LCNT,user=D,name=LC2,IINV,name=InvariantA;
   :C;
   if (XOR) then ("error")
     #red:R;
     detach
   else ("normal")
-    fork
+    split
       repeat
         :D;
         :E,EINV,USER,name=AUTH_TOKEN_A;
@@ -26,20 +26,19 @@ group "Single Sequence"
           :F;
         endif
       repeat while
-    fork again
+    split again
       :K;
       :L,EINV,USER,name=AUTH_TOKEN_A;
       :M;
       if (XOR) then ("error")
         #red:N;
         detach
-      else ("normal")  
       endif    
-    fork again
+    split again
       :P;
       #red:Q;
       detach
-    fork again
+    split again
       :C;
       repeat
         :D;
@@ -49,14 +48,14 @@ group "Single Sequence"
       :D,EINV,USER,name=AUTH_TOKEN_A;
       #red:G;
       detach
-    fork again
+    split again
       repeat
         :S;
       repeat while
       :D;
       #red:E;
       detach
-    end fork
+    end split
     :H;
     #red:J;
     detach

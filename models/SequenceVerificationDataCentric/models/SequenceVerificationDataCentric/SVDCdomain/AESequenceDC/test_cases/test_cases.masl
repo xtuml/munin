@@ -2021,7 +2021,9 @@ begin
   // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 3 branches
   // This test does not reveal any erroneous behaviour of the twin
   //
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "InstFork_1", "10");
   acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
   acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
@@ -2317,7 +2319,10 @@ begin
   // This test covers 1 Job with 2 sequences based on a split fork and merge path definition - there are 10 branches
   // This test does not reveal any erroneous behaviour of the twin
   // Forking Sequence
+
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "SplitInstFork_1", "10");
   acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
   acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
@@ -2402,7 +2407,9 @@ begin
   // all at the same fork point
   // This test does not reveal any erroneous behaviour of the twin
   //
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "TypeFork_1", "15");
   acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
   acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
