@@ -5,19 +5,19 @@ plusdefn       : NEWLINE* umlblock+
 
 umlblock       : STARTUML ( '(' 'id' '=' identifier ')' )? NEWLINE
                  ( job_defn      // primary use case defining full job
-                 | sequence_defn // sequence to be referenced from elsewhere
-                 | statement+    // simple grouping of statements to be !included
+//               | sequence_defn // sequence to be referenced from elsewhere
+//               | statement+    // simple grouping of statements to be !included
                  )
                  ENDUML NEWLINE?
                ;
 
-job_defn       : PARTITION job_name '{' NEWLINE sequence_defn* '}' NEWLINE
+job_defn       : PARTITION job_name '{' NEWLINE sequence_defn+ '}' NEWLINE
                ;
 
 job_name       : identifier
                ;
 
-sequence_defn  : GROUP sequence_name NEWLINE statement* ( HIDE NEWLINE )? ENDGROUP NEWLINE
+sequence_defn  : GROUP sequence_name NEWLINE statement+ ( HIDE NEWLINE )? ENDGROUP NEWLINE
                ;
 
 sequence_name  : identifier

@@ -9,11 +9,24 @@ from plus2jsonListener import plus2jsonListener
 from plus2jsonParser import plus2jsonParser
 
 # TODO
+# Fix loop start_events -> start_event.
 # Deal with merge-in-merge with no event in between.  This may require joining 2 merge usages.
 # !include
 # Use a notational mark and some data to indicate where instance forks occur.
 # What if a loop surrounds a sequence with multiple start events (HIDE)?  In such a case,
 # the collection of start_events may need to be plural.
+# Audit Event Play (play)
+# I wonder if revisiting the tree would be good.  This would allow seeing fork/repeat/etc.
+# Here we check the edge types (X/I/A) and add them accordingly.
+# Actually, I know the fork and loop start events.
+# When edges are XOR, choose 1.
+# When edges are IOR, choose a random number of the available.
+# When edges are AND, select them all.
+# Here we check branch counts and choose a random (not very big) number.
+# We do not care about the source of dynamic control, only the user (BCNT, LCNT, MCNT).
+# Consider a "visit count" on each event.  Use it to not loop too much.
+# Consider recognizing a loop going backwards based on the index of the event (less than).
+#   Prefer the event with the lower index until the visit count rises above a threshold.
 
 class JobDefn:
     """PLUS Job Definition"""
@@ -92,28 +105,51 @@ class AuditEvent:
             AuditEvent.c_current_event = None
         # detect loop
         # if it exists but has no starting event, add this one
-        if Loop.population and not Loop.population[-1].start_events:
-            Loop.population[-1].start_events.append( self )
+        if Loop.population and not Loop.population[-1].start_event:
+            Loop.population[-1].start_event = self
+        # Interpret/play variables.
+        self.visit_count = 0
         AuditEvent.c_current_event = self
         AuditEvent.population.append(self)
     def play(self):
         """interpret the event"""
-        print( self.EventName + "(" + self.OccurrenceId + ")" )
+        self.visit_count += 1
         # Find all audit events in this sequence that have this event as a previous_event.
         next_aes = []
+        xor_included = False
+        ior_included = False # TODO:  need to select at least one
         for next_ae in self.sequence.audit_events:
             paes = [pae for pae in next_ae.previous_events if pae.previous_event is self]
-            # TODO:  Check AND, IOR, XOR edges on the paes.
             if paes:
-                # Here we check the edge types (X/I/A) and add them accordingly.
-                # Here we check branch counts and choose a random (not very big) number.
-                # Consider recognizing a loop going backwards based on the index of the event (less than).
-                # We do not care about the source of dynamic control, only the user.
-                # BCNT, LCNT
-                # When edges are XOR, choose 1.
-                # When edges are IOR, choose a random number of the available.
-                # When edges are AND, select them all.
-                next_aes.append( next_ae )
+                for pae in paes:
+                    # Check AND, IOR, XOR edges on the paes.
+                    if "AND" == pae.ConstraintValue:
+                        next_aes.append( next_ae )
+                    elif not xor_included and "XOR" == pae.ConstraintValue:
+                        next_aes.append( next_ae )
+                        xor_included = True
+                    elif not ior_included and "IOR" == pae.ConstraintValue:
+                        next_aes.append( next_ae )
+                        ior_included = True
+                    elif "" == pae.ConstraintValue:
+                        # Loop detected here.  Go backwards N times and then choose the larger event.
+                        if ( AuditEvent.population.index( next_ae ) < AuditEvent.population.index( self ) and
+                             next_ae.visit_count < 4 ):
+                            next_aes.clear()
+                            next_aes.append( next_ae )
+                            break
+                        else:
+                            if next_ae.visit_count < 5:
+                                next_aes.append( next_ae )
+                else:
+                    continue
+                break
+        # Give some indication that we are forking.
+        fork_count = len( next_aes )
+        fork_text = "" if fork_count < 2 else "f" + str( fork_count )
+        print( self.EventName,
+               "[" + str( self.visit_count ) + "]" if self.visit_count > 1 else "",
+               fork_text )
         for ae in next_aes:
             ae.play()
 
@@ -294,7 +330,7 @@ class Loop:
     population = []
     c_scope = 0
     def __init__(self):
-        self.start_events = []                             # first event encountered
+        self.start_event = None                            # first event encountered
         Loop.population.append(self)
 
 class IntrajobInvariant:
@@ -472,14 +508,14 @@ class plus2json_run(plus2jsonListener):
     # Link the last event in the loop as a previous event to the first event in the loop.
     def exitLoop(self, ctx:plus2jsonParser.LoopContext):
         if AuditEvent.c_current_event: # We may be following a fork/merge.
-            Loop.population[-1].start_events[-1].previous_events.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
+            Loop.population[-1].start_event.previous_events.append( PreviousAuditEvent( AuditEvent.c_current_event ) )
         else:
             # ended the loop with a merge
             if Fork.population[-1].merge_usage:
                 for mu_pe in Fork.population[-1].merge_usage:
                     # omit break events
                     if not mu_pe.previous_event.isBreak:
-                        Loop.population[-1].start_events[-1].previous_events.append( mu_pe )
+                        Loop.population[-1].start_event.previous_events.append( mu_pe )
         Loop.population.pop()
 
     def exitJob_defn(self, ctx:plus2jsonParser.Job_defnContext):
@@ -501,7 +537,10 @@ def output_json():
     for job_defn in JobDefn.population:
         json += "{ \"JobDefinitionName\":" + job_defn.JobDefinitionName + ",\n"
         json += "\"Events\": [\n"
+        seqdelim = ""
         for seq in job_defn.sequences:
+            json += seqdelim
+            seqdelim = ","
             aedelim = ""
             for ae in seq.audit_events:
                 json += aedelim
@@ -535,7 +574,8 @@ def output_json():
                 if "" != prev_aes: json += "\"PreviousEvents\": [ " + prev_aes + "],"
                 json += "\"Application\": \"\""
                 json += "}"
-            json += "\n]"
+        # All events for all sequences are defined together.
+        json += "\n]"
     json += "\n}\n"
     print( json )
 
