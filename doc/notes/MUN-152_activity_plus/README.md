@@ -34,8 +34,10 @@ python -m plus2json examples/Tutorial_1.puml -p           # show job in human re
 ### Interesting Files
 
 src/plus2json.g4 - anltr4 grammar for PLUS
-src/plus_job_defn.py - primary source for the tree walker listener JSON generator
+src/plus2son_run.py - source for the tree walker listener JSON generator
+src/plus_job_defn.py - data model for the job definition with output routines
 src/__main__.py
+bin/plus2json.pyz - Python 3 executable with dependencies included
 
 ### Package for release
 
