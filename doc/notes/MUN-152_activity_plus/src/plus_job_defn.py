@@ -12,20 +12,6 @@ from plus2jsonParser import plus2jsonParser
 # Deal with merge-in-merge with no event in between.  This may require joining 2 merge usages.
 # !include
 # Use a notational mark and some data to indicate where instance forks occur.
-# What if a loop surrounds a sequence with multiple start events (HIDE)?  In such a case,
-# the collection of start_events may need to be plural.
-# Audit Event Play (play)
-# I wonder if revisiting the tree would be good.  This would allow seeing fork/repeat/etc.
-# Here we check the edge types (X/I/A) and add them accordingly.
-# Actually, I know the fork and loop start events.
-# When edges are XOR, choose 1.
-# When edges are IOR, choose a random number of the available.
-# When edges are AND, select them all.
-# Here we check branch counts and choose a random (not very big) number.
-# We do not care about the source of dynamic control, only the user (BCNT, LCNT, MCNT).
-# Consider a "visit count" on each event.  Use it to not loop too much.
-# Consider recognizing a loop going backwards based on the index of the event (less than).
-#   Prefer the event with the lower index until the visit count rises above a threshold.
 
 class JobDefn:
     """PLUS Job Definition"""
@@ -39,7 +25,6 @@ class JobDefn:
         print( "job:", self.JobDefinitionName )
         for seq in self.sequences:
             seq.play()
-
 
 class SequenceDefn:
     """PLUS Sequence Definition"""
@@ -62,7 +47,6 @@ class SequenceDefn:
         print( "seq:", self.SequenceName )
         for start_event in self.start_events:
             start_event.play()
-
 
 class AuditEvent:
     """PLUS Audit Event Definition"""
@@ -411,20 +395,26 @@ def output_json():
 
 def output_audit_event_data():
     # Output invariants separately.
-    ijson = "{ \"Invariants\": ["
+    ijson = "["
     idelim = ""
     for invariant in Invariant.population:
         ijson += idelim + "\n{"
-        ijson += "\"Name\": \"" + invariant.Name + "\","
-        ijson += "\"Type\": \"" + invariant.Type + "\","
-        ijson += "\"SourceEventName\": \"" + invariant.src_evt_txt + "\","
+        ijson += "\"EventDataName\": \"" + invariant.Name + "\","
+        invariant_type = "INTRAJOBINV" if invariant.Type == "IINV" else "EXTRAJOBINV"
+        ijson += "\"EventDataType\": \"" + invariant_type + "\","
+        ijson += "\"SourceEventJobDefinitionName\": " + JobDefn.population[-1].JobDefinitionName + ","
+        ijson += "\"SourceEventType\": \"" + invariant.src_evt_txt + "\","
         ijson += "\"SourceOccurrenceId\": " + invariant.src_occ_txt + ","
-        ijson += "\"UserEventName\": \"" + invariant.user_evt_txt + "\","
-        ijson += "\"UserOccurrenceId\": " + invariant.user_occ_txt
+        ijson += "\"UserEvents\": [\n"
+        ijson += "{ \"UserEventName\": \"" + invariant.user_evt_txt + "\","
+        ijson += "\"UserOccurrenceId\": " + invariant.user_occ_txt + ","
+        ijson += "\"UserEventDataItemName\": \"" + invariant.Name + "\" }"
+        ijson += "]\n"
         ijson += "}"
         idelim = ","
-    ijson += "\n] }\n"
-    print( ijson )
+    ijson += "]\n"
+    if Invariant.population:
+        print( ijson )
 
 def pretty_print_job():
     for job_defn in JobDefn.population:
