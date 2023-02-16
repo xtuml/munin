@@ -20,6 +20,116 @@ class JobDefn:
         self.JobDefinitionName = name                      # created when the name is encountered
         self.sequences = []                                # job may contain multiple peer sequences
         JobDefn.population.append(self)
+    def output_json(self):
+        json = ""
+        for job_defn in JobDefn.population:
+            json += "{ \"JobDefinitionName\":" + job_defn.JobDefinitionName + ",\n"
+            json += "\"Events\": [\n"
+            seqdelim = ""
+            for seq in job_defn.sequences:
+                json += seqdelim
+                seqdelim = ","
+                aedelim = ""
+                for ae in seq.audit_events:
+                    json += aedelim
+                    aedelim = ",\n"
+                    json += "{ \"EventName\": \"" + ae.EventName + "\","
+                    json += "\"OccurrenceId\": " + ae.OccurrenceId + ","
+                    json += "\"SequenceName\": " + seq.SequenceName + ","
+                    if ae.SequenceStart: json += "\"SequenceStart\": true,"
+                    if ae.SequenceEnd: json += "\"SequenceEnd\": true,"
+                    if ae.isBreak: json += "\"isBreak\": true,"
+                    # look for linked DynamicControl
+                    dcs = [dc for dc in DynamicControl.population if dc.source_event is ae]
+                    for dc in dcs: # preparing for when multiple DynamicControls are allowed.
+                        json += "\"DynamicControl\": {"
+                        json += "\"DynamicControlName\": \"" + dc.DynamicControlName + "\","
+                        json += "\"DynamicControlType\": \"" + dc.DynamicControlType + "\","
+                        json += "\"UserEventType\": \"" + dc.user_evt_txt + "\","
+                        json += "\"UserOccurrenceId\": " + dc.user_occ_txt
+                        json += "},"
+                    prev_aes = ""
+                    pdelim = ""
+                    for prev_ae in ae.previous_events:
+                        constraintid = "" if "" == prev_ae.ConstraintDefinitionId else ", \"ConstraintDefinitionId\": \"" + prev_ae.ConstraintDefinitionId + "\""
+                        constraint = "" if "" == prev_ae.ConstraintValue else ", \"ConstraintValue\": \"" + prev_ae.ConstraintValue + "\""
+                        prev_aes = ( prev_aes + pdelim +
+                              "{ \"PreviousEventName\": \"" + prev_ae.previous_event.EventName + "\","
+                              "\"PreviousOccurrenceId\": " + prev_ae.previous_event.OccurrenceId +
+                              constraintid + constraint +
+                              " }" )
+                        pdelim = ","
+                    if "" != prev_aes: json += "\"PreviousEvents\": [ " + prev_aes + "],"
+                    json += "\"Application\": \"\""
+                    json += "}"
+            # All events for all sequences are defined together.
+            json += "\n]"
+        json += "\n}\n"
+        print( json )
+    def pretty_print(self):
+        for job_defn in JobDefn.population:
+            print("job defn:", job_defn.JobDefinitionName)
+            for seq in job_defn.sequences:
+                print("sequence:", seq.SequenceName)
+                for ae in seq.audit_events:
+                    ss = "start" if ae.SequenceStart else ""
+                    se = "end" if ae.SequenceEnd else ""
+                    b = "break" if ae.isBreak else "     "
+                    # look for linked DynamicControls
+                    bcnt = ""
+                    lcnt = ""
+                    mcnt = ""
+                    dcs = [dc for dc in DynamicControl.population if dc.source_event is ae]
+                    for dc in dcs:
+                        su = "s=" + dc.src_evt_txt + "(" + dc.src_occ_txt + ")"
+                        su += "u=" + dc.user_evt_txt + "(" + dc.user_occ_txt + ")"
+                        if dc.DynamicControlType == "BRANCHCOUNT":
+                            bcnt += "bc:" + dc.DynamicControlName + "-" + su
+                        elif dc.DynamicControlType == "MERGECOUNT":
+                            mcnt += "mc:" + dc.DynamicControlName + "-" + su
+                        elif dc.DynamicControlType == "LOOPCOUNT":
+                            lcnt += "lc:" + dc.DynamicControlName + "-" + su
+                        else:
+                            print( "ERROR:  malformed dynamic control" )
+                            sys.exit()
+                    # look for linked Invariant
+                    einv = ""
+                    iinv = ""
+                    inv = [inv for inv in Invariant.population if inv.source_event is ae]
+                    if inv:
+                        su = ""
+                        if "" != inv[-1].src_evt_txt:
+                            su += "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
+                        if "" != inv[-1].user_evt_txt:
+                            su += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
+                        if inv[-1].Type == "EINV":
+                            einv = "einv:" + inv[-1].Name + "-" + su
+                        elif inv[-1].Type == "IINV":
+                            iinv = "iinv:" + inv[-1].Name + "-" + su
+                    inv = [inv for inv in Invariant.population if ae in inv.user_events]
+                    if inv:
+                        su = ""
+                        if "" != inv[-1].src_evt_txt:
+                            su += "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
+                        if "" != inv[-1].user_evt_txt:
+                            su += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
+                        if inv[-1].Type == "EINV":
+                            einv = "einv:" + inv[-1].Name + "-" + su
+                        elif inv[-1].Type == "IINV":
+                            iinv = "iinv:" + inv[-1].Name + "-" + su
+                        else:
+                            print( "ERROR:  malformed invariant type" )
+                            sys.exit()
+                    prev_aes = "    "
+                    delim = ""
+                    for prev_ae in ae.previous_events:
+                        prev_aes = ( prev_aes + delim + prev_ae.previous_event.EventName +
+                                     "(" + prev_ae.previous_event.OccurrenceId + ")" +
+                                     prev_ae.ConstraintDefinitionId + prev_ae.ConstraintValue
+                                   )
+                        delim = ","
+                    print( f'{ae.EventName+"("+ae.OccurrenceId+")":{AuditEvent.c_longest_name_length+3}}',
+                       f'{ss:{5}}', f'{se:{3}}', b, prev_aes, bcnt, mcnt, lcnt, einv, iinv )
     def play(self):
         """interpret the job"""
         print( "job:", self.JobDefinitionName )
@@ -330,6 +440,29 @@ class Invariant:
                 for uae in uaes:
                     #print( "Resolving invariant users:", inv.src_evt_txt, inv.src_occ_txt, inv.user_evt_txt, inv.user_occ_txt )
                     inv.user_events.append( uae )
+    @classmethod
+    def output_json(cls):
+        # Output invariants separately.
+        if Invariant.population:
+            ijson = "["
+            idelim = ""
+            for invariant in Invariant.population:
+                ijson += idelim + "\n{"
+                ijson += "\"EventDataName\": \"" + invariant.Name + "\","
+                invariant_type = "INTRAJOBINV" if invariant.Type == "IINV" else "EXTRAJOBINV"
+                ijson += "\"EventDataType\": \"" + invariant_type + "\","
+                ijson += "\"SourceEventJobDefinitionName\": " + JobDefn.population[-1].JobDefinitionName + ","
+                ijson += "\"SourceEventType\": \"" + invariant.src_evt_txt + "\","
+                ijson += "\"SourceOccurrenceId\": " + invariant.src_occ_txt + ","
+                ijson += "\"UserEvents\": [\n"
+                ijson += "{ \"UserEventName\": \"" + invariant.user_evt_txt + "\","
+                ijson += "\"UserOccurrenceId\": " + invariant.user_occ_txt + ","
+                ijson += "\"UserEventDataItemName\": \"" + invariant.Name + "\" }"
+                ijson += "]\n"
+                ijson += "}"
+                idelim = ","
+            ijson += "]\n"
+            print( ijson )
 
 class Loop:
     """data collected from PLUS repeat loop"""
@@ -344,139 +477,3 @@ class IntrajobInvariant:
     population = []
     def __init__(self, name):
         IntrajobInvariant.population.append(self)
-
-# output routines (JSON and pretty-printed)
-def output_json():
-    json = ""
-    for job_defn in JobDefn.population:
-        json += "{ \"JobDefinitionName\":" + job_defn.JobDefinitionName + ",\n"
-        json += "\"Events\": [\n"
-        seqdelim = ""
-        for seq in job_defn.sequences:
-            json += seqdelim
-            seqdelim = ","
-            aedelim = ""
-            for ae in seq.audit_events:
-                json += aedelim
-                aedelim = ",\n"
-                json += "{ \"EventName\": \"" + ae.EventName + "\","
-                json += "\"OccurrenceId\": " + ae.OccurrenceId + ","
-                json += "\"SequenceName\": " + seq.SequenceName + ","
-                if ae.SequenceStart: json += "\"SequenceStart\": true,"
-                if ae.SequenceEnd: json += "\"SequenceEnd\": true,"
-                if ae.isBreak: json += "\"isBreak\": true,"
-                # look for linked DynamicControl
-                dcs = [dc for dc in DynamicControl.population if dc.source_event is ae]
-                for dc in dcs: # preparing for when multiple DynamicControls are allowed.
-                    json += "\"DynamicControl\": {"
-                    json += "\"DynamicControlName\": \"" + dc.DynamicControlName + "\","
-                    json += "\"DynamicControlType\": \"" + dc.DynamicControlType + "\","
-                    json += "\"UserEventType\": \"" + dc.user_evt_txt + "\","
-                    json += "\"UserOccurrenceId\": " + dc.user_occ_txt
-                    json += "},"
-                prev_aes = ""
-                pdelim = ""
-                for prev_ae in ae.previous_events:
-                    constraintid = "" if "" == prev_ae.ConstraintDefinitionId else ", \"ConstraintDefinitionId\": \"" + prev_ae.ConstraintDefinitionId + "\""
-                    constraint = "" if "" == prev_ae.ConstraintValue else ", \"ConstraintValue\": \"" + prev_ae.ConstraintValue + "\""
-                    prev_aes = ( prev_aes + pdelim +
-                          "{ \"PreviousEventName\": \"" + prev_ae.previous_event.EventName + "\","
-                          "\"PreviousOccurrenceId\": " + prev_ae.previous_event.OccurrenceId +
-                          constraintid + constraint +
-                          " }" )
-                    pdelim = ","
-                if "" != prev_aes: json += "\"PreviousEvents\": [ " + prev_aes + "],"
-                json += "\"Application\": \"\""
-                json += "}"
-        # All events for all sequences are defined together.
-        json += "\n]"
-    json += "\n}\n"
-    print( json )
-
-def output_audit_event_data():
-    # Output invariants separately.
-    ijson = "["
-    idelim = ""
-    for invariant in Invariant.population:
-        ijson += idelim + "\n{"
-        ijson += "\"EventDataName\": \"" + invariant.Name + "\","
-        invariant_type = "INTRAJOBINV" if invariant.Type == "IINV" else "EXTRAJOBINV"
-        ijson += "\"EventDataType\": \"" + invariant_type + "\","
-        ijson += "\"SourceEventJobDefinitionName\": " + JobDefn.population[-1].JobDefinitionName + ","
-        ijson += "\"SourceEventType\": \"" + invariant.src_evt_txt + "\","
-        ijson += "\"SourceOccurrenceId\": " + invariant.src_occ_txt + ","
-        ijson += "\"UserEvents\": [\n"
-        ijson += "{ \"UserEventName\": \"" + invariant.user_evt_txt + "\","
-        ijson += "\"UserOccurrenceId\": " + invariant.user_occ_txt + ","
-        ijson += "\"UserEventDataItemName\": \"" + invariant.Name + "\" }"
-        ijson += "]\n"
-        ijson += "}"
-        idelim = ","
-    ijson += "]\n"
-    if Invariant.population:
-        print( ijson )
-
-def pretty_print_job():
-    for job_defn in JobDefn.population:
-        print("job defn:", job_defn.JobDefinitionName)
-        for seq in job_defn.sequences:
-            print("sequence:", seq.SequenceName)
-            for ae in seq.audit_events:
-                ss = "start" if ae.SequenceStart else ""
-                se = "end" if ae.SequenceEnd else ""
-                b = "break" if ae.isBreak else "     "
-                # look for linked DynamicControls
-                bcnt = ""
-                lcnt = ""
-                mcnt = ""
-                dcs = [dc for dc in DynamicControl.population if dc.source_event is ae]
-                for dc in dcs:
-                    su = "s=" + dc.src_evt_txt + "(" + dc.src_occ_txt + ")"
-                    su += "u=" + dc.user_evt_txt + "(" + dc.user_occ_txt + ")"
-                    if dc.DynamicControlType == "BRANCHCOUNT":
-                        bcnt += "bc:" + dc.DynamicControlName + "-" + su
-                    elif dc.DynamicControlType == "MERGECOUNT":
-                        mcnt += "mc:" + dc.DynamicControlName + "-" + su
-                    elif dc.DynamicControlType == "LOOPCOUNT":
-                        lcnt += "lc:" + dc.DynamicControlName + "-" + su
-                    else:
-                        print( "ERROR:  malformed dynamic control" )
-                        sys.exit()
-                # look for linked Invariant
-                einv = ""
-                iinv = ""
-                inv = [inv for inv in Invariant.population if inv.source_event is ae]
-                if inv:
-                    su = ""
-                    if "" != inv[-1].src_evt_txt:
-                        su += "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
-                    if "" != inv[-1].user_evt_txt:
-                        su += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
-                    if inv[-1].Type == "EINV":
-                        einv = "einv:" + inv[-1].Name + "-" + su
-                    elif inv[-1].Type == "IINV":
-                        iinv = "iinv:" + inv[-1].Name + "-" + su
-                inv = [inv for inv in Invariant.population if ae in inv.user_events]
-                if inv:
-                    su = ""
-                    if "" != inv[-1].src_evt_txt:
-                        su += "s=" + inv[-1].src_evt_txt + "(" + inv[-1].src_occ_txt + ")"
-                    if "" != inv[-1].user_evt_txt:
-                        su += "u=" + inv[-1].user_evt_txt + "(" + inv[-1].user_occ_txt + ")"
-                    if inv[-1].Type == "EINV":
-                        einv = "einv:" + inv[-1].Name + "-" + su
-                    elif inv[-1].Type == "IINV":
-                        iinv = "iinv:" + inv[-1].Name + "-" + su
-                    else:
-                        print( "ERROR:  malformed invariant type" )
-                        sys.exit()
-                prev_aes = "    "
-                delim = ""
-                for prev_ae in ae.previous_events:
-                    prev_aes = ( prev_aes + delim + prev_ae.previous_event.EventName +
-                                 "(" + prev_ae.previous_event.OccurrenceId + ")" +
-                                 prev_ae.ConstraintDefinitionId + prev_ae.ConstraintValue
-                               )
-                    delim = ","
-                print( f'{ae.EventName+"("+ae.OccurrenceId+")":{AuditEvent.c_longest_name_length+3}}',
-                       f'{ss:{5}}', f'{se:{3}}', b, prev_aes, bcnt, mcnt, lcnt, einv, iinv )

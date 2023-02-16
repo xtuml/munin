@@ -19,10 +19,19 @@ Usage
 Options
 =======
 --help, -h               show this help message and exit
---json, -j               output PLUS Job Definition (JSON)      default: off
+--job, -j                output PLUS Job Definition (JSON)      default: off
 --audit_event_data, -d   output PLUS audit event data           default: off
---print, -p              print human readable output            default: off
 --play                   interpret the job and produce events   default: off
+--print, -p              print human readable output            default: off
+
+Examples:
+
+python plus2json.pyz Tutorial_1.puml --job                # convert Tutorial_1.puml into JSON
+python plus2json.pyz Tutorial_13.puml -d                  # produce audit event data definition as JSON
+python plus2json.pyz myjobdefn.puml --play                # interpret the job producing event instances
+python -m plus2json Tutorial_1.puml --job -p              # show job in human readable view
+python plus2json.pyz j.puml --job | python -m json.tool   # format output JSON
+
         """)
         exit()
 
@@ -31,11 +40,24 @@ Options
     stream = CommonTokenStream(lexer)
     parser = plus2jsonParser(stream)
     tree = parser.plusdefn()
-    if ( "--print" in argv or "-p" in argv or "--json" in argv or "-j" in argv or
+    if ( "--print" in argv or "-p" in argv or "--job" in argv or "-j" in argv or
          "--audit_event_data" in argv or "-d" in argv or "--play" in argv ):
         run = plus2json_run() # custom listener
         walker = ParseTreeWalker()
         walker.walk(run, tree)
+    if "--job" in sys.argv or "-j" in sys.argv:
+        if "--print" in sys.argv or "-p" in sys.argv:
+            JobDefn.population[-1].pretty_print()
+        else:
+            JobDefn.population[-1].output_json()
+    elif "--audit_event_data" in sys.argv or "-d" in sys.argv:
+        Invariant.output_json()
+    elif "--play" in sys.argv:
+        if "--print" in sys.argv or "-p" in sys.argv:
+            JobDefn.population[-1].play()
+        else:
+            JobDefn.population[-1].play()
+
  
 if __name__ == '__main__':
     main(sys.argv)

@@ -189,14 +189,7 @@ class plus2json_run(plus2jsonListener):
         Loop.population.pop()
 
     def exitJob_defn(self, ctx:plus2jsonParser.Job_defnContext):
+        # Resolve the linkage between audit events using name and occurrence.
+        # This is due to forward references made in the job definition.
         DynamicControl.resolve_event_linkage()
         Invariant.resolve_event_linkage()
-        if "--print" in sys.argv or "-p" in sys.argv:
-            pretty_print_job()
-        elif "--json" in sys.argv or "-j" in sys.argv:
-            output_json()
-        elif "--audit_event_data" in sys.argv or "-d" in sys.argv:
-            output_audit_event_data()
-        elif "--play" in sys.argv:
-            pretty_print_job()
-            JobDefn.population[-1].play()

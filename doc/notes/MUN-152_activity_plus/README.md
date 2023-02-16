@@ -18,17 +18,20 @@ Usage
 Options
 =======
 --help, -h               show this help message and exit
---json, -j               output PLUS Job Definition (JSON)      default: off
+--job, -j                output PLUS Job Definition (JSON)      default: off
 --audit_event_data, -d   output PLUS audit event data           default: off
---print, -p              print human readable output            default: off
 --play                   interpret the job and produce events   default: off
+--print, -p              print human readable output            default: off
 ```
 
 Example:
 
 ```
-python plus2json.pyz examples/Tutorial_1.puml -json       # convert Tutorial_1.puml into JSON
-python -m plus2json examples/Tutorial_1.puml -p           # show job in human readable view
+python plus2json.pyz Tutorial_1.puml --job                # convert Tutorial_1.puml into JSON
+python plus2json.pyz Tutorial_13.puml -d                  # produce audit event data definition as JSON
+python plus2json.pyz myjobdefn.puml --play                # interpret the job producing event instances
+python -m plus2json Tutorial_1.puml --job -p              # show job in human readable view
+python plus2json.pyz j.puml --job | python -m json.tool   # format output JSON
 ```
 
 ### Interesting Files
