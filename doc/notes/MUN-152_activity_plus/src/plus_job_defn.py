@@ -60,7 +60,7 @@ class JobDefn:
                               " }" )
                         pdelim = ","
                     if "" != prev_aes: json += "\"PreviousEvents\": [ " + prev_aes + "],"
-                    json += "\"Application\": \"\""
+                    json += "\"Application\": \"" + AuditEvent.ApplicationName + "\""
                     json += "}"
             # All events for all sequences are defined together.
             json += "\n]"
@@ -130,11 +130,27 @@ class JobDefn:
                         delim = ","
                     print( f'{ae.EventName+"("+ae.OccurrenceId+")":{AuditEvent.c_longest_name_length+3}}',
                        f'{ss:{5}}', f'{se:{3}}', b, prev_aes, bcnt, mcnt, lcnt, einv, iinv )
-    def play(self):
+    def play(self, pretty):
         """interpret the job"""
-        print( "job:", self.JobDefinitionName )
+        if pretty:
+            print( "job:", self.JobDefinitionName )
+        else:
+            json = "{ \"SpecUpdateRate\": \"PT2M\","
+            json += "\"MaxOutOfSequenceEvents\": 10,"
+            json += "\"MaximumJobTime\": \"PT10M\","
+            json += "\"JobCompletePeriod\": \"PT24H\","
+            json += "\"Jobs\": [\n"
+            json += "{ \"JobDefinitionName\": " + self.JobDefinitionName + ","
+            json += "\"JobDeprecated\": false,"
+            json += "\"JobTypeExpiryDate\": \"2022-04-11T18:08:00Z\","
+            json += "\"StaleAuditEventDuration\": \"P99W\","
+            json += "\"BlockedAuditEventDuration\": \"PT5M\","
+            json += "\n\"EventRules\": [\n"
+            print( json )
         for seq in self.sequences:
-            seq.play()
+            seq.play(pretty)
+        if not pretty:
+            print( "\n]}]}\n" )
 
 class SequenceDefn:
     """PLUS Sequence Definition"""
@@ -152,15 +168,19 @@ class SequenceDefn:
                                                            # ... and by any event preceded by HIDE
         SequenceDefn.c_current_sequence = self
         SequenceDefn.population.append(self)
-    def play(self):
+    def play(self, pretty):
         """interpret the sequence"""
-        print( "seq:", self.SequenceName )
+        if pretty:
+            print( "seq:", self.SequenceName )
         for start_event in self.start_events:
-            start_event.play()
+            start_event.play(pretty, "")
 
 class AuditEvent:
     """PLUS Audit Event Definition"""
     population = []
+    ApplicationName = "default"                            # not presently used
+    BlockedAuditEventDuration = "PT1H"                     # default for AE Simulator
+    StaleAuditEventDuration = "PT2H"                       # default for AE Simulator
     c_current_event = None                                 # set at creation, reset at sequence exit
     c_longest_name_length = 0                              # Keep longest name length for pretty printing.
     def __init__(self, name, occurrence):
@@ -204,7 +224,7 @@ class AuditEvent:
         self.visit_count = 0
         AuditEvent.c_current_event = self
         AuditEvent.population.append(self)
-    def play(self):
+    def play(self, pretty, delim):
         """interpret the event"""
         self.visit_count += 1
         next_aes = []
@@ -262,11 +282,20 @@ class AuditEvent:
         # Give some indication that we are forking.
         fork_count = len( next_aes )
         fork_text = "" if fork_count < 2 else "f" + str( fork_count )
-        print( self.EventName,
-               "[" + str( self.visit_count ) + "]" if self.visit_count > 1 else "",
-               fork_text )
+        if pretty:
+            print( self.EventName,
+                   "[" + str( self.visit_count ) + "]" if self.visit_count > 1 else "",
+                   fork_text )
+        else:
+            json = delim + "{ \"EventName\": \"" + self.EventName + "\","
+            json += "\"OccurrenceId\": " + str( self.OccurrenceId ) + ","
+            json += "\"ApplicationName\": \"" + AuditEvent.ApplicationName + "\","
+            json += "\"BlockedAuditEventDuration\": \"" + AuditEvent.BlockedAuditEventDuration + "\","
+            json += "\"StaleAuditEventDuration\": \"" + AuditEvent.StaleAuditEventDuration + "\""
+            json += "}"
+            print( json )
         for ae in next_aes:
-            ae.play()
+            ae.play(pretty, ",")
 
 # A previous audit event contains a reference to the previous event
 # but may also contain attributes that decorate the "edge" from the

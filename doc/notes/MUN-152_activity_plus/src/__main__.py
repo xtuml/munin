@@ -54,9 +54,9 @@ python plus2json.pyz j.puml --job | python -m json.tool   # format output JSON
         Invariant.output_json()
     elif "--play" in sys.argv:
         if "--print" in sys.argv or "-p" in sys.argv:
-            JobDefn.population[-1].play()
+            JobDefn.population[-1].play(True)
         else:
-            JobDefn.population[-1].play()
+            JobDefn.population[-1].play(False)
 
  
 if __name__ == '__main__':
