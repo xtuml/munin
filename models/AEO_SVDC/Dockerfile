@@ -18,7 +18,7 @@ ADD CMakeLists.txt /root/CMakeLists.txt
 # BASE INSTALL                                                                 #
 ################################################################################
 
-FROM levistarrett/masl-base:v1 AS install-base
+FROM levistarrett/masl-base:v2 AS install-base
 
 # copy schedules
 ADD schedule /root/schedule
