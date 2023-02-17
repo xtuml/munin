@@ -6,16 +6,16 @@ services:
       context: .
       args:
         EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
-#    ports:
-#      - "20000:20000"
-#      - "30000:30000"
-#      - "40000:40000"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
     volumes:
       - "./config:/root/config"
       - "../test-files/verifier-incoming:/root/incoming"
-#      - "../test-files/verifier-processing:/root/processing"
+      - "../test-files/JobIdStore:/root/JobIdStore"
       - "../test-files/verifier-processed:/root/processed"
-    command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 54 -util Inspector -inspector-port 0"
+    command: "-configPath config/ -log-level e -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 7F -util Inspector -inspector-port 0"
   aeo_svdc-2:
     image: "ghcr.io/xtuml/aeo_svdc"
     build:
@@ -29,22 +29,6 @@ services:
     volumes:
       - "./config:/root/config"
       - "../test-files/verifier-incoming:/root/incoming"
-#      - "../test-files/verifier-processing:/root/processing"
+      - "../test-files/JobIdStore:/root/JobIdStore"
       - "../test-files/verifier-processed:/root/processed"
-    command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup 55 -endJobGroup A9 -util Inspector -inspector-port 110"
-  aeo_svdc-3:
-    image: "ghcr.io/xtuml/aeo_svdc"
-    build:
-      context: .
-      args:
-        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
-#    ports:
-#      - "20210:20210"
-#      - "30210:30210"
-#      - "40210:40210"
-    volumes:
-      - "./config:/root/config"
-      - "../test-files/verifier-incoming:/root/incoming"
-#      - "../test-files/verifier-processing:/root/processing"
-      - "../test-files/verifier-processed:/root/processed"
-    command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup AA -endJobGroup FF -util Inspector -inspector-port 110"
+    command: "-configPath config/ -log-level e -preinit schedule/startup.sch -startJobGroup 80 -endJobGroup FF -util Inspector -inspector-port 110"

@@ -65,6 +65,13 @@ associatedEvent : IntraJobInvDataType;
 emptyAssociatedEvent : IntraJobInvDataType;
 associatedEvents : sequence of IntraJobInvDataType;
 emptyAssociatedEvents : sequence of IntraJobInvDataType;
+jobStore : instance of JobStore;
+jobStoreName : string := "JobIdStore.log";
+jobStoreLocation : string := "./";
+jobStoreAgeLimit : duration := @P7D@;
+today : sequence of integer;
+midnight : timestamp;
+fileControl : instance of FileControl;
 
 begin
     
@@ -113,6 +120,12 @@ begin
 				if Filesystem::file_exists(Filesystem::filename(this.processedDirectory)) = false then
 					Filesystem::create_directory(Filesystem::filename(this.processedDirectory));
 				end if;
+            end if;
+            if configJSONObject'contains("JobStoreLocation") then
+                jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);
+            end if;
+            if configJSONObject'contains("JobStoreAgeLimit") then
+                jobStoreAgeLimit := duration'parse(JSON::get_string(configJSONObject["JobStoreAgeLimit"]));
             end if;
             // read in the jobs that we expect to process
             if configJSONObject'contains("Jobs") and configJSONObject["Jobs"].kind = JSON::Array then
@@ -226,6 +239,17 @@ begin
             end if;
         end loop;
 
+        // if the job store does not exist then create it
+        jobStore := find_one JobStore();
+        if jobStore = null then
+        	fileControl := find_one FileControl();
+        	jobStoreName := "JobIdStore" & "-" &  fileControl.startJobGroup'image & "-" & fileControl.endJobGroup'image;
+        	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, Current_State => Created);
+        	JobStore.loadJobStore();
+        	today := timestamp'now'split_ymd();
+        	midnight := timestamp'combine_ymd(today[1], today[2], today[3] + 1);
+        	schedule jobStore.jobStoreTimer generate JobStore.purgeJobStore() to jobStore at midnight; 
+        end if;
         // schedule to check the config file
         schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
     else

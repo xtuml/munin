@@ -57,6 +57,7 @@ json_element: JSON::JSONElement;
 eventJsonArray : JSON::JSONArray;
 eventJsonObject : JSON::JSONObject;
 systemSpec : instance of SystemSpec;
+storedJobIdentifier : instance of StoredJobIdentifier;
 
 begin
 	logMessage := "AEOrdering::FileControl.FileProcessed";
@@ -121,8 +122,14 @@ begin
                     end if;
                 end loop;
                 
-                // we have now read the event so process it
-                AEOrdering::AcceptEvent(jobId, node, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData);
+                // check if the job id is in the completed job store
+                storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId); 
+                if storedJobIdentifier = null then
+	                // we have now read the event so process it
+	                AEOrdering::AcceptEvent(jobId, node, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData);
+	            else
+					Logger::log(Logger::Information, "AEOrdering", "Duplicate Job Id identified, Job Id = " & jobId);
+	            end if;
             end;
 	     end if;
     end loop;
