@@ -163,7 +163,10 @@ begin
 		unlink dataItemTypes R18.constrains.DataItemType;
 		delete dataItemTypes;
 	end if;
-		
+	
+	// clear out the StoredJobIdentifiers
+	delete find_all StoredJobIdentifier();
+	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -478,6 +481,7 @@ verificationAuditEvent : instance of _TEST_Req_IF_Verification_audit_event;
 prevEventIds : sequence of string;
 emptyPrevEventIds : sequence of string;
 auditEventData : AuditEventDataType;
+storedJobIdentifier : instance of StoredJobIdentifier;
 
 begin
 	
@@ -508,6 +512,10 @@ begin
 	else
 		Test::fail("", 1, "Test Job Complete: Failed to find Job");
 	end if;
+	
+	// check that the StoredJobIdentifier has been recorded
+	storedJobIdentifier := find_one StoredJobIdentifier(jobId = "1");
+    Assertions::assertTrue((storedJobIdentifier /= null), "Test Job Complete: Failed to find StoredJobIdentifier");
 	
 	// verify that the job was completed
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -1356,7 +1364,7 @@ begin
 	// verify the audit event data
 	verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "1");
     Assertions::assertTrue((verificationAuditEvent /= null), "Test Ordered Job: Failed to find` verification audit event id = 1");
-	Logger::log(Logger::Information, "AEOrdering", "LEVI: " & verificationAuditEvent.reportableAuditEventDataItems'length'image);
+	Logger::log(Logger::Information, "AEOrdering", "verification audit event length: " & verificationAuditEvent.reportableAuditEventDataItems'length'image);
     Assertions::assertTrue((verificationAuditEvent.reportableAuditEventDataItems'length = 2), "Test Ordered Job With Data: Failed as verification audit event data Items /= 2");
     for dataItem in verificationAuditEvent.reportableAuditEventDataItems loop
 	    if dataItem.dataName = "Data1" then
@@ -1387,7 +1395,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '60138ace-c525-4185-9443-4b3374de7bdb' DO NOT EDIT THIS LINE.
-private service AEOrdering::testFileInjest () is
+private service AEOrdering::testFileIngest () is
 systemSpec : instance of SystemSpec;
 configFile : string := "config0.json";
 testFileDir : Filesystem::filename := "test-files/";
@@ -1398,6 +1406,11 @@ reportedEventDefinitions : sequence of instance of _TEST_Req_IF_Verification_eve
 reportEventDefinition :  instance of _TEST_Req_IF_Verification_eventDefinition;
 verificationAuditEvents : sequence of instance of _TEST_Req_IF_Verification_audit_event;
 verificationAuditEvent : instance of _TEST_Req_IF_Verification_audit_event;
+jobId : string := "95a3b3a7-fada-41d5-b7e2-902079e810d5";
+jobs : sequence of instance of Job;
+storedJobIdentifier : instance of StoredJobIdentifier;
+jobStore : instance of JobStore;
+fileControl : instance of FileControl;
 
 begin
 	
@@ -1421,8 +1434,36 @@ begin
 	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
 
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
-	Assertions::assertTrue(verificationAuditEvents'length = 9, "wrong number of audit events, expected 9 found: " & (verificationAuditEvents'length)'image);
-
+	Assertions::assertTrue(verificationAuditEvents'length = 9, "Test File Injest: wrong number of audit events, expected 9 found: " & (verificationAuditEvents'length)'image);
+	
+	// complete the job by calling delete
+	AEOrdering::deleteJob(jobId);
+	
+	// verify we have the job stored in the job store
+	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId);
+    Assertions::assertTrue((storedJobIdentifier /= null), "Test Job Complete: Failed to find StoredJobIdentifier");
+	
+	// run the job again and verify that the job has not been created
+	fileControl := find_one FileControl();
+	fileControl.currentJobGroup := 1;
+	Filesystem::copy_file(testFileDir & testFile1, incomingDir & testFile1);
+	Filesystem::move_file(incomingDir & testFile1, targetDirectory & testFile1);
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+	jobs := find Job();
+	Assertions::assertTrue(jobs'length = 0, "wrong number of jobs, expected 0 found: " & (jobs'length)'image);	
+	
+	// fire the age off timer and re-run the test
+	jobStore := find_one JobStore();
+	jobStore.jobStoreAgeLimit := @PT0S@;
+	schedule jobStore.jobStoreTimer generate JobStore.purgeJobStore() to jobStore delay @PT1S@;
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId);
+    Assertions::assertTrue((storedJobIdentifier = null), "Test Job Complete: Failed to find StoredJobIdentifier");
+	
+	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

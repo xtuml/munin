@@ -13,9 +13,9 @@ services:
     volumes:
       - "./config:/root/config"
       - "../test-files/verifier-incoming:/root/incoming"
-#      - "../test-files/verifier-processing:/root/processing"
-#      - "../test-files/verifier-processed:/root/processed"
-    command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 3F -util Inspector -inspector-port 0"
+      - "../test-files/JobIdStore:/root/JobIdStore"
+      - "../test-files/verifier-processed:/root/processed"
+    command: "-configPath config/ -log-level e -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 7F -util Inspector -inspector-port 0"
   aeo_svdc-2:
     image: "ghcr.io/xtuml/aeo_svdc"
     build:
@@ -29,8 +29,8 @@ services:
     volumes:
       - "./config:/root/config"
       - "../test-files/verifier-incoming:/root/incoming"
-#      - "../test-files/verifier-processing:/root/processing"
-#      - "../test-files/verifier-processed:/root/processed"
+      - "../test-files/JobIdStore:/root/JobIdStore"
+      - "../test-files/verifier-processed:/root/processed"
     command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup 40 -endJobGroup 7F -util Inspector -inspector-port 0"
   aeo_svdc-3:
     image: "ghcr.io/xtuml/aeo_svdc"
@@ -45,8 +45,8 @@ services:
     volumes:
       - "./config:/root/config"
       - "../test-files/verifier-incoming:/root/incoming"
-#      - "../test-files/verifier-processing:/root/processing"
-#      - "../test-files/verifier-processed:/root/processed"
+      - "../test-files/JobIdStore:/root/JobIdStore"
+      - "../test-files/verifier-processed:/root/processed"
     command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup 80 -endJobGroup BF -util Inspector -inspector-port 0"
   aeo_svdc-4:
     image: "ghcr.io/xtuml/aeo_svdc"
@@ -61,6 +61,6 @@ services:
     volumes:
       - "./config:/root/config"
       - "../test-files/verifier-incoming:/root/incoming"
-#      - "../test-files/verifier-processing:/root/processing"
-#      - "../test-files/verifier-processed:/root/processed"
+      - "../test-files/JobIdStore:/root/JobIdStore"
+      - "../test-files/verifier-processed:/root/processed"
     command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup C0 -endJobGroup FF -util Inspector -inspector-port 0"

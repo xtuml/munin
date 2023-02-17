@@ -161,6 +161,8 @@ begin
     json_string := Filesystem::read_file(Filesystem::filename(this.filePath));
     json_element := JSON::parse(json_string);
     if validate = true then
+        logMessage := "AEReception::Reception.parsing - validating JSON format for file: " & this.filePath;
+        Logger::log(Logger::Error, "AEReception", logMessage);
 	    validation_result := JSONValidation::validate(json_element, #PROP["auditEventSchema"]#);
     
 	    if JSON::get_boolean(validation_result["valid"]) = false then
@@ -172,7 +174,7 @@ begin
         this.currentIndex := this.jsonElements'first;
         generate Reception.ready_for_event() to this;
     else
-        logMessage := "Incorrect JSON format for file: " & this.filePath & "\n" & JSON::dump(validation_result, true);
+        logMessage := "AEReception::Reception.parsing - Incorrect JSON format for file: " & this.filePath & "\n" & JSON::dump(validation_result, true);
         Logger::log(Logger::Error, "AEReception", logMessage);
         generate Reception.parse_failed() to this;
     end if;
