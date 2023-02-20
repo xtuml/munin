@@ -1025,6 +1025,10 @@ begin
   eventDefinition ("BranchedJob","BranchedSequence","FMF",1,previousEventTypes,false,false,false);
   previousEventTypes := ("FMF",1,"","");
   eventDefinition ("BranchedJob","BranchedSequence","FMG",1,previousEventTypes,false,true,false);
+  
+  dynamicControlDefinition("BranchedJob", "TypeFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "FMA",1,"FMB",1);
+  dynamicControlDefinition("BranchedJob", "TypeFork_2", dynamicControlTypeEnum.MERGECOUNT, "FMA",1,"FMF",1);
+  
 //
 // An illegal definition since it contains an end sequence in the middle of the event chain
 // This is provided to test a defensive feature of the model and should not be permitted in normal circumstances
@@ -1056,6 +1060,9 @@ begin
   eventDefinition ("InstForkJob","InstForkSequence","IFE",1,previousEventTypes,false,false,false);
   previousEventTypes := ("IFE",1,"","");
   eventDefinition ("InstForkJob","InstForkSequence","IFF",1,previousEventTypes,false,true,false);
+
+  dynamicControlDefinition("InstForkJob", "InstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "IFA",1,"IFB",1);
+  dynamicControlDefinition("InstForkJob", "InstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "IFA",1,"IFD",1);
   //
   // Job SplitBranchedJob, Sequence ForkSequence
   // 
@@ -1069,6 +1076,7 @@ begin
   eventDefinition ("SplitBranchedJob","ForkSequence","SFMD",1,previousEventTypes,false,true,false);
   previousEventTypes := ("SFMB",1,"","");
   eventDefinition ("SplitBranchedJob","ForkSequence","SFME",1,previousEventTypes,false,true,false);
+
   //
   // Job SplitBranchedJob, Sequence MergeSequence
   // 
@@ -1104,6 +1112,9 @@ begin
   eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFE",1,previousEventTypes,false,false,false);
   previousEventTypes := ("SIFE",1,"","");
   eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFF",1,previousEventTypes,false,true,false);
+
+  dynamicControlDefinition("SplitInstForkJob", "SplitInstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "SIFA",1,"SIFB",1);
+  dynamicControlDefinition("SplitInstForkJob", "SplitInstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "SIFA",1,"SIFE",1);
 
 end service;
 //
