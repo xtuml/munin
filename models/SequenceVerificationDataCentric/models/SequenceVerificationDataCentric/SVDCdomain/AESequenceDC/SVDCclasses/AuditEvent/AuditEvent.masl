@@ -279,11 +279,10 @@ creationErrorMessage : string;
                   if aeDataElement.aedValue /= "" then
                     // Convert the provided string value to an integer (a non-integer input value causes the Program Error exception caught below)
                     loopCount := integer'parse(aeDataElement.aedValue);
-                    newDynamicControl := create DynamicControl (jobID => theJob.jobID, 
-                  	                                          dynamicControlName => aeDataElement.aedName, 
-                  	                                          expectedDynamicControlValue => loopCount);
+                    newDynamicControl := create unique DynamicControl (expectedDynamicControlValue => loopCount);
                     link newDynamicControl R29 theDynamicControlDefn;
                     link newDynamicControl R35 theJob;
+                    link newDynamicControl R37 this;
                   else
                     // No Loop Count value provided
                     theJob.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
@@ -312,11 +311,10 @@ creationErrorMessage : string;
                   if aeDataElement.aedValue /= "" then
                     // Convert the provided string value to an integer (a non-integer input value causes the Program Error exception caught below)
                     branchCount := integer'parse(aeDataElement.aedValue);
-                    newDynamicControl := create DynamicControl (jobID => theJob.jobID, 
-                  	                                            dynamicControlName => aeDataElement.aedName, 
-                  	                                            expectedDynamicControlValue => branchCount);
+                    newDynamicControl := create unique DynamicControl (expectedDynamicControlValue => branchCount, isUser => false);
                     link newDynamicControl R29 theDynamicControlDefn;
                     link newDynamicControl R35 theJob;
+                    link newDynamicControl R37 this;
                   else
                     // No Branch Count value provided
                     theJob.failJob("No valid branch count value provided on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
@@ -345,11 +343,10 @@ creationErrorMessage : string;
                   if aeDataElement.aedValue /= "" then
                     // Convert the provided string value to an integer (a non-integer input value causes the Program Error exception caught below)
                     mergeCount := integer'parse(aeDataElement.aedValue);
-                    newDynamicControl := create DynamicControl (jobID => theJob.jobID, 
-                  	                                          dynamicControlName => aeDataElement.aedName, 
-                  	                                          expectedDynamicControlValue => mergeCount);
+                    newDynamicControl := create unique DynamicControl (expectedDynamicControlValue => mergeCount);
                     link newDynamicControl R29 theDynamicControlDefn;
                     link newDynamicControl R35 theJob;
+                    link newDynamicControl R37 this;
                   else
                     // No Merge Count value provided
                     theJob.failJob("No valid merge count value provided on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);

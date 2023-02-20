@@ -1,0 +1,14 @@
+@startuml
+#green:TransferRequest;
+repeat
+  :B,1;
+  :C,1;
+  if (XOR) then (error)
+    :CError,1;
+    break
+  else (normal)
+    :D,1;
+  endif
+repeat while
+#red:E,1;
+@enduml

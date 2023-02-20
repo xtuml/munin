@@ -862,3 +862,77 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. 'fd59ce5a-ea6c-4e1c-aab0-964b60e6a963' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test204NormalMultiInstanceForkWithBranchAndMergeCount () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 10 branches
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "MultiFork_1", "2");
+  theAuditEventData := theAuditEventData & (aeDataKindEnum.BRANCHCOUNT, "MultiFork_2", "4");
+  theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "MultiMerge_1", "2");
+  theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "MultiMerge_2", "4");
+  acceptOrderedEvent ("1620920000","Test-0001","MFMA","MultiForkJob",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData :=  emptyAuditEventData;
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","MFMB","MultiForkJob",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","MFMC","MultiForkJob",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","MFMC","MultiForkJob",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev303");
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev305",theAuditEventData);
+  previousEvents := ("Ev303");
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := ("Ev303");
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := ("Ev303");
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := ("Ev304");
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev304");
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev310",theAuditEventData);
+  previousEvents := ("Ev304");
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev311",theAuditEventData);
+  previousEvents := ("Ev304");
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev312",theAuditEventData);
+  previousEvents := empty & "Ev305" & "Ev306";
+  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob",previousEvents,"Ev313",theAuditEventData);
+  previousEvents := empty & "Ev307" & "Ev308";
+  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob",previousEvents,"Ev314",theAuditEventData);
+  previousEvents := empty & "Ev309" & "Ev310";
+  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob",previousEvents,"Ev315",theAuditEventData);
+  previousEvents := empty & "Ev311" & "Ev312";
+  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob",previousEvents,"Ev316",theAuditEventData);
+  previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316";
+  acceptOrderedEvent ("1620920004","Test-0001","MFMF","MultiForkJob",previousEvents,"Ev317",theAuditEventData);
+  previousEvents := ("Ev317");
+  acceptOrderedEvent ("1620920005","Test-0001","MFMG","MultiForkJob",previousEvents,"Ev318",theAuditEventData);
+ //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 18, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
