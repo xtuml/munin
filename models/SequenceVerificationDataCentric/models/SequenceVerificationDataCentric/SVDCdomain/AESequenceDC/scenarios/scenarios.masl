@@ -1027,6 +1027,7 @@ begin
   eventDefinition ("BranchedJob","BranchedSequence","FMG",1,previousEventTypes,false,true,false);
   
   dynamicControlDefinition("BranchedJob", "TypeFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "FMA",1,"FMB",1);
+  dynamicControlDefinition("BranchedJob", "TypeFork_2", dynamicControlTypeEnum.MERGECOUNT, "FMA",1,"FMF",1);
   
 //
 // An illegal definition since it contains an end sequence in the middle of the event chain
@@ -1061,6 +1062,7 @@ begin
   eventDefinition ("InstForkJob","InstForkSequence","IFF",1,previousEventTypes,false,true,false);
 
   dynamicControlDefinition("InstForkJob", "InstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "IFA",1,"IFB",1);
+  dynamicControlDefinition("InstForkJob", "InstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "IFA",1,"IFD",1);
   //
   // Job SplitBranchedJob, Sequence ForkSequence
   // 
@@ -1101,8 +1103,6 @@ begin
   eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFB",1,previousEventTypes,false,false,false);
   previousEventTypes := ("SIFB",1,"","");
   eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFC",1,previousEventTypes,false,true,false);
-
-  dynamicControlDefinition("SplitInstForkJob", "SplitInstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "SIFA",1,"SIFB",1);
   
 // SplitInstForkJob and SplitInstMergeSequence
 //
@@ -1112,6 +1112,9 @@ begin
   eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFE",1,previousEventTypes,false,false,false);
   previousEventTypes := ("SIFE",1,"","");
   eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFF",1,previousEventTypes,false,true,false);
+
+  dynamicControlDefinition("SplitInstForkJob", "SplitInstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "SIFA",1,"SIFB",1);
+  dynamicControlDefinition("SplitInstForkJob", "SplitInstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "SIFA",1,"SIFE",1);
 
 end service;
 //

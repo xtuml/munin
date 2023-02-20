@@ -54,6 +54,11 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test70ComplexSequence_SunnyDay1 107
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test71ComplexSequence_SunnyDay2 1071 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test72ComplexSequence_SunnyDay3 1072 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test200NormalInstanceForkWithBranchAndMergeCount 1200 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test201NormalInstanceForkWithBranchAndMergeCount 1201 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test202NormalSplitInstanceForkWithBranchAndMergeCount 1202 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test203NormalTypeAndInstanceForkWithBranchAndMergeCount 1203 CleanUpAllJobs 64]
+
+
 # Suspend & Reactivate JobDefinition test cases
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test20StartOfNewJobForSuspendedJobDefinition 1020 CleanUpAllJobs 64]
 
@@ -97,6 +102,8 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test64InvalidLoopWithLoopCountExcee
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test250IllegalInstanceForkAndMergePath 1250 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test251IllegalSplitInstanceForkAndMergePath 1251 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test252IllegalInstanceAndTypeForkAndMergePath 1252 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test254IllegalInstanceForkWithIncorrectBranchAndMergeCount 1254 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test255IllegalSplitInstanceForkWithBranchAndMergeCount 1255 CleanUpAllJobs 64]
 
 # Errors in complex sequences
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test100ComplexSequence_RainyDay1_XORconstraintViolation 1100 CleanUpAllJobs 64]
