@@ -232,6 +232,7 @@ begin
 	                        Logger::log(Logger::Information, "AESequenceDC", logMessage);                       
                           end if;
                         else
+                          // An instance fork has occurred but the Job Definition does not expect this to occur at this point in the sequence.
                           this.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);
                         end if;
                       else
