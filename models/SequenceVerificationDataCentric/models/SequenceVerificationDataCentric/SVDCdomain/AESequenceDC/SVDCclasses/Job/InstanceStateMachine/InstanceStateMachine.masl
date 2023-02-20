@@ -103,9 +103,6 @@ begin
                 // We have a follow on event for an existing Job with a valid previous event
                 theAeInSequencePairDefn := theAeOccInSequenceDef with prevAeOccInSequenceDef -> R6.follows.AEInSequencePairDefn;
                 // Check that the previous event has not already been seen with this event as that would be an error
-                
-//                existingAuditEventPair := find_one AuditEventPair (previousAuditEventId = prevEvent.AuditEventId and
-//                                                                   nextAuditEventId = newEvent.AuditEventId);
                 existingAuditEventPair := find_one AuditEventPair (previousAuditEventId = prevEvent.AuditEventId and
                 	                                               nextAuditEventId = newEvent.AuditEventId);
                
@@ -157,7 +154,7 @@ begin
                           end if;  
                         end if;  
 	                  else
-                        logMessage := "There is no event using a Dynamic Control of type" & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+                        logMessage := "This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
 	                    Logger::log(Logger::Information, "AESequenceDC", logMessage);
 	                  end if;  
 	                  
