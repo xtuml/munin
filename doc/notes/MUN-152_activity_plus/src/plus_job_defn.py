@@ -500,9 +500,3 @@ class Loop:
     def __init__(self):
         self.start_event = None                            # first event encountered
         Loop.population.append(self)
-
-class IntrajobInvariant:
-    """invariant information used within a single job"""
-    population = []
-    def __init__(self, name):
-        IntrajobInvariant.population.append(self)
