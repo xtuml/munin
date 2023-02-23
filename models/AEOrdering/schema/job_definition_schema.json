@@ -33,9 +33,9 @@
           "type": "string"
         },
         "OccurrenceId": {
-          "description": "TODO",
+          "description": "Secondary key to an event that appears more than once in a job",
           "type": "integer",
-          "exclusiveMinimum": 0
+          "minimum": 0
         },
         "Application": {
           "description": "The name of the issuing application.",
@@ -69,9 +69,9 @@
               "type": "string"
             },
             "UserOccurrenceId": {
-              "description": "TODO",
+              "description": "Secondary key to an event that appears more than once in a job",
               "type": "integer",
-              "exclusiveMinimum": 0
+              "minimum": 0
             }
           },
           "required": ["DynamicControlName", "DynamicControlType", "UserEventType", "UserOccurrenceId"],
@@ -87,9 +87,9 @@
                 "type": "string"
               },
               "PreviousOccurrenceId": {
-                "description": "TODO",
+                "description": "Secondary key to an event that appears more than once in a job",
                 "type": "integer",
-                "exclusiveMinimum": 0
+                "minimum": 0
               },
               "ConstraintDefinitionId": {
                 "description": "An identifier assigned to the constraint",
