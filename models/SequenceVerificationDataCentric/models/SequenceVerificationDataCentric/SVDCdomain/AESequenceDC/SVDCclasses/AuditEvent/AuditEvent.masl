@@ -181,6 +181,8 @@ mergeCount : integer;
 dynamicControlDefinitionFound : boolean;
 logMessage : string;
 creationErrorMessage : string;
+//TODO Remove Debug declaration
+totalDynamicControls : set of instance of DynamicControl;
     
     begin
       // Capture any audit event data associated with this audit event
@@ -201,7 +203,7 @@ creationErrorMessage : string;
                   link newIntraJobInvariant R23 this;
                   link newIntraJobInvariant R26 theIntraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
-	              logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType;
+	              logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType & " with value = " & newIntraJobInvariant.invariantValue;
 	              Logger::log(Logger::Information, "AESequenceDC", logMessage); 
 	            else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
@@ -279,10 +281,11 @@ creationErrorMessage : string;
                   if aeDataElement.aedValue /= "" then
                     // Convert the provided string value to an integer (a non-integer input value causes the Program Error exception caught below)
                     loopCount := integer'parse(aeDataElement.aedValue);
-                    newDynamicControl := create unique DynamicControl (expectedDynamicControlValue => loopCount);
+                    newDynamicControl := create unique DynamicControl (expectedDynamicControlValue => loopCount, isUser => false);
                     link newDynamicControl R29 theDynamicControlDefn;
                     link newDynamicControl R35 theJob;
                     link newDynamicControl R37 this;
+                    
                   else
                     // No Loop Count value provided
                     theJob.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
@@ -315,6 +318,7 @@ creationErrorMessage : string;
                     link newDynamicControl R29 theDynamicControlDefn;
                     link newDynamicControl R35 theJob;
                     link newDynamicControl R37 this;
+
                   else
                     // No Branch Count value provided
                     theJob.failJob("No valid branch count value provided on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
@@ -339,14 +343,15 @@ creationErrorMessage : string;
                 if theDynamicControlDefn.dynamicControlName = aeDataElement.aedName and theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.MERGECOUNT then
                   //A matching dynamic control definition has been identified and its of the right type.
                   dynamicControlDefinitionFound := true;
-                  //Check that the branch count value is not empty
+                  //Check that the merge count value is not empty
                   if aeDataElement.aedValue /= "" then
                     // Convert the provided string value to an integer (a non-integer input value causes the Program Error exception caught below)
                     mergeCount := integer'parse(aeDataElement.aedValue);
-                    newDynamicControl := create unique DynamicControl (expectedDynamicControlValue => mergeCount);
+                    newDynamicControl := create unique DynamicControl (expectedDynamicControlValue => mergeCount, isUser => false);
                     link newDynamicControl R29 theDynamicControlDefn;
                     link newDynamicControl R35 theJob;
                     link newDynamicControl R37 this;
+
                   else
                     // No Merge Count value provided
                     theJob.failJob("No valid merge count value provided on this audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
