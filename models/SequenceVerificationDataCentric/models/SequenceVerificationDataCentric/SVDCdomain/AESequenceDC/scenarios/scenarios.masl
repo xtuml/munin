@@ -1012,6 +1012,7 @@ begin
   //
   // Job BranchedJob, Sequence BranchedSequence
   // 
+  previousEventTypes := empty;
   eventDefinition ("BranchedJob","BranchedSequence","FMA",1,previousEventTypes,true,false,false);
   previousEventTypes := ("FMA",1,"","");
   eventDefinition ("BranchedJob","BranchedSequence","FMB",1,previousEventTypes,false,false,false);
@@ -1116,6 +1117,28 @@ begin
   dynamicControlDefinition("SplitInstForkJob", "SplitInstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "SIFA",1,"SIFB",1);
   dynamicControlDefinition("SplitInstForkJob", "SplitInstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "SIFA",1,"SIFE",1);
 
+  //
+  // Job MultiForkJob, Sequence MultiForkSequence
+  // 
+  previousEventTypes := empty;
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMA",1,previousEventTypes,true,false,false);
+  previousEventTypes := ("MFMA",1,"","");
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMB",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("MFMB",1,"","");
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMC",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("MFMC",1,"","");
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMD",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("MFMD",1,"","");
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFME",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("MFME",1,"","");
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMF",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("MFMF",1,"","");
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMG",1,previousEventTypes,false,true,false);
+  
+  dynamicControlDefinition("MultiForkJob", "MultiFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "MFMA",1,"MFMB",1);
+  dynamicControlDefinition("MultiForkJob", "MultiFork_2", dynamicControlTypeEnum.BRANCHCOUNT, "MFMA",1,"MFMC",1);
+  dynamicControlDefinition("MultiForkJob", "MultiMerge_1", dynamicControlTypeEnum.MERGECOUNT, "MFMA",1,"MFME",1);
+  dynamicControlDefinition("MultiForkJob", "MultiMerge_2", dynamicControlTypeEnum.MERGECOUNT, "MFMA",1,"MFMF",1);
 end service;
 //
 //
