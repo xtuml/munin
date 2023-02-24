@@ -1827,7 +1827,9 @@ begin
   // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 3 branches
   // This test does not reveal any erroneous behaviour of the twin
   //
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "TypeFork_1", "3");
   acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
   acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
@@ -2007,7 +2009,7 @@ begin
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '6eebfd0a-8991-449d-bb75-8c5a038a563d' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test201NormalInstanceForkWithBranchAndMergeCount () is
+private service AESequenceDC::Test13NormalInstanceForkAndMergePath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
@@ -2305,7 +2307,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'dcaee3ce-d56b-4cf5-a50f-212d2c506052' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test202NormalSplitInstanceForkWithBranchAndMergeCount () is
+private service AESequenceDC::Test15NormalSplitInstanceForkAndMergePath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;

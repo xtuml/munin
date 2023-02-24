@@ -36,18 +36,28 @@ theSourceExtraJobInvariant : instance of PersistedInvariant;
 theUserExtraJobInvariant : instance of TransientInvariant;
 theDynamicControlDefn : instance of DynamicControlDefinition;
 theDynamicControlDefns : set of instance of DynamicControlDefinition;
+theExistingDynamicControls : set of instance of DynamicControl;
 newDynamicControl : instance of DynamicControl;
 theUserDynamicControlDefn : instance of DynamicControlDefinition;
 theCurrentDynamicControlDefn : instance of DynamicControlDefinition;
 theUserDynamicControl : instance of DynamicControl;
 thisJobsDynamicControl : instance of DynamicControl;
 thisJobsDynamicControls : set of instance of DynamicControl;
+theDynamicControls : set of instance of DynamicControl;
+theSourceDynamicControl : instance of DynamicControl;
 theCurrentDynamicControls : set of instance of DynamicControl;
 thePrevUserDynamicControlDefn : instance of DynamicControlDefinition;
+thePrevSourceDynamicControl : instance of DynamicControl;
 thePrevUserDynamicControl : instance of DynamicControl;
 thePrevUserDynamicControls : set of instance of DynamicControl;
+theCandidatePrevUserDynamicControl : instance of DynamicControl;
+theCandidatePrevUserDynamicControlDefn : instance of DynamicControlDefinition;
+thePrevUserBranchPoints : set of instance of DynamicControl;
+allPrevUserBranchPoints : set of instance of DynamicControl;
+emptyPrevUserDynamicControl : instance of DynamicControl;
 loopCount : integer;
 branchCount : integer;
+auditEventDataProcessed : boolean;
 empty : sequence of string;
 emptyPrevId : sequence of string:= empty & "";
 lastPreviousEventId : string;
@@ -74,13 +84,14 @@ begin
       theSequenceDef := theEventType -> R1.AESequenceDefinition;
       theAeInSequenceDef := theSequenceDef with theEventType -> R1.AEInSequenceDefinition;
       theAeOccurrencesInSequenceDef := theAeInSequenceDef -> R12;
-
+      
       // ...and then check that just one of these matches with an event occurrence that is expected for the previous event
       if (prevAEIds /= empty) and (prevAEIds /= emptyPrevId) then
         // Log info: Event has previous event ids
         logMessage := "Follow on event for existing Job received - jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
 	    Logger::log(Logger::Information, "AESequenceDC", logMessage);   
 
+        auditEventDataProcessed := false;
         for aPrevEventId in prevAEIds loop 
           // Need to locate the previous event as defined in the event parameter
           prevEvent := find_one AuditEvent (AuditEventId = aPrevEventId);
@@ -138,66 +149,54 @@ begin
                     end if;
                     // Note that the previous Audit Event has now been seen as a previous audit event       
                     prevEvent.seenAsPreviousEvent := true;
+
+
+                
+                    // Process the audit event data for this new event 
+                    // checking we haven't already added the audit event data for this event
+                    // This approach is a bit clunky but ensures we don't try to add the audit event data more than once
+                    if auditEventDataProcessed = false then
+                      newEvent.ProcessAuditEventData (aeData);
+                      auditEventDataProcessed := true;
+                    end if;  
+      
+
+
+
               
                     // Add logic for incrementing Loop Count
                     theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
                     if theUserDynamicControlDefn /= null then                      
                       thisJobsDynamicControls := this -> R35;
                       
-                      theUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = theUserDynamicControlDefn.dynamicControlName);
-                      if theUserDynamicControl /= null then
+                      theUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = theUserDynamicControlDefn.dynamicControlName );
+                      if theUserDynamicControl /= null and theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
+                        if (theUserDynamicControl -> R36) = null then
+                          link theUserDynamicControl R36 newEvent;
+                        end if;                      
                     
-                        if theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
-                          if theUserDynamicControl.expectedDynamicControlValue > 0 then
-                            if theUserDynamicControl.currentDynamicControlValue < theUserDynamicControl.expectedDynamicControlValue then
-                              theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
-                            else
-                              this.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
-                            end if;               
-                          end if;  
+                        if theUserDynamicControl.expectedDynamicControlValue > 0 then
+                          if theUserDynamicControl.currentDynamicControlValue < theUserDynamicControl.expectedDynamicControlValue then
+                            theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
+                          else
+                            this.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
+                          end if;                 
                         end if;  
+                        
 	                  else
-                        logMessage := "There is no event using a Dynamic Control of type" & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+                        logMessage := "There is no event using a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
 	                    Logger::log(Logger::Information, "AESequenceDC", logMessage);
 	                  end if;  
 	                  
 	                else 
 	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
 	                end if;  
-
-                    // Add logic for incrementing Branch Count - to count branches from a fork we have to look to see if the previous event was the fork event with a branch count on it.
-                    prevAeOccInSequenceDef := prevEvent -> R13;
-                    if prevAeOccInSequenceDef /= null then
-	                      
-                    thePrevUserDynamicControlDefn := prevAeOccInSequenceDef -> R31;                    
-                      if thePrevUserDynamicControlDefn /= null then
-                    
-                        thisJobsDynamicControls := this -> R35;
-                        thePrevUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = thePrevUserDynamicControlDefn.dynamicControlName);
-                        if thePrevUserDynamicControl /= null then
-                    
-                          if thePrevUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then  
-                            if thePrevUserDynamicControl.expectedDynamicControlValue > 0 then
-                              thePrevUserDynamicControl.currentDynamicControlValue := thePrevUserDynamicControl.currentDynamicControlValue + 1;
-                            end if;  
-                         
-                          end if;  
-	                    else
-                          logMessage := "There is no event using a Dynamic Control of type" & thePrevUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
-	                      Logger::log(Logger::Information, "AESequenceDC", logMessage);
-	                    end if;  
-  
-	                  else 
-	                    // This event doesn't have a previous event that has a branch count defined on it and so can be ignored
-	                  end if;  
-	                else
-                      logMessage := "The previous event has no associated definition " & prevEvent.AuditEventId & " for " & this.jobID;
-	                  Logger::log(Logger::Information, "AESequenceDC", logMessage);	                
-	                end if;
-
+	                
                     // Check to see if this is a break event causing us to exit a loop and cancel the loop count
+                    // TODO Is there a better way to do this now R36 and R37 have been added
                     if theAeOccInSequenceDef.isBreak = true then
-                      theCurrentDynamicControls := find DynamicControl (expectedDynamicControlValue > 0);
+                      thisJobsDynamicControls := this -> R35;
+                      theCurrentDynamicControls := find thisJobsDynamicControls (expectedDynamicControlValue > 0);
                       for theCurrentDynamicControl in theCurrentDynamicControls loop
                         theCurrentDynamicControlDefn := theCurrentDynamicControl -> R29;
                         if theCurrentDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
@@ -205,6 +204,49 @@ begin
                         end if;
                       end loop;
                     end if;
+	                
+
+                    // Add logic for creating user Branch Count on Fork event
+                    theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
+                    if theUserDynamicControlDefn /= null and theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then                      
+
+                      // We know this event is a fork point so find the corresponding source event to get the number of branches expected
+
+                      theDynamicControls := theUserDynamicControlDefn -> R29;
+                      theSourceDynamicControl := find_one theDynamicControls (isUser = false);
+                      if theSourceDynamicControl /= null then
+ 
+                        theUserDynamicControl := newEvent -> R36;
+                        if theUserDynamicControl = null then
+                          theUserDynamicControl := create unique DynamicControl (expectedDynamicControlValue => theSourceDynamicControl.expectedDynamicControlValue,
+                            	                                                 currentDynamicControlValue => 0,
+                            	                                                 isUser => true);
+                          link theUserDynamicControl R36 newEvent;
+                          link theUserDynamicControl R29 theUserDynamicControlDefn;
+                          link theUserDynamicControl R35 this;
+
+                        else
+                          //this.failJob("This event already has a user branch count associated with it for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
+
+                        end if;  
+                    
+	                  else
+                        this.failJob("The fork point has been found but no corresponding source branch count is associated with it for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
+	                  end if;  
+	                  
+	                else 
+	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
+	                end if;  
+
+                    // Add logic for incrementing Branch Count - to count branches from a fork we have to look to see if the previous event was the fork event with a branch count on it.
+
+                    thePrevUserDynamicControl := prevEvent -> R36;
+                    if thePrevUserDynamicControl /= null and thePrevUserDynamicControl.isUser then
+                      thePrevUserDynamicControl.currentDynamicControlValue := thePrevUserDynamicControl.currentDynamicControlValue + 1;
+                      
+                    end if;
+
+
                   
                     // TODO Verify this optional section is required
                     // Don't allow an instance branch unless there is a branch count defined
@@ -223,19 +265,17 @@ begin
                         lastPreviousEventId := eachAuditEventPair.previousAuditEventId;
                       end loop;
                       if instanceForkFound then
+                      
                         // There is an instance fork so check that the previous event is a user of a branch count
-                        thePrevUserDynamicControlDefn := prevAeOccInSequenceDef -> R31;                    
-                        if thePrevUserDynamicControlDefn /= null and thePrevUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then
-                          thisJobsDynamicControls := this -> R35;
-                          thePrevUserDynamicControls := thePrevUserDynamicControlDefn -> R29;
-                          if (thisJobsDynamicControls intersection thePrevUserDynamicControls)'length /= 1 then
-                            this.failJob("There is no valid Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);
-                          else
+                        thePrevUserDynamicControl := prevEvent -> R36;
+                        if thePrevUserDynamicControl /= null and thePrevUserDynamicControl.isUser then                        
+                          thePrevUserDynamicControlDefn := thePrevUserDynamicControl -> R29;
+                          if thePrevUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT and thePrevUserDynamicControl.expectedDynamicControlValue > 0 then
                             logMessage := "Valid Branch Count found on instance fork in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType;
 	                        Logger::log(Logger::Information, "AESequenceDC", logMessage);                       
+                          else
+                            this.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);                         
                           end if;
-                        else
-                          this.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);
                         end if;
                       else
                         // There is no instance fork here so carry on
@@ -247,20 +287,20 @@ begin
 
                     // Add logic for setting Merge Count
                     theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
-                    if theUserDynamicControlDefn /= null then                      
+                    if theUserDynamicControlDefn /= null and theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.MERGECOUNT then                      
                       thisJobsDynamicControls := this -> R35;
                       
                       theUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = theUserDynamicControlDefn.dynamicControlName);
                       if theUserDynamicControl /= null then
-                    
-                        if theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.MERGECOUNT then
-                          if theUserDynamicControl.expectedDynamicControlValue > 0 then
-                            // The current Merge count value is set to the number of previous event ids
-                            theUserDynamicControl.currentDynamicControlValue := prevAEIds'length;                                           
-                          end if;  
+                        if (theUserDynamicControl -> R36) = null then
+                          link theUserDynamicControl R36 newEvent;
+                        end if;                      
+                        if theUserDynamicControl.expectedDynamicControlValue > 0 then
+                          // The current Merge count value is set to the number of previous event ids
+                          theUserDynamicControl.currentDynamicControlValue := prevAEIds'length;                                           
                         end if;  
 	                  else
-                        logMessage := "There is no event using a Dynamic Control of type" & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+                        logMessage := "There is no event using a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
 	                    Logger::log(Logger::Information, "AESequenceDC", logMessage);
 	                  end if;  
 
@@ -366,6 +406,12 @@ begin
 	          link newSequence R14 theSequenceDef;          
 	        end if;
 	      end if;  
+
+
+
+          // Process the audit event data for this first event
+          newEvent.ProcessAuditEventData (aeData);    
+
         
         else
           // We have a valid new event type and no previous event. This should indicate the start of
@@ -376,11 +422,9 @@ begin
         end if; 
       end if;    
  
-              
-      // Process the audit event data for this new event
-      newEvent.ProcessAuditEventData (aeData);
- 
-  
+      // TODO Remove later: Process Audit event data was here
+      
+        
       // Check to see if the received event marks an end point in the current sequence and if so check whether or
       // not it completes the sequence (note that sequences can have multiple end points due to branching)
       if (theAeOccInSequenceDef /= null) and (theAeOccInSequenceDef.isSequenceEnd) = true then
@@ -424,6 +468,8 @@ eachConstrainedSeqPairDefn : instance of AEInSequencePairDefn;
 theConstrainedAuditEventPairs : sequence of instance of AuditEventPair;
 thePreviousAuditEvents : set of instance of AuditEvent;
 theFollowingAuditEventPairs : sequence of instance of AuditEventPair;
+theForkAuditEvent : instance of AuditEvent;
+theBranchedEvents : set of instance of AuditEvent;
 validatedConstraint : boolean;
 validatedDynamicControl : boolean;
 logMessage : string;
@@ -489,14 +535,22 @@ begin
           Logger::log(Logger::Information, "AESequenceDC", logMessage);              
         end if;
       elsif theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then
-        if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
-          validatedDynamicControl := false;          
-          logMessage := "Branch Count check failed for Job = " & this.jobID & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
-          Logger::log(Logger::Information, "AESequenceDC", logMessage);    
+//        if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
+        theForkAuditEvent := theDynamicControl -> R36;
+
+        if theDynamicControl -> R36 /= null then
+        // We have a user dynamic control so check its values
+          if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.currentDynamicControlValue /= theDynamicControl.expectedDynamicControlValue) then
+            validatedDynamicControl := false;          
+            logMessage := "Branch Count check failed for Job = " & this.jobID & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theBranchedEvents'length'image;
+            Logger::log(Logger::Information, "AESequenceDC", logMessage);    
+          else
+            logMessage := "Branch Count check passed for Job = " & this.jobID & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theBranchedEvents'length'image;
+            Logger::log(Logger::Information, "AESequenceDC", logMessage);              
+          end if;
         else
-          logMessage := "Branch Count check passed for Job = " & this.jobID & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
-          Logger::log(Logger::Information, "AESequenceDC", logMessage);              
-        end if;
+          // This is the source branch count which isn't checked
+        end if;    
       elsif theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.MERGECOUNT then
         if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
           validatedConstraint := false;    
