@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  istore_test:
+    image: "ghcr.io/xtuml/istore:test"
+    build:
+      context: .
+      target: install-test
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"

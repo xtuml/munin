@@ -1,0 +1,91 @@
+//! ACTIVITY BEGIN. '152c9ebb-ba76-485f-8e08-860b3f081909' DO NOT EDIT THIS LINE.
+private service IStore::testInvariantStore () is
+invStore : instance of InvStore;
+currentStoredModificationTime : timestamp;
+testFile : Filesystem::filename := "./test-files/InvariantStore";
+tmpFile : Filesystem::filename := "./test-files/InvariantStore-1";
+emptyInvaraintFile : Filesystem::filename := "./test-files/InvariantStore-empty";
+invariant : instance of Invariant;
+reportedInvariants : sequence of instance of _TEST_StoreClient_addInvariants;
+invariantList : sequence of persistedInvariantStructure;
+
+begin
+	
+	// check the store and the store file exists
+	delete find Invariant();
+	delete find _TEST_StoreClient_addInvariants();
+	Assertions::assertTrue((find InvStore())'length = 1, "Test Invariant Store: wrong number of invariant store, expected 1 found: " & ((find InvStore())'length)'image);
+	invStore := find_one InvStore();
+	Assertions::assertTrue(Filesystem::file_exists(invStore.invStoreName), "Test Invariant Store: invariant store does not exist: " & (invStore.invStoreName));
+	
+	// make sure that the invariant store is empty
+	Filesystem::touch_file(emptyInvaraintFile);
+	Filesystem::move_file(emptyInvaraintFile, invStore.invStoreName);
+	
+	// touch the file and check that it is successfully re-read
+	currentStoredModificationTime := invStore.storeModificationTime;
+	Filesystem::touch_file(invStore.invStoreName);
+	generate InvStore.checkStore() to invStore;
+	Test::service_event_queue();
+	Assertions::assertTrue(currentStoredModificationTime /= invStore.storeModificationTime, "Test Invariant Store: invariant store file was not re-read: " & (invStore.invStoreName));
+	
+	// move the test invariant store into place
+	Filesystem::copy_file(testFile, tmpFile);
+	Filesystem::move_file(tmpFile, invStore.invStoreName);
+	generate InvStore.checkStore() to invStore;
+	Test::service_event_queue();
+	
+	// verify two invariants have been loaded
+	Assertions::assertTrue((find Invariant())'length = 2, "Test Invariant Store: Expected 2 invariants found: " & (find Invariant())'length'image);
+	Assertions::assertTrue(find_one Invariant(invariantName = "inv1") /= null, "Test Invariant Store: Failed to find invariant inv1");
+	Assertions::assertTrue(find_one Invariant(invariantName = "inv2") /= null, "Test Invariant Store: Failed to find invariant inv2");
+	
+	// verify that the invariants have been reported to the Store Client
+	reportedInvariants := find _TEST_StoreClient_addInvariants();
+	Assertions::assertTrue(reportedInvariants'length = 1, "Test Invariant Store: Invariants not reported to client");
+	invariantList := reportedInvariants'any.invariantsToReport;
+	Assertions::assertTrue(invariantList'length = 2, "Test Invariant Store: Expected 2 invariants to be reported to client found: " &invariantList'length'image);
+	
+	// add an invariant
+	IStore::persistInvariant("inv3", "11111", timestamp'now, timestamp'now + @PT10M@, "Job2", "Event3", 0);
+	Test::service_event_queue();
+	Assertions::assertTrue((find Invariant())'length = 3, "Test Invariant Store: Expected 3 invariants found: " & (find Invariant())'length'image);
+	
+	// reload the file and check 3 are loaded in
+	delete reportedInvariants;
+	delete (find Invariant());
+	Filesystem::touch_file(invStore.invStoreName);
+	generate InvStore.checkStore() to invStore;
+	Test::service_event_queue();
+	Assertions::assertTrue((find Invariant())'length = 3, "Test Invariant Store: Expected 2 invariants found: " & (find Invariant())'length'image);
+	Assertions::assertTrue(find_one Invariant(invariantName = "inv1") /= null, "Test Invariant Store: Failed to find invariant inv1");
+	Assertions::assertTrue(find_one Invariant(invariantName = "inv2") /= null, "Test Invariant Store: Failed to find invariant inv2");
+	Assertions::assertTrue(find_one Invariant(invariantName = "inv3") /= null, "Test Invariant Store: Failed to find invariant inv3");
+	reportedInvariants := find _TEST_StoreClient_addInvariants();
+	Assertions::assertTrue(reportedInvariants'length = 1, "Test Invariant Store: Invariants not reported to client");
+	invariantList := reportedInvariants'any.invariantsToReport;
+	Assertions::assertTrue(invariantList'length = 3, "Test Invariant Store: Expected 3 invariants to be reported to client found: " &invariantList'length'image);
+	
+	// add an invariant that will expire
+	IStore::persistInvariant("inv4", "99999", timestamp'now, timestamp'now + @PT0.001S@, "Job2", "Event4", 0);
+	Test::service_event_queue();
+	Assertions::assertTrue((find Invariant())'length = 4, "Test Invariant Store: Expected 4 invariants found: " & (find Invariant())'length'image);
+	
+	// reload the file and check that the expired invariant is not used
+	delay @PT1S@;
+	delete reportedInvariants;
+	delete (find Invariant());
+	Filesystem::touch_file(invStore.invStoreName);
+	cancel invStore.storeTimer;
+	schedule invStore.storeTimer generate InvStore.loadStore() to invStore delay @PT1S@;
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+	Assertions::assertTrue((find Invariant())'length = 3, "Test Invariant Store: Expected 3 invariants found: " & (find Invariant())'length'image);
+	Assertions::assertTrue(find_one Invariant(invariantName = "inv4") = null, "Test Invariant Store: Invariant inv4 not deleted");
+	reportedInvariants := find _TEST_StoreClient_addInvariants();
+	Assertions::assertTrue(reportedInvariants'length = 1, "Test Invariant Store: Invariants not reported to client");
+	invariantList := reportedInvariants'any.invariantsToReport;
+	Assertions::assertTrue(invariantList'length = 3, "Test Invariant Store: Expected 3 invariants to be reported to client found: " &invariantList'length'image);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

@@ -1,0 +1,11 @@
+public service IStore::setLoadRate ( loadRate: in duration ) is
+invStore : instance of InvStore;
+
+begin
+	invStore := find_one InvStore();
+	if invStore = null then
+		invStore.loadRate := loadRate;
+		cancel invStore.storeTimer;
+		generate InvStore.checkStore() to invStore;
+	end if;
+end service;

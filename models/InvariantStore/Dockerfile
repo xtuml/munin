@@ -20,11 +20,8 @@ ADD CMakeLists.txt /root/CMakeLists.txt
 
 FROM levistarrett/masl-base:v2 AS install-base
 
-# copy schedules
+# copy configuration
 ADD schedule /root/schedule
-
-# create test directories
-RUN mkdir -p /root/incoming /root/processing /root/processed
 
 # configure the library path
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/install/lib
@@ -33,7 +30,30 @@ ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/install/lib
 ENV PATH=$PATH:/install/bin
 
 # set the entrypoint
-ENTRYPOINT ["/install/bin/AEO_SVDC_transient"]
+ENTRYPOINT ["/install/bin/IStore_transient_standalone"]
+
+
+
+################################################################################
+# TEST BUILD                                                                   #
+################################################################################
+
+# build stage
+FROM build-base AS build-test
+
+# perform the build
+RUN cmake /root -G Ninja -DCMAKE_BUILD_TYPE=Debug -DEXTRA_MASL_ARGS="${EXTRA_MASL_ARGS}" -DCMAKE_INSTALL_PREFIX=/install
+RUN ninja install
+
+# installation stage
+FROM install-base AS install-test
+
+# copy the includes, libs, and bins
+COPY --from=build-test /build /build
+COPY --from=build-test /install/include /install/include
+COPY --from=build-test /install/lib /install/lib
+RUN mkdir -p /install/bin
+COPY --from=build-test /build/cmake-masl/build/IStore_OOA/IStore_transient_standalone /install/bin
 
 
 
@@ -44,18 +64,6 @@ ENTRYPOINT ["/install/bin/AEO_SVDC_transient"]
 # build stage
 FROM build-base AS build-release
 
-# copy includes and libs from the domains
-RUN mkdir -p /install/include
-RUN mkdir -p /install/lib
-COPY --from="ghcr.io/xtuml/aeordering" /install/include/ /install/include
-COPY --from="ghcr.io/xtuml/aeordering" /install/lib/ /install/lib
-COPY --from="ghcr.io/xtuml/aeordering" /install/share/ /install/share
-COPY --from="ghcr.io/xtuml/istore" /install/include/ /install/include
-COPY --from="ghcr.io/xtuml/istore" /install/lib/ /install/lib
-COPY --from="ghcr.io/xtuml/istore" /install/share/ /install/share
-COPY --from="ghcr.io/xtuml/aesequencedc" /install/include/ /install/include
-COPY --from="ghcr.io/xtuml/aesequencedc" /install/lib/ /install/lib
-
 # perform the build
 RUN cmake /root -G Ninja -DEXTRA_MASL_ARGS="${EXTRA_MASL_ARGS}" -DCMAKE_INSTALL_PREFIX=/install
 RUN ninja install
@@ -65,7 +73,12 @@ FROM install-base AS install-release
 
 LABEL org.opencontainers.image.source https://github.com/xtuml/munin
 
-# copy the libs and bins
-COPY --from=build-release /install/bin /install/bin
+# copy the includes, libs, and bins
+COPY --from=build-release /install/include /install/include
 COPY --from=build-release /install/lib /install/lib
-COPY --from=build-release /install/share /install/share
+RUN mkdir -p /install/bin
+COPY --from=build-release /build/cmake-masl/build/IStore_OOA/IStore_transient_standalone /install/bin
+
+# copy in the MASL interfaces
+RUN mkdir -p /install/lib/masl
+COPY --from=build-release /root/masl/**/*.int /install/lib/masl

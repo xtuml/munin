@@ -72,6 +72,7 @@ jobStoreAgeLimit : duration := @P7D@;
 today : sequence of integer;
 midnight : timestamp;
 fileControl : instance of FileControl;
+invariantStoreLoadRate : duration;
 
 begin
     
@@ -126,6 +127,13 @@ begin
             end if;
             if configJSONObject'contains("JobStoreAgeLimit") then
                 jobStoreAgeLimit := duration'parse(JSON::get_string(configJSONObject["JobStoreAgeLimit"]));
+            end if;
+            if configJSONObject'contains("InvariantStoreLoadRate") then
+                invariantStoreLoadRate := duration'parse(JSON::get_string(configJSONObject["InvariantStoreLoadRate"]));
+                if this.invariantStoreLoadRate /= invariantStoreLoadRate then
+                	this.invariantStoreLoadRate := invariantStoreLoadRate;
+                	Req_IF_InvariantStore~>setLoadRate(this.invariantStoreLoadRate);
+                end if;
             end if;
             // read in the jobs that we expect to process
             if configJSONObject'contains("Jobs") and configJSONObject["Jobs"].kind = JSON::Array then
