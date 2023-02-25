@@ -3114,6 +3114,8 @@ theSequences : set of instance of Sequence;
 theAuditEvents : set of instance of AuditEvent;
 theDynamicControls : set of instance of DynamicControl;
 theDynamicControlDefinitions : set of instance of DynamicControlDefinition;
+theSourceDynamicControls : set of instance of DynamicControl;
+theUsedDynamicControls : set of instance of DynamicControl;
 theLOOPCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
 theBRANCHCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
 theIntraJobInvariantDefinitions : set of instance of IntraJobInvariantDefn;
@@ -3341,6 +3343,8 @@ begin
   theAuditEvents := theSequences -> R11;
   theDynamicControls := theJobs -> R35;
   theDynamicControlDefinitions := theJobs -> R35 -> R29;
+  theSourceDynamicControls := theAuditEvents -> R37;
+  theUsedDynamicControls := theAuditEvents -> R36;
   theLOOPCOUNTcontrolDefinitions := find theDynamicControlDefinitions (dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT);
   theBRANCHCOUNTcontrolDefinitions := find theDynamicControlDefinitions (dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT);
   theIntraJobInvariantDefinitions := theJobs -> R8 -> R22;
@@ -3359,6 +3363,8 @@ begin
   Assertions::assertTrue(theSequences'length = 2, "Wrong number of sequences created: " & (theSequences'length)'image);
   Assertions::assertTrue(theAuditEvents'length = 27, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
   Assertions::assertTrue(theDynamicControls'length = 5, "Wrong number of dynamic controls created: " & (theDynamicControls'length)'image);
+  Assertions::assertTrue(theSourceDynamicControls'length = 4, "Wrong number of dynamic controls employed as sources were created: " & (theSourceDynamicControls'length)'image);
+  Assertions::assertTrue(theUsedDynamicControls'length = 3, "Wrong number of dynamic controls employed as usages were created: " & (theUsedDynamicControls'length)'image);
   Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 3, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
   Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 1, "Wrong number of BRANCHCOUNT control definitions created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
   Assertions::assertTrue(theIntraJobInvariantDefinitions'length = 1, "Wrong number of Intra-Job Invariant definitions created: " & (theIntraJobInvariantDefinitions'length)'image);
@@ -3389,6 +3395,8 @@ theSequences : set of instance of Sequence;
 theAuditEvents : set of instance of AuditEvent;
 theDynamicControls : set of instance of DynamicControl;
 theDynamicControlDefinitions : set of instance of DynamicControlDefinition;
+theSourceDynamicControls : set of instance of DynamicControl;
+theUsedDynamicControls : set of instance of DynamicControl;
 theLOOPCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
 theBRANCHCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
 theIntraJobInvariantDefinitions : set of instance of IntraJobInvariantDefn;
@@ -3461,7 +3469,7 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246788","ProtProc-0001","CS1-C","ComplexRainyDay1",previousEvents,"Event13",theAuditEventData);
   //
-  // ...then the events for the second section of the sequence (up until Event55 which is just before the Type Merge at Event15)...
+  // ...then the events for the second section of the sequence (up until Event36 which is just before the Type Merge at Event15)...
   previousEvents := ("Event13");
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246789","ProtProc-0001","CS1-D","ComplexRainyDay1",previousEvents,"Event60",theAuditEventData);
@@ -3620,6 +3628,8 @@ begin
   theAuditEvents := theSequences -> R11;
   theDynamicControls := theJobs -> R35;
   theDynamicControlDefinitions := theJobs -> R35 -> R29;
+  theSourceDynamicControls := theAuditEvents -> R37;
+  theUsedDynamicControls := theAuditEvents -> R36;
   theLOOPCOUNTcontrolDefinitions := find theDynamicControlDefinitions (dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT);
   theBRANCHCOUNTcontrolDefinitions := find theDynamicControlDefinitions (dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT);
   theIntraJobInvariantDefinitions := theJobs -> R8 -> R22;
@@ -3638,6 +3648,8 @@ begin
   Assertions::assertTrue(theSequences'length = 2, "Wrong number of sequences created: " & (theSequences'length)'image);
   Assertions::assertTrue(theAuditEvents'length = 21, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
   Assertions::assertTrue(theDynamicControls'length = 4, "Wrong number of dynamic controls created: " & (theDynamicControls'length)'image);
+  Assertions::assertTrue(theSourceDynamicControls'length = 4, "Wrong number of dynamic controls employed as sources were created: " & (theSourceDynamicControls'length)'image);
+  Assertions::assertTrue(theUsedDynamicControls'length = 2, "Wrong number of dynamic controls employed as usages were created: " & (theUsedDynamicControls'length)'image);
   Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 3, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
   Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 1, "Wrong number of BRANCHCOUNT control definitions created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
   Assertions::assertTrue(theIntraJobInvariantDefinitions'length = 1, "Wrong number of Intra-Job Invariant definitions created: " & (theIntraJobInvariantDefinitions'length)'image);
@@ -3668,6 +3680,8 @@ theSequences : set of instance of Sequence;
 theAuditEvents : set of instance of AuditEvent;
 theDynamicControls : set of instance of DynamicControl;
 theDynamicControlDefinitions : set of instance of DynamicControlDefinition;
+theSourceDynamicControls : set of instance of DynamicControl;
+theUsedDynamicControls : set of instance of DynamicControl;
 theLOOPCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
 theBRANCHCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
 theIntraJobInvariantDefinitions : set of instance of IntraJobInvariantDefn;
@@ -3927,6 +3941,8 @@ begin
   theAuditEvents := theSequences -> R11;
   theDynamicControls := theJobs -> R35;
   theDynamicControlDefinitions := theJobs -> R35 -> R29;
+  theSourceDynamicControls := theAuditEvents -> R37;
+  theUsedDynamicControls := theAuditEvents -> R36;
   theLOOPCOUNTcontrolDefinitions := find theDynamicControlDefinitions (dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT);
   theBRANCHCOUNTcontrolDefinitions := find theDynamicControlDefinitions (dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT);
   theIntraJobInvariantDefinitions := theJobs -> R8 -> R22;
@@ -3941,14 +3957,16 @@ begin
     end if;
   end loop;
   //
-  Assertions::assertTrue(theJobs'length = 2, "Wrong number of jobs created: " & (theJobs'length)'image);
-  Assertions::assertTrue(theSequences'length = 2, "Wrong number of sequences created: " & (theSequences'length)'image);
-  Assertions::assertTrue(theAuditEvents'length = 43, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
-  Assertions::assertTrue(theDynamicControls'length = 5, "Wrong number of dynamic controls created: " & (theDynamicControls'length)'image);
-  Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 3, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
-  Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 2, "Wrong number of BRANCHCOUNT control definitions created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
-  Assertions::assertTrue(theIntraJobInvariantDefinitions'length = 1, "Wrong number of Intra-Job Invariant definitions created: " & (theIntraJobInvariantDefinitions'length)'image);
-  Assertions::assertTrue(theTransientInvariantsForIntraJobInvariants'length = 2, "Wrong number of Transient Invariants created for IntraJob Invariants: " & (theTransientInvariantsForIntraJobInvariants'length)'image);
+  Assertions::assertTrue(theJobs'length = 2, "Wrong number of jobs were created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 2, "Wrong number of sequences were created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 43, "Wrong number of audit events were created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theDynamicControls'length = 7, "Wrong number of dynamic controls were created: " & (theDynamicControls'length)'image);
+  Assertions::assertTrue(theSourceDynamicControls'length = 5, "Wrong number of dynamic controls employed as sources were created: " & (theSourceDynamicControls'length)'image);
+  Assertions::assertTrue(theUsedDynamicControls'length = 4, "Wrong number of dynamic controls employed as usages were created: " & (theUsedDynamicControls'length)'image);
+  Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 3, "Wrong number of LOOPCOUNT control definitions were created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
+  Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 2, "Wrong number of BRANCHCOUNT control definitions were created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
+  Assertions::assertTrue(theIntraJobInvariantDefinitions'length = 1, "Wrong number of Intra-Job Invariant definitions were created: " & (theIntraJobInvariantDefinitions'length)'image);
+  Assertions::assertTrue(theTransientInvariantsForIntraJobInvariants'length = 2, "Wrong number of Transient Invariants were created for IntraJob Invariants: " & (theTransientInvariantsForIntraJobInvariants'length)'image);
   Assertions::assertTrue(theSourcesOfExtraJobInvariant'length = 1, "Wrong number of audit events acting as source of a PersistedInvariant : " & (theSourcesOfExtraJobInvariant'length)'image);
   Assertions::assertTrue(theUsagesOfTransientInvariant'length = 10, "Wrong number of audit events making usage of a TransientInvariant : " & (theUsagesOfTransientInvariant'length)'image);
   Assertions::assertTrue(theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn = 8, "Wrong number of audit events using an Extra-Job Invariant : " & (theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn)'image);

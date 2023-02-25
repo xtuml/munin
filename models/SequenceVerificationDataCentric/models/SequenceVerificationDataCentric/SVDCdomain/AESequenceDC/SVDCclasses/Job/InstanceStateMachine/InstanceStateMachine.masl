@@ -88,7 +88,7 @@ begin
       // ...and then check that just one of these matches with an event occurrence that is expected for the previous event
       if (prevAEIds /= empty) and (prevAEIds /= emptyPrevId) then
         // Log info: Event has previous event ids
-        logMessage := "Follow on event for existing Job received - jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
+        logMessage := "Follow on event (" & eventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
 	    Logger::log(Logger::Information, "AESequenceDC", logMessage);   
 
         auditEventDataProcessed := false;
