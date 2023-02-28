@@ -66,7 +66,7 @@ begin
   // Starting with the initial 3 events of section 1 of the complex sequence...
   previousEvents := empty;
   // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
-  // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
+  // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,1' to 3).
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC3", "2") & (aeDataKindEnum.BRANCHCOUNT, "BC2", "3");
   acceptOrderedEvent ("1670246786","ProtProc-0001","CS1-A","ComplexSunnyDay1",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event25");
@@ -4027,5 +4027,134 @@ begin
 end service;
 //
 //
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'af1b4193-a636-48fe-81a8-851c74f076fa' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test73ComplexInstanceFork_SunnyDay1 () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 3 Jobs which are all compliant with the Job Definition 'ComplexInstanceForkJob1' but exhibit very 
+  // different topologies. The test is intended to expose this issue which can be solved by mandating the use of 
+  // MERGECOUNT controls to enforce the required topology.
+  //
+  // This test does not reveal any erroneous behaviour of the twin.
+  //
+  // ****************************************************************************************************************
+  // Job 1 of 3
+  // ****************************************************************************************************************
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BCV1", "3");
+  acceptOrderedEvent ("1620920000","Test73","CS2-U","InstanceForkVariant1",previousEvents,"Event1",theAuditEventData);
+  theAuditEventData :=  emptyAuditEventData;
+  previousEvents := ("Event1");
+  acceptOrderedEvent ("1620920001","Test73","CS2-V","InstanceForkVariant1",previousEvents,"Event2",theAuditEventData);
+  previousEvents := ("Event2");
+  acceptOrderedEvent ("1620920002","Test73","CS2-W","InstanceForkVariant1",previousEvents,"Event3",theAuditEventData);
+  previousEvents := ("Event2");
+  acceptOrderedEvent ("1620920003","Test73","CS2-W","InstanceForkVariant1",previousEvents,"Event6",theAuditEventData);
+  previousEvents := ("Event2");
+  acceptOrderedEvent ("1620920004","Test73","CS2-W","InstanceForkVariant1",previousEvents,"Event9",theAuditEventData);
+  previousEvents := empty & "Event3" & "Event6" & "Event9";
+  acceptOrderedEvent ("1620920005","Test73","CS2-X","InstanceForkVariant1",previousEvents,"Event7",theAuditEventData);
+  previousEvents := ("Event7");
+  acceptOrderedEvent ("1620920006","Test73","CS2-Y","InstanceForkVariant1",previousEvents,"Event8",theAuditEventData);
+  previousEvents := ("Event8");
+  acceptOrderedEvent ("1620920007","Test73","CS2-Z","InstanceForkVariant1",previousEvents,"Event12",theAuditEventData);
+  
+  Test::service_event_queue();
+  
+  // ****************************************************************************************************************
+  // Job 2 of 3
+  // ****************************************************************************************************************
+  previousEvents := empty;
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BCV1", "3");
+  acceptOrderedEvent ("1620920000","Test73","CS2-U","InstanceForkVariant2",previousEvents,"Event21",theAuditEventData);
+  theAuditEventData :=  emptyAuditEventData;
+  previousEvents := ("Event21");
+  acceptOrderedEvent ("1620920001","Test73","CS2-V","InstanceForkVariant2",previousEvents,"Event22",theAuditEventData);
+  previousEvents := ("Event22");
+  acceptOrderedEvent ("1620920002","Test73","CS2-W","InstanceForkVariant2",previousEvents,"Event23",theAuditEventData);
+  previousEvents := ("Event23");
+  acceptOrderedEvent ("1620920003","Test73","CS2-X","InstanceForkVariant2",previousEvents,"Event24",theAuditEventData);
+  previousEvents := ("Event24");
+  acceptOrderedEvent ("1620920004","Test73","CS2-Y","InstanceForkVariant2",previousEvents,"Event25",theAuditEventData);
+  previousEvents := ("Event22");
+  acceptOrderedEvent ("1620920002","Test73","CS2-W","InstanceForkVariant2",previousEvents,"Event26",theAuditEventData);
+  previousEvents := ("Event26");
+  acceptOrderedEvent ("1620920003","Test73","CS2-X","InstanceForkVariant2",previousEvents,"Event27",theAuditEventData);
+  previousEvents := ("Event27");
+  acceptOrderedEvent ("1620920004","Test73","CS2-Y","InstanceForkVariant2",previousEvents,"Event28",theAuditEventData);
+  previousEvents := ("Event22");
+  acceptOrderedEvent ("1620920002","Test73","CS2-W","InstanceForkVariant2",previousEvents,"Event29",theAuditEventData);
+  previousEvents := ("Event29");
+  acceptOrderedEvent ("1620920003","Test73","CS2-X","InstanceForkVariant2",previousEvents,"Event30",theAuditEventData);
+  previousEvents := ("Event30");
+  acceptOrderedEvent ("1620920004","Test73","CS2-Y","InstanceForkVariant2",previousEvents,"Event31",theAuditEventData);
+  previousEvents := empty & "Event25" & "Event28" & "Event31";
+  acceptOrderedEvent ("1620920005","Test73","CS2-Z","InstanceForkVariant2",previousEvents,"Event32",theAuditEventData);
+  
+  Test::service_event_queue();
+  
+  // ****************************************************************************************************************
+  // Job 3 of 3
+  // ****************************************************************************************************************
+  previousEvents := empty;
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BCV1", "3");
+  acceptOrderedEvent ("1620920000","Test73","CS2-U","InstanceForkVariant3",previousEvents,"Event41",theAuditEventData);
+  theAuditEventData :=  emptyAuditEventData;
+  previousEvents := ("Event41");
+  acceptOrderedEvent ("1620920001","Test73","CS2-V","InstanceForkVariant3",previousEvents,"Event42",theAuditEventData);
+  previousEvents := ("Event42");
+  acceptOrderedEvent ("1620920002","Test73","CS2-W","InstanceForkVariant3",previousEvents,"Event43",theAuditEventData);
+  previousEvents := ("Event43");
+  acceptOrderedEvent ("1620920003","Test73","CS2-X","InstanceForkVariant3",previousEvents,"Event44",theAuditEventData);
+  previousEvents := ("Event44");
+  acceptOrderedEvent ("1620920004","Test73","CS2-Y","InstanceForkVariant3",previousEvents,"Event45",theAuditEventData);
+  previousEvents := ("Event45");
+  acceptOrderedEvent ("1620920005","Test73","CS2-Z","InstanceForkVariant3",previousEvents,"Event52",theAuditEventData);
+  previousEvents := ("Event42");
+  acceptOrderedEvent ("1620920002","Test73","CS2-W","InstanceForkVariant3",previousEvents,"Event46",theAuditEventData);
+  previousEvents := ("Event46");
+  acceptOrderedEvent ("1620920003","Test73","CS2-X","InstanceForkVariant3",previousEvents,"Event47",theAuditEventData);
+  previousEvents := ("Event47");
+  acceptOrderedEvent ("1620920004","Test73","CS2-Y","InstanceForkVariant3",previousEvents,"Event48",theAuditEventData);
+  previousEvents := ("Event48");
+  acceptOrderedEvent ("1620920002","Test73","CS2-Z","InstanceForkVariant3",previousEvents,"Event53",theAuditEventData);
+  previousEvents := ("Event42");
+  acceptOrderedEvent ("1620920002","Test73","CS2-W","InstanceForkVariant3",previousEvents,"Event49",theAuditEventData);
+  previousEvents := ("Event49");
+  acceptOrderedEvent ("1620920003","Test73","CS2-X","InstanceForkVariant3",previousEvents,"Event50",theAuditEventData);
+  previousEvents := ("Event50");
+  acceptOrderedEvent ("1620920004","Test73","CS2-Y","InstanceForkVariant3",previousEvents,"Event51",theAuditEventData);
+  previousEvents := ("Event51");
+  acceptOrderedEvent ("1620920005","Test73","CS2-Z","InstanceForkVariant3",previousEvents,"Event54",theAuditEventData);
+  
+ //
+  Test::service_event_queue();
+  
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  
+  //
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  Assertions::assertTrue(theJobs'length = 3, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 3, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 34, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;  
+end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

@@ -6,48 +6,120 @@ empty : sequence of eventStructure;
 //userEventOccurrences : sequence of userEventDataStructure;
 
 begin
-  // *****************************************************************************************************************
-  // This scenario sets up the definitions for two Job types - 'ComplexInstanceForkJob1' and 'ComplexInstanceForkJob2'
-  // *****************************************************************************************************************
-  // 
-  // Firstly the event definitions for Job: ComplexInstanceForkJob1, Sequence: MultipleEventsInEachInstanceBranch 
+  // **************************************************************************************************************************
+  // This scenario sets up the definitions for five Job types:
+  //   1. 'ComplexInstanceForkJob1' - Defines a sequence with a BRANCHCOUNT but no merging.
+  //   2. 'ComplexInstanceForkAndMergeJob1' - Defines a sequence with a BRANCHCOUNT and MERGECOUNT with just one event in each branch.
+  //   3. 'ComplexInstanceForkAndMergeJob3' - Defines a sequence with a BRANCHCOUNT and MERGECOUNT with multiple events in each branch.
+  //   4. 'ComplexInstanceForkAndMergeJob4' - Defines a sequence with nested BRANCHCOUNTs and a single MERGECOUNT.
+  //   5  'ComplexInstanceForkAndMergeJob5' - Same as Job4 except Forks and Merge are defined in different sequences.
+  // **************************************************************************************************************************
+  // Note that for the first of these definitions there would be numerous event sequence variations that would be 
+  // valid - these are explored in Test73.
   //
+  // ****************************************************************************************************************
+  // Firstly the event definitions for Job: ComplexInstanceForkJob1, Sequence: InstanceBranchingWithNoMerge 
+  // ****************************************************************************************************************
   previousEventTypes := empty;
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-U",1,previousEventTypes,true,false,false);  
+  eventDefinition ("ComplexInstanceForkJob1","InstanceBranchingWithNoMerge","CS2-U",1,previousEventTypes,true,false,false);  
   previousEventTypes := ("CS2-U",1,"","");
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-V",1,previousEventTypes,false,false,false); 
+  eventDefinition ("ComplexInstanceForkJob1","InstanceBranchingWithNoMerge","CS2-V",1,previousEventTypes,false,false,false); 
   previousEventTypes := ("CS2-V",1,"","");
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-W",1,previousEventTypes,false,false,false);
+  eventDefinition ("ComplexInstanceForkJob1","InstanceBranchingWithNoMerge","CS2-W",1,previousEventTypes,false,false,false);
   previousEventTypes := ("CS2-W",1,"","");
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-X",1,previousEventTypes,false,false,false);
+  eventDefinition ("ComplexInstanceForkJob1","InstanceBranchingWithNoMerge","CS2-X",1,previousEventTypes,false,false,false);
   previousEventTypes := ("CS2-X",1,"","");
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-Y",1,previousEventTypes,false,false,false);
+  eventDefinition ("ComplexInstanceForkJob1","InstanceBranchingWithNoMerge","CS2-Y",1,previousEventTypes,false,false,false);
   previousEventTypes := ("CS2-Y",1,"","");
-  eventDefinition ("ComplexInstanceForkJob1","MultipleEventsInEachInstanceBranch","CS2-Z",1,previousEventTypes,false,true,false);
+  eventDefinition ("ComplexInstanceForkJob1","InstanceBranchingWithNoMerge","CS2-Z",1,previousEventTypes,false,true,false);
   
   // Now, set up the dynamic control definitions for 'ComplexInstanceForkJob1'...
   dynamicControlDefinition("ComplexInstanceForkJob1", "BCV1", dynamicControlTypeEnum.BRANCHCOUNT, "CS2-U",1,"CS2-V",1);
-  //
-  // Now the event definitions for Job: ComplexInstanceForkJob2, Sequence: NestedInstanceForks
-  //
+
+  // *********************************************************************************************************************
+  // Secondly, set up the event definitions for Job: ComplexInstanceForkAndMergeJob1, Sequence: SingleEventInEachBranch 
+  // *********************************************************************************************************************
   previousEventTypes := empty;
-  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-U",2,previousEventTypes,true,false,false);  
-  previousEventTypes := ("CS3-U",2,"","");
-  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-V",2,previousEventTypes,false,false,false); 
-  previousEventTypes := ("CS3-V",2,"","");
-  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-W",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS3-W",2,"","");
-  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-X",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS3-X",2,"","");
-  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-Y",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS3-Y",2,"","");
-  eventDefinition ("ComplexInstanceForkJob2","NestedInstanceForks","CS3-Z",2,previousEventTypes,false,true,false);
+  eventDefinition ("ComplexInstanceForkAndMergeJob1","SingleEventInEachBranch","CS3-U",1,previousEventTypes,true,false,false);  
+  previousEventTypes := ("CS3-U",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob1","SingleEventInEachBranch","CS3-V",1,previousEventTypes,false,false,false); 
+  previousEventTypes := ("CS3-V",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob1","SingleEventInEachBranch","CS3-W",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS3-W",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob1","SingleEventInEachBranch","CS3-X",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS3-X",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob1","SingleEventInEachBranch","CS3-Y",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS3-Y",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob1","SingleEventInEachBranch","CS3-Z",1,previousEventTypes,false,true,false);
+  
+  // Now, set up the dynamic control definitions for 'ComplexInstanceForkAndMergeJob1'...
+  dynamicControlDefinition("ComplexInstanceForkAndMergeJob1", "BCV2", dynamicControlTypeEnum.BRANCHCOUNT, "CS3-U",1,"CS3-V",1);
+  dynamicControlDefinition("ComplexInstanceForkAndMergeJob1", "MCX2", dynamicControlTypeEnum.MERGECOUNT, "CS3-U",1,"CS3-X",1);
+  
+  // *********************************************************************************************************************
+  // Thirdly, set up the event definitions for Job: ComplexInstanceForkAndMergeJob2, Sequence: MultipleEventsInEachBranch 
+  // *********************************************************************************************************************
+  previousEventTypes := empty;
+  eventDefinition ("ComplexInstanceForkAndMergeJob2","MultipleEventsInEachBranch","CS4-U",1,previousEventTypes,true,false,false);  
+  previousEventTypes := ("CS4-U",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob2","MultipleEventsInEachBranch","CS4-V",1,previousEventTypes,false,false,false); 
+  previousEventTypes := ("CS4-V",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob2","MultipleEventsInEachBranch","CS4-W",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS4-W",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob2","MultipleEventsInEachBranch","CS4-X",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS4-X",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob2","MultipleEventsInEachBranch","CS4-Y",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS4-Y",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob2","MultipleEventsInEachBranch","CS4-Z",1,previousEventTypes,false,true,false);
+  
+  // Now, set up the dynamic control definitions for 'ComplexInstanceForkAndMergeJob2'...
+  dynamicControlDefinition("ComplexInstanceForkAndMergeJob2", "BCV3", dynamicControlTypeEnum.BRANCHCOUNT, "CS4-U",1,"CS4-V",1);
+  dynamicControlDefinition("ComplexInstanceForkAndMergeJob2", "MCZ3", dynamicControlTypeEnum.MERGECOUNT, "CS4-U",1,"CS4-Z",1);
+  
+  // ****************************************************************************************************************
+  // Fourthly, set up the event definitions for Job: ComplexInstanceForkAndMergeJob3, Sequence: NestedInstanceForks
+  // ****************************************************************************************************************
+  previousEventTypes := empty;
+  eventDefinition ("ComplexInstanceForkAndMergeJob3","NestedInstanceForks","CS5-U",1,previousEventTypes,true,false,false);  
+  previousEventTypes := ("CS5-U",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob3","NestedInstanceForks","CS5-V",1,previousEventTypes,false,false,false); 
+  previousEventTypes := ("CS5-V",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob3","NestedInstanceForks","CS5-W",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS5-W",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob3","NestedInstanceForks","CS5-X",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS5-X",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob3","NestedInstanceForks","CS5-Y",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS5-Y",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob3","NestedInstanceForks","CS5-Z",1,previousEventTypes,false,true,false);
   
   // Now, set up the dynamic control definitions for 'ComplexInstanceForkJob2'...
-  dynamicControlDefinition("ComplexInstanceForkJob2", "BCV2", dynamicControlTypeEnum.BRANCHCOUNT, "CS3-U",2,"CS3-V",2);
-  dynamicControlDefinition("ComplexInstanceForkJob2", "BCW2", dynamicControlTypeEnum.BRANCHCOUNT, "CS3-U",2,"CS3-W",2);
+  dynamicControlDefinition("ComplexInstanceForkAndMergeJob3", "BCV4", dynamicControlTypeEnum.BRANCHCOUNT, "CS5-U",1,"CS5-V",1);
+  dynamicControlDefinition("ComplexInstanceForkAndMergeJob3", "BCW4", dynamicControlTypeEnum.BRANCHCOUNT, "CS5-U",2,"CS5-W",1);
+  dynamicControlDefinition("ComplexInstanceForkAndMergeJob3", "MCZ4", dynamicControlTypeEnum.MERGECOUNT, "CS5-U",1,"CS5-Z",1);
+  
+  // ****************************************************************************************************************************
+  // Finally, set up the event definitions for Job: ComplexInstanceForkAndMergeJob4, Sequence: NestedInstanceForksAcrossSequences
+  // ****************************************************************************************************************************
+  previousEventTypes := empty;
+  eventDefinition ("ComplexInstanceForkAndMergeJob4","NestedInstanceForksAcrossSequences","CS6-U",1,previousEventTypes,true,false,false);  
+  previousEventTypes := ("CS6-U",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob4","NestedInstanceForksAcrossSequences","CS6-V",1,previousEventTypes,false,false,false); 
+  previousEventTypes := ("CS6-V",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob4","NestedInstanceForksAcrossSequences","CS6-W",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS6-W",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob4","NestedInstanceForksAcrossSequences","CS6-X",1,previousEventTypes,false,true,false);
+  previousEventTypes := ("CS6-X",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob4","NestedInstanceForksAcrossSequences","CS6-Y",1,previousEventTypes,true,false,false);
+  previousEventTypes := ("CS6-Y",1,"","");
+  eventDefinition ("ComplexInstanceForkAndMergeJob4","NestedInstanceForksAcrossSequences","CS6-Z",1,previousEventTypes,false,true,false);
+  
+  // Now, set up the dynamic control definitions for 'ComplexInstanceForkJob2'...
+  dynamicControlDefinition("ComplexInstanceForkAndMergeJob4", "BCV5", dynamicControlTypeEnum.BRANCHCOUNT, "CS6-U",1,"CS6-V",1);
+  dynamicControlDefinition("ComplexInstanceForkAndMergeJob4", "BCW5", dynamicControlTypeEnum.BRANCHCOUNT, "CS6-U",2,"CS6-W",1);
+  dynamicControlDefinition("ComplexInstanceForkAndMergeJob4", "MCZ5", dynamicControlTypeEnum.MERGECOUNT, "CS6-U",1,"CS6-Z",1);
   //
 end service;
+//
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'cb65d55d-2024-4988-aa4f-d9fad1cd4170' DO NOT EDIT THIS LINE.
