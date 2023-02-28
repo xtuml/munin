@@ -6,6 +6,9 @@ public service AESequenceDC::PersistedInvariant.createSourceExtraJobInvariant ( 
 endTime : timestamp;
 existingExtraJobInvariant : instance of PersistedInvariant;
 newExtraJobInvariant : instance of PersistedInvariant;
+sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
+sourceEventDefn : instance of AuditEventDefinition;
+sourceJobDefn : instance of JobDefinition;
 logMessage : string;
 
 begin
@@ -22,6 +25,17 @@ begin
   	                                         
     link newExtraJobInvariant R24 extraJobInvDefn;
     generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
+    sourceAEOccurrenceDefn := extraJobInvDefn -> R20;
+    sourceEventDefn := sourceAEOccurrenceDefn -> R12 -> R1.AuditEventDefinition;
+    sourceJobDefn := sourceAEOccurrenceDefn -> R12 -> R1.AESequenceDefinition -> R7;
+    
+    Persistence~>PersistInvariant(newExtraJobInvariant.invariantName, 
+    	                          newExtraJobInvariant.invariantValue,
+    	                          newExtraJobInvariant.validFrom,
+    	                          newExtraJobInvariant.validUntil,
+    	                          sourceJobDefn.jobName,
+    	                          sourceEventDefn.AEType,
+    	                          sourceAEOccurrenceDefn.occurrenceNumberInSequence    );
   else
     errorReason := "Empty Invariant Value provided for this ExtraJob Invariant = " & invariantName;
   end if;

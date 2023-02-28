@@ -756,14 +756,21 @@ expectedIntraJobInvDefns : set of instance of IntraJobInvariantDefn;
 expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
 theExpectedIntraJobInvDefn : instance of IntraJobInvariantDefn;
 theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;
+theRestoredExtraJobInvDefn : instance of ExtraJobInvariantDefn;
 theJobsAuditEvents : set of instance of AuditEvent;
 theInvariantAuditEvents : set of instance of AuditEvent;
 theJobsInvariantAuditEvents : set of instance of AuditEvent;
 theIntraJobInvariant : instance of TransientInvariant;
 theTransientExtraJobInvariant : instance of TransientInvariant;
 thePersistedExtraJobInvariant : instance of PersistedInvariant;
+theRestoredPersistentInvariant : instance of PersistedInvariant;
 thePersistedExtraJobInvariants : set of instance of PersistedInvariant;
 theInForcePersistedExtraJobInvariants : set of instance of PersistedInvariant;
+theAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
+theEventDefn : instance of AuditEventDefinition;
+theJobDefn : instance of JobDefinition;
+restoredInvariant : persistedInvariantStructure;
+theSystemSpec : instance of SystemSpecification;
 intraJobInvariantCheckPassed : boolean;
 extraJobInvariantCheckPassed : boolean;
 matched : boolean;
@@ -802,12 +809,13 @@ begin
       extraJobInvariantCheckPassed := true;
       theJobsAuditEvents := this -> R3;
       expectedUserExtraJobInvDefns := this -> R3 -> R13 -> R21;
-      for theExpectedIntraJobInvDefn in expectedUserExtraJobInvDefns loop
-        theInvariantAuditEvents := theExpectedIntraJobInvDefn -> R21 -> R13;
+      for theExpectedUserExtraJobInvDefn in expectedUserExtraJobInvDefns loop
+        theInvariantAuditEvents := theExpectedUserExtraJobInvDefn -> R21 -> R13;
         // This finds the set of audit events that are expected to have invariants attached
         theJobsInvariantAuditEvents :=  theJobsAuditEvents intersection theInvariantAuditEvents;
-        for eachJobsInvariantAuditEvent in theJobsInvariantAuditEvents loop
-          theTransientExtraJobInvariant := eachJobsInvariantAuditEvent -> R23;
+        for eachInvariantAuditEvent in theJobsInvariantAuditEvents loop
+          // Iterate over each Audit Event which is expected to have a user extra job invariant attached
+          theTransientExtraJobInvariant := eachInvariantAuditEvent -> R23;
           thePersistedExtraJobInvariants := theTransientExtraJobInvariant -> R28 -> R24;
           // The following allows for more than one instance of a persisted extra job invariant to be in force at the same time
           // If any one of them matches the value of the transient invariant then the transient invariant is valid
@@ -820,7 +828,103 @@ begin
               matched := false;
             end if;  
           end loop;
+
           if not matched then
+            // Check to see if there is a stored persistent invariant 
+            Persistence~>RestoreNamedInvariant(theTransientExtraJobInvariant.extraJobInvName,
+            	                               theTransientExtraJobInvariant.invariantValue,
+            	                               restoredInvariant);
+                  
+            if restoredInvariant.extraJobInvariantName = theTransientExtraJobInvariant.extraJobInvName and
+               restoredInvariant.InvariantValue = theTransientExtraJobInvariant.invariantValue then
+               
+              // We have found a stored persistent invariant that matches so restore it
+              
+              theRestoredExtraJobInvDefn := find_one ExtraJobInvariantDefn (extraJobInvName = restoredInvariant.extraJobInvariantName);
+              if theRestoredExtraJobInvDefn /= null then
+                theAEOccurrenceDefn := theRestoredExtraJobInvDefn -> R20;
+                theEventDefn := theAEOccurrenceDefn -> R12 -> R1.AuditEventDefinition;
+                theJobDefn := theAEOccurrenceDefn -> R12 -> R1.AESequenceDefinition -> R7;
+                if restoredInvariant.sourceJobDefinitionType = theJobDefn.jobName and
+                   restoredInvariant.sourceAuditEventType = theEventDefn.AEType and
+                   restoredInvariant.sourceAuditEventOccurrenceId = theAEOccurrenceDefn.occurrenceNumberInSequence then
+                  // The restored invariant checks out against the source event definition
+                  if restoredInvariant.validFrom > timestamp'now then
+                    // The Persistent Invariant will be valid in the future
+                    theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.extraJobInvariantName,
+  	                                                          invariantValue => restoredInvariant.InvariantValue,
+  	                                                          validFrom => restoredInvariant.validFrom, 
+  	                                                          validUntil => restoredInvariant.validTo,
+  	                                                          inForce => false, 
+  	                                                          Current_State => Pending );
+  	                schedule theRestoredPersistentInvariant.invariantTimer generate PersistedInvariant.invariantComesIntoForce() to theRestoredPersistentInvariant at theRestoredPersistentInvariant.validFrom;
+
+  	              elsif restoredInvariant.validFrom < timestamp'now and 
+  	                    restoredInvariant.validTo > timestamp'now then
+                    // The Persistent Invariant is valid now
+                    theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.extraJobInvariantName,
+  	                                                          invariantValue => restoredInvariant.InvariantValue,
+  	                                                          validFrom => restoredInvariant.validFrom, 
+  	                                                          validUntil => restoredInvariant.validTo,
+  	                                                          inForce => true, 
+  	                                                          Current_State => InForce );
+  	                schedule theRestoredPersistentInvariant.invariantTimer generate PersistedInvariant.invariantExpires() to theRestoredPersistentInvariant at theRestoredPersistentInvariant.validUntil;
+  	                                                          
+  	              elsif restoredInvariant.validTo < timestamp'now then
+                    // The Persistent Invariant is out of date
+                    theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.extraJobInvariantName,
+  	                                                          invariantValue => restoredInvariant.InvariantValue,
+  	                                                          validFrom => restoredInvariant.validFrom, 
+  	                                                          validUntil => restoredInvariant.validTo,
+  	                                                          inForce => false, 
+  	                                                          Current_State => Deprecated );
+  	                                                          
+  	                 theSystemSpec := find_only SystemSpecification();                                                    
+  	                 schedule theRestoredPersistentInvariant.invariantTimer generate PersistedInvariant.timeToDeleteInvariant() to theRestoredPersistentInvariant delay theSystemSpec.sourceExtraJobInvariantDeletionPeriod;
+  	              
+  	              else
+  	              
+                    logMessage := "Something went wrong restoring the Extra-Job Invariant's state " & restoredInvariant.extraJobInvariantName & " for Job = " & this.jobID;
+                    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  	                                                          
+  	              end if; 
+
+  	              if theRestoredPersistentInvariant /= null then
+  	                link theRestoredPersistentInvariant R24 theRestoredExtraJobInvDefn;                                          
+  	                     
+                    if theRestoredPersistentInvariant.inForce then
+                      matched := true;
+                  
+                    else
+                      matched := false;
+                      logMessage := "Extra-Job Invariant " & restoredInvariant.extraJobInvariantName & "found but not in force for Job = " & this.jobID;
+                      Logger::log(Logger::Information, "AESequenceDC", logMessage);
+                    end if;
+                    
+                  else
+                  
+                    logMessage := "The Extra-Job Invariant has not been restored successfully " & restoredInvariant.extraJobInvariantName & " for Job = " & this.jobID;
+                    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  	                                                          
+                  end if;  
+                
+                else
+                
+                  logMessage := "The Extra-Job Invariant to be restored does not match any known definition " & restoredInvariant.extraJobInvariantName & " for Job = " & this.jobID;
+                  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  	                                                                           
+                end if;     
+              end if;  
+              
+            else
+            
+              logMessage := "There is not persisted source Extra-Job Invariant to match the user Extra-Job Invariant " & restoredInvariant.extraJobInvariantName & " for Job = " & this.jobID;
+              Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  	                                                                           
+            end if;  
+          end if;      
+                      
+           if not matched then
             extraJobInvariantCheckPassed := false;
           end if;
         end loop;
