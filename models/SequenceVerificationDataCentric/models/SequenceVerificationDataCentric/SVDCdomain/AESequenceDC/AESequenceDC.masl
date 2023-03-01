@@ -5,32 +5,30 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '7fa7b324-6ef9-4092-843c-22fb9afc3ed3' DO NOT EDIT THIS LINE.
-public service AESequenceDC::Persistence~>PersistInvariant ( extraJobInvariantName : in string,
-                                                            invariantValue : in string,
-                                                            validFrom : in timestamp,
-                                                            validTo : in timestamp,
-                                                            sourceJobDefinitionType : in string,
-                                                            sourceAuditEventType : in string,
-                                                            sourceAuditEventOccurrenceId : in integer ) is
+//! ACTIVITY BEGIN. 'eb803f32-d763-444e-9e0f-5ad4e591f2fb' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Persistence_Req_IF~>PersistInvariant ( extraJobInvariantName : in string,
+                                                                   invariantValue : in string,
+                                                                   validFrom : in timestamp,
+                                                                   validTo : in timestamp,
+                                                                   sourceJobDefinitionType : in string,
+                                                                   sourceAuditEventType : in string,
+                                                                   sourceAuditEventOccurrenceId : in integer ) is
 logMessage : string;
 
 begin
 
-  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been written to the persistence service";
+  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
   Logger::log(Logger::Information, "AESequenceDC", logMessage);
 
+
+  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. 'a4cde433-7a79-4149-87c4-7b7afdf77217' DO NOT EDIT THIS LINE.
-public service AESequenceDC::Persistence~>RestoreInvariants ( restoredInvariants : out sequence of persistedInvariantStructure ) is
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'ea868425-7127-45e1-9c3c-212baf50ee5a' DO NOT EDIT THIS LINE.
-public service AESequenceDC::Persistence~>RestoreNamedInvariant ( extraJobInvariantName : in string,
-                                                                 invariantValue : in string,
-                                                                 restoredNamedInvariant : out persistedInvariantStructure ) is
+//! ACTIVITY BEGIN. '8f6997e2-f231-474b-b2d8-4a94d4ea47c6' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Persistence_Req_IF~>RestoreNamedInvariant ( extraJobInvariantName : in string,
+                                                                        invariantValue : in string,
+                                                                        restoredNamedInvariant : out persistedInvariantStructure ) is
 logMessage : string;
 
 begin

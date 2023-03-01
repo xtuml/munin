@@ -44,15 +44,3 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '3db0e64d-4e23-4f05-8854-97fac796cc48' DO NOT EDIT THIS LINE.
-private service AESequenceDC::InitAndRestorePersistentInvariants () is
-restoredInvariants : sequence of persistedInvariantStructure;
-
-begin
-  Persistence~>RestoreInvariants(restoredInvariants);
-  for eachInvariantStructure in restoredInvariants loop
-    
-  end loop;
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-

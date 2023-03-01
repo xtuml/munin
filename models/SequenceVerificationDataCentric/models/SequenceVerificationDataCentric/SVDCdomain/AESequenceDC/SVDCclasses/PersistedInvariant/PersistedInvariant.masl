@@ -29,7 +29,7 @@ begin
     sourceEventDefn := sourceAEOccurrenceDefn -> R12 -> R1.AuditEventDefinition;
     sourceJobDefn := sourceAEOccurrenceDefn -> R12 -> R1.AESequenceDefinition -> R7;
     
-    Persistence~>PersistInvariant(newExtraJobInvariant.invariantName, 
+    Persistence_Req_IF~>PersistInvariant(newExtraJobInvariant.invariantName, 
     	                          newExtraJobInvariant.invariantValue,
     	                          newExtraJobInvariant.validFrom,
     	                          newExtraJobInvariant.validUntil,
