@@ -52,7 +52,6 @@ COPY --from="ghcr.io/xtuml/aeordering" /install/lib/ /install/lib
 COPY --from="ghcr.io/xtuml/aeordering" /install/share/ /install/share
 COPY --from="ghcr.io/xtuml/istore" /install/include/ /install/include
 COPY --from="ghcr.io/xtuml/istore" /install/lib/ /install/lib
-COPY --from="ghcr.io/xtuml/istore" /install/share/ /install/share
 COPY --from="ghcr.io/xtuml/aesequencedc" /install/include/ /install/include
 COPY --from="ghcr.io/xtuml/aesequencedc" /install/lib/ /install/lib
 

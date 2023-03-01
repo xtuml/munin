@@ -29,7 +29,7 @@ public service AEOrdering::Req_IF_Verification~>audit_event ( jobId : in string,
                                                              auditEventId : in string,
                                                              auditEventTime : in string,
                                                              prevAuditEventIds : in sequence of string,
-                                                             reportableAuditEventDataItems : in AEOrdering::sequence of ReportableAuditEventDataType ) is
+                                                             reportableAuditEventDataItems : in sequence of ReportableAuditEventDataType ) is
 auditEventData: sequence of AESequenceDC::auditEventDataStructure;
 begin
   for dataItem in reportableAuditEventDataItems loop
@@ -80,7 +80,7 @@ public service AEOrdering::Req_IF_Verification~>eventDefinition ( jobName : in s
                                                                  sequenceName : in string,
                                                                  eventType : in string,
                                                                  occurrenceId : in integer,
-                                                                 previousEventTypes : in AEOrdering::sequence of PreviousEventType,
+                                                                 previousEventTypes : in sequence of PreviousEventType,
                                                                  isSequenceStart : in boolean,
                                                                  isSequenceEnd : in boolean,
                                                                  isBreak : in boolean ) is
@@ -122,7 +122,7 @@ end service;
 //! ACTIVITY BEGIN. '7bdff90a-d2ba-47e3-8082-eb657e8e6496' DO NOT EDIT THIS LINE.
 public service AEOrdering::Req_IF_Verification~>intraJobInvariantDefinition ( auditEventDataName : in string,
                                                                              jobDefinitionName : in string,
-                                                                             associatedEvents : in AEOrdering::sequence of IntraJobInvDataType ) is
+                                                                             associatedEvents : in sequence of IntraJobInvDataType ) is
 assocEvents: sequence of AESequenceDC::intraJobInvDataStructure;
 begin
   for evt in associatedEvents loop
@@ -137,7 +137,7 @@ public service AEOrdering::Req_IF_Verification~>extraJobInvariantDefinition ( au
                                                                              sourceJobDefnName : in string,
                                                                              sourceEventType : in string,
                                                                              sourceOccurrenceId : in integer,
-                                                                             userEvents : in AEOrdering::sequence of UserEventDataType ) is
+                                                                             userEvents : in sequence of UserEventDataType ) is
 userEventData: sequence of AESequenceDC::userEventDataStructure;
 begin
   for evt in userEvents loop
@@ -150,7 +150,7 @@ end service;
 //! ACTIVITY BEGIN. 'b82cb07b-04f9-42a5-bd42-7bcf30e67f04' DO NOT EDIT THIS LINE.
 public service AEOrdering::Req_IF_Verification~>dynamicControlDefinition ( jobTypeName : in string,
                                                                           dynamicControlName : in string,
-                                                                          dynamicControlType : in AEOrdering::DynamicControlTypeEnum,
+                                                                          dynamicControlType : in DynamicControlTypeEnum,
                                                                           sourceEventType : in string,
                                                                           sourceOccurrenceId : in integer,
                                                                           userEventType : in string,
@@ -176,14 +176,14 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '989bd73a-aba6-4a06-b9a0-4cc8b09180fb' DO NOT EDIT THIS LINE.
-public service IStore::StoreClient~>addInvariants ( invariantsToReport : in IStore::sequence of persistedInvariantStructure ) is
+//! ACTIVITY BEGIN. 'ee7403ae-abfc-4f77-af8d-9f6ea68f6848' DO NOT EDIT THIS LINE.
+public service IStore::StoreClient~>addInvariants ( invariantsToReport : in sequence of persistedInvariantStructure ) is
 begin
   null;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '093bf88b-3026-4dda-9330-5830122efa0a' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '3dddeb2d-69b4-4e46-ac4c-59237bbdf8cd' DO NOT EDIT THIS LINE.
 public service AEOrdering::Req_IF_InvariantStore~>setLoadRate ( loadRate : in duration ) is
 begin
 	
