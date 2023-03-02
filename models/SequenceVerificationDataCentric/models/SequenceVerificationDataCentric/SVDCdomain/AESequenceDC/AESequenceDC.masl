@@ -33,16 +33,16 @@ logMessage : string;
 
 begin
 
-  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been restored from the persistence service";
+  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
   Logger::log(Logger::Information, "AESequenceDC", logMessage);
 
-  restoredNamedInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
-  restoredNamedInvariant.InvariantValue := "Restore1";
-  restoredNamedInvariant.validFrom := timestamp'now;
-  restoredNamedInvariant.validTo := restoredNamedInvariant.validFrom + @P1D@;
-  restoredNamedInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
-  restoredNamedInvariant.sourceAuditEventType := "EAuthoriserReceiveOrder";
-  restoredNamedInvariant.sourceAuditEventOccurrenceId := 1;
+//  restoredNamedInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
+//  restoredNamedInvariant.InvariantValue := "Restore1";
+//  restoredNamedInvariant.validFrom := timestamp'now;
+//  restoredNamedInvariant.validTo := restoredNamedInvariant.validFrom + @P1D@;
+//  restoredNamedInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
+//  restoredNamedInvariant.sourceAuditEventType := "EAuthoriserReceiveOrder";
+//  restoredNamedInvariant.sourceAuditEventOccurrenceId := 1;
 
   
 end service;

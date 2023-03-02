@@ -947,6 +947,8 @@ emptyAuditEventData : sequence of auditEventDataStructure;
 theUserInvariants : set of instance of TransientInvariant;
 theSourceInvariants : set of instance of PersistedInvariant;
 previousEvents : sequence of string;
+restoredInvariant : persistedInvariantStructure;
+restoredInvariants : sequence of persistedInvariantStructure;
 empty : sequence of string;
 logMessage : string;
 
@@ -1017,8 +1019,32 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","Ev50","Ev55",theAuditEventData);
   //
+  Test::service_event_queue();
+  theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
+  Test::fire_timer(theJob.jobEventTimer);
+  Test::service_event_queue();
+  //
+  // The invariant provided does not match any source invariant at this point so SVDC will request an update from the persistence
+  // service to see if that source invariant has been made available elsewhere. The next section simulates the required
+  // invariant being found and provided
+  
+  // Simulate the Persistence domain providing an updated set of invariants
+  
+  restoredInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
+  restoredInvariant.InvariantValue := "Restore1";
+  restoredInvariant.validFrom := timestamp'now;
+  restoredInvariant.validTo := restoredInvariant.validFrom + @P1D@;
+  restoredInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
+  restoredInvariant.sourceAuditEventType := "EAuthoriserReceiveOrder";
+  restoredInvariant.sourceAuditEventOccurrenceId := 1;
+  
+  restoredInvariants := restoredInvariants & restoredInvariant;
+  
+  restoreInvariants (restoredInvariants);
+  //
   //
   Test::service_event_queue();
+  //
   
   theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
   Test::fire_timer(theJob.jobEventTimer);
