@@ -65,6 +65,14 @@ associatedEvent : IntraJobInvDataType;
 emptyAssociatedEvent : IntraJobInvDataType;
 associatedEvents : sequence of IntraJobInvDataType;
 emptyAssociatedEvents : sequence of IntraJobInvDataType;
+jobStore : instance of JobStore;
+jobStoreName : string := "JobIdStore.log";
+jobStoreLocation : string := "./";
+jobStoreAgeLimit : duration := @P7D@;
+today : sequence of integer;
+midnight : timestamp;
+fileControl : instance of FileControl;
+invariantStoreLoadRate : duration;
 
 begin
     
@@ -92,6 +100,40 @@ begin
             end if;
             if configJSONObject'contains("JobCompletePeriod") then
                 this.jobCompletePeriod := duration'parse(JSON::get_string(configJSONObject["JobCompletePeriod"]));
+            end if;
+            if configJSONObject'contains("IncomingDirectory") then
+                this.incomingDirectory := JSON::get_string(configJSONObject["IncomingDirectory"]);
+                // check if the directory exists and if not create it
+				if Filesystem::file_exists(Filesystem::filename(this.incomingDirectory)) = false then
+					Filesystem::create_directory(Filesystem::filename(this.incomingDirectory));
+				end if;
+            end if;
+            if configJSONObject'contains("ProcessingDirectory") then
+                this.processingDirectory := JSON::get_string(configJSONObject["ProcessingDirectory"]);
+                // check if the directory exists and if not create it
+				if Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) = false then
+					Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
+				end if;
+            end if;
+            if configJSONObject'contains("ProcessedDirectory") then
+                this.processedDirectory := JSON::get_string(configJSONObject["ProcessedDirectory"]);
+                // check if the directory exists and if not create it
+				if Filesystem::file_exists(Filesystem::filename(this.processedDirectory)) = false then
+					Filesystem::create_directory(Filesystem::filename(this.processedDirectory));
+				end if;
+            end if;
+            if configJSONObject'contains("JobStoreLocation") then
+                jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);
+            end if;
+            if configJSONObject'contains("JobStoreAgeLimit") then
+                jobStoreAgeLimit := duration'parse(JSON::get_string(configJSONObject["JobStoreAgeLimit"]));
+            end if;
+            if configJSONObject'contains("InvariantStoreLoadRate") then
+                invariantStoreLoadRate := duration'parse(JSON::get_string(configJSONObject["InvariantStoreLoadRate"]));
+                if this.invariantStoreLoadRate /= invariantStoreLoadRate then
+                	this.invariantStoreLoadRate := invariantStoreLoadRate;
+                	Req_IF_InvariantStore~>setLoadRate(this.invariantStoreLoadRate);
+                end if;
             end if;
             // read in the jobs that we expect to process
             if configJSONObject'contains("Jobs") and configJSONObject["Jobs"].kind = JSON::Array then
@@ -129,7 +171,7 @@ begin
                               jobType.updateAuditEventDurations(JSON::get_array(jobDefJSONObject["EventRules"]));
                             end if;
                         else
-                            Logger::log(Logger::Debug, "AEReception", "Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true));
+                            Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true));
                             raise JSON::JSONException("Config file invalid");
                         end if;
                     else
@@ -205,6 +247,17 @@ begin
             end if;
         end loop;
 
+        // if the job store does not exist then create it
+        jobStore := find_one JobStore();
+        if jobStore = null then
+        	fileControl := find_one FileControl();
+        	jobStoreName := "JobIdStore" & "-" &  fileControl.startJobGroup'image & "-" & fileControl.endJobGroup'image;
+        	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, Current_State => Created);
+        	JobStore.loadJobStore();
+        	today := timestamp'now'split_ymd();
+        	midnight := timestamp'combine_ymd(today[1], today[2], today[3] + 1);
+        	schedule jobStore.jobStoreTimer generate JobStore.purgeJobStore() to jobStore at midnight; 
+        end if;
         // schedule to check the config file
         schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
     else

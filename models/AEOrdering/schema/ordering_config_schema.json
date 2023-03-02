@@ -25,6 +25,30 @@
       "type": "string",
       "format": "duration"
     },
+    "IncomingDirectory": {
+      "description": "The directory where incoming jobs are placed.",
+      "type": "string",
+    },
+    "ProcessingDirectory": {
+      "description": "The directory where processing jobs are placed.",
+      "type": "string",
+    },
+    "JobStoreLocation": {
+      "description": "The directory where job store is placed. Note this should match the path provided to the log config",
+      "type": "string",
+    },
+    "JobStoreAgeLimit": {
+      "description": "The number of days to hold the completed job ids.",
+      "type": "string",
+    },
+    "InvariantStoreLoadRate": {
+      "description": "The frequency that the invariant store should be checked for new invariant data.",
+      "type": "string",
+    },
+    "ProcessedDirectory": {
+      "description": "The directory where processed jobs are placed.",
+      "type": "string",
+    },
     "Jobs": {
       "type": "array",
       "items": {

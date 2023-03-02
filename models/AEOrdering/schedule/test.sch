@@ -14,6 +14,7 @@ RUN SCENARIO Test 1 "run_test" [AEOrdering testForkAndMerge 11]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testOrderedJobWithData 12]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testDeprecatedJob 3]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testConfigFile 10]
+RUN SCENARIO Test 1 "run_test" [AEOrdering testInjestFile 13]
 
 
 # done

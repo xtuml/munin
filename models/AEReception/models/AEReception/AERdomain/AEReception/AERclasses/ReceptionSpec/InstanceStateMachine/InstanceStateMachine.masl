@@ -27,7 +27,7 @@ begin
 
 		configJSONString := Filesystem::read_file(fileName);
 		configJSONElement := JSON::parse(configJSONString);
-    configValidationResult := JSONValidation::validate(configJSONElement, #PROP["receptionConfigSchema"]#);
+		configValidationResult := JSONValidation::validate(configJSONElement, #PROP["receptionConfigSchema"]#);
 		
 		if JSON::get_boolean(configValidationResult["valid"]) then
 		    // extract the spec data items
@@ -53,9 +53,21 @@ begin
 			if configJSONObject'contains("ConcurrentReceptionLimit") then
 				this.concurrentReceptionLimit := JSON::get_integer(configJSONObject["ConcurrentReceptionLimit"]);
 			end if;
-    else
-		  Logger::log(Logger::Debug, "AEReception", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
-      raise JSON::JSONException("Config file invalid");
+			if configJSONObject'contains("OutgoingDirectory") then
+				this.outgoingDirectory := JSON::get_string(configJSONObject["OutgoingDirectory"]);
+			end if;
+			if configJSONObject'contains("MaxEventsPerFile") then
+				this.maxEventsPerFile := JSON::get_integer(configJSONObject["MaxEventsPerFile"]);
+			end if;
+			if configJSONObject'contains("SchemaValidate") then
+				this.schemaValidate := JSON::get_boolean(configJSONObject["SchemaValidate"]);
+			end if;
+			if configJSONObject'contains("SchemaValidateFrequency") then
+				this.schemaValidateFrequency := JSON::get_integer(configJSONObject["SchemaValidateFrequency"]);
+			end if;
+    	else
+			Logger::log(Logger::Debug, "AEReception", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
+			raise JSON::JSONException("Config file invalid");
 		end if;
 
 		// set the config file mod time
@@ -74,8 +86,16 @@ begin
 	// check if file control exists and if not create it
 	fileControl := find_one FileControl();
 	if fileControl = null then
-		fileControl := create unique FileControl(Current_State => Created);
-		generate FileControl.checkCapacity() to fileControl;
+		fileControl := create unique FileControl(schemaValidationCount => 0, Current_State => Created);
+		// check the processing directory exists and if not create it
+		if not Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) then
+			Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
+		end if;
+		// check the outgoing directory exists and if not create it
+		if not Filesystem::file_exists(Filesystem::filename(this.outgoingDirectory)) then
+			Filesystem::create_directory(Filesystem::filename(this.outgoingDirectory));
+		end if;
+		schedule fileControl.fileControlTimer generate FileControl.checkCapacity() to fileControl delay @PT0S@;
 	end if;
 	
 exception
