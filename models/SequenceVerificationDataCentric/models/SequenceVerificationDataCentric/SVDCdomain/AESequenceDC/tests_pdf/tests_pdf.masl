@@ -4181,3 +4181,61 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '36afdd9d-ad66-45da-b441-48f960ea5cb6' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test74SimpleForkAndMerge_SunnyDay1 () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Job which is compliant with the Job Definition 'ComplexInstanceForkAndMergeJob1'..
+  //
+  // This test does not reveal any erroneous behaviour of the twin.
+  //
+  // ****************************************************************************************************************
+  // Job 1 of 3
+  // ****************************************************************************************************************
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BCV2", "3") & (aeDataKindEnum.MERGECOUNT, "MCX2", "3");
+  acceptOrderedEvent ("1620920000","Test74","CS3-U","InstanceForkAndMerge1",previousEvents,"Event1",theAuditEventData);
+  theAuditEventData :=  emptyAuditEventData;
+  previousEvents := ("Event1");
+  acceptOrderedEvent ("1620920001","Test74","CS3-V","InstanceForkAndMerge1",previousEvents,"Event2",theAuditEventData);
+  previousEvents := ("Event2");
+  acceptOrderedEvent ("1620920002","Test74","CS3-W","InstanceForkAndMerge1",previousEvents,"Event3",theAuditEventData);
+  previousEvents := ("Event2");
+  acceptOrderedEvent ("1620920003","Test74","CS3-W","InstanceForkAndMerge1",previousEvents,"Event6",theAuditEventData);
+  previousEvents := ("Event2");
+  acceptOrderedEvent ("1620920004","Test74","CS3-W","InstanceForkAndMerge1",previousEvents,"Event9",theAuditEventData);
+  previousEvents := empty & "Event3" & "Event6" & "Event9";
+  acceptOrderedEvent ("1620920005","Test74","CS3-X","InstanceForkAndMerge1",previousEvents,"Event7",theAuditEventData);
+  previousEvents := ("Event7");
+  acceptOrderedEvent ("1620920006","Test74","CS3-Y","InstanceForkAndMerge1",previousEvents,"Event8",theAuditEventData);
+  previousEvents := ("Event8");
+  acceptOrderedEvent ("1620920007","Test74","CS3-Z","InstanceForkAndMerge1",previousEvents,"Event12",theAuditEventData);
+  
+  Test::service_event_queue();
+  
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  
+  //
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 8, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

@@ -26,7 +26,7 @@ logMessage : string;
 
 begin
   // Report the current state of PersistedInvariant
-  logMessage := "PersistedInvariant: " & this.invariantId'image & " has been Deprecated";
+  logMessage := "PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") has been Deprecated";
   Logger::log(Logger::Information, "AESequenceDC", logMessage); 
   
   theSystemSpec := find_only SystemSpecification();
@@ -42,7 +42,7 @@ logMessage : string;
 
 begin
   // Report the current state of PersistedInvariant
-  logMessage := "PersistedInvariant: " & this.invariantId'image & " is about to be deleted";
+  logMessage := "PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") is about to be deleted";
   Logger::log(Logger::Information, "AESequenceDC", logMessage); 
   
   // Unlink the specification class
@@ -56,5 +56,7 @@ begin
   end if; 
   delete this;
 end state;
+//
+//
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
