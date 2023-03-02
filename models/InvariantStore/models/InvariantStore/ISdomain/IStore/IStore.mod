@@ -14,6 +14,8 @@ end structure;
         invariantName : in string,        invariantValue : in string,        validFrom : in timestamp,        validTo : in timestamp,        sourceJobDefinitionType : in string,        sourceAuditEventType : in string,        sourceAuditEventOccurrenceId : in integer    );
     public service setLoadRate (
         loadRate : in duration    );
+    private service restoreNamedInvariant (
+        invariantName : in string,        invariantValue : in string    );
     private service init (
     );
 pragma scenario ( 1 ); 
