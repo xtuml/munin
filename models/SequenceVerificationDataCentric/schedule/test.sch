@@ -108,6 +108,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test252IllegalInstanceAndTypeForkAn
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test254IllegalInstanceForkWithIncorrectBranchAndMergeCount 1254 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test255IllegalSplitInstanceForkWithBranchAndMergeCount 1255 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test256TimeoutDueToNoRestoredExtraJobInvariant 1256 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test257InvalidRestoredExtraJobInvariant 1257 CleanUpAllJobs 64]
 
 # Errors in complex sequences
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test100ComplexSequence_RainyDay1_XORconstraintViolation 1100 CleanUpAllJobs 64]
