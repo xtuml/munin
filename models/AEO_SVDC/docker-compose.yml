@@ -12,10 +12,11 @@ services:
       - "40001:40000"
     volumes:
       - "./config:/root/config"
+      - "../test-files/InvariantStore:/root/InvariantStore"
       - "../test-files/verifier-incoming:/root/incoming"
       - "../test-files/JobIdStore:/root/JobIdStore"
       - "../test-files/verifier-processed:/root/processed"
-    command: "-configPath config/ -log-level e -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 7F -util Inspector -inspector-port 0"
+    command: "-configPath config/ -log-level e -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 3F -util Inspector -inspector-port 0"
   aeo_svdc-2:
     image: "ghcr.io/xtuml/aeo_svdc"
     build:
@@ -28,6 +29,7 @@ services:
       - "40002:40000"
     volumes:
       - "./config:/root/config"
+      - "../test-files/InvariantStore:/root/InvariantStore"
       - "../test-files/verifier-incoming:/root/incoming"
       - "../test-files/JobIdStore:/root/JobIdStore"
       - "../test-files/verifier-processed:/root/processed"
@@ -44,6 +46,7 @@ services:
       - "40003:40000"
     volumes:
       - "./config:/root/config"
+      - "../test-files/InvariantStore:/root/InvariantStore"
       - "../test-files/verifier-incoming:/root/incoming"
       - "../test-files/JobIdStore:/root/JobIdStore"
       - "../test-files/verifier-processed:/root/processed"
@@ -60,6 +63,7 @@ services:
       - "40004:40000"
     volumes:
       - "./config:/root/config"
+      - "../test-files/InvariantStore:/root/InvariantStore"
       - "../test-files/verifier-incoming:/root/incoming"
       - "../test-files/JobIdStore:/root/JobIdStore"
       - "../test-files/verifier-processed:/root/processed"

@@ -24,7 +24,7 @@ FROM levistarrett/masl-base:v2 AS install-base
 ADD schedule /root/schedule
 
 # create test directories
-RUN mkdir -p /root/incoming /root/processing /root/processed
+RUN mkdir -p /root/incoming /root/processing /root/processed /root/InvariantStore
 
 # configure the library path
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/install/lib
