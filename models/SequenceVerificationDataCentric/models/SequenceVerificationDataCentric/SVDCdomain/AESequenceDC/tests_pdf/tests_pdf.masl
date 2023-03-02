@@ -19,6 +19,8 @@ theSourcesOfExtraJobInvariant : set of instance of PersistedInvariant;   // As d
 theUsageOfTransientInvariant : instance of TransientInvariant;           // As delivered by an AuditEvent in this test
 theExtraJobInvariantDefnForTransientInvariantUsage : instance of ExtraJobInvariantDefn;
 theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn : integer;
+thePersistedInvariants : set of instance of PersistedInvariant;
+thePersistedInvariant : instance of PersistedInvariant;
 logMessage : string;
 
 begin
@@ -265,6 +267,11 @@ begin
     Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
   end loop;
   //
+  // ... and finally clear down all the existing instances of PersistedInvariant in readiness for other tests.
+  thePersistedInvariants := find PersistedInvariant();
+  for thePersistedInvariant in thePersistedInvariants loop
+    thePersistedInvariant.deletePersistedInvariant();   
+  end loop;
 end service;
 //
 //
@@ -286,6 +293,8 @@ theLOOPCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
 theBRANCHCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
 theIntraJobInvariantDefinitions : set of instance of IntraJobInvariantDefn;
 theIntraJobInvariantUsages : set of instance of TransientInvariant;
+thePersistedInvariants : set of instance of PersistedInvariant;
+thePersistedInvariant : instance of PersistedInvariant;
 logMessage : string;
 
 begin
@@ -524,6 +533,12 @@ begin
     Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
   end loop;
   //
+  // ... and finally clear down all the existing instances of PersistedInvariant in readiness for other tests.
+  thePersistedInvariants := find PersistedInvariant();
+  for thePersistedInvariant in thePersistedInvariants loop
+    thePersistedInvariant.deletePersistedInvariant();   
+  end loop; 
+  
 end service;
 //
 //
@@ -836,6 +851,8 @@ theSourcesOfExtraJobInvariant : set of instance of PersistedInvariant;   // As d
 theUsageOfTransientInvariant : instance of TransientInvariant;           // As delivered by an AuditEvent in this test
 theExtraJobInvariantDefnForTransientInvariantUsage : instance of ExtraJobInvariantDefn;
 theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn : integer;
+thePersistedInvariants : set of instance of PersistedInvariant;
+thePersistedInvariant : instance of PersistedInvariant;
 logMessage : string;
 
 begin
@@ -1088,6 +1105,12 @@ begin
     Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
   end loop;
   //
+  // ... and finally clear down all the existing instances of PersistedInvariant in readiness for other tests.
+  thePersistedInvariants := find PersistedInvariant();
+  for thePersistedInvariant in thePersistedInvariants loop
+    thePersistedInvariant.deletePersistedInvariant();   
+  end loop; 
+  
 end service;
 //
 //
