@@ -936,3 +936,548 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '6f2d058c-034d-4399-959f-32ad44e48c84' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test205NormalUserExtraJobInvariantWithRestoredSourceEJI () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+theUserInvariants : set of instance of TransientInvariant;
+theSourceInvariants : set of instance of PersistedInvariant;
+previousEvents : sequence of string;
+restoredInvariant : persistedInvariantStructure;
+restoredInvariants : sequence of persistedInvariantStructure;
+empty : sequence of string;
+logMessage : string;
+
+thePersistedInvariants : set of instance of PersistedInvariant;
+thePersistedInvariant : instance of PersistedInvariant;
+theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+
+begin
+  // This test initially creates 1 Auth Job with 2 persistentinvariant values being defined
+  // This part of the test does not reveal any erroneous behaviour of the twin
+  //
+  
+  // This test test that the persistentinvariant can be used ok using 1 Job with 3 sequences and all events are in the standard default order
+  // 3 of the events refer to the persistentinvariant value and all must match to pass the extra job invariant check
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
+  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","","Ev1",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","Ev1","Ev2",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","Ev2","Ev3",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","Ev3","Ev4",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","Ev4","Ev5",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","Ev5","Ev6",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","Ev6","Ev7",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
+  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","Ev7","Ev8",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","Ev8","Ev9",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","Ev8","Ev9a",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","Ev9","Ev10",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","Ev10","Ev11",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
+  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","Ev11","Ev12",theAuditEventData);
+  
+  // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","","Ev13",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","Ev13","Ev14",theAuditEventData);
+  
+  // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","","Ev50",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","Ev50","Ev55",theAuditEventData);
+  //
+  Test::service_event_queue();
+  theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
+  Test::fire_timer(theJob.jobEventTimer);
+  Test::service_event_queue();
+  //
+  // The invariant provided does not match any source invariant at this point so SVDC will request an update from the persistence
+  // service to see if that source invariant has been made available elsewhere. The next section simulates the required
+  // invariant being found and provided
+  
+  // Simulate the Persistence domain providing an updated set of invariants
+  
+  restoredInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
+  restoredInvariant.InvariantValue := "Restore1";
+  restoredInvariant.validFrom := timestamp'now;
+  restoredInvariant.validTo := restoredInvariant.validFrom + @P1D@;
+  restoredInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
+  restoredInvariant.sourceAuditEventType := "EAuthoriserReceiveOrder";
+  restoredInvariant.sourceAuditEventOccurrenceId := 1;
+  
+  restoredInvariants := restoredInvariants & restoredInvariant;
+  
+  restoreInvariants (restoredInvariants);
+  //
+  //
+  Test::service_event_queue();
+  //
+  
+  theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
+  Test::fire_timer(theJob.jobEventTimer);
+
+  Test::service_event_queue();
+  
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  theUserInvariants := theAuditEvents -> R23;
+  theSourceInvariants := find PersistedInvariant(inForce = true);
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 3, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 17, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theUserInvariants'length = 3, "Wrong number of user invariants created: " & (theUserInvariants'length)'image);
+  Assertions::assertTrue(theSourceInvariants'length = 1, "Wrong number of source invariants in force: " & (theSourceInvariants'length)'image);
+  for eachJob in theJobs loop
+    Assertions::assertTrue(eachJob.jobCompleted, "Job is incomplete: " & eachJob.jobID);
+    Assertions::assertTrue(eachJob.sequencingFailed = false, "Sequencing has failed: " & eachJob.jobID);
+  end loop; 
+  
+  // ... and finally clear down all the existing instances of PersistedInvariant in readiness for other tests.
+  thePersistedInvariants := find PersistedInvariant();
+  for thePersistedInvariant in thePersistedInvariants loop
+    thePersistedInvariant.deletePersistedInvariant();   
+  end loop; 
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '61685058-10b8-4552-942d-cec8667db6f2' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test206NormalUserExtraJobInvariantWithRestoredSourceEJI () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+theUserInvariants : set of instance of TransientInvariant;
+theSourceInvariants : set of instance of PersistedInvariant;
+previousEvents : sequence of string;
+empty : sequence of string;
+logMessage : string;
+
+thePersistedInvariants : set of instance of PersistedInvariant;
+thePersistedInvariant : instance of PersistedInvariant;
+theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+restoredInvariant : persistedInvariantStructure;
+restoredInvariants : sequence of persistedInvariantStructure;
+
+begin
+  // This test initially simulates the pulling in of a persisted invariant that was sourced in a different
+  // instance of SVDC. This tests the restore of persisted invariants from the Persistence Service
+  // using the provided interface service restoreInvariants - 2 persistentinvariant values being restored
+  // This part of the test does not reveal any erroneous behaviour of the twin
+  //
+  
+  restoredInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
+  restoredInvariant.InvariantValue := "Restore2";
+  restoredInvariant.validFrom := timestamp'now;
+  restoredInvariant.validTo := restoredInvariant.validFrom + @P1D@;
+  restoredInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
+  restoredInvariant.sourceAuditEventType := "EAuthoriserReceiveOrder";
+  restoredInvariant.sourceAuditEventOccurrenceId := 1;
+  
+  restoredInvariants := restoredInvariants & restoredInvariant;
+  
+  restoredInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
+  restoredInvariant.InvariantValue := "Restore3";
+  restoredInvariant.validFrom := timestamp'now;
+  restoredInvariant.validTo := restoredInvariant.validFrom + @P1D@;
+  restoredInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
+  restoredInvariant.sourceAuditEventType := "EAuthoriserReceiveOrder";
+  restoredInvariant.sourceAuditEventOccurrenceId := 1;
+  
+  restoredInvariants := restoredInvariants & restoredInvariant;
+  
+  restoreInvariants (restoredInvariants);
+  
+  // This test tests that the restored persistent invariants can be used ok using 1 Job with 3 sequences and all events are in the standard default order
+  // 3 of the events refer to the persistent invariant values and all must match to pass the extra job invariant check
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore2");
+  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","","Ev1",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","Ev1","Ev2",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","Ev2","Ev3",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","Ev3","Ev4",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","Ev4","Ev5",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","Ev5","Ev6",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","Ev6","Ev7",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore2");
+  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","Ev7","Ev8",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","Ev8","Ev9",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","Ev8","Ev9a",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","Ev9","Ev10",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","Ev10","Ev11",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore3");
+  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","Ev11","Ev12",theAuditEventData);
+  
+  // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","","Ev13",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","Ev13","Ev14",theAuditEventData);
+  
+  // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","","Ev50",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","Ev50","Ev55",theAuditEventData);
+  //
+  //
+  Test::service_event_queue();
+  
+  theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
+  Test::fire_timer(theJob.jobEventTimer);
+
+  Test::service_event_queue();
+  
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  theUserInvariants := theAuditEvents -> R23;
+  theSourceInvariants := find PersistedInvariant(inForce = true);
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 3, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 17, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theUserInvariants'length = 3, "Wrong number of user invariants created: " & (theUserInvariants'length)'image);
+  Assertions::assertTrue(theSourceInvariants'length = 2, "Wrong number of source invariants in force: " & (theSourceInvariants'length)'image);
+  for eachJob in theJobs loop
+    Assertions::assertTrue(eachJob.jobCompleted, "Job is incomplete: " & eachJob.jobID);
+    Assertions::assertTrue(eachJob.sequencingFailed = false, "Sequencing has failed: " & eachJob.jobID);
+  end loop; 
+  
+  // ... and finally clear down all the existing instances of PersistedInvariant in readiness for other tests.
+  thePersistedInvariants := find PersistedInvariant();
+  for thePersistedInvariant in thePersistedInvariants loop
+    thePersistedInvariant.deletePersistedInvariant();   
+  end loop; 
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9011f660-12a2-4578-9780-58e232a5acba' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test256TimeoutDueToNoRestoredExtraJobInvariant () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+theUserInvariants : set of instance of TransientInvariant;
+theSourceInvariants : set of instance of PersistedInvariant;
+previousEvents : sequence of string;
+restoredInvariant : persistedInvariantStructure;
+restoredInvariants : sequence of persistedInvariantStructure;
+empty : sequence of string;
+logMessage : string;
+
+thePersistedInvariants : set of instance of PersistedInvariant;
+thePersistedInvariant : instance of PersistedInvariant;
+theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+
+begin
+  // This test initially creates 1 Auth Job with 2 persistentinvariant values being defined
+  // This part of the test does not reveal any erroneous behaviour of the twin
+  //
+  
+  // This test test that the persistentinvariant can be used ok using 1 Job with 3 sequences and all events are in the standard default order
+  // 3 of the events refer to the persistentinvariant value and all must match to pass the extra job invariant check
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
+  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","","Ev1",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","Ev1","Ev2",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","Ev2","Ev3",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","Ev3","Ev4",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","Ev4","Ev5",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","Ev5","Ev6",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","Ev6","Ev7",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
+  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","Ev7","Ev8",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","Ev8","Ev9",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","Ev8","Ev9a",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","Ev9","Ev10",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","Ev10","Ev11",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
+  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","Ev11","Ev12",theAuditEventData);
+  
+  // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","","Ev13",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","Ev13","Ev14",theAuditEventData);
+  
+  // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","","Ev50",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","Ev50","Ev55",theAuditEventData);
+  //
+  Test::service_event_queue();
+  theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
+  Test::fire_timer(theJob.jobEventTimer);
+  Test::service_event_queue();
+  //
+  // The invariant provided does not match any source invariant at this point so SVDC will request an update from the persistence
+  // service to see if that source invariant has been made available elsewhere. The next section simulates the required
+  // invariant being found and provided
+  
+  // Simulate the Persistence domain providing no updated invariants
+  
+  //
+  Test::service_event_queue();
+  //
+  
+  // If the persistence service doesn't have anything new then it won't invoke the restoreInvaraints service
+  // so we need to simulate timing out the jobInvariantSyncTimer which will cause the job to fail as the invariant check has failed
+  theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
+  Test::fire_timer(theJob.jobInvariantSyncTimer);
+  Test::service_event_queue();
+  Test::fire_timer(theJob.jobEventTimer);
+
+ 
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job has succeeded even though no matching extra job invariant was found: " & theJob.jobID);
+  end loop;  
+
+  
+  // ... and finally clear down all the existing instances of PersistedInvariant in readiness for other tests.
+  thePersistedInvariants := find PersistedInvariant();
+  for thePersistedInvariant in thePersistedInvariants loop
+    thePersistedInvariant.deletePersistedInvariant();   
+  end loop; 
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7cb6e24d-a5cc-4202-9ee2-7931ab0650ac' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test257InvalidRestoredExtraJobInvariant () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+theUserInvariants : set of instance of TransientInvariant;
+theSourceInvariants : set of instance of PersistedInvariant;
+previousEvents : sequence of string;
+restoredInvariant : persistedInvariantStructure;
+restoredInvariants : sequence of persistedInvariantStructure;
+empty : sequence of string;
+logMessage : string;
+
+thePersistedInvariants : set of instance of PersistedInvariant;
+thePersistedInvariant : instance of PersistedInvariant;
+theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+
+begin
+  // This test initially creates 1 Auth Job with 2 persistentinvariant values being defined
+  // This part of the test does not reveal any erroneous behaviour of the twin
+  //
+  
+  // This test test that the persistentinvariant can be used ok using 1 Job with 3 sequences and all events are in the standard default order
+  // 3 of the events refer to the persistentinvariant value and all must match to pass the extra job invariant check
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
+  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","","Ev1",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","Ev1","Ev2",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","Ev2","Ev3",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","Ev3","Ev4",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","Ev4","Ev5",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","Ev5","Ev6",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","Ev6","Ev7",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
+  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","Ev7","Ev8",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","Ev8","Ev9",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","Ev8","Ev9a",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","Ev9","Ev10",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","Ev10","Ev11",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
+  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","Ev11","Ev12",theAuditEventData);
+  
+  // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","","Ev13",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","Ev13","Ev14",theAuditEventData);
+  
+  // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","","Ev50",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","Ev50","Ev55",theAuditEventData);
+  //
+  Test::service_event_queue();
+  theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
+  Test::fire_timer(theJob.jobEventTimer);
+  Test::service_event_queue();
+  //
+  // The invariant provided does not match any source invariant at this point so SVDC will request an update from the persistence
+  // service to see if that source invariant has been made available elsewhere. The next section simulates the required
+  // invariant being found and provided
+  
+  // Simulate the Persistence domain providing an updated set of invariants
+  
+  restoredInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
+  restoredInvariant.InvariantValue := "InvalidRestore";
+  restoredInvariant.validFrom := timestamp'now;
+  restoredInvariant.validTo := restoredInvariant.validFrom + @P1D@;
+  restoredInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
+  restoredInvariant.sourceAuditEventType := "EAuthoriserReceiveOrder";
+  restoredInvariant.sourceAuditEventOccurrenceId := 1;
+  
+  restoredInvariants := restoredInvariants & restoredInvariant;
+  
+  restoreInvariants (restoredInvariants);
+  //
+  //
+  Test::service_event_queue();
+  //
+  
+  theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
+  Test::fire_timer(theJob.jobEventTimer);
+
+  Test::service_event_queue();
+  
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job has succeeded even though no matching extra job invariant was found: " & theJob.jobID);
+  end loop;  
+
+  
+  // ... and finally clear down all the existing instances of PersistedInvariant in readiness for other tests.
+  thePersistedInvariants := find PersistedInvariant();
+  for thePersistedInvariant in thePersistedInvariants loop
+    thePersistedInvariant.deletePersistedInvariant();   
+  end loop; 
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

@@ -318,13 +318,15 @@ end service;
 public service AESequenceDC::createSVDCsystemSpec ( maxIntraSequenceEventTimeoutPeriod : in duration,
                                                    waitPeriodForAllJobsCompletedCheck : in duration,
                                                    waitPeriodForJobDeletion : in duration,
-                                                   waitPeriodForInvariantDeletion : in duration ) is
+                                                   waitPeriodForInvariantDeletion : in duration,
+                                                   timeoutPeriodForRetreivingStoredInvariants : in duration ) is
 theSVDCSystemSpec : instance of SystemSpecification;
 begin
   theSVDCSystemSpec := create unique SystemSpecification (intraSequenceEventTimeoutPeriod => maxIntraSequenceEventTimeoutPeriod,
   	                                                      checkJobDefReadyForDeletionPeriod => waitPeriodForAllJobsCompletedCheck,
   	                                                      jobDeletionWaitPeriod => waitPeriodForJobDeletion,
-  	                                                      sourceExtraJobInvariantDeletionPeriod => waitPeriodForInvariantDeletion);
+  	                                                      sourceExtraJobInvariantDeletionPeriod => waitPeriodForInvariantDeletion,
+  	                                                      persistentInvariantRestoreTimeoutPeriod => timeoutPeriodForRetreivingStoredInvariants);
   //
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -450,6 +452,49 @@ begin
   	                                          userEventType,
   	                                          userOccurrenceId);
   
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9ebd061a-f613-4920-9250-f9095dc73be3' DO NOT EDIT THIS LINE.
+public service AESequenceDC::restoreInvariants ( restoredInvariants : in sequence of persistedInvariantStructure ) is
+theRestoredExtraJobInvDefn : instance of ExtraJobInvariantDefn;
+theAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
+theEventDefn : instance of AuditEventDefinition;
+theJobDefn : instance of JobDefinition;
+theJobs : set of instance of Job;
+theRestoredPersistentInvariant : instance of PersistedInvariant;
+existingInvariant : instance of PersistedInvariant;
+theSystemSpec : instance of SystemSpecification;
+
+logMessage : string;
+
+begin
+  for restoredInvariant in restoredInvariants loop
+                
+    theRestoredExtraJobInvDefn := find_one ExtraJobInvariantDefn (extraJobInvName = restoredInvariant.extraJobInvariantName);
+    if theRestoredExtraJobInvDefn /= null then    
+      theRestoredExtraJobInvDefn.restoreInvariantOfThisDefinition (restoredInvariant);      
+    
+    else
+                      
+      logMessage := "No Extra-Job Invariant Definition of the appropriate name was found so restoring the following Invariant cannot proceed " & restoredInvariant.extraJobInvariantName;
+      Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  	                                                                           
+    end if;  
+                 
+  end loop;
+  
+  // Tell all extant Jobs that stored invariants have been found
+  theJobs := find Job (jobCompleted = false);
+  // generate event to all jobs here
+  for eachJob in theJobs loop
+    
+    // TODO Remove debug message
+    logMessage := "Additional Source Invariants found so re-evaluate the extra job invariants for Job " & eachJob.jobID;
+    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+    
+    generate Job.StoredInvariantsReceived () to eachJob;
+  end loop;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

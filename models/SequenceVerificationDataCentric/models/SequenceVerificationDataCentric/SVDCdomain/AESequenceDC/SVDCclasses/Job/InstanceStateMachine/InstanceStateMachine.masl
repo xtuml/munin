@@ -751,21 +751,14 @@ end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '8296783c-a40c-413b-b700-e18ecd9df26d' DO NOT EDIT THIS LINE.
-state AESequenceDC::Job.AssessingInvariants () is
+state AESequenceDC::Job.AssessingIntraJobInvariants () is
 expectedIntraJobInvDefns : set of instance of IntraJobInvariantDefn;
-expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
 theExpectedIntraJobInvDefn : instance of IntraJobInvariantDefn;
-theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;
 theJobsAuditEvents : set of instance of AuditEvent;
 theInvariantAuditEvents : set of instance of AuditEvent;
 theJobsInvariantAuditEvents : set of instance of AuditEvent;
 theIntraJobInvariant : instance of TransientInvariant;
-theTransientExtraJobInvariant : instance of TransientInvariant;
-thePersistedExtraJobInvariant : instance of PersistedInvariant;
-thePersistedExtraJobInvariants : set of instance of PersistedInvariant;
-theInForcePersistedExtraJobInvariants : set of instance of PersistedInvariant;
 intraJobInvariantCheckPassed : boolean;
-extraJobInvariantCheckPassed : boolean;
 matched : boolean;
 invariantValue : string := "";
 failureReason : string;
@@ -797,17 +790,68 @@ begin
         end loop;
       end loop;
       
+      if intraJobInvariantCheckPassed then
+        logMessage := "Intra-Job Invariant check passed for - jobId = " & this.jobID;
+        Logger::log(Logger::Information, "AESequenceDC", logMessage);
+        generate Job.intraJobInvariantCheckSuccessful() to this;
+      else
+        failureReason := "Check of Intra-Job Invariants Failed";
+        generate Job.jobFailed(failureReason) to this;
+      end if;  
+  
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' 'f09c7295-aae5-4cb4-b76a-0bac7eb5fe52' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.AwaitingPersistenceService () is
+theSystemSpec : instance of SystemSpecification;
+failureReason : string;
+logMessage : string;
+
+begin
+
+  //TODO Remove debug message
+  logMessage := "Entered state Awaiting Persistence Service for - jobId = " & this.jobID;
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  
+  theSystemSpec := find_one SystemSpecification ();
+  failureReason := " Request for invariants from the persistence store has timed out meaning the Extra Job Invariant Check has failed " & this.jobID;
+  schedule this.jobInvariantSyncTimer generate Job.persistenceSyncTimedOut(failureReason) to this delay theSystemSpec.persistentInvariantRestoreTimeoutPeriod;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '1a48b626-651f-4dfb-b43e-fa7e296da623' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.AssessingLocalExtraJobInvariants () is
+expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
+theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;
+theJobsAuditEvents : set of instance of AuditEvent;
+theInvariantAuditEvents : set of instance of AuditEvent;
+theJobsInvariantAuditEvents : set of instance of AuditEvent;
+theTransientExtraJobInvariant : instance of TransientInvariant;
+thePersistedExtraJobInvariant : instance of PersistedInvariant;
+theRestoredPersistentInvariant : instance of PersistedInvariant;
+thePersistedExtraJobInvariants : set of instance of PersistedInvariant;
+theInForcePersistedExtraJobInvariants : set of instance of PersistedInvariant;
+restoredInvariant : persistedInvariantStructure;
+extraJobInvariantCheckPassed : boolean;
+matched : boolean;
+invariantValue : string := "";
+failureReason : string;
+logMessage : string;
+
+begin      
   // Checking Extra Job Invariants
       matched := false;
       extraJobInvariantCheckPassed := true;
       theJobsAuditEvents := this -> R3;
       expectedUserExtraJobInvDefns := this -> R3 -> R13 -> R21;
-      for theExpectedIntraJobInvDefn in expectedUserExtraJobInvDefns loop
-        theInvariantAuditEvents := theExpectedIntraJobInvDefn -> R21 -> R13;
+      for theExpectedUserExtraJobInvDefn in expectedUserExtraJobInvDefns loop
+        theInvariantAuditEvents := theExpectedUserExtraJobInvDefn -> R21 -> R13;
         // This finds the set of audit events that are expected to have invariants attached
         theJobsInvariantAuditEvents :=  theJobsAuditEvents intersection theInvariantAuditEvents;
-        for eachJobsInvariantAuditEvent in theJobsInvariantAuditEvents loop
-          theTransientExtraJobInvariant := eachJobsInvariantAuditEvent -> R23;
+        for eachInvariantAuditEvent in theJobsInvariantAuditEvents loop
+          // Iterate over each Audit Event which is expected to have a user extra job invariant attached
+          theTransientExtraJobInvariant := eachInvariantAuditEvent -> R23;
           thePersistedExtraJobInvariants := theTransientExtraJobInvariant -> R28 -> R24;
           // The following allows for more than one instance of a persisted extra job invariant to be in force at the same time
           // If any one of them matches the value of the transient invariant then the transient invariant is valid
@@ -820,33 +864,92 @@ begin
               matched := false;
             end if;  
           end loop;
+
           if not matched then
+            // Check to see if there is a stored persistent invariant 
+            Persistence_Req_IF~>RestoreNamedInvariant(theTransientExtraJobInvariant.extraJobInvName,
+            	                               theTransientExtraJobInvariant.invariantValue);
+            generate Job.WaitForStoredInvariants() to this;   
             extraJobInvariantCheckPassed := false;
-          end if;
+            exit;
+          end if;      
+                      
         end loop;
       end loop;
 
-      if intraJobInvariantCheckPassed then
-        logMessage := "Intra-Job Invariant check passed for - jobId = " & this.jobID;
-        Logger::log(Logger::Information, "AESequenceDC", logMessage);
-      end if;  
 
       if extraJobInvariantCheckPassed then
         logMessage := "Extra-Job Invariant check passed for - jobId = " & this.jobID;
         Logger::log(Logger::Information, "AESequenceDC", logMessage);
-      end if;  
-
-      if intraJobInvariantCheckPassed and extraJobInvariantCheckPassed then
-        generate Job.invariantCheckSuccessful() to this;
-      elsif intraJobInvariantCheckPassed and not extraJobInvariantCheckPassed then
-        failureReason := "Extra-Job Invariant Failed";
-        generate Job.jobFailed(failureReason) to this;  
-      elsif not intraJobInvariantCheckPassed and extraJobInvariantCheckPassed then   
-        failureReason := "Intra-Job Invariant Failed";
-        generate Job.jobFailed(failureReason) to this;  
+        generate Job.extraJobInvariantCheckSuccessful() to this;
       else
-        failureReason := "Extra-Job and Intra-Job Invariants Failed";
-        generate Job.jobFailed(failureReason) to this;
+        logMessage := "Local Extra-Job Invariants insufficient so checking stored value for - jobId = " & this.jobID;
+        Logger::log(Logger::Information, "AESequenceDC", logMessage);
+      end if;  
+  
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' 'fdf1deba-061a-4def-b29a-75ec05c72679' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.ReassessingExtraJobInvariants () is
+expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
+theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;
+theJobsAuditEvents : set of instance of AuditEvent;
+theInvariantAuditEvents : set of instance of AuditEvent;
+theJobsInvariantAuditEvents : set of instance of AuditEvent;
+theTransientExtraJobInvariant : instance of TransientInvariant;
+thePersistedExtraJobInvariant : instance of PersistedInvariant;
+thePersistedExtraJobInvariants : set of instance of PersistedInvariant;
+theInForcePersistedExtraJobInvariants : set of instance of PersistedInvariant;
+extraJobInvariantCheckPassed : boolean;
+matched : boolean;
+failureReason : string;
+logMessage : string;
+
+begin  
+  // Clear the time
+  cancel this.jobInvariantSyncTimer;    
+  // Checking Extra Job Invariants including those recovered from the persistent invariant store
+      matched := false;
+      extraJobInvariantCheckPassed := true;
+      theJobsAuditEvents := this -> R3;
+      expectedUserExtraJobInvDefns := this -> R3 -> R13 -> R21;
+      for theExpectedUserExtraJobInvDefn in expectedUserExtraJobInvDefns loop
+        theInvariantAuditEvents := theExpectedUserExtraJobInvDefn -> R21 -> R13;
+        // This finds the set of audit events that are expected to have invariants attached
+        theJobsInvariantAuditEvents :=  theJobsAuditEvents intersection theInvariantAuditEvents;
+        for eachInvariantAuditEvent in theJobsInvariantAuditEvents loop
+          // Iterate over each Audit Event which is expected to have a user extra job invariant attached
+          theTransientExtraJobInvariant := eachInvariantAuditEvent -> R23;
+          thePersistedExtraJobInvariants := theTransientExtraJobInvariant -> R28 -> R24;
+          // The following allows for more than one instance of a persisted extra job invariant to be in force at the same time
+          // If any one of them matches the value of the transient invariant then the transient invariant is valid
+          theInForcePersistedExtraJobInvariants := find thePersistedExtraJobInvariants (inForce = true);
+          for eachInForceInvariant in theInForcePersistedExtraJobInvariants loop
+            if eachInForceInvariant.invariantValue = theTransientExtraJobInvariant.invariantValue then
+              matched := true;
+              exit;
+            else
+              matched := false;
+            end if;  
+          end loop;
+
+          if not matched then
+            extraJobInvariantCheckPassed := false;
+            exit;
+          end if;      
+                      
+        end loop;
+      end loop;
+
+
+      if extraJobInvariantCheckPassed then
+        logMessage := "Extra-Job Invariant check passed for - jobId = " & this.jobID;
+        Logger::log(Logger::Information, "AESequenceDC", logMessage);
+        generate Job.extraJobInvariantCheckSuccessful() to this;
+      else
+        failureReason := "Extra-Job Invariant check failed including checking stored invariants for - jobId = " & this.jobID;
+        generate Job.jobFailed (failureReason) to this;
       end if;  
   
 end state;
