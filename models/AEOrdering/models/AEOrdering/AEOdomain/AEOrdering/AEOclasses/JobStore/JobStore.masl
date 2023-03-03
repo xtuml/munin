@@ -1,0 +1,50 @@
+//! ACTIVITY BEGIN. '4c2c3d56-7ad3-4be1-85e5-50dcd0bd0575' DO NOT EDIT THIS LINE.
+public service AEOrdering::JobStore.loadJobStore () is
+jobStore : instance of JobStore;
+fileName : Filesystem::filename;
+jobStoreString : string;
+storedJobIdentifier : instance of StoredJobIdentifier;
+tokens : sequence of string;
+
+begin
+	jobStore := find_one JobStore();
+    fileName := Filesystem::filename(jobStore.jobStoreLocation & "/" & jobStore.jobStoreName);
+    if Filesystem::file_exists(fileName) then
+        // read the contents of the config file 
+        jobStoreString := Filesystem::read_file(fileName);
+        for line in Strings::tokenize(jobStoreString, "\n") loop
+        	tokens :=  Strings::tokenize(line, " ");
+        	storedJobIdentifier := find_one StoredJobIdentifier(jobId = tokens[tokens'first + 1]);
+        	if storedJobIdentifier = null then
+    			storedJobIdentifier := create StoredJobIdentifier(jobId => tokens[tokens'first + 1], jobTime => timestamp'parse(tokens[tokens'first]));
+    		else
+			    Logger::log(Logger::Information, "AEOrdering", "Duplicate job id recovered from job store JobId = " & tokens[tokens'first + 1]);
+    		end if;
+        end loop;
+	end if;
+exception
+	when others =>
+	    Logger::log(Logger::Information, "AEOrdering", "Failed to load Job Store filename = " & fileName);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '47b304fc-89f6-4116-a87e-604aecbf8b4b' DO NOT EDIT THIS LINE.
+public service AEOrdering::JobStore.addJobToStore ( jobId : in string ) is
+jobStore : instance of JobStore;
+storedJobIdentifier : instance of StoredJobIdentifier;
+jobStoreDevice : Filesystem::file;
+
+begin
+	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId);
+	if storedJobIdentifier = null then
+		storedJobIdentifier := create StoredJobIdentifier(jobId => jobId, jobTime => timestamp'now);
+		jobStore := find_one JobStore();
+        Filesystem::open_append(Filesystem::filename(jobStore.jobStoreLocation & "/" & jobStore.jobStoreName), jobStoreDevice);
+		jobStoreDevice << storedJobIdentifier.jobTime'image << " " << storedJobIdentifier.jobId << "\n";
+		Filesystem::close(jobStoreDevice);
+	else
+	    Logger::log(Logger::Information, "AEOrdering", "Duplicate job id reported to job store JobId = " & jobId);
+	end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

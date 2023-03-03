@@ -121,6 +121,8 @@ begin
 			delete failedJob;
 		end if;
 	end if;
+	// add the job to the job store as there should be no more events
+	JobStore.addJobToStore(this.jobId);
 	delete this;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

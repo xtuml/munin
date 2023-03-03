@@ -1,0 +1,89 @@
+{
+  "JobSpecName" : "FileRequest_HappyPath",
+  "JobName" : "FileRequest",
+  "EventDefinition": [{
+    "EventId": "1",
+    "EventName": "RequestFile",
+    "NodeName": "client",
+    "ApplicationName": "client",
+    "DispatchDelay": "PT0S",
+    "SequenceStart": "true"
+  },
+  {
+    "EventId": "2",
+    "EventName": "PacketiseFile",
+    "EventData" : [{
+      "EventDataType" : "numPackets",
+      "DataName" : "LOOPCOUNT",
+      "DataValue" : 3
+    }],
+    "NodeName": "server",
+    "ApplicationName": "server",
+    "DispatchDelay": "PT0S",
+    "SequenceStart": "false",
+    "PreviousEventId" : "1"
+  },
+  {
+    "EventId": "3",
+    "EventName": "AssemblePacket",
+    "NodeName": "server",
+    "ApplicationName": "server",
+    "DispatchDelay": "PT0S",
+    "SequenceStart": "false",
+    "PreviousEventId" : "2"
+  },
+  {
+    "EventId": "4",
+    "EventName": "TransferPacket",
+    "NodeName": "server",
+    "ApplicationName": "server",
+    "DispatchDelay": "PT0S",
+    "SequenceStart": "false",
+    "PreviousEventId" : "3"
+  },
+  {
+    "EventId": "5",
+    "EventName": "AssemblePacket",
+    "NodeName": "server",
+    "ApplicationName": "server",
+    "DispatchDelay": "PT0S",
+    "SequenceStart": "false",
+    "PreviousEventId" : "4"
+  },
+  {
+    "EventId": "6",
+    "EventName": "TransferPacket",
+    "NodeName": "server",
+    "ApplicationName": "server",
+    "DispatchDelay": "PT0S",
+    "SequenceStart": "false",
+    "PreviousEventId" : "5"
+  },
+  {
+    "EventId": "7",
+    "EventName": "AssemblePacket",
+    "NodeName": "server",
+    "ApplicationName": "server",
+    "DispatchDelay": "PT0S",
+    "SequenceStart": "false",
+    "PreviousEventId" : "6"
+  },
+  {
+    "EventId": "8",
+    "EventName": "TransferPacket",
+    "NodeName": "server",
+    "ApplicationName": "server",
+    "DispatchDelay": "PT0S",
+    "SequenceStart": "false",
+    "PreviousEventId" : "7"
+  },
+  {
+    "EventId": "9",
+    "EventName": "TransferResultStatus",
+    "NodeName": "server",
+    "ApplicationName": "server",
+    "DispatchDelay": "PT0S",
+    "SequenceStart": "false",
+    "PreviousEventId" : "8"
+    }]
+  }

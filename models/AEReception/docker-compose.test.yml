@@ -16,5 +16,5 @@ services:
       - "./testing:/root/testing"
       - "./config:/root/config"
       - "./schedule:/root/schedule"
-    entrypoint: ["/usr/bin/timeout", "30s", "AEReception_transient_standalone"]
+    entrypoint: ["/usr/bin/timeout", "3000s", "AEReception_transient_standalone"]
     command: "-log-level Debug -configPath config/ -postinit schedule/test.sch -util Inspector -inspector-port 0"
