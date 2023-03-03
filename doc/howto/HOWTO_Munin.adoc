@@ -54,8 +54,25 @@ for a quick start on using git to clone repositories and import projects.
 
 PlantUML is a tool for visualizing UML diagrams written in a textual format. The
 PLUS domain specific language is based on PlantUML Activity Diagrams. PlantUML
-can be downloaded https://plantuml.com/starting[here] or installed through your
-package manager (recommended).
+can be downloaded from various sources. The recommended approach is to load it as an Eclipse plugin
+so that it works seemlessly with BridgePoint. The Eclipse plugin can be downloaded here 
+https://plantuml.com/eclipse and the update site is http://hallvard.github.io/plantuml
+
+TODO Getting the plugin working in BP
+
+To see PlantUML in BridgePoint select the Window menu item, then select Show View and then Other. 
+This will open a dialog showing a PlantUML folder. Open the folder and select PlantUML.
+Again using Window and Show View open a Project Explorer view. This will appear as a tab alongside
+the Model Explorer and provides a view of the file structure. PlantUML files with the filename
+extension .puml can be found in TODO 
+
+When first opening a .puml file right click on the file and select Open With... then Text Editor.
+For subsequent opening of the same file it will remember the selected editor. Position the text editor
+pane and the PlantUML graphic pane side by side. When the PlantUML text is edited the activity diagram
+is updated automatically.
+
+Whilst this is a generic PlantUML editor it is used specifically for editing the PLUS domain specific
+language. For details on PLUS see https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[here].
 
 === Source Projects
 
@@ -114,7 +131,7 @@ can be found https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[
 
 "plus2json" refers to the application which processes PLUS files (textual
 activity diagrams) and produces JSON configuration files consumable by the
-protocol verifier and the Audit Event Simulator.
+Protocol Verifier and the Audit Event Simulator.
 
 == Overview
 
@@ -253,20 +270,34 @@ conditions include unexpected audit event types, unexpected sequences of audit
 event types, sequences starting with the wrong audit event types and repetition
 of audit event types in unexpected places.
 
-==== PLUS Processor domains
+==== plus2json Description
 
-===== Statement Parser
+===== TODO
 
-The Statement Parser domain is responsible for parsing the PLUS files, verifying
-that all syntax is correct and organizing them into a sequence of statements.
-These statements are fed to the Sequence Processor one at a time to build up the
-job definition.
 
-===== Sequence Processor
 
-The Sequence Processor domain reads statements from the Statement Parser one at
-a time and interprets them into a structured job definition. It then serializes
-this job definition to JSON.
+===== TODO
+
+== Configure the build
+
+The Protocol Verifier is data driven. It has no built in knowledge of any specific protocols. So prior to building 
+the application the configuration files need to be in place. This only needs to be done when the configuration 
+changes and not prior to every build.
+
+=== Use PLUS to define the configuration
+
+Refer to https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[here] for details on the use of PLUS
+
+=== Use plus2json to convert PLUS into configuration files
+
+The plus2json application consumes PLUS text files and provides a number of possible outputs including configuartion 
+files that the Protocol Verifier can consume.
+
+TODO See xxx for details on using plus2json and its options.
+
+=== Load the configuration files
+
+TODO
 
 == Building and Running the Project
 
