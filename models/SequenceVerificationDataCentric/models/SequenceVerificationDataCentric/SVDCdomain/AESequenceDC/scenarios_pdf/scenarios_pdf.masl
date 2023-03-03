@@ -10,9 +10,9 @@ begin
   // This scenario sets up the definitions for five Job types:
   //   1. 'ComplexInstanceForkJob1' - Defines a sequence with a BRANCHCOUNT but no merging.
   //   2. 'ComplexInstanceForkAndMergeJob1' - Defines a sequence with a BRANCHCOUNT and MERGECOUNT with just one event in each branch.
-  //   3. 'ComplexInstanceForkAndMergeJob3' - Defines a sequence with a BRANCHCOUNT and MERGECOUNT with multiple events in each branch.
-  //   4. 'ComplexInstanceForkAndMergeJob4' - Defines a sequence with nested BRANCHCOUNTs and a single MERGECOUNT.
-  //   5  'ComplexInstanceForkAndMergeJob5' - Same as Job4 except Forks and Merge are defined in different sequences.
+  //   3. 'ComplexInstanceForkAndMergeJob2' - Defines a sequence with a BRANCHCOUNT and MERGECOUNT with multiple events in each branch.
+  //   4. 'ComplexInstanceForkAndMergeJob3' - Defines a sequence with nested BRANCHCOUNTs and a single MERGECOUNT.
+  //   5  'ComplexInstanceForkAndMergeJob4' - Same as Job3 except Forks and Merge are defined in different sequences.
   // **************************************************************************************************************************
   // Note that for the first of these definitions there would be numerous event sequence variations that would be 
   // valid - these are explored in Test73.
@@ -131,114 +131,115 @@ invariantEventTypeUses : sequence of intraJobInvDataStructure;
 userEventOccurrences : sequence of userEventDataStructure;
 
 begin
-  // This scenario sets up the definitions for two Job types - 'ComplexJob2' and 'GenerateAuthorisationTokenJob'
+  // This scenario sets up the definitions for two Job types - 'ComplexJob2' and 'GenerateAuthorisationTokenJob2'
   //
-  // Job: ComplexJob2, Sequence: ComplexSequence 
+  // Job: ComplexJob2, Sequence: ComplexSequence2 
   //
   // Event definitions for section 1 of sequence...
   previousEventTypes := empty;
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-A",1,previousEventTypes,true,false,false);  
-  previousEventTypes := ("CS2-A",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-B",1,previousEventTypes,false,false,false); 
-  previousEventTypes := ("CS2-B",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-C",1,previousEventTypes,false,false,false);
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-A",1,previousEventTypes,true,false,false);  
+  previousEventTypes := ("CS7-A",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-B",1,previousEventTypes,false,false,false); 
+  previousEventTypes := ("CS7-B",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-C",1,previousEventTypes,false,false,false);
   // Event definitions for section 2 of sequence...
   // Start of first loop in section 2.
-  previousEventTypes := ("CS2-C",1,"MultiWayANDFork","AND") & ("CS2-F",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-D",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-D",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-E",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-E",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-F",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-C",1,"MultiWayANDFork","AND") & ("CS7-F",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-D",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-D",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-E",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-E",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-F",1,previousEventTypes,false,false,false);
   // End of first loop of events in section 2.
-  previousEventTypes := ("CS2-F",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-G",1,previousEventTypes,false,false,false);
-  // Start of second loop in section 2 of sequence - this loop includes an XOR break-out alternative at event CS2-E
-  previousEventTypes := ("CS2-G",1,"","") & ("CS2-F",2,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-D",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-D",2,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-E",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-E",2,"LoopBreakoutAtCS2-E2","XOR");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-F",2,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-F",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-G",1,previousEventTypes,false,false,false);
+  // Start of second loop in section 2 of sequence - this loop includes an XOR break-out alternative at event CS7-E
+  previousEventTypes := ("CS7-G",1,"","") & ("CS7-F",2,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-D",2,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-D",2,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-E",2,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-E",2,"LoopBreakoutAtCS7-E2","XOR");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-F",2,previousEventTypes,false,false,false);
   // End of second loop in section2 of sequence
   //
   // ...and now the remaining event definitions for section 2 of sequence.
-  previousEventTypes := ("CS2-E",2,"LoopBreakoutAtCS2-E2","XOR");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-T",1,previousEventTypes,false,false,true);
-  previousEventTypes := ("CS2-F",2,"","") & ("CS2-T",1,"","") & ("CS2-M",1,"ErrorAtCS2-M1","XOR");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-H",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-H",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-J",1,previousEventTypes,false,true,false);
+  previousEventTypes := ("CS7-E",2,"LoopBreakoutAtCS7-E2","XOR");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-T",1,previousEventTypes,false,false,true);
+  previousEventTypes := ("CS7-F",2,"","") & ("CS7-T",1,"","") & ("CS7-M",1,"ErrorAtCS7-M1","XOR");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-H",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-H",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-J",1,previousEventTypes,false,true,false);
   //
   // Event definitions for section 3 of sequence...
-  previousEventTypes := ("CS2-C",1,"MultiWayANDFork","AND");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-K",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-K",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-L",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-L",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-M",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-M",1,"ErrorAtCS2-M1","XOR");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-N",1,previousEventTypes,false,true,false);
+  previousEventTypes := ("CS7-C",1,"MultiWayANDFork","AND");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-K",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-K",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-L",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-L",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-M",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-M",1,"ErrorAtCS7-M1","XOR");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-N",1,previousEventTypes,false,true,false);
   //
   // Event definitions for section 4 of sequence...
-  previousEventTypes := ("CS2-C",1,"MultiWayANDFork","AND");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-P",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-P",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-Q",1,previousEventTypes,false,true,false);
+  previousEventTypes := ("CS7-C",1,"MultiWayANDFork","AND");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-P",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-P",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-Q",1,previousEventTypes,false,true,false);
   //
   // Event definitions for section 5 of sequence...
-  previousEventTypes := ("CS2-C",1,"MultiWayANDFork","AND");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-C",2,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-C",2,"","") & ("CS2-E",3,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-D",3,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-D",3,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-E",3,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-E",3,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-F",3,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-F",3,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-D",4,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-D",4,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-G",2,previousEventTypes,false,true,false);
+  previousEventTypes := ("CS7-C",1,"MultiWayANDFork","AND");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-C",2,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-C",2,"","") & ("CS7-E",3,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-D",3,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-D",3,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-E",3,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-E",3,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-F",3,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-F",3,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-D",4,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-D",4,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-G",2,previousEventTypes,false,true,false);
   //
   // Event definitions for section 6 of sequence...
-  previousEventTypes := ("CS2-C",1,"MultiWayANDFork","AND") & ("CS2-S",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-S",1,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-S",1,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-D",5,previousEventTypes,false,false,false);
-  previousEventTypes := ("CS2-D",5,"","");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-E",4,previousEventTypes,false,true,false);
+  previousEventTypes := ("CS7-C",1,"MultiWayANDFork","AND") & ("CS7-S",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-S",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-S",1,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-D",5,previousEventTypes,false,false,false);
+  previousEventTypes := ("CS7-D",5,"","");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-E",4,previousEventTypes,false,true,false);
   //
   // Event definitions for section 7 of sequence...
-  previousEventTypes := ("CS2-C",1,"ErrorAtCS2-C1","XOR");
-  eventDefinition ("ComplexJob2","ComplexSequence","CS2-R",1,previousEventTypes,false,true,false);
+  previousEventTypes := ("CS7-C",1,"ErrorAtCS7-C1","XOR");
+  eventDefinition ("ComplexJob2","ComplexSequence2","CS7-R",1,previousEventTypes,false,true,false);
   //
   // Now, set up the dynamic control definitions for 'ComplexJob2'...
-  dynamicControlDefinition("ComplexJob2", "LC1", dynamicControlTypeEnum.LOOPCOUNT, "CS2-B",1,"CS2-E",1);
-  dynamicControlDefinition("ComplexJob2", "LC2", dynamicControlTypeEnum.LOOPCOUNT, "CS2-B",1,"CS2-D",2);
-  dynamicControlDefinition("ComplexJob2", "LC3", dynamicControlTypeEnum.LOOPCOUNT, "CS2-A",1,"CS2-S",1);
-  dynamicControlDefinition("ComplexJob2", "LC4", dynamicControlTypeEnum.LOOPCOUNT, "CS2-B",1,"CS2-F",1);
-  dynamicControlDefinition("ComplexJob2", "BC1", dynamicControlTypeEnum.BRANCHCOUNT, "CS2-F",3,"CS2-F",3);
-  dynamicControlDefinition("ComplexJob2", "BC2", dynamicControlTypeEnum.BRANCHCOUNT, "CS2-A",1,"CS2-K",1);
+  dynamicControlDefinition("ComplexJob2", "LCE1", dynamicControlTypeEnum.LOOPCOUNT, "CS7-B",1,"CS7-E",1);
+  dynamicControlDefinition("ComplexJob2", "LCD2", dynamicControlTypeEnum.LOOPCOUNT, "CS7-B",1,"CS7-D",2);
+  dynamicControlDefinition("ComplexJob2", "LCS1", dynamicControlTypeEnum.LOOPCOUNT, "CS7-A",1,"CS7-S",1);
+  dynamicControlDefinition("ComplexJob2", "LCF1", dynamicControlTypeEnum.LOOPCOUNT, "CS7-B",1,"CS7-F",1);
+  dynamicControlDefinition("ComplexJob2", "BCF3", dynamicControlTypeEnum.BRANCHCOUNT, "CS7-F",3,"CS7-F",3);
+  dynamicControlDefinition("ComplexJob2", "BCK1", dynamicControlTypeEnum.BRANCHCOUNT, "CS7-A",1,"CS7-K",1);
+  dynamicControlDefinition("ComplexJob2", "MCM1", dynamicControlTypeEnum.MERGECOUNT, "CS7-A",1,"CS7-M",1);
   //
   // And then set up the Invariant definitions for 'ComplexJob2'...
   // Define an intra-job invariant for the 'ComplexJob2' that is used at B,1 and H,1
-  invariantEventTypeUses := ("CS2-B",1,"") & ("CS2-H",1,"");
-  intraJobInvariantDefinition("ComplexJob2","InvariantA",invariantEventTypeUses);
+  invariantEventTypeUses := ("CS7-B",1,"") & ("CS7-H",1,"");
+  intraJobInvariantDefinition("ComplexJob2","InvariantB",invariantEventTypeUses);
   
-  // Now define the event definitions for 'GenerateAuthorisationTokenJob'...
-  //previousEventTypes := empty;
-  //eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-A",1,previousEventTypes,true,false,false);  
-  //previousEventTypes := ("TOK-A",1,"","");
-  //eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-B",1,previousEventTypes,false,false,false);
-  //previousEventTypes := ("TOK-B",1,"","");
-  //eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-C",1,previousEventTypes,false,false,false);
-  //previousEventTypes := ("TOK-C",1,"","");
-  //eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-D",1,previousEventTypes,false,true,false);
+  // Now define the event definitions for 'GenerateAuthorisationTokenJob2'...
+  previousEventTypes := empty;
+  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOKGEN-A",1,previousEventTypes,true,false,false);  
+  previousEventTypes := ("TOKGEN-A",1,"","");
+  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOKGEN-B",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("TOKGEN-B",1,"","");
+  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOKGEN-C",1,previousEventTypes,false,false,false);
+  previousEventTypes := ("TOKGEN-C",1,"","");
+  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOKGEN-D",1,previousEventTypes,false,true,false);
   
-  //Define the source of the ExtraJobInvariant 'AUTH_TOKEN_A' in the 'GenerateAuthorisationTokenJob' that is used by
-  // event occurrences CS2-E,1 & CS2-L,1 & CS2-F,3 in the 'ComplexJob2'.
-  userEventOccurrences := ("ComplexJob2","CS2-E",1,"") & ("ComplexJob2","CS2-L",1,"") & ("ComplexJob2","CS2-D",4,"");
-  //extraJobInvariantDefinition("AUTH_TOKEN_A", "GenerateAuthorisationTokenJob", "TOK-D",1,userEventOccurrences);
+  //Define the source of the ExtraJobInvariant 'AUTH_TOKEN_B' in the 'GenerateAuthorisationTokenJob' that is used by
+  // event occurrences CS7-E,1 & CS7-L,1 & CS7-F,3 in the 'ComplexJob2'.
+  userEventOccurrences := ("ComplexJob2","CS7-E",1,"") & ("ComplexJob2","CS7-L",1,"") & ("ComplexJob2","CS7-D",4,"");
+  extraJobInvariantDefinition("AUTH_TOKEN_B", "GenerateAuthorisationTokenJob", "TOKGEN-D",1,userEventOccurrences);
   
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
