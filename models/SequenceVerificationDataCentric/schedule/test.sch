@@ -57,6 +57,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test73ComplexInstanceFork_SunnyDay1
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test74SingleEventForkAndMerge_SunnyDay1 1074 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test75MultiEventForkAndMerge_SunnyDay1 1075 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test76NestedEventForkAndMerge_SunnyDay1 1076 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test77NestedEventForkAndMergeAcrossSequences_SunnyDay1 1077 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test200NormalInstanceForkWithBranchAndMergeCount 1200 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test201NormalInstanceForkWithBranchAndMergeCount 1201 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test202NormalSplitInstanceForkWithBranchAndMergeCount 1202 CleanUpAllJobs 64]

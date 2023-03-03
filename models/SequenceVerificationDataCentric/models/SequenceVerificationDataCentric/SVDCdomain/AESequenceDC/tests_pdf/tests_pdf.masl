@@ -4414,42 +4414,42 @@ begin
 
 previousEvents := empty;
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BCV4", "3") & (aeDataKindEnum.BRANCHCOUNT, "BCW4", "2") & (aeDataKindEnum.MERGECOUNT, "MCZ4", "6");
-  acceptOrderedEvent ("1620920000","Test75","CS5-U","InstanceForkAndMerge3",previousEvents,"Event21",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test76","CS5-U","InstanceForkAndMerge3",previousEvents,"Event21",theAuditEventData);
   theAuditEventData :=  emptyAuditEventData;
   previousEvents := ("Event21");
-  acceptOrderedEvent ("1620920001","Test75","CS5-V","InstanceForkAndMerge3",previousEvents,"Event22",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test76","CS5-V","InstanceForkAndMerge3",previousEvents,"Event22",theAuditEventData);
   previousEvents := ("Event22");
-  acceptOrderedEvent ("1620920002","Test75","CS5-W","InstanceForkAndMerge3",previousEvents,"Event23",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test76","CS5-W","InstanceForkAndMerge3",previousEvents,"Event23",theAuditEventData);
   previousEvents := ("Event23");
-  acceptOrderedEvent ("1620920003","Test75","CS5-X","InstanceForkAndMerge3",previousEvents,"Event24",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test76","CS5-X","InstanceForkAndMerge3",previousEvents,"Event24",theAuditEventData);
   previousEvents := ("Event24");
-  acceptOrderedEvent ("1620920004","Test75","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event25",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test76","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event25",theAuditEventData);
   previousEvents := ("Event23");
-  acceptOrderedEvent ("1620920003","Test75","CS5-X","InstanceForkAndMerge3",previousEvents,"Event26",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test76","CS5-X","InstanceForkAndMerge3",previousEvents,"Event26",theAuditEventData);
   previousEvents := ("Event26");
-  acceptOrderedEvent ("1620920004","Test75","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event27",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test76","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event27",theAuditEventData);
   previousEvents := ("Event22");
-  acceptOrderedEvent ("1620920002","Test75","CS5-W","InstanceForkAndMerge3",previousEvents,"Event28",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test76","CS5-W","InstanceForkAndMerge3",previousEvents,"Event28",theAuditEventData);
   previousEvents := ("Event28");
-  acceptOrderedEvent ("1620920003","Test75","CS5-X","InstanceForkAndMerge3",previousEvents,"Event29",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test76","CS5-X","InstanceForkAndMerge3",previousEvents,"Event29",theAuditEventData);
   previousEvents := ("Event29");
-  acceptOrderedEvent ("1620920004","Test75","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event30",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test76","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event30",theAuditEventData);
   previousEvents := ("Event28");
-  acceptOrderedEvent ("1620920003","Test75","CS5-X","InstanceForkAndMerge3",previousEvents,"Event31",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test76","CS5-X","InstanceForkAndMerge3",previousEvents,"Event31",theAuditEventData);
   previousEvents := ("Event31");
-  acceptOrderedEvent ("1620920004","Test75","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event32",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test76","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event32",theAuditEventData);
   previousEvents := ("Event22");
-  acceptOrderedEvent ("1620920002","Test75","CS5-W","InstanceForkAndMerge3",previousEvents,"Event33",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test76","CS5-W","InstanceForkAndMerge3",previousEvents,"Event33",theAuditEventData);
   previousEvents := ("Event33");
-  acceptOrderedEvent ("1620920003","Test75","CS5-X","InstanceForkAndMerge3",previousEvents,"Event34",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test76","CS5-X","InstanceForkAndMerge3",previousEvents,"Event34",theAuditEventData);
   previousEvents := ("Event34");
-  acceptOrderedEvent ("1620920004","Test75","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event35",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test76","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event35",theAuditEventData);
   previousEvents := ("Event33");
-  acceptOrderedEvent ("1620920003","Test75","CS5-X","InstanceForkAndMerge3",previousEvents,"Event36",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test76","CS5-X","InstanceForkAndMerge3",previousEvents,"Event36",theAuditEventData);
   previousEvents := ("Event36");
-  acceptOrderedEvent ("1620920004","Test75","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event37",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test76","CS5-Y","InstanceForkAndMerge3",previousEvents,"Event37",theAuditEventData);
   previousEvents := empty & "Event25" & "Event27" & "Event30" & "Event32" & "Event35" & "Event37";
-  acceptOrderedEvent ("1620920005","Test75","CS5-Z","InstanceForkAndMerge3",previousEvents,"Event38",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test76","CS5-Z","InstanceForkAndMerge3",previousEvents,"Event38",theAuditEventData);
   
   Test::service_event_queue();
   
@@ -4464,6 +4464,85 @@ previousEvents := empty;
   //
   Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 18, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;  
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd8a27cb0-71f8-4631-8411-e851bf5684e9' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test77NestedEventForkAndMergeAcrossSequences_SunnyDay1 () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Job which is compliant with the Job Definition 'ComplexInstanceForkAndMergeJob4'..
+  //
+  // This test does not reveal any erroneous behaviour of the twin.
+  //
+  // ****************************************************************************************************************
+
+  previousEvents := empty;
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BCV5", "3") & (aeDataKindEnum.BRANCHCOUNT, "BCW5", "2") & (aeDataKindEnum.MERGECOUNT, "MCZ5", "6");
+  acceptOrderedEvent ("1620920000","Test77","CS6-U","InstanceForkAndMerge4",previousEvents,"Event21",theAuditEventData);
+  theAuditEventData :=  emptyAuditEventData;
+  previousEvents := ("Event21");
+  acceptOrderedEvent ("1620920001","Test77","CS6-V","InstanceForkAndMerge4",previousEvents,"Event22",theAuditEventData);
+  previousEvents := ("Event22");
+  acceptOrderedEvent ("1620920002","Test77","CS6-W","InstanceForkAndMerge4",previousEvents,"Event23",theAuditEventData);
+  previousEvents := ("Event23");
+  acceptOrderedEvent ("1620920003","Test77","CS6-X","InstanceForkAndMerge4",previousEvents,"Event24",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920004","Test77","CS6-Y","InstanceForkAndMerge4",previousEvents,"Event25",theAuditEventData);
+  previousEvents := ("Event23");
+  acceptOrderedEvent ("1620920003","Test77","CS6-X","InstanceForkAndMerge4",previousEvents,"Event26",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920004","Test77","CS6-Y","InstanceForkAndMerge4",previousEvents,"Event27",theAuditEventData);
+  previousEvents := ("Event22");
+  acceptOrderedEvent ("1620920002","Test77","CS6-W","InstanceForkAndMerge4",previousEvents,"Event28",theAuditEventData);
+  previousEvents := ("Event28");
+  acceptOrderedEvent ("1620920003","Test77","CS6-X","InstanceForkAndMerge4",previousEvents,"Event29",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920004","Test77","CS6-Y","InstanceForkAndMerge4",previousEvents,"Event30",theAuditEventData);
+  previousEvents := ("Event28");
+  acceptOrderedEvent ("1620920003","Test77","CS6-X","InstanceForkAndMerge4",previousEvents,"Event31",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920004","Test77","CS6-Y","InstanceForkAndMerge4",previousEvents,"Event32",theAuditEventData);
+  previousEvents := ("Event22");
+  acceptOrderedEvent ("1620920002","Test77","CS6-W","InstanceForkAndMerge4",previousEvents,"Event33",theAuditEventData);
+  previousEvents := ("Event33");
+  acceptOrderedEvent ("1620920003","Test77","CS6-X","InstanceForkAndMerge4",previousEvents,"Event34",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920004","Test77","CS6-Y","InstanceForkAndMerge4",previousEvents,"Event35",theAuditEventData);
+  previousEvents := ("Event33");
+  acceptOrderedEvent ("1620920003","Test77","CS6-X","InstanceForkAndMerge4",previousEvents,"Event36",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920004","Test77","CS6-Y","InstanceForkAndMerge4",previousEvents,"Event37",theAuditEventData);
+  previousEvents := empty & "Event25" & "Event27" & "Event30" & "Event32" & "Event35" & "Event37";
+  acceptOrderedEvent ("1620920005","Test77","CS6-Z","InstanceForkAndMerge4",previousEvents,"Event38",theAuditEventData);
+  
+  Test::service_event_queue();
+  
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  
+  //
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 2, "Wrong number of sequences created: " & (theSequences'length)'image);
   Assertions::assertTrue(theAuditEvents'length = 18, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
   for theJob in theJobs loop
     Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
