@@ -84,6 +84,12 @@ begin
       if (theDynamicControl -> R29) /= null then
         unlink (theDynamicControl -> R29) R29 theDynamicControl;
       end if;  
+      if (theDynamicControl -> R36) /= null then
+        unlink (theDynamicControl -> R36) R36 theDynamicControl;
+      end if;  
+      if (theDynamicControl -> R37) /= null then
+        unlink (theDynamicControl -> R37) R37 theDynamicControl;
+      end if;  
       unlink theDynamicControl R35 this;
       delete theDynamicControl;
     end loop;

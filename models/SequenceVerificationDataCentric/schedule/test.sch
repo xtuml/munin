@@ -6,11 +6,13 @@ RUN SCENARIO AESequenceDC 2 "InitCyclicTopologyEventDefinition"
 RUN SCENARIO AESequenceDC 3 "InitSystemSpec"
 RUN SCENARIO AESequenceDC 4 "InitForkAndMergeTopologyEventDefinition"
 RUN SCENARIO AESequenceDC 5 "InitIntraJobInvariantDefinition"
+RUN SCENARIO AESequenceDC 6 "InitBranchCountDefinitionEnhanced"
 RUN SCENARIO AESequenceDC 7 "InitPersistentInvariantAuthAndBankTransferDefinition"
 RUN SCENARIO AESequenceDC 8 "InitEventDefinitionForInclusiveOR"
 RUN SCENARIO AESequenceDC 9 "InitLoopBreakEventDefinition"
+RUN SCENARIO AESequenceDC 501 "InitComplexEventSequence1Definition"
+RUN SCENARIO AESequenceDC 502 "InitComplexEventSequence2Definition"
 RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
-RUN SCENARIO AESequenceDC 901 "InitBranchCountDefinition"
 
 
 # run normal path tests
@@ -31,6 +33,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test11NormalPath 1011 CleanUpAllJob
 
 # Fork and Merge normal test cases
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test12NormalForkAndMergePath 1012 CleanUpAllJobs 64]
+# Tests 13, 15 and 16 have been updated to include branch count which is now enforced
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test13NormalInstanceForkAndMergePath 1013 CleanUpAllJobs 64]
 # The following test is now invalid because invariants have been added to the defintions
 #RUN SCENARIO Test 1 "run_test" [AESequenceDC Test14NormalSplitForkAndMergePath 1014 CleanUpAllJobs 64]
@@ -45,7 +48,18 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test25NormalLoopWithBreakPath 1025 
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test26NormalLoopWithLoopCount 1026 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test27NormalInstanceForkWithBranchCount 1027 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test28NormalLoopWithBreakNotTaken 1028 CleanUpAllJobs 64]
-RUN SCENARIO Test 1 "run_test" [AESequenceDC Test29NormalBranchCountWithSameSourceAndUserEvent 1029 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test29NormalBranchCountWithSameSourceAndUserEvent 1029 CleanUpAllJobs 64] 
+# Complex sequence tests
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test70ComplexSequence_SunnyDay1 1070 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test71ComplexSequence_SunnyDay2 1071 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test72ComplexSequence_SunnyDay3 1072 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test200NormalInstanceForkWithBranchAndMergeCount 1200 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test201NormalInstanceForkWithBranchAndMergeCount 1201 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test202NormalSplitInstanceForkWithBranchAndMergeCount 1202 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test203NormalTypeAndInstanceForkWithBranchAndMergeCount 1203 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test204NormalMultiInstanceForkWithBranchAndMergeCount 1204 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test205NormalUserExtraJobInvariantWithRestoredSourceEJI 1205 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test206NormalUserExtraJobInvariantWithRestoredSourceEJI 1206 CleanUpAllJobs 64]
 
 
 # Suspend & Reactivate JobDefinition test cases
@@ -87,9 +101,26 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test60StalePersistedInvariant 1060 
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test61InvalidInstanceForkWithBranchCount 1061 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test62InvalidLoopWithLoopCount 1062 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test63InvalidLoopWithNonIntegerLoopCount 1063 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test64InvalidLoopWithLoopCountExceedingExpectedValue 1064 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test250IllegalInstanceForkAndMergePath 1250 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test251IllegalSplitInstanceForkAndMergePath 1251 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test252IllegalInstanceAndTypeForkAndMergePath 1252 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test254IllegalInstanceForkWithIncorrectBranchAndMergeCount 1254 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test255IllegalSplitInstanceForkWithBranchAndMergeCount 1255 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test256TimeoutDueToNoRestoredExtraJobInvariant 1256 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test257InvalidRestoredExtraJobInvariant 1257 CleanUpAllJobs 64]
 
-
-
+# Errors in complex sequences
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test100ComplexSequence_RainyDay1_XORconstraintViolation 1100 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test101ComplexSequence_RainyDay2_InstanceForkViolation 1101 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test102ComplexSequence_RainyDay3_LOOPCOUNTviolation 1102 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test103ComplexSequence_RainyDay4_LOOPCOUNTandBRANCHCOUNTviolation 1103 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test104ComplexSequence_RainyDay5_LOOPCOUNTandBRANCHCOUNTandXORviolation 1104 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test105ComplexSequence_RainyDay6_InvalidExtraJobInvariantValueUsedInLoop 1105 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test106ComplexSequence_RainyDay7_InvalidExtraJobInvariantValueUsedInInstanceFork 1106 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test107ComplexSequence_RainyDay8_InvalidExtraJobInvariantNameUsedInLoop 1107 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test108ComplexSequence_RainyDay9_InvalidExtraJobInvariantNameUsedInInstanceFork 1108 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test109ComplexSequence_RainyDay10_InvalidBreakOutOfLoop 1109 CleanUpAllJobs 64]
 
 # The following Tests will delete some or all of the JobDefinitions so beware!!!!
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test18DeprecationAndDeletionOfActiveJobDefinition 1018 CleanUpAllJobs 64]

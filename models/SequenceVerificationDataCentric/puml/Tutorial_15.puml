@@ -1,0 +1,29 @@
+/'
+
+Tutorial - Extra Job Invariant User Definition
+  
+'/
+
+@startuml 
+partition "Job Using Extra-Job Invariant" {
+  group "Sequence Consuming EINV"
+      #green:A;
+      :B,EINV,USER,name=Q;
+      note right 
+        B declares itself
+        a user of extra-job
+        invariant Q.
+      end note
+      :C;
+      :D;
+      :E;
+      :F,EINV,USER,name=Q;
+      note right 
+        F declares itself
+        as another user of
+        extra-job invariant Q.
+      end note
+      #red:G;
+  end group
+}
+@enduml

@@ -6,6 +6,9 @@ public service AESequenceDC::PersistedInvariant.createSourceExtraJobInvariant ( 
 endTime : timestamp;
 existingExtraJobInvariant : instance of PersistedInvariant;
 newExtraJobInvariant : instance of PersistedInvariant;
+sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
+sourceEventDefn : instance of AuditEventDefinition;
+sourceJobDefn : instance of JobDefinition;
 logMessage : string;
 
 begin
@@ -13,17 +16,33 @@ begin
   //TODO Is this adequate for setting the validity period? Currently not known if timestamps are available
   // so set validFrom to now and ValidUntil to now plus lifetime
   
-  newExtraJobInvariant := create unique PersistedInvariant (invariantName => invariantName,
-  	                                         invariantValue => invariantValue,
-  	                                         validFrom => timestamp'now, 
-  	                                         validUntil => endTime, 
-  	                                         Current_State => Pending );
+  if invariantValue /= "" then
+    newExtraJobInvariant := create unique PersistedInvariant (invariantName => invariantName,
+  	                                                          invariantValue => invariantValue,
+  	                                                          validFrom => timestamp'now, 
+  	                                                          validUntil => endTime, 
+  	                                                          Current_State => Pending );
   	                                         
-  link newExtraJobInvariant R24 extraJobInvDefn;
-  generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
-
+    link newExtraJobInvariant R24 extraJobInvDefn;
+    generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
+    sourceAEOccurrenceDefn := extraJobInvDefn -> R20;
+    sourceEventDefn := sourceAEOccurrenceDefn -> R12 -> R1.AuditEventDefinition;
+    sourceJobDefn := sourceAEOccurrenceDefn -> R12 -> R1.AESequenceDefinition -> R7;
+    
+    Persistence_Req_IF~>PersistInvariant(newExtraJobInvariant.invariantName, 
+    	                          newExtraJobInvariant.invariantValue,
+    	                          newExtraJobInvariant.validFrom,
+    	                          newExtraJobInvariant.validUntil,
+    	                          sourceJobDefn.jobName,
+    	                          sourceEventDefn.AEType,
+    	                          sourceAEOccurrenceDefn.occurrenceNumberInSequence    );
+  else
+    errorReason := "Empty Invariant Value provided for this ExtraJob Invariant = " & invariantName;
+  end if;
   return newExtraJobInvariant;
 end service;
+//
+//
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '2869fcaf-8e75-459e-8a4b-c88648b57c5f' DO NOT EDIT THIS LINE.

@@ -1,0 +1,26 @@
+/'
+
+Tutorial - Intra-Job Invariant
+  
+'/
+
+@startuml 
+partition "Job with Intra-Job Invariant" {
+  group "Straight Sequence w/ Invariant"
+      #green:A,IINV,name=X;
+      note right 
+        A carries an intra-job
+        invariant named X
+        targeted to E.
+      end note
+      :B;
+      :C;
+      :D;
+      #red:E,IINV,USER,name=X;
+      note right 
+        E is a user of intra-
+        job invariant X.
+      end note
+  end group
+}
+@enduml

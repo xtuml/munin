@@ -1,0 +1,74 @@
+@startuml
+
+#green:A,1;
+note right 
+  LoopConstraint Name=LC1 Source=A,1 User=S,2
+end note  
+:B,1;
+note right 
+  LoopConstraint Name=LC2 Source=B,1 User=D,2
+  LoopConstraint Name=LC3 Source=B,1 User=E,1
+  IntraJobInvariant Name=IJI1 Source=B,1 User=H,1
+end note  
+:C,1;
+note right 
+  BranchConstraint Name=BC1 Source=C,1 User=K,1
+end note  
+if (XOR) then (error)
+  #red:R,1;
+  kill
+else (normal)
+  fork
+    repeat
+      :D,1;
+      :E,1;
+      :F,1;
+    repeat while (XOR)
+    :G,1;
+    repeat
+      :D,2;
+      :E,2;
+      if (XOR) then (error)
+        :T,1;
+        break
+      else (normal)
+        :F,2;
+      endif
+    repeat while (XOR)
+  fork again
+    :K,1;
+    :L,1;
+    :M,1;
+    if (XOR) then (error)
+      #red:N,1;
+      kill
+    endif
+    
+  fork again
+    :P,1;
+    #red:Q,1;
+    kill
+  fork again
+    :C,2;
+    repeat
+      :D,3;
+      :E,3;
+    repeat while (XOR)
+    :F,3;
+    :D,4;
+    #red:G,2;
+    kill
+  fork again
+    repeat
+      :S,1;
+    repeat while (XOR)
+    :D,5;
+    #red:E,4;
+    kill
+  end fork
+  :H,1;
+  #red:J,1;
+  kill
+endif
+
+@enduml
