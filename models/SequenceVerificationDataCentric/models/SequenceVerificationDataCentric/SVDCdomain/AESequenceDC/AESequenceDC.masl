@@ -5,7 +5,7 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. 'eb803f32-d763-444e-9e0f-5ad4e591f2fb' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'f0cb0136-029a-49bd-8e9d-ec5bac662eaa' DO NOT EDIT THIS LINE.
 public service AESequenceDC::Persistence_Req_IF~>PersistInvariant ( extraJobInvariantName : in string,
                                                                    invariantValue : in string,
                                                                    validFrom : in timestamp,
@@ -20,30 +20,18 @@ begin
   logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
   Logger::log(Logger::Information, "AESequenceDC", logMessage);
 
-
-  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '8f6997e2-f231-474b-b2d8-4a94d4ea47c6' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '36acd8e4-80e2-45d4-8b9c-dadf7efdc5f3' DO NOT EDIT THIS LINE.
 public service AESequenceDC::Persistence_Req_IF~>RestoreNamedInvariant ( extraJobInvariantName : in string,
-                                                                        invariantValue : in string,
-                                                                        restoredNamedInvariant : out persistedInvariantStructure ) is
+                                                                        invariantValue : in string ) is
 logMessage : string;
 
 begin
 
   logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
   Logger::log(Logger::Information, "AESequenceDC", logMessage);
-
-//  restoredNamedInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
-//  restoredNamedInvariant.InvariantValue := "Restore1";
-//  restoredNamedInvariant.validFrom := timestamp'now;
-//  restoredNamedInvariant.validTo := restoredNamedInvariant.validFrom + @P1D@;
-//  restoredNamedInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
-//  restoredNamedInvariant.sourceAuditEventType := "EAuthoriserReceiveOrder";
-//  restoredNamedInvariant.sourceAuditEventOccurrenceId := 1;
-
   
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
