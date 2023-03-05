@@ -1414,6 +1414,7 @@ fileControl : instance of FileControl;
 
 begin
 	
+  Filesystem::create_directory(targetDirectory);
 	AEOrdering::clearDomain(true, true);
 	reportedEventDefinitions := find _TEST_Req_IF_Verification_eventDefinition();
 	delete reportedEventDefinitions;

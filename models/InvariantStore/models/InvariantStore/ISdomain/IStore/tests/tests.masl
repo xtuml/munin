@@ -25,6 +25,7 @@ begin
 	Logger::log(Logger::Information, "IStore", "Running Test02 - Reload Store on Update");
 	Filesystem::touch_file(emptyInvaraintFile);
 	Filesystem::move_file(emptyInvaraintFile, invStore.invStoreName);
+	delay duration'milliseconds(100); // short delay to make sure the modification time changes
 	
 	// touch the file and check that it is successfully re-read
 	currentStoredModificationTime := invStore.storeModificationTime;
@@ -36,6 +37,7 @@ begin
 	
 	// move the test invariant store into place
 	Logger::log(Logger::Information, "IStore", "Running Test03 - Reload Store containing invariants");
+	delay duration'milliseconds(100); // short delay to make sure the modification time changes
 	Filesystem::copy_file(testFile, tmpFile);
 	Filesystem::move_file(tmpFile, invStore.invStoreName);
 	generate InvStore.checkStore() to invStore;
@@ -62,6 +64,7 @@ begin
 	// reload the file and check 3 are loaded in
 	delete reportedInvariants;
 	delete (find Invariant());
+	delay duration'milliseconds(100); // short delay to make sure the modification time changes
 	Filesystem::touch_file(invStore.invStoreName);
 	generate InvStore.checkStore() to invStore;
 	Test::service_event_queue();
