@@ -88,7 +88,7 @@ begin
       // ...and then check that just one of these matches with an event occurrence that is expected for the previous event
       if (prevAEIds /= empty) and (prevAEIds /= emptyPrevId) then
         // Log info: Event has previous event ids
-        logMessage := "Follow on event for existing Job received - jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
+        logMessage := "Follow on event (" & eventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
 	    Logger::log(Logger::Information, "AESequenceDC", logMessage);   
 
         auditEventDataProcessed := false;
@@ -114,9 +114,6 @@ begin
                 // We have a follow on event for an existing Job with a valid previous event
                 theAeInSequencePairDefn := theAeOccInSequenceDef with prevAeOccInSequenceDef -> R6.follows.AEInSequencePairDefn;
                 // Check that the previous event has not already been seen with this event as that would be an error
-                
-//                existingAuditEventPair := find_one AuditEventPair (previousAuditEventId = prevEvent.AuditEventId and
-//                                                                   nextAuditEventId = newEvent.AuditEventId);
                 existingAuditEventPair := find_one AuditEventPair (previousAuditEventId = prevEvent.AuditEventId and
                 	                                               nextAuditEventId = newEvent.AuditEventId);
                
@@ -184,7 +181,7 @@ begin
                         end if;  
                         
 	                  else
-                        logMessage := "There is no event using a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+                          logMessage := "This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
 	                    Logger::log(Logger::Information, "AESequenceDC", logMessage);
 	                  end if;  
 	                  
@@ -276,6 +273,10 @@ begin
                           else
                             this.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);                         
                           end if;
+
+                        else
+                          // An instance fork has occurred but the Job Definition does not expect this to occur at this point in the sequence.
+                          this.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);
                         end if;
                       else
                         // There is no instance fork here so carry on

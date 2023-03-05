@@ -50,7 +50,7 @@ begin
         if theAeOccInSequenceDef.isSequenceStart then
           //The the first event for this new Job is a valid event type for starting the sequence
           // Log info: new Job and event sequence started
-          logMessage := "New Job started - jobId = " & newJob.jobID & ", Initial audit event = " & newEventType.AEType;
+          logMessage := "New Job started - jobId = " & newJob.jobID & ", Initial audit event: " & eventId & " of type " & newEventType.AEType;
 	      Logger::log(Logger::Information, "AESequenceDC", logMessage);
       
         else
