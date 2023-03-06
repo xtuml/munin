@@ -84,13 +84,12 @@ repository from GitHub. Follow the steps from the guide linked in the
 workspace:
 
 * AEOrdering
-* AER_AEO_SVDC
+* AER
+* AEO_SVDC
 * AEReception
 * AESimulator
-* PlusProcessor
-* SequenceProcessor
 * SequenceVerificationDataCentric
-* StatementParser
+* iStore
 * utils
 
 === Terminology
@@ -281,9 +280,9 @@ multiple instances of AEO_SVDC.
 The Protocol Verifier is partitioned into deployable parts that can be instantiated and
 deployed in parallel to provide a scaling of performance. The deployable parts are made up
 of one or more of the Protocol Verifer domains. They are:
-Reception (AER) - mulitiple instances
-Ordering and Sequence Verification (AEO_SVDC) - multiple instances
-Persistence Store (iStore) - single instance
+* Reception (AER) - mulitiple instances
+* Ordering and Sequence Verification (AEO_SVDC) - multiple instances
+* Persistence Store (iStore) - single instance
 
 For a description of how this architecture achieves scaling see TODO Link
 
