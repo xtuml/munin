@@ -83,14 +83,20 @@ repository from GitHub. Follow the steps from the guide linked in the
 <<BridgePoint>> section to import the following projects into a fresh
 workspace:
 
-* AEOrdering
-* AER
-* AEO_SVDC
-* AEReception
-* AESimulator
-* SequenceVerificationDataCentric
-* iStore
-* utils
+* Domains
+** AEReception
+** AEOrdering
+** SequenceVerificationDataCentric
+** iStore
+* Deployments
+** AER
+** AEO_SVDC
+** iStore
+* Test Domain
+** AESimulator
+* Utilities
+** utils
+** plus2json
 
 === Terminology
 
@@ -271,9 +277,9 @@ of audit event types in unexpected places.
 
 ===== Invariant Store (iStore)
 
-The role of the Persistence Store domain is to provide persistent storage of long-lived
-data items. The Persistence Store domain also effectively provides communications between 
-multiple instances of AEO_SVDC. 
+The role of the Invariant Store domain is to provide persistent storage of extra job 
+invariants which will typically live longer than any single job. The Invariant Store 
+domain will be shared by multiple instances of AEO_SVDC. 
 
 === Deployment Overview
 
@@ -283,7 +289,7 @@ of one or more of the Protocol Verifer domains. They are:
 
 * Reception (AER) - mulitiple instances
 * Ordering and Sequence Verification (AEO_SVDC) - multiple instances
-* Persistence Store (iStore) - single instance
+* Invariant Store (iStore) - single instance
 
 For a description of how this architecture achieves scaling see TODO Link
 
@@ -580,6 +586,10 @@ The following provides an explanation to each of the JSON elements in the test j
 *DataValue* - The value of the data that is to be supplied for the event data e.g. "PersistentInvariant" : "someDataValue".
 
 ====
+
+=== Configuring the Deployment
+
+TODO
 
 == Building and Running the Project
 
