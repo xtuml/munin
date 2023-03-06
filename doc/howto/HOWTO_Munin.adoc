@@ -269,7 +269,7 @@ conditions include unexpected audit event types, unexpected sequences of audit
 event types, sequences starting with the wrong audit event types and repetition
 of audit event types in unexpected places.
 
-===== Persistence Store (iStore)
+===== Invariant Store (iStore)
 
 The role of the Persistence Store domain is to provide persistent storage of long-lived
 data items. The Persistence Store domain also effectively provides communications between 
@@ -280,6 +280,7 @@ multiple instances of AEO_SVDC.
 The Protocol Verifier is partitioned into deployable parts that can be instantiated and
 deployed in parallel to provide a scaling of performance. The deployable parts are made up
 of one or more of the Protocol Verifer domains. They are:
+
 * Reception (AER) - mulitiple instances
 * Ordering and Sequence Verification (AEO_SVDC) - multiple instances
 * Persistence Store (iStore) - single instance
@@ -315,7 +316,7 @@ For details on using plus2json and its options refer to https://github.com/xtuml
 
 === Load the configuration files
 
-TODO - Check this is right:
+TODO: - Check this is right:
 
 To configure the Protocol Verifier: Backup the existing configuration file by moving 
 https://github.com/xtuml/munin/models/AEOrdering/config/config.json to a backup location of your choice.
