@@ -279,19 +279,21 @@ of audit event types in unexpected places.
 
 The role of the Invariant Store domain is to provide persistent storage of extra job 
 invariants which will typically live longer than any single job. The Invariant Store 
-domain will be shared by multiple instances of AEO_SVDC. 
+domain will be deployed in its own single instance deployment which will be shared 
+by multiple AEO_SVDC deployments. 
 
 === Deployment Overview
 
-The Protocol Verifier is partitioned into deployable parts that can be instantiated and
-deployed in parallel to provide a scaling of performance. The deployable parts are made up
+The Protocol Verifier is partitioned into a set of deployments that can be instantiated and
+deployed in parallel to provide for performance scaling. The deployments are made up
 of one or more of the Protocol Verifer domains. They are:
 
 * Reception (AER) - mulitiple instances
 * Ordering and Sequence Verification (AEO_SVDC) - multiple instances
 * Invariant Store (iStore) - single instance
 
-For a description of how this architecture achieves scaling see TODO Link
+For a description of how this architecture achieves scaling see 
+link:https://github.com/xtuml/munin/blob/main/doc/notes/MUN-151_scaling_ant.adoc[here]
 
 === Supporting Application Overview
 ==== plus2json 
@@ -303,37 +305,52 @@ without reconfiguration as lon as that protocol needs to be monitored.
 
 == Configure the Protocol Verifier (for new or changed protocols)
 
+This splits into two main parts:
+
+* Specifying Job and Event Data Definitions
+* Specifying Runtime Parameters
+
+=== Specifying Job and Event Data Definitions
 The Protocol Verifier is data driven. It has no built in knowledge of any specific protocols. So prior to building 
 the application the configuration files need to be in place. This only needs to be done when the configuration 
 changes to support a new or changed protocol. It is not required prior to every build. The configuration for the 
 protocol verifier is found in the `config.json` file. This is loaded at start up and checked on a regular basis 
 for updates.
 
-=== Use PLUS to define the configuration
+==== Use PLUS to define the configuration
 
-Refer to https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[here] for details on the use of PLUS
+Refer to link:https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[here] for details on the use of PLUS
 
-=== Use plus2json to convert PLUS into configuration files
+==== Use plus2json to convert PLUS into configuration files
 
 The plus2json application consumes PLUS text files and provides a number of possible outputs including configuartion 
 files that the Protocol Verifier and the Audit Event Simulator can consume.
 
 For details on using plus2json and its options refer to https://github.com/xtuml/plus2json/blob/main/README.adoc[here]
 
-=== Load the configuration files
+=== Specifying Runtime Parameters
+
+The Protocol Verifier can be configured with a number of parameters that determines its runtime behaviour. These include
+things like timeouts and file folder locations.
+
+TODO
+
+=== Load the Protocol Verifier configuration files
 
 TODO: - Check this is right:
 
 To configure the Protocol Verifier: Backup the existing configuration file by moving 
-https://github.com/xtuml/munin/models/AEOrdering/config/config.json to a backup location of your choice.
+link:https://github.com/xtuml/munin/models/AEOrdering/config/config.json[this] to a backup location of your choice.
 Check that the output file from plus2json --aeo_config is named config.json. Move this file, replacing the existing file, to 
-https://github.com/xtuml/munin/models/AEOrdering/config/
+link:https://github.com/xtuml/munin/models/AEOrdering/config/[here]
 There is only a single config.json file which contains all of the job specifications.
+
+TODO - Setting other AEO config
 
 TODO - Setting the AER config file
 
 To configure the Audit Event Simulator: Move the output file from plus2json --aesim_config to 
-https://github.com/xtuml/munin/models/AESimulator/config/test-job-specification
+link:https://github.com/xtuml/munin/models/AESimulator/config/test-job-specification[here]
 There can be multiple configurations files in this folder.
 
 TODO - Setting the runtime side of the AES config
@@ -589,7 +606,10 @@ The following provides an explanation to each of the JSON elements in the test j
 
 === Configuring the Deployment
 
-TODO
+This configuration determines the number of instances of each of the 3 deployments to instantiate at start up.
+Note: This version of the Protocol Verifier supports static scaling.
+
+TODO Complete details on how deployment scaling is defined
 
 == Building and Running the Project
 
@@ -638,7 +658,7 @@ section below, but it is good to be aware of them.
 The `config` directory contains plaintext files used by the application itself
 to configure the domain. The application is passed a config file as a command
 line argument, which it parses and uses to set up the initial instance
-population. Only AEReception and AEOrdering have config folders.
+population. Not all projects have config folders.
 
 ==== `gen/`
 
@@ -769,21 +789,40 @@ this download.
   .. SequenceVerificationDataCentric
   .. iStore
 
-=== Build the Protocol Verifier
+=== Build each Depl0yment
 
-IMPORTANT: Before this step, all three of the application domains must be built
+IMPORTANT: Before this step, all of the application domains must be built
 as demonstrated in the previous step.
+
+Each of the three deployments needs to be built
+
+* AER containing the Reception domain
+* AEO_SVDC containing both Ordering and Sequence Verification domains
+* iStore containing the iStore domain
+
+TODO Amend the following to describe the deployment build process
 
 . In your shell, navigate to the protocol verifier directory:
 
-  cd ~/git/munin/models/AER_AEO_SVDC   # linux/mac
-  cd C:\git\munin\models\AER_AEO_SVDC  # windows
+  cd ~/git/munin/models/AER   # linux/mac
+  cd C:\git\munin\models\AER  # windows
 
 . Build the project with Docker by running the following command:
 
   docker compose build --no-cache
 
+=== TODO Build the Protocol Verifier (Is this necessary or are the deployments simply run?)
+
+IMPORTANT: Before this step, all three of the deployemnts must be built
+as demonstrated in the previous step.
+
+TODO amend the following to describe how the deployments are stitched together 
+to form the Protocol Verifier
+
+
 === Running the protocol verifier
+
+TODO Fix this to describe the running of each deployment?
 
 . Open a shell in the protocol verifier directory, run the following command
 to launch the process:
@@ -890,6 +929,8 @@ have been received, ordered, and verified by the application.
 
 === Running the protocol verifier with the audit event simulator
 
+TODO Changes to this will depend upon the above
+
 In the last section, we built and ran the protocol verifier interactively with
 test files. The audit event simulator can also be used to generate test audit
 event files to be consumed by the main process. This section will also walk
@@ -947,6 +988,8 @@ to demonstrate building a domain in test mode.
 +
 You will see a lot of output including some logs from the test runner. All of
 the tests will be marked as "SUCCEEDED".
+
+TODO Update the following to a more representative test
 
 . In BridgePoint, navigate to and open the `basicTest01` function at
 link:images/07_basic_test.png[`AEReception::AERDomain::AEReception::test_cases`].
