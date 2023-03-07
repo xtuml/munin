@@ -1,0 +1,22 @@
+/'
+
+Tutorial - Multiple Event Occurrences
+  
+'/
+
+@startuml 
+partition "Job with multiple event occurrences" {
+  group "Sequence with AND fork & multiple event occurrences"
+      #green:A(0);
+      :B(0);
+      :C(0);
+      fork
+        :B(1);
+      fork again
+        #red:D(0);
+        detach
+      end fork
+      #red:C(1);
+  end group
+}
+@enduml

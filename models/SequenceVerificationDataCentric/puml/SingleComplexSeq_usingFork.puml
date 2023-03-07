@@ -1,0 +1,66 @@
+@startuml
+partition "Single Complex Job" {
+group "Single Sequence"
+
+  #green:A,LCNT,user=S,name=LC3,BCNT,user=K,name=BC2;
+  :B,LCNT,user=E(0),name=LC1,LCNT,user=D(1),name=LC2,IINV,name=InvariantA;
+  :C;
+  if (XOR) then ("error")
+    #red:R;
+    detach
+  else ("normal")
+    fork
+      repeat
+        :D;
+        :E,EINV,USER,name=AUTH_TOKEN_A;
+        :F;
+      repeat while
+      :G;
+      repeat
+        :D;
+        :E;
+        if (XOR) then ("error")
+          :T;
+          break
+        else ("normal")
+          :F;
+        endif
+      repeat while
+    fork again
+      :K;
+      :L,EINV,USER,name=AUTH_TOKEN_A;
+      :M;
+      if (XOR) then ("error")
+        #red:N;
+        detach
+      else ("normal")  
+      endif    
+    fork again
+      :P;
+      #red:Q;
+      detach
+    fork again
+      :C;
+      repeat
+        :D;
+        :E;
+      repeat while
+      :F,BCNT,name=BC1;
+      :D,EINV,USER,name=AUTH_TOKEN_A;
+      #red:G;
+      detach
+    fork again
+      repeat
+        :S;
+      repeat while
+      :D;
+      #red:E;
+      detach
+    end fork
+    :H;
+    #red:J;
+    detach
+  endif
+end group
+}
+@enduml
