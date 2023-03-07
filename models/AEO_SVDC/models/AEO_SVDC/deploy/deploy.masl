@@ -39,8 +39,8 @@ begin
       case dataItem.dataKind is
         when AEOrdering::INTRAJOBINV => auditEventDataItem.aedKind := AESequenceDC::INTRAJOBINV;
         when AEOrdering::EXTRAJOBINV => auditEventDataItem.aedKind := AESequenceDC::EXTRAJOBINV;
-        when AEOrdering::BRANCHCONSTRAINT => auditEventDataItem.aedKind := AESequenceDC::BRANCHCONSTRAINT;
-        when AEOrdering::LOOPCONSTRAINT => auditEventDataItem.aedKind := AESequenceDC::LOOPCONSTRAINT;
+        when AEOrdering::BRANCHCONSTRAINT => auditEventDataItem.aedKind := AESequenceDC::BRANCHCOUNT;
+        when AEOrdering::LOOPCONSTRAINT => auditEventDataItem.aedKind := AESequenceDC::LOOPCOUNT;
       end case;
       auditEventDataItem.aedName := dataItem.dataName;
       auditEventDataItem.aedValue := dataItem.dataValue;
