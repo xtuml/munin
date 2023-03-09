@@ -179,22 +179,6 @@ INSERT INTO S_DT_PROXY
 	'',
 	'',
 	'./Shared/Shared.xtuml');
-INSERT INTO D_TSPARM
-	VALUES ("0937f430-ce15-447b-abbb-4b7cb698a9ef",
-	"761aa195-381d-418a-adf0-826ba1496a16",
-	'auditEventData',
-	"12f6c466-b98f-44d5-ad14-43e24ca8df2a",
-	0,
-	'',
-	"bf02a783-8cc6-44fe-9088-05d66356538c",
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("12f6c466-b98f-44d5-ad14-43e24ca8df2a",
-	"00000000-0000-0000-0000-000000000000",
-	'AEOrdering::AuditEventDataType',
-	'',
-	'',
-	'./Shared/Shared.xtuml');
 INSERT INTO D_TSVC
 	VALUES ("5c8a4237-545c-4be6-8a67-fdeca542856f",
 	"d453bedc-74b8-498b-9edc-4dff14eccd75",
@@ -1330,6 +1314,35 @@ INSERT INTO D_TSPARM
 	'',
 	"53478efb-4b56-4dd8-87da-b374dcfb384b",
 	'');
+INSERT INTO D_TSVC
+	VALUES ("abea0ed5-9e4d-447a-b5e7-b8f76cbf3db5",
+	"a5542925-1105-4e3f-beca-179668a49a52",
+	'restoreInvariants',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	6,
+	0,
+	0,
+	15);
+INSERT INTO D_TSPARM
+	VALUES ("fe63a9ce-ca1b-457a-8d1d-6fc115132bc4",
+	"abea0ed5-9e4d-447a-b5e7-b8f76cbf3db5",
+	'restoredInvariants',
+	"eed76473-f12b-41a8-9240-29dd05055447",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("eed76473-f12b-41a8-9240-29dd05055447",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of persistedInvariantStructure',
+	'',
+	'',
+	'./Shared/Shared.xtuml');
 INSERT INTO D_TERM
 	VALUES ("e3abdb05-4ff5-4a35-94dd-69b7ac8384c0",
 	"62135dc9-315a-44c0-b372-aa586ddcaa34",
@@ -2168,6 +2181,123 @@ INSERT INTO D_TSPARM
 	0,
 	'',
 	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO D_TERM
+	VALUES ("124a623f-3279-452f-8880-58b78bd7e1d9",
+	"62135dc9-315a-44c0-b372-aa586ddcaa34",
+	'AESequenceDC::Persistence_Req_IF',
+	'',
+	'AESequenceDC',
+	'Persistence_Req_IF',
+	0,
+	'SequenceVerificationDataCentric',
+	'');
+INSERT INTO D_TSVC
+	VALUES ("62977fe4-727a-46a2-9ef0-0f384c6bab7e",
+	"124a623f-3279-452f-8880-58b78bd7e1d9",
+	'PersistInvariant',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	0,
+	1,
+	1);
+INSERT INTO D_TSPARM
+	VALUES ("d5028ee9-aaf0-4f73-96d5-ae3f000c1544",
+	"62977fe4-727a-46a2-9ef0-0f384c6bab7e",
+	'extraJobInvariantName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("2850660f-9d7a-428a-a0c5-5c6f00fe2146",
+	"62977fe4-727a-46a2-9ef0-0f384c6bab7e",
+	'invariantValue',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"d5028ee9-aaf0-4f73-96d5-ae3f000c1544",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("2bbb9c1d-62ee-461e-af5f-1df9956c1f78",
+	"62977fe4-727a-46a2-9ef0-0f384c6bab7e",
+	'validFrom',
+	"ba5eda7a-def5-0000-0000-000000000010",
+	0,
+	'',
+	"2850660f-9d7a-428a-a0c5-5c6f00fe2146",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("231dc277-ba17-47bf-b02b-d3dfdfffd702",
+	"62977fe4-727a-46a2-9ef0-0f384c6bab7e",
+	'validTo',
+	"ba5eda7a-def5-0000-0000-000000000010",
+	0,
+	'',
+	"2bbb9c1d-62ee-461e-af5f-1df9956c1f78",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("28987726-a123-4c11-beae-11e524083061",
+	"62977fe4-727a-46a2-9ef0-0f384c6bab7e",
+	'sourceJobDefinitionType',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"231dc277-ba17-47bf-b02b-d3dfdfffd702",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("84585434-bc80-4437-871d-e66b1bebf2d7",
+	"62977fe4-727a-46a2-9ef0-0f384c6bab7e",
+	'sourceAuditEventType',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"28987726-a123-4c11-beae-11e524083061",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("900af133-8feb-4dcf-8a22-c1f403edc231",
+	"62977fe4-727a-46a2-9ef0-0f384c6bab7e",
+	'sourceAuditEventOccurrenceId',
+	"ba5eda7a-def5-0000-0000-000000000002",
+	0,
+	'',
+	"84585434-bc80-4437-871d-e66b1bebf2d7",
+	'');
+INSERT INTO D_TSVC
+	VALUES ("c6265c8c-ad06-4641-8d0c-7d4a39786dc1",
+	"124a623f-3279-452f-8880-58b78bd7e1d9",
+	'RestoreNamedInvariant',
+	'',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	3,
+	'',
+	1,
+	0,
+	1,
+	3);
+INSERT INTO D_TSPARM
+	VALUES ("1243c1e9-27bd-4680-9272-1cab3e9e4d21",
+	"c6265c8c-ad06-4641-8d0c-7d4a39786dc1",
+	'extraJobInvariantName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO D_TSPARM
+	VALUES ("48a0135b-a4b6-43a8-bff2-b12b6e7a0b13",
+	"c6265c8c-ad06-4641-8d0c-7d4a39786dc1",
+	'invariantValue',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"1243c1e9-27bd-4680-9272-1cab3e9e4d21",
 	'');
 INSERT INTO PE_PE
 	VALUES ("62135dc9-315a-44c0-b372-aa586ddcaa34",
