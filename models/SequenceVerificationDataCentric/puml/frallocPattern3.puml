@@ -1,23 +1,27 @@
 @startuml
-#green:FrallocStart;
-if (XOR) then (normal)
-  :chmint;
-  if (XOR) then (normal)
-    :ehmint;
+partition "Fralloc Job 3" {
+  group "Fralloc Sequence 3"
+    #green:FrallocStart;
     if (XOR) then (normal)
-      :frallocEval;
+      :chmint;
       if (XOR) then (normal)
-        #red:frallocOK;
-        detach
+        :ehmint;
+        if (XOR) then (normal)
+          :frallocEval;
+          if (XOR) then (normal)
+            #red:frallocOK;
+            detach
+          else (error)
+          endif
+        else (error)
+          :ehmintError;
+        endif  
       else (error)
-      endif
-    else (error)
-      :ehmintError;
-    endif  
-  else (error)
-    :chmintError;    
-  endif 
-else (error)   
-endif
-#red:frallocError;  
+        :chmintError;    
+      endif 
+    else (error)   
+    endif
+    #red:frallocError;  
+  end group
+}  
 @enduml

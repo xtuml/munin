@@ -1,0 +1,48 @@
+@startuml
+floating note: This has degraded observability since the ordering of sequences cannot be checked
+partition "Fralloc Job 6" {
+  group "Fralloc start sequence"
+    #green:FrallocStart;
+    
+    if (XOR) then (normal)
+      #red:frallocStartOK;
+    else
+      #red:frallocError;
+      detach
+    endif
+    fork
+        #green:chmint;
+        if (XOR) then (normal)
+          #red:chmintOK;
+          detach
+        else (error)
+          :chmintError;
+          #red:frallocError;
+          detach
+        endif  
+    fork again    
+        #green:ehmint;
+        if (XOR) then (normal)
+          #red:ehmintOK;
+          detach
+        else (error)
+          :ehmintError;
+          #red:frallocError;
+          detach
+
+        endif  
+      end fork 
+      -[hidden]-> 
+  end group
+  group "fralloc eval sequence"  
+      #green:frallocEval;
+      if (XOR) then (normal)
+        #red:frallocOK;
+        detach
+      else (error)
+      endif;
+
+  #red:frallocError;
+  end group
+}  
+@enduml
