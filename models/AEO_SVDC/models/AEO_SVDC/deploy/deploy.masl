@@ -204,7 +204,13 @@ logMessage : string;
 
 begin
 
-  // TODO
+  IStore::persistInvariant(extraJobInvariantName,
+                               invariantValue,
+                               validFrom,
+                               validTo,
+                               sourceJobDefinitionType,
+                               sourceAuditEventType,
+                               sourceAuditEventOccurrenceId);
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -216,7 +222,8 @@ logMessage : string;
 
 begin
 
-  // TODO
+  IStore::restoreNamedInvariant(extraJobInvariantName,
+                                    invariantValue);
   
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
