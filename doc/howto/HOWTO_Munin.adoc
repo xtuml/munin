@@ -1,4 +1,4 @@
-= HOWTO build and run the Munin project
+= HOWTO build and run the Protocol Verifier
 
 Enough talk! <<Export MASL,Skip to the steps>>
 
@@ -53,9 +53,41 @@ for a quick start on using git to clone repositories and import projects.
 === PlantUML
 
 PlantUML is a tool for visualizing UML diagrams written in a textual format. The
-PLUS domain specific language is based on PlantUML sequence diagrams. PlantUML
-can be downloaded https://plantuml.com/starting[here] or installed through your
-package manager (recommended).
+PLUS domain specific language is based on PlantUML Activity Diagrams. PlantUML
+can be downloaded from various sources. The recommended approach is to load it
+as an Eclipse plugin so that it works seamlessly with BridgePoint. The Eclipse
+plugin can be downloaded link:https://plantuml.com/eclipse[here] and the update
+site is link:http://hallvard.github.io/plantuml[here].
+
+.**Getting PlantUML Working within BridgePoint**
+[%collapsible]
+====
+
+To see PlantUML in BridgePoint, select the Window menu item, then select
+Show View and then Other.  This will open a dialog showing a PlantUML
+folder. Open the folder and select PlantUML.  Again using Window and Show
+View, open a Project Explorer view. This will appear as a tab alongside the
+Model Explorer and provides a view of the file structure. Sample PlantUML
+files with the filename extension `.puml` can be found
+link:https://github.com/xtuml/plus2json/tree/main/tests[here].
+
+When first opening a `.puml` file right click on the file and select Open
+With... then Text Editor.  Position the text editor pane and the PlantUML
+graphic pane side by side. When the PlantUML text is edited the activity
+diagram is updated automatically.
+
+====
+
+Whilst this is a generic PlantUML editor, it is used specifically for
+editing the PLUS domain specific language. For details on PLUS see
+link:https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[here].
+For a tutorial on PLUS and explanation of supported Protocol Verifier
+topologies, see
+link:https://github.com/xtuml/plus2json/blob/main/doc/tutorial/AuditEventTopologyTutorial.pdf[here].
+
+PlantUML and the PLUS language represent the "front end" of the Protocol
+Verifier.  Together with the plus2json utility, this is how the Protocol
+Verifier is configured and managed.
 
 === Source Projects
 
@@ -66,15 +98,18 @@ repository from GitHub. Follow the steps from the guide linked in the
 <<BridgePoint>> section to import the following projects into a fresh
 workspace:
 
-* AEOrdering
-* AER_AEO_SVDC
-* AEReception
-* AESimulator
-* PlusProcessor
-* SequenceProcessor
-* SequenceVerificationDataCentric
-* StatementParser
-* utils
+* Domains
+  ** AEReception (AER)
+  ** AEOrdering (AEO)
+  ** SequenceVerificationDataCentric (SVDC)
+  ** InvariantStore (iStore)
+* Deployments
+  ** AEO_SVDC (AEO + SVDC + iStore)
+* Test Domain
+  ** AESimulator (AESim)
+* Utilities
+  ** utils
+  ** plus2json
 
 === Terminology
 
@@ -92,7 +127,7 @@ basic unit of compilation. Each domain exists in its own project.
 
 ==== Deployment
 
-A "deployment" represents a configuration of one or more domains including the
+A "deployment" represents a combination of one or more domains including the
 modelled connections between them. Deployments map to "project" in textual MASL
 form, but the term "deployment" is preferred to avoid confusion with the more
 general term "project".
@@ -100,21 +135,28 @@ general term "project".
 ==== Protocol Verifier
 
 "Protocol Verifier" refers to the overall application as well as the BridgePoint
-project where all of the domains are integrated together using a deployment. In
-our context this is synonymous with the "AER_AEO_SVDC" project.
+project where all of the domains are integrated together using a set of deployments.
+In our context the Protocol Verifier is the collections of the two deployments:
+
+* AER 
+* AEO_SVDC (includes iStore)
 
 ==== PLUS
 
 "PLUS" is the name of the domain specific language for specifying valid job
 sequences for the protocol verifier. PLUS is defined as a subset of constructs
-from the PlantUML sequence diagram syntax. A full description and guide for PLUS
-can be found https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[here].
+from the PlantUML activity diagram syntax. A full description and guide for PLUS
+can be found link:https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[here].
 
-==== PLUS Processor
+==== plus2json
 
-"PLUS Processor" refers to the application which processes PLUS files (textual
-sequence diagrams) and produces JSON configuration files consumable by the
-protocol verifier.
+"plus2json" refers to the application which processes PLUS files (textual
+`.puml` activity diagrams) and produces JSON job definition and runtime
+configuration files consumable by the Protocol Verifier (and the Audit
+Event Simulator).
+
+plus2json source code, documentation and examples/tests can be found in a
+git repository link:https://github.com/xtuml/plus2json[here].
 
 == Overview
 
@@ -211,9 +253,9 @@ mainline.
 
 === Domain overview
 
-==== Protocol Verifier domains
+==== Protocol Verifier Domains
 
-===== Reception
+===== Reception (AER)
 
 The role of the Audit Event Reception domain is to convert audit events received
 from the monitored system, in whatever form they arrive, into audit event
@@ -223,10 +265,10 @@ domain. The format of delivery to the other domains will remain consistent. This
 isolates the impact of changes in received audit event format to a single
 domain. Unexpected input formats are rejected and errors are notified.
 
-===== Ordering
+===== Ordering (AEO)
 
-The role of the Audit Event Ordering domain is two-fold. It validates the source
-of the received audit event in terms of Node and Application, and it constructs
+The role of the Audit Event Ordering domain is two-fold. It validates
+audit event fields for reasonable and legal values, and it constructs
 the audit event sequence into the correct order as determined by the previous
 event ID in each Audit Event. Once the audit events have been correctly ordered
 they are delivered to the Sequence Verification domain. Events from unexpected
@@ -241,7 +283,7 @@ forward that configuration information to Sequence Verification to set up its
 definition classes. This approach ensures that the definition classes of Audit
 Event Ordering and Sequence Verification are aligned.
 
-===== Sequence Verification
+===== Sequence Verification (SVDC)
 
 The role of the Sequence Verification domain is to verify that the audit events
 received are in a correct, expected order taking account of support for repeated
@@ -253,376 +295,112 @@ conditions include unexpected audit event types, unexpected sequences of audit
 event types, sequences starting with the wrong audit event types and repetition
 of audit event types in unexpected places.
 
-==== PLUS Processor domains
-
-===== Statement Parser
-
-The Statement Parser domain is responsible for parsing the PLUS files, verifying
-that all syntax is correct and organizing them into a sequence of statements.
-These statements are fed to the Sequence Processor one at a time to build up the
-job definition.
+===== Invariant Store (iStore)
 
-===== Sequence Processor
+The role of the Invariant Store domain is to provide persistent storage of
+extra job invariants which will typically live longer than any single job.
+The Invariant Store serialises access to persisted invariants across
+multiple concurrent instances of Protocol Verifier processes.
 
-The Sequence Processor domain reads statements from the Statement Parser one at
-a time and interprets them into a structured job definition. It then serializes
-this job definition to JSON.
+=== Deployment Overview
 
-== Building and Running the Project
+The Protocol Verifier is partitioned into a set of deployments that can be instantiated and
+deployed in parallel to provide for performance scaling. The deployments are made up
+of one or more of the Protocol Verifer domains. They are:
 
-=== Build Overview
+* Reception (AER) - mulitiple instances
+* Ordering, Sequence Verification, iStore (AEO_SVDC) - multiple instances
 
-For a visual overview of the build process, refer to these
-link:images/build_process.pdf[slides].
-
-As mentioned in the section discussing the toolchain, there are three major
-steps to building and running the projects:
-
-. Export MASL
-. Build with Docker
-. Launch with Docker
+For a description of how this architecture achieves scaling see 
+link:https://github.com/xtuml/munin/blob/main/doc/notes/MUN-151_scaling_ant.adoc[here].
 
-Before getting into the actual build, it is often an instructive process to
-go through the project structure file by file and explore the purpose of each
-file in the context of the build. We will use the `AEReception` domain for this.
-Each of the other domains follows a similar pattern. Not every file/directory
-seen here will exist in each domain project.
-
-NOTE: Some files are marked by git as "ignored" these tend to be generated
-byproducts of the build that should not be committed to the repository (e.g.
-build logs, test results). Not every one of these files will be covered in the
-section below, but it is good to be aware of them.
-
-  ▾ AEReception/
-    ▸ config/
-    ▾ gen/
-      ▸ AEJSON_OOA/
-        application.mark
-        features.mark
-        README.adoc
-    ▸ masl/
-    ▸ models/
-    ▸ schedule/
-    ▸ test_results/
-    ▸ testing/
-      CMakeLists.txt
-      docker-compose.test.yml
-      docker-compose.yml
-      Dockerfile
-
-==== `config`
-
-The `config` directory contains plaintext files used by the application itself
-to configure the domain. The application is passed a config file as a command
-line argument, which it parses and uses to set up the initial instance
-population.
-
-==== `gen/`
-
-The `gen` directory contains files used during the process of code generation
-and build. The `AEJSON_OOA/` subdirectory contains a handwritten C++ utility
-domain used by the main `AEReception` domain to parse the JSON input files.
-`features.mark` and `application.mark` contain model compiler "marks". These
-metadata are associated with particular application model elements and act as directives
-to the compiler. For example, domain services used exclusively for testing are
-marked as `test_only`, and the architecture will exclude them from generation
-during a production build.
+=== Supporting Application Overview
 
-==== `masl/`
+==== plus2json 
 
-The `masl` directory is the output location for exported MASL text. When the
-project is clean, this directory is empty. The files in this directory are
-generated and should not be hand edited.
+plus2json is an application that converts the PLUS language into JSON
+files that the Protocol Verifier and the Audit Event
+Simulator can consume. Since the Protocol Verifier is data driven, the use
+of plus2json is essential to set up a new instance of the Protocol
+Verifier to monitor and check a new protocol. Once configured and supplied
+with a set of job definitions, the Protocol Verifier can be run without
+reconfiguration for as long as the input set of job definitions need to be
+monitored.
 
-==== `models/`
+== Configuring the Protocol Verifier
 
-The `models` directory is where BridgePoint stores xtUML source model files. The
-files in this directory are managed by BridgePoint and should not be hand
-edited.
-
-==== `schedule/`
+This splits into two main parts:
 
-The `schedule` directory contains plaintext files used by the architecture for
-startup and testing. The MASL C++ platform provides a mechanism to run domain
-services externally using a schedule file. This mechanism is particularly useful
-for setting up execution of a particular set of tests, however it can also be
-leveraged to determine which services will run at different stages of
-initialisation.
-
-==== `test_results/`
-
-The `test_results` directory is created during a test execution and contains
-JSON files containing the results and details of executed tests. This directory
-is created by the execution of the unit tests. The files should not be hand
-edited and this directory may not exist before a run.
+* Specifying Job and Event Data Definitions
+* Configuring Runtime Parameters
 
-==== `testing/`
+=== Specifying Job and Event Data Definitions
 
-The `testing` directory contains test files used in the unit tests.
+Each protocol monitored by the Protocol Verifier needs a __Job
+Definition__ which specifies the behaviour (protocol) of a particular
+monitored task.  Job definitions are defined in the PLUS language and
+edited/visualised with PlantUML.
 
-==== `CMakeLists.txt`
+The Protocol Verifier is data driven. It has no built-in knowledge of any
+particular protocol. Prior to running the Protocol Verifier for the first
+time, a runtime configuration file and job definition files need to be in
+place for the protocols being monitored. After this has been done
+initially, it need be repeated only to add or change the definitions of
+monitored jobs.  The configuration for the protocol verifier is found in
+the `config.json` file. This is loaded at start up and checked on a
+regular basis for updates.
 
-The `CMakeLists.txt` file is the top-level build file for the C++ build after
-code generation is complete. It sets up link paths, include directories and
-other global properties for the build. The behaviour of the build is different
-depending on whether or not the build is launched in `Debug` (test) mode.
+==== PLUS Job Definitions
 
-==== `docker-compose.yml` and `docker-compose.test.yml`
+Use PLUS to define jobs and produce runtime configuration.
 
-The two `docker-compose*.yml` files are used to configure the build and
-execution using Docker. The build target and parameters are configured, internet
-ports and shared volumes are set up between host and container, and the command
-line arguments are defined for the process. Any `docker compose ...` commands
-will reference `docker-compose.yml` by default, however the config file can be
-altered by passing the name of the new file with `-f`. You will notice in the
-rest of this document that any time the test build is being run, the command
-will start with `docker compose -f docker-compose.test.yml ...`.
+Refer to
+link:https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[here]
+for details on the use of PLUS.
 
-==== `Dockerfile`
+==== plus2json:  PLUS Conversion
 
-The `Dockerfile` file defines the actual build. The file uses Docker's
-multi-stage build capability which allows the file to define two separate builds
--- one for testing and one for release. The testing version of the image
-executes the code generator in test mode which will cause it to generate code
-for the `test_only` services as well as additional scaffolding for testing
-interfaces.
+Use plus2json to convert PLUS into job definitions and runtime
+configuration files.
 
-TIP: I encourage you to take a moment before moving on to open each of these
-files in a text editor (you can double click them from the "Project Explorer"
-within BridgePoint) and briefly explore their contents.
+The plus2json application takes as input PLUS (`.puml`) text files and
+produces a number of possible outputs.  The primary output is the
+JSON-formatted job definition for a particular protocol.  plus2json also
+can produce runtime configuration files in a format that the Protocol
+Verifier and the Audit Event Simulator can consume.
 
-=== Export MASL
+For details on using plus2json and its options refer to
+link:https://github.com/xtuml/plus2json[plus2json].
 
-. Open up BridgePoint. Assure that you have all six of the source projects
-imported into your workspace.
+=== Specifying Runtime Parameters
 
-+
-See the <<Source Projects,list of projects>>.
+The Protocol Verifier can be configured with a number of parameters that
+determine its runtime behaviour. These include values for timeouts and
+file/folder locations.
 
-. To export MASL, select each project and click the
-link:images/01_hammer.png[hammer icon] found in the tool ribbon at the top of
-the screen.
-. Alternatively you can right click each project and select
-link:images/02_build_project.png["Build Project"] from the context menu.
-. If you wish to export MASL for all projects at once, you can click
-link:images/03_build_all.png["Build All"] from the "Project" menu in the
-application bar at the top of the application or use the `Ctrl-B`/`Cmd-B`
-keyboard shortcut.
+TODO
 
-NOTE: The `utils` project simply contains common MASL interfaces and need not be
-built. In fact, it will not even show up in the xtUML Modelling perspective.
+=== Load the Protocol Verifier configuration files
 
-=== Build each domain
+TODO: - Check this is right:
 
-This should be repeated for each of the three application domains and the
-simulator domain. For the sake of demonstration, the following instructions will
-reference the `AEReception` domain. Additionally, the instructions will assume
-that the code has been cloned in a standard location (`~/git/munin` on Linux/Mac
-and `C:\git\munin` on Windows).
+To configure the Protocol Verifier: Backup the existing configuration file by moving 
+link:https://github.com/xtuml/munin/models/AEOrdering/config/config.json[this] to a backup location of your choice.
+Check that the output file from plus2json --aeo_config is named config.json. Move this file, replacing the existing file, to 
+link:https://github.com/xtuml/munin/models/AEOrdering/config/[here]
+There is only a single config.json file which contains all of the job specifications.
 
-. Open a shell and navigate to the `AEReception` project directory:
+TODO - Setting other AEO config
 
-  cd ~/git/munin/models/AEReception   # linux/mac
-  cd C:\git\munin\models\AEReception  # windows
+TODO - Setting the AER config file
 
-. Build the project with Docker by running the following command:
+To configure the Audit Event Simulator: Move the output file from plus2json --aesim_config to 
+link:https://github.com/xtuml/munin/models/AESimulator/config/test-job-specification[here]
+There can be multiple configurations files in this folder.
 
-  docker compose build --no-cache
+TODO - Setting the runtime side of the AES config
 
-+
-NOTE: The `--no-cache` flag tells Docker to rebuild the image even if it has
-been built before and exists in cache. This is not strictly necessary, but it
-provides confidence that the latest code is being used for the build.
-
-+
-NOTE: The first invocation of `docker compose build ...` will cause Docker to
-download the base MASL image from Docker Hub. This image is > 600 MB and
-therefore will take some time to download. Subsequent builds will not require
-this download.
-
-. Repeat this step for the other domains:
-  .. AEOrdering
-  .. AESimulator
-  .. SequenceProcessor
-  .. SequenceVerificationDataCentric
-  .. StatmentParser
-
-=== Build PLUS processor
-
-IMPORTANT: Before this step, both of the application domains must be built as
-demonstrated in the previous step.
-
-. In your shell, navigate to the protocol verifier directory:
-
-  cd ~/git/munin/models/PlusProcessor   # linux/mac
-  cd C:\git\munin\models\PlusProcessor  # windows
-
-. Build the project with Docker by running the following command:
-
-  docker compose build --no-cache
-
-=== Build protocol verifier
-
-IMPORTANT: Before this step, all three of the application domains must be built
-as demonstrated in the previous step.
-
-. In your shell, navigate to the protocol verifier directory:
-
-  cd ~/git/munin/models/AER_AEO_SVDC   # linux/mac
-  cd C:\git\munin\models\AER_AEO_SVDC  # windows
-
-. Build the project with Docker by running the following command:
-
-  docker compose build --no-cache
-
-=== Running the protocol verifier
-
-. Open a shell in the protocol verifier directory, run the following command
-to launch the process:
-
-  docker compose up
-
-+
-You should see some logs begin to appear, in particular a periodic log from the
-`AEReception` domain that it is waiting on input files.
-
-. Open a file explorer and navigate to the `deploy/processed/`
-directory within the repository. This can be done through your OS GUI or quickly
-through a simple command:
-
-  open -a Finder ~/git/munin/deploy/processed/  # mac
-  xdg-open ~/git/munin/deploy/processed/        # linux
-  explorer C:\git\munin\deploy\processed\       # windows
-
-. Open another file explorer window and navigate to the
-`deploy/incoming/` directory within the repository:
-
-  open -a Finder ~/git/munin/deploy/incoming/  # mac
-  xdg-open ~/git/munin/deploy/incoming/        # linux
-  explorer C:\git\munin\deploy\incoming\       # windows
-
-. link:images/04_drag_and_drop.gif[Drag and drop] `FileRequest_HappyPath.json` from the
-`processed/` directory to the `incoming/` directory. You will see a flurry of
-output from the application and the file will reappear in the `processed/`
-directory. Inspect the logs and you will see that the audit events have been
-received, ordered, and verified by the application.
-
-. Kill the process by pressing `Ctrl-C`. Clean up the process by running the
-following command:
-
-  docker compose down
-
-==== Troubleshooting Docker
-
-Docker is a great tool for standardising builds and deployments, however it
-presents some pitfalls when being used as a local build/development tool.
-
-Docker Compose requires the "down" command to be issued even after all the
-processes launched by the "up" command have terminated. This is because though
-the process inside each container has exited, the container itself still exists
-and can be restarted. As long as the container exists (whether running or
-stopped), it will hold onto resources such as shared volumes and internet ports.
-The "down" command tells Docker Compose to remove all the containers associated
-with the launch.
-
-If you see the message "port is already allocated", it is likely that you forgot
-to run the `docker compose down` command somewhere along the way. When you run
-this command, make sure it matches the "up" command (e.g. if you run `docker
-compose -f docker-compose.test.yml up` to start the application, you should run
-`docker compose -f docker-compose.test.yml down` in the same directory to tear
-it down.)
-
-If there is only one command to remember from this section, it is this:
-
-  docker system prune
-
-This command causes Docker to remove all stopped containers, networks, dangling
-images and build cache. This usually works to give a "fresh" start if you get
-stuck.
-
-If you are making changes but not observing different behavior check the
-following:
-
-. Assure you have re-exported MASL (build projects from within BridgePoint)
-. Run the build again with caching disabled: `docker compose build --no-cache`
-. Run the "up" command with the `--force-recreate` flag: `docker compose up
---force-recreate` (this flag forces existing containers to be replaced with new
-ones created from the latest image).
-
-==== Running the latest published version of the protocol verifier
-
-As mentioned above, the application is built and published automatically each
-time new code is merged into the main repository branch. It is possible to use
-docker to run the latest version of the application without any build at all.
-
-. Authenticate with the GitHub Container Registry by executing the command:
-
-  docker login ghcr.io
-
-+
-Use your GitHub.com account name and password to log in. If you have two-factor
-authentication enabled on your account, you will have to create a new personal
-access token to use in place of your password. Follow the guide
-link:https://github.com/xtuml/bridgepoint/blob/master/doc-bridgepoint/process/HOWTO-use-git.adoc#generating-authentication-credentials[here]
-to generate a new token with the
-link:images/08_read_packages.png["read:packages"] scope.
-
-. Execute the application by running the following command:
-
-  docker run -it -v $PWD/test-files/:/root/test-files ghcr.io/xtuml/aer_aeo_svdc:latest -config aeoconfig/aeordering_spec.txt -receptionConfig aerconfig/aereception_spec.txt -preinit schedule/startup.sch
-
-. link:images/04_drag_and_drop.gif[Drag and drop] a test file e.g.
-link:https://github.com/xtuml/tower/blob/main/deploy/processed/FileRequest_HappyPath.json[`FileRequest_HappyPath.json`]
-to the `/incoming/` directory in your current directory. You will see
-a flurry of output from the application and the file will reappear in the
-`processed/` directory. Inspect the logs and you will see that the audit events
-have been received, ordered, and verified by the application.
-
-. Kill the process by pressing `Ctrl-C`.
-
-=== Running the protocol verifier with the audit event simulator
-
-In the last section, we built and ran the protocol verifier interactively with
-test files. The audit event simulator can also be used to generate test audit
-event files to be consumed by the main process. This section will also walk
-through using the process inspector to attach to the running process and browse
-the instance population.
-
-. Open a shell in the protocol verifier directory, run the following command
-to launch the process with the simulator:
-
-  docker compose -f docker-compose.test.yml up
-
-+
-You will see a lot of output at once. If you look closely, you can see several
-logs showing the simulator emitting audit events, followed by the main application
-handling those audit events.
-
-. In a new shell tab/window, run the following command to launch Inspector:
-
-  java -jar ~/git/munin/bin/inspector-1.0.0-jar-with-dependencies.jar   # linux/mac
-  java -jar C:\git\munin\bin\inspector-1.0.0-jar-with-dependencies.jar  # windows
-
-. Select "AESequenceDC" from the link:images/05_domain_select.png["Domain" drop-down menu]
-
-. Double-click the link:images/06_job_population.png["Job" item] in the object
-list. Note that each line represents an instance of "Job" and each column
-represents an attribute of the object.
-
-. Take some time to explore the rest of the instance population in Inspector
-
-. Exit inspector. Kill the application process by pressing `Ctrl-C` in the shell
-window where it was launched. Clean up the process by running the following
-command:
-
-  docker compose -f docker-compose.test.yml down
-
-==== Configuring the protocol verifier
-
-The configuration for the protocol verifier is found in the `config.json` file.
-This is loaded at start up and checked on a regular basis for updates:
-
-.Click to see more details on the config file format
+.Click to see more details on the Protocol Verifier config file format
 [%collapsible]
 ====
 
@@ -691,8 +469,7 @@ Example:
 ----
 
 ====
-
-==== Configuring the simulator
+==== Configuring the simulator TODO check this is still correct
 
 It is possible to configure the simulator to generate jobs that are to be
 delivered to the digital twin. The configuration file it loads is defined in the
@@ -872,6 +649,368 @@ The following provides an explanation to each of the JSON elements in the test j
 
 ====
 
+=== Configuring the Deployment
+
+This configuration determines the number of instances of each of the 3 deployments to instantiate at start up.
+Note: This version of the Protocol Verifier supports static scaling.
+
+TODO Complete details on how deployment scaling is defined
+
+== Building and Running the Project
+
+=== Build Overview
+
+For a visual overview of the build process, refer to these
+link:images/build_process.pdf[slides].
+
+As mentioned in the section discussing the toolchain, there are three major
+steps to building and running the projects:
+
+. Export MASL
+. Build with Docker
+. Launch with Docker
+
+Before getting into the actual build, it is often an instructive process to
+go through the project structure file by file and explore the purpose of each
+file in the context of the build. We will use the `AEReception` domain for this.
+Each of the other domains follows a similar pattern. Not every file/directory
+seen here will exist in each domain project.
+
+NOTE: Some files are marked by git as "ignored" these tend to be generated
+byproducts of the build that should not be committed to the repository (e.g.
+build logs, test results). Not every one of these files will be covered in the
+section below, but it is good to be aware of them.
+
+  ▾ AEReception/
+    ▸ config/
+    ▾ gen/
+      ▸ AEJSON_OOA/
+        application.mark
+        features.mark
+        README.adoc
+    ▸ masl/
+    ▸ models/
+    ▸ schedule/
+    ▸ test_results/
+    ▸ testing/
+      CMakeLists.txt
+      docker-compose.test.yml
+      docker-compose.yml
+      Dockerfile
+
+==== `config`
+
+The `config` directory contains plaintext files used by the application itself
+to configure the domain. The application is passed a config file as a command
+line argument, which it parses and uses to set up the initial instance
+population. Not all projects have config folders.
+
+==== `gen/`
+
+The `gen` directory contains files used during the process of code generation
+and build. The `AEJSON_OOA/` subdirectory contains a handwritten C++ utility
+domain used by the main `AEReception` domain to parse the JSON input files.
+`features.mark` and `application.mark` contain model compiler "marks". These
+metadata are associated with particular application model elements and act as directives
+to the compiler. For example, domain services used exclusively for testing are
+marked as `test_only`, and the architecture will exclude them from generation
+during a production build.
+
+==== `masl/`
+
+The `masl` directory is the output location for exported MASL text. When the
+project is clean, this directory is empty. The files in this directory are
+generated and should not be hand edited.
+
+==== `models/`
+
+The `models` directory is where BridgePoint stores xtUML source model files. The
+files in this directory are managed by BridgePoint and should not be hand
+edited.
+
+==== `schedule/`
+
+The `schedule` directory contains plaintext files used by the architecture for
+startup and testing. The MASL C++ platform provides a mechanism to run domain
+services externally using a schedule file. This mechanism is particularly useful
+for setting up execution of a particular set of tests, however it can also be
+leveraged to determine which services will run at different stages of
+initialisation.
+
+==== `test_results/`
+
+The `test_results` directory is created during a test execution and contains
+JSON files containing the results and details of executed tests. This directory
+is created by the execution of the unit tests. The files should not be hand
+edited and this directory may not exist before a run.
+
+==== `testing/`
+
+The `testing` directory contains test files used in the unit tests.
+
+==== `CMakeLists.txt`
+
+The `CMakeLists.txt` file is the top-level build file for the C++ build after
+code generation is complete. It sets up link paths, include directories and
+other global properties for the build. The behaviour of the build is different
+depending on whether or not the build is launched in `Debug` (test) mode.
+
+==== `docker-compose.yml` and `docker-compose.test.yml`
+
+The two `docker-compose*.yml` files are used to configure the build and
+execution using Docker. The build target and parameters are configured, internet
+ports and shared volumes are set up between host and container, and the command
+line arguments are defined for the process. Any `docker compose ...` commands
+will reference `docker-compose.yml` by default, however the config file can be
+altered by passing the name of the new file with `-f`. You will notice in the
+rest of this document that any time the test build is being run, the command
+will start with `docker compose -f docker-compose.test.yml ...`.
+
+==== `Dockerfile`
+
+The `Dockerfile` file defines the actual build. The file uses Docker's
+multi-stage build capability which allows the file to define two separate builds
+-- one for testing and one for release. The testing version of the image
+executes the code generator in test mode which will cause it to generate code
+for the `test_only` services as well as additional scaffolding for testing
+interfaces.
+
+TIP: I encourage you to take a moment before moving on to open each of these
+files in a text editor (you can double click them from the "Project Explorer"
+within BridgePoint) and briefly explore their contents.
+
+=== Export MASL
+
+. Open up BridgePoint. Assure that you have all six of the source projects
+imported into your workspace.
+
++
+See the <<Source Projects,list of projects>>.
+
+. To export MASL, select each project and click the
+link:images/01_hammer.png[hammer icon] found in the tool ribbon at the top of
+the screen.
+. Alternatively you can right click each project and select
+link:images/02_build_project.png["Build Project"] from the context menu.
+. If you wish to export MASL for all projects at once, you can click
+link:images/03_build_all.png["Build All"] from the "Project" menu in the
+application bar at the top of the application or use the `Ctrl-B`/`Cmd-B`
+keyboard shortcut.
+
+NOTE: The `utils` project simply contains common MASL interfaces and need not be
+built. In fact, it will not even show up in the xtUML Modelling perspective.
+
+=== Build each domain
+
+This should be repeated for each of the three application domains and the
+simulator domain. For the sake of demonstration, the following instructions will
+reference the `AEReception` domain. Additionally, the instructions will assume
+that the code has been cloned in a standard location (`~/git/munin` on Linux/Mac
+and `C:\git\munin` on Windows).
+
+. Open a shell and navigate to the `AEReception` project directory:
+
+  cd ~/git/munin/models/AEReception   # linux/mac
+  cd C:\git\munin\models\AEReception  # windows
+
+. Build the project with Docker by running the following command:
+
+  docker compose build --no-cache
+
++
+NOTE: The `--no-cache` flag tells Docker to rebuild the image even if it has
+been built before and exists in cache. This is not strictly necessary, but it
+provides confidence that the latest code is being used for the build.
+
++
+NOTE: The first invocation of `docker compose build ...` will cause Docker to
+download the base MASL image from Docker Hub. This image is > 600 MB and
+therefore will take some time to download. Subsequent builds will not require
+this download.
+
+. Repeat this step for the other domains:
+  .. AEOrdering
+  .. AESimulator
+  .. SequenceVerificationDataCentric
+  .. invariantStore
+
+=== Build each Deployment
+
+IMPORTANT: Before this step, all of the application domains must be built
+as demonstrated in the previous step.
+
+Each of the cd ..deployments needs to be built
+
+* AER containing the Reception domain
+* AEO_SVDC containing Ordering, Sequence Verification and the invariantStore domains
+
+TODO Amend the following to describe the deployment build process
+
+. In your shell, navigate to the protocol verifier directory:
+
+  cd ~/git/munin/models/AER   # linux/mac
+  cd C:\git\munin\models\AER  # windows
+
+. Build the project with Docker by running the following command:
+
+  docker compose build --no-cache
+
+=== TODO Build the Protocol Verifier (Is this necessary or are the deployments simply run?)
+
+IMPORTANT: Before this step, all three of the deployemnts must be built
+as demonstrated in the previous step.
+
+TODO amend the following to describe how the deployments are stitched together 
+to form the Protocol Verifier
+
+
+=== Running the protocol verifier
+
+TODO Fix this to describe the running of each deployment?
+
+. Open a shell in the protocol verifier directory, run the following command
+to launch the process:
+
+  docker compose up
+
++
+You should see some logs begin to appear, in particular a periodic log from the
+`AEReception` domain that it is waiting on input files.
+
+. Open a file explorer and navigate to the `deploy/processed/`
+directory within the repository. This can be done through your OS GUI or quickly
+through a simple command:
+
+  open -a Finder ~/git/munin/deploy/processed/  # mac
+  xdg-open ~/git/munin/deploy/processed/        # linux
+  explorer C:\git\munin\deploy\processed\       # windows
+
+. Open another file explorer window and navigate to the
+`deploy/incoming/` directory within the repository:
+
+  open -a Finder ~/git/munin/deploy/incoming/  # mac
+  xdg-open ~/git/munin/deploy/incoming/        # linux
+  explorer C:\git\munin\deploy\incoming\       # windows
+
+. link:images/04_drag_and_drop.gif[Drag and drop] `FileRequest_HappyPath.json` from the
+`processed/` directory to the `incoming/` directory. You will see a flurry of
+output from the application and the file will reappear in the `processed/`
+directory. Inspect the logs and you will see that the audit events have been
+received, ordered, and verified by the application.
+
+. Kill the process by pressing `Ctrl-C`. Clean up the process by running the
+following command:
+
+  docker compose down
+
+==== Troubleshooting Docker
+
+Docker is a great tool for standardising builds and deployments, however it
+presents some pitfalls when being used as a local build/development tool.
+
+Docker Compose requires the "down" command to be issued even after all the
+processes launched by the "up" command have terminated. This is because though
+the process inside each container has exited, the container itself still exists
+and can be restarted. As long as the container exists (whether running or
+stopped), it will hold onto resources such as shared volumes and internet ports.
+The "down" command tells Docker Compose to remove all the containers associated
+with the launch.
+
+If you see the message "port is already allocated", it is likely that you forgot
+to run the `docker compose down` command somewhere along the way. When you run
+this command, make sure it matches the "up" command (e.g. if you run `docker
+compose -f docker-compose.test.yml up` to start the application, you should run
+`docker compose -f docker-compose.test.yml down` in the same directory to tear
+it down.)
+
+If there is only one command to remember from this section, it is this:
+
+  docker system prune
+
+This command causes Docker to remove all stopped containers, networks, dangling
+images and build cache. This usually works to give a "fresh" start if you get
+stuck.
+
+If you are making changes but not observing different behavior check the
+following:
+
+. Assure you have re-exported MASL (build projects from within BridgePoint)
+. Run the build again with caching disabled: `docker compose build --no-cache`
+. Run the "up" command with the `--force-recreate` flag: `docker compose up
+--force-recreate` (this flag forces existing containers to be replaced with new
+ones created from the latest image).
+
+==== Running the latest published version of the protocol verifier
+
+As mentioned above, the application is built and published automatically each
+time new code is merged into the main repository branch. It is possible to use
+docker to run the latest version of the application without any build at all.
+
+. Authenticate with the GitHub Container Registry by executing the command:
+
+  docker login ghcr.io
+
++
+Use your GitHub.com account name and password to log in. If you have two-factor
+authentication enabled on your account, you will have to create a new personal
+access token to use in place of your password. Follow the guide
+link:https://github.com/xtuml/bridgepoint/blob/master/doc-bridgepoint/process/HOWTO-use-git.adoc#generating-authentication-credentials[here]
+to generate a new token with the
+link:images/08_read_packages.png["read:packages"] scope.
+
+. Execute the application by running the following command:
+
+  docker run -it -v $PWD/test-files/:/root/test-files ghcr.io/xtuml/aer_aeo_svdc:latest -config aeoconfig/aeordering_spec.txt -receptionConfig aerconfig/aereception_spec.txt -preinit schedule/startup.sch
+
+. link:images/04_drag_and_drop.gif[Drag and drop] a test file e.g.
+link:https://github.com/xtuml/tower/blob/main/deploy/processed/FileRequest_HappyPath.json[`FileRequest_HappyPath.json`]
+to the `/incoming/` directory in your current directory. You will see
+a flurry of output from the application and the file will reappear in the
+`processed/` directory. Inspect the logs and you will see that the audit events
+have been received, ordered, and verified by the application.
+
+. Kill the process by pressing `Ctrl-C`.
+
+=== Running the protocol verifier with the audit event simulator
+
+TODO Changes to this will depend upon the above
+
+In the last section, we built and ran the protocol verifier interactively with
+test files. The audit event simulator can also be used to generate test audit
+event files to be consumed by the main process. This section will also walk
+through using the process inspector to attach to the running process and browse
+the instance population.
+
+. Open a shell in the protocol verifier directory, run the following command
+to launch the process with the simulator:
+
+  docker compose -f docker-compose.test.yml up
+
++
+You will see a lot of output at once. If you look closely, you can see several
+logs showing the simulator emitting audit events, followed by the main application
+handling those audit events.
+
+. In a new shell tab/window, run the following command to launch Inspector:
+
+  java -jar ~/git/munin/bin/inspector-1.0.0-jar-with-dependencies.jar   # linux/mac
+  java -jar C:\git\munin\bin\inspector-1.0.0-jar-with-dependencies.jar  # windows
+
+. Select "AESequenceDC" from the link:images/05_domain_select.png["Domain" drop-down menu]
+
+. Double-click the link:images/06_job_population.png["Job" item] in the object
+list. Note that each line represents an instance of "Job" and each column
+represents an attribute of the object.
+
+. Take some time to explore the rest of the instance population in Inspector
+
+. Exit inspector. Kill the application process by pressing `Ctrl-C` in the shell
+window where it was launched. Clean up the process by running the following
+command:
+
+  docker compose -f docker-compose.test.yml down
+
+
 === Building a domain with test
 
 Each domain contains a set of unit tests. We will use the `AEReception` domain
@@ -893,6 +1032,8 @@ to demonstrate building a domain in test mode.
 +
 You will see a lot of output including some logs from the test runner. All of
 the tests will be marked as "SUCCEEDED".
+
+TODO Update the following to a more representative test
 
 . In BridgePoint, navigate to and open the `basicTest01` function at
 link:images/07_basic_test.png[`AEReception::AERDomain::AEReception::test_cases`].
