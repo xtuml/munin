@@ -98,13 +98,13 @@ repository from GitHub. Follow the steps from the guide linked in the
 <<BridgePoint>> section to import the following projects into a fresh
 workspace:
 
-* Domains
+* Protocol Verifier Domains
   ** AEReception (AER)
   ** AEOrdering (AEO)
   ** SequenceVerificationDataCentric (SVDC)
   ** InvariantStore (iStore)
 * Deployments
-  ** AEO_SVDC (AEO + SVDC + iStore)
+  ** AEO_SVDC (AEO + SVDC + IStore)
 * Test Domain
   ** AESimulator (AESim)
 * Utilities
@@ -295,7 +295,7 @@ conditions include unexpected audit event types, unexpected sequences of audit
 event types, sequences starting with the wrong audit event types and repetition
 of audit event types in unexpected places.
 
-===== Invariant Store (iStore)
+===== Invariant Store (IStore)
 
 The role of the Invariant Store domain is to provide persistent storage of
 extra job invariants which will typically live longer than any single job.
@@ -651,7 +651,7 @@ The following provides an explanation to each of the JSON elements in the test j
 
 === Configuring the Deployment
 
-This configuration determines the number of instances of each of the 3 deployments to instantiate at start up.
+This configuration determines the number of instances of each of the deployments to instantiate at start up.
 Note: This version of the Protocol Verifier supports static scaling.
 
 TODO Complete details on how deployment scaling is defined
@@ -832,7 +832,7 @@ this download.
   .. AEOrdering
   .. AESimulator
   .. SequenceVerificationDataCentric
-  .. invariantStore
+  .. InvariantStore
 
 === Build each Deployment
 
@@ -841,8 +841,7 @@ as demonstrated in the previous step.
 
 Each of the cd ..deployments needs to be built
 
-* AER containing the Reception domain
-* AEO_SVDC containing Ordering, Sequence Verification and the invariantStore domains
+* AEO_SVDC containing Ordering, Sequence Verification and the InvariantStore domains
 
 TODO Amend the following to describe the deployment build process
 
@@ -857,7 +856,7 @@ TODO Amend the following to describe the deployment build process
 
 === TODO Build the Protocol Verifier (Is this necessary or are the deployments simply run?)
 
-IMPORTANT: Before this step, all three of the deployemnts must be built
+IMPORTANT: Before this step, all three of the deployments must be built
 as demonstrated in the previous step.
 
 TODO amend the following to describe how the deployments are stitched together 
@@ -958,6 +957,8 @@ link:https://github.com/xtuml/bridgepoint/blob/master/doc-bridgepoint/process/HO
 to generate a new token with the
 link:images/08_read_packages.png["read:packages"] scope.
 
+TODO The following definitiely needs to change since aer_aeo_svdc is no longer used:
+
 . Execute the application by running the following command:
 
   docker run -it -v $PWD/test-files/:/root/test-files ghcr.io/xtuml/aer_aeo_svdc:latest -config aeoconfig/aeordering_spec.txt -receptionConfig aerconfig/aereception_spec.txt -preinit schedule/startup.sch
@@ -1042,6 +1043,9 @@ link:images/07_basic_test.png[`AEReception::AERDomain::AEReception::test_cases`]
 NOTE: There will be red error markers in this activity. This is due to the fact
 that the BridgePoint editor does not expect the test scaffolding that the C++
 code generator will produce. These error markers are expected.
+
+TODO Update the following refer to terms in the actual data 
+- HighOutput and LowOutput have been removed
 
 . On line 28, change "HighOutput" to "LowOutput".
 
