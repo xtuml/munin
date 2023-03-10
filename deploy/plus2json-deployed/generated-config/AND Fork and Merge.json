@@ -1,0 +1,117 @@
+{
+    "JobDefinitionName": "AND Fork and Merge",
+    "Events": [
+        {
+            "EventName": "A6",
+            "OccurrenceId": 1,
+            "SequenceName": "AND Fork and Merge",
+            "SequenceStart": true,
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "B6",
+            "OccurrenceId": 0,
+            "SequenceName": "AND Fork and Merge",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "A6",
+                    "PreviousOccurrenceId": 1
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "C6",
+            "OccurrenceId": 0,
+            "SequenceName": "AND Fork and Merge",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "B6",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "andfork1",
+                    "ConstraintValue": "AND"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "G6",
+            "OccurrenceId": 0,
+            "SequenceName": "AND Fork and Merge",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "C6",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "D6",
+            "OccurrenceId": 0,
+            "SequenceName": "AND Fork and Merge",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "B6",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "andfork1",
+                    "ConstraintValue": "AND"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "H6",
+            "OccurrenceId": 0,
+            "SequenceName": "AND Fork and Merge",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "D6",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "J6",
+            "OccurrenceId": 0,
+            "SequenceName": "AND Fork and Merge",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "H6",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "K6",
+            "OccurrenceId": 0,
+            "SequenceName": "AND Fork and Merge",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "G6",
+                    "PreviousOccurrenceId": 0
+                },
+                {
+                    "PreviousEventName": "J6",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "L6",
+            "OccurrenceId": 0,
+            "SequenceName": "AND Fork and Merge",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "K6",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        }
+    ]
+}

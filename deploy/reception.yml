@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  aereception:
+    image: "ghcr.io/xtuml/aereception"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+#    ports:
+#      - "20000:20000"
+#      - "30000:30000"
+#      - "40000:40000"
+    volumes:
+      - "./reception-config:/root/config"
+      - "./aer-incoming:/root/incoming"
+      - "./verifier-incoming:/root/outgoing"
+    restart: on-failure
+    command: "-configPath config/ -preinit schedule/startup.sch -util Inspector -inspector-port 0"
