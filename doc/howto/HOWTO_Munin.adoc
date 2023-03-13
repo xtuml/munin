@@ -306,6 +306,9 @@ extra job invariants which will typically live longer than any single job.
 The Invariant Store serialises access to persisted invariants across
 multiple concurrent instances of Protocol Verifier processes.
 
+For a visual overview of the domains and the key interactions between them click 
+link:images/MUNIN_Domains_and_Key_Interactions.pdf[here].
+
 === Deployment Overview
 
 The Protocol Verifier is partitioned into a set of deployments that can be instantiated and
@@ -664,6 +667,8 @@ TODO Complete details on how deployment scaling is defined
 
 === Build Overview
 
+TODO Remove the following sentence and link in favour of separate links to individual diagrams at the appropritate place in the document.
+
 For a visual overview of the build process, refer to these
 link:images/build_process.pdf[slides].
 
@@ -833,6 +838,9 @@ NOTE: The first invocation of `docker compose build ...` will cause Docker to
 download the base MASL image from Docker Hub. This image is > 600 MB and
 therefore will take some time to download. Subsequent builds will not require
 this download.
+
+A graphical rendition of the domain build process is depicted 
+link:images/Building_a_Domain.pdf[here].
 
 . Repeat this step for the other domains:
   .. AEOrdering
