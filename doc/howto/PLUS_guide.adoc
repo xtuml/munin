@@ -1,17 +1,244 @@
-= PLUS User Guide
+= PLUS and plus2json User Guide
 
 == Introduction
 
-The Munin protocol verifier is dynamically configured using UML sequence
-diagrams as input for defining valid sequences of events. A subset of the
-PlantUML syntax forms a DSL for defining these sequences and PlantUML can be
-used as a visualization tool.
+The Munin Protocol Verifier is dynamically configured using the PLUS domain 
+specific language. PLUS uses a constrained subset of PlantUML Activity
+Diagrams as input for defining valid sequences of events and the
+supplementary audit event data. PLUS is captured using textual input and the
+PlantUML tools can be used for visualization and review.
 
-== Specification
+The application plus2json converts the textual form of the PlantUML activity
+diagrams into json files that are used to configure various aspects of the
+Protocol Verifier and its associated tools.
 
-=== General Parsing Rules
+== PLUS
 
-The PLUS processor operates on a line by line basis. Each statement must be
+=== Statements
+
+==== Job Name
+
+The job name is defined by the `partition` statement. Every job definition
+_must_ have a name defined:
+
+----
+partition "MyJob" {
+}
+----
+
+==== Start/End Sequence Definition
+
+A job consists of one or more disjoint sequences of events. A sequence is
+defined by surrounding a set of statements with a 'group' definition. All audit
+event statements and participant declarations must be defined within a sequence:
+
+----
+group Sequence1
+...
+end group
+----
+
+
+==== Audit Event
+
+Actual audit events in sequences are defined using the activity statement. The
+name of the activity is the event name and uniquely identifies the event type.
+An additional occurrence number is automatically generated so that if the same
+event type occurs more than once in a Job definition it's location in the
+sequence will be uniquely identified.
+
+----
+:transactionApproved;
+----
+
+image::images/PLUS_01_SingleEvent.png[Single Event]
+
+==== Sequence of Audit Events
+
+A sequence of audit events is captured by the sequential listing of activity statements.
+The graphic shows the arrow representing the sequence automatically. These will always
+occur in the context of a Sequence which is itself in a Job. A simple Job with a single
+sequence of 3 audit events looks like this.
+
+----
+@startuml 
+partition "Simple Job" {
+  group "Fund Transfer"
+    :requestFunds;
+    :requestApproved;
+    :fundsTransferred;
+  end group
+}
+@enduml
+----
+
+image::images/PLUS_02_SimpleJob.png[Simpgle Job]
+
+==== Sequence Start/End
+
+Sequences can have multiple valid starting and ending points. An event with no
+predecessor event is deemed to be a sequence start event. An event with no 
+successor event is deemed to be a sequence end event. An useful convention that
+can help users to read and interpret the activity diagrams is to colour code the
+start and end events using the #green and #red labels. These colour labels are ignored by the plus2json application and are an optional visual clue.
+
+----
+partition "MyJob" {
+  group "Sequence1"
+    #green:startEvent;
+    :intermediaryEvent;
+    #red:endEvent;
+  end group
+}
+----
+
+image::images/PLUS_03_SimpleSequence.png[Start and End Events Highlighted]
+
+==== Alternate Paths through a Sequence
+
+Valid sequence definitions can fork into alternate distinct paths. For example,
+an error condition is tested with the sequence of events following the test where 
+no error was detected would be different to the sequence of events where an error
+was detected. In its basic form, this is achieved using the familiar 
+if..then..else..endif construct. This captures a fork in the sequence of events. 
+In this case it is an Exclusive-Or fork (XOR) since only one of the available paths 
+can be taken for a given visit to the fork point.
+
+----
+@startuml
+partition "File Transfer with XOR Definition" {
+  group "File Transfer with XOR"
+    #green:RequestFileX;
+    :PacketiseFileX;
+    if (XOR) then (normal)
+      :AssemblePacketX;
+    else (alternative)
+      :ReportInvalidFileX;
+    endif
+    :TransferPacketX;
+    #red:TransferResultStatusX;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_04_XORFork.png[Alternate Paths using if..then..else..endif]
+
+Note that the terms in brackets associated with the if..then..else..endif 
+(XOR, normal and alternate in this example) are
+purely to enhance human readability. This information is not carried through
+to the Protocol Verifier. Remember the role of the Protocol Verifier is to
+verify that a sequence of events was expected. It does not need to know what 
+the condition was that caused an alternative sequence of events to emerge just 
+that an alternative sequence of events can be expected.
+
+Although the above is a valid construct it may not always be what is required 
+after a fork. In this case it is unlikely that the system should continue
+with the transfer if the alternate path is taken with the ReportInvalidFileX
+event. In this case, the path may need to end at that point. This can be achieved 
+using the 'detach' statement. Note that as the detach signals the end event of that
+path we use the colour convention to mark the end event of a sequence. This shows
+that sequences can have multiple end events.
+
+----
+
+@startuml
+partition "File Transfer with XOR Definition" {
+  group "File Transfer with XOR"
+    #green:RequestFileX;
+    :PacketiseFileX;
+    if (XOR) then (normal)
+      :AssemblePacketX;
+    else (alternative)
+      #red:ReportInvalidFileX;
+      detach
+    endif
+    :TransferPacketX;
+    #red:TransferResultStatusX;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_05_XORForkNoMerge.png[if..then..else..endif without a merge]
+
+An Exclusive-OR fork can have more than 2 branches and this can be supported
+either by using if..then..elsif..elsif..else..endif.
+
+TODO add example
+
+If several alternates are required then a switch case construct is recommended
+
+TODO add example
+
+
+
+
+
+
+
+==== Loop (in development)
+
+Valid sequences may have subsequences of events that occur repeatedly in a loop.
+This can be  specified using the `loop` grouping.
+
+----
+client -> server: "Request file"
+loop
+server -> server: "Prepare packet"
+server -> client: "Send packet"
+end loop
+server -> client: "Transfer complete"
+----
+
+image::loop.png[Loop]
+
+===== Breaking from a loop (in development)
+
+A loop can be constrained to a specific number of iterations or it can be
+unconstrained. The sequence can also specify an event which breaks the loop
+early. This is done by adding the word "break" as the secondary group label of
+the branch of an `alt`:
+
+----
+client -> server: "Request file"
+loop
+alt
+server -> server: "Prepare packet"
+else break
+server -> server: "Internal error"
+end alt
+server -> client: "Send packet"
+end loop
+server -> client: "Transfer result"
+----
+
+image::loopbreak.png[Loop with break]
+
+The last event an alt branch marked with "break" is considered to be a break
+event. The next event expected after a "break" event is the first event after
+the end of the loop. There is currently no support for breaking from the outer
+loop of a nested loop.
+
+=== Audit Event Data Definition
+
+==== Loop Counting
+
+==== Branch Counting
+
+==== Intra Job Invariant
+
+==== Extra Job Invariant
+
+
+
+=== plus2json General Parsing Rules
+
+TODO check that the following paragraphs are still correct/relevant
+
+plus2json operates on a line by line basis. Each statement must be
 fully contained on a single line. Blank lines are ignored.
 
 Each line is split into tokens by whitespace. Extra whitespace characters are
@@ -139,183 +366,6 @@ title BankDeposit
 
 image::BankDeposit.png[BankDeposit]
 
-=== Statements
-
-==== Job Name
-
-The job name is defined by the `title` statement. Every top level job definition
-_must_ have a name defined. If multiple `title` statements are encountered, the
-last one wins:
-
-----
-title MyJob
-title "My Job With Spaces"
-----
-
 If a job definition is composed of many `!include` statements, the `title`
 statement should come _after_ the `!includes` to assure it is the last `title`
 statement processed for the job definition:
-
-==== Start/End Sequence Definition
-
-A job consists of one or more disjoint sequences of events. A sequence is
-defined by surrounding a set of statements with a `box` definition. All audit
-event statements and participant declarations must be defined within a sequence:
-
-----
-box Sequence1 #LightBlue
-...
-end box
-----
-
-==== Application/Participant
-
-All participants in the sequence must be pre-declared. This is done with the
-`participant` statement:
-
-----
-participant Participant1
-participant Participant2
-participant "Participant with Spaces"
-----
-
-==== Sequence Start/End
-
-Sequences can have multiple valid starting and ending points. The first event in
-a sequence is automatically considered to be a sequence start event. Likewise,
-the last event in a sequence is automatically considered to be a sequence end
-event. Other start and end events can be defined by sending messages between an
-external "actor" and "participant" in the sequence diagram. An actor is defined
-with the `actor` statement:
-
-----
-actor User
-actor System
-actor "Actor with Spaces"
-----
-
-Like participants, actors must be pre-declared. Actors must be declared
-_outside_ the sequence definitions.
-
-==== Audit Event
-
-Actual audit events in sequences are defined using the message statement. The
-message must be defined between a pre-declared actor or participant and another
-participant in the diagram. The name of the message is the event name and
-uniquely identifies the event type in the job. An additional occurrence number
-is used in some cases to identify the instance of the event in the job
-definition:
-
-----
-teller -> customer: "Print Receipt"
-----
-
-image::ae.png[Audit Event]
-
-==== Start/Stop/Resume Numbering
-
-In cases where an event or set of events is used in multiple places in a single
-job definition, it is necessary to include an additional numeric value to
-identify the occurrence of an event in a job sequence. Numbering can be
-controlled by the following statements:
-
-`autonumber` causes the processor to start automatically attaching occurrence
-numbers to audit events with sequentially increasing integers starting at 1.
-
-`autonumber stop` causes the processor to stop attaching occurrence numbers to
-audit events. `autonumber stop` is not valid before an instance of `autonumber`
-or `autonumber resume`.
-
-`autonumber resume` causes the processor to restart attaching occurrence numbers
-starting at the last number plus 1. `autonumber resume` is not valid before an
-instance of `autonumber stop`
-
-----
-alice -> bob: "A"
-autonumber
-alice -> bob: "B"
-alice -> bob: "C"
-autonumber stop
-alice -> bob: "D"
-alice -> bob: "E"
-autonumber resume
-alice -> bob: "F"
-alice -> bob: "G"
-autonumber stop
-alice -> bob: "H"
-alice -> bob: "I"
-alice -> bob: "J"
-autonumber
-alice -> bob: "K"
-alice -> bob: "L"
-alice -> bob: "M"
-----
-
-image::autonumber.png[Autonumber]
-
-==== Alt/Else (in development)
-
-Valid sequence definitions can branch into multiple distinct paths. This can be
-specified using the `alt` and `else` groupings.
-
-----
-teller -> system: "Request withdrawal"
-alt
-system -> teller: "Report insufficient balance"
-else
-system -> teller: "Report success"
-end alt
-----
-
-image::alt.png[Alt/else]
-
-Each alt/else collection starts with a single `alt` statement followed by a
-series of statements. An `else` statement can follow along with additional
-statements. The whole collection is terminated by an `end` statement. There may
-be any number of `else` branches. An `else` or `end` statement is invalid
-without a preceding `alt` statement. Every `alt` statement must be terminated
-with an `end` statement.
-
-==== Loop (in development)
-
-Valid sequences may have subsequences of events that occur repeatedly in a loop.
-This can be  specified using the `loop` grouping.
-
-----
-client -> server: "Request file"
-loop
-server -> server: "Prepare packet"
-server -> client: "Send packet"
-end loop
-server -> client: "Transfer complete"
-----
-
-image::loop.png[Loop]
-
-===== Breaking from a loop (in development)
-
-A loop can be constrained to a specific number of iterations or it can be
-unconstrained. The sequence can also specify an event which breaks the loop
-early. This is done by adding the word "break" as the secondary group label of
-the branch of an `alt`:
-
-----
-client -> server: "Request file"
-loop
-alt
-server -> server: "Prepare packet"
-else break
-server -> server: "Internal error"
-end alt
-server -> client: "Send packet"
-end loop
-server -> client: "Transfer result"
-----
-
-image::loopbreak.png[Loop with break]
-
-The last event an alt branch marked with "break" is considered to be a break
-event. The next event expected after a "break" event is the first event after
-the end of the loop. There is currently no support for breaking from the outer
-loop of a nested loop.
-
