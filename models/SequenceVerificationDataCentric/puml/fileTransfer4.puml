@@ -1,0 +1,13 @@
+@startuml
+partition "File Transfer with loop Definition" {
+  group "File Transfer with loop"
+    :RequestFileL;
+    :PacketiseFileL;
+    repeat
+      :AssemblePacketL;
+      :TransferPacketL;
+    repeat while (unconstrained)
+    :TransferResultStatusL;
+  end group
+}  
+@enduml

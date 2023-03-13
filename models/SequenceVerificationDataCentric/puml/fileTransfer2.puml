@@ -1,0 +1,16 @@
+@startuml
+partition "File Transfer with AND Definition" {
+  group "File Transfer with AND"
+    #green:RequestFileA;
+    :PacketiseFileA;
+    fork
+      :AssemblePacketA;
+    fork again
+      :CharacterisePacketA;
+    end fork
+    :CheckPacketA;
+    :TransferPacketA;
+    #red:TransferResultStatusA;
+  end group
+}  
+@enduml
