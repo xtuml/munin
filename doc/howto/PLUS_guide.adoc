@@ -125,12 +125,13 @@ partition "File Transfer with XOR Definition" {
 
 image::images/PLUS_04_XORFork.png[Alternate Paths using if..then..else..endif]
 
-Note that the terms in brackets associated with the if..then..else..endif are
+Note that the terms in brackets associated with the if..then..else..endif 
+(XOR, normal and alternate in this example) are
 purely to enhance human readability. This information is not carried through
 to the Protocol Verifier. Remember the role of the Protocol Verifier is to
 verify that a sequence of events was expected. It does not need to know what 
-the condition was that an alternative sequence of events to emerge just that
-an alternative sequence of events can be expected.
+the condition was that caused an alternative sequence of events to emerge just 
+that an alternative sequence of events can be expected.
 
 Although the above is a valid construct it may not always be what is required 
 after a fork. In this case it is unlikely that the system should continue
@@ -220,6 +221,18 @@ The last event an alt branch marked with "break" is considered to be a break
 event. The next event expected after a "break" event is the first event after
 the end of the loop. There is currently no support for breaking from the outer
 loop of a nested loop.
+
+=== Audit Event Data Definition
+
+==== Loop Counting
+
+==== Branch Counting
+
+==== Intra Job Invariant
+
+==== Extra Job Invariant
+
+
 
 === plus2json General Parsing Rules
 
