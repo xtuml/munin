@@ -5,13 +5,11 @@ PLUS User Guide - Simple Sequence Definition
 '/
 
 @startuml 
-partition "BankDeposit" {
-  group "BankDeposit"
-      :SendCheck;
-      :SendDepositSlip;
-      :ScanDocuments;
-      :EnterInformation;
-      :SubmitForReview;
+partition "MyJob" {
+  group Sequence1
+    #green:startEvent;
+    :intermediaryEvent;
+    #red:endEvent;
   end group
 }
 @enduml
