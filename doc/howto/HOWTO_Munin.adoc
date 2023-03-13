@@ -53,7 +53,7 @@ for a quick start on using git to clone repositories and import projects.
 === PlantUML
 
 PlantUML is a tool for manipulating UML diagrams specified in a textual format,
-which for the MUNIN project is constrained to use the PLUS domain-specific language. 
+which for the MUNIN project is constrained as the 'PLUS' domain-specific language. 
 PLUS is based on PlantUML Activity Diagrams. PlantUMLcan be downloaded from various 
 sources. The recommended approach is to load itas an Eclipse plugin so that it works 
 seamlessly with BridgePoint. The Eclipse plugin can be downloaded
@@ -103,7 +103,7 @@ workspace:
   ** AEReception (AER)
   ** AEOrdering (AEO)
   ** SequenceVerificationDataCentric (SVDC)
-  ** InvariantStore (iStore)
+  ** InvariantStore (IStore)
 * Deployments
   ** AEO_SVDC (AEO + SVDC + IStore)
 * Test Domain
@@ -238,11 +238,14 @@ scaling.
 ==== Testing and GitHub Actions (Continuous Integration)
 
 We are using features of the MASL code generator along with custom domains to
-define and run tests for each domain and the whole system. A domain service is
-created for each test. Test services are specially marked to be excluded from
+define and run tests for each domain and the whole system. Like all other actions, 
+the tests are defined in MASL.A domain service is created for each test. 
+Test are specially marked to be excluded from
 the production application and are added to a test schedule. When the project is
 built in the testing configuration, the tests are generated and executed and
-results are logged to the console and output as a set of JSON files.
+results are logged to the console and output as a set of JSON files in the test
+
+results directory.
 
 We are using GitHub Actions to automatically build and run tests for each domain
 and the system deployment any time new code is merged into the main development
@@ -346,7 +349,7 @@ The Protocol Verifier is data driven. It has no built-in knowledge of any
 particular protocol. Prior to running the Protocol Verifier for the first
 time, a runtime configuration file and job definition files need to be in
 place for the protocols being monitored. After this has been done
-initially, it need be repeated only to add or change the definitions of
+initially, it needs be repeated only to add or change the definitions of
 monitored jobs.  The configuration for the protocol verifier is found in
 the `config.json` file. This is loaded at start up and checked on a
 regular basis for updates.
@@ -657,7 +660,7 @@ Note: This version of the Protocol Verifier supports static scaling.
 
 TODO Complete details on how deployment scaling is defined
 
-== Building and Running the Project
+== Building and Running the Protocol Verifier
 
 === Build Overview
 
@@ -738,6 +741,8 @@ for setting up execution of a particular set of tests, however it can also be
 leveraged to determine which services will run at different stages of
 initialisation.
 
+TODO Should we mention SKIP and PAUSE commands here?
+
 ==== `test_results/`
 
 The `test_results` directory is created during a test execution and contains
@@ -782,7 +787,7 @@ within BridgePoint) and briefly explore their contents.
 
 === Export MASL
 
-. Open up BridgePoint. Assure that you have all six of the source projects
+. Open up BridgePoint. Assure that you have all of the source projects
 imported into your workspace.
 
 +
@@ -803,8 +808,8 @@ built. In fact, it will not even show up in the xtUML Modelling perspective.
 
 === Build each domain
 
-This should be repeated for each of the three application domains and the
-simulator domain. For the sake of demonstration, the following instructions will
+This should be repeated for each of the domains and the simulator domain. 
+For the sake of demonstration, the following instructions will
 reference the `AEReception` domain. Additionally, the instructions will assume
 that the code has been cloned in a standard location (`~/git/munin` on Linux/Mac
 and `C:\git\munin` on Windows).
@@ -857,7 +862,7 @@ TODO Amend the following to describe the deployment build process
 
 === TODO Build the Protocol Verifier (Is this necessary or are the deployments simply run?)
 
-IMPORTANT: Before this step, all three of the deployments must be built
+IMPORTANT: Before this step, all of the deployments must be built
 as demonstrated in the previous step.
 
 TODO amend the following to describe how the deployments are stitched together 
@@ -930,6 +935,8 @@ If there is only one command to remember from this section, it is this:
 This command causes Docker to remove all stopped containers, networks, dangling
 images and build cache. This usually works to give a "fresh" start if you get
 stuck.
+
+TODO Introduce use of Clean/Purge command as a means to clear down the docker virtual disk usage.
 
 If you are making changes but not observing different behavior check the
 following:
