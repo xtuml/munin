@@ -1,0 +1,61 @@
+{
+    "JobDefinitionName": "Job with Simple Sequence",
+    "Events": [
+        {
+            "EventName": "A1",
+            "OccurrenceId": 1,
+            "SequenceName": "Straight Line Sequence",
+            "SequenceStart": true,
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "B1",
+            "OccurrenceId": 0,
+            "SequenceName": "Straight Line Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "A1",
+                    "PreviousOccurrenceId": 1
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "C1",
+            "OccurrenceId": 0,
+            "SequenceName": "Straight Line Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "B1",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "D1",
+            "OccurrenceId": 0,
+            "SequenceName": "Straight Line Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "C1",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "E1",
+            "OccurrenceId": 0,
+            "SequenceName": "Straight Line Sequence",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "D1",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        }
+    ]
+}
