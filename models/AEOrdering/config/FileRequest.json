@@ -1,0 +1,88 @@
+{
+  "JobDefinitionName": "FileRequest",
+  "Events": [
+    {
+      "EventName": "RequestFile",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "client",
+      "SequenceStart": true
+    },
+    {
+      "EventName": "PacketiseFile",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "server",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "RequestFile",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "DynamicControl" : {
+        "DynamicControlName" : "numPackets",
+        "DynamicControlType" : "LOOPCOUNT",
+        "UserEventType" : "AssemblePacket",
+        "UserOccurrenceId" : 1
+      }
+    },
+    {
+      "EventName": "AssemblePacket",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "server",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "PacketiseFile",
+          "PreviousOccurrenceId": 1
+        },
+        {
+          "PreviousEventName": "TransferPacket",
+          "PreviousOccurrenceId": 1
+        }
+      ]
+    },
+    {
+      "EventName": "TransferPacket",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "server",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "AssemblePacket",
+          "PreviousOccurrenceId": 1
+        }
+      ]
+    },
+    {
+      "EventName": "CorruptedPacketError",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "server",
+      "IsBreak": true,
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "AssemblePacket",
+          "PreviousOccurrenceId": 1
+        }
+      ]
+    },
+    {
+      "EventName": "TransferResultStatus",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "server",
+      "SequenceEnd": true,
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "TransferPacket",
+          "PreviousOccurrenceId": 1
+        },
+        {
+          "PreviousEventName": "CorruptedPacketError",
+          "PreviousOccurrenceId": 1
+        }
+      ]
+    }
+  ]
+}

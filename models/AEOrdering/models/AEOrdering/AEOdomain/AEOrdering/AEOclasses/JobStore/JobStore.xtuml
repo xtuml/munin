@@ -1,0 +1,183 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("a470b7ea-0c27-4393-b1bb-05286fda5a75",
+	'JobStore',
+	19,
+	'JobStore',
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_TFR
+	VALUES ("4c2c3d56-7ad3-4be1-85e5-50dcd0bd0575",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75",
+	'loadJobStore',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	0,
+	'',
+	3,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	1,
+	1);
+INSERT INTO O_TFR
+	VALUES ("47b304fc-89f6-4116-a87e-604aecbf8b4b",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75",
+	'addJobToStore',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	0,
+	'',
+	3,
+	'',
+	"4c2c3d56-7ad3-4be1-85e5-50dcd0bd0575",
+	1,
+	2);
+INSERT INTO O_TPARM
+	VALUES ("9931eaab-e23c-446e-b367-bcec0ca999b0",
+	"47b304fc-89f6-4116-a87e-604aecbf8b4b",
+	'jobId',
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("ca05455a-8231-467f-be9a-63be44793e6a",
+	"00000000-0000-0000-0000-000000000000",
+	'string',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("1dd8c7f0-1c67-4e82-a934-ad544694bee6",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_BATTR
+	VALUES ("1dd8c7f0-1c67-4e82-a934-ad544694bee6",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_ATTR
+	VALUES ("1dd8c7f0-1c67-4e82-a934-ad544694bee6",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75",
+	"00000000-0000-0000-0000-000000000000",
+	'jobStoreName',
+	'',
+	'',
+	'jobStoreName',
+	0,
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("86dfada1-3a11-4ff1-890b-6ce33e46265c",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_BATTR
+	VALUES ("86dfada1-3a11-4ff1-890b-6ce33e46265c",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_ATTR
+	VALUES ("86dfada1-3a11-4ff1-890b-6ce33e46265c",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75",
+	"1dd8c7f0-1c67-4e82-a934-ad544694bee6",
+	'jobStoreLocation',
+	'',
+	'',
+	'jobStoreLocation',
+	0,
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("9ba96ab7-a390-41b1-b659-d4a5990ffc17",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_BATTR
+	VALUES ("9ba96ab7-a390-41b1-b659-d4a5990ffc17",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_ATTR
+	VALUES ("9ba96ab7-a390-41b1-b659-d4a5990ffc17",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75",
+	"d9d90c84-f338-4cee-b9c5-93d02c25ff95",
+	'current_state',
+	'',
+	'',
+	'current_state',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000006",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("a81252af-3325-4fa3-9dc3-35f559dae7d6",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_BATTR
+	VALUES ("a81252af-3325-4fa3-9dc3-35f559dae7d6",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_ATTR
+	VALUES ("a81252af-3325-4fa3-9dc3-35f559dae7d6",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75",
+	"86dfada1-3a11-4ff1-890b-6ce33e46265c",
+	'jobStoreTimer',
+	'',
+	'',
+	'jobStoreTimer',
+	0,
+	"f93e8fda-cfc1-49d7-80e2-1a3df8a06efe",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("f93e8fda-cfc1-49d7-80e2-1a3df8a06efe",
+	"00000000-0000-0000-0000-000000000000",
+	'timer',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("d9d90c84-f338-4cee-b9c5-93d02c25ff95",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_BATTR
+	VALUES ("d9d90c84-f338-4cee-b9c5-93d02c25ff95",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_ATTR
+	VALUES ("d9d90c84-f338-4cee-b9c5-93d02c25ff95",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75",
+	"a81252af-3325-4fa3-9dc3-35f559dae7d6",
+	'jobStoreAgeLimit',
+	'',
+	'',
+	'jobStoreAgeLimit',
+	0,
+	"5121b717-dfad-45ae-bb2f-9cb5ed060878",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("5121b717-dfad-45ae-bb2f-9cb5ed060878",
+	"00000000-0000-0000-0000-000000000000",
+	'duration',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_ID
+	VALUES (0,
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_OIDA
+	VALUES ("1dd8c7f0-1c67-4e82-a934-ad544694bee6",
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75",
+	0,
+	'jobStoreName');
+INSERT INTO O_ID
+	VALUES (1,
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO O_ID
+	VALUES (2,
+	"a470b7ea-0c27-4393-b1bb-05286fda5a75");
+INSERT INTO PE_PE
+	VALUES ("a470b7ea-0c27-4393-b1bb-05286fda5a75",
+	1,
+	"4e31923b-253c-45ba-b003-819b251264a9",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("4e31923b-253c-45ba-b003-819b251264a9",
+	"00000000-0000-0000-0000-000000000000",
+	"93a25cc9-604e-47d9-928e-aad6575c0677",
+	'AEOclasses',
+	'',
+	0,
+	'../AEOclasses.xtuml');

@@ -1,0 +1,70 @@
+version: "3.9"
+services:
+  aeo_svdc-1:
+    image: "ghcr.io/xtuml/aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20001:20000"
+      - "30001:30000"
+      - "40001:40000"
+    volumes:
+      - "./config:/root/config"
+      - "../test-files/InvariantStore:/root/InvariantStore"
+      - "../test-files/verifier-incoming:/root/incoming"
+      - "../test-files/JobIdStore:/root/JobIdStore"
+      - "../test-files/verifier-processed:/root/processed"
+    command: "-configPath config/ -log-level e -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 3F -util Inspector -inspector-port 0"
+  aeo_svdc-2:
+    image: "ghcr.io/xtuml/aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20002:20000"
+      - "30002:30000"
+      - "40002:40000"
+    volumes:
+      - "./config:/root/config"
+      - "../test-files/InvariantStore:/root/InvariantStore"
+      - "../test-files/verifier-incoming:/root/incoming"
+      - "../test-files/JobIdStore:/root/JobIdStore"
+      - "../test-files/verifier-processed:/root/processed"
+    command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup 40 -endJobGroup 7F -util Inspector -inspector-port 0"
+  aeo_svdc-3:
+    image: "ghcr.io/xtuml/aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20003:20000"
+      - "30003:30000"
+      - "40003:40000"
+    volumes:
+      - "./config:/root/config"
+      - "../test-files/InvariantStore:/root/InvariantStore"
+      - "../test-files/verifier-incoming:/root/incoming"
+      - "../test-files/JobIdStore:/root/JobIdStore"
+      - "../test-files/verifier-processed:/root/processed"
+    command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup 80 -endJobGroup BF -util Inspector -inspector-port 0"
+  aeo_svdc-4:
+    image: "ghcr.io/xtuml/aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20004:20000"
+      - "30004:30000"
+      - "40004:40000"
+    volumes:
+      - "./config:/root/config"
+      - "../test-files/InvariantStore:/root/InvariantStore"
+      - "../test-files/verifier-incoming:/root/incoming"
+      - "../test-files/JobIdStore:/root/JobIdStore"
+      - "../test-files/verifier-processed:/root/processed"
+    command: "-configPath config/ -preinit schedule/startup.sch -startJobGroup C0 -endJobGroup FF -util Inspector -inspector-port 0"

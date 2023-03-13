@@ -35,7 +35,7 @@
         "OccurrenceId": {
           "description": "Secondary key to an event that appears more than once in a job",
           "type": "integer",
-          "minimum": 0
+          "minimum": -1
         },
         "Application": {
           "description": "The name of the issuing application.",
@@ -71,7 +71,7 @@
             "UserOccurrenceId": {
               "description": "Secondary key to an event that appears more than once in a job",
               "type": "integer",
-              "minimum": 0
+              "minimum": -1
             }
           },
           "required": ["DynamicControlName", "DynamicControlType", "UserEventType", "UserOccurrenceId"],
@@ -89,7 +89,7 @@
               "PreviousOccurrenceId": {
                 "description": "Secondary key to an event that appears more than once in a job",
                 "type": "integer",
-                "minimum": 0
+                "minimum": -1
               },
               "ConstraintDefinitionId": {
                 "description": "An identifier assigned to the constraint",

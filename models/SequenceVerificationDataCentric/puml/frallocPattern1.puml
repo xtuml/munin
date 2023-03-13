@@ -1,0 +1,18 @@
+@startuml
+:FrallocStart;
+if (XOR) then (normal)
+  fork
+    :chmint;
+  fork again
+    :ehmint;
+  end fork
+  :frallocEval;
+  if (XOR) then (normal)
+    :frallocOK;
+    detach
+  else (error)
+  endif;
+else (error)
+endif    
+  :frallocError;
+@enduml

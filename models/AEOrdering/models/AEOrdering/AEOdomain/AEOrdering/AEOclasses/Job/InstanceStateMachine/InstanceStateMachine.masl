@@ -45,6 +45,9 @@ begin
 	// set the completion time and start the job complete period
 	this.jobCompletionTime := timestamp'now;
 	
+	// add the job to the job store as there should be no more events
+	JobStore.addJobToStore(this.jobId);
+	
 	// inform Verification that the job is complete
 	Req_IF_Verification~>jobComplete(this.jobId);
 	systemSpec := find_one SystemSpec();
@@ -63,6 +66,9 @@ begin
 	logMessage := "AEOrdering::Job.Failed";
 	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	cancel this.jobTimer;
+	
+	// add the job to the job store as there should be no more events
+	JobStore.addJobToStore(this.jobId);
 	
 	// start the job complete period
 	systemSpec := find_one SystemSpec();

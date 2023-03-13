@@ -10,45 +10,41 @@ state AEReception::FileControl.WaitingForFile () is
 logMessage : string;
 receptionSpec : instance of ReceptionSpec;
 fileNames : sequence of Filesystem::filename;
-unassignedEventFile : instance of EventFile;
 eventFile : instance of EventFile;
+fileToBeProcessed : Filesystem::filename;
+lock: Filesystem::file_lock;
+fileAssigned : boolean := false;
 
 begin
 
-	logMessage := "AEReception::FileControl.WaitingForFile";
-	Logger::log(Logger::Information, "AEReception", logMessage);
-		
-	// if we have files to process then select one
-	cancel this.fileControlTimer;
-	unassignedEventFile := find_one EventFile(assigned = false);
-	if unassignedEventFile /= null then
-		unassignedEventFile.assigned := true;
-		generate FileControl.allocateFile(unassignedEventFile) to this;
-		logMessage := "AEReception::FileControl.WaitingForFile - assigning file " & unassignedEventFile.fileName;
-		Logger::log(Logger::Information, "AEReception", logMessage);
-	else
-		// no files to process so check the incoming directory
-		receptionSpec := find_one ReceptionSpec();
-		if not Filesystem::file_exists(Filesystem::filename(receptionSpec.incomingDirectory)) then
-			Filesystem::create_directory(Filesystem::filename(receptionSpec.incomingDirectory));
-		end if;
-		fileNames := Filesystem::list_directory(Filesystem::filename(receptionSpec.incomingDirectory));
-		for fileName in fileNames loop
-			eventFile := find_one EventFile(fileName = string(fileName));
-			if eventFile = null then
-				eventFile := create EventFile(fileName => string(fileName), assigned => false);
-				link this R1 eventFile;
+	// find a file to process
+	receptionSpec := find_one ReceptionSpec();
+	if not Filesystem::file_exists(Filesystem::filename(receptionSpec.incomingDirectory)) then
+		Filesystem::create_directory(Filesystem::filename(receptionSpec.incomingDirectory));
+	end if;
+	fileNames := Filesystem::list_directory(Filesystem::filename(receptionSpec.incomingDirectory));
+	for currentFile in fileNames loop
+		begin
+			if Filesystem::lock_file(Filesystem::filename(receptionSpec.incomingDirectory & "/") & currentFile, Filesystem::ExclusiveLock, lock, false) then
+				fileToBeProcessed := Filesystem::filename(receptionSpec.processingDirectory & "/") & currentFile;
+				Filesystem::move_file( Filesystem::filename(receptionSpec.incomingDirectory & "/") & currentFile, Filesystem::filename(fileToBeProcessed));
+				// verify that the move worked
+				if Filesystem::file_exists(Filesystem::filename(fileToBeProcessed)) then
+					eventFile := create EventFile(fileName => string(currentFile), assigned => true);
+					link this R1 eventFile;
+					generate FileControl.allocateFile(eventFile) to this;
+					fileAssigned := true;
+					logMessage := "AEReception::FileControl.assignFile - assigning file " & eventFile.fileName;
+					Logger::log(Logger::Information, "AEReception", logMessage);
+					exit; // for loop
+				end if;
 			end if;
-		end loop;
-		unassignedEventFile := find_one EventFile(assigned = false);
-		if unassignedEventFile /= null then
-			unassignedEventFile.assigned := true;
-			generate FileControl.allocateFile(unassignedEventFile) to this;
-			logMessage := "AEReception::FileControl.WaitingForFile - assigning file " & unassignedEventFile.fileName;
-			Logger::log(Logger::Information, "AEReception", logMessage);
-		else
-			schedule this.fileControlTimer generate FileControl.checkForFile() to this delay @PT1S@;
-		end if;
+		exception
+			when others => null;
+		end;
+	end loop;
+	if fileAssigned = false then
+		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay @PT0S@;
 	end if;
 	
 end state;
@@ -60,6 +56,7 @@ logMessage : string;
 receptionSpec : instance of ReceptionSpec;
 receptionJob : instance of Reception;
 fileToBeProcessed : string;
+validate : boolean := false;
 
 begin
 	
@@ -68,16 +65,17 @@ begin
 		
 	// create the reception job and link to the event file it has to process
 	receptionSpec := find_one ReceptionSpec();
-	// move the file to be processed
-	if not Filesystem::file_exists(Filesystem::filename(receptionSpec.processingDirectory)) then
-		Filesystem::create_directory(Filesystem::filename(receptionSpec.processingDirectory));
-	end if;
 	fileToBeProcessed := receptionSpec.processingDirectory & "/" & eventFile.fileName;
-	Filesystem::move_file( Filesystem::filename(receptionSpec.incomingDirectory & "/" & eventFile.fileName), Filesystem::filename(fileToBeProcessed));
-	receptionJob := create unique Reception (filePath => fileToBeProcessed, aeDelay => receptionSpec.eventThrottleRate, Current_State => starting);
+	receptionJob := create unique Reception (filePath => fileToBeProcessed, aeDelay => receptionSpec.eventThrottleRate, eventsProcessed => 0, Current_State => starting);
 	link receptionJob R2 eventFile;
-	generate Reception.ready_to_parse() to receptionJob;
-	
+	if receptionSpec.schemaValidate = true then
+		this.schemaValidationCount := this.schemaValidationCount + 1;
+		if this.schemaValidationCount = receptionSpec.schemaValidateFrequency then
+			validate := true;
+			this.schemaValidationCount := 0;
+		end if;
+	end if;
+	generate Reception.ready_to_parse(validate) to receptionJob;
 	// check for more capacity
 	generate FileControl.checkCapacity() to this;
 	
@@ -92,8 +90,8 @@ currentJobs : sequence of instance of Reception;
 
 begin
 	
-	logMessage := "AEReception::FileControl.WaitingForCapacity";
-	Logger::log(Logger::Information, "AEReception", logMessage);
+//	logMessage := "AEReception::FileControl.WaitingForCapacity";
+//	Logger::log(Logger::Information, "AEReception", logMessage);
 	
 	cancel this.fileControlTimer;
 	receptionSpec := find_one ReceptionSpec();

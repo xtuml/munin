@@ -1,0 +1,72 @@
+//! ACTIVITY BEGIN. '1a8a4cd7-1f09-42a3-b4e0-8a69a30208db' DO NOT EDIT THIS LINE.
+public service IStore::persistInvariant ( invariantName : in string,
+                                         invariantValue : in string,
+                                         validFrom : in timestamp,
+                                         validTo : in timestamp,
+                                         sourceJobDefinitionType : in string,
+                                         sourceAuditEventType : in string,
+                                         sourceAuditEventOccurrenceId : in integer ) is
+invariant : instance of Invariant;
+invStore : instance of InvStore;
+logMessage : string;
+
+begin
+	logMessage := "IStore::persistInvariant";
+	Logger::log(Logger::Information, "IStore", logMessage);
+	invariant := find_one Invariant(invariantName = invariantName and invariantValue = invariantValue);
+	if invariant = null then
+		invariant := create Invariant(invariantName => invariantName, invariantValue => invariantValue, validFrom => validFrom, validTo => validTo, 
+			                          sourceJobDefinitionType => sourceJobDefinitionType, sourceAuditEventType => sourceAuditEventType, 
+			                          sourceAuditEventOccurrenceId => sourceAuditEventOccurrenceId'image, reportedToLocalClient => true, stored => false);
+		invStore := find_one InvStore();
+		generate InvStore.loadStore() to invStore;
+	end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b24f98b3-e070-4c67-aafb-b0c438cdea53' DO NOT EDIT THIS LINE.
+public service IStore::setLoadRate ( loadRate : in duration ) is
+invStore : instance of InvStore;
+
+begin
+	invStore := find_one InvStore();
+	if invStore = null then
+		invStore.loadRate := loadRate;
+		cancel invStore.storeTimer;
+		generate InvStore.checkStore() to invStore;
+	end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '0d534fb3-4054-4fcf-9f2e-7b7f3f7ed3c6' DO NOT EDIT THIS LINE.
+private service IStore::restoreNamedInvariant ( invariantName : in string,
+                                               invariantValue : in string ) is
+logMessage : string;
+invariant : instance of Invariant;
+invStore : instance of InvStore;
+invariantToReport : persistedInvariantStructure;
+invariantsToReport : sequence of persistedInvariantStructure;
+
+begin
+	logMessage := "IStore::restoreNamedInvariant";
+	Logger::log(Logger::Information, "IStore", logMessage);
+	invariant := find_one Invariant(invariantName = invariantName and invariantValue = invariantValue);
+	if invariant /= null then
+		invariantToReport.invariantName := invariant.invariantName;
+		invariantToReport.invariantValue := invariant.invariantValue;
+		invariantToReport.validFrom := invariant.validFrom;
+		invariantToReport.validTo := invariant.validTo;
+		invariantToReport.sourceJobDefinitionType := invariant.sourceJobDefinitionType;
+		invariantToReport.sourceAuditEventType := invariant.sourceAuditEventType;
+		invariantToReport.sourceAuditEventOccurrenceId := integer'parse(invariant.sourceAuditEventOccurrenceId);
+		invariantsToReport := invariantsToReport & invariantToReport;
+		invariant.reportedToLocalClient := true;
+		StoreClient~>addInvariants(invariantsToReport);
+	else
+		invStore := find_one InvStore();
+		generate InvStore.loadStore() to invStore;
+	end if;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

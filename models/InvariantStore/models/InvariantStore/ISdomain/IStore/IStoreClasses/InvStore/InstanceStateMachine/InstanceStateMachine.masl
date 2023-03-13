@@ -1,0 +1,130 @@
+//! ACTIVITY BEGIN. '90683570-e285-40c7-ad2f-38ef7c7a3f32' '33b935da-8383-4ac1-8c50-067a393cc9a1' DO NOT EDIT THIS LINE.
+state IStore::InvStore.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '90683570-e285-40c7-ad2f-38ef7c7a3f32' '3074e03d-6973-4279-a8a3-64a3838a6fe4' DO NOT EDIT THIS LINE.
+state IStore::InvStore.StoreLoaded () is
+lock : Filesystem::file_lock;
+storeContents : string;
+tokens : sequence of string;
+invariantName : string;
+invariantValue : string;
+validFrom : timestamp;
+validTo : timestamp;
+sourceJobDefinitionType : string;
+sourceAuditEventType : string;
+sourceAuditEventOccurrenceId : string;
+invariant : instance of Invariant;
+invariantToReport : persistedInvariantStructure;
+invariantsToReport : sequence of persistedInvariantStructure;
+logMessage : string;
+fileStatus : Filesystem::file_status;
+
+begin
+	logMessage := "IStore::InvStore.StoreLoaded";
+	Logger::log(Logger::Information, "IStore", logMessage);
+
+ 	cancel this.storeTimer;
+	if Filesystem::lock_file(Filesystem::filename(this.invStoreName), Filesystem::ExclusiveLock, lock, false) then
+        fileStatus := Filesystem::get_file_status(Filesystem::filename(this.invStoreName));
+        this.storeModificationTime := fileStatus.modification_time;
+		storeContents := Filesystem::read_file(this.invStoreName);
+        for line in Strings::tokenize(storeContents, "\n") loop
+        	tokens :=  Strings::tokenize(line, ",");
+        	invariantName := tokens[tokens'first];
+        	invariantValue := tokens[tokens'first + 1];
+        	validFrom := timestamp'parse(tokens[tokens'first + 2]);
+        	validTo := timestamp'parse(tokens[tokens'first + 3]);
+        	sourceJobDefinitionType := tokens[tokens'first + 4];
+        	sourceAuditEventType := tokens[tokens'first + 5];
+        	sourceAuditEventOccurrenceId := tokens[tokens'first + 6];
+        	invariant := find_one Invariant(invariantName = invariantName and invariantValue = invariantValue);
+        	if invariant = null then
+        		invariant := create Invariant(invariantName => invariantName, invariantValue => invariantValue, validFrom => validFrom, validTo => validTo, 
+        			                          sourceJobDefinitionType => sourceJobDefinitionType, sourceAuditEventType => sourceAuditEventType, 
+        			                          sourceAuditEventOccurrenceId => sourceAuditEventOccurrenceId, reportedToLocalClient => false, stored => true);
+        	end if;
+        end loop;
+	
+		// remove any stale invariants
+		for invariantToRemove in find Invariant(validTo < timestamp'now) loop
+			delete invariantToRemove;
+		end loop;
+		
+		// write the invariant data back to the store
+		storeContents := "";
+		for validInvariant in find Invariant() loop
+			storeContents := storeContents & validInvariant.invariantName & "," & validInvariant.invariantValue & "," & validInvariant.validFrom'image & "," & validInvariant.validTo'image
+			                 & "," & validInvariant.sourceJobDefinitionType & "," & validInvariant.sourceAuditEventType & "," &  validInvariant.sourceAuditEventOccurrenceId & "\n";  
+			if validInvariant.reportedToLocalClient = false then
+				invariantToReport.invariantName := validInvariant.invariantName;
+				invariantToReport.invariantValue := validInvariant.invariantValue;
+				invariantToReport.validFrom := validInvariant.validFrom;
+				invariantToReport.validTo := validInvariant.validTo;
+				invariantToReport.sourceJobDefinitionType := validInvariant.sourceJobDefinitionType;
+				invariantToReport.sourceAuditEventType := validInvariant.sourceAuditEventType;
+				invariantToReport.sourceAuditEventOccurrenceId := integer'parse(validInvariant.sourceAuditEventOccurrenceId);
+				invariantsToReport := invariantsToReport & invariantToReport;
+				validInvariant.reportedToLocalClient := true;
+			end if;
+			validInvariant.stored := true;
+		end loop;
+		if invariantsToReport'length > 0 then
+			StoreClient~>addInvariants(invariantsToReport);
+		end if;
+		
+		// write the file
+		Filesystem::write_file(this.invStoreName, storeContents);
+		
+		// unlock the file
+		Filesystem::unlock_file(lock);
+		schedule this.storeTimer generate InvStore.checkStore() to this delay this.loadRate;
+	else
+		// back off for one second for the file to become unlocked
+		schedule this.storeTimer generate InvStore.loadStore() to this delay @PT1S@;
+	end if;
+exception
+	when others => 
+		logMessage := "IStore::InvStore.StoreLoaded - failed to load invariant store";
+		Logger::log(Logger::Information, "IStore", logMessage);
+
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '90683570-e285-40c7-ad2f-38ef7c7a3f32' '458a6c58-34cf-4445-a4b4-d7928645e3e8' DO NOT EDIT THIS LINE.
+state IStore::InvStore.StoreChecked () is
+logMessage : string;
+fileStatus : Filesystem::file_status;
+
+begin
+
+	logMessage := "IStore::InvStore.StoreChecked";
+	Logger::log(Logger::Information, "IStore", logMessage);
+	cancel this.storeTimer;
+	
+	if Filesystem::file_exists(this.invStoreName) then
+		fileStatus := Filesystem::get_file_status(this.invStoreName);
+		if fileStatus.modification_time /= this.storeModificationTime then
+			generate InvStore.loadStore() to this;
+		else
+			schedule this.storeTimer generate InvStore.checkStore() to this delay this.loadRate;
+		end if;
+	else
+		logMessage := "InvStore.StoreChecked, failed to locate invariant store. Specified file = " & string(this.invStoreName);
+		Logger::log(Logger::Error, "IStore", logMessage);
+		raise program_error;
+	end if;
+	
+exception
+	when others => 	
+	
+		logMessage := "AEOrdering::InvStore.StoreChecked, failed to load invariant store";
+		Logger::log(Logger::Error, "IStore", logMessage);
+		
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

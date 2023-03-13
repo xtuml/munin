@@ -4,6 +4,9 @@ configFilePath : string;
 configFile : string;
 logMessage : string;
 systemSpec : instance of SystemSpec;
+startJobGroup : integer;
+endJobGroup : integer;
+fileControl : instance of FileControl;
 
 begin
 
@@ -13,7 +16,7 @@ begin
 	// get the supplied command line option for the config file and verify it is valid
 	configFilePath := CommandLine::get_option_value("-configPath");
 	configFile := CommandLine::get_option_value("-configFile", "config.json");
-	if Filesystem::file_exists(Filesystem::filename(configFilePath & configFile)) then
+	if Filesystem::file_exists(Filesystem::filename(configFilePath & configFile)) then 
 		systemSpec := find_one SystemSpec();
 		if systemSpec = null then
 			systemSpec := create unique SystemSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, maxOutOfSequenceEvents => 10, 
@@ -26,6 +29,14 @@ begin
 		raise program_error;
 	end if;
 
+	startJobGroup := integer'parse(CommandLine::get_option_value("-startJobGroup"),16);
+	endJobGroup := integer'parse(CommandLine::get_option_value("-endJobGroup"),16);
+	fileControl := find_one FileControl();
+	if fileControl = null then
+		fileControl := create unique FileControl(startJobGroup => startJobGroup, endJobGroup => endJobGroup, Current_State => Created);
+		schedule fileControl.fileTimer generate FileControl.selectFile() to fileControl delay @PT0S@;
+	end if;
+	
 exception
 	when others =>
 	
@@ -48,6 +59,16 @@ begin
   end;
   begin
 	  CommandLine::register_value("-configFile", "The configuration file for the service", CommandLine::Optional, "configFile", CommandLine::Required, CommandLine::Single);
+  exception
+    when program_error => null;  // Ignore error if option has been defined in another domain.
+  end;
+  begin
+	  CommandLine::register_value("-startJobGroup", "The starting group id for jobs to be processed by this instance", CommandLine::Required, "startJobGroup", CommandLine::Required, CommandLine::Single);
+  exception
+    when program_error => null;  // Ignore error if option has been defined in another domain.
+  end;
+  begin
+	  CommandLine::register_value("-endJobGroup", "The ending group id for jobs to be processed by this instance", CommandLine::Required, "endJobGroup", CommandLine::Required, CommandLine::Single);
   exception
     when program_error => null;  // Ignore error if option has been defined in another domain.
   end;
