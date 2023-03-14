@@ -166,20 +166,63 @@ partition "File Transfer with XOR Definition" {
 
 image::images/PLUS_05_XORForkNoMerge.png[if..then..else..endif without a merge]
 
+==== Multiple Path Exclusive-OR Fork using elseif
+
 An Exclusive-OR fork can have more than 2 branches and this can be supported
 either by using if..then..elsif..elsif..else..endif.
 
-TODO add example
+----
 
-If several alternates are required then a switch case construct is recommended
+@startuml
+partition "File Transfer with XOR Definition" {
+  group "File Transfer with XOR"
+    #green:RequestFileX;
+    :PacketiseFileX;
+    if (XOR) then (simple)
+      :AssemblePacketX;
+    elseif (XOR) then (complex)
+      :ReconstructPacketX;  
+    else (alternative)
+      :ReportInvalidFileX;
+    endif
+    :TransferPacketX;
+    #red:TransferResultStatusX;
+  end group
+}  
+@enduml
 
-TODO add example
+----
 
+image::images/PLUS_04a_XORFork.png[Alternate Paths using if..then..elseif..else..endif]
 
+==== Multiple Path Exclusive-OR Fork using switch
 
+If several alternates are required then a switch case construct is recommended:
 
+----
 
+@startuml
+partition "File Transfer with XOR Definition" {
+  group "File Transfer with XOR"
+    #green:RequestFileX;
+    :PacketiseFileX;
+    switch (XOR)
+      case (simple)
+        :AssemblePacketX;
+      case (complex)
+        :ReconstructPacketX;  
+      case (alternative)
+        :ReportInvalidFileX;
+    endswitch
+    :TransferPacketX;
+    #red:TransferResultStatusX;
+  end group
+}  
+@enduml
 
+----
+
+image::images/PLUS_04b_XORFork.png[Alternate Paths using switch]
 
 ==== Loop
 
