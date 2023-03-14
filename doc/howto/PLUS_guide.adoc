@@ -480,7 +480,39 @@ event data along with its value.
 
 ==== Extra Job Invariant
 
+An Extra Job Invariant is a data value that is attached to an audit event
+in one Job that is then checked to see that the same value is attached 
+to one or more other audit events within other Jobs. An Extra Job 
+Invariant has a lifetime independent of any Jobs and is expected to
+ourlive its source Job. When it comes to the end of its life which is a 
+pre-determined length then it is no longer available to be used. As an 
+example, consider a source job type that creates a key name and value that is
+valid for 14 days. The source job will terminate but the extra job invariant 
+will be persisted for those 14 days. Any number of user jobs can use
+that key name and value over the 14 day life of the key. The Protocol
+Verifier will check that every user Job that uses that key will have a
+matching value. Any mismatch would be deemed an error.
 
+It is expected that extra job invariants of the same name may have overlapping 
+lifetimes. The Protocol Verifier will accept any matching value for a 
+given extra job invariant name provided that extra job invariant is still
+in force (i.e. within its lifetime) at the time it is used.
+
+The support for extra job invariants provides an additional level of
+verification over and above that which can be achieved by sequencing the
+audit events.
+
+A single audit event definition in a single Job is marked as the source
+event for each extra job invariant. There can be only one source event
+for a given extra job invariant. There can be as many user events defined
+in as many jobs as required for the same extra job invariant.
+
+The Protocol Verifier persists the extra job invariant for its lifetime
+and checks that the user events carrying the same named extra job invariant
+macth a value that is valid at that time. If they don't match then that is 
+an error condition. If an audit event is expected to carry a source or a 
+user extra job invariant and, at runtime, it doesn't then that is an error 
+condition detected by the Protocol Verifier.
 
 === plus2json General Parsing Rules
 
