@@ -480,29 +480,99 @@ event data along with its value.
 
 ==== Extra Job Invariant
 
+An Extra Job Invariant is a data value that is attached to an audit event
+in one Job that is then checked to see that the same value is attached 
+to one or more other audit events within other Jobs. An Extra Job 
+Invariant has a lifetime independent of any Jobs and is expected to
+ourlive its source Job. When it comes to the end of its life which is a 
+pre-determined length then it is no longer available to be used. As an 
+example, consider a source job type that creates a key name and value that is
+valid for 14 days. The source job will terminate but the extra job invariant 
+will be persisted for those 14 days. Any number of user jobs can use
+that key name and value over the 14 day life of the key. The Protocol
+Verifier will check that every user Job that uses that key will have a
+matching value. Any mismatch would be deemed an error.
 
+It is expected that extra job invariants of the same name may have overlapping 
+lifetimes. The Protocol Verifier will accept any matching value for a 
+given extra job invariant name provided that extra job invariant is still
+in force (i.e. within its lifetime) at the time it is used.
 
-=== plus2json General Parsing Rules
+The support for extra job invariants provides an additional level of
+verification over and above that which can be achieved by sequencing the
+audit events.
 
-TODO check that the following paragraphs are still correct/relevant
+A single audit event definition in a single Job is marked as the source
+event for each extra job invariant. There can be only one source event
+for a given extra job invariant. There can be as many user events defined
+in as many jobs as required for the same extra job invariant.
 
-plus2json operates on a line by line basis. Each statement must be
-fully contained on a single line. Blank lines are ignored.
+The Protocol Verifier persists the extra job invariant for its lifetime
+and checks that the user events carrying the same named extra job invariant
+macth a value that is valid at that time. If they don't match then that is 
+an error condition. If an audit event is expected to carry a source or a 
+user extra job invariant and, at runtime, it doesn't then that is an error 
+condition detected by the Protocol Verifier.
 
-Each line is split into tokens by whitespace. Extra whitespace characters are
-ignored. Element names may not have spaces in them unless they are wrapped by
-double quotes (`""`).
+----
+@startuml 
+partition "Source Extra-Job Invariant Definition" {
+  group "Source Extra-Job Invariant"
+      #green:RequestEINV;
+      :GenerateEINV;
+      #red:SendEINV,EINV,SRC,name=FileTransferEINV;
+      note right 
+        SendEINV defines extra-job
+        invariant named FileTransferEINV.
+      end note
+  end group
+}
+@enduml
+----
 
-Display directives prepended with hash (`#`) or found inside square brackets
-(`[]`) are ignored.
+image::images/PLUS_11_SourceExtraJobInvariant.png[Extra Job Invariant Source]
 
-PLUS does not directly support code comments, however any line that does not
-match one of the supported statements is silently ignored. PlantUML single line
-comments (start with a single `'`) will work. PlantUML block comments
-(surrounded by `/' ... '/`) will work as long as no valid statements are
-contained in the block.
+Look the the elements of the SendEINV event: the EINV indicates that 
+this audit event data is an extra job invariant; SRC indicates that this is the 
+source event for the named extra job invariant; name=FileTransferEInv indicates 
+that the name of the extra job invariant is FileTransferEInv which will appear 
+in the runtime audit event data along with its value.
 
-=== File Structure and Preprocessing
+----
+@startuml
+partition "File Transfer with EINV Definition" {
+  group "File Transfer with EINV"
+    #green:RequestFileE;
+    :PacketiseFileE,EINV,USER,name=FileTransferEINV;
+    fork
+      :AssemblePacketE;
+    fork again
+      :CharacterisePacketE;
+    end fork
+    :CheckPacketE;
+    :TransferPacketE,EINV,USER,name=FileTransferEINV;
+    #red:TransferResultStatusE;
+  end group
+}  
+@enduml
+----
+
+image::images/PLUS_12_UserExtraJobInvariant.png[Extra Job Invariant Usage]
+
+Note that 2 events in this job are users of the FileTransferEINV extra job
+invariant. Look the the elements of the PacketiseFileE event: the EINV indicates that 
+this audit event data is an extra job invariant; USER indicates that this is a 
+user event for the named extra job invariant; name=FileTransferEInv indicates 
+that the name of the extra job invariant is FileTransferEInv which will appear 
+in the runtime audit event data along with its value.
+
+At runtime the Protocol Verifier will check that the named extra job invariant 
+is still in force and that the value provided in the user event matches that
+of the persisted extra job invariant of the same name.
+
+=== Splitting a PLUS definition across multiple files (In development)
+
+==== File Structure and Preprocessing
 
 PLUS job definitions are defined in files with the `.puml` extension. Each
 definition file must contain at least one UML block. The start of a UML block is
@@ -547,73 +617,40 @@ as a top level job definition.
 Includes are handled during preprocessing and simply inject the statements from
 the target UML block in the place of the `!include` statement itself.
 
-Example:
+TODO Add example
 
-._BankDeposit1.puml
-----
-@startuml(id=Part1)
-title BankDeposit (part 1)
-participant Customer
-participant Teller
-participant System
-Customer -> Teller : SendCheck
-Customer -> Teller : SendDepositSlip
-Teller -> Teller : ScanDocuments
-Teller -> Teller : EnterInformation
-Teller -> System : SubmitForReview
-@enduml
+== plus2json
 
-@startuml(id=Part3)
-title BankDeposit (part 3)
-participant Teller
-participant Customer
-Teller -> Customer : GiveReceipt
-@enduml
-----
+TODO the whole of the plus2 json section needs to be checked and refined
 
-image::_BankDeposit1.png[BankDeposit (part 1)]
+This is  the application that converts job and audit event data definitions
+described using PLUS described above into a form that can configure the
+behaviour of the Protocol Varifier and its associated Simulator.
 
-image::_BankDeposit1_001.png[BankDeposit (part 3)]
+plus2json has been written in Python and uses standard parsing tools such
+as ANTLR
 
-._BankDeposit2.puml
-----
-@startuml(id=Part2)
-title BankDeposit (part 2)
-participant System
-participant Auditor
-System -> System : VerifyAmount
-System -> System : VerifyAccountNumber
-System -> Auditor : RequestFraudCheck
-Auditor -> System: FraudCheckResponse
-@enduml
-----
+=== plus2json General Parsing Rules
 
-image::_BankDeposit2.png[BankDeposit (part 2)]
+TODO check that the following paragraphs are still correct/relevant
 
-.BankDeposit.puml
-----
-@startuml
-box Sequence #LightBlue
+plus2json operates on a line by line basis. Each statement must be
+fully contained on a single line. Blank lines are ignored.
 
-# note the included files begin with "_"
-!include _BankDeposit1.puml!Part1
-!include _BankDeposit2.puml!Part2
-!include _BankDeposit1.puml!Part3
+Each line is split into tokens by whitespace. Extra whitespace characters are
+ignored. Element names may not have spaces in them unless they are wrapped by
+double quotes (`""`).
 
-# participants restated here to control display order
-participant Customer
-participant Teller
-participant System
-participant Auditor
-end box
+Display directives prepended with hash (`#`) or found inside square brackets
+(`[]`) are ignored.
 
-# title restated at the end to ensure it is the last title statement
-title BankDeposit
-@enduml
-----
+PLUS does not directly support code comments, however any line that does not
+match one of the supported statements is silently ignored. PlantUML single line
+comments (start with a single `'`) will work. PlantUML block comments
+(surrounded by `/' ... '/`) will work as long as no valid statements are
+contained in the block.
 
-image::BankDeposit.png[BankDeposit]
+Use of the plus2json application and its options can be found 
+link:https://github.com/xtuml/plus2json/readme.adoc[here]
 
-If a job definition is composed of many `!include` statements, the `title`
-statement should come _after_ the `!includes` to assure it is the last `title`
-statement processed for the job definition:
+TODO DO we want to move the plus2json readme in here?
