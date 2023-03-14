@@ -1,0 +1,17 @@
+@startuml
+partition "File Transfer with XOR Definition" {
+  group "File Transfer with XOR"
+    #green:RequestFileX;
+    :PacketiseFileX;
+    if (XOR) then (simple)
+      :AssemblePacketX;
+    elseif (XOR) then (complex)
+      :ReconstructPacketX;  
+    else (alternative)
+      :ReportInvalidFileX;
+    endif
+    :TransferPacketX;
+    #red:TransferResultStatusX;
+  end group
+}  
+@enduml
