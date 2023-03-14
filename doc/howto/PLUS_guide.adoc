@@ -1,33 +1,578 @@
-= PLUS User Guide
+= PLUS and plus2json User Guide
 
 == Introduction
 
-The Munin protocol verifier is dynamically configured using UML sequence
-diagrams as input for defining valid sequences of events. A subset of the
-PlantUML syntax forms a DSL for defining these sequences and PlantUML can be
-used as a visualization tool.
+The Munin Protocol Verifier is dynamically configured using the PLUS domain 
+specific language. PLUS uses a constrained subset of PlantUML Activity
+Diagrams as input for defining valid sequences of events and the
+supplementary audit event data. PLUS is captured using textual input and the
+PlantUML tools can be used for visualization and review.
 
-== Specification
+The application plus2json converts the textual form of the PlantUML activity
+diagrams into json files that are used to configure various aspects of the
+Protocol Verifier and its associated tools.
 
-=== General Parsing Rules
+== PLUS
 
-The PLUS processor operates on a line by line basis. Each statement must be
-fully contained on a single line. Blank lines are ignored.
+=== Statements
 
-Each line is split into tokens by whitespace. Extra whitespace characters are
-ignored. Element names may not have spaces in them unless they are wrapped by
-double quotes (`""`).
+==== Job Name
 
-Display directives prepended with hash (`#`) or found inside square brackets
-(`[]`) are ignored.
+The job name is defined by the `partition` statement. Every job definition
+_must_ have a name defined:
 
-PLUS does not directly support code comments, however any line that does not
-match one of the supported statements is silently ignored. PlantUML single line
-comments (start with a single `'`) will work. PlantUML block comments
-(surrounded by `/' ... '/`) will work as long as no valid statements are
-contained in the block.
+----
+partition "MyJob" {
+}
+----
 
-=== File Structure and Preprocessing
+==== Start/End Sequence Definition
+
+A job consists of one or more disjoint sequences of events. A sequence is
+defined by surrounding a set of statements with a 'group' definition. All audit
+event statements and participant declarations must be defined within a sequence:
+
+----
+group Sequence1
+...
+end group
+----
+
+
+==== Audit Event
+
+Actual audit events in sequences are defined using the activity statement. The
+name of the activity is the event name and uniquely identifies the event type.
+An additional occurrence number is automatically generated so that if the same
+event type occurs more than once in a Job definition it's location in the
+sequence will be uniquely identified.
+
+----
+:transactionApproved;
+----
+
+image::images/PLUS_01_SingleEvent.png[Single Event]
+
+==== Sequence of Audit Events
+
+A sequence of audit events is captured by the sequential listing of activity statements.
+The graphic shows the arrow representing the sequence automatically. These will always
+occur in the context of a Sequence which is itself in a Job. A simple Job with a single
+sequence of 3 audit events looks like this.
+
+----
+@startuml 
+partition "Simple Job" {
+  group "Fund Transfer"
+    :requestFunds;
+    :requestApproved;
+    :fundsTransferred;
+  end group
+}
+@enduml
+----
+
+image::images/PLUS_02_SimpleJob.png[Simpgle Job]
+
+==== Sequence Start/End
+
+Sequences can have multiple valid starting and ending points. An event with no
+predecessor event is deemed to be a sequence start event. An event with no 
+successor event is deemed to be a sequence end event. An useful convention that
+can help users to read and interpret the activity diagrams is to colour code the
+start and end events using the #green and #red labels. These colour labels are ignored by the plus2json application and are an optional visual clue.
+
+----
+partition "MyJob" {
+  group "Sequence1"
+    #green:startEvent;
+    :intermediaryEvent;
+    #red:endEvent;
+  end group
+}
+----
+
+image::images/PLUS_03_SimpleSequence.png[Start and End Events Highlighted]
+
+==== Alternate Paths through a Sequence
+
+Valid sequence definitions can fork into alternate distinct paths. For example,
+an error condition is tested with the sequence of events following the test where 
+no error was detected would be different to the sequence of events where an error
+was detected. In its basic form, this is achieved using the familiar 
+if..then..else..endif construct. This captures a fork in the sequence of events. 
+In this case it is an Exclusive-Or fork (XOR) since only one of the available paths 
+can be taken for a given visit to the fork point.
+
+----
+@startuml
+partition "File Transfer with XOR Definition" {
+  group "File Transfer with XOR"
+    #green:RequestFileX;
+    :PacketiseFileX;
+    if (XOR) then (normal)
+      :AssemblePacketX;
+    else (alternative)
+      :ReportInvalidFileX;
+    endif
+    :TransferPacketX;
+    #red:TransferResultStatusX;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_04_XORFork.png[Alternate Paths using if..then..else..endif]
+
+Note that the terms in brackets associated with the if..then..else..endif 
+(XOR, normal and alternate in this example) are
+purely to enhance human readability. This information is not carried through
+to the Protocol Verifier. Remember the role of the Protocol Verifier is to
+verify that a sequence of events was expected. It does not need to know what 
+the condition was that caused an alternative sequence of events to emerge just 
+that an alternative sequence of events can be expected.
+
+==== Additional End Events in a Sequence
+
+Although the above is a valid construct it may not always be what is required 
+after a fork. In this case it is unlikely that the system should continue
+with the transfer if the alternate path is taken with the ReportInvalidFileX
+event. In this case, the path may need to end at that point. This can be achieved 
+using the 'detach' statement. Note that as the detach signals the end event of that
+path we use the colour convention to mark the end event of a sequence. This shows
+that sequences can have multiple end events.
+
+----
+
+@startuml
+partition "File Transfer with XOR Definition" {
+  group "File Transfer with XOR"
+    #green:RequestFileX;
+    :PacketiseFileX;
+    if (XOR) then (normal)
+      :AssemblePacketX;
+    else (alternative)
+      #red:ReportInvalidFileX;
+      detach
+    endif
+    :TransferPacketX;
+    #red:TransferResultStatusX;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_05_XORForkNoMerge.png[if..then..else..endif without a merge]
+
+==== Multiple Path Exclusive-OR Fork using elseif
+
+An Exclusive-OR fork can have more than 2 branches and this can be supported
+either by using if..then..elsif..elsif..else..endif.
+
+----
+
+@startuml
+partition "File Transfer with XOR Definition" {
+  group "File Transfer with XOR"
+    #green:RequestFileX;
+    :PacketiseFileX;
+    if (XOR) then (simple)
+      :AssemblePacketX;
+    elseif (XOR) then (complex)
+      :ReconstructPacketX;  
+    else (alternative)
+      :ReportInvalidFileX;
+    endif
+    :TransferPacketX;
+    #red:TransferResultStatusX;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_04a_XORFork.png[Alternate Paths using if..then..elseif..else..endif]
+
+==== Multiple Path Exclusive-OR Fork using switch
+
+If several alternates are required then a switch case construct is recommended:
+
+----
+
+@startuml
+partition "File Transfer with XOR Definition" {
+  group "File Transfer with XOR"
+    #green:RequestFileX;
+    :PacketiseFileX;
+    switch (XOR)
+      case (simple)
+        :AssemblePacketX;
+      case (complex)
+        :ReconstructPacketX;  
+      case (alternative)
+        :ReportInvalidFileX;
+    endswitch
+    :TransferPacketX;
+    #red:TransferResultStatusX;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_04b_XORFork.png[Alternate Paths using switch]
+
+==== Loop
+
+Valid sequences may have subsequences of events that occur repeatedly in a loop.
+This can be  specified using the `repeat`...`repeat while` construct. The following
+is an example of an unconstrained loop. Consrtained loops with runtime specified
+loop counts are also supported (see below).
+
+----
+@startuml
+partition "File Transfer with loop Definition" {
+  group "File Transfer with loop"
+    #green:RequestFileL;
+    :PacketiseFileL;
+    repeat
+      :AssemblePacketL;
+      :TransferPacketL;
+    repeat while (unconstrained)
+    #red:TransferResultStatusL;
+  end group
+}  
+@enduml
+----
+
+image::images/PLUS_06_BasicLoop.png[Unconstrained Loop]
+
+Note: Nested loops are currently not supported.
+
+===== Breaking from a loop
+
+The sequence can also specify an event which breaks the loop
+early. This is done by adding the word "break" immediately
+after the event that marks the break point in the loop. This
+means the flow of control will exit the loop and continue 
+with the first event after the end of the loop as shown:
+
+----
+@startuml
+partition "File Transfer with loop break Definition" {
+  group "File Transfer with loop break"
+    #green:RequestFileB;
+    :PacketiseFileB;
+    repeat
+      :AssemblePacketB;
+      :TransferPacketB;
+      if (XOR) then (break)
+        :CorruptedPacketErrorB;
+        break    
+      else (normal)
+      endif
+    repeat while (loopCount)
+    #red:TransferResultStatusB;
+  end group
+}  
+@enduml
+----
+
+image::images/PLUS_07_LoopWithBreak.png[Loop with break]
+
+The event before the "break" is considered to be a break
+event and is marked as such in the information sent to the
+Protocol Verifier. The next event expected after a "break"
+event is the first event after the end of the loop. 
+
+=== Audit Event Data Definition
+
+Audit events can be supplemented with audit event data that
+allows additional verification checks to be performed. Each
+of these is described here.
+
+Audit event data is always attached to an event. The event that
+provides the audit event data is known as the source event.
+For some uses of audit event data other events will use or
+check the audit event data event though they don't carry 
+audit event data. In other cases other audit events will carry 
+audit event data that has to be compared with the audit event data
+on the source event. Both these latter cases are termed user events.
+
+A given event can be the source of multiple elements of audit
+event data.
+
+==== Loop Counting
+
+A runtime constraint can be added to a loop. This will specify
+the number of times the events in the loop are expected to be
+executed. The loop count is provided on the source audit event
+which must occur somewhere before the loop and not be in a loop
+of its own. The user event is defined as part of the audit event 
+data and that defines the event that will be checked to see if
+an event of the correct type has been seen the specified number 
+of times.
+
+----
+@startuml
+partition "File Transfer with loop count Definition" {
+  group "File Transfer with loop count"
+    #green:RequestFileLC;
+    :PacketiseFileLC,LCNT,user=TransferPacketLC,name=LC1;
+    repeat
+      :AssemblePacketLC;
+      :TransferPacketLC;
+    repeat while (loopCount)
+    #red:TransferResultStatusLC;
+  end group
+}  
+@enduml
+----
+
+image::images/PLUS_08_LoopCount.png[Loop with Loop Count]
+
+The audit event data defintion is added directly to the audit event.
+The event PacketiseFileLC is the source event since that is the event
+that is expected to carry the audit event data. Look the the elements 
+of the PacketiseFileLC: the LCNT indicates that this audit event data 
+is a loop count; user=TransferPacketLC indicates that the user event
+i.e. the one that will be counted is TransferPacketLC which is an 
+event within the loop; name=LC1 indicates that the name of the 
+loop count is LC1 which will appear in the runtime audit event data
+along with its value.
+
+Any event within the loop can be used as the user event. The important
+point is that the user event must be unambiguous when it appears on the
+source event. For example, the source event could not be followed by
+multiple paths where the same type of event as the user event occurs on
+more than one path. It would be impossible for the system to resolve
+which of the events to treat as the correct user event.
+
+If an audit event is expected to carry a Loop Count and, at 
+runtime, it doesn't then that is an error condition detected by
+the Protocol Verifier.
+
+Note: the phrase loopCount in the repeat while statement is only to
+aid readability of the diagram. It is not passed to the
+Protocol Verifier.
+
+==== Branch Counting
+
+A single audit event can be followed by mulitple instances of another 
+type of audit event. This is likely to occur where the flow fragments
+from large units into smaller unit. In the example shown here a single 
+file is likely to result in many packets. So a single PacketiseFile
+event might reasonably be followed by many AssemblePacket events.
+This is known as an instance fork and at first sight it appears to
+have no impact on the audit event definition since a PacketiseFile event
+is followed by an AssemblePacket event in each case. However, this would
+allow a large number of acceptable paths which is unlikely to be 
+appropriate. So if instances forks are required then they must be 
+accompanied by a branch count. This is a numeric value that says
+how many instances of the event following the fork point to expect.
+For example, the PacketiseFile event could carry audit event data
+that indicates 12 packets were created from the file and so 12 
+instances of the AssemblePacket event can be expected. This value
+is determined and checked at runtime and so can be different for 
+each execution of the Job.
+
+A Branch Count source event must be prior to or at the fork point.
+The user event of a Branch Count is the fork point, i.e. the single
+event which expects multiple events to refer back to it in their
+previous event id value. The source event and the user event can be 
+the same event, i.e. the fork point. The source event can be earlier
+than, and therefore separate to, the user event.
+
+A Branch Count is mandatory for instance forks. If multiple occurrences
+of the same type of event follow a single event without a branch
+count being defined then the Protocol Verifier will record a failed Job.
+
+A Branch Count could be used on an AND fork though it has significantly 
+less value and is not mandatory.
+
+----
+
+@startuml
+partition "File Transfer with branch count Definition" {
+  group "File Transfer with branch count"
+    #green:RequestFileBC;
+    :PacketiseFileBC,BCNT,name=BC1;
+    :AssemblePacketBC;
+    :TransferPacketBC;
+    #red:TransferResultStatusBC;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_09_BranchCount.png[Branch Count]
+
+The audit event data defintion is added directly to the audit event.
+The event PacketiseFileBC is the source event since that is the event
+that is expected to carry the audit event data. It is also the user 
+event in case as no user event has been explicitly mentioned. 
+Look the the elements of the PacketiseFileBC: the BCNT indicates that 
+this audit event data is a branch count; name=BC1 indicates that the 
+name of the branch count is BC1 which will appear in the runtime audit 
+event data along with its value.
+
+If the source and user events were separate then user=<userEventTypeName> 
+would be expected after the BCNT, and before name=BC1.
+
+If an audit event is expected to carry an Branch Count and, at 
+runtime, it doesn't then that is an error condition detected by
+the Protocol Verifier.
+
+
+==== Intra Job Invariant
+
+An Intra Job Invariant is a data value that is attached to an audit event
+that is then checked to see that the same value is attached to one or more 
+other audit events within the same Job. As an example, consider a Job Type 
+which represents a process that manipulates a file. It may be useful to 
+calculate a hash from the file at the start of the process and then check 
+that the same hash can be generated at the end of the process. This would
+help verify that the process had not corrupted the file in some way.
+
+The support for intra job invariants provides an additional level of
+verification over and above that which can be achieved by sequencing the
+audit events.
+
+The first audit event in a Job that provides an intra job invariant is 
+the source event. Any number of other audit events can provide the
+same intra job invariant and these are all user events. The Protocol 
+Verifier checks that the all the values of the intra job invariant
+within a single job match. If they don't then that is an error condition.
+If an audit event is expected to carry an intra job invariant and, at 
+runtime, it doesn't then that is an error condition detected by
+the Protocol Verifier.
+
+----
+
+@startuml
+partition "File Transfer with IINV Definition" {
+  group "File Transfer with IINV"
+    #green:RequestFileI,IINV,name=XferInv;
+    :PacketiseFileI;
+    fork
+      :AssemblePacketI;
+    fork again
+      :CharacterisePacketI;
+    end fork
+    :CheckPacketI;
+    :TransferPacketI,IINV,USER,name=XferInv;
+    #red:TransferResultStatusI;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_10_IntraJobInvariant.png[Intra Job Invariant]
+
+Look the the elements of the RequestFileI: the IINV indicates that 
+this audit event data is an intra job invariant; name=XferInv indicates that the 
+name of the intra job invariant is XfreInv which will appear in the runtime audit 
+event data along with its value.
+
+==== Extra Job Invariant
+
+An Extra Job Invariant is a data value that is attached to an audit event
+in one Job that is then checked to see that the same value is attached 
+to one or more other audit events within other Jobs. An Extra Job 
+Invariant has a lifetime independent of any Jobs and is expected to
+ourlive its source Job. When it comes to the end of its life which is a 
+pre-determined length then it is no longer available to be used. As an 
+example, consider a source job type that creates a key name and value that is
+valid for 14 days. The source job will terminate but the extra job invariant 
+will be persisted for those 14 days. Any number of user jobs can use
+that key name and value over the 14 day life of the key. The Protocol
+Verifier will check that every user Job that uses that key will have a
+matching value. Any mismatch would be deemed an error.
+
+It is expected that extra job invariants of the same name may have overlapping 
+lifetimes. The Protocol Verifier will accept any matching value for a 
+given extra job invariant name provided that extra job invariant is still
+in force (i.e. within its lifetime) at the time it is used.
+
+The support for extra job invariants provides an additional level of
+verification over and above that which can be achieved by sequencing the
+audit events.
+
+A single audit event definition in a single Job is marked as the source
+event for each extra job invariant. There can be only one source event
+for a given extra job invariant. There can be as many user events defined
+in as many jobs as required for the same extra job invariant.
+
+The Protocol Verifier persists the extra job invariant for its lifetime
+and checks that the user events carrying the same named extra job invariant
+macth a value that is valid at that time. If they don't match then that is 
+an error condition. If an audit event is expected to carry a source or a 
+user extra job invariant and, at runtime, it doesn't then that is an error 
+condition detected by the Protocol Verifier.
+
+----
+@startuml 
+partition "Source Extra-Job Invariant Definition" {
+  group "Source Extra-Job Invariant"
+      #green:RequestEINV;
+      :GenerateEINV;
+      #red:SendEINV,EINV,SRC,name=FileTransferEINV;
+      note right 
+        SendEINV defines extra-job
+        invariant named FileTransferEINV.
+      end note
+  end group
+}
+@enduml
+----
+
+image::images/PLUS_11_SourceExtraJobInvariant.png[Extra Job Invariant Source]
+
+Look the the elements of the SendEINV event: the EINV indicates that 
+this audit event data is an extra job invariant; SRC indicates that this is the 
+source event for the named extra job invariant; name=FileTransferEInv indicates 
+that the name of the extra job invariant is FileTransferEInv which will appear 
+in the runtime audit event data along with its value.
+
+----
+@startuml
+partition "File Transfer with EINV Definition" {
+  group "File Transfer with EINV"
+    #green:RequestFileE;
+    :PacketiseFileE,EINV,USER,name=FileTransferEINV;
+    fork
+      :AssemblePacketE;
+    fork again
+      :CharacterisePacketE;
+    end fork
+    :CheckPacketE;
+    :TransferPacketE,EINV,USER,name=FileTransferEINV;
+    #red:TransferResultStatusE;
+  end group
+}  
+@enduml
+----
+
+image::images/PLUS_12_UserExtraJobInvariant.png[Extra Job Invariant Usage]
+
+Note that 2 events in this job are users of the FileTransferEINV extra job
+invariant. Look the the elements of the PacketiseFileE event: the EINV indicates that 
+this audit event data is an extra job invariant; USER indicates that this is a 
+user event for the named extra job invariant; name=FileTransferEInv indicates 
+that the name of the extra job invariant is FileTransferEInv which will appear 
+in the runtime audit event data along with its value.
+
+At runtime the Protocol Verifier will check that the named extra job invariant 
+is still in force and that the value provided in the user event matches that
+of the persisted extra job invariant of the same name.
+
+=== Splitting a PLUS definition across multiple files (In development)
+
+==== File Structure and Preprocessing
 
 PLUS job definitions are defined in files with the `.puml` extension. Each
 definition file must contain at least one UML block. The start of a UML block is
@@ -72,250 +617,40 @@ as a top level job definition.
 Includes are handled during preprocessing and simply inject the statements from
 the target UML block in the place of the `!include` statement itself.
 
-Example:
+TODO Add example
 
-._BankDeposit1.puml
-----
-@startuml(id=Part1)
-title BankDeposit (part 1)
-participant Customer
-participant Teller
-participant System
-Customer -> Teller : SendCheck
-Customer -> Teller : SendDepositSlip
-Teller -> Teller : ScanDocuments
-Teller -> Teller : EnterInformation
-Teller -> System : SubmitForReview
-@enduml
+== plus2json
 
-@startuml(id=Part3)
-title BankDeposit (part 3)
-participant Teller
-participant Customer
-Teller -> Customer : GiveReceipt
-@enduml
-----
+TODO the whole of the plus2 json section needs to be checked and refined
 
-image::_BankDeposit1.png[BankDeposit (part 1)]
+This is  the application that converts job and audit event data definitions
+described using PLUS described above into a form that can configure the
+behaviour of the Protocol Varifier and its associated Simulator.
 
-image::_BankDeposit1_001.png[BankDeposit (part 3)]
+plus2json has been written in Python and uses standard parsing tools such
+as ANTLR
 
-._BankDeposit2.puml
-----
-@startuml(id=Part2)
-title BankDeposit (part 2)
-participant System
-participant Auditor
-System -> System : VerifyAmount
-System -> System : VerifyAccountNumber
-System -> Auditor : RequestFraudCheck
-Auditor -> System: FraudCheckResponse
-@enduml
-----
+=== plus2json General Parsing Rules
 
-image::_BankDeposit2.png[BankDeposit (part 2)]
+TODO check that the following paragraphs are still correct/relevant
 
-.BankDeposit.puml
-----
-@startuml
-box Sequence #LightBlue
+plus2json operates on a line by line basis. Each statement must be
+fully contained on a single line. Blank lines are ignored.
 
-# note the included files begin with "_"
-!include _BankDeposit1.puml!Part1
-!include _BankDeposit2.puml!Part2
-!include _BankDeposit1.puml!Part3
+Each line is split into tokens by whitespace. Extra whitespace characters are
+ignored. Element names may not have spaces in them unless they are wrapped by
+double quotes (`""`).
 
-# participants restated here to control display order
-participant Customer
-participant Teller
-participant System
-participant Auditor
-end box
+Display directives prepended with hash (`#`) or found inside square brackets
+(`[]`) are ignored.
 
-# title restated at the end to ensure it is the last title statement
-title BankDeposit
-@enduml
-----
+PLUS does not directly support code comments, however any line that does not
+match one of the supported statements is silently ignored. PlantUML single line
+comments (start with a single `'`) will work. PlantUML block comments
+(surrounded by `/' ... '/`) will work as long as no valid statements are
+contained in the block.
 
-image::BankDeposit.png[BankDeposit]
+Use of the plus2json application and its options can be found 
+link:https://github.com/xtuml/plus2json/blob/main/README.adoc[here]
 
-=== Statements
-
-==== Job Name
-
-The job name is defined by the `title` statement. Every top level job definition
-_must_ have a name defined. If multiple `title` statements are encountered, the
-last one wins:
-
-----
-title MyJob
-title "My Job With Spaces"
-----
-
-If a job definition is composed of many `!include` statements, the `title`
-statement should come _after_ the `!includes` to assure it is the last `title`
-statement processed for the job definition:
-
-==== Start/End Sequence Definition
-
-A job consists of one or more disjoint sequences of events. A sequence is
-defined by surrounding a set of statements with a `box` definition. All audit
-event statements and participant declarations must be defined within a sequence:
-
-----
-box Sequence1 #LightBlue
-...
-end box
-----
-
-==== Application/Participant
-
-All participants in the sequence must be pre-declared. This is done with the
-`participant` statement:
-
-----
-participant Participant1
-participant Participant2
-participant "Participant with Spaces"
-----
-
-==== Sequence Start/End
-
-Sequences can have multiple valid starting and ending points. The first event in
-a sequence is automatically considered to be a sequence start event. Likewise,
-the last event in a sequence is automatically considered to be a sequence end
-event. Other start and end events can be defined by sending messages between an
-external "actor" and "participant" in the sequence diagram. An actor is defined
-with the `actor` statement:
-
-----
-actor User
-actor System
-actor "Actor with Spaces"
-----
-
-Like participants, actors must be pre-declared. Actors must be declared
-_outside_ the sequence definitions.
-
-==== Audit Event
-
-Actual audit events in sequences are defined using the message statement. The
-message must be defined between a pre-declared actor or participant and another
-participant in the diagram. The name of the message is the event name and
-uniquely identifies the event type in the job. An additional occurrence number
-is used in some cases to identify the instance of the event in the job
-definition:
-
-----
-teller -> customer: "Print Receipt"
-----
-
-image::ae.png[Audit Event]
-
-==== Start/Stop/Resume Numbering
-
-In cases where an event or set of events is used in multiple places in a single
-job definition, it is necessary to include an additional numeric value to
-identify the occurrence of an event in a job sequence. Numbering can be
-controlled by the following statements:
-
-`autonumber` causes the processor to start automatically attaching occurrence
-numbers to audit events with sequentially increasing integers starting at 1.
-
-`autonumber stop` causes the processor to stop attaching occurrence numbers to
-audit events. `autonumber stop` is not valid before an instance of `autonumber`
-or `autonumber resume`.
-
-`autonumber resume` causes the processor to restart attaching occurrence numbers
-starting at the last number plus 1. `autonumber resume` is not valid before an
-instance of `autonumber stop`
-
-----
-alice -> bob: "A"
-autonumber
-alice -> bob: "B"
-alice -> bob: "C"
-autonumber stop
-alice -> bob: "D"
-alice -> bob: "E"
-autonumber resume
-alice -> bob: "F"
-alice -> bob: "G"
-autonumber stop
-alice -> bob: "H"
-alice -> bob: "I"
-alice -> bob: "J"
-autonumber
-alice -> bob: "K"
-alice -> bob: "L"
-alice -> bob: "M"
-----
-
-image::autonumber.png[Autonumber]
-
-==== Alt/Else (in development)
-
-Valid sequence definitions can branch into multiple distinct paths. This can be
-specified using the `alt` and `else` groupings.
-
-----
-teller -> system: "Request withdrawal"
-alt
-system -> teller: "Report insufficient balance"
-else
-system -> teller: "Report success"
-end alt
-----
-
-image::alt.png[Alt/else]
-
-Each alt/else collection starts with a single `alt` statement followed by a
-series of statements. An `else` statement can follow along with additional
-statements. The whole collection is terminated by an `end` statement. There may
-be any number of `else` branches. An `else` or `end` statement is invalid
-without a preceding `alt` statement. Every `alt` statement must be terminated
-with an `end` statement.
-
-==== Loop (in development)
-
-Valid sequences may have subsequences of events that occur repeatedly in a loop.
-This can be  specified using the `loop` grouping.
-
-----
-client -> server: "Request file"
-loop
-server -> server: "Prepare packet"
-server -> client: "Send packet"
-end loop
-server -> client: "Transfer complete"
-----
-
-image::loop.png[Loop]
-
-===== Breaking from a loop (in development)
-
-A loop can be constrained to a specific number of iterations or it can be
-unconstrained. The sequence can also specify an event which breaks the loop
-early. This is done by adding the word "break" as the secondary group label of
-the branch of an `alt`:
-
-----
-client -> server: "Request file"
-loop
-alt
-server -> server: "Prepare packet"
-else break
-server -> server: "Internal error"
-end alt
-server -> client: "Send packet"
-end loop
-server -> client: "Transfer result"
-----
-
-image::loopbreak.png[Loop with break]
-
-The last event an alt branch marked with "break" is considered to be a break
-event. The next event expected after a "break" event is the first event after
-the end of the loop. There is currently no support for breaking from the outer
-loop of a nested loop.
-
+TODO DO we want to move the plus2json readme in here?

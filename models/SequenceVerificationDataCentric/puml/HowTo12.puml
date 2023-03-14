@@ -1,0 +1,16 @@
+@startuml
+partition "File Transfer with EINV Definition" {
+  group "File Transfer with EINV"
+    #green:RequestFileE;
+    :PacketiseFileE,EINV,USER,name=FileTransferEINV;
+    fork
+      :AssemblePacketE;
+    fork again
+      :CharacterisePacketE;
+    end fork
+    :CheckPacketE;
+    :TransferPacketE,EINV,USER,name=FileTransferEINV;
+    #red:TransferResultStatusE;
+  end group
+}  
+@enduml

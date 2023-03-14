@@ -1,0 +1,11 @@
+@startuml
+partition "File Transfer with branch count Definition" {
+  group "File Transfer with branch count"
+    #green:RequestFileBC;
+    :PacketiseFileBC,BCNT,name=BC1;
+    :AssemblePacketBC;
+    :TransferPacketBC;
+    #red:TransferResultStatusBC;
+  end group
+}  
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+partition "File Transfer with IINV Definition" {
+  group "File Transfer with IINV"
+    #green:RequestFileI,IINV,name=XferInv;
+    :PacketiseFileI;
+    fork
+      :AssemblePacketI;
+    fork again
+      :CharacterisePacketI;
+    end fork
+    :CheckPacketI;
+    :TransferPacketI,IINV,USER,name=XferInv;
+    #red:TransferResultStatusI;
+  end group
+}  
+@enduml
