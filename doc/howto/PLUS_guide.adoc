@@ -293,11 +293,190 @@ Audit events can be supplemented with audit event data that
 allows additional verification checks to be performed. Each
 of these is described here.
 
+Audit event data is always attached to an event. The event that
+provides the audit event data is known as the source event.
+For some uses of audit event data other events will use or
+check the audit event data event though they don't carry 
+audit event data. In other cases other audit events will carry 
+audit event data that has to be compared with the audit event data
+on the source event. Both these latter cases are termed user events.
+
+A given event can be the source of multiple elements of audit
+event data.
+
 ==== Loop Counting
+
+A runtime constraint can be added to a loop. This will specify
+the number of times the events in the loop are expected to be
+executed. The loop count is provided on the source audit event
+which must occur somewhere before the loop and not be in a loop
+of its own. The user event is defined as part of the audit event 
+data and that defines the event that will be checked to see if
+an event of the correct type has been seen the specified number 
+of times.
+
+----
+@startuml
+partition "File Transfer with loop count Definition" {
+  group "File Transfer with loop count"
+    #green:RequestFileLC;
+    :PacketiseFileLC,LCNT,user=TransferPacketLC,name=LC1;
+    repeat
+      :AssemblePacketLC;
+      :TransferPacketLC;
+    repeat while (loopCount)
+    #red:TransferResultStatusLC;
+  end group
+}  
+@enduml
+----
+
+image::images/PLUS_08_LoopCount.png[Loop with Loop Count]
+
+The audit event data defintion is added directly to the audit event.
+The event PacketiseFileLC is the source event since that is the event
+that is expected to carry the audit event data. Look the the elements 
+of the PacketiseFileLC: the LCNT indicates that this audit event data 
+is a loop count; user=TransferPacketLC indicates that the user event
+i.e. the one that will be counted is TransferPacketLC which is an 
+event within the loop; name=LC1 indicates that the name of the 
+loop count is LC1 which will appear in the runtime audit event data
+along with its value.
+
+Any event within the loop can be used as the user event. The important
+point is that the user event must be unambiguous when it appears on the
+source event. For example, the source event could not be followed by
+multiple paths where the same type of event as the user event occurs on
+more than one path. It would be impossible for the system to resolve
+which of the events to treat as the correct user event.
+
+If an audit event is expected to carry a Loop Count and, at 
+runtime, it doesn't then that is an error condition detected by
+the Protocol Verifier.
+
+Note: the phrase loopCount in the repeat while statement is only to
+aid readability of the diagram. It is not passed to the
+Protocol Verifier.
 
 ==== Branch Counting
 
+A single audit event can be followed by mulitple instances of another 
+type of audit event. This is likely to occur where the flow fragments
+from large units into smaller unit. In the example shown here a single 
+file is likely to result in many packets. So a single PacketiseFile
+event might reasonably be followed by many AssemblePacket events.
+This is known as an instance fork and at first sight it appears to
+have no impact on the audit event definition since a PacketiseFile event
+is followed by an AssemblePacket event in each case. However, this would
+allow a large number of acceptable paths which is unlikely to be 
+appropriate. So if instances forks are required then they must be 
+accompanied by a branch count. This is a numeric value that says
+how many instances of the event following the fork point to expect.
+For example, the PacketiseFile event could carry audit event data
+that indicates 12 packets were created from the file and so 12 
+instances of the AssemblePacket event can be expected. This value
+is determined and checked at runtime and so can be different for 
+each execution of the Job.
+
+A Branch Count source event must be prior to or at the fork point.
+The user event of a Branch Count is the fork point, i.e. the single
+event which expects multiple events to refer back to it in their
+previous event id value. The source event and the user event can be 
+the same event, i.e. the fork point. The source event can be earlier
+than, and therefore separate to, the user event.
+
+A Branch Count is mandatory for instance forks. If multiple occurrences
+of the same type of event follow a single event without a branch
+count being defined then the Protocol Verifier will record a failed Job.
+
+A Branch Count could be used on an AND fork though it has significantly 
+less value and is not mandatory.
+
+----
+
+@startuml
+partition "File Transfer with branch count Definition" {
+  group "File Transfer with branch count"
+    #green:RequestFileBC;
+    :PacketiseFileBC,BCNT,name=BC1;
+    :AssemblePacketBC;
+    :TransferPacketBC;
+    #red:TransferResultStatusBC;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_09_BranchCount.png[Branch Count]
+
+The audit event data defintion is added directly to the audit event.
+The event PacketiseFileBC is the source event since that is the event
+that is expected to carry the audit event data. It is also the user 
+event in case as no user event has been explicitly mentioned. 
+Look the the elements of the PacketiseFileBC: the BCNT indicates that 
+this audit event data is a branch count; name=BC1 indicates that the 
+name of the branch count is BC1 which will appear in the runtime audit 
+event data along with its value.
+
+If the source and user events were separate then user=<userEventTypeName> 
+would be expected after the BCNT, and before name=BC1.
+
+If an audit event is expected to carry an Branch Count and, at 
+runtime, it doesn't then that is an error condition detected by
+the Protocol Verifier.
+
+
 ==== Intra Job Invariant
+
+An Intra Job Invariant is a data value that is attached to an audit event
+that is then checked to see that the same value is attached to one or more 
+other audit events within the same Job. As an example, consider a Job Type 
+which represents a process that manipulates a file. It may be useful to 
+calculate a hash from the file at the start of the process and then check 
+that the same hash can be generated at the end of the process. This would
+help verify that the process had not corrupted the file in some way.
+
+The support for intra job invariants provides an additional level of
+verification over and above that which can be achieved by sequencing the
+audit events.
+
+The first audit event in a Job that provides an intra job invariant is 
+the source event. Any number of other audit events can provide the
+same intra job invariant and these are all user events. The Protocol 
+Verifier checks that the all the values of the intra job invariant
+within a single job match. If they don't then that is an error condition.
+If an audit event is expected to carry an intra job invariant and, at 
+runtime, it doesn't then that is an error condition detected by
+the Protocol Verifier.
+
+----
+
+@startuml
+partition "File Transfer with IINV Definition" {
+  group "File Transfer with IINV"
+    #green:RequestFileI,IINV,name=XferInv;
+    :PacketiseFileI;
+    fork
+      :AssemblePacketI;
+    fork again
+      :CharacterisePacketI;
+    end fork
+    :CheckPacketI;
+    :TransferPacketI,IINV,USER,name=XferInv;
+    #red:TransferResultStatusI;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_10_IntraJobInvariant.png[Intra Job Invariant]
+
+Look the the elements of the RequestFileI: the IINV indicates that 
+this audit event data is an intra job invariant; name=XferInv indicates that the 
+name of the intra job invariant is XfreInv which will appear in the runtime audit 
+event data along with its value.
 
 ==== Extra Job Invariant
 
