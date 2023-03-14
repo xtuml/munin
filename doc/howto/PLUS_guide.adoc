@@ -570,27 +570,9 @@ At runtime the Protocol Verifier will check that the named extra job invariant
 is still in force and that the value provided in the user event matches that
 of the persisted extra job invariant of the same name.
 
-=== plus2json General Parsing Rules
+=== Splitting a PLUS definition across multiple files (In development)
 
-TODO check that the following paragraphs are still correct/relevant
-
-plus2json operates on a line by line basis. Each statement must be
-fully contained on a single line. Blank lines are ignored.
-
-Each line is split into tokens by whitespace. Extra whitespace characters are
-ignored. Element names may not have spaces in them unless they are wrapped by
-double quotes (`""`).
-
-Display directives prepended with hash (`#`) or found inside square brackets
-(`[]`) are ignored.
-
-PLUS does not directly support code comments, however any line that does not
-match one of the supported statements is silently ignored. PlantUML single line
-comments (start with a single `'`) will work. PlantUML block comments
-(surrounded by `/' ... '/`) will work as long as no valid statements are
-contained in the block.
-
-=== File Structure and Preprocessing
+==== File Structure and Preprocessing
 
 PLUS job definitions are defined in files with the `.puml` extension. Each
 definition file must contain at least one UML block. The start of a UML block is
@@ -635,73 +617,40 @@ as a top level job definition.
 Includes are handled during preprocessing and simply inject the statements from
 the target UML block in the place of the `!include` statement itself.
 
-Example:
+TODO Add example
 
-._BankDeposit1.puml
-----
-@startuml(id=Part1)
-title BankDeposit (part 1)
-participant Customer
-participant Teller
-participant System
-Customer -> Teller : SendCheck
-Customer -> Teller : SendDepositSlip
-Teller -> Teller : ScanDocuments
-Teller -> Teller : EnterInformation
-Teller -> System : SubmitForReview
-@enduml
+== plus2json
 
-@startuml(id=Part3)
-title BankDeposit (part 3)
-participant Teller
-participant Customer
-Teller -> Customer : GiveReceipt
-@enduml
-----
+TODO the whole of the plus2 json section needs to be checked and refined
 
-image::_BankDeposit1.png[BankDeposit (part 1)]
+This is  the application that converts job and audit event data definitions
+described using PLUS described above into a form that can configure the
+behaviour of the Protocol Varifier and its associated Simulator.
 
-image::_BankDeposit1_001.png[BankDeposit (part 3)]
+plus2json has been written in Python and uses standard parsing tools such
+as ANTLR
 
-._BankDeposit2.puml
-----
-@startuml(id=Part2)
-title BankDeposit (part 2)
-participant System
-participant Auditor
-System -> System : VerifyAmount
-System -> System : VerifyAccountNumber
-System -> Auditor : RequestFraudCheck
-Auditor -> System: FraudCheckResponse
-@enduml
-----
+=== plus2json General Parsing Rules
 
-image::_BankDeposit2.png[BankDeposit (part 2)]
+TODO check that the following paragraphs are still correct/relevant
 
-.BankDeposit.puml
-----
-@startuml
-box Sequence #LightBlue
+plus2json operates on a line by line basis. Each statement must be
+fully contained on a single line. Blank lines are ignored.
 
-# note the included files begin with "_"
-!include _BankDeposit1.puml!Part1
-!include _BankDeposit2.puml!Part2
-!include _BankDeposit1.puml!Part3
+Each line is split into tokens by whitespace. Extra whitespace characters are
+ignored. Element names may not have spaces in them unless they are wrapped by
+double quotes (`""`).
 
-# participants restated here to control display order
-participant Customer
-participant Teller
-participant System
-participant Auditor
-end box
+Display directives prepended with hash (`#`) or found inside square brackets
+(`[]`) are ignored.
 
-# title restated at the end to ensure it is the last title statement
-title BankDeposit
-@enduml
-----
+PLUS does not directly support code comments, however any line that does not
+match one of the supported statements is silently ignored. PlantUML single line
+comments (start with a single `'`) will work. PlantUML block comments
+(surrounded by `/' ... '/`) will work as long as no valid statements are
+contained in the block.
 
-image::BankDeposit.png[BankDeposit]
+Use of the plus2json application and its options can be found 
+link:https://github.com/xtuml/plus2json/readme.adoc[here]
 
-If a job definition is composed of many `!include` statements, the `title`
-statement should come _after_ the `!includes` to assure it is the last `title`
-statement processed for the job definition:
+TODO DO we want to move the plus2json readme in here?
