@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  aeo_svdc-1:
+    image: "ghcr.io/xtuml/aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    volumes:
+      - "./plus2json-deployed/generated-config:/root/config"
+      - "./InvariantStore:/root/InvariantStore"
+      - "./verifier-incoming:/root/incoming"
+      - "./JobIdStore:/root/JobIdStore"
+      - "./verifier-processed:/root/processed"
+    command: "-configPath config/  -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup FF"
