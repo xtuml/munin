@@ -53,9 +53,9 @@ for a quick start on using git to clone repositories and import projects.
 === PlantUML
 
 PlantUML is a tool for manipulating UML diagrams specified in a textual format,
-which for the MUNIN project is constrained as the 'PLUS' domain-specific language. 
-PLUS is based on PlantUML Activity Diagrams. PlantUMLcan be downloaded from various 
-sources. The recommended approach is to load itas an Eclipse plugin so that it works 
+which for the Munin project is constrained as the 'PLUS' domain-specific language.
+PLUS is based on PlantUML Activity Diagrams. PlantUML can be downloaded from various
+sources. The recommended approach is to load it as an Eclipse plugin so that it works
 seamlessly with BridgePoint. The Eclipse plugin can be downloaded
 link:https://plantuml.com/eclipse[here] and the update site is
 link:http://hallvard.github.io/plantuml[here].
@@ -139,7 +139,7 @@ general term "project".
 project where all of the domains are integrated together using a set of deployments.
 In our context the Protocol Verifier is the collections of the two deployments:
 
-* AER 
+* AER
 * AEO_SVDC (includes iStore)
 
 ==== PLUS
@@ -238,13 +238,12 @@ scaling.
 ==== Testing and GitHub Actions (Continuous Integration)
 
 We are using features of the MASL code generator along with custom domains to
-define and run tests for each domain and the whole system. Like all other actions, 
-the tests are defined in MASL.A domain service is created for each test. 
+define and run tests for each domain and the whole system. Like all other actions,
+the tests are defined in MASL.  A domain service is created for each test.
 Test are specially marked to be excluded from
 the production application and are added to a test schedule. When the project is
 built in the testing configuration, the tests are generated and executed and
 results are logged to the console and output as a set of JSON files in the test
-
 results directory.
 
 We are using GitHub Actions to automatically build and run tests for each domain
@@ -306,7 +305,7 @@ extra job invariants which will typically live longer than any single job.
 The Invariant Store serialises access to persisted invariants across
 multiple concurrent instances of Protocol Verifier processes.
 
-For a visual overview of the domains and the key interactions between them click 
+For a visual overview of the domains and the key interactions between them click
 link:images/MUNIN_Domains_and_Key_Interactions.pdf[here].
 
 === Deployment Overview
@@ -318,12 +317,12 @@ of one or more of the Protocol Verifer domains. They are:
 * Reception (AER) - mulitiple instances
 * Ordering, Sequence Verification, iStore (AEO_SVDC) - multiple instances
 
-For a description of how this architecture achieves scaling see 
+For a description of how this architecture achieves scaling see
 link:https://github.com/xtuml/munin/blob/main/doc/notes/MUN-151_scaling_ant.adoc[here].
 
 === Supporting Application Overview
 
-==== plus2json 
+==== plus2json
 
 plus2json is an application that converts the PLUS language into JSON
 files that the Protocol Verifier and the Audit Event
@@ -352,7 +351,7 @@ The Protocol Verifier is data driven. It has no built-in knowledge of any
 particular protocol. Prior to running the Protocol Verifier for the first
 time, a runtime configuration file and job definition files need to be in
 place for the protocols being monitored. After this has been done
-initially, it needs be repeated only to add or change the definitions of
+initially, it needs to be repeated only to add or change the definitions of
 monitored jobs.  The configuration for the protocol verifier is found in
 the `config.json` file. This is loaded at start up and checked on a
 regular basis for updates.
@@ -391,9 +390,9 @@ TODO
 
 TODO: - Check this is right:
 
-To configure the Protocol Verifier: Backup the existing configuration file by moving 
+To configure the Protocol Verifier: Backup the existing configuration file by moving
 link:https://github.com/xtuml/munin/models/AEOrdering/config/config.json[this] to a backup location of your choice.
-Check that the output file from plus2json --aeo_config is named config.json. Move this file, replacing the existing file, to 
+Check that the output file from plus2json --aeo_config is named config.json. Move this file, replacing the existing file, to
 link:https://github.com/xtuml/munin/models/AEOrdering/config/[here]
 There is only a single config.json file which contains all of the job specifications.
 
@@ -401,7 +400,7 @@ TODO - Setting other AEO config
 
 TODO - Setting the AER config file
 
-To configure the Audit Event Simulator: Move the output file from plus2json --aesim_config to 
+To configure the Audit Event Simulator: Move the output file from plus2json --aesim_config to
 link:https://github.com/xtuml/munin/models/AESimulator/config/test-job-specification[here]
 There can be multiple configurations files in this folder.
 
@@ -493,7 +492,7 @@ The JSON test specification configuration file allows the user to define the tes
 Below is a sample of a test from the configuration file:
 
   {
-  "OneFilePerJob" : "true", 
+  "OneFilePerJob" : "true",
   "MaxEventsPerFile" : 100,
   "FileTimoutPeriod" : "PT10S",
   "JobSpecificationLocation" : "config/test-job-specification",
@@ -813,7 +812,7 @@ built. In fact, it will not even show up in the xtUML Modelling perspective.
 
 === Build each domain
 
-This should be repeated for each of the domains and the simulator domain. 
+This should be repeated for each of the domains and the simulator domain.
 For the sake of demonstration, the following instructions will
 reference the `AEReception` domain. Additionally, the instructions will assume
 that the code has been cloned in a standard location (`~/git/munin` on Linux/Mac
@@ -839,7 +838,7 @@ download the base MASL image from Docker Hub. This image is > 600 MB and
 therefore will take some time to download. Subsequent builds will not require
 this download.
 
-A graphical rendition of the domain build process is depicted 
+A graphical rendition of the domain build process is depicted
 link:images/Building_a_Domain.pdf[here].
 
 . Repeat this step for the other domains:
@@ -873,7 +872,7 @@ TODO Amend the following to describe the deployment build process
 IMPORTANT: Before this step, all of the deployments must be built
 as demonstrated in the previous step.
 
-TODO amend the following to describe how the deployments are stitched together 
+TODO amend the following to describe how the deployments are stitched together
 to form the Protocol Verifier
 
 
@@ -944,8 +943,6 @@ This command causes Docker to remove all stopped containers, networks, dangling
 images and build cache. This usually works to give a "fresh" start if you get
 stuck.
 
-TODO Introduce use of Clean/Purge command as a means to clear down the docker virtual disk usage.
-
 If you are making changes but not observing different behavior check the
 following:
 
@@ -973,7 +970,7 @@ link:https://github.com/xtuml/bridgepoint/blob/master/doc-bridgepoint/process/HO
 to generate a new token with the
 link:images/08_read_packages.png["read:packages"] scope.
 
-TODO The following definitiely needs to change since aer_aeo_svdc is no longer used:
+TODO Change to the newer aer+aeo_svdc deployment scheme.
 
 . Execute the application by running the following command:
 
@@ -1060,7 +1057,7 @@ NOTE: There will be red error markers in this activity. This is due to the fact
 that the BridgePoint editor does not expect the test scaffolding that the C++
 code generator will produce. These error markers are expected.
 
-TODO Update the following refer to terms in the actual data 
+TODO Update the following refer to terms in the actual data
 - HighOutput and LowOutput have been removed
 
 . On line 28, change "HighOutput" to "LowOutput".
