@@ -350,6 +350,10 @@ multiple paths where the same type of event as the user event occurs on
 more than one path. It would be impossible for the system to resolve
 which of the events to treat as the correct user event.
 
+If an audit event is expected to carry a Loop Count and, at 
+runtime, it doesn't then that is an error condition detected by
+the Protocol Verifier.
+
 Note: the phrase loopCount in the repeat while statement is only to
 aid readability of the diagram. It is not passed to the
 Protocol Verifier.
@@ -418,8 +422,34 @@ event data along with its value.
 If the source and user events were separate then user=<userEventTypeName> 
 would be expected after the BCNT, and before name=BC1.
 
+If an audit event is expected to carry an Branch Count and, at 
+runtime, it doesn't then that is an error condition detected by
+the Protocol Verifier.
+
 
 ==== Intra Job Invariant
+
+An Intra Job Invariant is a data value that is attached to an audit event
+that is then checked to see that the same value is attached to one or more 
+other audit events within the same Job. As an example, consider a Job Type 
+which represents a process that manipulates a file. It may be useful to 
+calculate a hash from the file at the start of the process and then check 
+that the same hash can be generated at the end of the process. This would
+help verify that the process had not corrupted the file in some way.
+
+The support for intra job invariants provides an additional level of
+verification over and above that which can be achieved by sequencing the
+audit events.
+
+The first audit event in a Job that provides an intra job invariant is 
+the source event. Any number of other audit events can provide the
+same intra job invariant and these are all user events. The Protocol 
+Verifier checks that the all the values of the intra job invariant
+within a single job match. If they don't then that is an error condition.
+If an audit event is expected to carry an intra job invariant and, at 
+runtime, it doesn't then that is an error condition detected by
+the Protocol Verifier.
+
 
 ==== Extra Job Invariant
 
