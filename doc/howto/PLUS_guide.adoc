@@ -450,6 +450,33 @@ If an audit event is expected to carry an intra job invariant and, at
 runtime, it doesn't then that is an error condition detected by
 the Protocol Verifier.
 
+----
+
+@startuml
+partition "File Transfer with IINV Definition" {
+  group "File Transfer with IINV"
+    #green:RequestFileI,IINV,name=XferInv;
+    :PacketiseFileI;
+    fork
+      :AssemblePacketI;
+    fork again
+      :CharacterisePacketI;
+    end fork
+    :CheckPacketI;
+    :TransferPacketI,IINV,USER,name=XferInv;
+    #red:TransferResultStatusI;
+  end group
+}  
+@enduml
+
+----
+
+image::images/PLUS_10_IntraJobInvariant.png[Intra Job Invariant]
+
+Look the the elements of the RequestFileI: the IINV indicates that 
+this audit event data is an intra job invariant; name=XferInv indicates that the 
+name of the intra job invariant is XfreInv which will appear in the runtime audit 
+event data along with its value.
 
 ==== Extra Job Invariant
 
