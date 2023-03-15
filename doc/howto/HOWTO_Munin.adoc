@@ -378,35 +378,27 @@ Verifier and the Audit Event Simulator can consume.
 For details on using plus2json and its options refer to
 link:https://github.com/xtuml/plus2json[plus2json].
 
-=== Specifying Runtime Parameters
-
-The Protocol Verifier can be configured with a number of parameters that
-determine its runtime behaviour. These include values for timeouts and
-file/folder locations.
-
-TODO
-
 === Load the Protocol Verifier configuration files
 
 TODO: - Check this is right:
 
+==== Configuration of Protocol Verifier behaviour
+
+
+
 To configure the Protocol Verifier: Backup the existing configuration file by moving
-link:https://github.com/xtuml/munin/models/AEOrdering/config/config.json[this] to a backup location of your choice.
+link:https://github.com/xtuml/munin/deploy/config/config.json[this] to a backup location of your choice.
 Check that the output file from plus2json --aeo_config is named config.json. Move this file, replacing the existing file, to
-link:https://github.com/xtuml/munin/models/AEOrdering/config/[here]
-There is only a single config.json file which contains all of the job specifications.
+link:https://github.com/xtuml/munin/deploy/config/[here]
 
-TODO - Setting other AEO config
+There is a single config.json file which contains a number of configuation parameters and a list of the job specification
+names together with individual job configuation parameters. Each job definition also has its own file containing the 
+sequence and event definitions relevant to that job definition. Further, if the job definition requires any supplemantary 
+audit event data then an additional configuration file defining the audit event data definitions for that job definition 
+will be included.
 
-TODO - Setting the AER config file
 
-To configure the Audit Event Simulator: Move the output file from plus2json --aesim_config to
-link:https://github.com/xtuml/munin/models/AESimulator/config/test-job-specification[here]
-There can be multiple configurations files in this folder.
-
-TODO - Setting the runtime side of the AES config
-
-.Click to see more details on the Protocol Verifier config file format
+.Click to see more details on the `deploy/config/config.json` config file format
 [%collapsible]
 ====
 
@@ -448,6 +440,25 @@ archived if there are no blocked events or failed if there are blocked events.
 failed and once the job complete period has expired it shall be deleted from the
 domain with all associated events.
 
+For each *Job Definition* the following are defined:
+
+*JobDefinitionName* - this is provided automatically by the plus2json application
+(This is also known as JobTypeName)
+
+*JobDeprecated* - this is a boolean which indicates whether the job definition is in 
+current use. `false` means the job definition is in current use.
+
+*JobTypeExpiryDate* - this is a timestamp that sets a date and time for when the job 
+definition is no longer valid.
+
+*StaleAuditEventDuration* - this is the period of time for which a received event is
+deemed to be valid after its stated auditEventTime. If the event is received 
+outside of this valid period then the audit event is considered to have failed.
+
+*BlockedAuditEventDuration* - this is the period of time for which a job will wait
+for an expected event (as indicated by its previous event id on earlier event) to arrive.
+If the expected event fails to arrive within this period then the job will be failed.
+
 Example:
 
 ----
@@ -475,7 +486,80 @@ Example:
 ----
 
 ====
+
+TODO There are parameters present in the following file that are also
+present in the `deploy/config/config.json` file described above
+
+There are a set of configuation parameters that allow the reception
+of files by the Protocol Verifier to be tuned.
+
+.Click to see more details on the `deploy/reception-config/config.json` config file format
+[%collapsible]
+====
+
+This configuration file contain some items that may be adjusted to manage the
+the reception of events by the digital twin. The following is a list of the 
+configuration items that can be adjusted and there description are as follows:
+
+*SpecUpdateRate* - A time period that determines how often the application
+reloads the configuration files.
+
+*IncomingDirectory* - The directory where the application expects to find JSON
+files containing events.
+
+*ProcessingDirectory* - The directory where the application moves JSON files
+while the events are being processed.
+
+*ProcessedDirectory* - The directory where the application moves JSON files
+after all the contained events are processed.
+
+*EventThrottleRate* - The rate that events should be processed from one
+reception file specified as a duration. Once an event has been processed a timer
+shall be set to the throttle rate and the timer shall have to expire before
+another event is selected for processing.
+
+*ReceptionDeletionTime* - When a file has been through reception the details of
+the reception processing shall be stored until this time expires.
+
+*ConcurrentReceptionLimit* - A number that indicates the limit of concurrent
+reception jobs that can be executing, e.g. 1 = one active reception job
+
+*SchemaValidate* - This is a boolean that determines whether the incoming
+files should be validated against the defined schema.
+
+*SchemaValidateFrequency* - This is an integer that indicates the frequency 
+with which schema validation should be performed e.g. a value of 10 states that
+every 10th file processed should be validated when the schemaValidate flag is set to true.
+This is provided because performing schema validation is a time consuming process and 
+this field allows tuning of how big an impact this has.
+
+Example:
+
+----
+{
+  "SpecUpdateRate": "PT2M",
+  "IncomingDirectory": "./incoming",
+  "ProcessingDirectory": "./processing",
+  "ProcessedDirectory": "./processed",
+  "OutgoingDirectory": "./outgoing",
+  "EventThrottleRate": "PT0S",
+  "ReceptionDeletionTime": "PT10M",
+  "MaxEventsPerFile": 0,
+  "ConcurrentReceptionLimit": 1,
+  "SchemaValidate" : false,
+  "SchemaValidateFrequency" : 10
+}
+----
+
+====
+
 ==== Configuring the simulator TODO check this is still correct
+
+To configure the Audit Event Simulator: Move the output file from plus2json --aesim_config to
+link:https://github.com/xtuml/munin/models/AESimulator/config/test-job-specification[here]
+There can be multiple configurations files in this folder.
+
+TODO - Setting the runtime side of the AES config
 
 It is possible to configure the simulator to generate jobs that are to be
 delivered to the digital twin. The configuration file it loads is defined in the
