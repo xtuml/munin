@@ -692,13 +692,14 @@ section below, but it is good to be aware of them.
   ▾ AEReception/
     ▸ config/
     ▾ gen/
-      ▸ AEJSON_OOA/
+      ▸ code_generation/
         application.mark
         features.mark
         README.adoc
     ▸ masl/
     ▸ models/
     ▸ schedule/
+    ▸ schema/
     ▸ test_results/
     ▸ testing/
       CMakeLists.txt
@@ -746,6 +747,11 @@ leveraged to determine which services will run at different stages of
 initialisation.
 
 TODO Should we mention SKIP and PAUSE commands here?
+
+==== `schema/`
+
+The `schema` directory holds the json schemas relevant to the domain. Not all
+domains will have a schema directory
 
 ==== `test_results/`
 
@@ -852,35 +858,44 @@ link:images/Building_a_Domain.pdf[here].
 IMPORTANT: Before this step, all of the application domains must be built
 as demonstrated in the previous step.
 
-Each of the cd ..deployments needs to be built
+The following deployments need to be built
 
 * AEO_SVDC containing Ordering, Sequence Verification and the InvariantStore domains
 
-TODO Amend the following to describe the deployment build process
+TODO Check the following describes the deployment build process
 
-. In your shell, navigate to the protocol verifier directory:
+. In your shell, navigate to the AEO_SVDC directory:
 
-  cd ~/git/munin/models/AER   # linux/mac
-  cd C:\git\munin\models\AER  # windows
+  cd ~/git/munin/models/AEO_SVDC   # linux/mac
+  cd C:\git\munin\models\AEO_SVDC  # windows
 
 . Build the project with Docker by running the following command:
 
   docker compose build --no-cache
 
-=== TODO Build the Protocol Verifier (Is this necessary or are the deployments simply run?)
-
-IMPORTANT: Before this step, all of the deployments must be built
-as demonstrated in the previous step.
-
-TODO amend the following to describe how the deployments are stitched together
-to form the Protocol Verifier
-
-
 === Running the protocol verifier
 
 TODO Fix this to describe the running of each deployment?
 
-. Open a shell in the protocol verifier directory, run the following command
+IMPORTANT: Before this step, all of the domains and deployments 
+described above must be built as demonstrated in the previous steps.
+
+The Protocol Verifier is run as two separate processes. The first contains
+the single domain AEReception. Having been built it can be run using the 
+command below. The second is the AEO_SVDC deployment which contains the 
+three domains AEOrdering, SequenceVerification and InvariantStore. Again,
+having been built it can be run using the command below.
+
+In addition, a third process can be launched containing the AESimulator
+domain. This is required if a simulated source of audit events is required.
+This is covered <<Running the protocol verifier with the audit event simulator,here>>.
+
+. Open a shell in the AEO_SVDC directory, run the following command
+to launch the process:
+
+  docker compose up
+
+. Also open a separate shell in the AEReception directory, run the following command
 to launch the process:
 
   docker compose up
