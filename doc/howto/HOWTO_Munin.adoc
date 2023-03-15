@@ -378,6 +378,21 @@ Verifier and the Audit Event Simulator can consume.
 For details on using plus2json and its options refer to
 link:https://github.com/xtuml/plus2json[plus2json].
 
+Assume a PlantUML file containing a single job definition called `Tutorial_1.puml` 
+has been created. The typical sequence of plus2json commands is as follows:
+
+TODO Check the following:
+
+`python plus2json.pyz Tutorial_1.puml` this checks the syntax of the puml file.
+`python plus2json.pyz Tutorial_1.puml --job -p | python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1.json` this generates the job definition and loads them into the appropriate folder
+`python plus2json.pyz Tutorial_1.puml --audit_event_data -p |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1_aedata.json` this generates the audit event data associated with the job definition and loads them into the appropriate folder
+`python plus2json.pyz Tutorial_1.puml --aeo_config -p |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/config.json` this loads the master config file which references each of the job files
+
+Additionally if the simulator is to be used also execute these:
+
+`python plus2json.pyz Tutorial_1.puml --aesim_config -p | python -m json.tool > munin/deploy/aesim-config/plus2json/Tutorial_1.json` this creates a job definition file for Tutorial_1 for consumption by the AE Simulator
+`python plus2json.pyz Tutorial_1.puml --aesim_test -p | python -m json.tool > munin/deploy/aesim-config/plus2json/plus2json-test-specification.json` this creates an example dispatch file for Tutorial_1 for consumption by the AE Simulator
+
 === Load the Protocol Verifier configuration files
 
 TODO: - Check this is right:
@@ -750,7 +765,8 @@ TODO Complete details on how deployment scaling is defined
 
 === Build Overview
 
-TODO Remove the following sentence and link in favour of separate links to individual diagrams at the appropritate place in the document.
+TODO Remove the following sentence and link in favour of separate links to individual diagrams at the appropriate 
+place in the document.
 
 For a visual overview of the build process, refer to these
 link:images/build_process.pdf[slides].
@@ -959,8 +975,24 @@ TODO Check the following describes the deployment build process
 
 === Running the protocol verifier
 
-TODO Fix this to describe the running of each deployment?
+==== The `munin/deploy` Folder
 
+.It is useful but not essential to have a good understanding of the structure
+of the deploy folder. Click to see more details on the deploy folder
+[%collapsible]
+==== 
+
+This section describes the purpose of the folders and files within the 
+`munin/deploy` folder.
+
+TODO
+
+====
+
+==== Executing the Processes
+
+TODO Check and fix the following
+ 
 IMPORTANT: Before this step, all of the domains and deployments 
 described above must be built as demonstrated in the previous steps.
 
@@ -974,38 +1006,41 @@ In addition, a third process can be launched containing the AESimulator
 domain. This is required if a simulated source of audit events is required.
 This is covered <<Running the protocol verifier with the audit event simulator,here>>.
 
-. Open a shell in the AEO_SVDC directory, run the following command
-to launch the process:
+. Open a shell in the `munin/deploy` directory, run the following command
+to launch the AEO_SVDC process:
 
-  docker compose up
+  docker compose -f verifier.yml up
 
-. Also open a separate shell in the AEReception directory, run the following command
-to launch the process:
+. Open another shell in the `munin/deploy` directory, run the following command
+to launch the AEReception process:
 
-  docker compose up
+  docker compose -f reception.yml up
 
 +
 You should see some logs begin to appear, in particular a periodic log from the
 `AEReception` domain that it is waiting on input files.
 
-. Open a file explorer and navigate to the `deploy/processed/`
+TODO The following won't work because feeding a job through that has already
+been processed results in a `Duplicate Job Id identified` error
+
+. Open a file explorer and navigate to the `deploy/verifier-processed/`
 directory within the repository. This can be done through your OS GUI or quickly
 through a simple command:
 
-  open -a Finder ~/git/munin/deploy/processed/  # mac
-  xdg-open ~/git/munin/deploy/processed/        # linux
-  explorer C:\git\munin\deploy\processed\       # windows
+  open -a Finder ~/git/munin/deploy/verifier-processed/  # mac
+  xdg-open ~/git/munin/deploy/verifier-processed/        # linux
+  explorer C:\git\munin\deploy\verifier-processed\       # windows
 
 . Open another file explorer window and navigate to the
-`deploy/incoming/` directory within the repository:
+`deploy/aer-incoming/` directory within the repository:
 
-  open -a Finder ~/git/munin/deploy/incoming/  # mac
-  xdg-open ~/git/munin/deploy/incoming/        # linux
-  explorer C:\git\munin\deploy\incoming\       # windows
+  open -a Finder ~/git/munin/deploy/aer-incoming/  # mac
+  xdg-open ~/git/munin/deploy/aer-incoming/        # linux
+  explorer C:\git\munin\deploy\aer-incoming\       # windows
 
-. link:images/04_drag_and_drop.gif[Drag and drop] `FileRequest_HappyPath.json` from the
-`processed/` directory to the `incoming/` directory. You will see a flurry of
-output from the application and the file will reappear in the `processed/`
+. link:images/04_drag_and_drop.gif[Drag and drop] `TODO.json` from the
+`verifier-processed/` directory to the `aer-incoming/` directory. You will see a flurry of
+output from the application and the file will reappear in the `verifier-processed/`
 directory. Inspect the logs and you will see that the audit events have been
 received, ordered, and verified by the application.
 
@@ -1090,19 +1125,21 @@ TODO Changes to this will depend upon the above
 
 In the last section, we built and ran the protocol verifier interactively with
 test files. The audit event simulator can also be used to generate test audit
-event files to be consumed by the main process. This section will also walk
-through using the process inspector to attach to the running process and browse
-the instance population.
+event files to be consumed by the AE Reception and AEO_SVDC processes. This 
+section will also walk through using the process inspector to attach to the 
+running processes and browse the instance population.
 
-. Open a shell in the protocol verifier directory, run the following command
+. Open an additional shell in the `munin/deploy` directory, run the following command
 to launch the process with the simulator:
 
-  docker compose -f docker-compose.test.yml up
+  docker compose -f ae-simulator.yml up
 
 +
 You will see a lot of output at once. If you look closely, you can see several
-logs showing the simulator emitting audit events, followed by the main application
-handling those audit events.
+logs showing the simulator emitting audit events, followed by the AE Reception
+and AEO_SVDC handling those audit events.
+
+TODO Is the following still correct and/or useful?
 
 . In a new shell tab/window, run the following command to launch Inspector:
 
