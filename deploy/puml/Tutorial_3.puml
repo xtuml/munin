@@ -1,0 +1,26 @@
+/'
+
+Tutorial - And Fork Topology
+  
+'/
+
+@startuml 
+partition "AND Fork" {
+group "AND Fork"
+      #green:A3;
+      :B3;
+  fork
+      :C3;
+  fork again
+      #red:D3;
+      detach
+  end fork    
+      :E3;
+      :F3;
+      :G3;
+      :K3;
+      #red:L3;
+      detach
+end group
+}      
+@enduml

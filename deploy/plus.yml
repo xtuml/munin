@@ -1,8 +1,0 @@
-version: "3.9"
-services:
-  plus_processor:
-    image: "ghcr.io/xtuml/plus_processor"
-    volumes:
-      - "./job_definitions:/root/job_definitions"
-      - "./config:/root/config"
-    command: "-source job_definitions/ -output config/ -preinit schedule/startup.sch -util MetaData"
