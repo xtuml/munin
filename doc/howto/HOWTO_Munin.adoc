@@ -364,7 +364,7 @@ Refer to
 link:https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[here]
 for details on the use of PLUS.
 
-==== plus2json:  PLUS Conversion
+==== plus2json: PLUS Conversion and configuring the Protocol Verifier
 
 Use plus2json to convert PLUS into job definitions and runtime
 configuration files.
@@ -378,42 +378,45 @@ Verifier and the Audit Event Simulator can consume.
 For details on using plus2json and its options refer to
 link:https://github.com/xtuml/plus2json[plus2json].
 
+The commands described below produce a single config.json file which contains a 
+number of configuation parameters and a list of the job specification
+names together with individual job configuation parameters. In addition they 
+generate a file for each job definition and the event definitions relevant to 
+that job definition. Further, if the job definition requires any supplementary 
+audit event data then an additional configuration file defining the audit event 
+data definitions for that job definition can be created.
+
 Assume a PlantUML file containing a single job definition called `Tutorial_1.puml` 
 has been created. The typical sequence of plus2json commands is as follows:
 
-TODO Check the following:
+TODO Check the following and adjust for multiple jobs:
 
-`python plus2json.pyz Tutorial_1.puml` this checks the syntax of the puml file.
-`python plus2json.pyz Tutorial_1.puml --job -p | python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1.json` this generates the job definition and loads them into the appropriate folder
-`python plus2json.pyz Tutorial_1.puml --audit_event_data -p |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1_aedata.json` this generates the audit event data associated with the job definition and loads them into the appropriate folder
-`python plus2json.pyz Tutorial_1.puml --aeo_config -p |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/config.json` this loads the master config file which references each of the job files
+Optionally backup the existing configuration file by moving the contents of 
+link:https://github.com/xtuml/munin/deploy/plus2json-deployed[this directory] 
+to a backup location of your choice.
+
+The following commands convert the PLUS files into json files and load them into the appropriate
+configuration directories: 
+
+. `python plus2json.pyz Tutorial_1.puml` 
+- this checks the syntax of the puml file
+. `python plus2json.pyz Tutorial_1.puml --job -p | python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1.json` 
+- this generates the job definition and loads it into the appropriate directory
+. `python plus2json.pyz Tutorial_1.puml --audit_event_data -p |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1_aedata.json` 
+- this generates the audit event data associated with the job definition and loads it into the appropriate directory
+. `python plus2json.pyz Tutorial_1.puml --aeo_config -p |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/config.json` 
+- this loads the master config file which sets a number of behavioural parameters and references each of the jobs
+
+Note: Advanced feature - the behavioural parameters in the config.json file can be adjusted with appropriate caution
 
 Additionally if the simulator is to be used also execute these:
 
-`python plus2json.pyz Tutorial_1.puml --aesim_config -p | python -m json.tool > munin/deploy/aesim-config/plus2json/Tutorial_1.json` this creates a job definition file for Tutorial_1 for consumption by the AE Simulator
-`python plus2json.pyz Tutorial_1.puml --aesim_test -p | python -m json.tool > munin/deploy/aesim-config/plus2json/plus2json-test-specification.json` this creates an example dispatch file for Tutorial_1 for consumption by the AE Simulator
+. `python plus2json.pyz Tutorial_1.puml --aesim_config -p | python -m json.tool > munin/deploy/aesim-config/plus2json/Tutorial_1.json` 
+- this creates a job definition file for Tutorial_1 for consumption by the AE Simulator
+. `python plus2json.pyz Tutorial_1.puml --aesim_test -p | python -m json.tool > munin/deploy/aesim-config/plus2json/plus2json-test-specification.json` 
+- this creates an example dispatch file for Tutorial_1 for consumption by the AE Simulator
 
-=== Load the Protocol Verifier configuration files
-
-TODO: - Check this is right:
-
-==== Configuration of Protocol Verifier behaviour
-
-
-
-To configure the Protocol Verifier: Backup the existing configuration file by moving
-link:https://github.com/xtuml/munin/deploy/config/config.json[this] to a backup location of your choice.
-Check that the output file from plus2json --aeo_config is named config.json. Move this file, replacing the existing file, to
-link:https://github.com/xtuml/munin/deploy/config/[here]
-
-There is a single config.json file which contains a number of configuation parameters and a list of the job specification
-names together with individual job configuation parameters. Each job definition also has its own file containing the 
-sequence and event definitions relevant to that job definition. Further, if the job definition requires any supplemantary 
-audit event data then an additional configuration file defining the audit event data definitions for that job definition 
-will be included.
-
-
-.Click to see more details on the `deploy/config/config.json` config file format
+.Click to see more details on the `deploy/plus2json-deployed/generated-config/config.json` config file format
 [%collapsible]
 ====
 
@@ -455,6 +458,16 @@ archived if there are no blocked events or failed if there are blocked events.
 failed and once the job complete period has expired it shall be deleted from the
 domain with all associated events.
 
+*JobStoreLocation* - This contains the relative path to the directory where the 
+Job Store Id file will be created and maintained.
+
+*JobStoreAgeLimit* - This defines how long the job ids will be retained in the job
+store.
+
+*InvariantStoreLoadRate* - This defines how frequently the invariant store is 
+checked for changes. The detection of changes will prompt the upload of the new 
+invariants to each running instance of the AEO_SVDC process.
+
 For each *Job Definition* the following are defined:
 
 *JobDefinitionName* - this is provided automatically by the plus2json application
@@ -478,91 +491,56 @@ Example:
 
 ----
 {
-  "SpecUpdateRate": "PT2M",
-  "IncomingDirectory": "./incoming",
-  "ProcessingDirectory": "./processing",
-  "ProcessedDirectory": "./processed",
-  "EventThrottleRate": "PT0S",
-  "ReceptionDeletionTime": "PT10M",
-  "ConcurrentReceptionLimit": 1,
-  "MaxOutOfSequenceEvents": 10,
-  "MaximumJobTime": "PT10M",
-  "JobCompletePeriod": "PT24H",
-  "Jobs": [
-    {
-      "JobDefinitionName": "FileRequest",
-      "JobDeprecated": false,
-      "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
-      "StaleAuditEventDuration": "P99W",
-      "BlockedAuditEventDuration": "PT5M"
-    }
-  ]
-}
-----
-
-====
-
-TODO There are parameters present in the following file that are also
-present in the `deploy/config/config.json` file described above
-
-There are a set of configuation parameters that allow the reception
-of files by the Protocol Verifier to be tuned.
-
-.Click to see more details on the `deploy/reception-config/config.json` config file format
-[%collapsible]
-====
-
-This configuration file contain some items that may be adjusted to manage the
-the reception of events by the digital twin. The following is a list of the 
-configuration items that can be adjusted and there description are as follows:
-
-*SpecUpdateRate* - A time period that determines how often the application
-reloads the configuration files.
-
-*IncomingDirectory* - The directory where the application expects to find JSON
-files containing events.
-
-*ProcessingDirectory* - The directory where the application moves JSON files
-while the events are being processed.
-
-*ProcessedDirectory* - The directory where the application moves JSON files
-after all the contained events are processed.
-
-*EventThrottleRate* - The rate that events should be processed from one
-reception file specified as a duration. Once an event has been processed a timer
-shall be set to the throttle rate and the timer shall have to expire before
-another event is selected for processing.
-
-*ReceptionDeletionTime* - When a file has been through reception the details of
-the reception processing shall be stored until this time expires.
-
-*ConcurrentReceptionLimit* - A number that indicates the limit of concurrent
-reception jobs that can be executing, e.g. 1 = one active reception job
-
-*SchemaValidate* - This is a boolean that determines whether the incoming
-files should be validated against the defined schema.
-
-*SchemaValidateFrequency* - This is an integer that indicates the frequency 
-with which schema validation should be performed e.g. a value of 10 states that
-every 10th file processed should be validated when the schemaValidate flag is set to true.
-This is provided because performing schema validation is a time consuming process and 
-this field allows tuning of how big an impact this has.
-
-Example:
-
-----
-{
-  "SpecUpdateRate": "PT2M",
-  "IncomingDirectory": "./incoming",
-  "ProcessingDirectory": "./processing",
-  "ProcessedDirectory": "./processed",
-  "OutgoingDirectory": "./outgoing",
-  "EventThrottleRate": "PT0S",
-  "ReceptionDeletionTime": "PT10M",
-  "MaxEventsPerFile": 0,
-  "ConcurrentReceptionLimit": 1,
-  "SchemaValidate" : false,
-  "SchemaValidateFrequency" : 10
+    "SpecUpdateRate": "PT2M",
+    "MaxOutOfSequenceEvents": 10,
+    "MaximumJobTime": "PT10M",
+    "JobCompletePeriod": "PT24H",
+    "IncomingDirectory": "incoming",
+    "ProcessingDirectory": "processing",
+    "ProcessedDirectory": "processed",
+    "EventThrottleRate": "PT0S",
+    "ReceptionDeletionTime": "PT10M",
+    "ConcurrentReceptionLimit": 1,
+    "JobStoreLocation": "./JobIdStore",
+    "JobStoreAgeLimit": "P7D",
+    "InvariantStoreLoadRate": "PT2M",
+    "Jobs": [
+        {
+            "JobDefinitionName": "Job with Simple Sequence",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "AND Fork",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "XOR Fork",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "AND Fork and Merge",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "Job with Intra-Job Invariant",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        }
+    ]
 }
 ----
 
