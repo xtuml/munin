@@ -364,7 +364,7 @@ Refer to
 link:https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.adoc[here]
 for details on the use of PLUS.
 
-==== plus2json:  PLUS Conversion
+==== plus2json: PLUS Conversion and configuring the Protocol Verifier
 
 Use plus2json to convert PLUS into job definitions and runtime
 configuration files.
@@ -378,35 +378,54 @@ Verifier and the Audit Event Simulator can consume.
 For details on using plus2json and its options refer to
 link:https://github.com/xtuml/plus2json[plus2json].
 
-=== Specifying Runtime Parameters
+The commands described below produce a single config.json file which contains a 
+number of configuation parameters and a list of the job specification
+names together with individual job configuation parameters. In addition they 
+generate a file for each job definition and the event definitions relevant to 
+that job definition. Further, if the job definition requires any supplementary 
+audit event data then an additional configuration file defining the audit event 
+data definitions for that job definition can be created.
 
-The Protocol Verifier can be configured with a number of parameters that
-determine its runtime behaviour. These include values for timeouts and
-file/folder locations.
+Currently, PLUS files should each contain a single job defintion.
 
-TODO
+Assume a PlantUML file containing a single job definition called `Tutorial_1.puml` 
+has been created. The typical sequence of plus2json commands is as follows:
 
-=== Load the Protocol Verifier configuration files
+TODO Check the following and adjust for multiple jobs:
 
-TODO: - Check this is right:
+Optionally backup the existing configuration file by moving the contents of 
+link:https://github.com/xtuml/munin/deploy/plus2json-deployed[this directory] 
+to a backup location of your choice.
 
-To configure the Protocol Verifier: Backup the existing configuration file by moving
-link:https://github.com/xtuml/munin/models/AEOrdering/config/config.json[this] to a backup location of your choice.
-Check that the output file from plus2json --aeo_config is named config.json. Move this file, replacing the existing file, to
-link:https://github.com/xtuml/munin/models/AEOrdering/config/[here]
-There is only a single config.json file which contains all of the job specifications.
+The following commands convert the PLUS files into json files and load them into the appropriate
+configuration directories: 
 
-TODO - Setting other AEO config
+. `python plus2json.pyz Tutorial_1.puml` 
+- this checks the syntax of the puml file
+. `python plus2json.pyz Tutorial_1.puml --job -p` 
+- this produces a human readable representation of the job definition including previous events and audit event data
+. `python plus2json.pyz Tutorial_1.puml --job | python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1.json` 
+- this generates the job definition file and loads it into the appropriate directory. The job definition file 
+must be the same name as the job definition name 
+. `python plus2json.pyz Tutorial_1.puml --audit_event_data |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1_aedata.json` 
+- this generates the audit event data associated with the job definition and loads it into the appropriate directory. 
+Currently, the file must be manually edited to create a file per audit event data item. Each file must have the same name
+as the audit event data item. For example, if the tutorial_1_aedata.json file contains an Invariant X and an Invariant Y
+then a file X.json and a file Y.jon need to be created containing the respective invariants.
+. `python plus2json.pyz Tutorial_1.puml --aeo_config |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/config.json` 
+- this loads the master config.json file which sets a number of behavioural parameters and references each of the jobs
 
-TODO - Setting the AER config file
+Note: Advanced feature - the behavioural parameters in the config.json file can be adjusted with appropriate caution
 
-To configure the Audit Event Simulator: Move the output file from plus2json --aesim_config to
-link:https://github.com/xtuml/munin/models/AESimulator/config/test-job-specification[here]
-There can be multiple configurations files in this folder.
+Additionally if the simulator is to be used also execute these:
 
-TODO - Setting the runtime side of the AES config
+. `python plus2json.pyz Tutorial_1.puml --play --aesim_config | python -m json.tool > munin/deploy/aesim-config/plus2json/Tutorial_1.json` 
+- this creates a job definition file for Tutorial_1 for consumption by the AE Simulator. The file name of this file must match
+the job type name.
+. `python plus2json.pyz Tutorial_1.puml --play --aesim_test | python -m json.tool > munin/deploy/aesim-config/plus2json/plus2json-test-specification.json` 
+- this creates an example dispatch file for Tutorial_1 for consumption by the AE Simulator
 
-.Click to see more details on the Protocol Verifier config file format
+.Click to see more details on the `deploy/plus2json-deployed/generated-config/config.json` config file format
 [%collapsible]
 ====
 
@@ -448,34 +467,101 @@ archived if there are no blocked events or failed if there are blocked events.
 failed and once the job complete period has expired it shall be deleted from the
 domain with all associated events.
 
+*JobStoreLocation* - This contains the relative path to the directory where the 
+Job Store Id file will be created and maintained.
+
+*JobStoreAgeLimit* - This defines how long the job ids will be retained in the job
+store.
+
+*InvariantStoreLoadRate* - This defines how frequently the invariant store is 
+checked for changes. The detection of changes will prompt the upload of the new 
+invariants to each running instance of the AEO_SVDC process.
+
+For each *Job Definition* the following are defined:
+
+*JobDefinitionName* - this is provided automatically by the plus2json application
+(This is also known as JobTypeName)
+
+*JobDeprecated* - this is a boolean which indicates whether the job definition is in 
+current use. `false` means the job definition is in current use.
+
+*JobTypeExpiryDate* - this is a timestamp that sets a date and time for when the job 
+definition is no longer valid.
+
+*StaleAuditEventDuration* - this is the period of time for which a received event is
+deemed to be valid after its stated auditEventTime. If the event is received 
+outside of this valid period then the audit event is considered to have failed.
+
+*BlockedAuditEventDuration* - this is the period of time for which a job will wait
+for an expected event (as indicated by its previous event id on earlier event) to arrive.
+If the expected event fails to arrive within this period then the job will be failed.
+
 Example:
 
 ----
 {
-  "SpecUpdateRate": "PT2M",
-  "IncomingDirectory": "./incoming",
-  "ProcessingDirectory": "./processing",
-  "ProcessedDirectory": "./processed",
-  "EventThrottleRate": "PT0S",
-  "ReceptionDeletionTime": "PT10M",
-  "ConcurrentReceptionLimit": 1,
-  "MaxOutOfSequenceEvents": 10,
-  "MaximumJobTime": "PT10M",
-  "JobCompletePeriod": "PT24H",
-  "Jobs": [
-    {
-      "JobDefinitionName": "FileRequest",
-      "JobDeprecated": false,
-      "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
-      "StaleAuditEventDuration": "P99W",
-      "BlockedAuditEventDuration": "PT5M"
-    }
-  ]
+    "SpecUpdateRate": "PT2M",
+    "MaxOutOfSequenceEvents": 10,
+    "MaximumJobTime": "PT10M",
+    "JobCompletePeriod": "PT24H",
+    "IncomingDirectory": "incoming",
+    "ProcessingDirectory": "processing",
+    "ProcessedDirectory": "processed",
+    "EventThrottleRate": "PT0S",
+    "ReceptionDeletionTime": "PT10M",
+    "ConcurrentReceptionLimit": 1,
+    "JobStoreLocation": "./JobIdStore",
+    "JobStoreAgeLimit": "P7D",
+    "InvariantStoreLoadRate": "PT2M",
+    "Jobs": [
+        {
+            "JobDefinitionName": "Job with Simple Sequence",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "AND Fork",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "XOR Fork",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "AND Fork and Merge",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "Job with Intra-Job Invariant",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        }
+    ]
 }
 ----
 
 ====
+
 ==== Configuring the simulator TODO check this is still correct
+
+To configure the Audit Event Simulator: Move the output file from plus2json --aesim_config to
+link:https://github.com/xtuml/munin/models/AESimulator/config/test-job-specification[here]
+There can be multiple configurations files in this folder.
+
+TODO - Setting the runtime side of the AES config
 
 It is possible to configure the simulator to generate jobs that are to be
 delivered to the digital twin. The configuration file it loads is defined in the
@@ -666,11 +752,6 @@ TODO Complete details on how deployment scaling is defined
 
 === Build Overview
 
-TODO Remove the following sentence and link in favour of separate links to individual diagrams at the appropritate place in the document.
-
-For a visual overview of the build process, refer to these
-link:images/build_process.pdf[slides].
-
 As mentioned in the section discussing the toolchain, there are three major
 steps to building and running the projects:
 
@@ -692,13 +773,14 @@ section below, but it is good to be aware of them.
   ▾ AEReception/
     ▸ config/
     ▾ gen/
-      ▸ AEJSON_OOA/
+      ▸ code_generation/
         application.mark
         features.mark
         README.adoc
     ▸ masl/
     ▸ models/
     ▸ schedule/
+    ▸ schema/
     ▸ test_results/
     ▸ testing/
       CMakeLists.txt
@@ -746,6 +828,11 @@ leveraged to determine which services will run at different stages of
 initialisation.
 
 TODO Should we mention SKIP and PAUSE commands here?
+
+==== `schema/`
+
+The `schema` directory holds the json schemas relevant to the domain. Not all
+domains will have a schema directory
 
 ==== `test_results/`
 
@@ -852,61 +939,89 @@ link:images/Building_a_Domain.pdf[here].
 IMPORTANT: Before this step, all of the application domains must be built
 as demonstrated in the previous step.
 
-Each of the cd ..deployments needs to be built
+The following deployments need to be built
 
 * AEO_SVDC containing Ordering, Sequence Verification and the InvariantStore domains
 
-TODO Amend the following to describe the deployment build process
+TODO Check the following describes the deployment build process
 
-. In your shell, navigate to the protocol verifier directory:
+. In your shell, navigate to the AEO_SVDC directory:
 
-  cd ~/git/munin/models/AER   # linux/mac
-  cd C:\git\munin\models\AER  # windows
+  cd ~/git/munin/models/AEO_SVDC   # linux/mac
+  cd C:\git\munin\models\AEO_SVDC  # windows
 
 . Build the project with Docker by running the following command:
 
   docker compose build --no-cache
 
-=== TODO Build the Protocol Verifier (Is this necessary or are the deployments simply run?)
-
-IMPORTANT: Before this step, all of the deployments must be built
-as demonstrated in the previous step.
-
-TODO amend the following to describe how the deployments are stitched together
-to form the Protocol Verifier
-
-
 === Running the protocol verifier
 
-TODO Fix this to describe the running of each deployment?
+==== The `munin/deploy` Folder
 
-. Open a shell in the protocol verifier directory, run the following command
-to launch the process:
+.It is useful but not essential to have a good understanding of the structure
+of the deploy folder. Click to see more details on the deploy folder
+[%collapsible]
+==== 
 
-  docker compose up
+This section describes the purpose of the folders and files within the 
+`munin/deploy` folder.
+
+TODO
+
+====
+
+==== Executing the Processes
+
+TODO Check and fix the following
+ 
+IMPORTANT: Before this step, all of the domains and deployments 
+described above must be built as demonstrated in the previous steps.
+
+The Protocol Verifier is run as two separate processes. The first contains
+the single domain AEReception. Having been built it can be run using the 
+command below. The second is the AEO_SVDC deployment which contains the 
+three domains AEOrdering, SequenceVerification and InvariantStore. Again,
+having been built it can be run using the command below.
+
+In addition, a third process can be launched containing the AESimulator
+domain. This is required if a simulated source of audit events is required.
+This is covered <<Running the protocol verifier with the audit event simulator,here>>.
+
+. Open a shell in the `munin/deploy` directory, run the following command
+to launch the AEO_SVDC process:
+
+  docker compose -f verifier.yml up
+
+. Open another shell in the `munin/deploy` directory, run the following command
+to launch the AEReception process:
+
+  docker compose -f reception.yml up
 
 +
 You should see some logs begin to appear, in particular a periodic log from the
 `AEReception` domain that it is waiting on input files.
 
-. Open a file explorer and navigate to the `deploy/processed/`
+TODO The following won't work because feeding a job through that has already
+been processed results in a `Duplicate Job Id identified` error
+
+. Open a file explorer and navigate to the `deploy/verifier-processed/`
 directory within the repository. This can be done through your OS GUI or quickly
 through a simple command:
 
-  open -a Finder ~/git/munin/deploy/processed/  # mac
-  xdg-open ~/git/munin/deploy/processed/        # linux
-  explorer C:\git\munin\deploy\processed\       # windows
+  open -a Finder ~/git/munin/deploy/verifier-processed/  # mac
+  xdg-open ~/git/munin/deploy/verifier-processed/        # linux
+  explorer C:\git\munin\deploy\verifier-processed\       # windows
 
 . Open another file explorer window and navigate to the
-`deploy/incoming/` directory within the repository:
+`deploy/aer-incoming/` directory within the repository:
 
-  open -a Finder ~/git/munin/deploy/incoming/  # mac
-  xdg-open ~/git/munin/deploy/incoming/        # linux
-  explorer C:\git\munin\deploy\incoming\       # windows
+  open -a Finder ~/git/munin/deploy/aer-incoming/  # mac
+  xdg-open ~/git/munin/deploy/aer-incoming/        # linux
+  explorer C:\git\munin\deploy\aer-incoming\       # windows
 
-. link:images/04_drag_and_drop.gif[Drag and drop] `FileRequest_HappyPath.json` from the
-`processed/` directory to the `incoming/` directory. You will see a flurry of
-output from the application and the file will reappear in the `processed/`
+. link:images/04_drag_and_drop.gif[Drag and drop] `TODO.json` from the
+`verifier-processed/` directory to the `aer-incoming/` directory. You will see a flurry of
+output from the application and the file will reappear in the `verifier-processed/`
 directory. Inspect the logs and you will see that the audit events have been
 received, ordered, and verified by the application.
 
@@ -991,19 +1106,21 @@ TODO Changes to this will depend upon the above
 
 In the last section, we built and ran the protocol verifier interactively with
 test files. The audit event simulator can also be used to generate test audit
-event files to be consumed by the main process. This section will also walk
-through using the process inspector to attach to the running process and browse
-the instance population.
+event files to be consumed by the AE Reception and AEO_SVDC processes. This 
+section will also walk through using the process inspector to attach to the 
+running processes and browse the instance population.
 
-. Open a shell in the protocol verifier directory, run the following command
+. Open an additional shell in the `munin/deploy` directory, run the following command
 to launch the process with the simulator:
 
-  docker compose -f docker-compose.test.yml up
+  docker compose -f ae-simulator.yml up
 
 +
 You will see a lot of output at once. If you look closely, you can see several
-logs showing the simulator emitting audit events, followed by the main application
-handling those audit events.
+logs showing the simulator emitting audit events, followed by the AE Reception
+and AEO_SVDC handling those audit events.
+
+TODO Is the following still correct and/or useful?
 
 . In a new shell tab/window, run the following command to launch Inspector:
 
@@ -1043,6 +1160,8 @@ to demonstrate building a domain in test mode.
 
   docker compose -f docker-compose.test.yml up
 
+A graphical rendition of the domain build process for test mode is depicted
+link:images/Building_a_Domain_in_Test_Mode.pdf[here].
 +
 You will see a lot of output including some logs from the test runner. All of
 the tests will be marked as "SUCCEEDED".
