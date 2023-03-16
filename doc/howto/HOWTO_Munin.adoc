@@ -386,13 +386,15 @@ that job definition. Further, if the job definition requires any supplementary
 audit event data then an additional configuration file defining the audit event 
 data definitions for that job definition can be created.
 
+Currently, PLUS files should each contain a single job defintion.
+
 Assume a PlantUML file containing a single job definition called `Tutorial_1.puml` 
 has been created. The typical sequence of plus2json commands is as follows:
 
 TODO Check the following and adjust for multiple jobs:
 
 Optionally backup the existing configuration file by moving the contents of 
-link:https://github.com/xtuml/munin/tree/main/deploy/plus2json-deployed/generated-config[this directory] 
+link:https://github.com/xtuml/munin/deploy/plus2json-deployed[this directory] 
 to a backup location of your choice.
 
 The following commands convert the PLUS files into json files and load them into the appropriate
@@ -400,20 +402,27 @@ configuration directories:
 
 . `python plus2json.pyz Tutorial_1.puml` 
 - this checks the syntax of the puml file
-. `python plus2json.pyz Tutorial_1.puml --job -p | python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1.json` 
-- this generates the job definition and loads it into the appropriate directory
-. `python plus2json.pyz Tutorial_1.puml --audit_event_data -p |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1_aedata.json` 
-- this generates the audit event data associated with the job definition and loads it into the appropriate directory
-. `python plus2json.pyz Tutorial_1.puml --aeo_config -p |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/config.json` 
-- this loads the master config file which sets a number of behavioural parameters and references each of the jobs
+. `python plus2json.pyz Tutorial_1.puml --job -p` 
+- this produces a human readable representation of the job definition including previous events and audit event data
+. `python plus2json.pyz Tutorial_1.puml --job | python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1.json` 
+- this generates the job definition file and loads it into the appropriate directory. The job definition file 
+must be the same name as the job definition name 
+. `python plus2json.pyz Tutorial_1.puml --audit_event_data |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1_aedata.json` 
+- this generates the audit event data associated with the job definition and loads it into the appropriate directory. 
+Currently, the file must be manually edited to create a file per audit event data item. Each file must have the same name
+as the audit event data item. For example, if the tutorial_1_aedata.json file contains an Invariant X and an Invariant Y
+then a file X.json and a file Y.jon need to be created containing the respective invariants.
+. `python plus2json.pyz Tutorial_1.puml --aeo_config |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/config.json` 
+- this loads the master config.json file which sets a number of behavioural parameters and references each of the jobs
 
 Note: Advanced feature - the behavioural parameters in the config.json file can be adjusted with appropriate caution
 
 Additionally if the simulator is to be used also execute these:
 
-. `python plus2json.pyz Tutorial_1.puml --aesim_config -p | python -m json.tool > munin/deploy/aesim-config/plus2json/Tutorial_1.json` 
-- this creates a job definition file for Tutorial_1 for consumption by the AE Simulator
-. `python plus2json.pyz Tutorial_1.puml --aesim_test -p | python -m json.tool > munin/deploy/aesim-config/plus2json/plus2json-test-specification.json` 
+. `python plus2json.pyz Tutorial_1.puml --play --aesim_config | python -m json.tool > munin/deploy/aesim-config/plus2json/Tutorial_1.json` 
+- this creates a job definition file for Tutorial_1 for consumption by the AE Simulator. The file name of this file must match
+the job type name.
+. `python plus2json.pyz Tutorial_1.puml --play --aesim_test | python -m json.tool > munin/deploy/aesim-config/plus2json/plus2json-test-specification.json` 
 - this creates an example dispatch file for Tutorial_1 for consumption by the AE Simulator
 
 .Click to see more details on the `deploy/plus2json-deployed/generated-config/config.json` config file format
