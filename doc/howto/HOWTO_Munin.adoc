@@ -1269,27 +1269,9 @@ You will see a lot of output at once. If you look closely, you can see several
 logs showing the simulator emitting audit events, followed by the AE Reception
 and AEO_SVDC handling those audit events.
 
-TODO Is the following still correct and/or useful?
+Clean up the process by running the following command:
 
-. In a new shell tab/window, run the following command to launch Inspector:
-
-  java -jar ~/git/munin/bin/inspector-1.0.0-jar-with-dependencies.jar   # linux/mac
-  java -jar C:\git\munin\bin\inspector-1.0.0-jar-with-dependencies.jar  # windows
-
-. Select "AESequenceDC" from the link:images/05_domain_select.png["Domain" drop-down menu]
-
-. Double-click the link:images/06_job_population.png["Job" item] in the object
-list. Note that each line represents an instance of "Job" and each column
-represents an attribute of the object.
-
-. Take some time to explore the rest of the instance population in Inspector
-
-. Exit inspector. Kill the application process by pressing `Ctrl-C` in the shell
-window where it was launched. Clean up the process by running the following
-command:
-
-  docker compose -f docker-compose.test.yml down
-
+  docker compose -f ae-simulator.yml down
 
 === Building a domain with test
 
@@ -1314,52 +1296,6 @@ link:images/Building_a_Domain_in_Test_Mode.pdf[here].
 +
 You will see a lot of output including some logs from the test runner. All of
 the tests will be marked as "SUCCEEDED".
-
-TODO Update the following to a more representative test
-
-. In BridgePoint, navigate to and open the `basicTest01` function at
-link:images/07_basic_test.png[`AEReception::AERDomain::AEReception::test_cases`].
-
-+
-NOTE: There will be red error markers in this activity. This is due to the fact
-that the BridgePoint editor does not expect the test scaffolding that the C++
-code generator will produce. These error markers are expected.
-
-TODO Update the following refer to terms in the actual data
-- HighOutput and LowOutput have been removed
-
-. On line 28, change "HighOutput" to "LowOutput".
-
-. Export MASL by pressing the link:images/01_hammer.png[hammer icon] or
-link:images/02_build_project.png[right-click > "Build Project"].
-
-. In the shell window, rebuild and run the tests. The following command will
-cause docker to build and run all at once:
-
-  docker compose -f docker-compose.test.yml up --build --force-recreate
-
-+
-NOTE: The `--build` flag tells docker to build the image before creating the
-container. The `--force-recreate` flag tells docker to provision a new container
-from the latest image rather than simply restarting the container that was
-already there from the previous run. Without both of these two flags, the
-changes will not take effect.
-
-+
-Scroll up near the beginning of the output and you will see some output that
-looks like the following:
-
-  2022-06-13T15:15:47Z Debug : AEReception : basicTest01: FAILED
-  2022-06-13T15:15:47Z Debug : AEReception : Expected: 'LowInput' but got: 'HighInput'
-    Stack:
-    #4	Assertions::assertTrue:4
-    #3	Assertions::assertEquals:3
-    #2	AEReception::basicTest01:28
-    #1	Test::run_test:65
-
-+
-This tells us that the `basicTest01` test case failed and lets us know that an
-assertion failed.
 
 . Clean up the docker run with the following command:
 
