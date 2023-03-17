@@ -1,5 +1,211 @@
-//! ACTIVITY BEGIN. 'cfbbd046-58ec-4b70-8609-5d001b8c8122' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test200NormalInstanceForkWithBranchAndMergeCount () is
+//! ACTIVITY BEGIN. '4cded56f-8e48-4fec-9a14-8096c119868a' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test63InvalidLoopWithNonIntegerLoopCount () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+theDynamicControlDefn : instance of DynamicControlDefinition;
+sourceOccurrence: instance of AEOccurrenceInSequenceDefinition;
+userOccurrence: instance of AEOccurrenceInSequenceDefinition;
+theJobDefn : instance of JobDefinition;
+theDynamicControl : instance of DynamicControl;
+theDynamicControls : set of instance of DynamicControl;
+
+begin
+  // initial Test of Definitions
+  theDynamicControlDefn := find_one DynamicControlDefinition (dynamicControlName = "Counter_1");
+  sourceOccurrence := theDynamicControlDefn -> R30;
+  userOccurrence := theDynamicControlDefn -> R31;
+  theJobDefn := theDynamicControlDefn -> R32;
+  
+  Assertions::assertTrue(theDynamicControlDefn.dynamicControlName = "Counter_1", "Loop Counter not created as expected: " & theDynamicControlDefn.dynamicControlName);
+  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType);
+//  Assertions::assertTrue((theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType = "LCLB", "User Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType);
+  Assertions::assertTrue(theJobDefn.jobName = "LoopCountJob", "Job not created as expected: " & theJobDefn.jobName);
+  
+  
+  // This test covers 1 Jobs with 1 sequences based on a looped path definition - 5 full iterations of the loop
+  // but the loop count has an erroneous non-integer value
+  // This test does  reveal any erroneous behaviour of the twin
+  //
+  // Loop count should be an integer. Here is it replaced by the string "FIVE" to provoke an error
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "FIVE");
+  acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","LCLC","Job_LoopCount_1","Ev302","Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","LCLD","Job_LoopCount_1","Ev303","Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","LCLB","Job_LoopCount_1","Ev304","Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","LCLC","Job_LoopCount_1","Ev305","Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920006","Test-0001","LCLD","Job_LoopCount_1","Ev306","Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920007","Test-0001","LCLB","Job_LoopCount_1","Ev307","Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920008","Test-0001","LCLC","Job_LoopCount_1","Ev308","Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920009","Test-0001","LCLD","Job_LoopCount_1","Ev309","Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920010","Test-0001","LCLB","Job_LoopCount_1","Ev310","Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920011","Test-0001","LCLC","Job_LoopCount_1","Ev311","Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920012","Test-0001","LCLD","Job_LoopCount_1","Ev312","Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920013","Test-0001","LCLB","Job_LoopCount_1","Ev313","Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920014","Test-0001","LCLC","Job_LoopCount_1","Ev314","Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920015","Test-0001","LCLD","Job_LoopCount_1","Ev315","Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920016","Test-0001","LCLE","Job_LoopCount_1","Ev316","Ev317",theAuditEventData);
+
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  theDynamicControls := theJobs -> R35;
+  //
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed even though loop count was invalid: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '98dfb3f9-4ba1-4f93-84fa-9b6bca1ba933' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test29NormalBranchCountWithSameSourceAndUserEvent () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 10 branches
+  // This test does not reveal any erroneous behaviour of the twin but does demonstrate use of the same source and user event
+  //
+  acceptOrderedEvent ("1620920000","Test-0001","SSUFA","Branch_Count_Job_SSU",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_SameSourceAndUser_1", "10");
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","SSUFB","Branch_Count_Job_SSU",previousEvents,"Ev302",theAuditEventData);
+  theAuditEventData :=  emptyAuditEventData;
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev305",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev310",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev311",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev312",theAuditEventData);
+  previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
+  acceptOrderedEvent ("1620920003","Test-0001","SSUFD","Branch_Count_Job_SSU",previousEvents,"Ev313",theAuditEventData);
+  previousEvents := ("Ev313");
+  acceptOrderedEvent ("1620920004","Test-0001","SSUFE","Branch_Count_Job_SSU",previousEvents,"Ev314",theAuditEventData);
+  previousEvents := ("Ev314");
+  acceptOrderedEvent ("1620920005","Test-0001","SSUFF","Branch_Count_Job_SSU",previousEvents,"Ev315",theAuditEventData);
+ //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 15, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '4f40861d-adb9-4b43-868e-8d6225259141' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test64InvalidLoopWithLoopCountExceedingExpectedValue () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+theDynamicControlDefn : instance of DynamicControlDefinition;
+sourceOccurrence: instance of AEOccurrenceInSequenceDefinition;
+userOccurrence: instance of AEOccurrenceInSequenceDefinition;
+theJobDefn : instance of JobDefinition;
+theDynamicControl : instance of DynamicControl;
+theDynamicControls : set of instance of DynamicControl;
+
+begin
+  // initial Test of Definitions
+  theDynamicControlDefn := find_one DynamicControlDefinition (dynamicControlName = "Counter_1");
+  sourceOccurrence := theDynamicControlDefn -> R30;
+  userOccurrence := theDynamicControlDefn -> R31;
+  theJobDefn := theDynamicControlDefn -> R32;
+  
+  Assertions::assertTrue(theDynamicControlDefn.dynamicControlName = "Counter_1", "Loop Counter not created as expected: " & theDynamicControlDefn.dynamicControlName);
+  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType);
+//  Assertions::assertTrue((theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType = "LCLB", "User Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType);
+  Assertions::assertTrue(theJobDefn.jobName = "LoopCountJob", "Job not created as expected: " & theJobDefn.jobName);
+  
+  
+  // This test covers 1 Jobs with 1 sequences based on a looped path definition - 4 full iterations of the loop
+  // followed by an error which cause the loop to be exited.
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "5");
+  acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","LCLC","Job_LoopCount_1","Ev302","Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","LCLD","Job_LoopCount_1","Ev303","Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","LCLB","Job_LoopCount_1","Ev304","Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","LCLC","Job_LoopCount_1","Ev305","Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920006","Test-0001","LCLD","Job_LoopCount_1","Ev306","Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920007","Test-0001","LCLB","Job_LoopCount_1","Ev307","Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920008","Test-0001","LCLC","Job_LoopCount_1","Ev308","Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920009","Test-0001","LCLD","Job_LoopCount_1","Ev309","Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920010","Test-0001","LCLB","Job_LoopCount_1","Ev310","Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920011","Test-0001","LCLC","Job_LoopCount_1","Ev311","Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920012","Test-0001","LCLD","Job_LoopCount_1","Ev312","Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920013","Test-0001","LCLB","Job_LoopCount_1","Ev313","Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920014","Test-0001","LCLC","Job_LoopCount_1","Ev314","Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920015","Test-0001","LCLD","Job_LoopCount_1","Ev315","Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920016","Test-0001","LCLB","Job_LoopCount_1","Ev316","Ev317",theAuditEventData);
+  acceptOrderedEvent ("1620920017","Test-0001","LCLC","Job_LoopCount_1","Ev317","Ev318",theAuditEventData);
+  acceptOrderedEvent ("1620920018","Test-0001","LCLD","Job_LoopCount_1","Ev318","Ev319",theAuditEventData);
+  acceptOrderedEvent ("1620920019","Test-0001","LCLE","Job_LoopCount_1","Ev319","Ev320",theAuditEventData);
+
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  theDynamicControls := theJobs -> R35;
+  //
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed even though loop count exceeded the expected value: " & theJob.jobID);
+ end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '5f653156-31f3-4973-983d-7e8e9c0c7a14' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test74SingleEventForkAndMerge_SunnyDay1 () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
@@ -64,7 +270,299 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '6d604705-9d2f-40e9-8d92-010d169fcfee' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '41148b44-b55d-4ee3-8075-ef5d2c6a820a' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test250IllegalInstanceForkAndMergePath () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 3 branches
+  // However no branch count is provided so the test will fail
+  // This test does reveal any erroneous behaviour of the twin
+  //
+  acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
+  acceptOrderedEvent ("1620920003","Test-0001","IFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  previousEvents := ("Ev313");
+  acceptOrderedEvent ("1620920004","Test-0001","IFE","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  previousEvents := ("Ev314");
+  acceptOrderedEvent ("1620920005","Test-0001","IFF","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+ //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed despite having no branch count: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '20368041-ef75-4561-a07a-f4198ed9831d' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test251IllegalSplitInstanceForkAndMergePath () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Job with 2 sequences based on a split fork and merge path definition - there are 10 branches
+  // This test does reveal any erroneous behaviour of the twin
+  // Forking Sequence
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_3", "10");
+  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  
+  // Merging Sequence
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev316",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev317",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev318",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev319",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev320",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev321",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev322",theAuditEventData);
+  previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317" & "Ev318" & "Ev319" & "Ev320" & "Ev321" & "Ev322";
+  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job",previousEvents,"Ev323",theAuditEventData);
+  previousEvents := ("Ev323");
+  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job",previousEvents,"Ev324",theAuditEventData);
+ //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed despite having no branch count: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '0b3a718b-eb02-45ab-9ad7-7ee673712201' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test252IllegalInstanceAndTypeForkAndMergePath () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Job with 1 sequence based on a fork and merge path definition - 
+  // there are 3 type branches and each type branch has 5 instance branches 
+  // all at the same fork point
+  // This test does reveal any erroneous behaviour of the twin
+  //
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_3", "15");
+  acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev305",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev310",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev311",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev312",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev313",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev314",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev315",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev316",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev317",theAuditEventData);
+   
+  // The merge point
+  previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312" & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317";
+  acceptOrderedEvent ("1620920006","Test-0001","FMF","Job_FandM",previousEvents,"Ev318",theAuditEventData);
+  previousEvents := ("Ev318");
+  acceptOrderedEvent ("1620920007","Test-0001","FMG","Job_FandM",previousEvents,"Ev319",theAuditEventData);
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed despite having no branch count: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '0c97faca-2a3b-47d0-87a2-87d633707061' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test203NormalTypeAndInstanceForkWithBranchAndMergeCount () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Job with 1 sequence based on a fork and merge path definition - 
+  // there are 3 type branches and each type branch has 5 instance branches 
+  // all at the same fork and merge points. Branch and Merge counts are defined.
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "TypeFork_1", "15");
+  theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "TypeFork_2", "15");
+  acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev305",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev310",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev311",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev312",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev313",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev314",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev315",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev316",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev317",theAuditEventData);
+   
+  // The merge point
+  previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312" & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317";
+  acceptOrderedEvent ("1620920006","Test-0001","FMF","Job_FandM",previousEvents,"Ev318",theAuditEventData);
+  previousEvents := ("Ev318");
+  acceptOrderedEvent ("1620920007","Test-0001","FMG","Job_FandM",previousEvents,"Ev319",theAuditEventData);
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 19, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '08b32a91-9e3c-41cd-afb4-1e4733539108' DO NOT EDIT THIS LINE.
 private service AESequenceDC::Test201NormalInstanceForkWithBranchAndMergeCount () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
@@ -130,7 +628,7 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '7f628ae7-0bc9-42de-b8aa-3bbcfaa7c049' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '37a6d0d1-c1c1-4302-a498-ace07518d026' DO NOT EDIT THIS LINE.
 private service AESequenceDC::Test202NormalSplitInstanceForkWithBranchAndMergeCount () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
@@ -217,8 +715,8 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '2c195228-e2d0-446e-9308-c553df831d01' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test203NormalTypeAndInstanceForkWithBranchAndMergeCount () is
+//! ACTIVITY BEGIN. 'ac486785-caa0-4039-b2f7-bd14ee5d67bf' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test254IllegalInstanceForkWithIncorrectBranchAndMergeCount () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
@@ -229,54 +727,43 @@ theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
 begin
-  // This test covers 1 Job with 1 sequence based on a fork and merge path definition - 
-  // there are 3 type branches and each type branch has 5 instance branches 
-  // all at the same fork and merge points. Branch and Merge counts are defined.
-  // This test does not reveal any erroneous behaviour of the twin
+  // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 3 branches
+  // The branch and merge count is set to 9 though there are 10 branches merging
+  // This test does reveal any erroneous behaviour of the twin
   //
-  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "TypeFork_1", "15");
-  theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "TypeFork_2", "15");
-  acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "InstFork_1", "9");
+  theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "InstMerge_1", "9");
+  acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev312",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev313",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev314",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev315",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev316",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev317",theAuditEventData);
-   
-  // The merge point
-  previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312" & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317";
-  acceptOrderedEvent ("1620920006","Test-0001","FMF","Job_FandM",previousEvents,"Ev318",theAuditEventData);
-  previousEvents := ("Ev318");
-  acceptOrderedEvent ("1620920007","Test-0001","FMG","Job_FandM",previousEvents,"Ev319",theAuditEventData);
-  //
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
+  acceptOrderedEvent ("1620920003","Test-0001","IFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  previousEvents := ("Ev313");
+  acceptOrderedEvent ("1620920004","Test-0001","IFE","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  previousEvents := ("Ev314");
+  acceptOrderedEvent ("1620920005","Test-0001","IFF","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+ //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
     Test::fire_scheduled_timers();
@@ -285,17 +772,97 @@ begin
   theSequences := theJobs -> R10;
   theAuditEvents := theSequences -> R11;
   //
-  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
-  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
-  Assertions::assertTrue(theAuditEvents'length = 19, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
   for theJob in theJobs loop
-    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
-    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed even though the branch and merge count is incorrect: " & theJob.jobID);
   end loop;  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. 'ce30411f-5b87-43e3-92fd-05fa085d94d3' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '9dd36025-f91f-488c-81b7-a602c933f4ad' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test255IllegalSplitInstanceForkWithBranchAndMergeCount () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of AuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Job with 2 sequences based on a split fork and merge path definition - there are 10 branches
+  // There merge count has been set to 11 though only 10 branches merge at the merge point
+  // This test does reveal any erroneous behaviour of the twin
+  // Forking Sequence
+
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "SplitInstFork_1", "10");
+  theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "SplitInstMerge_1", "11");
+  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  theAuditEventData := emptyAuditEventData;
+  previousEvents := ("Ev301");
+  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  
+  // Merging Sequence
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev316",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev317",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev318",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev319",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev320",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev321",theAuditEventData);
+  previousEvents := empty;
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev322",theAuditEventData);
+  previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317" & "Ev318" & "Ev319" & "Ev320" & "Ev321" & "Ev322";
+  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job",previousEvents,"Ev323",theAuditEventData);
+  previousEvents := ("Ev323");
+  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job",previousEvents,"Ev324",theAuditEventData);
+ //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job is completed even though merge count was incorrect: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'fd59ce5a-ea6c-4e1c-aab0-964b60e6a963' DO NOT EDIT THIS LINE.
 private service AESequenceDC::Test204NormalMultiInstanceForkWithBranchAndMergeCount () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
@@ -369,7 +936,7 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '39e5b22a-e8b2-4360-9775-3e90a7a02faf' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '6f2d058c-034d-4399-959f-32ad44e48c84' DO NOT EDIT THIS LINE.
 private service AESequenceDC::Test205NormalUserExtraJobInvariantWithRestoredSourceEJI () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
@@ -509,7 +1076,7 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '7666c3fe-ab47-408a-89de-d5bad4e39530' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '61685058-10b8-4552-942d-cec8667db6f2' DO NOT EDIT THIS LINE.
 private service AESequenceDC::Test206NormalUserExtraJobInvariantWithRestoredSourceEJI () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
@@ -649,368 +1216,7 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '05ce82b3-9e59-4332-bc8c-aa4d2a98a2aa' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test250IllegalInstanceForkAndMergePath () is
-theJob : instance of Job;
-theJobs : set of instance of Job;
-theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
-previousEvents : sequence of string;
-empty : sequence of string;
-theAuditEventData : sequence of auditEventDataStructure;
-emptyAuditEventData : sequence of auditEventDataStructure;
-
-begin
-  // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 3 branches
-  // However no branch count is provided so the test will fail
-  // This test does reveal any erroneous behaviour of the twin
-  //
-  acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
-  previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
-  previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
-  acceptOrderedEvent ("1620920003","Test-0001","IFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
-  previousEvents := ("Ev313");
-  acceptOrderedEvent ("1620920004","Test-0001","IFE","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
-  previousEvents := ("Ev314");
-  acceptOrderedEvent ("1620920005","Test-0001","IFF","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
- //
-  Test::service_event_queue();
-  if (Test::get_scheduled_timers ())'length /= 0 then
-    Test::fire_scheduled_timers();
-  end if; 
-  theJobs := find Job ();
-  theSequences := theJobs -> R10;
-  theAuditEvents := theSequences -> R11;
-  //
-  for theJob in theJobs loop
-    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed despite having no branch count: " & theJob.jobID);
-  end loop;  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'dbd93951-7cad-4b15-be44-b16a39c813bf' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test251IllegalSplitInstanceForkAndMergePath () is
-theJob : instance of Job;
-theJobs : set of instance of Job;
-theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
-previousEvents : sequence of string;
-empty : sequence of string;
-theAuditEventData : sequence of auditEventDataStructure;
-emptyAuditEventData : sequence of auditEventDataStructure;
-
-begin
-  // This test covers 1 Job with 2 sequences based on a split fork and merge path definition - there are 10 branches
-  // This test does reveal any erroneous behaviour of the twin
-  // Forking Sequence
-  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_3", "10");
-  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
-  theAuditEventData := emptyAuditEventData;
-  previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
-  
-  // Merging Sequence
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev316",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev317",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev318",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev319",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev320",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev321",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev322",theAuditEventData);
-  previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317" & "Ev318" & "Ev319" & "Ev320" & "Ev321" & "Ev322";
-  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job",previousEvents,"Ev323",theAuditEventData);
-  previousEvents := ("Ev323");
-  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job",previousEvents,"Ev324",theAuditEventData);
- //
-  Test::service_event_queue();
-  if (Test::get_scheduled_timers ())'length /= 0 then
-    Test::fire_scheduled_timers();
-  end if; 
-  theJobs := find Job ();
-  theSequences := theJobs -> R10;
-  theAuditEvents := theSequences -> R11;
-  //
-  for theJob in theJobs loop
-    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed despite having no branch count: " & theJob.jobID);
-  end loop;  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '4b204c31-7bf5-49ca-b466-b176b6274d46' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test252IllegalInstanceAndTypeForkAndMergePath () is
-theJob : instance of Job;
-theJobs : set of instance of Job;
-theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
-previousEvents : sequence of string;
-empty : sequence of string;
-theAuditEventData : sequence of auditEventDataStructure;
-emptyAuditEventData : sequence of auditEventDataStructure;
-
-begin
-  // This test covers 1 Job with 1 sequence based on a fork and merge path definition - 
-  // there are 3 type branches and each type branch has 5 instance branches 
-  // all at the same fork point
-  // This test does reveal any erroneous behaviour of the twin
-  //
-  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_3", "15");
-  acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM",previousEvents,"Ev301",theAuditEventData);
-  theAuditEventData := emptyAuditEventData;
-  previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM",previousEvents,"Ev302",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev303",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev304",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev305",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev306",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev307",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev308",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev309",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev310",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev311",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev312",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev313",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev314",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev315",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev316",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev317",theAuditEventData);
-   
-  // The merge point
-  previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312" & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317";
-  acceptOrderedEvent ("1620920006","Test-0001","FMF","Job_FandM",previousEvents,"Ev318",theAuditEventData);
-  previousEvents := ("Ev318");
-  acceptOrderedEvent ("1620920007","Test-0001","FMG","Job_FandM",previousEvents,"Ev319",theAuditEventData);
-  //
-  Test::service_event_queue();
-  if (Test::get_scheduled_timers ())'length /= 0 then
-    Test::fire_scheduled_timers();
-  end if; 
-  theJobs := find Job ();
-  theSequences := theJobs -> R10;
-  theAuditEvents := theSequences -> R11;
-  //
-  for theJob in theJobs loop
-    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed despite having no branch count: " & theJob.jobID);
-  end loop;  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'a573f553-c196-488e-8ccb-1802cb323971' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test254IllegalInstanceForkWithIncorrectBranchAndMergeCount () is
-theJob : instance of Job;
-theJobs : set of instance of Job;
-theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
-previousEvents : sequence of string;
-empty : sequence of string;
-theAuditEventData : sequence of auditEventDataStructure;
-emptyAuditEventData : sequence of auditEventDataStructure;
-
-begin
-  // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 3 branches
-  // The branch and merge count is set to 9 though there are 10 branches merging
-  // This test does reveal any erroneous behaviour of the twin
-  //
-  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "InstFork_1", "9");
-  theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "InstMerge_1", "9");
-  acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
-  theAuditEventData := emptyAuditEventData;
-  previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
-  previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
-  acceptOrderedEvent ("1620920003","Test-0001","IFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
-  previousEvents := ("Ev313");
-  acceptOrderedEvent ("1620920004","Test-0001","IFE","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
-  previousEvents := ("Ev314");
-  acceptOrderedEvent ("1620920005","Test-0001","IFF","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
- //
-  Test::service_event_queue();
-  if (Test::get_scheduled_timers ())'length /= 0 then
-    Test::fire_scheduled_timers();
-  end if; 
-  theJobs := find Job ();
-  theSequences := theJobs -> R10;
-  theAuditEvents := theSequences -> R11;
-  //
-  for theJob in theJobs loop
-    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed even though the branch and merge count is incorrect: " & theJob.jobID);
-  end loop;  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '0fd2d1a7-facc-427f-ac29-5a3b8abccf11' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test255IllegalSplitInstanceForkWithBranchAndMergeCount () is
-theJob : instance of Job;
-theJobs : set of instance of Job;
-theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
-previousEvents : sequence of string;
-empty : sequence of string;
-theAuditEventData : sequence of auditEventDataStructure;
-emptyAuditEventData : sequence of auditEventDataStructure;
-
-begin
-  // This test covers 1 Job with 2 sequences based on a split fork and merge path definition - there are 10 branches
-  // There merge count has been set to 11 though only 10 branches merge at the merge point
-  // This test does reveal any erroneous behaviour of the twin
-  // Forking Sequence
-
-  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "SplitInstFork_1", "10");
-  theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "SplitInstMerge_1", "11");
-  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
-  theAuditEventData := emptyAuditEventData;
-  previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
-  
-  // Merging Sequence
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev316",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev317",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev318",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev319",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev320",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev321",theAuditEventData);
-  previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev322",theAuditEventData);
-  previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317" & "Ev318" & "Ev319" & "Ev320" & "Ev321" & "Ev322";
-  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job",previousEvents,"Ev323",theAuditEventData);
-  previousEvents := ("Ev323");
-  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job",previousEvents,"Ev324",theAuditEventData);
- //
-  Test::service_event_queue();
-  if (Test::get_scheduled_timers ())'length /= 0 then
-    Test::fire_scheduled_timers();
-  end if; 
-  theJobs := find Job ();
-  theSequences := theJobs -> R10;
-  theAuditEvents := theSequences -> R11;
-  //
-  for theJob in theJobs loop
-    Assertions::assertTrue(theJob.jobCompleted = false, "Job is completed even though merge count was incorrect: " & theJob.jobID);
-  end loop;  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'd32e1918-b1fc-4dcb-bc66-5fdedb596917' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '9011f660-12a2-4578-9780-58e232a5acba' DO NOT EDIT THIS LINE.
 private service AESequenceDC::Test256TimeoutDueToNoRestoredExtraJobInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
@@ -1138,7 +1344,7 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '6629ce17-0798-4c1b-9ede-d9029e92abad' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '7cb6e24d-a5cc-4202-9ee2-7931ab0650ac' DO NOT EDIT THIS LINE.
 private service AESequenceDC::Test257InvalidRestoredExtraJobInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
@@ -1272,212 +1478,6 @@ begin
     thePersistedInvariant.deletePersistedInvariant();   
   end loop; 
   
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '6077ff1c-c046-47c4-b045-f5d5ea9637bc' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test29NormalBranchCountWithSameSourceAndUserEvent () is
-theJob : instance of Job;
-theJobs : set of instance of Job;
-theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
-previousEvents : sequence of string;
-empty : sequence of string;
-theAuditEventData : sequence of auditEventDataStructure;
-emptyAuditEventData : sequence of auditEventDataStructure;
-
-begin
-  // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 10 branches
-  // This test does not reveal any erroneous behaviour of the twin but does demonstrate use of the same source and user event
-  //
-  acceptOrderedEvent ("1620920000","Test-0001","SSUFA","Branch_Count_Job_SSU",previousEvents,"Ev301",theAuditEventData);
-  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_SameSourceAndUser_1", "10");
-  previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","SSUFB","Branch_Count_Job_SSU",previousEvents,"Ev302",theAuditEventData);
-  theAuditEventData :=  emptyAuditEventData;
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev303",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev304",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev305",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev306",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev307",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev308",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev309",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev310",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev311",theAuditEventData);
-  previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev312",theAuditEventData);
-  previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
-  acceptOrderedEvent ("1620920003","Test-0001","SSUFD","Branch_Count_Job_SSU",previousEvents,"Ev313",theAuditEventData);
-  previousEvents := ("Ev313");
-  acceptOrderedEvent ("1620920004","Test-0001","SSUFE","Branch_Count_Job_SSU",previousEvents,"Ev314",theAuditEventData);
-  previousEvents := ("Ev314");
-  acceptOrderedEvent ("1620920005","Test-0001","SSUFF","Branch_Count_Job_SSU",previousEvents,"Ev315",theAuditEventData);
- //
-  Test::service_event_queue();
-  if (Test::get_scheduled_timers ())'length /= 0 then
-    Test::fire_scheduled_timers();
-  end if; 
-  theJobs := find Job ();
-  theSequences := theJobs -> R10;
-  theAuditEvents := theSequences -> R11;
-  //
-  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
-  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
-  Assertions::assertTrue(theAuditEvents'length = 15, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
-  for theJob in theJobs loop
-    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
-    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
-  end loop;  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '8bd84f67-7cc8-48e2-a676-156b20f9c3d4' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test63InvalidLoopWithNonIntegerLoopCount () is
-theJob : instance of Job;
-theJobs : set of instance of Job;
-theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
-theAuditEventData : sequence of auditEventDataStructure;
-emptyAuditEventData : sequence of auditEventDataStructure;
-theDynamicControlDefn : instance of DynamicControlDefinition;
-sourceOccurrence: instance of AEOccurrenceInSequenceDefinition;
-userOccurrence: instance of AEOccurrenceInSequenceDefinition;
-theJobDefn : instance of JobDefinition;
-theDynamicControl : instance of DynamicControl;
-theDynamicControls : set of instance of DynamicControl;
-
-begin
-  // initial Test of Definitions
-  theDynamicControlDefn := find_one DynamicControlDefinition (dynamicControlName = "Counter_1");
-  sourceOccurrence := theDynamicControlDefn -> R30;
-  userOccurrence := theDynamicControlDefn -> R31;
-  theJobDefn := theDynamicControlDefn -> R32;
-  
-  Assertions::assertTrue(theDynamicControlDefn.dynamicControlName = "Counter_1", "Loop Counter not created as expected: " & theDynamicControlDefn.dynamicControlName);
-  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType);
-//  Assertions::assertTrue((theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType = "LCLB", "User Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType);
-  Assertions::assertTrue(theJobDefn.jobName = "LoopCountJob", "Job not created as expected: " & theJobDefn.jobName);
-  
-  
-  // This test covers 1 Jobs with 1 sequences based on a looped path definition - 5 full iterations of the loop
-  // but the loop count has an erroneous non-integer value
-  // This test does  reveal any erroneous behaviour of the twin
-  //
-  // Loop count should be an integer. Here is it replaced by the string "FIVE" to provoke an error
-  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "FIVE");
-  acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
-  theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
-  acceptOrderedEvent ("1620920002","Test-0001","LCLC","Job_LoopCount_1","Ev302","Ev303",theAuditEventData);
-  acceptOrderedEvent ("1620920003","Test-0001","LCLD","Job_LoopCount_1","Ev303","Ev304",theAuditEventData);
-  acceptOrderedEvent ("1620920004","Test-0001","LCLB","Job_LoopCount_1","Ev304","Ev305",theAuditEventData);
-  acceptOrderedEvent ("1620920005","Test-0001","LCLC","Job_LoopCount_1","Ev305","Ev306",theAuditEventData);
-  acceptOrderedEvent ("1620920006","Test-0001","LCLD","Job_LoopCount_1","Ev306","Ev307",theAuditEventData);
-  acceptOrderedEvent ("1620920007","Test-0001","LCLB","Job_LoopCount_1","Ev307","Ev308",theAuditEventData);
-  acceptOrderedEvent ("1620920008","Test-0001","LCLC","Job_LoopCount_1","Ev308","Ev309",theAuditEventData);
-  acceptOrderedEvent ("1620920009","Test-0001","LCLD","Job_LoopCount_1","Ev309","Ev310",theAuditEventData);
-  acceptOrderedEvent ("1620920010","Test-0001","LCLB","Job_LoopCount_1","Ev310","Ev311",theAuditEventData);
-  acceptOrderedEvent ("1620920011","Test-0001","LCLC","Job_LoopCount_1","Ev311","Ev312",theAuditEventData);
-  acceptOrderedEvent ("1620920012","Test-0001","LCLD","Job_LoopCount_1","Ev312","Ev313",theAuditEventData);
-  acceptOrderedEvent ("1620920013","Test-0001","LCLB","Job_LoopCount_1","Ev313","Ev314",theAuditEventData);
-  acceptOrderedEvent ("1620920014","Test-0001","LCLC","Job_LoopCount_1","Ev314","Ev315",theAuditEventData);
-  acceptOrderedEvent ("1620920015","Test-0001","LCLD","Job_LoopCount_1","Ev315","Ev316",theAuditEventData);
-  acceptOrderedEvent ("1620920016","Test-0001","LCLE","Job_LoopCount_1","Ev316","Ev317",theAuditEventData);
-
-  //
-  Test::service_event_queue();
-  if (Test::get_scheduled_timers ())'length /= 0 then
-    Test::fire_scheduled_timers();
-  end if; 
-  theJobs := find Job ();
-  theSequences := theJobs -> R10;
-  theAuditEvents := theSequences -> R11;
-  theDynamicControls := theJobs -> R35;
-  //
-  for theJob in theJobs loop
-    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed even though loop count was invalid: " & theJob.jobID);
-  end loop;  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '6136e0c7-db55-43f7-adf8-53ba563f9cf7' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test64InvalidLoopWithLoopCountExceedingExpectedValue () is
-theJob : instance of Job;
-theJobs : set of instance of Job;
-theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
-theAuditEventData : sequence of auditEventDataStructure;
-emptyAuditEventData : sequence of auditEventDataStructure;
-theDynamicControlDefn : instance of DynamicControlDefinition;
-sourceOccurrence: instance of AEOccurrenceInSequenceDefinition;
-userOccurrence: instance of AEOccurrenceInSequenceDefinition;
-theJobDefn : instance of JobDefinition;
-theDynamicControl : instance of DynamicControl;
-theDynamicControls : set of instance of DynamicControl;
-
-begin
-  // initial Test of Definitions
-  theDynamicControlDefn := find_one DynamicControlDefinition (dynamicControlName = "Counter_1");
-  sourceOccurrence := theDynamicControlDefn -> R30;
-  userOccurrence := theDynamicControlDefn -> R31;
-  theJobDefn := theDynamicControlDefn -> R32;
-  
-  Assertions::assertTrue(theDynamicControlDefn.dynamicControlName = "Counter_1", "Loop Counter not created as expected: " & theDynamicControlDefn.dynamicControlName);
-  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType);
-//  Assertions::assertTrue((theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType = "LCLB", "User Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType);
-  Assertions::assertTrue(theJobDefn.jobName = "LoopCountJob", "Job not created as expected: " & theJobDefn.jobName);
-  
-  
-  // This test covers 1 Jobs with 1 sequences based on a looped path definition - 4 full iterations of the loop
-  // followed by an error which cause the loop to be exited.
-  // This test does not reveal any erroneous behaviour of the twin
-  //
-  
-  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "5");
-  acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
-  theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
-  acceptOrderedEvent ("1620920002","Test-0001","LCLC","Job_LoopCount_1","Ev302","Ev303",theAuditEventData);
-  acceptOrderedEvent ("1620920003","Test-0001","LCLD","Job_LoopCount_1","Ev303","Ev304",theAuditEventData);
-  acceptOrderedEvent ("1620920004","Test-0001","LCLB","Job_LoopCount_1","Ev304","Ev305",theAuditEventData);
-  acceptOrderedEvent ("1620920005","Test-0001","LCLC","Job_LoopCount_1","Ev305","Ev306",theAuditEventData);
-  acceptOrderedEvent ("1620920006","Test-0001","LCLD","Job_LoopCount_1","Ev306","Ev307",theAuditEventData);
-  acceptOrderedEvent ("1620920007","Test-0001","LCLB","Job_LoopCount_1","Ev307","Ev308",theAuditEventData);
-  acceptOrderedEvent ("1620920008","Test-0001","LCLC","Job_LoopCount_1","Ev308","Ev309",theAuditEventData);
-  acceptOrderedEvent ("1620920009","Test-0001","LCLD","Job_LoopCount_1","Ev309","Ev310",theAuditEventData);
-  acceptOrderedEvent ("1620920010","Test-0001","LCLB","Job_LoopCount_1","Ev310","Ev311",theAuditEventData);
-  acceptOrderedEvent ("1620920011","Test-0001","LCLC","Job_LoopCount_1","Ev311","Ev312",theAuditEventData);
-  acceptOrderedEvent ("1620920012","Test-0001","LCLD","Job_LoopCount_1","Ev312","Ev313",theAuditEventData);
-  acceptOrderedEvent ("1620920013","Test-0001","LCLB","Job_LoopCount_1","Ev313","Ev314",theAuditEventData);
-  acceptOrderedEvent ("1620920014","Test-0001","LCLC","Job_LoopCount_1","Ev314","Ev315",theAuditEventData);
-  acceptOrderedEvent ("1620920015","Test-0001","LCLD","Job_LoopCount_1","Ev315","Ev316",theAuditEventData);
-  acceptOrderedEvent ("1620920016","Test-0001","LCLB","Job_LoopCount_1","Ev316","Ev317",theAuditEventData);
-  acceptOrderedEvent ("1620920017","Test-0001","LCLC","Job_LoopCount_1","Ev317","Ev318",theAuditEventData);
-  acceptOrderedEvent ("1620920018","Test-0001","LCLD","Job_LoopCount_1","Ev318","Ev319",theAuditEventData);
-  acceptOrderedEvent ("1620920019","Test-0001","LCLE","Job_LoopCount_1","Ev319","Ev320",theAuditEventData);
-
-  //
-  Test::service_event_queue();
-  if (Test::get_scheduled_timers ())'length /= 0 then
-    Test::fire_scheduled_timers();
-  end if; 
-  theJobs := find Job ();
-  theSequences := theJobs -> R10;
-  theAuditEvents := theSequences -> R11;
-  theDynamicControls := theJobs -> R35;
-  //
-  for theJob in theJobs loop
-    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed even though loop count exceeded the expected value: " & theJob.jobID);
- end loop;  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

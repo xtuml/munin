@@ -1,8 +1,8 @@
-//! ACTIVITY BEGIN. '719d39a2-4658-4128-9557-9451b7e15472' DO NOT EDIT THIS LINE.
-public service AESequenceDC::PersistedInvariant.createSourceExtraJobInvariant ( extraJobInvDefn : in inst_ref<ExtraJobInvariantDefn>,
+//! ACTIVITY BEGIN. '577ba888-088a-4859-a16d-98dfc25eb790' DO NOT EDIT THIS LINE.
+public service AESequenceDC::PersistedInvariant.createSourceExtraJobInvariant ( extraJobInvDefn : in instance of ExtraJobInvariantDefn,
                                                                                invariantName : in string,
                                                                                invariantValue : in string,
-                                                                               errorReason : out string ) return inst_ref<PersistedInvariant> is
+                                                                               errorReason : out string ) return instance of PersistedInvariant is
 endTime : timestamp;
 existingExtraJobInvariant : instance of PersistedInvariant;
 newExtraJobInvariant : instance of PersistedInvariant;
@@ -45,7 +45,7 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '965c546d-798b-4a41-becb-e083b0573dbb' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '2869fcaf-8e75-459e-8a4b-c88648b57c5f' DO NOT EDIT THIS LINE.
 public instance service AESequenceDC::PersistedInvariant.deletePersistedInvariant () is
 theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theProvidingAuditEvent : instance of AuditEvent;

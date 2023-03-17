@@ -1,11 +1,11 @@
-//! ACTIVITY BEGIN. 'a67776e2-da9d-46b0-801a-32003ae5c8ee' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '298c8d7e-e4b9-4710-a16a-e892653eccda' DO NOT EDIT THIS LINE.
 public service AESequenceDC::acceptOrderedEvent ( ae_time : in string,
                                                  app : in string,
                                                  ae_type : in string,
                                                  jobId : in string,
-                                                 prevAEIds : in string,
+                                                 prevAEIds : in sequence of string,
                                                  id : in string,
-                                                 auditEventData : in auditEventDataStructure ) is
+                                                 auditEventData : in sequence of auditEventDataStructure ) is
 existingJob : instance of Job;
 theAuditEventDefinition : instance of AuditEventDefinition;
 theJobDefinition : instance of JobDefinition;
@@ -45,102 +45,40 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '6169ad9f-b508-4f6c-a7bb-276651567fa5' DO NOT EDIT THIS LINE.
-public service AESequenceDC::createSVDCsystemSpec ( maxIntraSequenceEventTimeoutPeriod : in duration,
-                                                   waitPeriodForAllJobsCompletedCheck : in duration,
-                                                   waitPeriodForJobDeletion : in duration,
-                                                   waitPeriodForInvariantDeletion : in duration,
-                                                   timeoutPeriodForRetreivingStoredInvariants : in duration ) is
-theSVDCSystemSpec : instance of SystemSpecification;
+//! ACTIVITY BEGIN. 'bb8ee068-445c-4b0a-95b8-d612dd1a0a6c' DO NOT EDIT THIS LINE.
+public service AESequenceDC::failedJob ( jobId : in string,
+                                        failureReason : in string ) is
+theJob : instance of Job;
+
 begin
-  theSVDCSystemSpec := create unique SystemSpecification (intraSequenceEventTimeoutPeriod => maxIntraSequenceEventTimeoutPeriod,
-  	                                                      checkJobDefReadyForDeletionPeriod => waitPeriodForAllJobsCompletedCheck,
-  	                                                      jobDeletionWaitPeriod => waitPeriodForJobDeletion,
-  	                                                      sourceExtraJobInvariantDeletionPeriod => waitPeriodForInvariantDeletion,
-  	                                                      persistentInvariantRestoreTimeoutPeriod => timeoutPeriodForRetreivingStoredInvariants);
-  //
+  theJob := find_only Job (jobID = jobId);
+  if theJob /= null then
+    generate Job.jobFailed(failureReason) to theJob;
+  end if;
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '9df39681-9dfb-4591-a288-bdf137dc5e6f' DO NOT EDIT THIS LINE.
-private service AESequenceDC::deleteJob ( jobId : in string ) is
+//! ACTIVITY BEGIN. '0178da63-222b-4260-8c2a-2d4c29ff808d' DO NOT EDIT THIS LINE.
+public service AESequenceDC::jobComplete ( jobId : in string ) is
 theJob : instance of Job;
-logMessage : string;
 
 begin
-
-  theJob := find_one Job (jobID = jobId);
+  //
+  theJob := find_only Job (jobID = jobId);
   if theJob /= null then
-    theJob.deleteJob();
-
-  else
-
-    logMessage := "jobId provided is unknown " & jobId;
-	Logger::log(Logger::Information, "AESequenceDC", logMessage);
-      
+    generate Job.jobTimedOut() to theJob;
   end if;
   //
-  //
-  //
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '66b809ff-8475-4298-96fa-89f463ebf779' DO NOT EDIT THIS LINE.
-public service AESequenceDC::deprecateJobDefinition ( jobName : in string ) is
-theJobDefn : instance of JobDefinition;
-logMessage : string;
-
-begin
-
-  // Move the JobDefinition into the 'Deprecated' state and wait for all outstanding Jobs of that 
-  // type to complete (either successful for fail) before automatically deleting it.
-  theJobDefn := find_one JobDefinition (jobName = jobName);
-  if theJobDefn /= null then
-    generate JobDefinition.deprecate() to theJobDefn;
-  else
-  
-    logMessage := "Job Definition specified for deprecation is unknown - jobName " & jobName;
-	Logger::log(Logger::Information, "AESequenceDC", logMessage);
-  
-  end if;  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '590264de-ceb7-4214-823d-109b13c12970' DO NOT EDIT THIS LINE.
-public service AESequenceDC::dynamicControlDefinition ( jobName : in string,
-                                                       dynamicControlName : in string,
-                                                       dynamicControlType : in dynamicControlTypeEnum,
-                                                       sourceEventType : in string,
-                                                       sourceOccurrenceId : in integer,
-                                                       userEventType : in string,
-                                                       userOccurrenceId : in integer ) is
-// This function defines the dynamic control, which is a loop count or a branch count, together with the event
-// that provides it and the event that uses it. This function could be split such that the dynamic control is
-// set up with just the source event and the user event linked in later on in a different call to a different 
-// function.
-//
-
-begin
-  DynamicControlDefinition.createDynamicControlDefinition (jobName,
-  	                                                       dynamicControlName,
-  	                                                       dynamicControlType,
-  	                                                       sourceEventType,
-  	                                                       sourceOccurrenceId);
-  DynamicControlDefinition.linkUserEventDefn (jobName,
-  	                                          dynamicControlName,
-  	                                          dynamicControlType,
-  	                                          userEventType,
-  	                                          userOccurrenceId);
-  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'c0230f91-9a36-4f74-be75-7c34ba701bd9' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'f0bfcefa-2cc9-4e61-81da-4571627deee7' DO NOT EDIT THIS LINE.
 public service AESequenceDC::eventDefinition ( jobName : in string,
                                               sequenceName : in string,
                                               eventType : in string,
                                               occurrenceId : in integer,
-                                              previousEventTypes : in eventStructure,
+                                              previousEventTypes : in sequence of eventStructure,
                                               isSequenceStart : in boolean,
                                               isSequenceEnd : in boolean,
                                               isBreak : in boolean ) is
@@ -332,81 +270,90 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '6b0e46af-4fd0-41d7-bac8-31c75391883e' DO NOT EDIT THIS LINE.
-public service AESequenceDC::extraJobInvariantDefinition ( auditEventDataName : in string,
-                                                          sourceJobDefnName : in string,
-                                                          sourceEventType : in string,
-                                                          sourceOccurrenceId : in integer,
-                                                          userEvents : in userEventDataStructure ) is
-sourceInvariantEventType : eventStructure;
-invariantEventType : eventStructure;
+//! ACTIVITY BEGIN. 'ad9b6852-61ff-4b7e-9f03-426846633e70' DO NOT EDIT THIS LINE.
+private service AESequenceDC::deleteJob ( jobId : in string ) is
+theJob : instance of Job;
 logMessage : string;
 
 begin
-  // TODO - remove the following log message (added for testing purposes).
-  logMessage := "Extra Job Invariant Definition added for "& auditEventDataName;
-  Logger::log(Logger::Information, "AESequenceDC", logMessage);
 
-  sourceInvariantEventType := (sourceEventType,sourceOccurrenceId,"","");
-  ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn(sourceJobDefnName,auditEventDataName, sourceInvariantEventType, @P1D@);
-  // TODO - the lifetime of the extra job invariant is currently fixed at 1 day (see last parameter in previous function call). This needs 
-  // to be user-configurable and will require a change to the interface for the function 'extraJobInvaiantDefinition'.
-
-  for userEvent in userEvents loop
-    invariantEventType := (userEvent.auditEventType,userEvent.occurrenceId,"","");
-    ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn(userEvent.jobDefinitionName, auditEventDataName, invariantEventType);
-  end loop;
-  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'f716864d-31d3-4429-8285-1543e4c52589' DO NOT EDIT THIS LINE.
-public service AESequenceDC::failedJob ( jobId : in string,
-                                        failureReason : in string ) is
-theJob : instance of Job;
-
-begin
-  theJob := find_only Job (jobID = jobId);
+  theJob := find_one Job (jobID = jobId);
   if theJob /= null then
-    generate Job.jobFailed(failureReason) to theJob;
+    theJob.deleteJob();
+
+  else
+
+    logMessage := "jobId provided is unknown " & jobId;
+	Logger::log(Logger::Information, "AESequenceDC", logMessage);
+      
   end if;
-
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '717b206c-41fa-42cd-9369-d67a207b3443' DO NOT EDIT THIS LINE.
-public service AESequenceDC::intraJobInvariantDefinition ( jobDefnName : in string,
-                                                          auditEventDataName : in string,
-                                                          associatedEvents : in intraJobInvDataStructure ) is
-invariantEventType : eventStructure;
-invariantEventTypes : sequence of eventStructure;
-begin
-  
-  for associatedEvent in associatedEvents loop
-    invariantEventType := (associatedEvent.auditEventType,associatedEvent.occurrenceId,"","");
-    invariantEventTypes := invariantEventTypes & invariantEventType;
-  end loop;
-  IntraJobInvariantDefn.createIntraJobInvariantDefn(jobDefnName, auditEventDataName, invariantEventTypes);
-
-  
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'd04342bf-0d52-4e7d-a24e-61f2f09c8fa3' DO NOT EDIT THIS LINE.
-public service AESequenceDC::jobComplete ( jobId : in string ) is
-theJob : instance of Job;
-
-begin
   //
-  theJob := find_only Job (jobID = jobId);
-  if theJob /= null then
-    generate Job.jobTimedOut() to theJob;
-  end if;
+  //
   //
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. 'da43231c-367e-435f-a401-81720efcd239' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '8548b0fd-27ba-42ee-b392-3098142e30ed' DO NOT EDIT THIS LINE.
+public service AESequenceDC::deprecateJobDefinition ( jobName : in string ) is
+theJobDefn : instance of JobDefinition;
+logMessage : string;
+
+begin
+
+  // Move the JobDefinition into the 'Deprecated' state and wait for all outstanding Jobs of that 
+  // type to complete (either successful for fail) before automatically deleting it.
+  theJobDefn := find_one JobDefinition (jobName = jobName);
+  if theJobDefn /= null then
+    generate JobDefinition.deprecate() to theJobDefn;
+  else
+  
+    logMessage := "Job Definition specified for deprecation is unknown - jobName " & jobName;
+	Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  
+  end if;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'ecc6c890-af9e-41d7-a4a0-cad083920fdf' DO NOT EDIT THIS LINE.
+public service AESequenceDC::createSVDCsystemSpec ( maxIntraSequenceEventTimeoutPeriod : in duration,
+                                                   waitPeriodForAllJobsCompletedCheck : in duration,
+                                                   waitPeriodForJobDeletion : in duration,
+                                                   waitPeriodForInvariantDeletion : in duration,
+                                                   timeoutPeriodForRetreivingStoredInvariants : in duration ) is
+theSVDCSystemSpec : instance of SystemSpecification;
+begin
+  theSVDCSystemSpec := create unique SystemSpecification (intraSequenceEventTimeoutPeriod => maxIntraSequenceEventTimeoutPeriod,
+  	                                                      checkJobDefReadyForDeletionPeriod => waitPeriodForAllJobsCompletedCheck,
+  	                                                      jobDeletionWaitPeriod => waitPeriodForJobDeletion,
+  	                                                      sourceExtraJobInvariantDeletionPeriod => waitPeriodForInvariantDeletion,
+  	                                                      persistentInvariantRestoreTimeoutPeriod => timeoutPeriodForRetreivingStoredInvariants);
+  //
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'e933a4e5-fd85-42d8-9e5f-43423ba863e4' DO NOT EDIT THIS LINE.
+public service AESequenceDC::suspendJobDefinition ( jobName : in string ) is
+theJobDefn : instance of JobDefinition;
+logMessage : string;
+
+begin
+
+  // Move the JobDefinition into the 'Suspended' state - in this state no further new Jobs of this type
+  // will be processed until returned back to the 'Active' state.
+  theJobDefn := find_one JobDefinition (jobName = jobName);
+  if theJobDefn /= null then
+    // Note that if the Job is not in the 'Active' state then the suspension attempt will be ignored.
+    generate JobDefinition.suspend() to theJobDefn;
+  else
+  
+    logMessage := "The JobDefinition specified for suspension is unknown - jobName " & jobName;
+	Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  
+  end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9ff9de0d-be3c-4799-94fd-023a6a83a934' DO NOT EDIT THIS LINE.
 public service AESequenceDC::reactivateJobDefinition ( jobName : in string ) is
 theJobDefn : instance of JobDefinition;
 logMessage : string;
@@ -433,8 +380,83 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '026cc64b-a266-4bff-8571-3163f776218a' DO NOT EDIT THIS LINE.
-public service AESequenceDC::restoreInvariants ( restoredInvariants : in persistedInvariantStructure ) is
+//! ACTIVITY BEGIN. 'e02e51d5-9455-4a34-b8c1-e2c7f0a628ed' DO NOT EDIT THIS LINE.
+public service AESequenceDC::extraJobInvariantDefinition ( auditEventDataName : in string,
+                                                          sourceJobDefnName : in string,
+                                                          sourceEventType : in string,
+                                                          sourceOccurrenceId : in integer,
+                                                          userEvents : in sequence of userEventDataStructure ) is
+sourceInvariantEventType : eventStructure;
+invariantEventType : eventStructure;
+logMessage : string;
+
+begin
+  // TODO - remove the following log message (added for testing purposes).
+  logMessage := "Extra Job Invariant Definition added for "& auditEventDataName;
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+
+  sourceInvariantEventType := (sourceEventType,sourceOccurrenceId,"","");
+  ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn(sourceJobDefnName,auditEventDataName, sourceInvariantEventType, @P1D@);
+  // TODO - the lifetime of the extra job invariant is currently fixed at 1 day (see last parameter in previous function call). This needs 
+  // to be user-configurable and will require a change to the interface for the function 'extraJobInvaiantDefinition'.
+
+  for userEvent in userEvents loop
+    invariantEventType := (userEvent.auditEventType,userEvent.occurrenceId,"","");
+    ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn(userEvent.jobDefinitionName, auditEventDataName, invariantEventType);
+  end loop;
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a7653f36-7f90-48e4-b78f-af997de14261' DO NOT EDIT THIS LINE.
+public service AESequenceDC::intraJobInvariantDefinition ( jobDefnName : in string,
+                                                          auditEventDataName : in string,
+                                                          associatedEvents : in sequence of intraJobInvDataStructure ) is
+invariantEventType : eventStructure;
+invariantEventTypes : sequence of eventStructure;
+begin
+  
+  for associatedEvent in associatedEvents loop
+    invariantEventType := (associatedEvent.auditEventType,associatedEvent.occurrenceId,"","");
+    invariantEventTypes := invariantEventTypes & invariantEventType;
+  end loop;
+  IntraJobInvariantDefn.createIntraJobInvariantDefn(jobDefnName, auditEventDataName, invariantEventTypes);
+
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '14010743-d12c-4236-a031-cc9825948007' DO NOT EDIT THIS LINE.
+public service AESequenceDC::dynamicControlDefinition ( jobName : in string,
+                                                       dynamicControlName : in string,
+                                                       dynamicControlType : in dynamicControlTypeEnum,
+                                                       sourceEventType : in string,
+                                                       sourceOccurrenceId : in integer,
+                                                       userEventType : in string,
+                                                       userOccurrenceId : in integer ) is
+// This function defines the dynamic control, which is a loop count or a branch count, together with the event
+// that provides it and the event that uses it. This function could be split such that the dynamic control is
+// set up with just the source event and the user event linked in later on in a different call to a different 
+// function.
+//
+
+begin
+  DynamicControlDefinition.createDynamicControlDefinition (jobName,
+  	                                                       dynamicControlName,
+  	                                                       dynamicControlType,
+  	                                                       sourceEventType,
+  	                                                       sourceOccurrenceId);
+  DynamicControlDefinition.linkUserEventDefn (jobName,
+  	                                          dynamicControlName,
+  	                                          dynamicControlType,
+  	                                          userEventType,
+  	                                          userOccurrenceId);
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9ebd061a-f613-4920-9250-f9095dc73be3' DO NOT EDIT THIS LINE.
+public service AESequenceDC::restoreInvariants ( restoredInvariants : in sequence of persistedInvariantStructure ) is
 theRestoredExtraJobInvDefn : instance of ExtraJobInvariantDefn;
 theAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 theEventDefn : instance of AuditEventDefinition;
@@ -473,28 +495,6 @@ begin
     
     generate Job.StoredInvariantsReceived () to eachJob;
   end loop;
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '5f1d38ac-0624-4bf7-aa33-37aa1c328d35' DO NOT EDIT THIS LINE.
-public service AESequenceDC::suspendJobDefinition ( jobName : in string ) is
-theJobDefn : instance of JobDefinition;
-logMessage : string;
-
-begin
-
-  // Move the JobDefinition into the 'Suspended' state - in this state no further new Jobs of this type
-  // will be processed until returned back to the 'Active' state.
-  theJobDefn := find_one JobDefinition (jobName = jobName);
-  if theJobDefn /= null then
-    // Note that if the Job is not in the 'Active' state then the suspension attempt will be ignored.
-    generate JobDefinition.suspend() to theJobDefn;
-  else
-  
-    logMessage := "The JobDefinition specified for suspension is unknown - jobName " & jobName;
-	Logger::log(Logger::Information, "AESequenceDC", logMessage);
-  
-  end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

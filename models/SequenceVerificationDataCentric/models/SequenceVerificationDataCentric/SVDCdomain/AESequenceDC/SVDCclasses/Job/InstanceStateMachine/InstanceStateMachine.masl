@@ -1,8 +1,8 @@
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' '808192b6-d902-43b5-b51a-4ebf2367fe17' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '4363c1b5-2587-4a86-9702-c5975f4b2816' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.JobInProgress ( eventId : in string,
-                                       prevAEIds : in string,
+                                       prevAEIds : in sequence of string,
                                        aeType : in string,
-                                       aeData : in auditEventDataStructure ) is
+                                       aeData : in sequence of auditEventDataStructure ) is
 newEvent : instance of AuditEvent;
 existingEvent : instance of AuditEvent;
 theEventType : instance of AuditEventDefinition;
@@ -458,7 +458,7 @@ begin
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' '2123ce69-ff7f-4d27-9297-333ba39f5f21' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '45910edf-ed38-4fdb-b6b8-206e07e4bdec' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.AssessingJobConstraints () is
 eachAuditEventPair : instance of AuditEventPair;
 theAuditEventPairs : sequence of instance of AuditEventPair;
@@ -605,7 +605,7 @@ end state;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' '04cd9e55-56b1-4ee7-aa53-a1b977128aea' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '629612ca-ac5a-494b-b9de-7ef1afda21f0' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.JobFailed ( failureReason : in string ) is
 logMessage : string;
 theSystemSpec : instance of SystemSpecification;
@@ -631,11 +631,11 @@ begin
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' '2d602afb-9f6a-419d-8a2d-68f8046d9600' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' 'e08a98eb-9e0e-4eaf-83d7-60649b23bdac' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.JobGoneHorriblyWrong ( eventId : in string,
-                                              prevAEIds : in string,
+                                              prevAEIds : in sequence of string,
                                               aeType : in string,
-                                              aeData : in auditEventDataStructure ) is
+                                              aeData : in sequence of auditEventDataStructure ) is
 logMessage : string;
 theSystemSpec : instance of SystemSpecification;
 
@@ -660,8 +660,8 @@ begin
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' 'e29cce82-f428-4826-83c4-51dd9aca156e' DO NOT EDIT THIS LINE.
-state AESequenceDC::Job.AssessingSequenceCompletion ( thePotentiallyCompletedSequence : in inst_ref<Sequence> ) is
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '02372df1-eda5-43dc-9e3b-740dccc50479' DO NOT EDIT THIS LINE.
+state AESequenceDC::Job.AssessingSequenceCompletion ( thePotentiallyCompletedSequence : in instance of Sequence ) is
 aeSequenceDefs : set of instance of AESequenceDefinition;
 completeSequences : set of instance of Sequence;
 sequencesForJob : set of instance of Sequence;
@@ -696,7 +696,7 @@ begin
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' 'b070536d-4622-4352-9b13-a123aa302c82' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' 'fe76e332-fa89-4fc8-bf40-ea0923527fad' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.JobTimeoutReported () is
 logMessage : string;
 begin
@@ -712,7 +712,7 @@ begin
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' '19b77974-07b8-4794-b962-d5bb5fa09c9f' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' 'af8e77f2-393f-44d3-add2-d0babcb15053' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.JobSuccessful () is
 logMessage : string;
 theSystemSpec : instance of SystemSpecification;
@@ -732,7 +732,7 @@ begin
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' 'd8960c63-a8e9-44b0-8675-83b3fca5d37b' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '8fe3aaed-1b2a-4e4b-bd5a-8206f6e08cf0' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.Deleted () is
 logMessage : string;
 theJobID : string;
@@ -751,7 +751,7 @@ begin
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' '09296429-bea0-452f-abe1-947e48d23031' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '8296783c-a40c-413b-b700-e18ecd9df26d' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.AssessingIntraJobInvariants () is
 expectedIntraJobInvDefns : set of instance of IntraJobInvariantDefn;
 theExpectedIntraJobInvDefn : instance of IntraJobInvariantDefn;
@@ -803,7 +803,7 @@ begin
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' '6b00bfeb-f9ca-4959-8fe6-239c81ae0299' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' 'f09c7295-aae5-4cb4-b76a-0bac7eb5fe52' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.AwaitingPersistenceService () is
 theSystemSpec : instance of SystemSpecification;
 failureReason : string;
@@ -821,7 +821,7 @@ begin
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' 'a3963090-afc8-409d-ac3f-47fff2f8a1bc' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' '1a48b626-651f-4dfb-b43e-fa7e296da623' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.AssessingLocalExtraJobInvariants () is
 expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
 theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;
@@ -891,7 +891,7 @@ begin
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '34b3cf63-af0a-4818-acef-14bff7354fba' 'f5caca41-018c-45e5-8e7b-fe181b39f98d' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd011774c-53f3-4995-b8bf-9a4879033d00' 'fdf1deba-061a-4def-b29a-75ec05c72679' DO NOT EDIT THIS LINE.
 state AESequenceDC::Job.ReassessingExtraJobInvariants () is
 expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
 theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;

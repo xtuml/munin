@@ -1,9 +1,9 @@
-//! ACTIVITY BEGIN. '20ca69d9-fc7a-49f1-abb1-cd3fadd4e0f0' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '1c910ac3-72cf-4b5c-9022-936017cad0c7' DO NOT EDIT THIS LINE.
 public service AESequenceDC::AuditEvent.AddEventForNewJob ( jobId : in string,
                                                            eventId : in string,
-                                                           prevAEIds : in string,
+                                                           prevAEIds : in sequence of string,
                                                            aeType : in string,
-                                                           aeData : in auditEventDataStructure ) is
+                                                           aeData : in sequence of auditEventDataStructure ) is
 newJob :  instance of Job;
 newEvent : instance of AuditEvent;
 oldEvent : instance of AuditEvent;
@@ -79,7 +79,7 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '600638e2-cc8b-481a-be79-a8c10da08e89' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. '26822f33-6a72-4785-a400-7c11e5d71d99' DO NOT EDIT THIS LINE.
 public instance service AESequenceDC::AuditEvent.AddEventTBD () is
 newJob :  instance of Job;
 newEvent : instance of AuditEvent;
@@ -99,8 +99,8 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '8976a953-7898-449f-87c2-b3d7ef785e77' DO NOT EDIT THIS LINE.
-public instance service AESequenceDC::AuditEvent.TestPreviousEventIsValid ( prevEventInstance : in inst_ref<AuditEvent>,
+//! ACTIVITY BEGIN. 'f6c7376e-a155-480d-8007-f3c3ebc441aa' DO NOT EDIT THIS LINE.
+public instance service AESequenceDC::AuditEvent.TestPreviousEventIsValid ( prevEventInstance : in instance of AuditEvent,
                                                                            previousEventIsValid : out boolean ) is
 //The Audit Event instance on which this operation is invoked is newEvent
 // The input parameter is prevEventInstance
@@ -146,8 +146,8 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '8f6dd497-9105-49f8-8e95-78cd1b3022c9' DO NOT EDIT THIS LINE.
-public instance service AESequenceDC::AuditEvent.ProcessAuditEventData ( aeData : in auditEventDataStructure ) is
+//! ACTIVITY BEGIN. 'c6026915-9e48-40be-868c-610fa28ecd6a' DO NOT EDIT THIS LINE.
+public instance service AESequenceDC::AuditEvent.ProcessAuditEventData ( aeData : in sequence of auditEventDataStructure ) is
 theJob : instance of Job;
 theEventType : instance of AuditEventDefinition;
 theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
