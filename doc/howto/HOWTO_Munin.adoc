@@ -417,14 +417,6 @@ then a file X.json and a file Y.jon need to be created containing the respective
 
 Note: Advanced feature - the behavioural parameters in the config.json file can be adjusted with appropriate caution
 
-Additionally if the simulator is to be used also execute these:
-
-. `python plus2json.pyz Tutorial_1.puml --play --aesim_config | python -m json.tool > munin/deploy/aesim-config/plus2json/Tutorial_1.json` 
-- this creates a job definition file for Tutorial_1 for consumption by the AE Simulator. The file name of this file must match
-the job type name.
-. `python plus2json.pyz Tutorial_1.puml --play --aesim_test | python -m json.tool > munin/deploy/aesim-config/plus2json/plus2json-test-specification.json` 
-- this creates an example dispatch file for Tutorial_1 for consumption by the AE Simulator
-
 .Click to see more details on the `deploy/plus2json-deployed/generated-config/config.json` config file format
 [%collapsible]
 ====
@@ -554,21 +546,27 @@ Example:
 ----
 
 ====
+Additionally if the simulator is to be used also execute these:
 
-==== Configuring the simulator TODO check this is still correct
+. `python plus2json.pyz Tutorial_1.puml --play --aesim_config | python -m json.tool > munin/deploy/aesim-config/plus2json/Tutorial_1.json` 
+- this creates a job definition file for Tutorial_1 for consumption by the AE Simulator. The file name of this file must match
+the job type name.
+. `python plus2json.pyz Tutorial_1.puml --play --aesim_test | python -m json.tool > munin/deploy/aesim-config/plus2json/plus2json-test-specification.json` 
+- this creates an example dispatch file for Tutorial_1 for consumption by the AE Simulator
 
-To configure the Audit Event Simulator: Move the output file from plus2json --aesim_config to
-link:https://github.com/xtuml/munin/models/AESimulator/config/test-job-specification[here]
+==== Configuring the simulator
+
+The Audit Event Simulator will use the configuration files that are placed in the deploy/aesim-config/ directory.
 There can be multiple configurations files in this folder.
-
-TODO - Setting the runtime side of the AES config
 
 It is possible to configure the simulator to generate jobs that are to be
 delivered to the digital twin. The configuration file it loads is defined in the
-command specified in the `docker-compose-test.yml` and passed on the
+command specified in the `ae-simulator.yml` and passed on the
 `-test-config` argument as shown here:
 
-  command: "-test-config config/test-specification/sample-test-specification.json -postinit schedule/startup.sch -util Inspector -inspector-port 10 -util MetaData"
+  command: "-test-config config/plus2json/plus2json-test-specification.json -postinit schedule/startup.sch -util Inspector -inspector-port 10 -util MetaData"
+
+It ispossible to edit the yml file to point atthe configuration file that the simulator should load.
 
 .Click to see more details on the config file format
 [%collapsible]
@@ -578,37 +576,40 @@ The JSON test specification configuration file allows the user to define the tes
 Below is a sample of a test from the configuration file:
 
   {
-  "OneFilePerJob" : "true",
-  "MaxEventsPerFile" : 100,
+  "OneFilePerJob" : "false",
+  "MaxEventsPerFile" : 170,
   "FileTimoutPeriod" : "PT10S",
-  "JobSpecificationLocation" : "config/test-job-specification",
+  "JobSpecificationLocation" : "config/plus2json",
   "TestFileLocation" : "test-files/generated",
   "TestFileDestination" : "test-files/incoming",
   "Tests" : [{
       "TestId" : 1,
-      "TestName" : "EndToEndHappyPathJob",
-      "TotalTests" : 10,
-      "TestFrequency" : "PT1S",
+      "TestName" : "Ordered_Test1",
+      "TotalTests" : 100,
+      "TestFrequency" : "PT0.15S",
       "TestJobSpec" : [{
-          "TestJobSpecName" : "EndToEndHappyPathJob",
-          "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17"
+            "TestJobSpecName" : "Job with Simple Sequence",
+            "EventDispatchOrder" : "1,2,3,4,5"
         },
         {
-            "TestJobSpecName" : "EndToEndAlternatePathJob",
-            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9,10,11,12,13"
-          }]
-      },
-      {
-        "TestId" : 2,
-        "TestName" : "MissingEventJob",
-        "TotalTests" : 10,
-        "TestFrequency" : "PT10S",
-        "TestJobSpec" : [{
-            "TestJobSpecName" : "EndToEndHappyPathJob",
-            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17"
+            "TestJobSpecName" : "AND Fork",
+            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9"
+          },
+          {
+            "TestJobSpecName" : "XOR Fork",
+            "EventDispatchOrder" : "1,2,3,4,5,6,7,8"
+          },
+          {
+            "TestJobSpecName" : "AND Fork and Merge",
+            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9"
+          },
+          {
+            "TestJobSpecName" : "Job with Intra-Job Invariant",
+            "EventDispatchOrder" : "1,2,3,4,5"
           }]
       }]
 }
+
 
 
 The following provides an explanation to each of the JSON elements in the configuration
@@ -650,68 +651,52 @@ Below is a sample of a test from the configuration file:
 
 
   {
-  "JobSpecName" : "EndToEndHappyPathJob",
-  "EventDefinition": [{
-    "EventId": "1",
-    "EventName": "NearInput",
-    "NodeName": "Input",
-    "ApplicationName": "InputControl",
-    "DispatchDelay": "PT0S",
-    "SequenceStart": "true"
-  },
-  {
-    "EventId": "2",
-    "EventName": "NearPartWrite",
-    "EventData" : [{
-        "DataName" : "PersistentInvariant",
-        "DataValue" : "someDataValue"
-    },
-    {
-      "DataName" : "SomeOtherDataName",
-      "DataValue" : "someOtherDataValue"
-    }],
-    "NodeName": "Input",
-    "ApplicationName": "InputControl",
-    "DispatchDelay": "PT0S",
-    "SequenceStart": "false",
-    "PreviousEventId" : "1"
-  },
-  {
-    "EventId": "3",
-    "EventName": "NearJustificationWrite",
-    "NodeName": "Input",
-    "ApplicationName": "InputControl",
-    "DispatchDelay": "PT0S",
-    "SequenceStart": "false",
-    "PreviousEventId" : "2"
-  },
-  {
-    "EventId": "4",
-    "EventName": "AgentRequestWidgets",
-    "NodeName": "Agent",
-    "ApplicationName": "AgentControl",
-    "DispatchDelay": "PT0S",
-    "SequenceStart": "false",
-    "PreviousEventId" : "3"
-  },
-  {
-    "EventId": "5",
-    "EventName": "FarInput",
-    "NodeName": "Far",
-    "ApplicationName": "FarControl",
-    "DispatchDelay": "PT0S",
-    "SequenceStart": "true"
-  },
-  {
-    "EventId": "6",
-    "EventName": "FarOutput",
-    "NodeName": "Far",
-    "ApplicationName": "FarControl",
-    "DispatchDelay": "PT0S",
-    "SequenceStart": "false",
-    "PreviousEventId" : "5"
-  }]
+    "JobSpecName": "scenario1",
+    "JobName": "Job with Simple Sequence",
+    "EventDefinition": [
+        {
+            "EventId": "1",
+            "PreviousEventId": "None",
+            "EventName": "A1",
+            "SequenceStart": "true",
+            "NodeName": "default_node_name",
+            "ApplicationName": "default_application_name"
+        },
+        {
+            "EventId": "2",
+            "PreviousEventId": "1",
+            "EventName": "B1",
+            "SequenceStart": "false",
+            "NodeName": "default_node_name",
+            "ApplicationName": "default_application_name"
+        },
+        {
+            "EventId": "3",
+            "PreviousEventId": "2",
+            "EventName": "C1",
+            "SequenceStart": "false",
+            "NodeName": "default_node_name",
+            "ApplicationName": "default_application_name"
+        },
+        {
+            "EventId": "4",
+            "PreviousEventId": "3",
+            "EventName": "D1",
+            "SequenceStart": "false",
+            "NodeName": "default_node_name",
+            "ApplicationName": "default_application_name"
+        },
+        {
+            "EventId": "5",
+            "PreviousEventId": "4",
+            "EventName": "E1",
+            "SequenceStart": "false",
+            "NodeName": "default_node_name",
+            "ApplicationName": "default_application_name"
+        }
+    ]
 }
+
 
 The following provides an explanation to each of the JSON elements in the test job specification configuration file. It identifies som of the data that shall by the simulator for each event e.g., EventName, PreviousEventId, etc:
 
@@ -746,7 +731,107 @@ The following provides an explanation to each of the JSON elements in the test j
 This configuration determines the number of instances of each of the deployments to instantiate at start up.
 Note: This version of the Protocol Verifier supports static scaling.
 
-TODO Complete details on how deployment scaling is defined
+Two different methods have been used for scaling the containers for the protocol verifier. 
+The first used be AER makes use of the
+
+    `--scale aereception=2` 
+
+command line option provided by docker. This instructs the docker engine how many instances of the service named `aereception` 
+to create. This method is being used by AER as we do not to configure each running instance with specific configuration data.
+AER is responsible for arranging events by JobId and each instane of aereception shall process the incoming event files and 
+place events for each job identified in a file in the `verifier-incoming` directory. The files placed in `verifier-incoming` 
+are arranged into directories fomr 00 to ff and AER places the file for the job into the directory that matches the last two 
+digits in the job id.
+
+    `jobId = cadf665f-fc78-4d84-9673-0ab2eb2c8b4d` 
+
+would be placed in
+
+    `verifier-incoming/4d` 
+
+In order to ensure that an individual job is only every processed by one instance of AEO_SVDC this is provided with configuration 
+data in its docker compose file that indicate which job ids it is to process and we refer to this as its `Job Group`. An example can
+seen in the following compose file:
+[source,yml]
+----
+version: "3.9"
+services:
+  aeo_svdc-1:
+    image: "ghcr.io/xtuml/aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    volumes:
+      - "./plus2json-deployed/generated-config:/root/config"
+      - "./InvariantStore:/root/InvariantStore"
+      - "./verifier-incoming:/root/incoming"
+      - "./JobIdStore:/root/JobIdStore"
+      - "./verifier-processed:/root/processed"
+    command: "-configPath config/  -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup FF"
+----
+
+In the above example we have defined one service `aeo_svdc-1` that has a `startJobgroup` of `00` and
+an `endJobGroup` of `FF`. This means that it will process all audit event files it finds in the directories
+in its `verifier-incoming` directory from `00` to `FF` e.g., an eventfile for the job
+
+    `jobId = cadf665f-fc78-4d84-9673-0ab2eb2c8b4d` 
+
+placed in
+
+    `verifier-incoming/4d` 
+
+would be processed by the instance `aeo_svdc-1`
+
+As we have to inform the AEO_SVDC instance of its `Job Group` in order to scale this processing we have to extend the docker compose file. The following is an example of AE_SVDC being scaled to two instance.
+
+[source,yml]
+----
+version: "3.9"
+services:
+  aeo_svdc-1:
+    image: "ghcr.io/xtuml/aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    volumes:
+      - "./plus2json-deployed/generated-config:/root/config"
+      - "./InvariantStore:/root/InvariantStore"
+      - "./verifier-incoming:/root/incoming"
+      - "./JobIdStore:/root/JobIdStore"
+      - "./verifier-processed:/root/processed"
+    command: "-configPath config/  -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 7F"
+  aeo_svdc-2:
+    image: "ghcr.io/xtuml/aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20001:20001"
+      - "30001:30001"
+      - "40001:40001"
+    volumes:
+      - "./plus2json-deployed/generated-config:/root/config"
+      - "./InvariantStore:/root/InvariantStore"
+      - "./verifier-incoming:/root/incoming"
+      - "./JobIdStore:/root/JobIdStore"
+      - "./verifier-processed:/root/processed"
+    command: "-configPath config/  -preinit schedule/startup.sch -startJobGroup 80 -endJobGroup FF"
+----
+
+In this example `aeo_svdc-1` has been assigned `00` to `7F` and 'aeo_svdc-2' has been assigned `80` to `FF`.
+
+NOTE: Care should be taken when assigning `Job Group` as there is no verification that the instanes have not been assigned overlapping groups.
 
 == Building and Running the Protocol Verifier
 
@@ -966,14 +1051,77 @@ of the deploy folder. Click to see more details on the deploy folder
 This section describes the purpose of the folders and files within the 
 `munin/deploy` folder.
 
-TODO
+
+  ▾ deploy/
+    ▸ aesim-config/
+      ▸ plus2json/
+    ▸ reception-config/
+    ▾ plus2json-deployed/
+      ▸ generated-config/
+    ▸ aer-incoming/
+    ▸ verifier-incoming/
+    ▸ verifier-processed/
+    ▸ InvariantStore/
+    ▸ JobIdStore/
+    ▸ puml/
+      ae-simulator.yml
+      reception.yml
+      verifier.yml
+      README.adoc
+
+`aesim-config/plus2json/`
+
+This contains files that capture the test specification and job specifications that are too be used by the Audit Event Simulator. Typically these will have been generated using plus2json. 
+
+`reception-config/`
+
+This contains the configuration file for the Audit Event Reception (AER). 
+
+`plus2json/generated-config/`
+
+This contains files that capture the test specification and job specifications that are too be used by the AEO_SVDC. Typically these will have been generated using plus2json. 
+
+`aer-incoming/`
+
+This is the directory that AER shall check for incoming Audit Event files. The Audit Event Simulator shall place Audit Event files that it generates in this directory. 
+
+`verifier-incoming/`
+
+This is the directory that AEO_SVDC shall check for incoming Audit Event files. AER shall place Audit Event files that it has processed in this directory. 
+
+`verifier-processed/`
+
+This is the directory that AEO_SVDC shall place Audit Event files that it has processed in this directory. 
+
+`puml/`
+
+This is the directory contains example PLUS files. 
+
+`ae-simulator.yml`
+
+This is the docker compse file that is used by the Audit Event Simulator. 
+
+`reception.yml`
+
+This is the docker compse file that is used by the Audit Event Reception. 
+
+`verifier.yml`
+
+This is the docker compse file that is used by AEO_SVDC. 
+
+`README.adoc`
+
+An explanition of the directory. 
 
 ====
 
 ==== Executing the Processes
 
-TODO Check and fix the following
- 
+TODO Check and fix the following - This section looks ok to me but in future we should use the -d option 
+and have the containers running in the background. When we do this we need to makesure that the
+log files are not getting sent to the console bit to a log file that is accessible outside the
+container and is managed using rotate. Pretty sure the logging domain will do this for us. Greg.
+
 IMPORTANT: Before this step, all of the domains and deployments 
 described above must be built as demonstrated in the previous steps.
 
@@ -1001,8 +1149,11 @@ to launch the AEReception process:
 You should see some logs begin to appear, in particular a periodic log from the
 `AEReception` domain that it is waiting on input files.
 
-TODO The following won't work because feeding a job through that has already
-been processed results in a `Duplicate Job Id identified` error
+When running without the simulator it is possible to use previously processed files.
+However if doing this it is important that the files in the JobIdStore are removed prior
+to running the software. Failure to do so will result in the following error:
+
+  `Duplicate Job Id identified`
 
 . Open a file explorer and navigate to the `deploy/verifier-processed/`
 directory within the repository. This can be done through your OS GUI or quickly
@@ -1019,7 +1170,7 @@ through a simple command:
   xdg-open ~/git/munin/deploy/aer-incoming/        # linux
   explorer C:\git\munin\deploy\aer-incoming\       # windows
 
-. link:images/04_drag_and_drop.gif[Drag and drop] `TODO.json` from the
+. link:images/04_drag_and_drop.gif[Drag and drop] e.g, `871f08bc-324e-4a8c-8d5d-bd052d3ba0ed` from the
 `verifier-processed/` directory to the `aer-incoming/` directory. You will see a flurry of
 output from the application and the file will reappear in the `verifier-processed/`
 directory. Inspect the logs and you will see that the audit events have been
@@ -1085,24 +1236,22 @@ link:https://github.com/xtuml/bridgepoint/blob/master/doc-bridgepoint/process/HO
 to generate a new token with the
 link:images/08_read_packages.png["read:packages"] scope.
 
-TODO Change to the newer aer+aeo_svdc deployment scheme.
+. Execute the application by running the following commands from the munin/deploy directory:
 
-. Execute the application by running the following command:
+  docker-composer -f reception.yml up
 
-  docker run -it -v $PWD/test-files/:/root/test-files ghcr.io/xtuml/aer_aeo_svdc:latest -config aeoconfig/aeordering_spec.txt -receptionConfig aerconfig/aereception_spec.txt -preinit schedule/startup.sch
+  docker-compose -f verifier.yml up
 
 . link:images/04_drag_and_drop.gif[Drag and drop] a test file e.g.
 link:https://github.com/xtuml/tower/blob/main/deploy/processed/FileRequest_HappyPath.json[`FileRequest_HappyPath.json`]
-to the `/incoming/` directory in your current directory. You will see
+to the `/reception-incoming/` directory in your current directory. You will see
 a flurry of output from the application and the file will reappear in the
-`processed/` directory. Inspect the logs and you will see that the audit events
+`verifier-processed/` directory. Inspect the logs and you will see that the audit events
 have been received, ordered, and verified by the application.
 
 . Kill the process by pressing `Ctrl-C`.
 
 === Running the protocol verifier with the audit event simulator
-
-TODO Changes to this will depend upon the above
 
 In the last section, we built and ran the protocol verifier interactively with
 test files. The audit event simulator can also be used to generate test audit
