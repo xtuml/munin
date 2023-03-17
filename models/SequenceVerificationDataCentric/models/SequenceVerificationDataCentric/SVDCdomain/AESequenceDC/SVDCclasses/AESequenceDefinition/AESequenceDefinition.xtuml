@@ -1,178 +1,25 @@
--- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+// BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
 
-INSERT INTO O_OBJ
-	VALUES ("6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	'AESequenceDefinition',
-	3,
-	'AESD',
-	'The definition of an expected sequence of audit events from the monitored system. The sequence of real audit events received will be compared with this expected sequence to check the monitored system is healthy.',
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO O_NBATTR
-	VALUES ("3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f");
-INSERT INTO O_BATTR
-	VALUES ("3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f");
-INSERT INTO O_ATTR
-	VALUES ("3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	"00000000-0000-0000-0000-000000000000",
-	'AESequenceId',
-	'',
-	'',
-	'AESequenceId',
-	0,
-	"2c7953f2-99b9-47a8-a2b6-50cdd050b5ac",
-	'',
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("2c7953f2-99b9-47a8-a2b6-50cdd050b5ac",
-	"00000000-0000-0000-0000-000000000000",
-	'MASLunique',
-	'',
-	'',
-	'../../../../types/types.xtuml');
-INSERT INTO O_NBATTR
-	VALUES ("804ff5e6-cc98-46be-ae6b-c55ac170dc1e",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f");
-INSERT INTO O_BATTR
-	VALUES ("804ff5e6-cc98-46be-ae6b-c55ac170dc1e",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f");
-INSERT INTO O_ATTR
-	VALUES ("804ff5e6-cc98-46be-ae6b-c55ac170dc1e",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	"3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
-	'sequenceDefinitionName',
-	'',
-	'',
-	'sequenceDefinitionName',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'',
-	'');
-INSERT INTO O_REF
-	VALUES ("6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
-	0,
-	"ce51957e-3e87-424e-85c3-75c022e6c476",
-	"d5d72d3b-0314-4430-a5a5-9b8c89bf5c2b",
-	"20b05084-c92e-441a-881f-4a6fb5591a1d",
-	"edf304d7-c31c-4957-988e-a6b3beaf4e35",
-	"141ddc4e-e6fb-4891-814d-74a85213b9f7",
-	"9a4d6fe4-16b6-40e9-b594-ac5697f67b1e",
-	"00000000-0000-0000-0000-000000000000",
-	0,
-	'',
-	'JobDefinition',
-	'jobName',
-	'R7.''is_expected_in''');
-INSERT INTO R_RGO_PROXY
-	VALUES ("6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	"d5d72d3b-0314-4430-a5a5-9b8c89bf5c2b",
-	"20b05084-c92e-441a-881f-4a6fb5591a1d",
-	'../SVDCclasses.xtuml');
-INSERT INTO O_RTIDA_PROXY
-	VALUES ("ce51957e-3e87-424e-85c3-75c022e6c476",
-	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
-	0,
-	"d5d72d3b-0314-4430-a5a5-9b8c89bf5c2b",
-	"edf304d7-c31c-4957-988e-a6b3beaf4e35",
-	'../SVDCclasses.xtuml');
-INSERT INTO O_RATTR
-	VALUES ("141ddc4e-e6fb-4891-814d-74a85213b9f7",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	"ce51957e-3e87-424e-85c3-75c022e6c476",
-	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
-	1,
-	'jobName');
-INSERT INTO O_BATTR_PROXY
-	VALUES ("ce51957e-3e87-424e-85c3-75c022e6c476",
-	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
-	'../JobDefinition/JobDefinition.xtuml');
-INSERT INTO O_ATTR
-	VALUES ("141ddc4e-e6fb-4891-814d-74a85213b9f7",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	"804ff5e6-cc98-46be-ae6b-c55ac170dc1e",
-	'jobName',
-	'',
-	'',
-	'jobName',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000007",
-	'',
-	'');
-INSERT INTO O_REF
-	VALUES ("6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	0,
-	"3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
-	"fd3bde90-b73b-4ae8-964b-ef440d821984",
-	"96aea7d4-8555-42aa-a88c-eae7983189e1",
-	"b0615ba4-7f3d-4f35-8ce8-544c9d153b93",
-	"c18ab836-fe21-46b5-bef8-72f887a04b47",
-	"a715ad24-9700-49de-84e6-5f76557604ef",
-	"00000000-0000-0000-0000-000000000000",
-	0,
-	'',
-	'AESequenceDefinition',
-	'AESequenceId',
-	'R9.''precedes''');
-INSERT INTO R_RGO_PROXY
-	VALUES ("6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	"fd3bde90-b73b-4ae8-964b-ef440d821984",
-	"96aea7d4-8555-42aa-a88c-eae7983189e1",
-	'../SVDCclasses.xtuml');
-INSERT INTO O_RTIDA_PROXY
-	VALUES ("3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	0,
-	"fd3bde90-b73b-4ae8-964b-ef440d821984",
-	"b0615ba4-7f3d-4f35-8ce8-544c9d153b93",
-	'../SVDCclasses.xtuml');
-INSERT INTO O_RATTR
-	VALUES ("c18ab836-fe21-46b5-bef8-72f887a04b47",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	"3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	1,
-	'AESequenceId');
-INSERT INTO O_ATTR
-	VALUES ("c18ab836-fe21-46b5-bef8-72f887a04b47",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	"141ddc4e-e6fb-4891-814d-74a85213b9f7",
-	'followingAESequenceId',
-	'',
-	'following',
-	'AESequenceId',
-	1,
-	"ba5eda7a-def5-0000-0000-000000000007",
-	'',
-	'');
-INSERT INTO O_ID
-	VALUES (0,
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f");
-INSERT INTO O_OIDA
-	VALUES ("3fcc16c6-4eaa-4643-b975-d4c43ed64c12",
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	0,
-	'AESequenceId');
-INSERT INTO O_ID
-	VALUES (1,
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f");
-INSERT INTO O_ID
-	VALUES (2,
-	"6716f0be-7c68-4d6f-a215-281ad5f07b7f");
-INSERT INTO PE_PE
-	VALUES ("6716f0be-7c68-4d6f-a215-281ad5f07b7f",
-	1,
-	"77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
-	"00000000-0000-0000-0000-000000000000",
-	4);
-INSERT INTO EP_PKG_PROXY
-	VALUES ("77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
-	"00000000-0000-0000-0000-000000000000",
-	"be1840aa-9d3d-4f55-baec-da45c54219a5",
-	'SVDCclasses',
-	'',
-	0,
-	'../SVDCclasses.xtuml');
+within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
+
+	//! The definition of an expected sequence of audit events from the monitored system. The sequence of real audit events received will be compared with this expected sequence to check the monitored system is healthy.
+	@key_letters("AESD");
+	@class_num(3);
+	class AESequenceDefinition is
+
+		unique AESequenceId: integer;
+
+		sequenceDefinitionName: string;
+
+		@ref_mode("referred_to");
+		jobName: referential (R7.JobDefinition.jobName) string;
+
+		@ref_mode("referred_to");
+		@use_prefix(prefix="following", root_name="AESequenceId");
+		followingAESequenceId: referential (R9.precedes.AESequenceDefinition.AESequenceId) integer;
+
+		preferred identifier is (AESequenceId);
+
+	end class;
+
+end;

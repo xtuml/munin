@@ -1,373 +1,110 @@
--- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+// BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
 
-INSERT INTO O_OBJ
-	VALUES ("26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	'PersistedInvariant',
-	19,
-	'EJI',
-	'',
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO O_TFR
-	VALUES ("577ba888-088a-4859-a16d-98dfc25eb790",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	'createSourceExtraJobInvariant',
-	'',
-	"7ecb6b07-29df-4360-b071-7501d93a9c92",
-	0,
-	'',
-	3,
-	'',
-	"00000000-0000-0000-0000-000000000000",
-	1,
-	1);
-INSERT INTO O_TPARM
-	VALUES ("420c7c70-4a6e-45f1-a5b8-31b2809fb555",
-	"577ba888-088a-4859-a16d-98dfc25eb790",
-	'errorReason',
-	"ba5eda7a-def5-0000-0000-000000000004",
-	1,
-	'',
-	"d42ad0cd-eb8b-4b6f-98f6-ed722334606c",
-	'');
-INSERT INTO O_TPARM
-	VALUES ("60c6c95c-7cf2-4050-8c20-7bc402aa2ee6",
-	"577ba888-088a-4859-a16d-98dfc25eb790",
-	'extraJobInvDefn',
-	"9492e84f-50fc-4d4f-a262-1d8e31a6d370",
-	0,
-	'',
-	"00000000-0000-0000-0000-000000000000",
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("9492e84f-50fc-4d4f-a262-1d8e31a6d370",
-	"00000000-0000-0000-0000-000000000000",
-	'instance of ExtraJobInvariantDefn',
-	'',
-	'',
-	'../../DomainTypes/DomainTypes.xtuml');
-INSERT INTO O_TPARM
-	VALUES ("45c39b74-1399-42e2-8efc-243a3e48df20",
-	"577ba888-088a-4859-a16d-98dfc25eb790",
-	'invariantName',
-	"ba5eda7a-def5-0000-0000-000000000004",
-	0,
-	'',
-	"60c6c95c-7cf2-4050-8c20-7bc402aa2ee6",
-	'');
-INSERT INTO O_TPARM
-	VALUES ("d42ad0cd-eb8b-4b6f-98f6-ed722334606c",
-	"577ba888-088a-4859-a16d-98dfc25eb790",
-	'invariantValue',
-	"ba5eda7a-def5-0000-0000-000000000004",
-	0,
-	'',
-	"45c39b74-1399-42e2-8efc-243a3e48df20",
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("7ecb6b07-29df-4360-b071-7501d93a9c92",
-	"00000000-0000-0000-0000-000000000000",
-	'instance of PersistedInvariant',
-	'',
-	'',
-	'../../DomainTypes/DomainTypes.xtuml');
-INSERT INTO O_TFR
-	VALUES ("2869fcaf-8e75-459e-8a4b-c88648b57c5f",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	'deletePersistedInvariant',
-	'',
-	"ba5eda7a-def5-0000-0000-000000000000",
-	1,
-	'',
-	3,
-	'',
-	"577ba888-088a-4859-a16d-98dfc25eb790",
-	1,
-	2);
-INSERT INTO O_REF
-	VALUES ("26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"f2b47006-4b47-45ad-9f8c-03ee959aafac",
-	0,
-	"6649bf56-9f79-4ba3-85c2-f984d8d2af26",
-	"ad2fce3b-8200-4b7b-be03-cb532a52c0d2",
-	"b1babe70-9735-4a28-ae9a-557060087006",
-	"1e7dcdb6-0c7e-4d18-80dd-d458df46abe7",
-	"069de76a-9462-4ee9-ba3b-ce1504eb137b",
-	"d4d25828-de2b-4f5d-94fc-1647ab4fc3f0",
-	"00000000-0000-0000-0000-000000000000",
-	0,
-	'',
-	'ExtraJobInvariantDefn',
-	'extraJobInvName',
-	'R24.''is_defined_by''');
-INSERT INTO R_RGO_PROXY
-	VALUES ("26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"ad2fce3b-8200-4b7b-be03-cb532a52c0d2",
-	"b1babe70-9735-4a28-ae9a-557060087006",
-	'../SVDCclasses.xtuml');
-INSERT INTO O_RTIDA_PROXY
-	VALUES ("6649bf56-9f79-4ba3-85c2-f984d8d2af26",
-	"f2b47006-4b47-45ad-9f8c-03ee959aafac",
-	0,
-	"ad2fce3b-8200-4b7b-be03-cb532a52c0d2",
-	"1e7dcdb6-0c7e-4d18-80dd-d458df46abe7",
-	'../SVDCclasses.xtuml');
-INSERT INTO O_RATTR
-	VALUES ("069de76a-9462-4ee9-ba3b-ce1504eb137b",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"6649bf56-9f79-4ba3-85c2-f984d8d2af26",
-	"f2b47006-4b47-45ad-9f8c-03ee959aafac",
-	1,
-	'extraJobInvName');
-INSERT INTO O_BATTR_PROXY
-	VALUES ("6649bf56-9f79-4ba3-85c2-f984d8d2af26",
-	"f2b47006-4b47-45ad-9f8c-03ee959aafac",
-	'../ExtraJobInvariantDefn/ExtraJobInvariantDefn.xtuml');
-INSERT INTO O_ATTR
-	VALUES ("069de76a-9462-4ee9-ba3b-ce1504eb137b",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"2661834d-34bc-462a-b93e-e2ca01961c1f",
-	'extraJobInvName',
-	'',
-	'',
-	'extraJobInvName',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000007",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("44e604ca-e4a7-45e5-9b10-211e867d38d4",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_BATTR
-	VALUES ("44e604ca-e4a7-45e5-9b10-211e867d38d4",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_ATTR
-	VALUES ("44e604ca-e4a7-45e5-9b10-211e867d38d4",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"069de76a-9462-4ee9-ba3b-ce1504eb137b",
-	'validFrom',
-	'',
-	'',
-	'validFrom',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000010",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("a90abf6e-029d-4a0e-b317-4af8cbca5f3c",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_BATTR
-	VALUES ("a90abf6e-029d-4a0e-b317-4af8cbca5f3c",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_ATTR
-	VALUES ("a90abf6e-029d-4a0e-b317-4af8cbca5f3c",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"44e604ca-e4a7-45e5-9b10-211e867d38d4",
-	'validUntil',
-	'',
-	'',
-	'validUntil',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000010",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("24f79e4f-6733-4736-a310-58dc2e1545f6",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_BATTR
-	VALUES ("24f79e4f-6733-4736-a310-58dc2e1545f6",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_ATTR
-	VALUES ("24f79e4f-6733-4736-a310-58dc2e1545f6",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"a90abf6e-029d-4a0e-b317-4af8cbca5f3c",
-	'invariantValue',
-	'',
-	'',
-	'invariantValue',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'',
-	'');
-INSERT INTO O_REF
-	VALUES ("26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"7e831fac-934c-4ee1-8003-366fd55296b2",
-	0,
-	"1717e0b4-093d-483f-9598-adbe78f63a7e",
-	"0b40bf1f-0c1f-4040-a46f-e995d187ad5d",
-	"e6a15c4b-72d6-4a5c-bafb-4f855f01172f",
-	"41421c2a-36c0-47e1-a11d-05bf5310caa4",
-	"ae4612fd-38a0-40c8-bd85-f4db9d2383c6",
-	"467672fb-81fa-41c7-be90-518f326b2077",
-	"00000000-0000-0000-0000-000000000000",
-	0,
-	'',
-	'AuditEvent',
-	'AuditEventId',
-	'R27.''was_provided_by''');
-INSERT INTO R_RGO_PROXY
-	VALUES ("26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"0b40bf1f-0c1f-4040-a46f-e995d187ad5d",
-	"e6a15c4b-72d6-4a5c-bafb-4f855f01172f",
-	'../SVDCclasses.xtuml');
-INSERT INTO O_RTIDA_PROXY
-	VALUES ("1717e0b4-093d-483f-9598-adbe78f63a7e",
-	"7e831fac-934c-4ee1-8003-366fd55296b2",
-	0,
-	"0b40bf1f-0c1f-4040-a46f-e995d187ad5d",
-	"41421c2a-36c0-47e1-a11d-05bf5310caa4",
-	'../SVDCclasses.xtuml');
-INSERT INTO O_RATTR
-	VALUES ("ae4612fd-38a0-40c8-bd85-f4db9d2383c6",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"1717e0b4-093d-483f-9598-adbe78f63a7e",
-	"7e831fac-934c-4ee1-8003-366fd55296b2",
-	1,
-	'AuditEventId');
-INSERT INTO O_BATTR_PROXY
-	VALUES ("1717e0b4-093d-483f-9598-adbe78f63a7e",
-	"7e831fac-934c-4ee1-8003-366fd55296b2",
-	'../AuditEvent/AuditEvent.xtuml');
-INSERT INTO O_ATTR
-	VALUES ("ae4612fd-38a0-40c8-bd85-f4db9d2383c6",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"24f79e4f-6733-4736-a310-58dc2e1545f6",
-	'AuditEventId',
-	'',
-	'',
-	'AuditEventId',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000007",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("13239422-5a62-4b61-8483-c8b5e8c96df6",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_BATTR
-	VALUES ("13239422-5a62-4b61-8483-c8b5e8c96df6",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_ATTR
-	VALUES ("13239422-5a62-4b61-8483-c8b5e8c96df6",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"ae4612fd-38a0-40c8-bd85-f4db9d2383c6",
-	'invariantName',
-	'',
-	'',
-	'invariantName',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("2661834d-34bc-462a-b93e-e2ca01961c1f",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_BATTR
-	VALUES ("2661834d-34bc-462a-b93e-e2ca01961c1f",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_ATTR
-	VALUES ("2661834d-34bc-462a-b93e-e2ca01961c1f",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"00000000-0000-0000-0000-000000000000",
-	'invariantId',
-	'',
-	'',
-	'invariantId',
-	0,
-	"2c7953f2-99b9-47a8-a2b6-50cdd050b5ac",
-	'',
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("2c7953f2-99b9-47a8-a2b6-50cdd050b5ac",
-	"00000000-0000-0000-0000-000000000000",
-	'MASLunique',
-	'',
-	'',
-	'../../../../types/types.xtuml');
-INSERT INTO O_NBATTR
-	VALUES ("c1f58cdd-9ef6-4b7c-9020-3f717adcac64",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_BATTR
-	VALUES ("c1f58cdd-9ef6-4b7c-9020-3f717adcac64",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_ATTR
-	VALUES ("c1f58cdd-9ef6-4b7c-9020-3f717adcac64",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"68e01473-3192-4d03-92f6-dd49413aa558",
-	'current_state',
-	'',
-	'',
-	'current_state',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000006",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("68e01473-3192-4d03-92f6-dd49413aa558",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_BATTR
-	VALUES ("68e01473-3192-4d03-92f6-dd49413aa558",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_ATTR
-	VALUES ("68e01473-3192-4d03-92f6-dd49413aa558",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"13239422-5a62-4b61-8483-c8b5e8c96df6",
-	'inForce',
-	'',
-	'',
-	'inForce',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000001",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("fed4788d-c535-464c-adcc-ccdf7ce861da",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_BATTR
-	VALUES ("fed4788d-c535-464c-adcc-ccdf7ce861da",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_ATTR
-	VALUES ("fed4788d-c535-464c-adcc-ccdf7ce861da",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	"c1f58cdd-9ef6-4b7c-9020-3f717adcac64",
-	'invariantTimer',
-	'',
-	'',
-	'invariantTimer',
-	0,
-	"78c29c89-7a3e-4b79-8163-53652917088c",
-	'',
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("78c29c89-7a3e-4b79-8163-53652917088c",
-	"00000000-0000-0000-0000-000000000000",
-	'timer',
-	'',
-	'',
-	'../../../../types/types.xtuml');
-INSERT INTO O_ID
-	VALUES (0,
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_OIDA
-	VALUES ("2661834d-34bc-462a-b93e-e2ca01961c1f",
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	0,
-	'invariantId');
-INSERT INTO O_ID
-	VALUES (1,
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO O_ID
-	VALUES (2,
-	"26bcc1f3-647b-4e6a-9f81-b2596d82d929");
-INSERT INTO PE_PE
-	VALUES ("26bcc1f3-647b-4e6a-9f81-b2596d82d929",
-	1,
-	"77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
-	"00000000-0000-0000-0000-000000000000",
-	4);
-INSERT INTO EP_PKG_PROXY
-	VALUES ("77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
-	"00000000-0000-0000-0000-000000000000",
-	"be1840aa-9d3d-4f55-baec-da45c54219a5",
-	'SVDCclasses',
-	'',
-	0,
-	'../SVDCclasses.xtuml');
+within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
+
+	@key_letters("EJI");
+	@class_num(19);
+	class PersistedInvariant is
+
+		unique invariantId: integer;
+
+		@ref_mode("referred_to");
+		extraJobInvName: referential (R24.ExtraJobInvariantDefn.extraJobInvName) string;
+
+		validFrom: timestamp;
+
+		validUntil: timestamp;
+
+		invariantValue: string;
+
+		@ref_mode("referred_to");
+		AuditEventId: referential (R27.AuditEvent.AuditEventId) string;
+
+		invariantName: string;
+
+		inForce: boolean;
+
+		invariantTimer: timer;
+
+		preferred identifier is (invariantId);
+
+		@operation_num(1);
+		class operation createSourceExtraJobInvariant(extraJobInvDefn: in instance of ExtraJobInvariantDefn, invariantName: in string, invariantValue: in string, errorReason: out string) return instance of PersistedInvariant is
+			@noparse
+			endTime : timestamp;
+			existingExtraJobInvariant : instance of PersistedInvariant;
+			newExtraJobInvariant : instance of PersistedInvariant;
+			sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
+			sourceEventDefn : instance of AuditEventDefinition;
+			sourceJobDefn : instance of JobDefinition;
+			logMessage : string;
+			
+			begin
+			  endTime := timestamp'now + extraJobInvDefn.lifetime;
+			  //TODO Is this adequate for setting the validity period? Currently not known if timestamps are available
+			  // so set validFrom to now and ValidUntil to now plus lifetime
+			  
+			  if invariantValue /= "" then
+			    newExtraJobInvariant := create unique PersistedInvariant (invariantName => invariantName,
+			  	                                                          invariantValue => invariantValue,
+			  	                                                          validFrom => timestamp'now, 
+			  	                                                          validUntil => endTime, 
+			  	                                                          Current_State => Pending );
+			  	                                         
+			    link newExtraJobInvariant R24 extraJobInvDefn;
+			    generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
+			    sourceAEOccurrenceDefn := extraJobInvDefn -> R20;
+			    sourceEventDefn := sourceAEOccurrenceDefn -> R12 -> R1.AuditEventDefinition;
+			    sourceJobDefn := sourceAEOccurrenceDefn -> R12 -> R1.AESequenceDefinition -> R7;
+			    
+			    Persistence_Req_IF~>PersistInvariant(newExtraJobInvariant.invariantName, 
+			    	                          newExtraJobInvariant.invariantValue,
+			    	                          newExtraJobInvariant.validFrom,
+			    	                          newExtraJobInvariant.validUntil,
+			    	                          sourceJobDefn.jobName,
+			    	                          sourceEventDefn.AEType,
+			    	                          sourceAEOccurrenceDefn.occurrenceNumberInSequence    );
+			  else
+			    errorReason := "Empty Invariant Value provided for this ExtraJob Invariant = " & invariantName;
+			  end if;
+			  return newExtraJobInvariant;
+			end service;
+			//
+			//
+			@endnoparse
+		end operation;
+
+		@operation_num(2);
+		operation deletePersistedInvariant() is
+			@noparse
+			theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+			theProvidingAuditEvent : instance of AuditEvent;
+			
+			logMessage : string;
+			
+			begin
+			  // This operation deletes the respective instance of PersistedInvariant
+			  
+			  // Firstly, ensure that all association instances that the PersistedInvariant is involved in are unlinked (R24 & R27)
+			
+			  // Unlink the PersistedInvariant that is to be deleted from its definition
+			    theExtraJobInvariantDefn := this -> R24;
+			    unlink this R24 theExtraJobInvariantDefn;
+			    
+			    // Unlink from the AuditEvent that provided it (if linked)
+			    theProvidingAuditEvent := this -> R27;
+			    if theProvidingAuditEvent /= null then
+			      unlink this R27 theProvidingAuditEvent;
+			    end if;
+			        
+			    // ... and finally deleted the specified instance of PersistedInvariant and log this.    
+			    logMessage := "PersistentInvariant: " & this.invariantId'image & " deleted ";
+			    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+			    delete this;
+			end service;
+			@endnoparse
+		end operation;
+
+	end class;
+
+end;

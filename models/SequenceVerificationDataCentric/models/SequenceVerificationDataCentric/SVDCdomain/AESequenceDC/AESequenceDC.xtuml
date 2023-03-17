@@ -1,1187 +1,145 @@
--- BP 7.1.6 content: Component syschar: 3 persistence-version: 7.1.6
+// BP 7.1.6 content: Component syschar: 3 persistence-version: 7.1.6
 
-INSERT INTO C_C
-	VALUES ("0c364501-cead-4520-a1cb-8f44e2211858",
-	"00000000-0000-0000-0000-000000000000",
-	"00000000-0000-0000-0000-000000000000",
-	'AESequenceDC',
-	'Events for a single job are expected to occur in a well-defined order. The role of this domain
-is to check that the sequnce of audit events received for each job are indeed in a known and
-valid order. 
+within SequenceVerificationDataCentric::SVDCdomain is
 
-The number of valid orders is to be determined but is expected to be in the order of 100s.
+	//! Events for a single job are expected to occur in a well-defined order. The role of this domain
+	//! is to check that the sequnce of audit events received for each job are indeed in a known and
+	//! valid order.
+	//! 
+	//! The number of valid orders is to be determined but is expected to be in the order of 100s.
+	//! 
+	//! This domain will notify various conditions:
+	//! 1. Events received in an unexpected sequence
+	//! 2. Events missing
+	//! 3. Unexpected events received (though they must have contained sufficient valid data to get
+	//! through Audit Event Reception and Audit Event Ordering)
+	//! 4. Incomplete or tawdry event sequences
+	//! 
+	//! This version of the domain will utilise a data-centric approach to verify acceptable sequences
+	//! of events. This is being done to compare and contrast with the state-centric approach. It is known
+	//! from the outset that the approaches have different strengths and weaknesses:
+	//! 1. A state-centric approach is simpler to understand and get right.
+	//! 2. A state-centric approach is ideal if the number of valid sequences is relatively small.
+	//! 3. A data-centric approach embeds the expected sequence knowledge in data rather than in a state
+	//! model. Therefore a change to expected sequences can be accomodated by a data change and does
+	//! not need the re-work of the state model.
+	//! 4. A data-centric approach is probably better suited if the number of valid sequences becomes large.
+	//! 5. The performance of the two approaches can be compared to see which best fits the performance of
+	//! the monitored system.
+	component AESequenceDC is
+		
+		package DomainTypes;
+		package SVDCclasses;
+		package functions;
+		package scenarios;
+		package scenarios_cbc;
+		package scenarios_pdf;
+		package test_cases;
+		package tests_cbc;
+		package tests_new;
+		package tests_pdf;
+		
+		required port JobAdmin implements JobSynchronisation is
 
-This domain will notify various conditions:
-1. Events received in an unexpected sequence
-2. Events missing
-3. Unexpected events received (though they must have contained sufficient valid data to get
-   through Audit Event Reception and Audit Event Ordering)
-4. Incomplete or tawdry event sequences   
+			@message_num(1);
+			message deleteJob(jobID: in string) from provider is
+				@noparse
+				begin
+				  null;
+				end service;
+				@endnoparse
+			end message;
 
-This version of the domain will utilise a data-centric approach to verify acceptable sequences 
-of events. This is being done to compare and contrast with the state-centric approach. It is known
-from the outset that the approaches have different strengths and weaknesses:
-1. A state-centric approach is simpler to understand and get right.
-2. A state-centric approach is ideal if the number of valid sequences is relatively small.
-3. A data-centric approach embeds the expected sequence knowledge in data rather than in a state
-   model. Therefore a change to expected sequences can be accomodated by a data change and does
-   not need the re-work of the state model.
-4. A data-centric approach is probably better suited if the number of valid sequences becomes large.
-5. The performance of the two approaches can be compared to see which best fits the performance of
-   the monitored system.   ',
-	0,
-	"00000000-0000-0000-0000-000000000000",
-	0,
-	'',
-	'');
-INSERT INTO GD_MD
-	VALUES ("a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	111,
-	"0c364501-cead-4520-a1cb-8f44e2211858",
-	98,
-	0,
-	0,
-	1,
-	1,
-	1,
-	12,
-	1,
-	0,
-	0,
-	200,
-	150,
-	0,
-	'4.1.17',
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC');
-INSERT INTO GD_GE
-	VALUES ("3e7f724f-4c7e-4096-9891-be1ea39e2ef4",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"0c364501-cead-4520-a1cb-8f44e2211858",
-	103,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC');
-INSERT INTO GD_SHP
-	VALUES ("3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_CTR
-	VALUES ("3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO DIM_ND
-	VALUES (5708.000000,
-	3584.000000,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO DIM_GE
-	VALUES (-12.000000,
-	-12.000000,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("3e7f724f-4c7e-4096-9891-be1ea39e2ef4",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_CON
-	VALUES ("810cd00b-ab78-4e1a-ac7d-7a0e34e7f99d",
-	-12.000000,
-	3456.000000,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO DIM_CON
-	VALUES ("fc744fac-c817-4f52-a66d-8e2e774f0fe8",
-	4614.000000,
-	3572.000000,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO DIM_CON
-	VALUES ("d3535f22-ac4d-4996-8fd9-24d47dc2e4f6",
-	-12.000000,
-	822.000000,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO DIM_CON
-	VALUES ("932e2f30-808e-4577-9732-fe69c2425ff1",
-	2700.000000,
-	3572.000000,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO DIM_CON
-	VALUES ("381c2540-a253-4ba4-8647-6a54579a68e5",
-	1674.000000,
-	3572.000000,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("9935ee49-0374-4f6c-8f92-581b0e074cab",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"f745c3da-aec7-48b9-b505-23762deb7dd3",
-	108,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::functions');
-INSERT INTO GD_SHP
-	VALUES ("9935ee49-0374-4f6c-8f92-581b0e074cab");
-INSERT INTO GD_NCS
-	VALUES ("9935ee49-0374-4f6c-8f92-581b0e074cab");
-INSERT INTO DIM_ND
-	VALUES (156.000000,
-	95.000000,
-	"9935ee49-0374-4f6c-8f92-581b0e074cab");
-INSERT INTO DIM_GE
-	VALUES (4648.000000,
-	3320.000000,
-	"9935ee49-0374-4f6c-8f92-581b0e074cab",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("9935ee49-0374-4f6c-8f92-581b0e074cab",
-	0,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("cfb0b48c-b138-4f24-9be6-3fb2ead1bd26",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"dccd2447-05b4-4e27-991a-234b65673b9c",
-	94,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::Prov_IF_Verification::Ordering');
-INSERT INTO GD_CON
-	VALUES ("cfb0b48c-b138-4f24-9be6-3fb2ead1bd26",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("e441a1ee-41de-4bd7-b9dd-f63dfdf52d8a",
-	"cfb0b48c-b138-4f24-9be6-3fb2ead1bd26",
-	0,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"e441a1ee-41de-4bd7-b9dd-f63dfdf52d8a");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"e441a1ee-41de-4bd7-b9dd-f63dfdf52d8a",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("e441a1ee-41de-4bd7-b9dd-f63dfdf52d8a",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("8a3165a5-0694-47ea-b377-134db855f5c6",
-	"cfb0b48c-b138-4f24-9be6-3fb2ead1bd26",
-	2,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"8a3165a5-0694-47ea-b377-134db855f5c6");
-INSERT INTO DIM_GE
-	VALUES (-94.000000,
-	3476.000000,
-	"8a3165a5-0694-47ea-b377-134db855f5c6",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("8a3165a5-0694-47ea-b377-134db855f5c6",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("c463b19b-dbae-4cd6-8a0a-34abeda76176",
-	"cfb0b48c-b138-4f24-9be6-3fb2ead1bd26",
-	1,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"c463b19b-dbae-4cd6-8a0a-34abeda76176");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"c463b19b-dbae-4cd6-8a0a-34abeda76176",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("c463b19b-dbae-4cd6-8a0a-34abeda76176",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_LS
-	VALUES ("0aba62d1-8aae-476c-8539-7b191edb3fc4",
-	"cfb0b48c-b138-4f24-9be6-3fb2ead1bd26",
-	"00000000-0000-0000-0000-000000000000",
-	"c3cd782d-ce8e-438f-8e45-181d7f05a8fb",
-	"82aeb0dc-fbf4-4ba3-9412-aa7715f74528");
-INSERT INTO DIM_WAY
-	VALUES ("c3cd782d-ce8e-438f-8e45-181d7f05a8fb",
-	-12.000000,
-	3456.000000,
-	"cfb0b48c-b138-4f24-9be6-3fb2ead1bd26",
-	"00000000-0000-0000-0000-000000000000",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_WAY
-	VALUES ("82aeb0dc-fbf4-4ba3-9412-aa7715f74528",
-	-85.000000,
-	3456.000000,
-	"cfb0b48c-b138-4f24-9be6-3fb2ead1bd26",
-	"00000000-0000-0000-0000-000000000000",
-	"c3cd782d-ce8e-438f-8e45-181d7f05a8fb");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"cfb0b48c-b138-4f24-9be6-3fb2ead1bd26",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("cfb0b48c-b138-4f24-9be6-3fb2ead1bd26",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ED
-	VALUES ("810cd00b-ab78-4e1a-ac7d-7a0e34e7f99d",
-	"00000000-0000-0000-0000-000000000000",
-	"cfb0b48c-b138-4f24-9be6-3fb2ead1bd26");
-INSERT INTO GD_GE
-	VALUES ("b5118aac-a6d6-414b-940f-28e2de135c98",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"13ce7b13-dca7-4f0b-9b79-804b30552ac3",
-	108,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::scenarios');
-INSERT INTO GD_SHP
-	VALUES ("b5118aac-a6d6-414b-940f-28e2de135c98");
-INSERT INTO GD_NCS
-	VALUES ("b5118aac-a6d6-414b-940f-28e2de135c98");
-INSERT INTO DIM_ND
-	VALUES (155.000000,
-	96.000000,
-	"b5118aac-a6d6-414b-940f-28e2de135c98");
-INSERT INTO DIM_GE
-	VALUES (4648.000000,
-	3440.000000,
-	"b5118aac-a6d6-414b-940f-28e2de135c98",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("b5118aac-a6d6-414b-940f-28e2de135c98",
-	0,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("38d2c53a-44dc-4dfe-9110-d1d6bcc1b8c5",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
-	108,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses');
-INSERT INTO GD_SHP
-	VALUES ("38d2c53a-44dc-4dfe-9110-d1d6bcc1b8c5");
-INSERT INTO GD_NCS
-	VALUES ("38d2c53a-44dc-4dfe-9110-d1d6bcc1b8c5");
-INSERT INTO DIM_ND
-	VALUES (156.000000,
-	95.000000,
-	"38d2c53a-44dc-4dfe-9110-d1d6bcc1b8c5");
-INSERT INTO DIM_GE
-	VALUES (4464.000000,
-	3324.000000,
-	"38d2c53a-44dc-4dfe-9110-d1d6bcc1b8c5",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("38d2c53a-44dc-4dfe-9110-d1d6bcc1b8c5",
-	0,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("35edf45d-d148-4f46-92aa-e522ae396b1c",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"ad86a6e4-c420-4ca0-b68a-bfde98ae3688",
-	108,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::DomainTypes');
-INSERT INTO GD_SHP
-	VALUES ("35edf45d-d148-4f46-92aa-e522ae396b1c");
-INSERT INTO GD_NCS
-	VALUES ("35edf45d-d148-4f46-92aa-e522ae396b1c");
-INSERT INTO DIM_ND
-	VALUES (156.000000,
-	97.000000,
-	"35edf45d-d148-4f46-92aa-e522ae396b1c");
-INSERT INTO DIM_GE
-	VALUES (4464.000000,
-	3444.000000,
-	"35edf45d-d148-4f46-92aa-e522ae396b1c",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("35edf45d-d148-4f46-92aa-e522ae396b1c",
-	0,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("f26e0871-bce6-4719-a431-c5232348d665",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"a747edc6-ec72-49d3-98c3-243b20e85629",
-	108,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::test_cases');
-INSERT INTO GD_SHP
-	VALUES ("f26e0871-bce6-4719-a431-c5232348d665");
-INSERT INTO GD_NCS
-	VALUES ("f26e0871-bce6-4719-a431-c5232348d665");
-INSERT INTO DIM_ND
-	VALUES (200.000000,
-	150.000000,
-	"f26e0871-bce6-4719-a431-c5232348d665");
-INSERT INTO DIM_GE
-	VALUES (4452.000000,
-	3096.000000,
-	"f26e0871-bce6-4719-a431-c5232348d665",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("f26e0871-bce6-4719-a431-c5232348d665",
-	0,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("3bb491b7-9987-41b3-baac-10393a19848b",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"d92bfac3-2cd8-4463-9d6d-4096b108142f",
-	93,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::JobAdmin::JobSynchronisation');
-INSERT INTO GD_CON
-	VALUES ("3bb491b7-9987-41b3-baac-10393a19848b",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("92cb193d-9660-4ffb-8f94-53a08743a509",
-	"3bb491b7-9987-41b3-baac-10393a19848b",
-	0,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"92cb193d-9660-4ffb-8f94-53a08743a509");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"92cb193d-9660-4ffb-8f94-53a08743a509",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("92cb193d-9660-4ffb-8f94-53a08743a509",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("10cda67f-bccc-4a73-a15c-01c3deff7cb3",
-	"3bb491b7-9987-41b3-baac-10393a19848b",
-	2,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"10cda67f-bccc-4a73-a15c-01c3deff7cb3");
-INSERT INTO DIM_GE
-	VALUES (-100.000000,
-	782.000000,
-	"10cda67f-bccc-4a73-a15c-01c3deff7cb3",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("10cda67f-bccc-4a73-a15c-01c3deff7cb3",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("7ee83fdf-ea24-4717-b058-cd48bb2f45f3",
-	"3bb491b7-9987-41b3-baac-10393a19848b",
-	1,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"7ee83fdf-ea24-4717-b058-cd48bb2f45f3");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"7ee83fdf-ea24-4717-b058-cd48bb2f45f3",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("7ee83fdf-ea24-4717-b058-cd48bb2f45f3",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_LS
-	VALUES ("3405127a-28bc-4472-b5c1-57733f9edb3f",
-	"3bb491b7-9987-41b3-baac-10393a19848b",
-	"00000000-0000-0000-0000-000000000000",
-	"d4d8154e-18ba-4bfb-974a-05bc243cd7d6",
-	"2a7d8dc2-39e5-46d8-b29c-0f4072ae60c9");
-INSERT INTO DIM_WAY
-	VALUES ("d4d8154e-18ba-4bfb-974a-05bc243cd7d6",
-	-12.000000,
-	822.000000,
-	"3bb491b7-9987-41b3-baac-10393a19848b",
-	"00000000-0000-0000-0000-000000000000",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_WAY
-	VALUES ("2a7d8dc2-39e5-46d8-b29c-0f4072ae60c9",
-	-87.000000,
-	822.000000,
-	"3bb491b7-9987-41b3-baac-10393a19848b",
-	"00000000-0000-0000-0000-000000000000",
-	"d4d8154e-18ba-4bfb-974a-05bc243cd7d6");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"3bb491b7-9987-41b3-baac-10393a19848b",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("3bb491b7-9987-41b3-baac-10393a19848b",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ED
-	VALUES ("d3535f22-ac4d-4996-8fd9-24d47dc2e4f6",
-	"00000000-0000-0000-0000-000000000000",
-	"3bb491b7-9987-41b3-baac-10393a19848b");
-INSERT INTO GD_GE
-	VALUES ("8177dad6-33a7-4f0f-a5f9-2ee28c5d1651",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"2035d474-8460-42c6-a8d8-eae314417d03",
-	108,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::tests_new');
-INSERT INTO GD_SHP
-	VALUES ("8177dad6-33a7-4f0f-a5f9-2ee28c5d1651");
-INSERT INTO GD_NCS
-	VALUES ("8177dad6-33a7-4f0f-a5f9-2ee28c5d1651");
-INSERT INTO DIM_ND
-	VALUES (200.000000,
-	150.000000,
-	"8177dad6-33a7-4f0f-a5f9-2ee28c5d1651");
-INSERT INTO DIM_GE
-	VALUES (4824.000000,
-	3320.000000,
-	"8177dad6-33a7-4f0f-a5f9-2ee28c5d1651",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("8177dad6-33a7-4f0f-a5f9-2ee28c5d1651",
-	0,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("b3075265-72b9-4a72-bffe-846f6deae986",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"1936b7f7-1eae-458e-ab8a-0bd1c38fd60c",
-	108,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::tests_pdf');
-INSERT INTO GD_SHP
-	VALUES ("b3075265-72b9-4a72-bffe-846f6deae986");
-INSERT INTO GD_NCS
-	VALUES ("b3075265-72b9-4a72-bffe-846f6deae986");
-INSERT INTO DIM_ND
-	VALUES (200.000000,
-	150.000000,
-	"b3075265-72b9-4a72-bffe-846f6deae986");
-INSERT INTO DIM_GE
-	VALUES (5044.000000,
-	3320.000000,
-	"b3075265-72b9-4a72-bffe-846f6deae986",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("b3075265-72b9-4a72-bffe-846f6deae986",
-	0,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("5b8a1775-1e86-408d-a050-46e25a38ab45",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"03c1b163-d3ce-44c2-be7c-5efa903a5d9b",
-	108,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::scenarios_cbc');
-INSERT INTO GD_SHP
-	VALUES ("5b8a1775-1e86-408d-a050-46e25a38ab45");
-INSERT INTO GD_NCS
-	VALUES ("5b8a1775-1e86-408d-a050-46e25a38ab45");
-INSERT INTO DIM_ND
-	VALUES (200.000000,
-	150.000000,
-	"5b8a1775-1e86-408d-a050-46e25a38ab45");
-INSERT INTO DIM_GE
-	VALUES (5264.000000,
-	3320.000000,
-	"5b8a1775-1e86-408d-a050-46e25a38ab45",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("5b8a1775-1e86-408d-a050-46e25a38ab45",
-	0,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("6f5066a4-d8aa-4d14-8fc8-b2b9f9c03ea7",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"1aafc217-fd27-44f9-b2c0-e085c26cc99e",
-	108,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::tests_cbc');
-INSERT INTO GD_SHP
-	VALUES ("6f5066a4-d8aa-4d14-8fc8-b2b9f9c03ea7");
-INSERT INTO GD_NCS
-	VALUES ("6f5066a4-d8aa-4d14-8fc8-b2b9f9c03ea7");
-INSERT INTO DIM_ND
-	VALUES (200.000000,
-	150.000000,
-	"6f5066a4-d8aa-4d14-8fc8-b2b9f9c03ea7");
-INSERT INTO DIM_GE
-	VALUES (5484.000000,
-	3320.000000,
-	"6f5066a4-d8aa-4d14-8fc8-b2b9f9c03ea7",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("6f5066a4-d8aa-4d14-8fc8-b2b9f9c03ea7",
-	0,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("50d5a0da-699a-49e2-b9fe-b0016aeef99f",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"02353390-16a4-42f8-8a54-5f0b1c5a691f",
-	108,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::scenarios_pdf');
-INSERT INTO GD_SHP
-	VALUES ("50d5a0da-699a-49e2-b9fe-b0016aeef99f");
-INSERT INTO GD_NCS
-	VALUES ("50d5a0da-699a-49e2-b9fe-b0016aeef99f");
-INSERT INTO DIM_ND
-	VALUES (200.000000,
-	150.000000,
-	"50d5a0da-699a-49e2-b9fe-b0016aeef99f");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"50d5a0da-699a-49e2-b9fe-b0016aeef99f",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("50d5a0da-699a-49e2-b9fe-b0016aeef99f",
-	0,
-	"3e7f724f-4c7e-4096-9891-be1ea39e2ef4");
-INSERT INTO GD_GE
-	VALUES ("577ac0d2-1356-4c42-9114-e99f63f2fa24",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"219049f0-1364-4f18-985b-3c84b12cfb4d",
-	93,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::Persistence_Req_IF::Persistence_Req_IF');
-INSERT INTO GD_CON
-	VALUES ("577ac0d2-1356-4c42-9114-e99f63f2fa24",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("f1f09271-5bd5-4b75-95b6-44af4782cd18",
-	"577ac0d2-1356-4c42-9114-e99f63f2fa24",
-	0,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"f1f09271-5bd5-4b75-95b6-44af4782cd18");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"f1f09271-5bd5-4b75-95b6-44af4782cd18",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("f1f09271-5bd5-4b75-95b6-44af4782cd18",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("63638ab0-b720-4bb1-b9c2-02a1ad85c568",
-	"577ac0d2-1356-4c42-9114-e99f63f2fa24",
-	2,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"63638ab0-b720-4bb1-b9c2-02a1ad85c568");
-INSERT INTO DIM_GE
-	VALUES (2554.000000,
-	3597.000000,
-	"63638ab0-b720-4bb1-b9c2-02a1ad85c568",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("63638ab0-b720-4bb1-b9c2-02a1ad85c568",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("6d4dbaba-2be0-4dd0-be71-e2170bd31c55",
-	"577ac0d2-1356-4c42-9114-e99f63f2fa24",
-	1,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"6d4dbaba-2be0-4dd0-be71-e2170bd31c55");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"6d4dbaba-2be0-4dd0-be71-e2170bd31c55",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("6d4dbaba-2be0-4dd0-be71-e2170bd31c55",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_LS
-	VALUES ("04780761-84bf-4156-b8a7-7e8bf5741619",
-	"577ac0d2-1356-4c42-9114-e99f63f2fa24",
-	"00000000-0000-0000-0000-000000000000",
-	"c91c23e2-71f2-447f-861d-4452f40e2feb",
-	"6632d9dd-ca84-4b11-915c-b0c549f5eae9");
-INSERT INTO DIM_WAY
-	VALUES ("c91c23e2-71f2-447f-861d-4452f40e2feb",
-	2700.000000,
-	3572.000000,
-	"577ac0d2-1356-4c42-9114-e99f63f2fa24",
-	"00000000-0000-0000-0000-000000000000",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_WAY
-	VALUES ("6632d9dd-ca84-4b11-915c-b0c549f5eae9",
-	2699.000000,
-	3642.000000,
-	"577ac0d2-1356-4c42-9114-e99f63f2fa24",
-	"00000000-0000-0000-0000-000000000000",
-	"c91c23e2-71f2-447f-861d-4452f40e2feb");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"577ac0d2-1356-4c42-9114-e99f63f2fa24",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("577ac0d2-1356-4c42-9114-e99f63f2fa24",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ED
-	VALUES ("932e2f30-808e-4577-9732-fe69c2425ff1",
-	"00000000-0000-0000-0000-000000000000",
-	"577ac0d2-1356-4c42-9114-e99f63f2fa24");
-INSERT INTO GD_GE
-	VALUES ("af016193-943a-43d4-803b-a2e3d800bf6d",
-	"a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	"b84ab95a-4088-42f1-b46f-a70c6183f972",
-	94,
-	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::Persistence_Prov_IF::Persistence_Prov_IF');
-INSERT INTO GD_CON
-	VALUES ("af016193-943a-43d4-803b-a2e3d800bf6d",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("ef3d7afc-2fff-49b1-9f10-b12aa55b8eda",
-	"af016193-943a-43d4-803b-a2e3d800bf6d",
-	0,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"ef3d7afc-2fff-49b1-9f10-b12aa55b8eda");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"ef3d7afc-2fff-49b1-9f10-b12aa55b8eda",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("ef3d7afc-2fff-49b1-9f10-b12aa55b8eda",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("32dc4b08-c950-43bd-a786-eb83aadf2e85",
-	"af016193-943a-43d4-803b-a2e3d800bf6d",
-	2,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"32dc4b08-c950-43bd-a786-eb83aadf2e85");
-INSERT INTO DIM_GE
-	VALUES (1522.000000,
-	3597.000000,
-	"32dc4b08-c950-43bd-a786-eb83aadf2e85",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("32dc4b08-c950-43bd-a786-eb83aadf2e85",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_CTXT
-	VALUES ("794d9d9b-8176-44ee-8b26-9cb759718ef4",
-	"af016193-943a-43d4-803b-a2e3d800bf6d",
-	1,
-	0.000000,
-	0.000000);
-INSERT INTO DIM_ND
-	VALUES (0.000000,
-	0.000000,
-	"794d9d9b-8176-44ee-8b26-9cb759718ef4");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"794d9d9b-8176-44ee-8b26-9cb759718ef4",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("794d9d9b-8176-44ee-8b26-9cb759718ef4",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO GD_LS
-	VALUES ("06559ceb-ef3e-489b-80b2-111ce8c68aac",
-	"af016193-943a-43d4-803b-a2e3d800bf6d",
-	"00000000-0000-0000-0000-000000000000",
-	"7259ffa7-8221-4ecd-b292-d79ca2a0b50b",
-	"a48313a2-30a5-4631-b557-c1ec209c1183");
-INSERT INTO DIM_WAY
-	VALUES ("7259ffa7-8221-4ecd-b292-d79ca2a0b50b",
-	1674.000000,
-	3572.000000,
-	"af016193-943a-43d4-803b-a2e3d800bf6d",
-	"00000000-0000-0000-0000-000000000000",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_WAY
-	VALUES ("a48313a2-30a5-4631-b557-c1ec209c1183",
-	1671.000000,
-	3642.000000,
-	"af016193-943a-43d4-803b-a2e3d800bf6d",
-	"00000000-0000-0000-0000-000000000000",
-	"7259ffa7-8221-4ecd-b292-d79ca2a0b50b");
-INSERT INTO DIM_GE
-	VALUES (0.000000,
-	0.000000,
-	"af016193-943a-43d4-803b-a2e3d800bf6d",
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ELE
-	VALUES ("af016193-943a-43d4-803b-a2e3d800bf6d",
-	0,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO DIM_ED
-	VALUES ("381c2540-a253-4ba4-8647-6a54579a68e5",
-	"00000000-0000-0000-0000-000000000000",
-	"af016193-943a-43d4-803b-a2e3d800bf6d");
-INSERT INTO DIM_DIA
-	VALUES ("a4237b65-a998-4663-8706-5ac0c2faa3bd",
-	'',
-	1.000000,
-	0.000000,
-	0.000000,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO C_PO
-	VALUES ("416d79d0-6839-4420-a253-187a027dd48f",
-	"0c364501-cead-4520-a1cb-8f44e2211858",
-	'Prov_IF_Verification',
-	0,
-	0,
-	'');
-INSERT INTO C_IR
-	VALUES ("dccd2447-05b4-4e27-991a-234b65673b9c",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	"00000000-0000-0000-0000-000000000000",
-	"416d79d0-6839-4420-a253-187a027dd48f");
-INSERT INTO C_P
-	VALUES ("dccd2447-05b4-4e27-991a-234b65673b9c",
-	'Ordering',
-	'Unnamed Interface',
-	'',
-	'AESequenceDC::Prov_IF_Verification::Ordering');
-INSERT INTO SPR_PEP
-	VALUES ("24ef64b9-be83-4cfe-90be-c0e6936ef526",
-	"490bbac3-d732-46ca-88e5-12a1cbdd6f7c",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("24ef64b9-be83-4cfe-90be-c0e6936ef526",
-	'acceptOrderedEvent',
-	'',
-	'',
-	3,
-	6,
-	2);
-INSERT INTO C_EP_PROXY
-	VALUES ("490bbac3-d732-46ca-88e5-12a1cbdd6f7c",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'acceptOrderedEvent',
-	'',
-	2,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO SPR_PEP
-	VALUES ("c462f7c4-27e7-4e77-a72d-5492437d81f2",
-	"c0a74fc7-1fda-4573-98b4-88b9a6ec61d5",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("c462f7c4-27e7-4e77-a72d-5492437d81f2",
-	'failedJob',
-	'',
-	'',
-	3,
-	6,
-	3);
-INSERT INTO C_EP_PROXY
-	VALUES ("c0a74fc7-1fda-4573-98b4-88b9a6ec61d5",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'failedJob',
-	'',
-	3,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO SPR_PEP
-	VALUES ("3a6826a2-8e4f-448d-95f8-c5c62b228649",
-	"66b828db-9d3b-458a-aa7b-59d41aafb29c",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("3a6826a2-8e4f-448d-95f8-c5c62b228649",
-	'jobComplete',
-	'',
-	'',
-	3,
-	6,
-	4);
-INSERT INTO C_EP_PROXY
-	VALUES ("66b828db-9d3b-458a-aa7b-59d41aafb29c",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'jobComplete',
-	'',
-	4,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO SPR_PEP
-	VALUES ("c527c1ba-3e44-4048-86b4-d1d0e99c4a6b",
-	"53291260-f2ab-4172-a52e-80575791cf8e",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("c527c1ba-3e44-4048-86b4-d1d0e99c4a6b",
-	'eventDefinition',
-	'This service defines the specification instance for an Audit Event Definition. 
-Each one of these refers to its previous Audit Event Definition to define the sequence. 
-The first one in the sequence has no previous audit event definition and has the boolean isSequenceStartEvent set to true.
-The last one in the sequence does have a previous audit event definition and has the boolean isSequenceEndEvent set to true.
-Forks in the sequence are supported by multiple Audit Event Definitions having the same previous Audit Event Definition.
-Merges in the sequence could be supported by allowing multiple values in Previous Audit Event Definition',
-	'',
-	3,
-	6,
-	7);
-INSERT INTO C_EP_PROXY
-	VALUES ("53291260-f2ab-4172-a52e-80575791cf8e",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'eventDefinition',
-	'This service defines the specification instance for an Audit Event Definition. 
-Each one of these refers to its previous Audit Event Definition to define the sequence. 
-The first one in the sequence has no previous audit event definition and has the boolean isSequenceStartEvent set to true.
-The last one in the sequence does have a previous audit event definition and has the boolean isSequenceEndEvent set to true.
-Forks in the sequence are supported by multiple Audit Event Definitions having the same previous Audit Event Definition.
-Merges in the sequence could be supported by allowing multiple values in Previous Audit Event Definition',
-	7,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO SPR_PEP
-	VALUES ("3a480d8e-2201-492a-81d4-1b8db285b42f",
-	"a69a6b02-3831-4089-b179-fe5fb0b6103f",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("3a480d8e-2201-492a-81d4-1b8db285b42f",
-	'deprecateJobDefinition',
-	'This service allows a Job Definition to be deprecated. In early versions this will simple result in deletion of the Job Defintion and its
-associated Sequence Definitions, Audit Events Definitions, etc. In due course this can be refuiend to check that there are no Jobs of that
-Job Definition currently in progress. If there are then these jobs should be allowed to complete. The Job Definition is then only removed 
-when there are no in progress Jobs.',
-	'',
-	3,
-	6,
-	9);
-INSERT INTO C_EP_PROXY
-	VALUES ("a69a6b02-3831-4089-b179-fe5fb0b6103f",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'deprecateJobDefinition',
-	'This service allows a Job Definition to be deprecated. In early versions this will simple result in deletion of the Job Defintion and its
-associated Sequence Definitions, Audit Events Definitions, etc. In due course this can be refuiend to check that there are no Jobs of that
-Job Definition currently in progress. If there are then these jobs should be allowed to complete. The Job Definition is then only removed 
-when there are no in progress Jobs.',
-	9,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO SPR_PEP
-	VALUES ("87cf1d26-c8d2-4cbf-b4dc-9d6355b09b64",
-	"0f82608c-67c1-46c2-95a0-f01118131c67",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("87cf1d26-c8d2-4cbf-b4dc-9d6355b09b64",
-	'createSVDCsystemSpec',
-	'',
-	'',
-	3,
-	6,
-	10);
-INSERT INTO C_EP_PROXY
-	VALUES ("0f82608c-67c1-46c2-95a0-f01118131c67",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'createSVDCsystemSpec',
-	'',
-	10,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO SPR_PEP
-	VALUES ("b079d31b-7ae6-43be-bf1b-f90f0959b4ab",
-	"b7f6ea58-cc1f-4cfa-b3b4-f7b878bfda45",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("b079d31b-7ae6-43be-bf1b-f90f0959b4ab",
-	'reactivateJobDefinition',
-	'',
-	'',
-	3,
-	6,
-	12);
-INSERT INTO C_EP_PROXY
-	VALUES ("b7f6ea58-cc1f-4cfa-b3b4-f7b878bfda45",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'reactivateJobDefinition',
-	'',
-	12,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO SPR_PEP
-	VALUES ("3907e515-1980-4033-8a51-b8c2fb573dfb",
-	"e008f839-4f6f-4bab-940a-5e2c5c59133a",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("3907e515-1980-4033-8a51-b8c2fb573dfb",
-	'suspendJobDefinition',
-	'',
-	'',
-	3,
-	6,
-	11);
-INSERT INTO C_EP_PROXY
-	VALUES ("e008f839-4f6f-4bab-940a-5e2c5c59133a",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'suspendJobDefinition',
-	'',
-	11,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO SPR_PEP
-	VALUES ("89a5b860-9c47-4a28-8a3a-faad1a34703f",
-	"11220314-c0ae-447b-82db-40cdd2290a82",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("89a5b860-9c47-4a28-8a3a-faad1a34703f",
-	'extraJobInvariantDefinition',
-	'This function, invoked during initialisation after all of the eventDefinition functions have been called, adds an 
-extra job invariant definition(such as entropy). The parameters define the extra job invariant, the job defintion and event 
-definition that is the source of the and the invariant and also the full set of job definitions and event definitions
-that use the invariant.',
-	'',
-	3,
-	6,
-	13);
-INSERT INTO C_EP_PROXY
-	VALUES ("11220314-c0ae-447b-82db-40cdd2290a82",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'extraJobInvariantDefinition',
-	'This function, invoked during initialisation after all of the eventDefinition functions have been called, adds an 
-extra job invariant definition(such as entropy). The parameters define the extra job invariant, the job defintion and event 
-definition that is the source of the and the invariant and also the full set of job definitions and event definitions
-that use the invariant.',
-	13,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO SPR_PEP
-	VALUES ("cf4d37d6-f079-4675-8221-41285f179a2b",
-	"59c150a7-e0e7-4f24-9021-3b3d43984dd9",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("cf4d37d6-f079-4675-8221-41285f179a2b",
-	'intraJobInvariantDefinition',
-	'This function, invoked during initialisation after all of the eventDefinition functions have been called, adds an 
-intra job invariant definition. The parameters define the intra job invariant, the job defintion that the invariant is used in 
-and the full set of event definitions within that job definition that use the invariant.',
-	'',
-	3,
-	6,
-	13);
-INSERT INTO C_EP_PROXY
-	VALUES ("59c150a7-e0e7-4f24-9021-3b3d43984dd9",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'intraJobInvariantDefinition',
-	'This function, invoked during initialisation after all of the eventDefinition functions have been called, adds an 
-intra job invariant definition. The parameters define the intra job invariant, the job defintion that the invariant is used in 
-and the full set of event definitions within that job definition that use the invariant.',
-	13,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO SPR_PEP
-	VALUES ("744db484-6e5b-4a2f-8012-bec397ce59c1",
-	"228d4d8b-45a7-4408-aa3b-e450fcb00d6f",
-	"dccd2447-05b4-4e27-991a-234b65673b9c");
-INSERT INTO SPR_PO
-	VALUES ("744db484-6e5b-4a2f-8012-bec397ce59c1",
-	'dynamicControlDefinition',
-	'',
-	'',
-	3,
-	6,
-	14);
-INSERT INTO C_EP_PROXY
-	VALUES ("228d4d8b-45a7-4408-aa3b-e450fcb00d6f",
-	"27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	-1,
-	'dynamicControlDefinition',
-	'',
-	14,
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO C_I_PROXY
-	VALUES ("27a8383b-0174-4e37-a8aa-37bcc4ce4c94",
-	"00000000-0000-0000-0000-000000000000",
-	'Ordering',
-	'',
-	'../Shared/Ordering/Ordering.xtuml');
-INSERT INTO C_PO
-	VALUES ("d81106fb-af64-4856-a2b8-906d179a4bcd",
-	"0c364501-cead-4520-a1cb-8f44e2211858",
-	'JobAdmin',
-	0,
-	0,
-	'');
-INSERT INTO C_IR
-	VALUES ("d92bfac3-2cd8-4463-9d6d-4096b108142f",
-	"28c908fd-d821-4e1d-bf2e-a3dce2a552e8",
-	"00000000-0000-0000-0000-000000000000",
-	"d81106fb-af64-4856-a2b8-906d179a4bcd");
-INSERT INTO C_R
-	VALUES ("d92bfac3-2cd8-4463-9d6d-4096b108142f",
-	'JobSynchronisation',
-	'',
-	'Unnamed Interface',
-	'AESequenceDC::JobAdmin::JobSynchronisation');
-INSERT INTO SPR_REP
-	VALUES ("f925b84a-998d-4d53-a61b-ee0f8b5e97a6",
-	"d7ef0b03-8b34-4ea3-a0f1-5742c8db4f36",
-	"d92bfac3-2cd8-4463-9d6d-4096b108142f");
-INSERT INTO SPR_RO
-	VALUES ("f925b84a-998d-4d53-a61b-ee0f8b5e97a6",
-	'deleteJob',
-	'',
-	'',
-	3,
-	1,
-	1);
-INSERT INTO C_EP_PROXY
-	VALUES ("d7ef0b03-8b34-4ea3-a0f1-5742c8db4f36",
-	"28c908fd-d821-4e1d-bf2e-a3dce2a552e8",
-	-1,
-	'deleteJob',
-	'',
-	1,
-	'../Shared/JobSynchronisation/JobSynchronisation.xtuml');
-INSERT INTO C_I_PROXY
-	VALUES ("28c908fd-d821-4e1d-bf2e-a3dce2a552e8",
-	"00000000-0000-0000-0000-000000000000",
-	'JobSynchronisation',
-	'',
-	'../Shared/JobSynchronisation/JobSynchronisation.xtuml');
-INSERT INTO C_PO
-	VALUES ("bdec8810-4fe8-475b-a5dc-d024083f55a6",
-	"0c364501-cead-4520-a1cb-8f44e2211858",
-	'Persistence_Req_IF',
-	0,
-	0,
-	'');
-INSERT INTO C_IR
-	VALUES ("219049f0-1364-4f18-985b-3c84b12cfb4d",
-	"8f31bc37-5533-4c68-9eba-1dfa28915cbd",
-	"00000000-0000-0000-0000-000000000000",
-	"bdec8810-4fe8-475b-a5dc-d024083f55a6");
-INSERT INTO C_R
-	VALUES ("219049f0-1364-4f18-985b-3c84b12cfb4d",
-	'Persistence_Req_IF',
-	'',
-	'Unnamed Interface',
-	'AESequenceDC::Persistence_Req_IF::Persistence_Req_IF');
-INSERT INTO SPR_REP
-	VALUES ("f0cb0136-029a-49bd-8e9d-ec5bac662eaa",
-	"57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"219049f0-1364-4f18-985b-3c84b12cfb4d");
-INSERT INTO SPR_RO
-	VALUES ("f0cb0136-029a-49bd-8e9d-ec5bac662eaa",
-	'PersistInvariant',
-	'',
-	'',
-	3,
-	1,
-	1);
-INSERT INTO C_EP_PROXY
-	VALUES ("57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"8f31bc37-5533-4c68-9eba-1dfa28915cbd",
-	-1,
-	'PersistInvariant',
-	'',
-	1,
-	'../Shared/Persistence_Req_IF/Persistence_Req_IF.xtuml');
-INSERT INTO SPR_REP
-	VALUES ("36acd8e4-80e2-45d4-8b9c-dadf7efdc5f3",
-	"346378a6-0612-4d75-ad7f-c9980e9c3fd3",
-	"219049f0-1364-4f18-985b-3c84b12cfb4d");
-INSERT INTO SPR_RO
-	VALUES ("36acd8e4-80e2-45d4-8b9c-dadf7efdc5f3",
-	'RestoreNamedInvariant',
-	'',
-	'',
-	3,
-	1,
-	3);
-INSERT INTO C_EP_PROXY
-	VALUES ("346378a6-0612-4d75-ad7f-c9980e9c3fd3",
-	"8f31bc37-5533-4c68-9eba-1dfa28915cbd",
-	-1,
-	'RestoreNamedInvariant',
-	'',
-	3,
-	'../Shared/Persistence_Req_IF/Persistence_Req_IF.xtuml');
-INSERT INTO C_I_PROXY
-	VALUES ("8f31bc37-5533-4c68-9eba-1dfa28915cbd",
-	"00000000-0000-0000-0000-000000000000",
-	'Persistence_Req_IF',
-	'',
-	'../Shared/Persistence_Req_IF/Persistence_Req_IF.xtuml');
-INSERT INTO C_PO
-	VALUES ("2503143a-e45a-4d27-b230-4f6bffe208eb",
-	"0c364501-cead-4520-a1cb-8f44e2211858",
-	'Persistence_Prov_IF',
-	0,
-	0,
-	'');
-INSERT INTO C_IR
-	VALUES ("b84ab95a-4088-42f1-b46f-a70c6183f972",
-	"5c49d63e-135f-48ac-95bc-d9faeedade6a",
-	"00000000-0000-0000-0000-000000000000",
-	"2503143a-e45a-4d27-b230-4f6bffe208eb");
-INSERT INTO C_P
-	VALUES ("b84ab95a-4088-42f1-b46f-a70c6183f972",
-	'Persistence_Prov_IF',
-	'Unnamed Interface',
-	'',
-	'AESequenceDC::Persistence_Prov_IF::Persistence_Prov_IF');
-INSERT INTO SPR_PEP
-	VALUES ("d43f8e8d-6111-4d35-ae46-aa4fb099a23e",
-	"995ec859-32ad-460c-8007-69e34bd211ba",
-	"b84ab95a-4088-42f1-b46f-a70c6183f972");
-INSERT INTO SPR_PO
-	VALUES ("d43f8e8d-6111-4d35-ae46-aa4fb099a23e",
-	'restoreInvariants',
-	'',
-	'',
-	3,
-	6,
-	15);
-INSERT INTO C_EP_PROXY
-	VALUES ("995ec859-32ad-460c-8007-69e34bd211ba",
-	"5c49d63e-135f-48ac-95bc-d9faeedade6a",
-	-1,
-	'restoreInvariants',
-	'',
-	15,
-	'../Shared/Persistence_Prov_IF/Persistence_Prov_IF.xtuml');
-INSERT INTO C_I_PROXY
-	VALUES ("5c49d63e-135f-48ac-95bc-d9faeedade6a",
-	"00000000-0000-0000-0000-000000000000",
-	'Persistence_Prov_IF',
-	'',
-	'../Shared/Persistence_Prov_IF/Persistence_Prov_IF.xtuml');
-INSERT INTO PE_PE
-	VALUES ("0c364501-cead-4520-a1cb-8f44e2211858",
-	1,
-	"54d6e399-a7f3-447b-bde3-ad35363156a2",
-	"00000000-0000-0000-0000-000000000000",
-	2);
-INSERT INTO EP_PKG_PROXY
-	VALUES ("54d6e399-a7f3-447b-bde3-ad35363156a2",
-	"be1840aa-9d3d-4f55-baec-da45c54219a5",
-	"be1840aa-9d3d-4f55-baec-da45c54219a5",
-	'SVDCdomain',
-	'',
-	0,
-	'../SVDCdomain.xtuml');
+		end port;
+
+		provided port Persistence_Prov_IF implements Persistence_Prov_IF is
+
+			@message_num(15);
+			message restoreInvariants(restoredInvariants: in sequence of persistedInvariantStructure) from provider is
+			end message;
+
+		end port;
+
+		required port Persistence_Req_IF implements Persistence_Req_IF is
+
+			@message_num(1);
+			message PersistInvariant(extraJobInvariantName: in string, invariantValue: in string, validFrom: in timestamp, validTo: in timestamp, sourceJobDefinitionType: in string, sourceAuditEventType: in string, sourceAuditEventOccurrenceId: in integer) from provider is
+				@noparse
+				logMessage : string;
+				
+				begin
+				
+				  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
+				  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+				
+				end service;
+				@endnoparse
+			end message;
+
+			@message_num(3);
+			message RestoreNamedInvariant(extraJobInvariantName: in string, invariantValue: in string) from provider is
+				@noparse
+				logMessage : string;
+				
+				begin
+				
+				  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
+				  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+				  
+				end service;
+				@endnoparse
+			end message;
+
+		end port;
+
+		provided port Prov_IF_Verification implements Ordering is
+
+			@message_num(2);
+			message acceptOrderedEvent(ae_time: in string, app: in string, ae_type: in string, jobId: in string, prevAEIds: in sequence of string, id: in string, auditEventData: in sequence of auditEventDataStructure) from provider is
+			end message;
+
+			@message_num(10);
+			message createSVDCsystemSpec(maxIntraSequenceEventTimeoutPeriod: in duration, waitPeriodForAllJobsCompletedCheck: in duration, waitPeriodForJobDeletion: in duration, waitPeriodForInvariantDeletion: in duration) from provider is
+			end message;
+
+			@message_num(9);
+			message deprecateJobDefinition(jobName: in string) from provider is
+			end message;
+
+			@message_num(14);
+			message dynamicControlDefinition(jobName: in string, dynamicControlName: in string, dynamicControlType: in dynamicControlTypeEnum, sourceEventType: in string, sourceOccurrenceId: in integer, userEventType: in string, userOccurrenceId: in integer) from provider is
+			end message;
+
+			@message_num(7);
+			message eventDefinition(jobName: in string, sequenceName: in string, eventType: in string, occurrenceId: in integer, previousEventTypes: in sequence of eventStructure, isSequenceStart: in boolean, isSequenceEnd: in boolean, isBreak: in boolean) from provider is
+			end message;
+
+			@message_num(13);
+			message extraJobInvariantDefinition(auditEventDataName: in string, sourceJobDefnName: in string, sourceEventType: in string, sourceOccurrenceId: in integer, userEvents: in sequence of userEventDataStructure) from provider is
+			end message;
+
+			@message_num(3);
+			message failedJob(jobId: in string, failureReason: in string) from provider is
+			end message;
+
+			@message_num(13);
+			message intraJobInvariantDefinition(jobDefnName: in string, auditEventDataName: in string, associatedEvents: in sequence of intraJobInvDataStructure) from provider is
+			end message;
+
+			@message_num(4);
+			message jobComplete(jobId: in string) from provider is
+			end message;
+
+			@message_num(12);
+			message reactivateJobDefinition(jobName: in string) from provider is
+			end message;
+
+			@message_num(11);
+			message suspendJobDefinition(jobName: in string) from provider is
+			end message;
+
+		end port;
+
+	end component;
+
+end;

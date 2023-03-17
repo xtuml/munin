@@ -1,132 +1,14 @@
--- BP 7.1.6 content: Interface syschar: 3 persistence-version: 7.1.6
+// BP 7.1.6 content: Interface syschar: 3 persistence-version: 7.1.6
 
-INSERT INTO C_I
-	VALUES ("8f31bc37-5533-4c68-9eba-1dfa28915cbd",
-	"00000000-0000-0000-0000-000000000000",
-	'Persistence_Req_IF',
-	'');
-INSERT INTO C_EP
-	VALUES ("57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"8f31bc37-5533-4c68-9eba-1dfa28915cbd",
-	-1,
-	'PersistInvariant',
-	'',
-	1);
-INSERT INTO C_IO
-	VALUES ("57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"ba5eda7a-def5-0000-0000-000000000000",
-	'PersistInvariant',
-	'',
-	0,
-	'',
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO C_PP
-	VALUES ("7eba5475-37c2-4972-be40-d5fc68628d01",
-	"57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'extraJobInvariantName',
-	'',
-	0,
-	'',
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO C_PP
-	VALUES ("59e4d470-b4f4-4679-b14c-f524aea6efc4",
-	"57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'invariantValue',
-	'',
-	0,
-	'',
-	"7eba5475-37c2-4972-be40-d5fc68628d01");
-INSERT INTO C_PP
-	VALUES ("e7227b43-1bcb-43e4-99ec-cd0aadfdc35f",
-	"57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"ba5eda7a-def5-0000-0000-000000000010",
-	'validFrom',
-	'',
-	0,
-	'',
-	"59e4d470-b4f4-4679-b14c-f524aea6efc4");
-INSERT INTO C_PP
-	VALUES ("2204fc42-0009-4f06-98e5-b2effc2249b0",
-	"57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"ba5eda7a-def5-0000-0000-000000000010",
-	'validTo',
-	'',
-	0,
-	'',
-	"e7227b43-1bcb-43e4-99ec-cd0aadfdc35f");
-INSERT INTO C_PP
-	VALUES ("d78480db-c929-4291-a207-31f996bbfccb",
-	"57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'sourceJobDefinitionType',
-	'',
-	0,
-	'',
-	"2204fc42-0009-4f06-98e5-b2effc2249b0");
-INSERT INTO C_PP
-	VALUES ("14257469-7e67-4af1-850c-4ff10b934048",
-	"57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'sourceAuditEventType',
-	'',
-	0,
-	'',
-	"d78480db-c929-4291-a207-31f996bbfccb");
-INSERT INTO C_PP
-	VALUES ("b8d93ca0-9837-4651-8dbc-e6b3e6bd2651",
-	"57a27206-b5dd-4717-8e94-d6d7dc729daa",
-	"ba5eda7a-def5-0000-0000-000000000002",
-	'sourceAuditEventOccurrenceId',
-	'',
-	0,
-	'',
-	"14257469-7e67-4af1-850c-4ff10b934048");
-INSERT INTO C_EP
-	VALUES ("346378a6-0612-4d75-ad7f-c9980e9c3fd3",
-	"8f31bc37-5533-4c68-9eba-1dfa28915cbd",
-	-1,
-	'RestoreNamedInvariant',
-	'',
-	3);
-INSERT INTO C_IO
-	VALUES ("346378a6-0612-4d75-ad7f-c9980e9c3fd3",
-	"ba5eda7a-def5-0000-0000-000000000000",
-	'RestoreNamedInvariant',
-	'',
-	0,
-	'',
-	"57a27206-b5dd-4717-8e94-d6d7dc729daa");
-INSERT INTO C_PP
-	VALUES ("61474dd8-b3c8-480e-9ca4-09cb1beeae9a",
-	"346378a6-0612-4d75-ad7f-c9980e9c3fd3",
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'extraJobInvariantName',
-	'',
-	0,
-	'',
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO C_PP
-	VALUES ("d6724e9b-7956-4144-8d5b-bd58926cf125",
-	"346378a6-0612-4d75-ad7f-c9980e9c3fd3",
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'invariantValue',
-	'',
-	0,
-	'',
-	"61474dd8-b3c8-480e-9ca4-09cb1beeae9a");
-INSERT INTO PE_PE
-	VALUES ("8f31bc37-5533-4c68-9eba-1dfa28915cbd",
-	1,
-	"43d4329b-5241-4a80-b393-ee1e5a928ccf",
-	"00000000-0000-0000-0000-000000000000",
-	6);
-INSERT INTO EP_PKG_PROXY
-	VALUES ("43d4329b-5241-4a80-b393-ee1e5a928ccf",
-	"00000000-0000-0000-0000-000000000000",
-	"be1840aa-9d3d-4f55-baec-da45c54219a5",
-	'Shared',
-	'',
-	0,
-	'../Shared.xtuml');
+within SequenceVerificationDataCentric::SVDCdomain::Shared is
+
+	interface Persistence_Req_IF is
+		
+		@message_num(1);
+		message PersistInvariant(extraJobInvariantName: in string, invariantValue: in string, validFrom: in timestamp, validTo: in timestamp, sourceJobDefinitionType: in string, sourceAuditEventType: in string, sourceAuditEventOccurrenceId: in integer) from provider;
+		@message_num(3);
+		message RestoreNamedInvariant(extraJobInvariantName: in string, invariantValue: in string) from provider;
+		
+	end interface;
+
+end;

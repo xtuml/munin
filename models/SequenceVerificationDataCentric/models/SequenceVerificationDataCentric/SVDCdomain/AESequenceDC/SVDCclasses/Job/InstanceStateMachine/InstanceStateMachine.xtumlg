@@ -1,0 +1,498 @@
+render : "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine"
+
+shapes :
+  shape : JobInProgress
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobInProgress"
+    bounds : x : 4392.0 y : 3000.0 width : 469.0 height : 229.0
+  shape : AssessingJobConstraints
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingJobConstraints"
+    bounds : x : 4704.0 y : 3240.0 width : 469.0 height : 265.0
+  shape : JobFailed
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobFailed"
+    bounds : x : 3960.0 y : 3552.0 width : 517.0 height : 264.0
+  shape : JobGoneHorriblyWrong
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobGoneHorriblyWrong"
+    bounds : x : 4248.0 y : 4488.0 width : 421.0 height : 228.0
+  shape : AssessingSequenceCompletion
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingSequenceCompletion"
+    bounds : x : 3840.0 y : 3252.0 width : 337.0 height : 204.0
+  shape : JobTimeoutReported
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobTimeoutReported"
+    bounds : x : 3564.0 y : 3480.0 width : 300.0 height : 144.0
+  shape : JobSuccessful
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobSuccessful"
+    bounds : x : 4800.0 y : 4296.0 width : 360.0 height : 217.0
+  shape : Deleted
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::Deleted"
+    bounds : x : 4188.0 y : 4824.0 width : 540.0 height : 204.0
+  shape : AssessingIntraJobInvariants
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingIntraJobInvariants"
+    bounds : x : 4812.0 y : 3576.0 width : 348.0 height : 228.0
+  shape : AwaitingPersistenceService
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AwaitingPersistenceService"
+    bounds : x : 4212.0 y : 3864.0 width : 396.0 height : 300.0
+  shape : AssessingLocalExtraJobInvariants
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingLocalExtraJobInvariants"
+    bounds : x : 5304.0 y : 3828.0 width : 396.0 height : 300.0
+  shape : ReassessingExtraJobInvariants
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::ReassessingExtraJobInvariants"
+    bounds : x : 4764.0 y : 3924.0 width : 396.0 height : 300.0
+
+connectors :
+  connector : JobInProgress____JOB1__newEventForExistingJob
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobInProgress::JOB1: newEventForExistingJob"
+    polyline :
+      segment :
+        start : x : 4392.0 y : 3036.0
+        end :   x : 4068.0 y : 3036.0
+      segment :
+        start : x : 4068.0 y : 3036.0
+        end :   x : 4068.0 y : 2952.0
+      segment :
+        start : x : 4068.0 y : 2952.0
+        end :   x : 4464.0 y : 2952.0
+      segment :
+        start : x : 4464.0 y : 2952.0
+        end :   x : 4464.0 y : 3000.0
+    anchors :
+      start :
+        point : x : 4392.0 y : 3036.0
+        shape : JobInProgress
+      end :
+        point : x : 4464.0 y : 3000.0
+        shape : JobInProgress
+    texts :
+      text :
+        bounds : x : 4074.0 y : 2962.0 width : 0.0 height : 0.0 where : middle
+  connector : JobInProgress____JOB3__jobFailed
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobInProgress::JOB3: jobFailed"
+    polyline :
+      segment :
+        start : x : 4416.0 y : 3229.0
+        end :   x : 4416.0 y : 3552.0
+    anchors :
+      start :
+        point : x : 4416.0 y : 3229.0
+        shape : JobInProgress
+      end :
+        point : x : 4416.0 y : 3552.0
+        shape : JobFailed
+    texts :
+      text :
+        bounds : x : 4423.0 y : 3236.0 width : 0.0 height : 0.0 where : middle
+  connector : JobGoneHorriblyWrong____JOB1__newEventForExistingJob
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobGoneHorriblyWrong::JOB1: newEventForExistingJob"
+    polyline :
+      segment :
+        start : x : 4669.0 y : 4638.0
+        end :   x : 4918.0 y : 4638.0
+      segment :
+        start : x : 4918.0 y : 4638.0
+        end :   x : 4918.0 y : 4689.0
+      segment :
+        start : x : 4918.0 y : 4689.0
+        end :   x : 4669.0 y : 4686.0
+    anchors :
+      start :
+        point : x : 4669.0 y : 4638.0
+        shape : JobGoneHorriblyWrong
+      end :
+        point : x : 4669.0 y : 4686.0
+        shape : JobGoneHorriblyWrong
+    texts :
+      text :
+        bounds : x : 4672.0 y : 4597.0 width : 0.0 height : 0.0 where : middle
+  connector : JobInProgress____JOB4__endEventInSequenceDetected
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobInProgress::JOB4: endEventInSequenceDetected"
+    polyline :
+      segment :
+        start : x : 4392.0 y : 3216.0
+        end :   x : 4092.0 y : 3216.0
+      segment :
+        start : x : 4092.0 y : 3216.0
+        end :   x : 4092.0 y : 3252.0
+    anchors :
+      start :
+        point : x : 4392.0 y : 3216.0
+        shape : JobInProgress
+      end :
+        point : x : 4092.0 y : 3252.0
+        shape : AssessingSequenceCompletion
+    texts :
+      text :
+        bounds : x : 3993.0 y : 3191.0 width : 0.0 height : 0.0 where : middle
+  connector : JobInProgress____JOB5__jobTimedOut
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobInProgress::JOB5: jobTimedOut"
+    polyline :
+      segment :
+        start : x : 4392.0 y : 3108.0
+        end :   x : 3588.0 y : 3108.0
+      segment :
+        start : x : 3588.0 y : 3108.0
+        end :   x : 3588.0 y : 3480.0
+    anchors :
+      start :
+        point : x : 4392.0 y : 3108.0
+        shape : JobInProgress
+      end :
+        point : x : 3588.0 y : 3480.0
+        shape : JobTimeoutReported
+    texts :
+      text :
+        bounds : x : 4273.0 y : 3077.0 width : 0.0 height : 0.0 where : middle
+  connector : AssessingSequenceCompletion____JOB1__newEventForExistingJob
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingSequenceCompletion::JOB1: newEventForExistingJob"
+    polyline :
+      segment :
+        start : x : 3960.0 y : 3252.0
+        end :   x : 3960.0 y : 3156.0
+      segment :
+        start : x : 3960.0 y : 3156.0
+        end :   x : 4392.0 y : 3156.0
+    anchors :
+      start :
+        point : x : 3960.0 y : 3252.0
+        shape : AssessingSequenceCompletion
+      end :
+        point : x : 4392.0 y : 3156.0
+        shape : JobInProgress
+    texts :
+      text :
+        bounds : x : 4019.0 y : 3125.0 width : 0.0 height : 0.0 where : middle
+  connector : AssessingSequenceCompletion____JOB2__jobComplete
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingSequenceCompletion::JOB2: jobComplete"
+    polyline :
+      segment :
+        start : x : 4177.0 y : 3324.0
+        end :   x : 4704.0 y : 3324.0
+    anchors :
+      start :
+        point : x : 4177.0 y : 3324.0
+        shape : AssessingSequenceCompletion
+      end :
+        point : x : 4704.0 y : 3324.0
+        shape : AssessingJobConstraints
+    texts :
+      text :
+        bounds : x : 4189.0 y : 3286.0 width : 0.0 height : 0.0 where : middle
+  connector : JobTimeoutReported____JOB3__jobFailed
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobTimeoutReported::JOB3: jobFailed"
+    polyline :
+      segment :
+        start : x : 3636.0 y : 3624.0
+        end :   x : 3636.0 y : 3696.0
+      segment :
+        start : x : 3636.0 y : 3696.0
+        end :   x : 3960.0 y : 3696.0
+    anchors :
+      start :
+        point : x : 3636.0 y : 3624.0
+        shape : JobTimeoutReported
+      end :
+        point : x : 3960.0 y : 3696.0
+        shape : JobFailed
+    texts :
+      text :
+        bounds : x : 3676.0 y : 3635.0 width : 0.0 height : 0.0 where : middle
+  connector : AssessingSequenceCompletion____JOB3__jobFailed
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingSequenceCompletion::JOB3: jobFailed"
+    polyline :
+      segment :
+        start : x : 4056.0 y : 3456.0
+        end :   x : 4056.0 y : 3552.0
+    anchors :
+      start :
+        point : x : 4056.0 y : 3456.0
+        shape : AssessingSequenceCompletion
+      end :
+        point : x : 4056.0 y : 3552.0
+        shape : JobFailed
+    texts :
+      text :
+        bounds : x : 4067.0 y : 3462.0 width : 0.0 height : 0.0 where : middle
+  connector : AssessingJobConstraints____JOB3__jobFailed
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingJobConstraints::JOB3: jobFailed"
+    polyline :
+      segment :
+        start : x : 4704.0 y : 3396.0
+        end :   x : 4452.0 y : 3396.0
+      segment :
+        start : x : 4452.0 y : 3396.0
+        end :   x : 4452.0 y : 3552.0
+    anchors :
+      start :
+        point : x : 4704.0 y : 3396.0
+        shape : AssessingJobConstraints
+      end :
+        point : x : 4452.0 y : 3552.0
+        shape : JobFailed
+    texts :
+      text :
+        bounds : x : 4487.0 y : 3361.0 width : 0.0 height : 0.0 where : middle
+  connector : JobGoneHorriblyWrong____JOB3__jobFailed
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobGoneHorriblyWrong::JOB3: jobFailed"
+    polyline :
+      segment :
+        start : x : 4248.0 y : 4584.0
+        end :   x : 4068.0 y : 4439.0
+      segment :
+        start : x : 4068.0 y : 4439.0
+        end :   x : 4068.0 y : 3816.0
+    anchors :
+      start :
+        point : x : 4248.0 y : 4584.0
+        shape : JobGoneHorriblyWrong
+      end :
+        point : x : 4068.0 y : 3816.0
+        shape : JobFailed
+    texts :
+      text :
+        bounds : x : 4085.0 y : 4406.0 width : 0.0 height : 0.0 where : middle
+  connector : JobSuccessful____JOB1__newEventForExistingJob
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobSuccessful::JOB1: newEventForExistingJob"
+    polyline :
+      segment :
+        start : x : 4872.0 y : 4513.0
+        end :   x : 4872.0 y : 4542.0
+      segment :
+        start : x : 4872.0 y : 4542.0
+        end :   x : 4669.0 y : 4542.0
+    anchors :
+      start :
+        point : x : 4872.0 y : 4513.0
+        shape : JobSuccessful
+      end :
+        point : x : 4669.0 y : 4542.0
+        shape : JobGoneHorriblyWrong
+    texts :
+      text :
+        bounds : x : 4605.0 y : 4447.0 width : 0.0 height : 0.0 where : middle
+  connector : JobSuccessful____JOB3__jobFailed
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobSuccessful::JOB3: jobFailed"
+    polyline :
+      segment :
+        start : x : 4800.0 y : 4392.0
+        end :   x : 4152.0 y : 4344.0
+      segment :
+        start : x : 4152.0 y : 4344.0
+        end :   x : 4152.0 y : 3816.0
+    anchors :
+      start :
+        point : x : 4800.0 y : 4392.0
+        shape : JobSuccessful
+      end :
+        point : x : 4152.0 y : 3816.0
+        shape : JobFailed
+    texts :
+      text :
+        bounds : x : 4170.0 y : 4302.0 width : 0.0 height : 0.0 where : middle
+  connector : JobSuccessful____JOB7__endOfLifeReached
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobSuccessful::JOB7: endOfLifeReached"
+    polyline :
+      segment :
+        start : x : 5088.0 y : 4513.0
+        end :   x : 5088.0 y : 4890.0
+      segment :
+        start : x : 5088.0 y : 4890.0
+        end :   x : 4728.0 y : 4890.0
+    anchors :
+      start :
+        point : x : 5088.0 y : 4513.0
+        shape : JobSuccessful
+      end :
+        point : x : 4728.0 y : 4890.0
+        shape : Deleted
+    texts :
+      text :
+        bounds : x : 5112.0 y : 4664.0 width : 0.0 height : 0.0 where : middle
+  connector : JobFailed____JOB7__endOfLifeReached
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobFailed::JOB7: endOfLifeReached"
+    polyline :
+      segment :
+        start : x : 3984.0 y : 3816.0
+        end :   x : 3984.0 y : 4722.0
+      segment :
+        start : x : 3984.0 y : 4722.0
+        end :   x : 4188.0 y : 4866.0
+    anchors :
+      start :
+        point : x : 3984.0 y : 3816.0
+        shape : JobFailed
+      end :
+        point : x : 4188.0 y : 4866.0
+        shape : Deleted
+    texts :
+      text :
+        bounds : x : 3724.0 y : 4331.0 width : 0.0 height : 0.0 where : middle
+  connector : JobGoneHorriblyWrong____JOB7__endOfLifeReached
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::JobGoneHorriblyWrong::JOB7: endOfLifeReached"
+    polyline :
+      segment :
+        start : x : 4452.0 y : 4716.0
+        end :   x : 4452.0 y : 4824.0
+    anchors :
+      start :
+        point : x : 4452.0 y : 4716.0
+        shape : JobGoneHorriblyWrong
+      end :
+        point : x : 4452.0 y : 4824.0
+        shape : Deleted
+    texts :
+      text :
+        bounds : x : 4320.0 y : 4732.0 width : 0.0 height : 0.0 where : middle
+  connector : AssessingJobConstraints____JOB6__constraintCheckSuccessful
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingJobConstraints::JOB6: constraintCheckSuccessful"
+    polyline :
+      segment :
+        start : x : 4920.0 y : 3505.0
+        end :   x : 4920.0 y : 3576.0
+    anchors :
+      start :
+        point : x : 4920.0 y : 3505.0
+        shape : AssessingJobConstraints
+      end :
+        point : x : 4920.0 y : 3576.0
+        shape : AssessingIntraJobInvariants
+    texts :
+      text :
+        bounds : x : 4929.0 y : 3517.0 width : 0.0 height : 0.0 where : middle
+  connector : AssessingIntraJobInvariants____JOB3__jobFailed
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingIntraJobInvariants::JOB3: jobFailed"
+    polyline :
+      segment :
+        start : x : 4812.0 y : 3624.0
+        end :   x : 4477.0 y : 3624.0
+    anchors :
+      start :
+        point : x : 4812.0 y : 3624.0
+        shape : AssessingIntraJobInvariants
+      end :
+        point : x : 4477.0 y : 3624.0
+        shape : JobFailed
+    texts :
+      text :
+        bounds : x : 4541.0 y : 3592.0 width : 0.0 height : 0.0 where : middle
+  connector : AwaitingPersistenceService____JOB12__persistenceSyncTimedOut
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AwaitingPersistenceService::JOB12: persistenceSyncTimedOut"
+    polyline :
+      segment :
+        start : x : 4368.0 y : 3864.0
+        end :   x : 4368.0 y : 3816.0
+    anchors :
+      start :
+        point : x : 4368.0 y : 3864.0
+        shape : AwaitingPersistenceService
+      end :
+        point : x : 4368.0 y : 3816.0
+        shape : JobFailed
+    texts :
+      text :
+        bounds : x : 4219.0 y : 3830.0 width : 0.0 height : 0.0 where : middle
+  connector : AssessingIntraJobInvariants____JOB9__intraJobInvariantCheckSuccessful
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingIntraJobInvariants::JOB9: intraJobInvariantCheckSuccessful"
+    polyline :
+      segment :
+        start : x : 5160.0 y : 3696.0
+        end :   x : 5352.0 y : 3696.0
+      segment :
+        start : x : 5352.0 y : 3696.0
+        end :   x : 5352.0 y : 3828.0
+    anchors :
+      start :
+        point : x : 5160.0 y : 3696.0
+        shape : AssessingIntraJobInvariants
+      end :
+        point : x : 5352.0 y : 3828.0
+        shape : AssessingLocalExtraJobInvariants
+    texts :
+      text :
+        bounds : x : 5170.0 y : 3650.0 width : 0.0 height : 0.0 where : middle
+  connector : AssessingLocalExtraJobInvariants____JOB8__extraJobInvariantCheckSuccessful
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingLocalExtraJobInvariants::JOB8: extraJobInvariantCheckSuccessful"
+    polyline :
+      segment :
+        start : x : 5328.0 y : 4128.0
+        end :   x : 5328.0 y : 4320.0
+      segment :
+        start : x : 5328.0 y : 4320.0
+        end :   x : 5160.0 y : 4368.0
+    anchors :
+      start :
+        point : x : 5328.0 y : 4128.0
+        shape : AssessingLocalExtraJobInvariants
+      end :
+        point : x : 5160.0 y : 4368.0
+        shape : JobSuccessful
+    texts :
+      text :
+        bounds : x : 5244.0 y : 4251.0 width : 0.0 height : 0.0 where : middle
+  connector : AssessingLocalExtraJobInvariants____JOB10__WaitForStoredInvariants
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AssessingLocalExtraJobInvariants::JOB10: WaitForStoredInvariants"
+    polyline :
+      segment :
+        start : x : 5304.0 y : 3888.0
+        end :   x : 4608.0 y : 3888.0
+    anchors :
+      start :
+        point : x : 5304.0 y : 3888.0
+        shape : AssessingLocalExtraJobInvariants
+      end :
+        point : x : 4608.0 y : 3888.0
+        shape : AwaitingPersistenceService
+    texts :
+      text :
+        bounds : x : 4894.0 y : 3843.0 width : 0.0 height : 0.0 where : middle
+  connector : ReassessingExtraJobInvariants____JOB8__extraJobInvariantCheckSuccessful
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::ReassessingExtraJobInvariants::JOB8: extraJobInvariantCheckSuccessful"
+    polyline :
+      segment :
+        start : x : 5000.0 y : 4224.0
+        end :   x : 5000.0 y : 4296.0
+    anchors :
+      start :
+        point : x : 5000.0 y : 4224.0
+        shape : ReassessingExtraJobInvariants
+      end :
+        point : x : 5000.0 y : 4296.0
+        shape : JobSuccessful
+    texts :
+      text :
+        bounds : x : 4851.0 y : 4250.0 width : 0.0 height : 0.0 where : middle
+  connector : AwaitingPersistenceService____JOB11__StoredInvariantsReceived
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::AwaitingPersistenceService::JOB11: StoredInvariantsReceived"
+    polyline :
+      segment :
+        start : x : 4488.0 y : 4164.0
+        end :   x : 4488.0 y : 4200.0
+      segment :
+        start : x : 4488.0 y : 4200.0
+        end :   x : 4764.0 y : 4200.0
+    anchors :
+      start :
+        point : x : 4488.0 y : 4164.0
+        shape : AwaitingPersistenceService
+      end :
+        point : x : 4764.0 y : 4200.0
+        shape : ReassessingExtraJobInvariants
+    texts :
+      text :
+        bounds : x : 4500.0 y : 4169.0 width : 0.0 height : 0.0 where : middle
+  connector : ReassessingExtraJobInvariants____JOB3__jobFailed
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::Job::Instance State Machine::ReassessingExtraJobInvariants::JOB3: jobFailed"
+    polyline :
+      segment :
+        start : x : 4764.0 y : 4212.0
+        end :   x : 4188.0 y : 4212.0
+      segment :
+        start : x : 4188.0 y : 4212.0
+        end :   x : 4188.0 y : 3816.0
+    anchors :
+      start :
+        point : x : 4764.0 y : 4212.0
+        shape : ReassessingExtraJobInvariants
+      end :
+        point : x : 4188.0 y : 3816.0
+        shape : JobFailed
+    texts :
+      text :
+        bounds : x : 4197.0 y : 4176.0 width : 0.0 height : 0.0 where : middle

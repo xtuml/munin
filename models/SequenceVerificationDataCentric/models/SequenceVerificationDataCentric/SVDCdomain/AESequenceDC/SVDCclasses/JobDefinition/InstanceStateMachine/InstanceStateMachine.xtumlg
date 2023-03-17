@@ -1,0 +1,125 @@
+render : "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine"
+
+shapes :
+  shape : Active
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine::Active"
+    bounds : x : 4536.0 y : 3084.0 width : 204.0 height : 109.0
+  shape : Deprecated
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine::Deprecated"
+    bounds : x : 4536.0 y : 3276.0 width : 204.0 height : 109.0
+  shape : Suspended
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine::Suspended"
+    bounds : x : 4080.0 y : 3264.0 width : 265.0 height : 121.0
+  shape : Deleted
+    render : state "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine::Deleted"
+    bounds : x : 4536.0 y : 3456.0 width : 313.0 height : 169.0
+
+connectors :
+  connector : Active____JD3__deprecate
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine::Active::JD3: deprecate"
+    polyline :
+      segment :
+        start : x : 4692.0 y : 3193.0
+        end :   x : 4692.0 y : 3276.0
+    anchors :
+      start :
+        point : x : 4692.0 y : 3193.0
+        shape : Active
+      end :
+        point : x : 4692.0 y : 3276.0
+        shape : Deprecated
+    texts :
+      text :
+        bounds : x : 4565.0 y : 3197.0 width : 0.0 height : 0.0 where : middle
+  connector : Active____JD1__suspend
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine::Active::JD1: suspend"
+    polyline :
+      segment :
+        start : x : 4536.0 y : 3114.0
+        end :   x : 4104.0 y : 3114.0
+      segment :
+        start : x : 4104.0 y : 3114.0
+        end :   x : 4104.0 y : 3264.0
+    anchors :
+      start :
+        point : x : 4536.0 y : 3114.0
+        shape : Active
+      end :
+        point : x : 4104.0 y : 3264.0
+        shape : Suspended
+    texts :
+      text :
+        bounds : x : 4382.0 y : 3088.0 width : 0.0 height : 0.0 where : middle
+  connector : Suspended____JD2__reactivate
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine::Suspended::JD2: reactivate"
+    polyline :
+      segment :
+        start : x : 4296.0 y : 3264.0
+        end :   x : 4296.0 y : 3174.0
+      segment :
+        start : x : 4296.0 y : 3174.0
+        end :   x : 4536.0 y : 3174.0
+    anchors :
+      start :
+        point : x : 4296.0 y : 3264.0
+        shape : Suspended
+      end :
+        point : x : 4536.0 y : 3174.0
+        shape : Active
+    texts :
+      text :
+        bounds : x : 4176.0 y : 3235.0 width : 0.0 height : 0.0 where : middle
+  connector : Suspended____JD3__deprecate
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine::Suspended::JD3: deprecate"
+    polyline :
+      segment :
+        start : x : 4345.0 y : 3336.0
+        end :   x : 4536.0 y : 3336.0
+    anchors :
+      start :
+        point : x : 4345.0 y : 3336.0
+        shape : Suspended
+      end :
+        point : x : 4536.0 y : 3336.0
+        shape : Deprecated
+    texts :
+      text :
+        bounds : x : 4372.0 y : 3307.0 width : 0.0 height : 0.0 where : middle
+  connector : Deprecated____JD4__noJobsUsingDeprecatedJobDefinition
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine::Deprecated::JD4: noJobsUsingDeprecatedJobDefinition"
+    polyline :
+      segment :
+        start : x : 4704.0 y : 3385.0
+        end :   x : 4704.0 y : 3456.0
+    anchors :
+      start :
+        point : x : 4704.0 y : 3385.0
+        shape : Deprecated
+      end :
+        point : x : 4704.0 y : 3456.0
+        shape : Deleted
+    texts :
+      text :
+        bounds : x : 4439.0 y : 3389.0 width : 0.0 height : 0.0 where : middle
+  connector : Deprecated____JD5__itsTimeToCheckForRemainingJobs
+    render : transition "SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::JobDefinition::Instance State Machine::Deprecated::JD5: itsTimeToCheckForRemainingJobs"
+    polyline :
+      segment :
+        start : x : 4740.0 y : 3360.0
+        end :   x : 4872.0 y : 3360.0
+      segment :
+        start : x : 4872.0 y : 3360.0
+        end :   x : 4872.0 y : 3312.0
+      segment :
+        start : x : 4872.0 y : 3312.0
+        end :   x : 4740.0 y : 3312.0
+    anchors :
+      start :
+        point : x : 4740.0 y : 3360.0
+        shape : Deprecated
+      end :
+        point : x : 4740.0 y : 3312.0
+        shape : Deprecated
+    texts :
+      text :
+        bounds : x : 4743.0 y : 3361.0 width : 303.0 height : 25.0 where : middle

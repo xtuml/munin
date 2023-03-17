@@ -1,257 +1,151 @@
--- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+// BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
 
-INSERT INTO O_OBJ
-	VALUES ("f50894a2-8c45-468f-896f-f76df8bebddc",
-	'Job',
-	1,
-	'JOB',
-	'A transaction through the monitored system which comprises a sequence of known events. This system is looking for unknown events or 
-events out of sequence to indicate an error in the monitored system.',
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO O_TFR
-	VALUES ("3d42cd49-1305-4d1b-9faf-370efe278d18",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	'failJob',
-	'',
-	"ba5eda7a-def5-0000-0000-000000000000",
-	1,
-	'',
-	1,
-	'',
-	"00000000-0000-0000-0000-000000000000",
-	1,
-	1);
-INSERT INTO O_TPARM
-	VALUES ("1ecb8b0c-dd10-4903-bff4-ce126ed6d25e",
-	"3d42cd49-1305-4d1b-9faf-370efe278d18",
-	'failureReason',
-	"ba5eda7a-def5-0000-0000-000000000004",
-	0,
-	'',
-	"00000000-0000-0000-0000-000000000000",
-	'');
-INSERT INTO O_TFR
-	VALUES ("29df042e-fb35-4443-881f-62ea6991447a",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	'deleteJob',
-	'',
-	"ba5eda7a-def5-0000-0000-000000000000",
-	1,
-	'',
-	3,
-	'',
-	"3d42cd49-1305-4d1b-9faf-370efe278d18",
-	1,
-	2);
-INSERT INTO O_NBATTR
-	VALUES ("57838f77-04c2-459e-984c-bf6ae53bfbd8",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_BATTR
-	VALUES ("57838f77-04c2-459e-984c-bf6ae53bfbd8",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_ATTR
-	VALUES ("57838f77-04c2-459e-984c-bf6ae53bfbd8",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"00000000-0000-0000-0000-000000000000",
-	'jobID',
-	'',
-	'',
-	'jobID',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("c0dd69d1-d93c-4707-8c9c-0e3e0c962cc4",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_BATTR
-	VALUES ("c0dd69d1-d93c-4707-8c9c-0e3e0c962cc4",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_ATTR
-	VALUES ("c0dd69d1-d93c-4707-8c9c-0e3e0c962cc4",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"57838f77-04c2-459e-984c-bf6ae53bfbd8",
-	'current_state',
-	'',
-	'',
-	'current_state',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000006",
-	'',
-	'');
-INSERT INTO O_REF
-	VALUES ("f50894a2-8c45-468f-896f-f76df8bebddc",
-	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
-	0,
-	"ce51957e-3e87-424e-85c3-75c022e6c476",
-	"c0504b80-9f9c-43db-846c-75c1c00e2b9a",
-	"c25e0cc1-6a56-455a-932d-3df5257619c5",
-	"bf142a20-92f8-42a0-b092-40d4cdeb5635",
-	"c70b6270-4c3b-4821-87f8-9699af8bef1f",
-	"fd0cea37-f539-4c8a-93a6-b53688f0ca66",
-	"00000000-0000-0000-0000-000000000000",
-	0,
-	'',
-	'JobDefinition',
-	'jobName',
-	'R8.''is_defined_by''');
-INSERT INTO R_RGO_PROXY
-	VALUES ("f50894a2-8c45-468f-896f-f76df8bebddc",
-	"c0504b80-9f9c-43db-846c-75c1c00e2b9a",
-	"c25e0cc1-6a56-455a-932d-3df5257619c5",
-	'../SVDCclasses.xtuml');
-INSERT INTO O_RTIDA_PROXY
-	VALUES ("ce51957e-3e87-424e-85c3-75c022e6c476",
-	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
-	0,
-	"c0504b80-9f9c-43db-846c-75c1c00e2b9a",
-	"bf142a20-92f8-42a0-b092-40d4cdeb5635",
-	'../SVDCclasses.xtuml');
-INSERT INTO O_RATTR
-	VALUES ("c70b6270-4c3b-4821-87f8-9699af8bef1f",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"ce51957e-3e87-424e-85c3-75c022e6c476",
-	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
-	1,
-	'jobName');
-INSERT INTO O_BATTR_PROXY
-	VALUES ("ce51957e-3e87-424e-85c3-75c022e6c476",
-	"6c40dbd4-bc24-4a70-a83c-696a09a4a08a",
-	'../JobDefinition/JobDefinition.xtuml');
-INSERT INTO O_ATTR
-	VALUES ("c70b6270-4c3b-4821-87f8-9699af8bef1f",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"c0dd69d1-d93c-4707-8c9c-0e3e0c962cc4",
-	'jobName',
-	'',
-	'',
-	'jobName',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000007",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("0aa36400-95fa-4fca-8b9d-64ed077a9444",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_BATTR
-	VALUES ("0aa36400-95fa-4fca-8b9d-64ed077a9444",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_ATTR
-	VALUES ("0aa36400-95fa-4fca-8b9d-64ed077a9444",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"c70b6270-4c3b-4821-87f8-9699af8bef1f",
-	'sequencingFailed',
-	'',
-	'',
-	'sequencingFailed',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000001",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("5a6368b9-3d5f-4d1d-8583-7b742688dede",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_BATTR
-	VALUES ("5a6368b9-3d5f-4d1d-8583-7b742688dede",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_ATTR
-	VALUES ("5a6368b9-3d5f-4d1d-8583-7b742688dede",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"0aa36400-95fa-4fca-8b9d-64ed077a9444",
-	'jobCompleted',
-	'',
-	'',
-	'jobCompleted',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000001",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("d90de957-78cd-46e9-8141-6d07615b5884",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_BATTR
-	VALUES ("d90de957-78cd-46e9-8141-6d07615b5884",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_ATTR
-	VALUES ("d90de957-78cd-46e9-8141-6d07615b5884",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"5a6368b9-3d5f-4d1d-8583-7b742688dede",
-	'jobEventTimer',
-	'',
-	'',
-	'jobEventTimer',
-	0,
-	"78c29c89-7a3e-4b79-8163-53652917088c",
-	'',
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("78c29c89-7a3e-4b79-8163-53652917088c",
-	"00000000-0000-0000-0000-000000000000",
-	'timer',
-	'',
-	'',
-	'../../../../types/types.xtuml');
-INSERT INTO O_NBATTR
-	VALUES ("183d025d-c5b6-4000-9087-bb6c1b9d8b11",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_BATTR
-	VALUES ("183d025d-c5b6-4000-9087-bb6c1b9d8b11",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_ATTR
-	VALUES ("183d025d-c5b6-4000-9087-bb6c1b9d8b11",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"d90de957-78cd-46e9-8141-6d07615b5884",
-	'jobDeletionTimer',
-	'',
-	'',
-	'jobDeletionTimer',
-	0,
-	"78c29c89-7a3e-4b79-8163-53652917088c",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("b44970db-6c2d-42e9-ba8d-a7d2fe0d0798",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_BATTR
-	VALUES ("b44970db-6c2d-42e9-ba8d-a7d2fe0d0798",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_ATTR
-	VALUES ("b44970db-6c2d-42e9-ba8d-a7d2fe0d0798",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"183d025d-c5b6-4000-9087-bb6c1b9d8b11",
-	'jobInvariantSyncTimer',
-	'',
-	'',
-	'jobInvariantSyncTimer',
-	0,
-	"78c29c89-7a3e-4b79-8163-53652917088c",
-	'',
-	'');
-INSERT INTO O_ID
-	VALUES (0,
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_OIDA
-	VALUES ("57838f77-04c2-459e-984c-bf6ae53bfbd8",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	0,
-	'jobID');
-INSERT INTO O_ID
-	VALUES (1,
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_ID
-	VALUES (2,
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO PE_PE
-	VALUES ("f50894a2-8c45-468f-896f-f76df8bebddc",
-	1,
-	"77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
-	"00000000-0000-0000-0000-000000000000",
-	4);
-INSERT INTO EP_PKG_PROXY
-	VALUES ("77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
-	"00000000-0000-0000-0000-000000000000",
-	"be1840aa-9d3d-4f55-baec-da45c54219a5",
-	'SVDCclasses',
-	'',
-	0,
-	'../SVDCclasses.xtuml');
+within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
+
+	//! A transaction through the monitored system which comprises a sequence of known events. This system is looking for unknown events or
+	//! events out of sequence to indicate an error in the monitored system.
+	@key_letters("JOB");
+	@class_num(1);
+	class Job is
+
+		jobID: string;
+
+		@ref_mode("referred_to");
+		jobName: referential (R8.JobDefinition.jobName) string;
+
+		sequencingFailed: boolean;
+
+		jobCompleted: boolean;
+
+		jobEventTimer: timer;
+
+		jobDeletionTimer: timer;
+
+		jobInvariantSyncTimer: timer;
+
+		preferred identifier is (jobID);
+
+		@operation_num(1);
+		operation failJob(failureReason: in string) is
+			@noparse
+			logMessage : string;
+			begin
+				
+				// This is just a progress message - the failure is reported in the state machine
+				logMessage := "AESequenceDC::Job.failJob function entered";
+				Logger::log(Logger::Information, "AESequenceDC", logMessage);
+				
+					
+				generate Job.jobFailed(failureReason) to this;
+				
+				// TODO: Every call to this function (elsewhere in the model) could be replaced
+				// with the generate Job.jobFailed(failureReason) to this; statement and then this
+				// function could be deleted from the model.
+				//
+			end service;
+			//
+			@endnoparse
+		end operation;
+
+		@operation_num(2);
+		operation deleteJob() is
+			@noparse
+			theAuditEvents : set of instance of AuditEvent;
+			theAuditEvent : instance of AuditEvent;
+			theNextAuditEvent : instance of AuditEvent;
+			theNextAuditEvents : set of instance of AuditEvent;
+			theSequences : set of instance of Sequence;
+			theJobDef : instance of JobDefinition;
+			theAuditEventPairs : set of instance of AuditEventPair;
+			theAuditEventPair : instance of AuditEventPair;
+			theAuditEventDefinition : instance of AuditEventDefinition;
+			theTransientInvariant : instance of TransientInvariant;
+			thePersistedInvariant : instance of PersistedInvariant;
+			theDynamicControls : set of instance of DynamicControl;
+			
+			begin
+			  theAuditEvents := this -> R3;
+			  for theAuditEvent in theAuditEvents'elements loop
+			    theNextAuditEvents := theAuditEvent -> R4.has_next.AuditEvent;
+			    for theNextAuditEvent in theNextAuditEvents loop
+			      theAuditEventPair := theAuditEvent with theNextAuditEvent -> R4.has_next.AuditEventPair;
+			      if (theAuditEventPair -> R15) /= null then
+			        unlink (theAuditEventPair -> R15) R15 theAuditEventPair;
+			      end if;
+			      unlink theAuditEvent R4.has_next.AuditEvent theNextAuditEvent using theAuditEventPair;
+			      delete theAuditEventPair;
+			    end loop;
+			    if (theAuditEvent -> R11) /= null then
+			      unlink (theAuditEvent -> R11) R11 theAuditEvent;
+			    end if;  
+			    if (theAuditEvent -> R2) /= null then
+			      unlink (theAuditEvent -> R2) R2 theAuditEvent;
+			    end if;
+			    if (theAuditEvent -> R3) /= null then      
+			      unlink (theAuditEvent -> R3) R3 theAuditEvent;  
+			    end if;  
+			    if (theAuditEvent -> R13) /= null then      
+			      unlink (theAuditEvent -> R13) R13 theAuditEvent;  
+			    end if;  
+			    
+			    // Delete the associated Intra Job Invariants
+			    theTransientInvariant := theAuditEvent -> R23;
+			    if theTransientInvariant /= null then
+			      if (theTransientInvariant -> R26) /= null then
+			        unlink (theTransientInvariant -> R26) R26 theTransientInvariant;
+			      end if;  
+			      if (theTransientInvariant -> R28) /= null then
+			        unlink (theTransientInvariant -> R28) R28 theTransientInvariant;
+			      end if;  
+			      unlink theTransientInvariant R23 theAuditEvent;
+			      delete theTransientInvariant;
+			    end if;
+			    // Extra Job Invariants are not deleted here as they have an independent lifecycle
+			
+			    // Unlink the associated Source Extra Job Invariant
+			    thePersistedInvariant := theAuditEvent -> R27;
+			    if thePersistedInvariant /= null then
+			      unlink thePersistedInvariant R27 theAuditEvent;
+			    end if;
+			
+			    // Delete the associated Dynamic Controls
+			    theDynamicControls := this -> R35;
+			    for theDynamicControl in theDynamicControls loop
+			      if (theDynamicControl -> R29) /= null then
+			        unlink (theDynamicControl -> R29) R29 theDynamicControl;
+			      end if;  
+			      if (theDynamicControl -> R36) /= null then
+			        unlink (theDynamicControl -> R36) R36 theDynamicControl;
+			      end if;  
+			      if (theDynamicControl -> R37) /= null then
+			        unlink (theDynamicControl -> R37) R37 theDynamicControl;
+			      end if;  
+			      unlink theDynamicControl R35 this;
+			      delete theDynamicControl;
+			    end loop;
+			     
+			  end loop;
+			  
+			  delete theAuditEvents;
+			  theSequences := this -> R10;
+			  if theSequences /= null then
+			    for theSequence in theSequences loop
+			      if (theSequence -> R14) /= null then
+			        unlink theSequence R14 (theSequence -> R14);
+			      end if;
+			    end loop;
+			    unlink theSequences R10 this;
+			    delete theSequences;
+			  end if;  
+			  theJobDef := this -> R8;
+			  if theJobDef /= null then
+			    unlink theJobDef R8 this;
+			  end if;  
+			  delete this;
+			end service;
+			@endnoparse
+		end operation;
+
+	end class;
+
+end;

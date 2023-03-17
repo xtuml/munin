@@ -1,98 +1,55 @@
--- BP 7.1.6 content: Package syschar: 3 persistence-version: 7.1.6
+// BP 7.1.6 content: Package syschar: 3 persistence-version: 7.1.6
 
-INSERT INTO EP_PKG
-	VALUES ("03c1b163-d3ce-44c2-be7c-5efa903a5d9b",
-	"00000000-0000-0000-0000-000000000000",
-	"be1840aa-9d3d-4f55-baec-da45c54219a5",
-	'scenarios_cbc',
-	'',
-	0);
-INSERT INTO GD_MD
-	VALUES ("4f126a42-ffcd-4d4b-b04e-608c5d40a3cc",
-	112,
-	"03c1b163-d3ce-44c2-be7c-5efa903a5d9b",
-	108,
-	0,
-	0,
-	1,
-	1,
-	1,
-	12,
-	1,
-	0,
-	0,
-	0,
-	0,
-	0,
-	'',
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::scenarios_cbc');
-INSERT INTO DIM_DIA
-	VALUES ("4f126a42-ffcd-4d4b-b04e-608c5d40a3cc",
-	'',
-	1.000000,
-	0.000000,
-	0.000000,
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO S_SYNC
-	VALUES ("52eb9bfd-2e1d-44ec-b813-aa9a07bd6c5e",
-	"00000000-0000-0000-0000-000000000000",
-	'InitBranchCountDefinitionEnhanced',
-	'',
-	'',
-	"ba5eda7a-def5-0000-0000-000000000000",
-	1,
-	'',
-	1,
-	0);
-INSERT INTO PE_PE
-	VALUES ("52eb9bfd-2e1d-44ec-b813-aa9a07bd6c5e",
-	1,
-	"03c1b163-d3ce-44c2-be7c-5efa903a5d9b",
-	"00000000-0000-0000-0000-000000000000",
-	1);
-INSERT INTO PE_PE
-	VALUES ("03c1b163-d3ce-44c2-be7c-5efa903a5d9b",
-	1,
-	"00000000-0000-0000-0000-000000000000",
-	"0c364501-cead-4520-a1cb-8f44e2211858",
-	7);
-INSERT INTO C_C_PROXY
-	VALUES ("0c364501-cead-4520-a1cb-8f44e2211858",
-	"00000000-0000-0000-0000-000000000000",
-	"00000000-0000-0000-0000-000000000000",
-	'AESequenceDC',
-	'Events for a single job are expected to occur in a well-defined order. The role of this domain
-is to check that the sequnce of audit events received for each job are indeed in a known and
-valid order. 
+within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC is
 
-The number of valid orders is to be determined but is expected to be in the order of 100s.
+	package scenarios_cbc is
+		function InitBranchCountDefinitionEnhanced() is
+			@noparse
+			// Initialisation goes here.
+			previousEventTypes : sequence of eventStructure;
+			empty : sequence of eventStructure;
+			
+			begin
+			  //
+			  // Job BranchCountJob, Sequence BranchCountSequence
+			  // 
+			  eventDefinition ("BranchCountJob","BranchCountSequence","BCFA",1,previousEventTypes,true,false,false);
+			  previousEventTypes := ("BCFA",1,"","");
+			  eventDefinition ("BranchCountJob","BranchCountSequence","BCFB",1,previousEventTypes,false,false,false);
+			  previousEventTypes := ("BCFB",1,"","");
+			  eventDefinition ("BranchCountJob","BranchCountSequence","BCFC",1,previousEventTypes,false,false,false);
+			  previousEventTypes := ("BCFC",1,"","");
+			  eventDefinition ("BranchCountJob","BranchCountSequence","BCFD",1,previousEventTypes,false,false,false);
+			  previousEventTypes := ("BCFD",1,"","");
+			  eventDefinition ("BranchCountJob","BranchCountSequence","BCFE",1,previousEventTypes,false,false,false);
+			  previousEventTypes := ("BCFE",1,"","");
+			  eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false);
+			
+			  dynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
+			  dynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
+			  
+			//
+			  previousEventTypes := empty;
+			  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFA",1,previousEventTypes,true,false,false);
+			  previousEventTypes := ("SSUFA",1,"","");
+			  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFB",1,previousEventTypes,false,false,false);
+			  previousEventTypes := ("SSUFB",1,"","");
+			  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFC",1,previousEventTypes,false,false,false);
+			  previousEventTypes := ("SSUFC",1,"","");
+			  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFD",1,previousEventTypes,false,false,false);
+			  previousEventTypes := ("SSUFD",1,"","");
+			  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFE",1,previousEventTypes,false,false,false);
+			  previousEventTypes := ("SSUFE",1,"","");
+			  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFF",1,previousEventTypes,false,true,false);
+			
+			  dynamicControlDefinition("BranchSameSourceAndUserJob", "Branch_SameSourceAndUser_1", dynamicControlTypeEnum.BRANCHCOUNT, "SSUFB",1,"SSUFB",1);
+			//
+			end service;
+			//
+			//
+			@endnoparse
+		end function;
 
-This domain will notify various conditions:
-1. Events received in an unexpected sequence
-2. Events missing
-3. Unexpected events received (though they must have contained sufficient valid data to get
-   through Audit Event Reception and Audit Event Ordering)
-4. Incomplete or tawdry event sequences   
+	end package;
 
-This version of the domain will utilise a data-centric approach to verify acceptable sequences 
-of events. This is being done to compare and contrast with the state-centric approach. It is known
-from the outset that the approaches have different strengths and weaknesses:
-1. A state-centric approach is simpler to understand and get right.
-2. A state-centric approach is ideal if the number of valid sequences is relatively small.
-3. A data-centric approach embeds the expected sequence knowledge in data rather than in a state
-   model. Therefore a change to expected sequences can be accomodated by a data change and does
-   not need the re-work of the state model.
-4. A data-centric approach is probably better suited if the number of valid sequences becomes large.
-5. The performance of the two approaches can be compared to see which best fits the performance of
-   the monitored system.   ',
-	0,
-	"00000000-0000-0000-0000-000000000000",
-	0,
-	'',
-	'',
-	'../AESequenceDC.xtuml');
-INSERT INTO S_SYS_PROXY
-	VALUES ("be1840aa-9d3d-4f55-baec-da45c54219a5",
-	'SequenceVerificationDataCentric',
-	1,
-	'../../../SequenceVerificationDataCentric.xtuml');
+end;

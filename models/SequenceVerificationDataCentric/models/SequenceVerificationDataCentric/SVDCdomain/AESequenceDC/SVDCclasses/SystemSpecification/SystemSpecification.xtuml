@@ -1,159 +1,28 @@
--- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+// BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
 
-INSERT INTO O_OBJ
-	VALUES ("11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe",
-	'SystemSpecification',
-	13,
-	'SS',
-	'',
-	"00000000-0000-0000-0000-000000000000");
-INSERT INTO O_NBATTR
-	VALUES ("07b9ec1a-cb0c-4da1-9543-52e9250fc633",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_BATTR
-	VALUES ("07b9ec1a-cb0c-4da1-9543-52e9250fc633",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_ATTR
-	VALUES ("07b9ec1a-cb0c-4da1-9543-52e9250fc633",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe",
-	"421a90bf-8df6-4543-9d56-4f24c72bb4d1",
-	'intraSequenceEventTimeoutPeriod',
-	'The period of time allowed following the apparent completion of an event sequence for the start of a previously unseen branch event to appear.',
-	'',
-	'intraSequenceEventTimeoutPeriod',
-	0,
-	"2c3d62ba-7048-4ec3-bae6-f725ea1bedbf",
-	'',
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("2c3d62ba-7048-4ec3-bae6-f725ea1bedbf",
-	"00000000-0000-0000-0000-000000000000",
-	'duration',
-	'',
-	'',
-	'../../../../types/types.xtuml');
-INSERT INTO O_NBATTR
-	VALUES ("421a90bf-8df6-4543-9d56-4f24c72bb4d1",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_BATTR
-	VALUES ("421a90bf-8df6-4543-9d56-4f24c72bb4d1",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_ATTR
-	VALUES ("421a90bf-8df6-4543-9d56-4f24c72bb4d1",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe",
-	"00000000-0000-0000-0000-000000000000",
-	'systemSpecID',
-	'An arbitrary but unique value',
-	'',
-	'systemSpecID',
-	0,
-	"2c7953f2-99b9-47a8-a2b6-50cdd050b5ac",
-	'',
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("2c7953f2-99b9-47a8-a2b6-50cdd050b5ac",
-	"00000000-0000-0000-0000-000000000000",
-	'MASLunique',
-	'',
-	'',
-	'../../../../types/types.xtuml');
-INSERT INTO O_NBATTR
-	VALUES ("354e33b2-e542-4836-b5fd-e868a35c07e9",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_BATTR
-	VALUES ("354e33b2-e542-4836-b5fd-e868a35c07e9",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_ATTR
-	VALUES ("354e33b2-e542-4836-b5fd-e868a35c07e9",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe",
-	"07b9ec1a-cb0c-4da1-9543-52e9250fc633",
-	'checkJobDefReadyForDeletionPeriod',
-	'',
-	'',
-	'checkJobDefReadyForDeletionPeriod',
-	0,
-	"2c3d62ba-7048-4ec3-bae6-f725ea1bedbf",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("19403452-ac59-4fe8-b6a7-eb69f92cf598",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_BATTR
-	VALUES ("19403452-ac59-4fe8-b6a7-eb69f92cf598",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_ATTR
-	VALUES ("19403452-ac59-4fe8-b6a7-eb69f92cf598",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe",
-	"354e33b2-e542-4836-b5fd-e868a35c07e9",
-	'jobDeletionWaitPeriod',
-	'The period of time after which a Job reaches one of its ''final'' states (JobSuccessful, JobFailed or JobGoneHorriblyWrong)that the Job will be automatica;ly deleted.',
-	'',
-	'jobDeletionWaitPeriod',
-	0,
-	"2c3d62ba-7048-4ec3-bae6-f725ea1bedbf",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("31d1ae30-954c-418e-aa32-0f5e405fb9bd",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_BATTR
-	VALUES ("31d1ae30-954c-418e-aa32-0f5e405fb9bd",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_ATTR
-	VALUES ("31d1ae30-954c-418e-aa32-0f5e405fb9bd",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe",
-	"19403452-ac59-4fe8-b6a7-eb69f92cf598",
-	'sourceExtraJobInvariantDeletionPeriod',
-	'',
-	'',
-	'sourceExtraJobInvariantDeletionPeriod',
-	0,
-	"2c3d62ba-7048-4ec3-bae6-f725ea1bedbf",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("1c55b912-d59b-4f77-a2c1-ce0d704714d5",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_BATTR
-	VALUES ("1c55b912-d59b-4f77-a2c1-ce0d704714d5",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_ATTR
-	VALUES ("1c55b912-d59b-4f77-a2c1-ce0d704714d5",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe",
-	"31d1ae30-954c-418e-aa32-0f5e405fb9bd",
-	'persistentInvariantRestoreTimeoutPeriod',
-	'',
-	'',
-	'persistentInvariantRestoreTimeoutPeriod',
-	0,
-	"2c3d62ba-7048-4ec3-bae6-f725ea1bedbf",
-	'',
-	'');
-INSERT INTO O_ID
-	VALUES (0,
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_OIDA
-	VALUES ("421a90bf-8df6-4543-9d56-4f24c72bb4d1",
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe",
-	0,
-	'systemSpecID');
-INSERT INTO O_ID
-	VALUES (1,
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO O_ID
-	VALUES (2,
-	"11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe");
-INSERT INTO PE_PE
-	VALUES ("11c6acb6-e553-4c01-a8fa-9ef7d6eb67fe",
-	1,
-	"77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
-	"00000000-0000-0000-0000-000000000000",
-	4);
-INSERT INTO EP_PKG_PROXY
-	VALUES ("77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
-	"00000000-0000-0000-0000-000000000000",
-	"be1840aa-9d3d-4f55-baec-da45c54219a5",
-	'SVDCclasses',
-	'',
-	0,
-	'../SVDCclasses.xtuml');
+within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
+
+	@key_letters("SS");
+	@class_num(13);
+	class SystemSpecification is
+
+		//! An arbitrary but unique value
+		unique systemSpecID: integer;
+
+		//! The period of time allowed following the apparent completion of an event sequence for the start of a previously unseen branch event to appear.
+		intraSequenceEventTimeoutPeriod: duration;
+
+		checkJobDefReadyForDeletionPeriod: duration;
+
+		//! The period of time after which a Job reaches one of its 'final' states (JobSuccessful, JobFailed or JobGoneHorriblyWrong)that the Job will be automatica;ly deleted.
+		jobDeletionWaitPeriod: duration;
+
+		sourceExtraJobInvariantDeletionPeriod: duration;
+
+		persistentInvariantRestoreTimeoutPeriod: duration;
+
+		preferred identifier is (systemSpecID);
+
+	end class;
+
+end;
