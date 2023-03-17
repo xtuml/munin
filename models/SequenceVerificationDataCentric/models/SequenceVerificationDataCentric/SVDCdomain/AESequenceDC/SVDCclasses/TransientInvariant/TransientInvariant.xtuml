@@ -2,28 +2,28 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	@key_letters("IJI");
-	@class_num(20);
-	class TransientInvariant is
+  @key_letters("IJI");
+  @class_num(20);
+  class TransientInvariant is
 
-		@ref_mode("referred_to");
-		intraJobInvName: referential (R26.IntraJobInvariantDefn.intraJobInvName) string;
+    @ref_mode("referred_to");
+    intraJobInvName: referential (R26.IntraJobInvariantDefn.intraJobInvName) string;
 
-		@ref_mode("referred_to");
-		jobName: referential (R26.IntraJobInvariantDefn.jobName) string;
+    @ref_mode("referred_to");
+    jobName: referential (R26.IntraJobInvariantDefn.jobName) string;
 
-		invariantValue: string;
+    invariantValue: string;
 
-		@ref_mode("referred_to");
-		AuditEventId: referential (R23.AuditEvent.AuditEventId) string;
+    @ref_mode("referred_to");
+    AuditEventId: referential (R23.AuditEvent.AuditEventId) string;
 
-		invariantName: string;
+    invariantName: string;
 
-		@ref_mode("referred_to");
-		extraJobInvName: referential (R28.ExtraJobInvariantDefn.extraJobInvName) string;
+    @ref_mode("referred_to");
+    extraJobInvName: referential (R28.ExtraJobInvariantDefn.extraJobInvName) string;
 
-		preferred identifier is (AuditEventId, invariantName);
+    preferred identifier is (AuditEventId, invariantName);
 
-	end class;
+  end class;
 
 end;

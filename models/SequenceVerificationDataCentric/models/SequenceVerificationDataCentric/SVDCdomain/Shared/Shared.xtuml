@@ -2,66 +2,66 @@
 
 within SequenceVerificationDataCentric::SVDCdomain is
 
-	package Shared is
-		type aeDataKindEnum is enum (
-			INTRAJOBINV, 
-			EXTRAJOBINV, 
-			BRANCHCOUNT, 
-			LOOPCOUNT, 
-			MERGECOUNT
-		);
+  package Shared is
+    type aeDataKindEnum is enum (
+      INTRAJOBINV, 
+      EXTRAJOBINV, 
+      BRANCHCOUNT, 
+      LOOPCOUNT, 
+      MERGECOUNT
+    );
 
-		type auditEventDataStructure is structure
-			aedKind: aeDataKindEnum;
-			aedName: string;
-			aedValue: string;
-		end structure;
+    type auditEventDataStructure is structure
+      aedKind: aeDataKindEnum;
+      aedName: string;
+      aedValue: string;
+    end structure;
 
-		type constraintTypeEnum is enum (
-			AND, 
-			XOR
-		);
+    type constraintTypeEnum is enum (
+      AND, 
+      XOR
+    );
 
-		type dynamicControlTypeEnum is enum (
-			BRANCHCOUNT, 
-			LOOPCOUNT, 
-			MERGECOUNT
-		);
+    type dynamicControlTypeEnum is enum (
+      BRANCHCOUNT, 
+      LOOPCOUNT, 
+      MERGECOUNT
+    );
 
-		type eventStructure is structure
-			eventTypeName: string;
-			occurrenceId: integer;
-			constraintDefId: string;
-			constraintValue: string;
-		end structure;
+    type eventStructure is structure
+      eventTypeName: string;
+      occurrenceId: integer;
+      constraintDefId: string;
+      constraintValue: string;
+    end structure;
 
-		type intraJobInvDataStructure is structure
-			auditEventType: string;
-			occurrenceId: integer;
-			alternativeDataItemName: string;
-		end structure;
+    type intraJobInvDataStructure is structure
+      auditEventType: string;
+      occurrenceId: integer;
+      alternativeDataItemName: string;
+    end structure;
 
-		type persistedInvariantStructure is structure
-			extraJobInvariantName: string;
-			InvariantValue: string;
-			validFrom: timestamp;
-			validTo: timestamp;
-			sourceJobDefinitionType: string;
-			sourceAuditEventType: string;
-			sourceAuditEventOccurrenceId: integer;
-		end structure;
+    type persistedInvariantStructure is structure
+      extraJobInvariantName: string;
+      InvariantValue: string;
+      validFrom: timestamp;
+      validTo: timestamp;
+      sourceJobDefinitionType: string;
+      sourceAuditEventType: string;
+      sourceAuditEventOccurrenceId: integer;
+    end structure;
 
-		type userEventDataStructure is structure
-			jobDefinitionName: string;
-			auditEventType: string;
-			occurrenceId: integer;
-			alternativeDataItemName: string;
-		end structure;
+    type userEventDataStructure is structure
+      jobDefinitionName: string;
+      auditEventType: string;
+      occurrenceId: integer;
+      alternativeDataItemName: string;
+    end structure;
 
-		interface JobSynchronisation;
-		interface Ordering;
-		interface Persistence_Prov_IF;
-		interface Persistence_Req_IF;
-	end package;
+    interface JobSynchronisation;
+    interface Ordering;
+    interface Persistence_Prov_IF;
+    interface Persistence_Req_IF;
+  end package;
 
 end;

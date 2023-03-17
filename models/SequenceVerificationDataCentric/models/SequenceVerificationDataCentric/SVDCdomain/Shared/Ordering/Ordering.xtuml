@@ -2,48 +2,48 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::Shared is
 
-	interface Ordering is
-		
-		@message_num(2);
-		message acceptOrderedEvent(ae_time: in string, app: in string, ae_type: in string, jobId: in string, prevAEIds: in sequence of string, id: in string, auditEventData: in sequence of auditEventDataStructure) from provider;
-		@message_num(3);
-		message failedJob(jobId: in string, failureReason: in string) from provider;
-		@message_num(4);
-		message jobComplete(jobId: in string) from provider;
-		//! This service defines the specification instance for an Audit Event Definition.
-		//! Each one of these refers to its previous Audit Event Definition to define the sequence.
-		//! The first one in the sequence has no previous audit event definition and has the boolean isSequenceStartEvent set to true.
-		//! The last one in the sequence does have a previous audit event definition and has the boolean isSequenceEndEvent set to true.
-		//! Forks in the sequence are supported by multiple Audit Event Definitions having the same previous Audit Event Definition.
-		//! Merges in the sequence could be supported by allowing multiple values in Previous Audit Event Definition
-		@message_num(7);
-		message eventDefinition(jobName: in string, sequenceName: in string, eventType: in string, occurrenceId: in integer, previousEventTypes: in sequence of eventStructure, isSequenceStart: in boolean, isSequenceEnd: in boolean, isBreak: in boolean) from provider;
-		//! This service allows a Job Definition to be deprecated. In early versions this will simple result in deletion of the Job Defintion and its
-		//! associated Sequence Definitions, Audit Events Definitions, etc. In due course this can be refuiend to check that there are no Jobs of that
-		//! Job Definition currently in progress. If there are then these jobs should be allowed to complete. The Job Definition is then only removed
-		//! when there are no in progress Jobs.
-		@message_num(9);
-		message deprecateJobDefinition(jobName: in string) from provider;
-		@message_num(10);
-		message createSVDCsystemSpec(maxIntraSequenceEventTimeoutPeriod: in duration, waitPeriodForAllJobsCompletedCheck: in duration, waitPeriodForJobDeletion: in duration, waitPeriodForInvariantDeletion: in duration) from provider;
-		@message_num(12);
-		message reactivateJobDefinition(jobName: in string) from provider;
-		@message_num(11);
-		message suspendJobDefinition(jobName: in string) from provider;
-		//! This function, invoked during initialisation after all of the eventDefinition functions have been called, adds an
-		//! extra job invariant definition(such as entropy). The parameters define the extra job invariant, the job defintion and event
-		//! definition that is the source of the and the invariant and also the full set of job definitions and event definitions
-		//! that use the invariant.
-		@message_num(13);
-		message extraJobInvariantDefinition(auditEventDataName: in string, sourceJobDefnName: in string, sourceEventType: in string, sourceOccurrenceId: in integer, userEvents: in sequence of userEventDataStructure) from provider;
-		//! This function, invoked during initialisation after all of the eventDefinition functions have been called, adds an
-		//! intra job invariant definition. The parameters define the intra job invariant, the job defintion that the invariant is used in
-		//! and the full set of event definitions within that job definition that use the invariant.
-		@message_num(13);
-		message intraJobInvariantDefinition(jobDefnName: in string, auditEventDataName: in string, associatedEvents: in sequence of intraJobInvDataStructure) from provider;
-		@message_num(14);
-		message dynamicControlDefinition(jobName: in string, dynamicControlName: in string, dynamicControlType: in dynamicControlTypeEnum, sourceEventType: in string, sourceOccurrenceId: in integer, userEventType: in string, userOccurrenceId: in integer) from provider;
-		
-	end interface;
+  interface Ordering is
+    
+    @message_num(2);
+    message acceptOrderedEvent(ae_time: in string, app: in string, ae_type: in string, jobId: in string, prevAEIds: in sequence of string, id: in string, auditEventData: in sequence of auditEventDataStructure) from provider;
+    @message_num(3);
+    message failedJob(jobId: in string, failureReason: in string) from provider;
+    @message_num(4);
+    message jobComplete(jobId: in string) from provider;
+    //! This service defines the specification instance for an Audit Event Definition.
+    //! Each one of these refers to its previous Audit Event Definition to define the sequence.
+    //! The first one in the sequence has no previous audit event definition and has the boolean isSequenceStartEvent set to true.
+    //! The last one in the sequence does have a previous audit event definition and has the boolean isSequenceEndEvent set to true.
+    //! Forks in the sequence are supported by multiple Audit Event Definitions having the same previous Audit Event Definition.
+    //! Merges in the sequence could be supported by allowing multiple values in Previous Audit Event Definition
+    @message_num(7);
+    message eventDefinition(jobName: in string, sequenceName: in string, eventType: in string, occurrenceId: in integer, previousEventTypes: in sequence of eventStructure, isSequenceStart: in boolean, isSequenceEnd: in boolean, isBreak: in boolean) from provider;
+    //! This service allows a Job Definition to be deprecated. In early versions this will simple result in deletion of the Job Defintion and its
+    //! associated Sequence Definitions, Audit Events Definitions, etc. In due course this can be refuiend to check that there are no Jobs of that
+    //! Job Definition currently in progress. If there are then these jobs should be allowed to complete. The Job Definition is then only removed
+    //! when there are no in progress Jobs.
+    @message_num(9);
+    message deprecateJobDefinition(jobName: in string) from provider;
+    @message_num(10);
+    message createSVDCsystemSpec(maxIntraSequenceEventTimeoutPeriod: in duration, waitPeriodForAllJobsCompletedCheck: in duration, waitPeriodForJobDeletion: in duration, waitPeriodForInvariantDeletion: in duration) from provider;
+    @message_num(12);
+    message reactivateJobDefinition(jobName: in string) from provider;
+    @message_num(11);
+    message suspendJobDefinition(jobName: in string) from provider;
+    //! This function, invoked during initialisation after all of the eventDefinition functions have been called, adds an
+    //! extra job invariant definition(such as entropy). The parameters define the extra job invariant, the job defintion and event
+    //! definition that is the source of the and the invariant and also the full set of job definitions and event definitions
+    //! that use the invariant.
+    @message_num(13);
+    message extraJobInvariantDefinition(auditEventDataName: in string, sourceJobDefnName: in string, sourceEventType: in string, sourceOccurrenceId: in integer, userEvents: in sequence of userEventDataStructure) from provider;
+    //! This function, invoked during initialisation after all of the eventDefinition functions have been called, adds an
+    //! intra job invariant definition. The parameters define the intra job invariant, the job defintion that the invariant is used in
+    //! and the full set of event definitions within that job definition that use the invariant.
+    @message_num(13);
+    message intraJobInvariantDefinition(jobDefnName: in string, auditEventDataName: in string, associatedEvents: in sequence of intraJobInvDataStructure) from provider;
+    @message_num(14);
+    message dynamicControlDefinition(jobName: in string, dynamicControlName: in string, dynamicControlType: in dynamicControlTypeEnum, sourceEventType: in string, sourceOccurrenceId: in integer, userEventType: in string, userOccurrenceId: in integer) from provider;
+    
+  end interface;
 
 end;

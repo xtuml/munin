@@ -2,137 +2,137 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC is
 
-	package SVDCclasses is
-		class AEInSequenceDefinition;
-		class AEInSequencePairDefn;
-		class AEOccurrenceInSequenceDefinition;
-		class AESequenceDefinition;
-		class AuditEvent;
-		class AuditEventDefinition;
-		class AuditEventPair;
-		class ConstraintDefinition;
-		class DynamicControl;
-		class DynamicControlDefinition;
-		class ExtraJobInvariantDefn;
-		class IntraJobInvariantDefn;
-		class Job;
-		class JobDefinition;
-		class PersistedInvariant;
-		class Sequence;
-		class SystemSpecification;
-		class TransientInvariant;
-		relationship R1 is AESequenceDefinition unconditionally includes many AuditEventDefinition,
-		                   AuditEventDefinition unconditionally is_expected_in one AESequenceDefinition
-		                   using one AEInSequenceDefinition;
+  package SVDCclasses is
+    class AEInSequenceDefinition;
+    class AEInSequencePairDefn;
+    class AEOccurrenceInSequenceDefinition;
+    class AESequenceDefinition;
+    class AuditEvent;
+    class AuditEventDefinition;
+    class AuditEventPair;
+    class ConstraintDefinition;
+    class DynamicControl;
+    class DynamicControlDefinition;
+    class ExtraJobInvariantDefn;
+    class IntraJobInvariantDefn;
+    class Job;
+    class JobDefinition;
+    class PersistedInvariant;
+    class Sequence;
+    class SystemSpecification;
+    class TransientInvariant;
+    relationship R1 is AuditEventDefinition unconditionally is_expected_in one AESequenceDefinition,
+                       AESequenceDefinition unconditionally includes many AuditEventDefinition
+                       using one AEInSequenceDefinition;
 
-		relationship R2 is AuditEventDefinition unconditionally defines many AuditEvent,
-		                   AuditEvent unconditionally is_defined_by one AuditEventDefinition;
+    relationship R2 is AuditEventDefinition unconditionally defines many AuditEvent,
+                       AuditEvent unconditionally is_defined_by one AuditEventDefinition;
 
-		relationship R3 is Job unconditionally contains_sequence_of many AuditEvent,
-		                   AuditEvent unconditionally defines_step_in_lifecycle_of one Job;
+    relationship R3 is Job unconditionally contains_sequence_of many AuditEvent,
+                       AuditEvent unconditionally defines_step_in_lifecycle_of one Job;
 
-		relationship R4 is AuditEvent conditionally has_previous many AuditEvent,
-		                   AuditEvent conditionally has_next many AuditEvent
-		                   using one AuditEventPair;
+    relationship R4 is AuditEvent conditionally has_next many AuditEvent,
+                       AuditEvent conditionally has_previous many AuditEvent
+                       using one AuditEventPair;
 
-		//! This captures the expected sequence of audit events within a sequence. It is currently a 1 to 1 association. this is for the Proof of Concept only.
-		//! For later versions this will have to capture forks and merges in the sequence so will have to become M to M or some explicit additions to the classes
-		//! that describe forks and merges.
-		relationship R6 is AEOccurrenceInSequenceDefinition conditionally precedes many AEOccurrenceInSequenceDefinition,
-		                   AEOccurrenceInSequenceDefinition conditionally follows many AEOccurrenceInSequenceDefinition
-		                   using one AEInSequencePairDefn;
+    //! This captures the expected sequence of audit events within a sequence. It is currently a 1 to 1 association. this is for the Proof of Concept only.
+    //! For later versions this will have to capture forks and merges in the sequence so will have to become M to M or some explicit additions to the classes
+    //! that describe forks and merges.
+    relationship R6 is AEOccurrenceInSequenceDefinition conditionally follows many AEOccurrenceInSequenceDefinition,
+                       AEOccurrenceInSequenceDefinition conditionally precedes many AEOccurrenceInSequenceDefinition
+                       using one AEInSequencePairDefn;
 
-		relationship R7 is JobDefinition unconditionally includes many AESequenceDefinition,
-		                   AESequenceDefinition unconditionally is_expected_in one JobDefinition;
+    relationship R7 is JobDefinition unconditionally includes many AESequenceDefinition,
+                       AESequenceDefinition unconditionally is_expected_in one JobDefinition;
 
-		relationship R8 is JobDefinition conditionally defines many Job,
-		                   Job unconditionally is_defined_by one JobDefinition;
+    relationship R8 is JobDefinition conditionally defines many Job,
+                       Job unconditionally is_defined_by one JobDefinition;
 
-		//! Although Sequences within a Job do have a defined order which this association
-		//! captures, there is no way of using this association in practice. The events
-		//! from different sequences can be interleaved because there is no way to ensure
-		//! the order of events from one sequence relative to another. As events from
-		//! different sequences are likely to be from different sources, the possibility of
-		//! event interleaving is very real. Therefore, there is not attempt made to ensure
-		//! that sequences are seen in the correct order.
-		relationship R9 is AESequenceDefinition conditionally follows one AESequenceDefinition,
-		                   AESequenceDefinition conditionally precedes one AESequenceDefinition;
+    //! Although Sequences within a Job do have a defined order which this association
+    //! captures, there is no way of using this association in practice. The events
+    //! from different sequences can be interleaved because there is no way to ensure
+    //! the order of events from one sequence relative to another. As events from
+    //! different sequences are likely to be from different sources, the possibility of
+    //! event interleaving is very real. Therefore, there is not attempt made to ensure
+    //! that sequences are seen in the correct order.
+    relationship R9 is AESequenceDefinition conditionally follows one AESequenceDefinition,
+                       AESequenceDefinition conditionally precedes one AESequenceDefinition;
 
-		relationship R10 is Job conditionally contains many Sequence,
-		                    Sequence unconditionally is_part_of one Job;
+    relationship R10 is Job conditionally contains many Sequence,
+                        Sequence unconditionally is_part_of one Job;
 
-		relationship R11 is Sequence unconditionally contains many AuditEvent,
-		                    AuditEvent unconditionally is_part_of one Sequence;
+    relationship R11 is Sequence unconditionally contains many AuditEvent,
+                        AuditEvent unconditionally is_part_of one Sequence;
 
-		relationship R12 is AEInSequenceDefinition unconditionally occurs_as many AEOccurrenceInSequenceDefinition,
-		                    AEOccurrenceInSequenceDefinition unconditionally is_an_occurrence_of one AEInSequenceDefinition;
+    relationship R12 is AEInSequenceDefinition unconditionally occurs_as many AEOccurrenceInSequenceDefinition,
+                        AEOccurrenceInSequenceDefinition unconditionally is_an_occurrence_of one AEInSequenceDefinition;
 
-		relationship R13 is AEOccurrenceInSequenceDefinition conditionally is_instantiated_as many AuditEvent,
-		                    AuditEvent unconditionally is_defined_by one AEOccurrenceInSequenceDefinition;
+    relationship R13 is AEOccurrenceInSequenceDefinition conditionally is_instantiated_as many AuditEvent,
+                        AuditEvent unconditionally is_defined_by one AEOccurrenceInSequenceDefinition;
 
-		relationship R14 is AESequenceDefinition conditionally defines many Sequence,
-		                    Sequence unconditionally is_defined_by one AESequenceDefinition;
+    relationship R14 is AESequenceDefinition conditionally defines many Sequence,
+                        Sequence unconditionally is_defined_by one AESequenceDefinition;
 
-		relationship R15 is AEInSequencePairDefn conditionally defines many AuditEventPair,
-		                    AuditEventPair unconditionally is_defined_by one AEInSequencePairDefn;
+    relationship R15 is AEInSequencePairDefn conditionally defines many AuditEventPair,
+                        AuditEventPair unconditionally is_defined_by one AEInSequencePairDefn;
 
-		relationship R16 is ConstraintDefinition unconditionally is_applied_to many AEInSequencePairDefn,
-		                    AEInSequencePairDefn conditionally is_subject_of one ConstraintDefinition;
+    relationship R16 is ConstraintDefinition unconditionally is_applied_to many AEInSequencePairDefn,
+                        AEInSequencePairDefn conditionally is_subject_of one ConstraintDefinition;
 
-		relationship R17 is JobDefinition conditionally includes many ConstraintDefinition,
-		                    ConstraintDefinition unconditionally is_in_scope_of one JobDefinition;
+    relationship R17 is JobDefinition conditionally includes many ConstraintDefinition,
+                        ConstraintDefinition unconditionally is_in_scope_of one JobDefinition;
 
-		relationship R19 is IntraJobInvariantDefn unconditionally is_expected_with many AEOccurrenceInSequenceDefinition,
-		                    AEOccurrenceInSequenceDefinition conditionally carries one IntraJobInvariantDefn;
+    relationship R19 is IntraJobInvariantDefn unconditionally is_expected_with many AEOccurrenceInSequenceDefinition,
+                        AEOccurrenceInSequenceDefinition conditionally carries one IntraJobInvariantDefn;
 
-		relationship R20 is AEOccurrenceInSequenceDefinition conditionally is_source_of one ExtraJobInvariantDefn,
-		                    ExtraJobInvariantDefn unconditionally is_sourced_by one AEOccurrenceInSequenceDefinition;
+    relationship R20 is AEOccurrenceInSequenceDefinition conditionally is_source_of one ExtraJobInvariantDefn,
+                        ExtraJobInvariantDefn unconditionally is_sourced_by one AEOccurrenceInSequenceDefinition;
 
-		relationship R21 is ExtraJobInvariantDefn unconditionally is_used_by many AEOccurrenceInSequenceDefinition,
-		                    AEOccurrenceInSequenceDefinition conditionally uses one ExtraJobInvariantDefn;
+    relationship R21 is ExtraJobInvariantDefn unconditionally is_used_by many AEOccurrenceInSequenceDefinition,
+                        AEOccurrenceInSequenceDefinition conditionally uses one ExtraJobInvariantDefn;
 
-		relationship R22 is JobDefinition conditionally is_constrained_by one IntraJobInvariantDefn,
-		                    IntraJobInvariantDefn unconditionally occurs_in one JobDefinition;
+    relationship R22 is JobDefinition conditionally is_constrained_by one IntraJobInvariantDefn,
+                        IntraJobInvariantDefn unconditionally occurs_in one JobDefinition;
 
-		relationship R23 is AuditEvent conditionally carries one TransientInvariant,
-		                    TransientInvariant unconditionally is_carried_by one AuditEvent;
+    relationship R23 is AuditEvent conditionally carries one TransientInvariant,
+                        TransientInvariant unconditionally is_carried_by one AuditEvent;
 
-		relationship R24 is ExtraJobInvariantDefn conditionally defines_source many PersistedInvariant,
-		                    PersistedInvariant unconditionally is_defined_by one ExtraJobInvariantDefn;
+    relationship R24 is ExtraJobInvariantDefn conditionally defines_source many PersistedInvariant,
+                        PersistedInvariant unconditionally is_defined_by one ExtraJobInvariantDefn;
 
-		relationship R26 is IntraJobInvariantDefn conditionally is_definition_for many TransientInvariant,
-		                    TransientInvariant conditionally is_defined_by one IntraJobInvariantDefn;
+    relationship R26 is IntraJobInvariantDefn conditionally is_definition_for many TransientInvariant,
+                        TransientInvariant conditionally is_defined_by one IntraJobInvariantDefn;
 
-		//! This represents the link between an audit event and an instance of a persisted invariant (e.g. entropy). It is conditional at both ends because not
-		//! all audit events need to produce persisted invariants and because, although any instance of a persisted invariant is always proved with an audit
-		//! event, the persisted invariant will typically outlive the audit event and the job it is associated with.
-		relationship R27 is AuditEvent conditionally provides one PersistedInvariant,
-		                    PersistedInvariant conditionally was_provided_by one AuditEvent;
+    //! This represents the link between an audit event and an instance of a persisted invariant (e.g. entropy). It is conditional at both ends because not
+    //! all audit events need to produce persisted invariants and because, although any instance of a persisted invariant is always proved with an audit
+    //! event, the persisted invariant will typically outlive the audit event and the job it is associated with.
+    relationship R27 is AuditEvent conditionally provides one PersistedInvariant,
+                        PersistedInvariant conditionally was_provided_by one AuditEvent;
 
-		relationship R28 is ExtraJobInvariantDefn conditionally is_definition_for_usages_of many TransientInvariant,
-		                    TransientInvariant conditionally is_defined_by one ExtraJobInvariantDefn;
+    relationship R28 is ExtraJobInvariantDefn conditionally is_definition_for_usages_of many TransientInvariant,
+                        TransientInvariant conditionally is_defined_by one ExtraJobInvariantDefn;
 
-		relationship R29 is DynamicControlDefinition conditionally defines many DynamicControl,
-		                    DynamicControl unconditionally is_defined_by one DynamicControlDefinition;
+    relationship R29 is DynamicControlDefinition conditionally defines many DynamicControl,
+                        DynamicControl unconditionally is_defined_by one DynamicControlDefinition;
 
-		relationship R30 is AEOccurrenceInSequenceDefinition conditionally is_source_of many DynamicControlDefinition,
-		                    DynamicControlDefinition unconditionally is_sourced_by one AEOccurrenceInSequenceDefinition;
+    relationship R30 is AEOccurrenceInSequenceDefinition conditionally is_source_of many DynamicControlDefinition,
+                        DynamicControlDefinition unconditionally is_sourced_by one AEOccurrenceInSequenceDefinition;
 
-		relationship R31 is AEOccurrenceInSequenceDefinition conditionally uses one DynamicControlDefinition,
-		                    DynamicControlDefinition unconditionally is_used_by one AEOccurrenceInSequenceDefinition;
+    relationship R31 is AEOccurrenceInSequenceDefinition conditionally uses one DynamicControlDefinition,
+                        DynamicControlDefinition unconditionally is_used_by one AEOccurrenceInSequenceDefinition;
 
-		relationship R32 is JobDefinition conditionally includes many DynamicControlDefinition,
-		                    DynamicControlDefinition unconditionally is_in_context_of one JobDefinition;
+    relationship R32 is JobDefinition conditionally includes many DynamicControlDefinition,
+                        DynamicControlDefinition unconditionally is_in_context_of one JobDefinition;
 
-		relationship R35 is Job conditionally contains many DynamicControl,
-		                    DynamicControl unconditionally is_in_context_of one Job;
+    relationship R35 is Job conditionally contains many DynamicControl,
+                        DynamicControl unconditionally is_in_context_of one Job;
 
-		relationship R36 is AuditEvent conditionally uses one DynamicControl,
-		                    DynamicControl conditionally is_used_by one AuditEvent;
+    relationship R36 is AuditEvent conditionally uses one DynamicControl,
+                        DynamicControl conditionally is_used_by one AuditEvent;
 
-		relationship R37 is AuditEvent conditionally is_source_of many DynamicControl,
-		                    DynamicControl unconditionally is_sourced_by one AuditEvent;
+    relationship R37 is AuditEvent conditionally is_source_of many DynamicControl,
+                        DynamicControl unconditionally is_sourced_by one AuditEvent;
 
-	end package;
+  end package;
 
 end;

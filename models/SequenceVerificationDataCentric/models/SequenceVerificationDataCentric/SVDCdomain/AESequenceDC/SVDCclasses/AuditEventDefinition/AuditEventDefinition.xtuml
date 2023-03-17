@@ -2,17 +2,17 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	//! The definition of an expected audit event type that can be received from the monitored system
-	@key_letters("AED");
-	@class_num(2);
-	class AuditEventDefinition is
+  //! The definition of an expected audit event type that can be received from the monitored system
+  @key_letters("AED");
+  @class_num(2);
+  class AuditEventDefinition is
 
-		unique AEDefinitionId: integer;
+    unique AEDefinitionId: integer;
 
-		AEType: string;
+    AEType: string;
 
-		preferred identifier is (AEDefinitionId);
+    preferred identifier is (AEDefinitionId);
 
-	end class;
+  end class;
 
 end;

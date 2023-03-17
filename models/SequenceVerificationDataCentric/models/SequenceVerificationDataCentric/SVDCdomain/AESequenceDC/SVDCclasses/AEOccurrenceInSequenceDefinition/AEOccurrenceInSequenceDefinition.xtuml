@@ -2,43 +2,43 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	//! This captures the occurrences of expected event types within a specific expected sequence.
-	//! The same event type can occur multiple times in a single sequence.
-	//! A reflexive association capturing the expected sequence R6 is used to capture the order.
-	@key_letters("AEOISD");
-	@class_num(4);
-	class AEOccurrenceInSequenceDefinition is
+  //! This captures the occurrences of expected event types within a specific expected sequence.
+  //! The same event type can occur multiple times in a single sequence.
+  //! A reflexive association capturing the expected sequence R6 is used to capture the order.
+  @key_letters("AEOISD");
+  @class_num(4);
+  class AEOccurrenceInSequenceDefinition is
 
-		@ref_mode("referred_to");
-		AEDefinitionId: referential (R12.AEInSequenceDefinition.AEDefinitionId) integer;
+    @ref_mode("referred_to");
+    AEDefinitionId: referential (R12.AEInSequenceDefinition.AEDefinitionId) integer;
 
-		@ref_mode("referred_to");
-		AESequenceId: referential (R12.AEInSequenceDefinition.AESequenceId) integer;
+    @ref_mode("referred_to");
+    AESequenceId: referential (R12.AEInSequenceDefinition.AESequenceId) integer;
 
-		occurrenceNumberInSequence: integer;
+    occurrenceNumberInSequence: integer;
 
-		isSequenceStart: boolean;
+    isSequenceStart: boolean;
 
-		isSequenceEnd: boolean;
+    isSequenceEnd: boolean;
 
-		//! This boolean, if set true, shows that this event definition indicates a break from a loop.
-		//! It is typically associated with an error condition which causes the execution of the loop
-		//! of events to be terminated. It is used to cancel the loop count verification check.
-		isBreak: boolean;
+    //! This boolean, if set true, shows that this event definition indicates a break from a loop.
+    //! It is typically associated with an error condition which causes the execution of the loop
+    //! of events to be terminated. It is used to cancel the loop count verification check.
+    isBreak: boolean;
 
-		isPlaceholder: boolean;
+    isPlaceholder: boolean;
 
-		@ref_mode("referred_to");
-		intraJobInvName: referential (R19.IntraJobInvariantDefn.intraJobInvName) string;
+    @ref_mode("referred_to");
+    intraJobInvName: referential (R19.IntraJobInvariantDefn.intraJobInvName) string;
 
-		@ref_mode("referred_to");
-		jobName: referential (R19.IntraJobInvariantDefn.jobName) string;
+    @ref_mode("referred_to");
+    jobName: referential (R19.IntraJobInvariantDefn.jobName) string;
 
-		@ref_mode("referred_to");
-		extraJobInvName: referential (R21.ExtraJobInvariantDefn.extraJobInvName) string;
+    @ref_mode("referred_to");
+    extraJobInvName: referential (R21.ExtraJobInvariantDefn.extraJobInvName) string;
 
-		preferred identifier is (AEDefinitionId, AESequenceId, occurrenceNumberInSequence);
+    preferred identifier is (AEDefinitionId, AESequenceId, occurrenceNumberInSequence);
 
-	end class;
+  end class;
 
 end;

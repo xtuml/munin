@@ -2,45 +2,45 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	@key_letters("DC");
-	@class_num(23);
-	class DynamicControl is
+  @key_letters("DC");
+  @class_num(23);
+  class DynamicControl is
 
-		@ref_mode("referred_to");
-		dynamicControlName: referential (R29.DynamicControlDefinition.dynamicControlName) string;
+    @ref_mode("referred_to");
+    dynamicControlName: referential (R29.DynamicControlDefinition.dynamicControlName) string;
 
-		@ref_mode("referred_to");
-		jobID: referential (R35.Job.jobID) string;
+    @ref_mode("referred_to");
+    jobID: referential (R35.Job.jobID) string;
 
-		@ref_mode("referred_to");
-		jobName: referential (R29.DynamicControlDefinition.jobName) string;
+    @ref_mode("referred_to");
+    jobName: referential (R29.DynamicControlDefinition.jobName) string;
 
-		//! This is the value received in the Audit Event Data that specifies either the
-		//! number of branches to expect at a fork or the number of executions of a loop to expect.
-		//! This is compared with the currentDynamicControlValue when the Job completes to ensure
-		//! that the Job has behaved as expected.
-		expectedDynamicControlValue: integer;
+    //! This is the value received in the Audit Event Data that specifies either the
+    //! number of branches to expect at a fork or the number of executions of a loop to expect.
+    //! This is compared with the currentDynamicControlValue when the Job completes to ensure
+    //! that the Job has behaved as expected.
+    expectedDynamicControlValue: integer;
 
-		//! This is the value of the number of branches seen at a fork or the number of executions
-		//! of a loop observed at runtime during the execution of the Job.
-		//! This is compared with the expectedDynamicControlValue when the Job completes to ensure
-		//! that the Job has behaved as expected.
-		currentDynamicControlValue: integer;
+    //! This is the value of the number of branches seen at a fork or the number of executions
+    //! of a loop observed at runtime during the execution of the Job.
+    //! This is compared with the expectedDynamicControlValue when the Job completes to ensure
+    //! that the Job has behaved as expected.
+    currentDynamicControlValue: integer;
 
-		unique dynamicControlId: integer;
+    unique dynamicControlId: integer;
 
-		@ref_mode("referred_to");
-		@use_prefix(prefix="user_", root_name="AuditEventId");
-		user_AuditEventId: referential (R36.AuditEvent.AuditEventId) string;
+    @ref_mode("referred_to");
+    @use_prefix(prefix="user_", root_name="AuditEventId");
+    user_AuditEventId: referential (R36.AuditEvent.AuditEventId) string;
 
-		isUser: boolean;
+    isUser: boolean;
 
-		@ref_mode("referred_to");
-		@use_prefix(prefix="source_", root_name="AuditEventId");
-		source_AuditEventId: referential (R37.AuditEvent.AuditEventId) string;
+    @ref_mode("referred_to");
+    @use_prefix(prefix="source_", root_name="AuditEventId");
+    source_AuditEventId: referential (R37.AuditEvent.AuditEventId) string;
 
-		preferred identifier is (dynamicControlId);
+    preferred identifier is (dynamicControlId);
 
-	end class;
+  end class;
 
 end;

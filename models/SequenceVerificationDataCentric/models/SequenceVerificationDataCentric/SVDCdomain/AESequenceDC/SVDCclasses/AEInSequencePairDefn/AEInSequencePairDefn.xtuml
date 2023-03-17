@@ -2,37 +2,37 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	@key_letters("AEPD");
-	@class_num(11);
-	class AEInSequencePairDefn is
+  @key_letters("AEPD");
+  @class_num(11);
+  class AEInSequencePairDefn is
 
-		@ref_mode("referred_to");
-		AESequenceId: referential (R6.precedes.AEOccurrenceInSequenceDefinition.AESequenceId, R6.follows.AEOccurrenceInSequenceDefinition.AESequenceId) integer;
+    @ref_mode("referred_to");
+    AESequenceId: referential (R6.precedes.AEOccurrenceInSequenceDefinition.AESequenceId, R6.follows.AEOccurrenceInSequenceDefinition.AESequenceId) integer;
 
-		@ref_mode("referred_to");
-		@use_prefix(prefix="following", root_name="AEDefinitionId");
-		followingAEDefinitionId: referential (R6.precedes.AEOccurrenceInSequenceDefinition.AEDefinitionId) integer;
+    @ref_mode("referred_to");
+    @use_prefix(prefix="following", root_name="AEDefinitionId");
+    followingAEDefinitionId: referential (R6.precedes.AEOccurrenceInSequenceDefinition.AEDefinitionId) integer;
 
-		@ref_mode("referred_to");
-		@use_prefix(prefix="preceding", root_name="AEDefinitionId");
-		precedingAEDefinitionId: referential (R6.follows.AEOccurrenceInSequenceDefinition.AEDefinitionId) integer;
+    @ref_mode("referred_to");
+    @use_prefix(prefix="preceding", root_name="AEDefinitionId");
+    precedingAEDefinitionId: referential (R6.follows.AEOccurrenceInSequenceDefinition.AEDefinitionId) integer;
 
-		@ref_mode("referred_to");
-		@use_prefix(prefix="preceding", root_name="occurrenceNumberInSequence");
-		precedingoccurrenceNumberInSequence: referential (R6.follows.AEOccurrenceInSequenceDefinition.occurrenceNumberInSequence) integer;
+    @ref_mode("referred_to");
+    @use_prefix(prefix="preceding", root_name="occurrenceNumberInSequence");
+    precedingoccurrenceNumberInSequence: referential (R6.follows.AEOccurrenceInSequenceDefinition.occurrenceNumberInSequence) integer;
 
-		@ref_mode("referred_to");
-		@use_prefix(prefix="following", root_name="occurrenceNumberInSequence");
-		followingoccurrenceNumberInSequence: referential (R6.precedes.AEOccurrenceInSequenceDefinition.occurrenceNumberInSequence) integer;
+    @ref_mode("referred_to");
+    @use_prefix(prefix="following", root_name="occurrenceNumberInSequence");
+    followingoccurrenceNumberInSequence: referential (R6.precedes.AEOccurrenceInSequenceDefinition.occurrenceNumberInSequence) integer;
 
-		@ref_mode("referred_to");
-		constraintDefnId: referential (R16.ConstraintDefinition.constraintDefnId) string;
+    @ref_mode("referred_to");
+    constraintDefnId: referential (R16.ConstraintDefinition.constraintDefnId) string;
 
-		@ref_mode("referred_to");
-		jobName: referential (R16.ConstraintDefinition.jobName) string;
+    @ref_mode("referred_to");
+    jobName: referential (R16.ConstraintDefinition.jobName) string;
 
-		preferred identifier is (AESequenceId, followingAEDefinitionId, precedingAEDefinitionId, precedingoccurrenceNumberInSequence, followingoccurrenceNumberInSequence);
+    preferred identifier is (AESequenceId, followingAEDefinitionId, precedingAEDefinitionId, precedingoccurrenceNumberInSequence, followingoccurrenceNumberInSequence);
 
-	end class;
+  end class;
 
 end;

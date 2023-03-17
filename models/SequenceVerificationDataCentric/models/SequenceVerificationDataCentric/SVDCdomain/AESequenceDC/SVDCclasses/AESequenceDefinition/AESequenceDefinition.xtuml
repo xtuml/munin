@@ -2,24 +2,24 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	//! The definition of an expected sequence of audit events from the monitored system. The sequence of real audit events received will be compared with this expected sequence to check the monitored system is healthy.
-	@key_letters("AESD");
-	@class_num(3);
-	class AESequenceDefinition is
+  //! The definition of an expected sequence of audit events from the monitored system. The sequence of real audit events received will be compared with this expected sequence to check the monitored system is healthy.
+  @key_letters("AESD");
+  @class_num(3);
+  class AESequenceDefinition is
 
-		unique AESequenceId: integer;
+    unique AESequenceId: integer;
 
-		sequenceDefinitionName: string;
+    sequenceDefinitionName: string;
 
-		@ref_mode("referred_to");
-		jobName: referential (R7.JobDefinition.jobName) string;
+    @ref_mode("referred_to");
+    jobName: referential (R7.JobDefinition.jobName) string;
 
-		@ref_mode("referred_to");
-		@use_prefix(prefix="following", root_name="AESequenceId");
-		followingAESequenceId: referential (R9.precedes.AESequenceDefinition.AESequenceId) integer;
+    @ref_mode("referred_to");
+    @use_prefix(prefix="following", root_name="AESequenceId");
+    followingAESequenceId: referential (R9.precedes.AESequenceDefinition.AESequenceId) integer;
 
-		preferred identifier is (AESequenceId);
+    preferred identifier is (AESequenceId);
 
-	end class;
+  end class;
 
 end;

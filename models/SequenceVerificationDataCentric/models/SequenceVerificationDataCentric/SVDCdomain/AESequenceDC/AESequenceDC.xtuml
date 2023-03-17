@@ -2,144 +2,144 @@
 
 within SequenceVerificationDataCentric::SVDCdomain is
 
-	//! Events for a single job are expected to occur in a well-defined order. The role of this domain
-	//! is to check that the sequnce of audit events received for each job are indeed in a known and
-	//! valid order.
-	//! 
-	//! The number of valid orders is to be determined but is expected to be in the order of 100s.
-	//! 
-	//! This domain will notify various conditions:
-	//! 1. Events received in an unexpected sequence
-	//! 2. Events missing
-	//! 3. Unexpected events received (though they must have contained sufficient valid data to get
-	//! through Audit Event Reception and Audit Event Ordering)
-	//! 4. Incomplete or tawdry event sequences
-	//! 
-	//! This version of the domain will utilise a data-centric approach to verify acceptable sequences
-	//! of events. This is being done to compare and contrast with the state-centric approach. It is known
-	//! from the outset that the approaches have different strengths and weaknesses:
-	//! 1. A state-centric approach is simpler to understand and get right.
-	//! 2. A state-centric approach is ideal if the number of valid sequences is relatively small.
-	//! 3. A data-centric approach embeds the expected sequence knowledge in data rather than in a state
-	//! model. Therefore a change to expected sequences can be accomodated by a data change and does
-	//! not need the re-work of the state model.
-	//! 4. A data-centric approach is probably better suited if the number of valid sequences becomes large.
-	//! 5. The performance of the two approaches can be compared to see which best fits the performance of
-	//! the monitored system.
-	component AESequenceDC is
-		
-		package DomainTypes;
-		package SVDCclasses;
-		package functions;
-		package scenarios;
-		package scenarios_cbc;
-		package scenarios_pdf;
-		package test_cases;
-		package tests_cbc;
-		package tests_new;
-		package tests_pdf;
-		
-		required port JobAdmin implements JobSynchronisation is
+  //! Events for a single job are expected to occur in a well-defined order. The role of this domain
+  //! is to check that the sequnce of audit events received for each job are indeed in a known and
+  //! valid order.
+  //! 
+  //! The number of valid orders is to be determined but is expected to be in the order of 100s.
+  //! 
+  //! This domain will notify various conditions:
+  //! 1. Events received in an unexpected sequence
+  //! 2. Events missing
+  //! 3. Unexpected events received (though they must have contained sufficient valid data to get
+  //! through Audit Event Reception and Audit Event Ordering)
+  //! 4. Incomplete or tawdry event sequences
+  //! 
+  //! This version of the domain will utilise a data-centric approach to verify acceptable sequences
+  //! of events. This is being done to compare and contrast with the state-centric approach. It is known
+  //! from the outset that the approaches have different strengths and weaknesses:
+  //! 1. A state-centric approach is simpler to understand and get right.
+  //! 2. A state-centric approach is ideal if the number of valid sequences is relatively small.
+  //! 3. A data-centric approach embeds the expected sequence knowledge in data rather than in a state
+  //! model. Therefore a change to expected sequences can be accomodated by a data change and does
+  //! not need the re-work of the state model.
+  //! 4. A data-centric approach is probably better suited if the number of valid sequences becomes large.
+  //! 5. The performance of the two approaches can be compared to see which best fits the performance of
+  //! the monitored system.
+  component AESequenceDC is
+    
+    package DomainTypes;
+    package SVDCclasses;
+    package functions;
+    package scenarios;
+    package scenarios_cbc;
+    package scenarios_pdf;
+    package test_cases;
+    package tests_cbc;
+    package tests_new;
+    package tests_pdf;
+    
+    required port JobAdmin implements JobSynchronisation is
 
-			@message_num(1);
-			message deleteJob(jobID: in string) from provider is
-				@noparse
-				begin
-				  null;
-				end service;
-				@endnoparse
-			end message;
+      @message_num(1);
+      message deleteJob(jobID: in string) from provider is
+        @noparse
+        begin
+          null;
+        end service;
+        @endnoparse
+      end message;
 
-		end port;
+    end port;
 
-		provided port Persistence_Prov_IF implements Persistence_Prov_IF is
+    provided port Persistence_Prov_IF implements Persistence_Prov_IF is
 
-			@message_num(15);
-			message restoreInvariants(restoredInvariants: in sequence of persistedInvariantStructure) from provider is
-			end message;
+      @message_num(15);
+      message restoreInvariants(restoredInvariants: in sequence of persistedInvariantStructure) from provider is
+      end message;
 
-		end port;
+    end port;
 
-		required port Persistence_Req_IF implements Persistence_Req_IF is
+    required port Persistence_Req_IF implements Persistence_Req_IF is
 
-			@message_num(1);
-			message PersistInvariant(extraJobInvariantName: in string, invariantValue: in string, validFrom: in timestamp, validTo: in timestamp, sourceJobDefinitionType: in string, sourceAuditEventType: in string, sourceAuditEventOccurrenceId: in integer) from provider is
-				@noparse
-				logMessage : string;
-				
-				begin
-				
-				  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
-				  Logger::log(Logger::Information, "AESequenceDC", logMessage);
-				
-				end service;
-				@endnoparse
-			end message;
+      @message_num(1);
+      message PersistInvariant(extraJobInvariantName: in string, invariantValue: in string, validFrom: in timestamp, validTo: in timestamp, sourceJobDefinitionType: in string, sourceAuditEventType: in string, sourceAuditEventOccurrenceId: in integer) from provider is
+        @noparse
+        logMessage : string;
+        
+        begin
+        
+          logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
+          Logger::log(Logger::Information, "AESequenceDC", logMessage);
+        
+        end service;
+        @endnoparse
+      end message;
 
-			@message_num(3);
-			message RestoreNamedInvariant(extraJobInvariantName: in string, invariantValue: in string) from provider is
-				@noparse
-				logMessage : string;
-				
-				begin
-				
-				  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
-				  Logger::log(Logger::Information, "AESequenceDC", logMessage);
-				  
-				end service;
-				@endnoparse
-			end message;
+      @message_num(3);
+      message RestoreNamedInvariant(extraJobInvariantName: in string, invariantValue: in string) from provider is
+        @noparse
+        logMessage : string;
+        
+        begin
+        
+          logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
+          Logger::log(Logger::Information, "AESequenceDC", logMessage);
+          
+        end service;
+        @endnoparse
+      end message;
 
-		end port;
+    end port;
 
-		provided port Prov_IF_Verification implements Ordering is
+    provided port Prov_IF_Verification implements Ordering is
 
-			@message_num(2);
-			message acceptOrderedEvent(ae_time: in string, app: in string, ae_type: in string, jobId: in string, prevAEIds: in sequence of string, id: in string, auditEventData: in sequence of auditEventDataStructure) from provider is
-			end message;
+      @message_num(2);
+      message acceptOrderedEvent(ae_time: in string, app: in string, ae_type: in string, jobId: in string, prevAEIds: in sequence of string, id: in string, auditEventData: in sequence of auditEventDataStructure) from provider is
+      end message;
 
-			@message_num(10);
-			message createSVDCsystemSpec(maxIntraSequenceEventTimeoutPeriod: in duration, waitPeriodForAllJobsCompletedCheck: in duration, waitPeriodForJobDeletion: in duration, waitPeriodForInvariantDeletion: in duration) from provider is
-			end message;
+      @message_num(10);
+      message createSVDCsystemSpec(maxIntraSequenceEventTimeoutPeriod: in duration, waitPeriodForAllJobsCompletedCheck: in duration, waitPeriodForJobDeletion: in duration, waitPeriodForInvariantDeletion: in duration) from provider is
+      end message;
 
-			@message_num(9);
-			message deprecateJobDefinition(jobName: in string) from provider is
-			end message;
+      @message_num(9);
+      message deprecateJobDefinition(jobName: in string) from provider is
+      end message;
 
-			@message_num(14);
-			message dynamicControlDefinition(jobName: in string, dynamicControlName: in string, dynamicControlType: in dynamicControlTypeEnum, sourceEventType: in string, sourceOccurrenceId: in integer, userEventType: in string, userOccurrenceId: in integer) from provider is
-			end message;
+      @message_num(14);
+      message dynamicControlDefinition(jobName: in string, dynamicControlName: in string, dynamicControlType: in dynamicControlTypeEnum, sourceEventType: in string, sourceOccurrenceId: in integer, userEventType: in string, userOccurrenceId: in integer) from provider is
+      end message;
 
-			@message_num(7);
-			message eventDefinition(jobName: in string, sequenceName: in string, eventType: in string, occurrenceId: in integer, previousEventTypes: in sequence of eventStructure, isSequenceStart: in boolean, isSequenceEnd: in boolean, isBreak: in boolean) from provider is
-			end message;
+      @message_num(7);
+      message eventDefinition(jobName: in string, sequenceName: in string, eventType: in string, occurrenceId: in integer, previousEventTypes: in sequence of eventStructure, isSequenceStart: in boolean, isSequenceEnd: in boolean, isBreak: in boolean) from provider is
+      end message;
 
-			@message_num(13);
-			message extraJobInvariantDefinition(auditEventDataName: in string, sourceJobDefnName: in string, sourceEventType: in string, sourceOccurrenceId: in integer, userEvents: in sequence of userEventDataStructure) from provider is
-			end message;
+      @message_num(13);
+      message extraJobInvariantDefinition(auditEventDataName: in string, sourceJobDefnName: in string, sourceEventType: in string, sourceOccurrenceId: in integer, userEvents: in sequence of userEventDataStructure) from provider is
+      end message;
 
-			@message_num(3);
-			message failedJob(jobId: in string, failureReason: in string) from provider is
-			end message;
+      @message_num(3);
+      message failedJob(jobId: in string, failureReason: in string) from provider is
+      end message;
 
-			@message_num(13);
-			message intraJobInvariantDefinition(jobDefnName: in string, auditEventDataName: in string, associatedEvents: in sequence of intraJobInvDataStructure) from provider is
-			end message;
+      @message_num(13);
+      message intraJobInvariantDefinition(jobDefnName: in string, auditEventDataName: in string, associatedEvents: in sequence of intraJobInvDataStructure) from provider is
+      end message;
 
-			@message_num(4);
-			message jobComplete(jobId: in string) from provider is
-			end message;
+      @message_num(4);
+      message jobComplete(jobId: in string) from provider is
+      end message;
 
-			@message_num(12);
-			message reactivateJobDefinition(jobName: in string) from provider is
-			end message;
+      @message_num(12);
+      message reactivateJobDefinition(jobName: in string) from provider is
+      end message;
 
-			@message_num(11);
-			message suspendJobDefinition(jobName: in string) from provider is
-			end message;
+      @message_num(11);
+      message suspendJobDefinition(jobName: in string) from provider is
+      end message;
 
-		end port;
+    end port;
 
-	end component;
+  end component;
 
 end;

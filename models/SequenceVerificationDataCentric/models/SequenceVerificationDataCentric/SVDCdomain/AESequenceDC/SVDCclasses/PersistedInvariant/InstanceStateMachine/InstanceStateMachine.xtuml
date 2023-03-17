@@ -2,104 +2,104 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses::PersistedInvariant is
 
-	@state_num(1);
-	state Pending;
+  @state_num(1);
+  state Pending;
 
-	@state_num(2);
-	state InForce;
+  @state_num(2);
+  state InForce;
 
-	@state_num(3);
-	state Deprecated;
+  @state_num(3);
+  state Deprecated;
 
-	@state_num(4);
-	state Deleted;
+  @state_num(4);
+  state Deleted;
 
-	@event_num(1);
-	event invariantComesIntoForce;
+  @event_num(1);
+  event invariantComesIntoForce;
 
-	@event_num(2);
-	event invariantExpires;
+  @event_num(2);
+  event invariantExpires;
 
-	@event_num(3);
-	event timeToDeleteInvariant;
+  @event_num(3);
+  event timeToDeleteInvariant;
 
-	state machine is
+  state machine is
 
-		|                         | invariantComesIntoForce | invariantExpires        | timeToDeleteInvariant   |
-		| ----------------------- | ----------------------- | ----------------------- | ----------------------- |
-		| Pending                 | InForce                 | cannot_happen           | cannot_happen           |
-		| InForce                 | cannot_happen           | Deprecated              | cannot_happen           |
-		| Deprecated              | cannot_happen           | cannot_happen           | Deleted                 |
-		| Deleted                 | cannot_happen           | cannot_happen           | cannot_happen           |
+    |                         | invariantComesIntoForce | invariantExpires        | timeToDeleteInvariant   |
+    | ----------------------- | ----------------------- | ----------------------- | ----------------------- |
+    | Pending                 | InForce                 | cannot_happen           | cannot_happen           |
+    | InForce                 | cannot_happen           | Deprecated              | cannot_happen           |
+    | Deprecated              | cannot_happen           | cannot_happen           | Deleted                 |
+    | Deleted                 | cannot_happen           | cannot_happen           | cannot_happen           |
 
-	end state machine;
+  end state machine;
 
-	state Pending is
-		@noparse
-		begin
-		  
-		  null;
-		
-		end state;
-		@endnoparse
-	end state;
+  state Pending is
+    @noparse
+    begin
+      
+      null;
+    
+    end state;
+    @endnoparse
+  end state;
 
-	state InForce is
-		@noparse
-		logMessage : string;
-		begin
-		  // Report the current state of PersistedInvariant
-		  logMessage := "PersistedInvariant: " & this.invariantId'image & " is InForce";
-		  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
-		  
-		  this.inForce := true;
-		  schedule this.invariantTimer generate PersistedInvariant.invariantExpires() to this at this.validUntil;
-		
-		end state;
-		@endnoparse
-	end state;
+  state InForce is
+    @noparse
+    logMessage : string;
+    begin
+      // Report the current state of PersistedInvariant
+      logMessage := "PersistedInvariant: " & this.invariantId'image & " is InForce";
+      Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+      
+      this.inForce := true;
+      schedule this.invariantTimer generate PersistedInvariant.invariantExpires() to this at this.validUntil;
+    
+    end state;
+    @endnoparse
+  end state;
 
-	state Deprecated is
-		@noparse
-		theSystemSpec : instance of SystemSpecification;
-		logMessage : string;
-		
-		begin
-		  // Report the current state of PersistedInvariant
-		  logMessage := "PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") has been Deprecated";
-		  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
-		  
-		  theSystemSpec := find_only SystemSpecification();
-		  this.inForce := false;
-		  schedule this.invariantTimer generate PersistedInvariant.timeToDeleteInvariant() to this delay theSystemSpec.sourceExtraJobInvariantDeletionPeriod;
-		  
-		end state;
-		@endnoparse
-	end state;
+  state Deprecated is
+    @noparse
+    theSystemSpec : instance of SystemSpecification;
+    logMessage : string;
+    
+    begin
+      // Report the current state of PersistedInvariant
+      logMessage := "PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") has been Deprecated";
+      Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+      
+      theSystemSpec := find_only SystemSpecification();
+      this.inForce := false;
+      schedule this.invariantTimer generate PersistedInvariant.timeToDeleteInvariant() to this delay theSystemSpec.sourceExtraJobInvariantDeletionPeriod;
+      
+    end state;
+    @endnoparse
+  end state;
 
-	state Deleted is
-		@noparse
-		logMessage : string;
-		
-		begin
-		  // Report the current state of PersistedInvariant
-		  logMessage := "PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") is about to be deleted";
-		  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
-		  
-		  // Unlink the specification class
-		  if (this -> R24) /= null then
-		    unlink this R24 (this -> R24);
-		  end if;
-		  //Unlink any audit events (though this shouldn't happen)
-		  if (this -> R27) /= null then
-		    // TODO This is really an error condition so should be notified
-		    unlink this R27 (this -> R27);
-		  end if; 
-		  delete this;
-		end state;
-		//
-		//
-		@endnoparse
-	end state;
+  state Deleted is
+    @noparse
+    logMessage : string;
+    
+    begin
+      // Report the current state of PersistedInvariant
+      logMessage := "PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") is about to be deleted";
+      Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+      
+      // Unlink the specification class
+      if (this -> R24) /= null then
+        unlink this R24 (this -> R24);
+      end if;
+      //Unlink any audit events (though this shouldn't happen)
+      if (this -> R27) /= null then
+        // TODO This is really an error condition so should be notified
+        unlink this R27 (this -> R27);
+      end if; 
+      delete this;
+    end state;
+    //
+    //
+    @endnoparse
+  end state;
 
 end;

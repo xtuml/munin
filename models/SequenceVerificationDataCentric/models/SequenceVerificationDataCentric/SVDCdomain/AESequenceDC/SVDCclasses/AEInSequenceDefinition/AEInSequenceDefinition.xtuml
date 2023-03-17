@@ -2,21 +2,21 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	//! This captures the presence of an expected event type within a specific expected sequence.
-	//! Audit events can occur in more than one sequence definition so R1 needs to be M to M
-	//! so an the association class is necessary.
-	@key_letters("AEISD");
-	@class_num(12);
-	class AEInSequenceDefinition is
+  //! This captures the presence of an expected event type within a specific expected sequence.
+  //! Audit events can occur in more than one sequence definition so R1 needs to be M to M
+  //! so an the association class is necessary.
+  @key_letters("AEISD");
+  @class_num(12);
+  class AEInSequenceDefinition is
 
-		@ref_mode("referred_to");
-		AEDefinitionId: referential (R1.AuditEventDefinition.AEDefinitionId) integer;
+    @ref_mode("referred_to");
+    AEDefinitionId: referential (R1.AuditEventDefinition.AEDefinitionId) integer;
 
-		@ref_mode("referred_to");
-		AESequenceId: referential (R1.AESequenceDefinition.AESequenceId) integer;
+    @ref_mode("referred_to");
+    AESequenceId: referential (R1.AESequenceDefinition.AESequenceId) integer;
 
-		preferred identifier is (AEDefinitionId, AESequenceId);
+    preferred identifier is (AEDefinitionId, AESequenceId);
 
-	end class;
+  end class;
 
 end;

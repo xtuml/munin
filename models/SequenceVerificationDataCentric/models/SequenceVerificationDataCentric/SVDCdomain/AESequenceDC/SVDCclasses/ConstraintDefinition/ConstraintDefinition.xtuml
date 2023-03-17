@@ -2,21 +2,21 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	//! The defintion of a static constraint such as an AND constraint or an Exclusive OR constraint.
-	//! The Constraint is linked to the Audit Event Pair Defintions that it constrains.
-	@key_letters("CD");
-	@class_num(14);
-	class ConstraintDefinition is
+  //! The defintion of a static constraint such as an AND constraint or an Exclusive OR constraint.
+  //! The Constraint is linked to the Audit Event Pair Defintions that it constrains.
+  @key_letters("CD");
+  @class_num(14);
+  class ConstraintDefinition is
 
-		constraintDefnId: string;
+    constraintDefnId: string;
 
-		constraintType: constraintTypeEnum;
+    constraintType: constraintTypeEnum;
 
-		@ref_mode("referred_to");
-		jobName: referential (R17.JobDefinition.jobName) string;
+    @ref_mode("referred_to");
+    jobName: referential (R17.JobDefinition.jobName) string;
 
-		preferred identifier is (constraintDefnId, jobName);
+    preferred identifier is (constraintDefnId, jobName);
 
-	end class;
+  end class;
 
 end;

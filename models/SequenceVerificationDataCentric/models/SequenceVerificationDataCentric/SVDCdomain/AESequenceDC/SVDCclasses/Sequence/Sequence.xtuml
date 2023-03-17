@@ -2,35 +2,35 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	//! A Sequence is a connected chain of Audit Events within a Job.
-	//! The Audit Events within a Sequence are connected by the next Audit
-	//! Event referring explicitly to the Id of the previous Audit Event(s).
-	//! A Job can contain multiple Sequences but there is no link between
-	//! the Sequences of a Job other than Job Id. There is no way to ensure
-	//! that the Sequences run in a specific order within the Job. A specific
-	//! type of Audit Event starts a Sequence and this is not expected to have a
-	//! previous Event Id. A specific type of Audit Event also ends a Sequence.
-	//! A Sequence can have multiple end points.
-	@key_letters("SEQ");
-	@class_num(9);
-	class Sequence is
+  //! A Sequence is a connected chain of Audit Events within a Job.
+  //! The Audit Events within a Sequence are connected by the next Audit
+  //! Event referring explicitly to the Id of the previous Audit Event(s).
+  //! A Job can contain multiple Sequences but there is no link between
+  //! the Sequences of a Job other than Job Id. There is no way to ensure
+  //! that the Sequences run in a specific order within the Job. A specific
+  //! type of Audit Event starts a Sequence and this is not expected to have a
+  //! previous Event Id. A specific type of Audit Event also ends a Sequence.
+  //! A Sequence can have multiple end points.
+  @key_letters("SEQ");
+  @class_num(9);
+  class Sequence is
 
-		unique sequenceId: integer;
+    unique sequenceId: integer;
 
-		@ref_mode("referred_to");
-		jobID: referential (R10.Job.jobID) string;
+    @ref_mode("referred_to");
+    jobID: referential (R10.Job.jobID) string;
 
-		isComplete: boolean;
+    isComplete: boolean;
 
-		//! This measures the current number of parallel branches active within the sequence.
-		//! It is used to determine sequence completion for sequences with forks and multiple end points.
-		branchExtent: integer;
+    //! This measures the current number of parallel branches active within the sequence.
+    //! It is used to determine sequence completion for sequences with forks and multiple end points.
+    branchExtent: integer;
 
-		@ref_mode("referred_to");
-		AESequenceId: referential (R14.AESequenceDefinition.AESequenceId) integer;
+    @ref_mode("referred_to");
+    AESequenceId: referential (R14.AESequenceDefinition.AESequenceId) integer;
 
-		preferred identifier is (sequenceId);
+    preferred identifier is (sequenceId);
 
-	end class;
+  end class;
 
 end;

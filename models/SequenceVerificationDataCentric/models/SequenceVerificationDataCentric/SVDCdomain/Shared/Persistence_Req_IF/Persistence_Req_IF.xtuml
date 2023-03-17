@@ -2,13 +2,13 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::Shared is
 
-	interface Persistence_Req_IF is
-		
-		@message_num(1);
-		message PersistInvariant(extraJobInvariantName: in string, invariantValue: in string, validFrom: in timestamp, validTo: in timestamp, sourceJobDefinitionType: in string, sourceAuditEventType: in string, sourceAuditEventOccurrenceId: in integer) from provider;
-		@message_num(3);
-		message RestoreNamedInvariant(extraJobInvariantName: in string, invariantValue: in string) from provider;
-		
-	end interface;
+  interface Persistence_Req_IF is
+    
+    @message_num(1);
+    message PersistInvariant(extraJobInvariantName: in string, invariantValue: in string, validFrom: in timestamp, validTo: in timestamp, sourceJobDefinitionType: in string, sourceAuditEventType: in string, sourceAuditEventOccurrenceId: in integer) from provider;
+    @message_num(3);
+    message RestoreNamedInvariant(extraJobInvariantName: in string, invariantValue: in string) from provider;
+    
+  end interface;
 
 end;

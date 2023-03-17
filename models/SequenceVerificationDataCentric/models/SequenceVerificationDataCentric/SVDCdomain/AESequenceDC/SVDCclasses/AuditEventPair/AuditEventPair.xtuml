@@ -2,40 +2,40 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	//! This class is required to formalise the reflexive association R4 but will not contain any additional data so could be omitted.
-	@key_letters("AEP");
-	@class_num(6);
-	class AuditEventPair is
+  //! This class is required to formalise the reflexive association R4 but will not contain any additional data so could be omitted.
+  @key_letters("AEP");
+  @class_num(6);
+  class AuditEventPair is
 
-		@ref_mode("referred_to");
-		@use_prefix(prefix="previous", root_name="AuditEventId");
-		previousAuditEventId: referential (R4.has_previous.AuditEvent.AuditEventId) string;
+    @ref_mode("referred_to");
+    @use_prefix(prefix="previous", root_name="AuditEventId");
+    previousAuditEventId: referential (R4.has_previous.AuditEvent.AuditEventId) string;
 
-		@ref_mode("referred_to");
-		@use_prefix(prefix="next", root_name="AuditEventId");
-		nextAuditEventId: referential (R4.has_next.AuditEvent.AuditEventId) string;
+    @ref_mode("referred_to");
+    @use_prefix(prefix="next", root_name="AuditEventId");
+    nextAuditEventId: referential (R4.has_next.AuditEvent.AuditEventId) string;
 
-		@ref_mode("referred_to");
-		AESequenceId: referential (R15.AEInSequencePairDefn.AESequenceId) integer;
+    @ref_mode("referred_to");
+    AESequenceId: referential (R15.AEInSequencePairDefn.AESequenceId) integer;
 
-		@ref_mode("referred_to");
-		@use_referred_to_prefix(root_name="followingAEDefinitionId");
-		followingAEDefinitionId: referential (R15.AEInSequencePairDefn.followingAEDefinitionId) integer;
+    @ref_mode("referred_to");
+    @use_referred_to_prefix(root_name="followingAEDefinitionId");
+    followingAEDefinitionId: referential (R15.AEInSequencePairDefn.followingAEDefinitionId) integer;
 
-		@ref_mode("referred_to");
-		@use_referred_to_prefix(root_name="precedingAEDefinitionId");
-		precedingAEDefinitionId: referential (R15.AEInSequencePairDefn.precedingAEDefinitionId) integer;
+    @ref_mode("referred_to");
+    @use_referred_to_prefix(root_name="precedingAEDefinitionId");
+    precedingAEDefinitionId: referential (R15.AEInSequencePairDefn.precedingAEDefinitionId) integer;
 
-		@ref_mode("referred_to");
-		@use_referred_to_prefix(root_name="precedingoccurrenceNumberInSequence");
-		precedingoccurrenceNumberInSequence: referential (R15.AEInSequencePairDefn.precedingoccurrenceNumberInSequence) integer;
+    @ref_mode("referred_to");
+    @use_referred_to_prefix(root_name="precedingoccurrenceNumberInSequence");
+    precedingoccurrenceNumberInSequence: referential (R15.AEInSequencePairDefn.precedingoccurrenceNumberInSequence) integer;
 
-		@ref_mode("referred_to");
-		@use_referred_to_prefix(root_name="followingoccurrenceNumberInSequence");
-		followingoccurrenceNumberInSequence: referential (R15.AEInSequencePairDefn.followingoccurrenceNumberInSequence) integer;
+    @ref_mode("referred_to");
+    @use_referred_to_prefix(root_name="followingoccurrenceNumberInSequence");
+    followingoccurrenceNumberInSequence: referential (R15.AEInSequencePairDefn.followingoccurrenceNumberInSequence) integer;
 
-		preferred identifier is (previousAuditEventId, nextAuditEventId);
+    preferred identifier is (previousAuditEventId, nextAuditEventId);
 
-	end class;
+  end class;
 
 end;

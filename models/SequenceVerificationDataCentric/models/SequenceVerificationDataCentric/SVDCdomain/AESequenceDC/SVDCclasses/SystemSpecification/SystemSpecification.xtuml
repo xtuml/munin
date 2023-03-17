@@ -2,27 +2,27 @@
 
 within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::SVDCclasses is
 
-	@key_letters("SS");
-	@class_num(13);
-	class SystemSpecification is
+  @key_letters("SS");
+  @class_num(13);
+  class SystemSpecification is
 
-		//! An arbitrary but unique value
-		unique systemSpecID: integer;
+    //! An arbitrary but unique value
+    unique systemSpecID: integer;
 
-		//! The period of time allowed following the apparent completion of an event sequence for the start of a previously unseen branch event to appear.
-		intraSequenceEventTimeoutPeriod: duration;
+    //! The period of time allowed following the apparent completion of an event sequence for the start of a previously unseen branch event to appear.
+    intraSequenceEventTimeoutPeriod: duration;
 
-		checkJobDefReadyForDeletionPeriod: duration;
+    checkJobDefReadyForDeletionPeriod: duration;
 
-		//! The period of time after which a Job reaches one of its 'final' states (JobSuccessful, JobFailed or JobGoneHorriblyWrong)that the Job will be automatica;ly deleted.
-		jobDeletionWaitPeriod: duration;
+    //! The period of time after which a Job reaches one of its 'final' states (JobSuccessful, JobFailed or JobGoneHorriblyWrong)that the Job will be automatica;ly deleted.
+    jobDeletionWaitPeriod: duration;
 
-		sourceExtraJobInvariantDeletionPeriod: duration;
+    sourceExtraJobInvariantDeletionPeriod: duration;
 
-		persistentInvariantRestoreTimeoutPeriod: duration;
+    persistentInvariantRestoreTimeoutPeriod: duration;
 
-		preferred identifier is (systemSpecID);
+    preferred identifier is (systemSpecID);
 
-	end class;
+  end class;
 
 end;
