@@ -5,7 +5,7 @@ within SequenceVerificationDataCentric::SVDCdomain::Shared is
   interface JobSynchronisation is
     
     @message_num(1);
-    message deleteJob(jobID: in string) from provider;
+    message deleteJob(jobID: in string) return void to provider;
     
   end interface;
 
