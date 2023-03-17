@@ -1,0 +1,64 @@
+//! ACTIVITY BEGIN. '92004e3c-f787-429d-ab51-facc51b841a5' '557cefda-f48a-4f58-a439-a24debcf9919' DO NOT EDIT THIS LINE.
+state AESequenceDC::PersistedInvariant.Pending () is
+begin
+  
+  null;
+
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '92004e3c-f787-429d-ab51-facc51b841a5' '436c1f27-289f-4697-ad61-44f216cf8eee' DO NOT EDIT THIS LINE.
+state AESequenceDC::PersistedInvariant.InForce () is
+logMessage : string;
+begin
+  // Report the current state of PersistedInvariant
+  logMessage := "PersistedInvariant: " & this.invariantId'image & " is InForce";
+  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+  
+  this.inForce := true;
+  schedule this.invariantTimer generate PersistedInvariant.invariantExpires() to this at this.validUntil;
+
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '92004e3c-f787-429d-ab51-facc51b841a5' '12581b54-dce5-453e-902b-2f10a9b77018' DO NOT EDIT THIS LINE.
+state AESequenceDC::PersistedInvariant.Deprecated () is
+theSystemSpec : instance of SystemSpecification;
+logMessage : string;
+
+begin
+  // Report the current state of PersistedInvariant
+  logMessage := "PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") has been Deprecated";
+  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+  
+  theSystemSpec := find_only SystemSpecification();
+  this.inForce := false;
+  schedule this.invariantTimer generate PersistedInvariant.timeToDeleteInvariant() to this delay theSystemSpec.sourceExtraJobInvariantDeletionPeriod;
+  
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '92004e3c-f787-429d-ab51-facc51b841a5' 'e5dad46b-810d-43a4-8574-aa4a6ade037f' DO NOT EDIT THIS LINE.
+state AESequenceDC::PersistedInvariant.Deleted () is
+logMessage : string;
+
+begin
+  // Report the current state of PersistedInvariant
+  logMessage := "PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") is about to be deleted";
+  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+  
+  // Unlink the specification class
+  if (this -> R24) /= null then
+    unlink this R24 (this -> R24);
+  end if;
+  //Unlink any audit events (though this shouldn't happen)
+  if (this -> R27) /= null then
+    // TODO This is really an error condition so should be notified
+    unlink this R27 (this -> R27);
+  end if; 
+  delete this;
+end state;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

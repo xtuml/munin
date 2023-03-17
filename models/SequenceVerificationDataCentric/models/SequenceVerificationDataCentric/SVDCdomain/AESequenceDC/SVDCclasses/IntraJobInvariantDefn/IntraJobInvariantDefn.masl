@@ -1,0 +1,39 @@
+//! ACTIVITY BEGIN. '826467d6-3ecb-4c15-a9ce-f03fa7b3537f' DO NOT EDIT THIS LINE.
+public service AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn ( jobName : in string,
+                                                                                invariantName : in string,
+                                                                                invariantEventDefns : in eventStructure ) is
+newInvariant : instance of IntraJobInvariantDefn;
+theJobDefn : instance of JobDefinition;
+theEventDefn : instance of AuditEventDefinition;
+theSequenceDefn: instance of AESequenceDefinition;
+theEventInSeqDefn : instance of AEInSequenceDefinition;
+theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
+theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
+logMessage: string;
+
+begin
+  theJobDefn := find_one JobDefinition (jobName = jobName);
+  if theJobDefn /= null then
+    newInvariant := create IntraJobInvariantDefn (jobName => theJobDefn.jobName, intraJobInvName => invariantName);
+    link newInvariant R22 theJobDefn;
+    
+    for eachInvariantEventDefn in invariantEventDefns'elements loop
+      theEventDefn := find_one AuditEventDefinition (AEType = eachInvariantEventDefn.eventTypeName);
+      if theEventDefn /= null then
+        theSequenceDefn := theEventDefn -> R1.AESequenceDefinition;
+        theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
+        theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
+        theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = eachInvariantEventDefn.occurrenceId);
+        link newInvariant R19 theEventOccInSeqDefn;
+      end if;
+    end loop;
+  else
+    // Digital Twin Error dues to failed configurations
+    logMessage := "Invalid Job Definition for this intra-job invariant definition = " & theJobDefn.jobName;
+    Logger::log(Logger::Error, "AESequenceDC", logMessage);
+          
+  end if;
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

@@ -1,0 +1,115 @@
+//! ACTIVITY BEGIN. '78145a7b-f852-4687-9d93-055545a2b5fb' DO NOT EDIT THIS LINE.
+public service AESequenceDC::JobAdmin~>deleteJob ( jobID : in string ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '485c5639-e280-4782-9449-6e1e3f66eebf' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Persistence_Prov_IF~>restoreInvariants ( restoredInvariants : in persistedInvariantStructure ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '69a625cc-1a94-4c37-a5e9-41361421c575' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Persistence_Req_IF~>PersistInvariant ( extraJobInvariantName : in string,
+                                                                   invariantValue : in string,
+                                                                   validFrom : in timestamp,
+                                                                   validTo : in timestamp,
+                                                                   sourceJobDefinitionType : in string,
+                                                                   sourceAuditEventType : in string,
+                                                                   sourceAuditEventOccurrenceId : in integer ) is
+logMessage : string;
+
+begin
+
+  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '1ac0491c-8eb6-45ad-96cc-bf5c230af6be' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Persistence_Req_IF~>RestoreNamedInvariant ( extraJobInvariantName : in string,
+                                                                        invariantValue : in string ) is
+logMessage : string;
+
+begin
+
+  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '68998198-4286-4d07-9a3a-c287719f8315' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>acceptOrderedEvent ( ae_time : in string,
+                                                                       app : in string,
+                                                                       ae_type : in string,
+                                                                       jobId : in string,
+                                                                       prevAEIds : in string,
+                                                                       id : in string,
+                                                                       auditEventData : in auditEventDataStructure ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c50b2519-5ded-487c-b4d5-eeb40ceae5b0' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>createSVDCsystemSpec ( maxIntraSequenceEventTimeoutPeriod : in duration,
+                                                                         waitPeriodForAllJobsCompletedCheck : in duration,
+                                                                         waitPeriodForJobDeletion : in duration,
+                                                                         waitPeriodForInvariantDeletion : in duration ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'dfd3c200-ba54-4221-a8dc-61c25b5b33df' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>deprecateJobDefinition ( jobName : in string ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'dacf8312-6bdb-404d-ba30-e6705c285e17' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>dynamicControlDefinition ( jobName : in string,
+                                                                             dynamicControlName : in string,
+                                                                             dynamicControlType : in dynamicControlTypeEnum,
+                                                                             sourceEventType : in string,
+                                                                             sourceOccurrenceId : in integer,
+                                                                             userEventType : in string,
+                                                                             userOccurrenceId : in integer ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c15593ba-2c91-44e5-b323-be745126b147' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>eventDefinition ( jobName : in string,
+                                                                    sequenceName : in string,
+                                                                    eventType : in string,
+                                                                    occurrenceId : in integer,
+                                                                    previousEventTypes : in eventStructure,
+                                                                    isSequenceStart : in boolean,
+                                                                    isSequenceEnd : in boolean,
+                                                                    isBreak : in boolean ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '76863fd4-a680-4f19-840e-1d27e683d775' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>extraJobInvariantDefinition ( auditEventDataName : in string,
+                                                                                sourceJobDefnName : in string,
+                                                                                sourceEventType : in string,
+                                                                                sourceOccurrenceId : in integer,
+                                                                                userEvents : in userEventDataStructure ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '385d7b0c-b051-4d98-8890-389119ec4b24' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>failedJob ( jobId : in string,
+                                                              failureReason : in string ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'dd9b0a6e-6822-4975-9ef4-f82b952320bf' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>intraJobInvariantDefinition ( jobDefnName : in string,
+                                                                                auditEventDataName : in string,
+                                                                                associatedEvents : in intraJobInvDataStructure ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b3c17431-df85-4d58-a4ca-2cd0fe864859' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>jobComplete ( jobId : in string ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd94d7b95-37fc-46c2-a639-4f28ac9459b4' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>reactivateJobDefinition ( jobName : in string ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '868cd7df-f587-4d50-b60b-b730beccf533' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Prov_IF_Verification~>suspendJobDefinition ( jobName : in string ) is
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

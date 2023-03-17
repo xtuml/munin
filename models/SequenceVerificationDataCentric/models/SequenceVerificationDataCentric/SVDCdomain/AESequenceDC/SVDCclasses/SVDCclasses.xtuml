@@ -21,8 +21,8 @@ within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC is
     class Sequence;
     class SystemSpecification;
     class TransientInvariant;
-    relationship R1 is AuditEventDefinition unconditionally is_expected_in one AESequenceDefinition,
-                       AESequenceDefinition unconditionally includes many AuditEventDefinition
+    relationship R1 is AESequenceDefinition unconditionally includes many AuditEventDefinition,
+                       AuditEventDefinition unconditionally is_expected_in one AESequenceDefinition
                        using one AEInSequenceDefinition;
 
     relationship R2 is AuditEventDefinition unconditionally defines many AuditEvent,
@@ -31,15 +31,15 @@ within SequenceVerificationDataCentric::SVDCdomain::AESequenceDC is
     relationship R3 is Job unconditionally contains_sequence_of many AuditEvent,
                        AuditEvent unconditionally defines_step_in_lifecycle_of one Job;
 
-    relationship R4 is AuditEvent conditionally has_next many AuditEvent,
-                       AuditEvent conditionally has_previous many AuditEvent
+    relationship R4 is AuditEvent conditionally has_previous many AuditEvent,
+                       AuditEvent conditionally has_next many AuditEvent
                        using one AuditEventPair;
 
     //! This captures the expected sequence of audit events within a sequence. It is currently a 1 to 1 association. this is for the Proof of Concept only.
     //! For later versions this will have to capture forks and merges in the sequence so will have to become M to M or some explicit additions to the classes
     //! that describe forks and merges.
-    relationship R6 is AEOccurrenceInSequenceDefinition conditionally follows many AEOccurrenceInSequenceDefinition,
-                       AEOccurrenceInSequenceDefinition conditionally precedes many AEOccurrenceInSequenceDefinition
+    relationship R6 is AEOccurrenceInSequenceDefinition conditionally precedes many AEOccurrenceInSequenceDefinition,
+                       AEOccurrenceInSequenceDefinition conditionally follows many AEOccurrenceInSequenceDefinition
                        using one AEInSequencePairDefn;
 
     relationship R7 is JobDefinition unconditionally includes many AESequenceDefinition,
