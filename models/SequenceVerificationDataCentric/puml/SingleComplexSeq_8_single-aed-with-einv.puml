@@ -1,0 +1,68 @@
+@startuml
+partition "Single Complex Job" {
+group "Single Sequence"
+
+  #green:SCJA1,LCNT,user=S,name=LC3;
+  :SCJA2,BCNT,user=K,name=BC2;
+  :SCJB1,LCNT,user=E,name=LC1;
+  :SCJB2,LCNT,user=D,name=LC2;
+  :SCJB3,IINV,name=InvariantA;
+  :SCJC;
+  if (XOR) then ("error")
+    #red:SCJR;
+    detach
+  else ("normal")
+    fork
+      repeat
+        :SCJD;
+        :SCJE,EINV,USER,name=AUTH_TOKEN_A;
+        :SCJF;
+      repeat while
+      :SCJG;
+      repeat
+        :SCJD;
+        :SCJE;
+        if (XOR) then ("error")
+          :SCJT;
+          break
+        else ("normal")
+          :SCJF;
+        endif
+      repeat while
+    fork again
+      :SCJK;
+      :SCJL,EINV,USER,name=AUTH_TOKEN_A;
+      :SCJM;
+      if (XOR) then ("error")
+        #red:SCJN;
+        detach
+      endif    
+    fork again
+      :SCJP;
+      #red:SCJQ;
+      detach
+    fork again
+      :SCJC;
+      repeat
+        :SCJD;
+        :SCJE;
+      repeat while
+      :SCJF,BCNT,name=BC1;
+      :SCJD,EINV,USER,name=AUTH_TOKEN_A;
+      #red:SCJG;
+      detach
+    fork again
+      repeat
+        :SCJS;
+      repeat while
+      :SCJD;
+      #red:SCJE;
+      detach
+    end fork
+    :H,IINV,USER,name=InvariantA;
+    #red:SCJJ;
+    detach
+  endif
+end group
+}
+@enduml
