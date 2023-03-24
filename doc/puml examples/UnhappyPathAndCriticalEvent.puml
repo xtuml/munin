@@ -1,0 +1,21 @@
+/'
+
+PLUS User Guide - Simple Sequence Definition
+  
+'/
+
+@startuml 
+partition "Simple Job" {
+  group "Fund Transfer"
+    :requestFunds;
+    :requestApproved;
+    #gold:fundsTransferred,CRITICAL;
+    detach
+  end group
+
+}
+package "Unhappy Path Events" {
+  :unhappy path event 1;
+  kill
+}
+@enduml

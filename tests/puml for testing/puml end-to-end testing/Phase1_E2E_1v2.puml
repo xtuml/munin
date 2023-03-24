@@ -1,12 +1,13 @@
 @startuml
+
 partition "Single Complex Job" {
 group "Single Sequence"
 
-  #green:SCJA1,LCNT,user=SCJS,name=LC3;
-  :SCJA2,BCNT,user=SCJK,name=BC2;
-  :SCJB1,LCNT,user=SCJE,name=LC1;
-  :SCJB2,LCNT,user=SCJD,name=LC2;
-  :SCJB3,IINV,name=InvariantA;
+  #green:SCJAa,BCNT,user=SCJK,name=BC2;
+  :SCJAb,LCNT,user=SCJS,name=LC3;
+  :SCJBa,LCNT,user=SCJE(0),name=LC1;
+  :SCJBb,LCNT,user=SCJD(1),name=LC2;
+  :SCJBc,IINV,name=SCJInvA;
   :SCJC;
   if (XOR) then ("error")
     #red:SCJR;
@@ -15,7 +16,7 @@ group "Single Sequence"
     fork
       repeat
         :SCJD;
-        :SCJE;
+        :SCJE,EINV,USER,name=AUTH_TOKEN_A;
         :SCJF;
       repeat while
       :SCJG;
@@ -31,11 +32,13 @@ group "Single Sequence"
       repeat while
     fork again
       :SCJK;
-      :SCJL;
+      :SCJL,EINV,USER,name=AUTH_TOKEN_A;
       :SCJM;
       if (XOR) then ("error")
         #red:SCJN;
         detach
+      else ("normal") 
+        :null; 
       endif    
     fork again
       :SCJP;
@@ -48,7 +51,7 @@ group "Single Sequence"
         :SCJE;
       repeat while
       :SCJF,BCNT,name=BC1;
-      :SCJD;
+      :SCJD,EINV,USER,name=AUTH_TOKEN_A;
       #red:SCJG;
       detach
     fork again
@@ -59,21 +62,10 @@ group "Single Sequence"
       #red:SCJE;
       detach
     end fork
-    :SCJH,IINV,USER,name=InvariantA;
+    :SCJH,IINV,USER,name=SCJInvA;
     #red:SCJJ;
     detach
   endif
 end group
-}
-@enduml
-@startuml
-package "Error Events" {
-("error 1")
-("error 2")
-("error 2")
-("error 3")
-("error 4")
-("error 5")
-("error 6")
 }
 @enduml

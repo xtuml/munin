@@ -1,0 +1,13 @@
+@startuml
+partition "File Transfer with loop count Definition" {
+  group "File Transfer with loop count"
+    #green:RequestFileLC;
+    :PacketiseFileLC,LCNT,user=TransferPacketLC,name=LC1;
+    repeat
+      :AssemblePacketLC;
+      :TransferPacketLC;
+    repeat while (loopCount)
+    #red:TransferResultStatusLC;
+  end group
+}  
+@enduml

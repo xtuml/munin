@@ -1,0 +1,73 @@
+@startuml
+partition "Multi Sequence Job" {
+group "MSJ Sequence Fan Out"
+  #green:MSJA,IINV,name=MSJInvA;
+  note right
+    This sources in Intra Job Invariant which is 
+    used in other sequences of the same job
+  end note
+  :MSJB,BCNT,user=MSJC,name=MSJBC1;
+  :MSJC;
+  note right 
+    Instance data will fan out at this point 
+    and merge in the Fan In Sequence
+  end note
+  #red:MSJD;
+  detach
+end group
+
+group "MSJ Sequence Fan In"
+  #green:MSJE;
+  :MSJF;
+  note right
+    Add a merge count on MSJA or MSJB with 
+    MSJF as the user event in Phase 2 testing
+  end note
+  :MSJG,IINV,USER,name=MSJInvA;
+  #red:MSJH,EINV,name=AUTH_TOKEN_A;
+  detach
+end group
+
+group "MSJ Sequence Main"
+
+  #green:MSJI,LCNT,user=MSJL(0),name=MSJLC1;
+  :MSJJ,LCNT,user=MSJL(1),name=MSJLC2,IINV,name=MSJInvA;
+  :MSJK,BCNT,user=MSJQ,name=MSJBC2;
+  if (XOR) then ("error")
+    #red:MSJZ;
+    detach
+  else ("normal")
+    fork
+      repeat
+        :MSJL;
+        :MSJM,EINV,USER,name=AUTH_TOKEN_A;
+        :MSJN;
+      repeat while
+      :MSJP;
+      repeat
+        :MSJL;
+        :MSJM;
+        if (XOR) then ("error")
+          :MSJY;
+          break
+        else ("normal")
+          :MSJN;
+        endif
+      repeat while
+    fork again
+      :MSJQ;
+      :MSJR,EINV,USER,name=AUTH_TOKEN_A;
+      :MSJS;
+      if (XOR) then ("error")
+        #red:MSJT;
+        detach
+      else ("normal")  
+      endif    
+    end fork
+    :MSJU,IINV,USER,name=MSJInvA;
+    #red:MSJV;
+    detach
+  endif
+end group
+}
+@enduml

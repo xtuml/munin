@@ -1,0 +1,19 @@
+/'
+
+Example - Extra Job Invariant Source Definition
+  
+'/
+
+@startuml 
+partition "Source Extra-Job Invariant Definition" {
+  group "Source Extra-Job Invariant"
+      #green:RequestEINV;
+      :GenerateEINV;
+      #red:SendEINV,EINV,SRC,name=FileTransferEINV;
+      note right 
+        SendEINV defines extra-job
+        invariant named FileTransferEINV.
+      end note
+  end group
+}
+@enduml

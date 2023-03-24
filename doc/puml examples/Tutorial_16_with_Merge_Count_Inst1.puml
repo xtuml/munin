@@ -1,0 +1,24 @@
+/'
+
+Tutorial - Branch and Merge Count Definition
+  
+'/
+
+@startuml 
+      #green:25,A;
+      :B,BCNT,name=Y,MCNT,user=D,name=Z;
+      note right 
+        B is source for both branch and merge count 
+        in this example.
+        It is also the user of the branch count 
+      end note
+      :C;
+      :D;
+      note right
+        D will be the merge point. In this simple
+        example the branch count and the merge count 
+        should be the same at runtime. In other scenarios
+        they could be different.
+      end note
+      #red:E;
+@enduml

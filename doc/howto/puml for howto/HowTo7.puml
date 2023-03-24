@@ -1,0 +1,18 @@
+@startuml
+partition "File Transfer with loop break Definition" {
+  group "File Transfer with loop break"
+    #green:RequestFileB;
+    :PacketiseFileB;
+    repeat
+      :AssemblePacketB;
+      :TransferPacketB;
+      if (XOR) then (break)
+        :CorruptedPacketErrorB;
+        break    
+      else (normal)
+      endif
+    repeat while (loopCount)
+    #red:TransferResultStatusB;
+  end group
+}  
+@enduml

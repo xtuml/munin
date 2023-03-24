@@ -1,0 +1,30 @@
+/'
+
+Tutorial - Mixed Logic Fork with possible Merge Topology
+  
+'/
+
+@startuml 
+partition "Mixed AND and XOR Logic Fork" {
+group "Mixed AND and XOR Logic Fork"
+      #green:A;
+      :B;
+  if (XOR) then ("e.g. normal")
+    fork
+      :C;
+    fork again  
+      :E;
+    fork again  
+      :F;
+    end fork  
+      :G;
+  else ("e.g. error")
+      #red:D;
+      detach
+  endif
+      :K;
+      #red:L;
+      detach
+end group
+}      
+@enduml

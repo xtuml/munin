@@ -1,0 +1,24 @@
+/'
+
+Tutorial - Exclusive OR Fork and Merge Topology
+  
+'/
+
+@startuml 
+partition "XOR Fork and Merge" {
+group "XOR Fork and Merge"
+  #green:A;
+  :B;
+  if (XOR) then ("e.g. normal")
+      :C;
+      :G;
+  else ("e.g. error")
+      :D;
+      :H;
+      :J;
+  endif
+  :K;
+  #red:L;
+end group
+}      
+@enduml
