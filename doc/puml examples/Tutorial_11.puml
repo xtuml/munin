@@ -1,0 +1,17 @@
+/'
+
+  Tutorial Sequence with Unconstrained Loop
+
+'/
+@startuml
+partition "Looping Job" {
+  group "Sequence with Loop"
+    #green:A;
+    repeat
+      :B;
+      :C;
+    repeat while
+    #red:D;
+  end group
+}
+@enduml

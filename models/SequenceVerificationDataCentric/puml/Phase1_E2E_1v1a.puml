@@ -1,0 +1,19 @@
+@startuml
+
+partition "Extra Job Invariant Source Job" {
+group "Extra Job Invariant Source Sequence"
+  :EINVSourceA;
+  note right
+    This job is the source of an extra job invariant 
+    used in several other jobs.
+    This file also contains 2 jobs.
+  end note
+  :EINVSourceB;
+  :EINVSourceC;
+  :EINVSourceB;
+  :EINVSourceC;
+  :EINVSourceD,EINV,name=AUTH_TOKEN_A;
+  detach
+end group
+}
+@enduml
