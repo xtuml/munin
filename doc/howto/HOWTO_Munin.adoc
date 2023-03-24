@@ -340,6 +340,9 @@ This splits into two main parts:
 * Specifying Job and Event Data Definitions
 * Configuring Runtime Parameters
 
+For a visual overview of the configuration of the Protocol Verifier (and the associated Audit Event Simulator) 
+click link:images/MUNIN_Configuration_Setup.pdf[here].
+
 === Specifying Job and Event Data Definitions
 
 Each protocol monitored by the Protocol Verifier needs a __Job
@@ -353,8 +356,10 @@ time, a runtime configuration file and job definition files need to be in
 place for the protocols being monitored. After this has been done
 initially, it needs to be repeated only to add or change the definitions of
 monitored jobs.  The configuration for the protocol verifier is found in
-the `config.json` file. This is loaded at start up and checked on a
+the `deploy` directory. This is loaded at start up and checked on a
 regular basis for updates.
+
+The structure of the `deploy` directory is shown link:images/MUNIN_Domains_and_Key_Interactions.pdf[here].
 
 ==== PLUS Job Definitions
 
@@ -848,6 +853,9 @@ file in the context of the build. We will use the `AEReception` domain for this.
 Each of the other domains follows a similar pattern. Not every file/directory
 seen here will exist in each domain project.
 
+For a visual overview of the top-level of the project directory structure click  
+link:images/MUNIN_Top_Level_Project_Directory_Structure.pdf[here].
+
 NOTE: Some files are marked by git as "ignored" these tend to be generated
 byproducts of the build that should not be committed to the repository (e.g.
 build logs, test results). Not every one of these files will be covered in the
@@ -870,6 +878,9 @@ section below, but it is good to be aware of them.
       docker-compose.test.yml
       docker-compose.yml
       Dockerfile
+
+For a visual overview of the directory structure for the AEReception domain 
+click link:images/AEReception_Directory_Structure.pdf[here].
 
 ==== `config`
 
@@ -959,6 +970,11 @@ TIP: I encourage you to take a moment before moving on to open each of these
 files in a text editor (you can double click them from the "Project Explorer"
 within BridgePoint) and briefly explore their contents.
 
+For completeness a visual overview of the top-level of the deployment directory structure is
+available by clicking link:images/MUNIN_Top_Level_Deployment_Directory_Structure.pdf[here], and
+a more detailed example for the AEO_SVDC deployment is illustrated by clicking 
+link:images/AEO_SVDC_Directory_Structure.pdf[here]
+
 === Export MASL
 
 . Open up BridgePoint. Assure that you have all of the source projects
@@ -1036,6 +1052,9 @@ TODO Check the following describes the deployment build process
 . Build the project with Docker by running the following command:
 
   docker compose build --no-cache
+  
+A graphical rendition of the deployment build process is depicted
+link:images/Building_a_Deployment.pdf[here].
 
 === Running the protocol verifier
 
