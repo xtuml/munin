@@ -1,0 +1,22 @@
+@startuml
+
+partition "Simple Job" {
+group "Simple Sequence"
+  #green:SimpA;
+  :SimpB;
+  fork
+    :SimpC;
+  fork again
+    :SimpD;
+  end fork
+  :SimpE;
+  if (XOR) then ("normal")
+    :SimpF;
+  else ("error")
+    :SimpG;
+  endif
+  #red:SimpH;
+end group
+}
+
+@enduml

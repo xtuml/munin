@@ -1,0 +1,113 @@
+{
+    "JobDefinitionName": "Simple Job",
+    "Events": [
+        {
+            "EventName": "SimpA",
+            "OccurrenceId": 0,
+            "SequenceName": "Simple Sequence",
+            "SequenceStart": true,
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SimpB",
+            "OccurrenceId": 0,
+            "SequenceName": "Simple Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SimpA",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SimpC",
+            "OccurrenceId": 0,
+            "SequenceName": "Simple Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SimpB",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "andfork1",
+                    "ConstraintValue": "AND"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SimpD",
+            "OccurrenceId": 0,
+            "SequenceName": "Simple Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SimpB",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "andfork1",
+                    "ConstraintValue": "AND"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SimpE",
+            "OccurrenceId": 0,
+            "SequenceName": "Simple Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SimpC",
+                    "PreviousOccurrenceId": 0
+                },
+                {
+                    "PreviousEventName": "SimpD",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SimpF",
+            "OccurrenceId": 0,
+            "SequenceName": "Simple Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SimpE",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "xorfork2",
+                    "ConstraintValue": "XOR"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SimpG",
+            "OccurrenceId": 0,
+            "SequenceName": "Simple Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SimpE",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "xorfork2",
+                    "ConstraintValue": "XOR"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SimpH",
+            "OccurrenceId": 0,
+            "SequenceName": "Simple Sequence",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SimpF",
+                    "PreviousOccurrenceId": 0
+                },
+                {
+                    "PreviousEventName": "SimpG",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        }
+    ]
+}
