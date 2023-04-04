@@ -14,13 +14,17 @@ eventFile : instance of EventFile;
 fileToBeProcessed : Filesystem::filename;
 lock: Filesystem::file_lock;
 fileAssigned : boolean := false;
+filePermissions : Filesystem::permissions;
 
 begin
 
 	// find a file to process
+	filePermissions.group.read := true;
+	filePermissions.other.read := true;
 	receptionSpec := find_one ReceptionSpec();
 	if not Filesystem::file_exists(Filesystem::filename(receptionSpec.incomingDirectory)) then
 		Filesystem::create_directory(Filesystem::filename(receptionSpec.incomingDirectory));
+		Filesystem::add_permissions(Filesystem::filename(receptionSpec.incomingDirectory),filePermissions);
 	end if;
 	fileNames := Filesystem::list_directory(Filesystem::filename(receptionSpec.incomingDirectory));
 	for currentFile in fileNames loop
@@ -44,7 +48,7 @@ begin
 		end;
 	end loop;
 	if fileAssigned = false then
-		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay @PT0S@;
+		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay receptionSpec.fileControlWaitTime;
 	end if;
 	
 end state;
@@ -100,7 +104,7 @@ begin
 		generate FileControl.checkForFile() to this;
 	else
 		// schedule to check for capacity. Should not be needed as conclusion of reception processing should force the check.
-		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay @PT1S@;
+		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay receptionSpec.fileControlWaitTime;
 	end if;
   
 end state;

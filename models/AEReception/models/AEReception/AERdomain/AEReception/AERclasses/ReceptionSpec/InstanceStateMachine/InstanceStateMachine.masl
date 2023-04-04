@@ -15,12 +15,14 @@ configJSONString : string;
 configJSONElement : JSON::JSONElement;
 configJSONObject : JSON::JSONObject;
 configValidationResult : JSON::JSONObject;
+filePermissions : Filesystem::permissions;
 
 begin
 	
 	logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded";
 	Logger::log(Logger::Information, "AEReception", logMessage);
-	
+	filePermissions.group.read := true;
+	filePermissions.other.read := true;
 	// check the config file has not been removed
 	fileName := Filesystem::filename(this.configFilePath & this.configFile);
 	if Filesystem::file_exists(fileName) then
@@ -65,6 +67,9 @@ begin
 			if configJSONObject'contains("SchemaValidateFrequency") then
 				this.schemaValidateFrequency := JSON::get_integer(configJSONObject["SchemaValidateFrequency"]);
 			end if;
+			if configJSONObject'contains("FileControlWaitTime") then
+				this.fileControlWaitTime := duration'parse(JSON::get_string(configJSONObject["FileControlWaitTime"]));
+			end if;
     	else
 			Logger::log(Logger::Debug, "AEReception", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
 			raise JSON::JSONException("Config file invalid");
@@ -90,10 +95,12 @@ begin
 		// check the processing directory exists and if not create it
 		if not Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) then
 			Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
+			Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
 		end if;
 		// check the outgoing directory exists and if not create it
 		if not Filesystem::file_exists(Filesystem::filename(this.outgoingDirectory)) then
 			Filesystem::create_directory(Filesystem::filename(this.outgoingDirectory));
+			Filesystem::add_permissions(Filesystem::filename(this.outgoingDirectory),filePermissions);
 		end if;
 		schedule fileControl.fileControlTimer generate FileControl.checkCapacity() to fileControl delay @PT0S@;
 	end if;

@@ -15,12 +15,15 @@ eventFile : instance of EventFile;
 jobEventFile : instance of JobEventFile;
 receptionSpec : instance of ReceptionSpec;
 jobEventFileLocation : string;
+filePermissions : Filesystem::permissions;
 
 begin
 
 //	logMessage := "AEReception::Reception.receiving_audit_event";
 //	Logger::log(Logger::Information, "AEReception", logMessage);
 
+	filePermissions.group.read := true;
+	filePermissions.other.read := true;
     // We may get a node name or an event.
     element_received := this.jsonElements[this.currentIndex];
     receptionSpec := find_one ReceptionSpec();
@@ -57,6 +60,7 @@ begin
                 	if Filesystem::file_exists(Filesystem::filename(jobEventFileLocation)) = false then
                 		begin
 	                		Filesystem::create_directory(Filesystem::filename(jobEventFileLocation));
+							Filesystem::add_permissions(Filesystem::filename(jobEventFileLocation),filePermissions);
 	                	exception
 	                		when others => null;
 	                	end;
@@ -111,11 +115,14 @@ logMessage : string;
 receptionSpec : instance of ReceptionSpec;
 eventFile : instance of EventFile;
 fileControl : instance of FileControl;
+filePermissions : Filesystem::permissions;
 
 begin
 	
 	logMessage := "AEReception::Reception.done";
 	Logger::log(Logger::Information, "AEReception", logMessage);
+	filePermissions.group.read := true;
+	filePermissions.other.read := true;
 
 	receptionSpec := find_one ReceptionSpec();
 	// keep the reception job until the deletion timer fires
@@ -130,6 +137,7 @@ begin
 	eventFile := this -> R2.EventFile;
 	if not Filesystem::file_exists(Filesystem::filename(receptionSpec.processedDirectory)) then
 		Filesystem::create_directory(Filesystem::filename(receptionSpec.processedDirectory));
+		Filesystem::add_permissions(Filesystem::filename(receptionSpec.processedDirectory),filePermissions);
 	end if;
 	if Filesystem::file_exists(Filesystem::filename(this.filePath)) then
 		Filesystem::move_file( Filesystem::filename(this.filePath), Filesystem::filename(receptionSpec.processedDirectory & "/" & eventFile.fileName));
