@@ -1,27 +1,13 @@
 @startuml
 
-partition "Extra Job Invariant Source Job" {
-group "Extra Job Invariant Source Sequence"
-  :EINVSourceA;
-  note right
-    This job is the source of an extra job invariant 
-    used in several other jobs.
-    This file also contains 2 jobs.
-  end note
-  :EINVSourceB;
-  :EINVSourceC;
-  :EINVSourceB;
-  :EINVSourceC;
-  :EINVSourceD,EINV,name=AUTH_TOKEN_A;
-  detach
-end group
-}
-
 partition "Single Complex Job" {
 group "Single Sequence"
 
   #green:SCJAa,BCNT,user=SCJK,name=BC2;
   :SCJAb,LCNT,user=SCJS,name=LC3;
+  note right
+    Note the single item of audit event data per audit event
+  end note
   :SCJBa,LCNT,user=SCJE(0),name=LC1;
   :SCJBb,LCNT,user=SCJD(1),name=LC2;
   :SCJBc,IINV,name=SCJInvA;
@@ -34,6 +20,9 @@ group "Single Sequence"
       repeat
         :SCJD;
         :SCJE,EINV,USER,name=AUTH_TOKEN_A;
+        note right
+          This is a user event for the extra job invariant sourced in Phase1_E2E_1v1a.puml
+        end note
         :SCJF;
       repeat while
       :SCJG;
@@ -56,6 +45,9 @@ group "Single Sequence"
         detach
       else ("normal") 
         :null; 
+        note right
+          This is present because an empty else clause is not yet supported
+        end note
       endif    
     fork again
       :SCJP;

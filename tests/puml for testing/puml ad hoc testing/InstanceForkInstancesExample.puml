@@ -1,0 +1,22 @@
+@startuml
+  note
+    This is an example instance view 
+    of the Instance Fork Example
+  end note
+  -[hidden]->
+  #green:25,IFSA;
+  :59,IFSB,25,IFBC1=3,IFMC1=3;
+  fork
+    :13,IFSC,59;
+    :60,IFSD,13;
+  fork again  
+    :17,IFSC,59;
+    :29,IFSD,17;
+  fork again
+    :33,IFSC,59;
+    :41,IFSD,33;  
+  end fork 
+    :15,IFSE,60,29,41; 
+    #red:44,IFSF,15;
+    detach
+@enduml
