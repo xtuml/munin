@@ -1,0 +1,19 @@
+@startuml
+partition "Switch Job" {
+
+group "Switch Sequence"
+
+  #green:XA;
+        switch (XOR)
+        case ("alternative1")
+          :XB;
+        case ("alternative2")
+          :XC;
+        case ("alternative3")
+        endswitch
+
+    #red:XD;
+
+end group
+}
+@enduml

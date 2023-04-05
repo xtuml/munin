@@ -1,0 +1,21 @@
+@startuml
+partition "Nested AND XOR Job" {
+
+group "Nested AND XOR Sequence"
+
+  #green:NAXA;
+    fork
+        if (XOR) then ("error")
+          :NAXB;
+        else ("normal")
+          :NAXC;
+        endif
+    fork again
+      :NAXD;
+      :NAXE;
+    end fork
+    #red:NAXF;
+  endif
+end group
+}
+@enduml

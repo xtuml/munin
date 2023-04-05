@@ -1,0 +1,20 @@
+@startuml
+partition "Instance Fork Job" {
+
+group "Instance Fork Sequence"
+
+  #green:IFSA;
+  :IFSB,BCNT,user=IFSB,name=IFBC1,MCNT,user=IFSE,name=IFMC1>
+  note right
+    Proposed symbol for fork symbolising fan out
+  end note
+  :IFSC;
+  :IFSD;
+  :IFSE<
+  note right
+    Proposed symbol for merge symbolising fan in
+  end note
+  #red:IFSF;
+end group
+}
+@enduml

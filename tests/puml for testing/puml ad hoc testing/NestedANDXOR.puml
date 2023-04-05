@@ -1,0 +1,21 @@
+@startuml
+partition "job" {
+  group "sequence"
+    #green:A;
+    if (XOR) then (one)
+      fork 
+        :B;
+      fork again
+        :D;
+      end fork
+    else (other)   
+      fork
+        :C;
+      fork again
+        :D;
+      end fork
+    endif  
+    #red:E;
+  end group  
+}
+@enduml

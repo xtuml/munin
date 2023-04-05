@@ -1,0 +1,20 @@
+@startuml
+partition "XOR Job" {
+
+group "XOR Sequence"
+
+  #green:XA;
+        if (XOR) then ("error")
+          :XB;
+        else  
+          ->"normal";
+          note right
+            The else clause carries the labelled arrow
+          end note
+        endif
+
+    #red:XD;
+
+end group
+}
+@enduml
