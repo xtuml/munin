@@ -81,6 +81,10 @@ begin
     Logger::log(Logger::Information, "AEOrdering", logMessage);
 	filePermissions.group.read := true;
 	filePermissions.other.read := true;
+	filePermissions.group.write := true;
+	filePermissions.other.write := true;
+	filePermissions.group.execute := true;
+	filePermissions.other.execute := false;
     
     // check the config file has not been removed
     fileName := Filesystem::filename(this.configFilePath & this.configFile);
@@ -109,24 +113,24 @@ begin
                 // check if the directory exists and if not create it
 				if Filesystem::file_exists(Filesystem::filename(this.incomingDirectory)) = false then
 					Filesystem::create_directory(Filesystem::filename(this.incomingDirectory));
-					Filesystem::add_permissions(Filesystem::filename(this.incomingDirectory),filePermissions);
 				end if;
+				Filesystem::add_permissions(Filesystem::filename(this.incomingDirectory),filePermissions);
             end if;
             if configJSONObject'contains("ProcessingDirectory") then
                 this.processingDirectory := JSON::get_string(configJSONObject["ProcessingDirectory"]);
                 // check if the directory exists and if not create it
 				if Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) = false then
 					Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
-					Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
 				end if;
+				Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
             end if;
             if configJSONObject'contains("ProcessedDirectory") then
                 this.processedDirectory := JSON::get_string(configJSONObject["ProcessedDirectory"]);
                 // check if the directory exists and if not create it
 				if Filesystem::file_exists(Filesystem::filename(this.processedDirectory)) = false then
 					Filesystem::create_directory(Filesystem::filename(this.processedDirectory));
-					Filesystem::add_permissions(Filesystem::filename(this.processedDirectory),filePermissions);
 				end if;
+				Filesystem::add_permissions(Filesystem::filename(this.processedDirectory),filePermissions);
             end if;
             if configJSONObject'contains("JobStoreLocation") then
                 jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);

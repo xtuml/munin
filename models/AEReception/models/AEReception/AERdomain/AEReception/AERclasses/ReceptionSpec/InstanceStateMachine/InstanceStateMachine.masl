@@ -23,6 +23,8 @@ begin
 	Logger::log(Logger::Information, "AEReception", logMessage);
 	filePermissions.group.read := true;
 	filePermissions.other.read := true;
+	filePermissions.group.write := true;
+	filePermissions.other.write := true;
 	// check the config file has not been removed
 	fileName := Filesystem::filename(this.configFilePath & this.configFile);
 	if Filesystem::file_exists(fileName) then
@@ -92,16 +94,25 @@ begin
 	fileControl := find_one FileControl();
 	if fileControl = null then
 		fileControl := create unique FileControl(schemaValidationCount => 0, Current_State => Created);
+		filePermissions.group.read := true;
+		filePermissions.other.read := true;
+		filePermissions.group.write := true;
+		filePermissions.other.write := true;
+		// check the incoming directory exists and if not create it
+		if not Filesystem::file_exists(Filesystem::filename(this.incomingDirectory)) then
+			Filesystem::create_directory(Filesystem::filename(this.incomingDirectory));
+		end if;
+		Filesystem::add_permissions(Filesystem::filename(this.incomingDirectory),filePermissions);
 		// check the processing directory exists and if not create it
 		if not Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) then
 			Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
-			Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
 		end if;
+		Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
 		// check the outgoing directory exists and if not create it
 		if not Filesystem::file_exists(Filesystem::filename(this.outgoingDirectory)) then
 			Filesystem::create_directory(Filesystem::filename(this.outgoingDirectory));
-			Filesystem::add_permissions(Filesystem::filename(this.outgoingDirectory),filePermissions);
 		end if;
+		Filesystem::add_permissions(Filesystem::filename(this.outgoingDirectory),filePermissions);
 		schedule fileControl.fileControlTimer generate FileControl.checkCapacity() to fileControl delay @PT0S@;
 	end if;
 	

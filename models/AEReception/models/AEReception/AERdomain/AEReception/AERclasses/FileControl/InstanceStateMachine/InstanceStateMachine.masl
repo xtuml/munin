@@ -19,13 +19,7 @@ filePermissions : Filesystem::permissions;
 begin
 
 	// find a file to process
-	filePermissions.group.read := true;
-	filePermissions.other.read := true;
 	receptionSpec := find_one ReceptionSpec();
-	if not Filesystem::file_exists(Filesystem::filename(receptionSpec.incomingDirectory)) then
-		Filesystem::create_directory(Filesystem::filename(receptionSpec.incomingDirectory));
-		Filesystem::add_permissions(Filesystem::filename(receptionSpec.incomingDirectory),filePermissions);
-	end if;
 	fileNames := Filesystem::list_directory(Filesystem::filename(receptionSpec.incomingDirectory));
 	for currentFile in fileNames loop
 		begin

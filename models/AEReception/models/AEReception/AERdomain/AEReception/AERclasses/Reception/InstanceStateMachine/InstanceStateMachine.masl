@@ -24,6 +24,8 @@ begin
 
 	filePermissions.group.read := true;
 	filePermissions.other.read := true;
+	filePermissions.group.write := true;
+	filePermissions.other.write := true;
     // We may get a node name or an event.
     element_received := this.jsonElements[this.currentIndex];
     receptionSpec := find_one ReceptionSpec();
@@ -123,6 +125,8 @@ begin
 	Logger::log(Logger::Information, "AEReception", logMessage);
 	filePermissions.group.read := true;
 	filePermissions.other.read := true;
+	filePermissions.group.write := true;
+	filePermissions.other.write := true;
 
 	receptionSpec := find_one ReceptionSpec();
 	// keep the reception job until the deletion timer fires
