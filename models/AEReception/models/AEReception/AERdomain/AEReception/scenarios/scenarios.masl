@@ -16,9 +16,11 @@ begin
 	if Filesystem::file_exists(Filesystem::filename(configFilePath & configFile)) then
 		receptionSpec := find_one ReceptionSpec();
 		if receptionSpec = null then
-			receptionSpec := create unique ReceptionSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, incomingDirectory => "./incoming", 
-				                                   processingDirectory => "./processing", processedDirectory => "./processed", 
-				                                   eventThrottleRate => @PT1S@, receptionDeletionTime => @PT10M@, concurrentReceptionLimit => 1, Current_State => Created);
+			receptionSpec := create unique ReceptionSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, 
+				                                   incomingDirectory => "./incoming", processingDirectory => "./processing", 
+				                                   processedDirectory => "./processed", eventThrottleRate => @PT1S@, 
+				                                   receptionDeletionTime => @PT10M@, concurrentReceptionLimit => 1, 
+				                                   fileControlWaitTime => @PT1S@, Current_State => Created);
 		end if;
 		generate ReceptionSpec.loadConfig() to receptionSpec;
 	else
