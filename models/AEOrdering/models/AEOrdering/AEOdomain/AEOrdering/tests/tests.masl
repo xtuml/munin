@@ -1446,7 +1446,6 @@ begin
 	
 	// run the job again and verify that the job has not been created
 	fileControl := find_one FileControl();
-	fileControl.currentJobGroup := 1;
 	Filesystem::copy_file(testFileDir & testFile1, incomingDir & testFile1);
 	Filesystem::move_file(incomingDir & testFile1, targetDirectory & testFile1);
 	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));

@@ -73,11 +73,18 @@ today : sequence of integer;
 midnight : timestamp;
 fileControl : instance of FileControl;
 invariantStoreLoadRate : duration;
+filePermissions : Filesystem::permissions;
 
 begin
     
     logMessage := "AEOrdering::SystemSpec.ConfigUpdated";
     Logger::log(Logger::Information, "AEOrdering", logMessage);
+	filePermissions.group.read := true;
+	filePermissions.other.read := true;
+	filePermissions.group.write := true;
+	filePermissions.other.write := true;
+	filePermissions.group.execute := true;
+	filePermissions.other.execute := false;
     
     // check the config file has not been removed
     fileName := Filesystem::filename(this.configFilePath & this.configFile);
@@ -107,6 +114,7 @@ begin
 				if Filesystem::file_exists(Filesystem::filename(this.incomingDirectory)) = false then
 					Filesystem::create_directory(Filesystem::filename(this.incomingDirectory));
 				end if;
+				Filesystem::add_permissions(Filesystem::filename(this.incomingDirectory),filePermissions);
             end if;
             if configJSONObject'contains("ProcessingDirectory") then
                 this.processingDirectory := JSON::get_string(configJSONObject["ProcessingDirectory"]);
@@ -114,6 +122,7 @@ begin
 				if Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) = false then
 					Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
 				end if;
+				Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
             end if;
             if configJSONObject'contains("ProcessedDirectory") then
                 this.processedDirectory := JSON::get_string(configJSONObject["ProcessedDirectory"]);
@@ -121,6 +130,7 @@ begin
 				if Filesystem::file_exists(Filesystem::filename(this.processedDirectory)) = false then
 					Filesystem::create_directory(Filesystem::filename(this.processedDirectory));
 				end if;
+				Filesystem::add_permissions(Filesystem::filename(this.processedDirectory),filePermissions);
             end if;
             if configJSONObject'contains("JobStoreLocation") then
                 jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);
@@ -134,6 +144,9 @@ begin
                 	this.invariantStoreLoadRate := invariantStoreLoadRate;
                 	Req_IF_InvariantStore~>setLoadRate(this.invariantStoreLoadRate);
                 end if;
+            end if;
+            if configJSONObject'contains("FileControlWaitTime") then
+                this.fileControlWaitTime := duration'parse(JSON::get_string(configJSONObject["FileControlWaitTime"]));
             end if;
             // read in the jobs that we expect to process
             if configJSONObject'contains("Jobs") and configJSONObject["Jobs"].kind = JSON::Array then
@@ -175,6 +188,7 @@ begin
                             raise JSON::JSONException("Config file invalid");
                         end if;
                     else
+                        Logger::log(Logger::Debug, "AEOrdering", "Job config file not found: " & this.configFilePath & jobType.jobTypeName & ".json");
                         raise program_error;
                     end if;
                 end loop;
