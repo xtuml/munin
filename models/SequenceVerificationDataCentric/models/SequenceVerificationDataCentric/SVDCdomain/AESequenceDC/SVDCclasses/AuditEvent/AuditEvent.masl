@@ -17,6 +17,8 @@ theJobDef : instance of JobDefinition;
 newSequence : instance of Sequence;
 logMessage : string;
 creationErrorMessage : string;
+eventDataCheckHasPassed : boolean;
+failureReason : string;
 
 empty : sequence of string;
 emptyString : sequence of string := empty & ("");
@@ -58,6 +60,11 @@ begin
         // Process the audit event data for this new event      
         newEvent.ProcessAuditEventData (aeData);
       
+        // ...and then check that the received audit event data matches that which is expected
+        newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+        if eventDataCheckHasPassed /= true then
+          newJob.failJob(failureReason);
+        end if;
         
       else
         newJob.failJob("Invalid audit event definition for a start event in job definition = " & theJobDef.jobName & " since the occurrenceNumberInSequence is expected to be 1");    
@@ -373,5 +380,68 @@ totalDynamicControls : set of instance of DynamicControl;
       end service;
 //
 //
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'e261f65f-eac2-47c7-beee-253b667a440a' DO NOT EDIT THIS LINE.
+public instance service AESequenceDC::AuditEvent.CheckEventCarriesExpectedEventData ( checkHasPassed : out boolean,
+                                                                                     failureReason : out string ) is
+theEventOccurrenceInSeqDef : instance of AEOccurrenceInSequenceDefinition;
+theExpectedSourceDynamicControlDefs : set of instance of DynamicControlDefinition;
+theExpectedUsageDynamicControlDef : instance of DynamicControlDefinition;
+theExpectedSourceExtraJobInvariantDef : instance of ExtraJobInvariantDefn;
+theExpectedUsageExtraJobInvariantDef : instance of ExtraJobInvariantDefn;
+theExpectedCarriedIntraJobInvariantDef : instance of IntraJobInvariantDefn;
+
+theReceivedSourceDynamicControlDefs : set of instance of DynamicControlDefinition;
+theReceivedUsageDynamicControlDef : instance of DynamicControlDefinition;
+theReceivedProvidedExtraJobInvariantDef : instance of ExtraJobInvariantDefn;
+theReceivedCarriedExtraJobInvariantDef : instance of ExtraJobInvariantDefn;
+theReceivedCarriedExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
+theReceivedCarriedIntraJobInvariantDef : instance of IntraJobInvariantDefn;
+theReceivedCarriedIntraJobInvariantDefn : instance of IntraJobInvariantDefn;
+logMessage : string;
+
+begin
+  // TODO: Remove the following log message - just for debug
+  logMessage := "Checking received event data against definition";
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	
+  // Initialise return parameters
+  checkHasPassed := true;
+  failureReason := "";
+  
+  // Find the definitions for the EXPECTED and RECEIVED DynamicControls, ExtraJobInvariants and IntraJobInvariants associated with this received event.
+  theEventOccurrenceInSeqDef := this -> R13;
+  
+  theExpectedSourceDynamicControlDefs := theEventOccurrenceInSeqDef -> R30;
+  theExpectedUsageDynamicControlDef := theEventOccurrenceInSeqDef -> R31;
+  theExpectedSourceExtraJobInvariantDef := theEventOccurrenceInSeqDef -> R20;
+  theExpectedUsageExtraJobInvariantDef := theEventOccurrenceInSeqDef -> R21;
+  theExpectedCarriedIntraJobInvariantDef := theEventOccurrenceInSeqDef -> R19;
+  
+  theReceivedSourceDynamicControlDefs := this -> R37 -> R29;
+  theReceivedUsageDynamicControlDef := this -> R36 -> R29;
+  theReceivedProvidedExtraJobInvariantDef := this -> R27 -> R24;
+  theReceivedCarriedExtraJobInvariantDefn := this -> R23 -> R28;
+  theReceivedCarriedIntraJobInvariantDefn := this -> R23 -> R26;
+  
+  //if theExpectedSourceDynamicControlDefs /= theReceivedSourceDynamicControlDefs then
+  //  checkHasPassed := false;
+  //  failureReason := "The dynamic controls provided as sources on received on event: " & this.AuditEventId & " do not match what was expected in the definition";
+  //elsif theExpectedUsageDynamicControlDef /= theReceivedUsageDynamicControlDef then
+  //  checkHasPassed := false;
+  //  failureReason := "The dynamic control usage received on event: " & this.AuditEventId & " does not match what was expected in the definition";
+  if theExpectedSourceExtraJobInvariantDef /= theReceivedProvidedExtraJobInvariantDef then
+    checkHasPassed := false;
+    failureReason := "The PROVIDED extra job invariant expected on received event: " & this.AuditEventId & " does not match what was expected in the definition";
+  elsif theExpectedUsageExtraJobInvariantDef /= theReceivedCarriedExtraJobInvariantDefn then
+    checkHasPassed := false;
+    failureReason := "The CARRIED extra-job invariant expected on received event: " & this.AuditEventId & " does not match what was expected in the definition";
+  elsif theExpectedCarriedIntraJobInvariantDef /= theReceivedCarriedIntraJobInvariantDefn then
+    checkHasPassed := false;
+    failureReason := "The CARRIED intra-job invariant expected on received event: " & this.AuditEventId & " does not match what was expected in the definition";
+  end if;
+  
+end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

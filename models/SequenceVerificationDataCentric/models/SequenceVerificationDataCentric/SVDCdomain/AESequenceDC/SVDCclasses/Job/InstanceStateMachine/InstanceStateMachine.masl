@@ -65,7 +65,8 @@ instanceForkFound : boolean;
 logMessage : string;
 failureMessage : string;
 creationErrorMessage : string;
-
+eventDataCheckHasPassed : boolean;
+failureReason : string;
 
 begin
   // Check to see if we've seen this event instance before
@@ -155,6 +156,12 @@ begin
                     if auditEventDataProcessed = false then
                       newEvent.ProcessAuditEventData (aeData);
                       auditEventDataProcessed := true;
+                      
+                      // ...and then check that the received audit event data matches that which is expected
+                      newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+                      if eventDataCheckHasPassed /= true then
+                        this.failJob(failureReason);
+                      end if;
                     end if;  
       
 
@@ -410,10 +417,15 @@ begin
 
 
 
-          // Process the audit event data for this first event
-          newEvent.ProcessAuditEventData (aeData);    
-
-        
+          // Process the audit event data for this new event
+          newEvent.ProcessAuditEventData (aeData);
+          
+          // ...and then check that the received audit event data matches that which is expected
+          newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+          if eventDataCheckHasPassed /= true then
+            this.failJob(failureReason);
+          end if;
+          
         else
           // We have a valid new event type and no previous event. This should indicate the start of
           // a new sequence within a Job yet the definition is ambiguous about which start event it is
