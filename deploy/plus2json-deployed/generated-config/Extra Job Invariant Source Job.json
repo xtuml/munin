@@ -1,0 +1,73 @@
+{
+    "JobDefinitionName": "Extra Job Invariant Source Job",
+    "Events": [
+        {
+            "EventName": "EINVSourceA",
+            "OccurrenceId": 0,
+            "SequenceName": "Extra Job Invariant Source Sequence",
+            "SequenceStart": true,
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "EINVSourceB",
+            "OccurrenceId": 0,
+            "SequenceName": "Extra Job Invariant Source Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "EINVSourceA",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "EINVSourceC",
+            "OccurrenceId": 0,
+            "SequenceName": "Extra Job Invariant Source Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "EINVSourceB",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "EINVSourceB",
+            "OccurrenceId": 1,
+            "SequenceName": "Extra Job Invariant Source Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "EINVSourceC",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "EINVSourceC",
+            "OccurrenceId": 1,
+            "SequenceName": "Extra Job Invariant Source Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "EINVSourceB",
+                    "PreviousOccurrenceId": 1
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "EINVSourceD",
+            "OccurrenceId": 0,
+            "SequenceName": "Extra Job Invariant Source Sequence",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "EINVSourceC",
+                    "PreviousOccurrenceId": 1
+                }
+            ],
+            "Application": "default_application_name"
+        }
+    ]
+}
