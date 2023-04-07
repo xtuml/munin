@@ -1,0 +1,202 @@
+= Prometheus Metrics Exporter for Protocol Verifier
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+A mechanism is needed to expose relevant metrics to a Prometheus server from
+the Protocol Verifier (PV) application. This note summaries the investigation
+that has taken place.
+
+== 2 Introduction and Background
+
+Prometheus is a well known time-series database server used for monitoring key
+metrics of long running applications (<<dr-2>>). Sources of metrics must expose
+an HTTP interface to the Prometheus server which is configured to scrape data
+from the sources at pre-defined intervals. There are many "off the shelf"
+exporters for common applications and there are also client libraries in many
+programming languages to support creation of custom exporters.
+
+== 3 Requirements
+
+=== 3.1 Exporter
+
+An exporter must be provided to connect key metrics produced by the PV to the
+Prometheus server.
+
+=== 3.2 Flexibility
+
+The exporter mechanism chosen should be flexible enough to support emerging
+requirements surrounding metrics. It should be able to handle a variety of
+metric types.
+
+=== 3.3 Extensibility
+
+The exporter mechanism must be able to be extended with additional metrics even
+after initial integration. This should be handled through configuration data.
+
+== 4 Analysis
+
+=== 4.1 Custom Exporter
+
+The initial investigation explored the possibility of creating a custom metrics
+exporter with bindings for MASL. This could be done either through a utility
+domain with custom code calling out to existing client libraries or through a
+modeled domain that makes use of some custom code or a mixture of both. This
+approach has the benefit of full customizability, however it comes with an
+overhead cost of development and maintenance.
+
+=== 4.2 `grok_exporter`
+
+Before committing to a custom exporter implementation, the list of off the
+shelf exporters was evaluated.
+
+`grok_exporter` (<<dr-3>>) is an exporter implementation that uses `grok` under
+the hood to parse logs using regular expressions and produce structured data.
+If the PV logs were stored in files, `grok_exporter` could be used to parse
+them and provide structured metrics data to Prometheus.
+
+=== 4.3 Log configuration
+
+The MASL C++ compiler provides a builtin logging domain. The domain is wrapper
+around the Poco library implementation of logging (<<dr-4>>). Loggers can be
+configured via an XML-based configuration file. The configuration includes log
+filtering by level, formatting, persisting and log rotating and more. There is
+plenty of flexibility to maintain our current console logging behavior and
+redirect logs to specific file locations for consumption by `grok_exporter`.
+
+Here is an example of a logging configuration file used in the proof of
+concept:
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<log>
+  <logger>
+    <name>AEOrdering</name>
+    <filter>
+      <minlevel>debug</minlevel>
+      <format>
+        <pattern><timestamp/> <priority/>: <name/>: <message/></pattern>
+        <stderr/>
+      </format>
+      <format>
+        <pattern><param name="instance_index" default="0"/> <message/></pattern>
+        <file>
+          <path>/var/log/AEOrdering/<param name="instance_index" default="0"/>.log</path>
+          <archive>
+            <rotate>
+              <size units="MiB">5</size>
+            </rotate>
+          </archive>
+         </file>
+      </format>
+    </filter>
+  </logger>
+</log>
+----
+
+This file declares a logger called "AEOrdering" which filters for all logs with
+level debug or higher. The stream then forks and the logs are printed to
+standard error in one format and also stored to a file in a second format. The
+file is rotated every 5 MiB. The file name is also based on the "instance
+index" to assure that every distinct instance of the protocol verifier gets its
+own log file.
+
+The path to this log config file and the value of "instance_index" is provided
+on the command line when the PV instance is launched (the command line is
+configured in the `docker-compose.yml` file).
+
+=== 4.4 `grok_exporter` configuration
+
+The actual mapping of logs to metrics is done in the configuration of
+`grok_exporter`. Below is an example of the config file used in the proof of
+concept:
+
+[source,yaml]
+----
+global:
+  config_version: 3
+input:
+  type: file
+  path: /var/log/AEOrdering/*.log
+  #readall: true
+  fail_on_missing_logfile: false
+imports:
+- type: grok_patterns
+  dir: ./logstash-patterns-core/patterns
+metrics:
+- type: counter
+  name: aeordering_events_processed
+  help: Number of events processed by the AEOrdering domain.
+  match: '%{NUMBER:pv_index} AEOrdering::AcceptEvent - jobId = %{UUID:job_id}, auditEventType = %{WORD:event_type}, auditEventId = %{UUID}'
+  labels:
+    pv_index: '{{.pv_index}}'
+    job_id: '{{.job_id}}'
+    event_type: '{{.event_type}}'
+server:
+  port: 9144
+----
+
+Each metric is defined in the "metrics" section. It is given a name and
+description. The "match" property is a regular expression used to match lines
+in the logs. Labels can be applied to each metric to provide additional
+metadata which can be queried in Prometheus. In this example a single metric
+"aeordering_events_processed" is configured as the "counter" type
+(monotonically increasing numerical value). This metric is incremented for
+every occurrence of the log specified by the "match" property. In our case,
+this log is printed each time the public service "AEOrdering::AcceptEvent" is
+invoked and so this metric tracks the number of incoming events received by the
+AEOrdering domain. `grok_exporter` aggregates the count of all occurrences of
+the log which have a unique set of labels on each scrape. The interval between
+scrapes can be specified in the Prometheus configuration.
+
+=== 4.5 Implementation considerations
+
+This proof of concept demonstrated that we could export metrics from the PV
+verifier to Prometheus without the need to implement a custom exporter and
+without the need to change the PV code itself. The only code changes required
+were configuration details. This provides all the flexibility we will need and
+avoids the maintenance headaches of a custom solution.
+
+==== 4.5.1 Dependence on Regex Matching
+
+One downside of this mechanism is that it relies on regular expression matching
+of logs. This has the potential to be brittle and lead to loss of data with
+little or no indication that the data is no longer being collected. It would be
+extremely easy for an engineer to change the format of a log message without
+realizing that it is being used for a key metric. It would also be easy to
+unintentionally duplicate logs which are being counted and in so doing skew the
+value of the metric itself.
+
+A solution to this problem would be to create an intermediate domain for metric
+logging with a rigid interface, but internally forward the calls to the logger.
+In this way we maintain the convenience and flexibility of log scraping while
+enforcing a more explicit interface in the code.
+
+==== 4.5.2 Logger names, PV instances, and log file locations
+
+A reasonable convention should be chosen for naming loggers and log files. It
+may be advantages to separate logs coming from different instances of the PV.
+Additionally, since the logger can be specified in MASL, there may be utility
+in defining multiple logging configurations for different situations. This
+needs to be considered at the time of implementation.
+
+== 5 Work Required
+
+At the moment, no further work is proposed. This work proves the concept and it
+would be wasted effort to go forward until we have a better idea of the full
+set of metrics we wish to capture. A basic setup of `grok_exporter` and
+Prometheus will be required. For each metric, the proper log format must be
+chosen and implemented in the MASL domains and then the corresponding metric
+configuration including regular expression must be configured in the
+`grok_exporter` config file. We may have a handful of metrics that we can be
+configured right away with no changes to the existing logs.
+
+== 6 Document References
+
+. [[dr-1]] https://onefact.atlassian.net/browse/MUN2-17[Investigate and provide a MASL interface for Prometheus]
+. [[dr-2]] https://prometheus.io[Prometheus homepage]
+. [[dr-3]] https://github.com/fstab/grok_exporter[`grok_exporter` (GitHub)]
+. [[dr-4]] https://pocoproject.org/slides/110-Logging.pdf[Poco Logging Framework]
+
