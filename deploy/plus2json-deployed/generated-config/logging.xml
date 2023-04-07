@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<log>
+  <logger>
+    <name>AEOrdering</name>
+    <filter>
+      <minlevel>debug</minlevel>
+      <format>
+        <pattern><timestamp/> <priority/>: <name/>: <message/></pattern>
+        <stderr/>
+      </format>
+      <format>
+        <pattern><param name="instance_index" default="0"/> <message/></pattern>
+        <file>
+          <path>/var/log/AEOrdering/<param name="instance_index" default="0"/>.log</path>
+          <archive>
+            <rotate>
+              <size units="MiB">5</size>
+            </rotate>
+          </archive>
+         </file>
+      </format>
+    </filter>
+  </logger>
+</log>

@@ -1,0 +1,21 @@
+global:
+  config_version: 3
+input:
+  type: file
+  path: /var/log/AEOrdering/*.log
+  #readall: true
+  fail_on_missing_logfile: false
+imports:
+- type: grok_patterns
+  dir: ./logstash-patterns-core/patterns
+metrics:
+- type: counter
+  name: aeordering_events_processed
+  help: Number of events processed by the AEOrdering domain.
+  match: '%{NUMBER:pv_index} AEOrdering::AcceptEvent - jobId = %{UUID:job_id}, auditEventType = %{WORD:event_type}, auditEventId = %{UUID}'
+  labels:
+    pv_index: '{{.pv_index}}'
+    job_id: '{{.job_id}}'
+    event_type: '{{.event_type}}'
+server:
+  port: 9144
