@@ -12,6 +12,8 @@ end structure;
         invariantName : in string,        invariantValue : in string,        validFrom : in timestamp,        validTo : in timestamp,        sourceJobDefinitionType : in string,        sourceAuditEventType : in string,        sourceAuditEventOccurrenceId : in integer    );
     public service setLoadRate (
         loadRate : in duration    );
+    public service restoreNamedInvariant (
+        invariantName : in string,        invariantValue : in string    );
   terminator StoreClient is
     public service addInvariants (
         invariantsToReport : in sequence of persistedInvariantStructure    );

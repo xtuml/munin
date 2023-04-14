@@ -9,12 +9,10 @@ reportedAuditEvent : instance of ReportedAuditEvent;
 theAuditEventData : AuditEventDataType;
 reportableAuditEventData : ReportableAuditEventDataType;
 allReportableAuditEventData : sequence of ReportableAuditEventDataType;
+eventContent : string;
 
 begin
-	
-	logMessage := "AEOrdering::ReportedAuditEvent.reportEvent";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
+		
 	this.eventReportedTime := timestamp'now;
 	
 	// report the event
@@ -57,8 +55,10 @@ begin
 			followedByEvent.eventState := EventStateEnum.REPORTED;
 			reportedAuditEvent.reportEvent();
 		else
-			logMessage := "AEOrdering::ReportedAuditEvent.reportEvent, followed by event was not blocked";
-			Logger::log(Logger::Error, "Monitored System Failure", logMessage);
+			logMessage := "AEOrdering::ReportedAuditEvent.reportEvent : followed by event was not blocked, jobId " & job.jobId & ", eventId " & this.auditEventId;
+			Logger::log(Logger::Error, "AEOrdering", logMessage);
+			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEvent.auditEventId & " EventType = " & auditEvent.eventType  & " : FailureReason = followed by event was not blocked";
+			Reporting~>reportEvent(Logger::Error, "verifier_failure", eventContent);
 			raise program_error;
 		end if;
 	end loop;

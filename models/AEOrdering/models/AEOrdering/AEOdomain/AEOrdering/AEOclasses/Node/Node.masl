@@ -10,8 +10,6 @@ eventType : instance of AuditEventType;
 validEvent : boolean := true;
 
 begin
-	logMessage := "AEOrdering::Node.validEvent";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
 
 	node := find_one Node(nodeName = auditEvent.reportedNodeName);
 	nodeApplications := node -> R5.Application;
