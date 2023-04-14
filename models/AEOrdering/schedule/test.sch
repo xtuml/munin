@@ -17,7 +17,6 @@ RUN SCENARIO Test 1 "run_test" [AEOrdering testDeprecatedJob 3]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testConfigFile 10]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testInjestFile 13]
 
-
 # done
 TERMINATE
 
