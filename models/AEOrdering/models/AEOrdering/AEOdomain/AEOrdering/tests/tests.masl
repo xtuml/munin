@@ -1424,6 +1424,8 @@ begin
 	systemSpec.configFile := configFile;
 	Filesystem::touch_file(Filesystem::filename(systemSpec.configFilePath & configFile));
     
+    // verify the event definitions and event data definitions are correct
+    
 	// fire the timer to check the config file
 	generate SystemSpec.checkConfigUpdate() to systemSpec;
 	Test::service_event_queue();
