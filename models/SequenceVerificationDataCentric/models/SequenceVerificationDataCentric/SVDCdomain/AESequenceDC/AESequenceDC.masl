@@ -5,7 +5,7 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. 'f0cb0136-029a-49bd-8e9d-ec5bac662eaa' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'd2842398-7991-4ab0-8542-8416cf13f85b' DO NOT EDIT THIS LINE.
 public service AESequenceDC::Persistence_Req_IF~>PersistInvariant ( extraJobInvariantName : in string,
                                                                    invariantValue : in string,
                                                                    validFrom : in timestamp,
@@ -17,22 +17,31 @@ logMessage : string;
 
 begin
 
-  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
+  logMessage := "AESequenceDC::Persistence_Req_IF~>PersistInvariant : PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
   Logger::log(Logger::Information, "AESequenceDC", logMessage);
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. '36acd8e4-80e2-45d4-8b9c-dadf7efdc5f3' DO NOT EDIT THIS LINE.
+//! ACTIVITY BEGIN. 'bc7d23ca-6429-4a37-b8bb-dfeda616a204' DO NOT EDIT THIS LINE.
 public service AESequenceDC::Persistence_Req_IF~>RestoreNamedInvariant ( extraJobInvariantName : in string,
                                                                         invariantValue : in string ) is
 logMessage : string;
 
 begin
 
-  logMessage := "PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
+  logMessage := "AESequenceDC::Persistence_Req_IF~>PersistInvariant : PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
   Logger::log(Logger::Information, "AESequenceDC", logMessage);
   
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '345f61e4-64b9-4213-8b91-08e058900d37' DO NOT EDIT THIS LINE.
+public service AESequenceDC::Reporting~>reportEvent ( eventPriority : in Logger::Priority,
+                                                     eventLabel : in string,
+                                                     eventContent : in string ) is
+begin
+	Logger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

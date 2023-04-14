@@ -12,7 +12,7 @@ sourceAEInSequenceDefn : instance of AEInSequenceDefinition;
 sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 sourceAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
 logMessage : string;
-
+eventContent : string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobName);
@@ -34,23 +34,31 @@ begin
           link newDynamicControlDefn R30 sourceAEOccurrenceDefn;
         else
           // Error handling for the specified Audit Event Occurrence Definition was not found
-          logMessage := "There is no known Audit Event Occurrence Definition with Audit Event Definition name " & sourceEventType & " Occurrence Id " & sourceOccurrenceId'image & " corresponding to the source event specified for Dynamic Control Definition";
+          logMessage := "AESequenceDC::DynamicControlDefinition.createDynamicControlDefinition : There is no known Audit Event Occurrence Definition with Audit Event Definition name " & sourceEventType & " Occurrence Id " & sourceOccurrenceId'image & " corresponding to the source event specified for Dynamic Control Definition";
 	      Logger::log(Logger::Error, "AESequenceDC", logMessage);
+		  eventContent := "EventType = " & sourceEventType & " : Occurrence Id = " & sourceOccurrenceId'image & " : FailureReason = There is no known Audit Event Occurrence Definition with Audit Event Definition name corresponding to the source event specified for Dynamic Control Definition";
+		  Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
         end if;  
       else
         // Error handling for the Sequence Definition corresponding to this Audit Event was not found
-        logMessage := "There is no known Sequence Definition associated with Audit Event Definition named " & sourceEventType & " corresponding to the source event specified for Dynamic Control Definition";
+        logMessage := "AESequenceDC::DynamicControlDefinition.createDynamicControlDefinition : There is no known Sequence Definition associated with Audit Event Definition named " & sourceEventType & " corresponding to the source event specified for Dynamic Control Definition";
 	    Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	    eventContent := "EventType = " & sourceEventType & " : FailureReason = There is no known Sequence Definition associated with Audit Event Definition named corresponding to the source event specified for Dynamic Control Definition";
+		Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
       end if;    
     else
       // Error handling for the sourceEventType specified is invalid
-      logMessage := "There is no known Audit Event Definition with name " & sourceEventType & " corresponding to the source event specified for Dynamic Control Definition";
+      logMessage := "AESequenceDC::DynamicControlDefinition.createDynamicControlDefinition : There is no known Audit Event Definition with name " & sourceEventType & " corresponding to the source event specified for Dynamic Control Definition";
 	  Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	  eventContent := "EventType = " & sourceEventType & " : FailureReason = There is no known Audit Event Definition with name corresponding to the source event specified for Dynamic Control Definition";
+	  Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
     end if;    
   else
     // Error handling for Error Job Definition Unknown
-    logMessage := "There is no known Job Definition with name " & jobName & " corresponding to the source event specified for Dynamic Control Definition";
+    logMessage := "AESequenceDC::DynamicControlDefinition.createDynamicControlDefinition : There is no known Job Definition with name " & jobName & " corresponding to the source event specified for Dynamic Control Definition";
 	Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	eventContent := "JobName = " & jobName & " : FailureReason = There is no known Job Definition with name corresponding to the source event specified for Dynamic Control Definition";
+	Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
     
   end if;  
 end service;
@@ -70,7 +78,7 @@ userAEInSequenceDefn : instance of AEInSequenceDefinition;
 userAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 userAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
 logMessage : string;
-
+eventContent : string;
 
 begin
   theDynamicControlDefn := find_one DynamicControlDefinition (jobName = jobName and 
@@ -91,24 +99,32 @@ begin
           link theDynamicControlDefn R31 userAEOccurrenceDefn;
         else
           // Error handling for the specified Audit Event Occurrence Definition was not found
-          logMessage := "There is no known Audit Event Occurrence Definition with Audit Event Definition name " & userEventType & " Occurrence Id " & userOccurrenceId'image & " corresponding to the user event specified for Dynamic Control Definition";
+          logMessage := "AESequenceDC::DynamicControlDefinition.linkUserEventDefn : There is no known Audit Event Occurrence Definition with Audit Event Definition name " & userEventType & " Occurrence Id " & userOccurrenceId'image & " corresponding to the user event specified for Dynamic Control Definition";
 	      Logger::log(Logger::Error, "AESequenceDC", logMessage);
+		  eventContent := "EventType = " & userEventType & " : Occurrence Id = " & userOccurrenceId'image & " : FailureReason = There is no known Audit Event Occurrence Definition with Audit Event Definition name corresponding to the user event specified for Dynamic Control Definition";
+		  Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
         end if;  
       else
         // Error handling for the Sequence Definition corresponding to this Audit Event was not found
-        logMessage := "There is no known Sequence Definition associated with Audit Event Definition named " & userEventType & " corresponding to the user event specified for Dynamic Control Definition";
+        logMessage := "AESequenceDC::DynamicControlDefinition.linkUserEventDefn : There is no known Sequence Definition associated with Audit Event Definition named " & userEventType & " corresponding to the user event specified for Dynamic Control Definition";
 	    Logger::log(Logger::Error, "AESequenceDC", logMessage);
+		eventContent := "EventType = " & userEventType & " : FailureReason = There is no known Sequence Definition associated with Audit Event Definition named corresponding to the user event specified for Dynamic Control Definition";
+		Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
       end if;    
     else
       // Error handling for the userEventType specified is invalid
-      logMessage := "There is no known Audit Event Definition with name " & userEventType & " corresponding to the user event specified for Dynamic Control Definition";
+      logMessage := "AESequenceDC::DynamicControlDefinition.linkUserEventDefn : There is no known Audit Event Definition with name " & userEventType & " corresponding to the user event specified for Dynamic Control Definition";
 	  Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	  eventContent := "EventType = " & userEventType & " : FailureReason = There is no known Audit Event Definition with name corresponding to the user event specified for Dynamic Control Definition";
+	  Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
     end if;    
     
   else
     //Error handling for the specified Dynamic Control Definition instance was not found
-    logMessage := "There is no known Job Definition with name " & jobName & " corresponding to the user event specified for Dynamic Control Definition";
+    logMessage := "AESequenceDC::DynamicControlDefinition.linkUserEventDefn : There is no known Job Definition with name " & jobName & " corresponding to the user event specified for Dynamic Control Definition";
 	Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	eventContent := "JobName = " & jobName & " : FailureReason = There is no known Job Definition with name corresponding to the user event specified for Dynamic Control Definition";
+	Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
   end if;
 
     

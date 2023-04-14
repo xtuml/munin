@@ -133,8 +133,8 @@ begin
     delete theConstraintDefinitions;
     delete this;
     
-    logMessage := "Job Definition " & jobName & " has been deleted";
-	Logger::log(Logger::Information, "AESequenceDC", logMessage);
+    logMessage := "AESequenceDC::JobDefinition.deleteJobDefinition : Job Definition " & jobName & " has been deleted";
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
     
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

@@ -10,9 +10,6 @@ fileControl : instance of FileControl;
 
 begin
 
-	logMessage := "AEOrdering::init";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
 	// get the supplied command line option for the config file and verify it is valid
 	configFilePath := CommandLine::get_option_value("-configPath");
 	configFile := CommandLine::get_option_value("-configFile", "config.json");
@@ -24,8 +21,8 @@ begin
 		end if;
 		generate SystemSpec.loadConfig() to systemSpec;
 	else
-		logMessage := "AEOrdering::init, failed to locate config file. Specified file = " & configFilePath & configFile;
-		Logger::log(Logger::Information, "AEOrdering", logMessage);
+		logMessage := "AEOrdering::init : failed to locate config file. Specified file = " & configFilePath & configFile;
+		Logger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 	end if;
 
@@ -45,7 +42,7 @@ begin
 exception
 	when others =>
 	
-		logMessage := "AEOrdering::init, failed during start up";
+		logMessage := "AEOrdering::init : failed during start up";
 		Logger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 	

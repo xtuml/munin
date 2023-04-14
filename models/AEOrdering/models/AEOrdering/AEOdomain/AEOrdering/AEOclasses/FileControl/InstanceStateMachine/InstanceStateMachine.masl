@@ -54,11 +54,9 @@ eventJsonArray : JSON::JSONArray;
 eventJsonObject : JSON::JSONObject;
 systemSpec : instance of SystemSpec;
 storedJobIdentifier : instance of StoredJobIdentifier;
+eventContent : string;
 
 begin
-	logMessage := "AEOrdering::FileControl.FileProcessed";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-
     // Read the file and parse
 	systemSpec := find_one SystemSpec();
     json_string := Filesystem::read_file(fileToProcess);
@@ -124,17 +122,22 @@ begin
 	                // we have now read the event so process it
 	                AEOrdering::AcceptEvent(jobId, node, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData);
 	            else
-					Logger::log(Logger::Information, "AEOrdering", "Duplicate Job Id identified, Job Id = " & jobId);
+					Logger::log(Logger::Error, "AEOrdering", "AEOrdering::FileControl.FileProcessed : Duplicate Job Id identified, Job Id = " & jobId);
+					eventContent := "JobId = " & jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType & " : FailureReason = Duplicate Job Id identified";
+					Reporting~>reportEvent(Logger::Error, "aeordering_duplicate_job", eventContent);
 	            end if;
             end;
 	     end if;
     end loop;
-	Filesystem::move_file( fileToProcess, Filesystem::filename(systemSpec.processedDirectory & "/") & this.currentFile);
+	Filesystem::move_file(fileToProcess, Filesystem::filename(systemSpec.processedDirectory & "/") & this.currentFile);
 	generate FileControl.selectFile() to this;
 	
 exception
 	when others => 
-		Logger::log(Logger::Information, "AEOrdering", "File to process = " & string(fileToProcess) & ", Processed file = " & systemSpec.processedDirectory & "/" & string(this.currentFile));
+		Filesystem::move_file(fileToProcess, Filesystem::filename(systemSpec.processedDirectory & "/") & this.currentFile);
+		Logger::log(Logger::Error, "AEOrdering", "AEOrdering::AEOrdering::FileControl.FileProcessed : Failed to process file. Failed file = " & systemSpec.processedDirectory & "/" & string(this.currentFile));
+		eventContent := "File = " &  systemSpec.processedDirectory & "/" & string(this.currentFile)  & " : FailureReason = Failed to process file";
+		Reporting~>reportEvent(Logger::Error, "aeordering_file_processing_failure", eventContent);
 		generate FileControl.selectFile() to this;
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

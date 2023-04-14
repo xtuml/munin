@@ -7,13 +7,16 @@ services:
       args:
         EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
     ports:
-      - "20000:20000"
-      - "30000:30000"
-      - "40000:40000"
+      - "20001:20001"
+      - "30001:30001"
+      - "40001:40001"
     volumes:
       - "./plus2json-deployed/generated-config:/root/config"
+      - "./log-config:/root/log-config"
+      - "./logs:/var/log/verifier"
       - "./InvariantStore:/root/InvariantStore"
       - "./verifier-incoming:/root/incoming"
       - "./JobIdStore:/root/JobIdStore"
       - "./verifier-processed:/root/processed"
-    command: "-configPath config/  -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup FF"
+    restart: on-failure
+    command: "-h -configPath config/ -log-config log-config/log-config-verifier.xml -preinit schedule/startup.sch -util Inspector -inspector-port 1 -startJobGroup 00 -endJobGroup FF"

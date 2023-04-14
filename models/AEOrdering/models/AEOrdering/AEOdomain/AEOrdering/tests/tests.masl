@@ -1414,7 +1414,7 @@ fileControl : instance of FileControl;
 
 begin
 	
-  Filesystem::create_directory(targetDirectory);
+    Filesystem::create_directory(targetDirectory);
 	AEOrdering::clearDomain(true, true);
 	reportedEventDefinitions := find _TEST_Req_IF_Verification_eventDefinition();
 	delete reportedEventDefinitions;
@@ -1431,6 +1431,7 @@ begin
 	// move the first test file into the correct incoming directory
 	Filesystem::copy_file(testFileDir & testFile1, incomingDir & testFile1);
 	Filesystem::move_file(incomingDir & testFile1, targetDirectory & testFile1);
+	Test::service_event_queue();
 	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
 	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
 
