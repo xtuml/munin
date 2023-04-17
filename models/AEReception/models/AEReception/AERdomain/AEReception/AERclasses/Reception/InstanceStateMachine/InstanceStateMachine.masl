@@ -16,11 +16,9 @@ jobEventFile : instance of JobEventFile;
 receptionSpec : instance of ReceptionSpec;
 jobEventFileLocation : string;
 filePermissions : Filesystem::permissions;
+eventContent : string;
 
 begin
-
-//	logMessage := "AEReception::Reception.receiving_audit_event";
-//	Logger::log(Logger::Information, "AEReception", logMessage);
 
 	filePermissions.group.read := true;
 	filePermissions.other.read := true;
@@ -37,7 +35,8 @@ begin
         json_object := JSON::get_object(element_received);
         if json_object'keys'length = 1 and json_object'keys'any = "__comment__" then
             // ignore comment objects
-	       Logger::log(Logger::Information, "AEReception", "JSON comment: " & JSON::get_string(json_object[json_object'keys'any]));
+            logMessage := "AEReception::Reception.receiving_audit_event : JSON comment: " & JSON::get_string(json_object[json_object'keys'any]);
+	       Logger::log(Logger::Debug, "AEReception", "JSON comment: " & JSON::get_string(json_object[json_object'keys'any]));
         else
             declare
                 jobId: string;
@@ -72,7 +71,7 @@ begin
                 
                 // send the event along
                 if this.currentNodeName = "" then
-                    logMessage := "Audit event with blank node name";
+                    logMessage := "AEReception::Reception.receiving_audit_event : Audit event with blank node name";
                     Logger::log(Logger::Warning, "AEReception", logMessage);
                 end if;
                 jobEventFile.addEvent(this.currentNodeName, json_object);
@@ -82,8 +81,10 @@ begin
         end if;
 
     else
-	    logMessage := "Invalid JSON type: " & element_received.kind'image;
+	    logMessage := "AEReception::Reception.receiving_audit_event : Invalid JSON type: " & element_received.kind'image;
 	    Logger::log(Logger::Error, "AEReception", logMessage);
+		eventContent := "FailureReason = Invalid JSON type = " & element_received.kind'image;;
+		Reporting~>reportEvent(Logger::Error, "reception_file_process_errror", eventContent);
     end if;
     
     // process the next data item or finish
@@ -121,8 +122,6 @@ filePermissions : Filesystem::permissions;
 
 begin
 	
-	logMessage := "AEReception::Reception.done";
-	Logger::log(Logger::Information, "AEReception", logMessage);
 	filePermissions.group.read := true;
 	filePermissions.other.read := true;
 	filePermissions.group.write := true;
@@ -164,17 +163,22 @@ json_string: string;
 json_element: JSON::JSONElement;
 validation_result: JSON::JSONObject;
 processFile : boolean := true;
+eventContent : string;
 
 begin
 	logMessage := "AEReception::Reception.parsing";
 	Logger::log(Logger::Information, "AEReception", logMessage);
 
     // Read the file and parse
+	eventContent := "FileProcessed = " & this.filePath;;
+	Reporting~>reportEvent(Logger::Information, "reception_file_pprocessed", eventContent);
     json_string := Filesystem::read_file(Filesystem::filename(this.filePath));
     json_element := JSON::parse(json_string);
     if validate = true then
-        logMessage := "AEReception::Reception.parsing - validating JSON format for file: " & this.filePath;
-        Logger::log(Logger::Error, "AEReception", logMessage);
+        logMessage := "AEReception::Reception.parsing : validating JSON format for file: " & this.filePath;
+        Logger::log(Logger::Information, "AEReception", logMessage);
+		eventContent := "Validating JSON format for file = " & this.filePath;;
+		Reporting~>reportEvent(Logger::Information, "reception_file_validated", eventContent);
 	    validation_result := JSONValidation::validate(json_element, #PROP["auditEventSchema"]#);
     
 	    if JSON::get_boolean(validation_result["valid"]) = false then
@@ -186,21 +190,27 @@ begin
         this.currentIndex := this.jsonElements'first;
         generate Reception.ready_for_event() to this;
     else
-        logMessage := "AEReception::Reception.parsing - Incorrect JSON format for file: " & this.filePath & "\n" & JSON::dump(validation_result, true);
+        logMessage := "AEReception::Reception.parsing : Incorrect JSON format for file: " & this.filePath & "\n" & JSON::dump(validation_result, true);
         Logger::log(Logger::Error, "AEReception", logMessage);
+		eventContent := "FailureReason = Incorrect JSON format for file = " & this.filePath;;
+		Reporting~>reportEvent(Logger::Error, "reception_file_process_errror", eventContent);
         generate Reception.parse_failed() to this;
     end if;
 
 exception
 
     when JSON::JSONException =>
-	   logMessage := "Failed to parse JSON for file: " & this.filePath;
+	   logMessage := "AEReception::Reception.parsing : Failed to parse JSON for file: " & this.filePath;
 	   Logger::log(Logger::Error, "AEReception", logMessage);
+		eventContent := "FailureReason = Failed to parse JSON for file = " & this.filePath;;
+		Reporting~>reportEvent(Logger::Error, "reception_file_process_errror", eventContent);
 	   generate Reception.parse_failed() to this;
 	   
 	when others =>
-	   logMessage := "Could not read file: " & this.filePath;
+	   logMessage := "AEReception::Reception.parsing : Could not read file: " & this.filePath;
 	   Logger::log(Logger::Error, "AEReception", logMessage);
+		eventContent := "FailureReason = Could not read file = " & this.filePath;;
+		Reporting~>reportEvent(Logger::Error, "reception_file_process_errror", eventContent);
 	   generate Reception.parse_failed() to this;
 
 end state;
@@ -214,9 +224,6 @@ eventFile : instance of EventFile;
 jobEventFiles : sequence of instance of JobEventFile;
 
 begin
-	
-	logMessage := "AEReception::Reception.ReceptionDeleted";
-	Logger::log(Logger::Information, "AEReception", logMessage);
 	
 	// remove the reception and the file
 	eventFile := this -> R2.EventFile;

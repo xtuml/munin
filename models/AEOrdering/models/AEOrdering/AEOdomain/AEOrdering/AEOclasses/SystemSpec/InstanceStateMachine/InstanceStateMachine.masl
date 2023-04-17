@@ -13,9 +13,6 @@ fileName : Filesystem::filename;
 
 begin
 
-	logMessage := "AEOrdering::SystemSpec.ConfigChecked";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
 	fileName := Filesystem::filename(this.configFilePath & this.configFile);
 	if Filesystem::file_exists(fileName) then
 		fileStatus := Filesystem::get_file_status(fileName);
@@ -25,7 +22,7 @@ begin
 			schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
 		end if;
 		else
-		logMessage := "AEOrdering::ConfigChecked, failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+		logMessage := "AEOrdering::ConfigChecked : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
 		Logger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 	end if;
@@ -33,10 +30,10 @@ begin
 exception
 	when others => 	
 	
-		logMessage := "AEOrdering::SystemSpec.ConfigChecked, failed to load configuration file";
+		logMessage := "AEOrdering::SystemSpec.ConfigChecked : failed to load configuration file";
 		Logger::log(Logger::Error, "AEOrdering", logMessage);
+		raise program_error;
 		
-	
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -77,8 +74,6 @@ filePermissions : Filesystem::permissions;
 
 begin
     
-    logMessage := "AEOrdering::SystemSpec.ConfigUpdated";
-    Logger::log(Logger::Information, "AEOrdering", logMessage);
 	filePermissions.group.read := true;
 	filePermissions.other.read := true;
 	filePermissions.group.write := true;
@@ -184,17 +179,20 @@ begin
                               jobType.updateAuditEventDurations(JSON::get_array(jobDefJSONObject["EventRules"]));
                             end if;
                         else
-                            Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true));
+                            logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true);
+                            Logger::log(Logger::Debug, logMessage);
                             raise JSON::JSONException("Config file invalid");
                         end if;
                     else
-                        Logger::log(Logger::Debug, "AEOrdering", "Job config file not found: " & this.configFilePath & jobType.jobTypeName & ".json");
+                        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job config file not found: " & this.configFilePath & jobType.jobTypeName & ".json";
+                        Logger::log(Logger::Debug, "AEOrdering", logMessage);
                         raise program_error;
                     end if;
                 end loop;
             end if;
         else
-            Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
+            logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
+            Logger::log(Logger::Debug, "AEOrdering", logMessage);
             raise JSON::JSONException("Config file invalid");
         end if;
         
@@ -275,20 +273,20 @@ begin
         // schedule to check the config file
         schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
     else
-        logMessage := "AEOrdering::ConfigUpdated, failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+        logMessage := "AEOrdering::ConfigUpdated : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
         Logger::log(Logger::Error, "AEOrdering", logMessage);
         raise program_error;
     end if;
     
 exception
     when program_error =>
-        logMessage := "AEOrdering::SystemSpec.ConfigUpdated, failed to load configuration file";
+        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : failed to load configuration file";
         Logger::log(Logger::Error, "AEOrdering", logMessage);
         raise program_error;
     when others =>     
-    
-        logMessage := "AEOrdering::SystemSpec.ConfigUpdated, failed to load configuration file";
+        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : failed to load configuration file";
         Logger::log(Logger::Error, "AEOrdering", logMessage);
+        raise program_error;
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

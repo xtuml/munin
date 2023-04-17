@@ -73,7 +73,7 @@ begin
     end if;
         
     // ... and finally deleted the specified instance of PersistedInvariant and log this.    
-    logMessage := "PersistentInvariant: " & this.invariantId'image & " deleted ";
+    logMessage := "AESequenceDC::PersistedInvariant.deletePersistedInvariant : PersistentInvariant: " & this.invariantId'image & " deleted ";
     Logger::log(Logger::Information, "AESequenceDC", logMessage);
     delete this;
 end service;

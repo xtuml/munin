@@ -17,7 +17,7 @@ theJobDef : instance of JobDefinition;
 newSequence : instance of Sequence;
 logMessage : string;
 creationErrorMessage : string;
-
+eventContent : string;
 empty : sequence of string;
 emptyString : sequence of string := empty & ("");
 
@@ -51,13 +51,13 @@ begin
         link newJob R8 theJobDef;
         //The the first event for this new Job is a valid event type for starting the sequence
         // Log info: new Job and event sequence started
-        logMessage := "New Job started - jobId = " & newJob.jobID & ", Initial audit event: " & eventId & " of type " & newEventType.AEType;
-	    Logger::log(Logger::Information, "AESequenceDC", logMessage);
-          
+        logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : New Job started - jobId = " & newJob.jobID & ", Initial audit event: " & eventId & " of type " & newEventType.AEType;
+	    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+		eventContent := "JobId = " & newJob.jobID & " : EventId = " & eventId & " : EventType = " & newEventType.AEType;
+		Reporting~>reportEvent(Logger::Information, "svdc_new_job_started", eventContent);
      
         // Process the audit event data for this new event      
         newEvent.ProcessAuditEventData (aeData);
-      
         
       else
         newJob.failJob("Invalid audit event definition for a start event in job definition = " & theJobDef.jobName & " since the occurrenceNumberInSequence is expected to be 1");    
@@ -71,8 +71,10 @@ begin
     end if;
   else
       // Log error: The audit event id received has been seen before
-	  logMessage := "The audit event has been seen before for jobId = " & jobId & ", Initial audit event = " & aeType;
-	  Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	  logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : The audit event has been seen before for jobId = " & jobId & ", Initial audit event = " & aeType;
+	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+	  eventContent := "JobId = " & jobId & " : EventId = " & eventId & " : EventType = " & aeType & " : FailureReason = The audit event has been seen before";
+	  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
    
   end if;  
   //
@@ -197,15 +199,15 @@ totalDynamicControls : set of instance of DynamicControl;
                   link newIntraJobInvariant R23 this;
                   link newIntraJobInvariant R26 theIntraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
-	              logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType & " with value = " & newIntraJobInvariant.invariantValue;
-	              Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+	              logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : ProcessAuditEventData " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType & " with value = " & newIntraJobInvariant.invariantValue;
+	              Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
 	            else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
 	            end if;                 
               else
                 // Log warning: The audit event data type provided with this audit event is of a disallowed type for this type of audit event
-	            logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " is disallowed for this type of audit event = " & theEventType.AEType;
-	            Logger::log(Logger::Information, "AESequenceDC", logMessage);                
+	            logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " is disallowed for this type of audit event = " & theEventType.AEType;
+	            Logger::log(Logger::Debug, "AESequenceDC", logMessage);                
                 theJob.failJob("Invalid audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
               end if;
             else
@@ -245,8 +247,8 @@ totalDynamicControls : set of instance of DynamicControl;
                   link theUserExtraJobInvariant R23 this;
                   link theUserExtraJobInvariant R28 theUserExtraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
-	              logMessage := "The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType;
-	              Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+	              logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType;
+	              Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
 	            else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
 	            end if; 
@@ -366,11 +368,11 @@ totalDynamicControls : set of instance of DynamicControl;
         end case;  
       end loop;
       
-      exception
-        when program_error =>
-          theJob.failJob("Program Error in AuditEvent.ProcessAuditEventData for " & theJob.jobID & " possibly caused by a non-integer loop or branch count in the audit event data : " & aeDataElement.aedValue);               
-                
-      end service;
+exception
+    when program_error =>
+      theJob.failJob("Program Error in AuditEvent.ProcessAuditEventData for " & theJob.jobID & " possibly caused by a non-integer loop or branch count in the audit event data : " & aeDataElement.aedValue);               
+            
+end service;
 //
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

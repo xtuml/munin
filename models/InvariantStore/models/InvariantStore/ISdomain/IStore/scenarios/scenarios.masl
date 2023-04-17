@@ -6,9 +6,6 @@ invStore : instance of InvStore;
 
 begin
 
-	logMessage := "IStore::init";
-	Logger::log(Logger::Information, "IStore", logMessage);
-	
 	// get the supplied command line option for the config file and verify it is valid
 	invStore := find_one InvStore();
 	if invStore = null then
@@ -27,7 +24,7 @@ begin
 exception
 	when others =>
 	
-		logMessage := "IStore::init, failed during start up";
+		logMessage := "IStore::init : failed during start up";
 		Logger::log(Logger::Error, "IStore", logMessage);
 		raise program_error;
 	

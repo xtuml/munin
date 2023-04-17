@@ -12,9 +12,6 @@ eventType : instance of AuditEventType;
 
 begin
 
-	logMessage := "AEOrdering::BlockedAuditEvent.Waiting, auditEventId = " & this.auditEventId;
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
 	eventType := this -> R4.AuditEvent -> R7.AuditEventType;
 	schedule this.blockedEventTimer generate BlockedAuditEvent.eventFailed() to this delay eventType.blockedAuditEventDuration;
 
@@ -27,16 +24,15 @@ logMessage : string;
 failedAuditEvent : instance of FailedAuditEvent;
 auditEvent : instance of AuditEvent;
 failureReason : string;
+job : instance of Job;
 
-begin
-
-	logMessage := "AEOrdering::BlockedAuditEvent.Failed, auditEventId = " & this.auditEventId;
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
+begin	
 	
 	cancel this.blockedEventTimer;
-	failureReason := "The reported event has been blocked longer than the blocked event time, audit eventId = " & this.auditEventId;
 	auditEvent := this -> R4.AuditEvent;
+	job := auditEvent -> R9.Job;
+	failureReason := "JobId = " & job.jobId & " : AuditEventId = " & this.auditEventId & " : AuditEventType = " & auditEvent.eventType &
+	                 " : FailureReason = The reported event has been blocked longer than the blocked event time";
 	unlink this R4 auditEvent;
 	failedAuditEvent := create FailedAuditEvent(auditEventId => this.auditEventId, failureTime => timestamp'now, failureReason => failureReason);
 	link failedAuditEvent R4 auditEvent;

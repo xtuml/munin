@@ -7,9 +7,6 @@ receptionSpec : instance of ReceptionSpec;
 
 begin
 
-	logMessage := "AEReception::init";
-	Logger::log(Logger::Information, "AEReception", logMessage);
-	
 	// get the supplied command line option for the config file and verify it is valid
 	configFilePath := CommandLine::get_option_value("-configPath");
 	configFile := CommandLine::get_option_value("-configFile", "config.json");
@@ -24,7 +21,7 @@ begin
 		end if;
 		generate ReceptionSpec.loadConfig() to receptionSpec;
 	else
-		logMessage := "AEReception::init, failed to locate config file. Specified file = " & configFilePath & configFile;
+		logMessage := "AEReception::init : failed to locate config file. Specified file = " & configFilePath & configFile;
 		Logger::log(Logger::Information, "AEReception", logMessage);
 		raise program_error;
 	end if;
@@ -32,7 +29,7 @@ begin
 exception
 	when others =>
 	
-		logMessage := "AEReception::init, failed during start up";
+		logMessage := "AEReception::init : failed during start up";
 		Logger::log(Logger::Error, "AEReception", logMessage);
 		raise program_error;
 	

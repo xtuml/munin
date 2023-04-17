@@ -6,23 +6,23 @@ application : instance of Application;
 applicationEventTypes : sequence of instance of AuditEventType;
 eventType : instance of AuditEventType;
 validEvent : boolean := true;
+job : instance of Job;
 
 begin
-	logMessage := "AEOrdering::Node.validEvent";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
 
 	application := find_one Application(applicationName = auditEvent.reportedApplication);
 	applicationEventTypes := application -> R6.AuditEventType;
 	eventType := find_one applicationEventTypes(eventType = auditEvent.reportedEventType);
+	job := auditEvent -> R9.Job;
 	
 	// failed to identify the event
 	if application = null then
 		validEvent := false;
-		failureReason := "Application is not allowed to be reported for event, applicationName = " & auditEvent.reportedApplication;
+		failureReason := "JobId = " & job.jobId & " : ApplicationName = " & auditEvent.reportedApplication & " : FailureReason = Application is not allowed to be reported for event";
 	elsif eventType = null then
 		validEvent := false;
-		failureReason := "Event type is not allowed to be reported for node and application , nodeName = " & auditEvent.reportedNodeName & ", applicationName = " & auditEvent.reportedApplication &
-		                 ", eventType = " & auditEvent.reportedEventType;
+		failureReason := "JobId = " & job.jobId & " :  NodeName = " & auditEvent.reportedNodeName & " : ApplicationName = " & auditEvent.reportedApplication &
+		                 " : EventType = " & auditEvent.reportedEventType & " : FailureReason = Event type is not allowed to be reported for node and application";
 	else
 		link eventType R7 auditEvent;
 	end if;
