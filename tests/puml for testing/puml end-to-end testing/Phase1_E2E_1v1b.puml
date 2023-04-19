@@ -16,7 +16,9 @@ group "Single Sequence"
     #red:SCJR;
     detach
   else ("normal")
+    :SJCDa;
     fork
+    :SJCDb;
       repeat
         :SCJD;
         :SCJE,EINV,USER,name=AUTH_TOKEN_A;
@@ -36,6 +38,7 @@ group "Single Sequence"
           :SCJF;
         endif
       repeat while
+      :SJCFa;
     fork again
       :SCJK;
       :SCJL,EINV,USER,name=AUTH_TOKEN_A;
@@ -48,7 +51,8 @@ group "Single Sequence"
         note right
           This is present because an empty else clause is not yet supported
         end note
-      endif    
+      endif
+      :SJCNa;    
     fork again
       :SCJP;
       #red:SCJQ;

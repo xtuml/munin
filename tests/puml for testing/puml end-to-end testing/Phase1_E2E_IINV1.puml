@@ -1,0 +1,40 @@
+@startuml
+
+partition "Single Complex Job" {
+group "Single Sequence"
+  #green:SCJAa;
+  :SCJAb;
+  :SCJBa;
+  :SCJBb;
+  :SCJBc,IINV,name=SCJInvA;
+  :SCJC;
+  if (XOR) then ("error")
+    :SJCDa;
+    fork
+    :SJCDb;
+      :SCJG;
+      :SJCFa;
+    fork again
+      :SCJP;
+      #red:SCJQ;
+      detach
+    fork again
+      :SCJC;
+      repeat
+        :SCJDc;
+        :SCJE;
+      repeat while
+      :SCJF;
+      :SCJD,IINV,USER,name=SCJInvA;
+      #red:SCJG;
+    end fork
+    :SCJH,IINV,USER,name=SCJInvA;
+    #red:SCJJ;
+    detach
+  else ("normal")
+    #red:SCJR;
+    detach
+  endif
+end group
+}
+@enduml
