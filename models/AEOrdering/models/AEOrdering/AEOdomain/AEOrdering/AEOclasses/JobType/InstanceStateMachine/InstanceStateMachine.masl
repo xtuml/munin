@@ -29,8 +29,8 @@ begin
 	// fail any in progress jobs
 	jobs := this -> R12.AuditEventType -> R7.AuditEvent -> R9.Job;
 	for job in jobs loop
-		failureReason := "JobId = " & job.jobId & "JobType = " & this.jobTypeName & 
-		                 " : FailureReason = The job type has been deprecated and is now expired";
+		failureReason := "JobId = " & job.jobId & 
+		                 " : FailureReason = The job type has been deprecated and is now expired : JobType = " & this.jobTypeName ;
 		job.failJob(failureReason);
 		job.jobDeleted();
 	end loop;

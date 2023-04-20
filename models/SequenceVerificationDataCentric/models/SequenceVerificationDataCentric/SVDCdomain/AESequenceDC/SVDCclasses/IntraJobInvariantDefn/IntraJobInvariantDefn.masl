@@ -32,7 +32,7 @@ begin
     // Digital Twin Error dues to failed configurations
     logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition = " & theJobDefn.jobName;
     Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	eventContent := "JobName = " & theJobDefn.jobName  & " : FailureReason = Invalid Job Definition for this intra-job invariant definition";
+	eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
 	Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
   end if;
   

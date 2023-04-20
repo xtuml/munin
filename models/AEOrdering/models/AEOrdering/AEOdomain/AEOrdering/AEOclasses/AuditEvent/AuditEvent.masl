@@ -26,7 +26,7 @@ begin
 			                            reportedNodeName => nodeName, reportedAuditEventTime => auditEventTime, reportedPrevEventIds => prevAuditEventIds, 
 			                            eventCreationTime => timestamp'now, eventState => EventStateEnum.BLOCKED, auditEventData => auditEventData);
 		link auditEvent R9 job;
-		eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType;
+		eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
 		Reporting~>reportEvent(Logger::Information, "aeordering_events_processed", eventContent);
 		for prevEventId in prevAuditEventIds loop
 			previousAuditEvent := find_one (auditEvent -> R13.PreviousAuditEvent)(previousAuditEventId = prevEventId and auditEventId = auditEvent.auditEventId);
@@ -80,8 +80,8 @@ begin
 		else
 			logMessage := "AEOrdering::AuditEvent.createAuditEvent : Audit Event has previously been reported for a different job, jobId = " & job.jobId & ", auditEventId = " & auditEventId & ", previous jobId = " & previousJob.jobId;
 			Logger::log(Logger::Error, "AEOrdering", logMessage);
-			failureReason := "Audit Event has previously been reported for a different job";
-			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType & " : PreviousJobId = " & previousJob.jobId & " : FailureReason = " & failureReason;
+			failureReason := "Audit Event has previously been reported for a different job. PreviousJobId = " & previousJob.jobId;
+			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType & " : FailureReason = " & failureReason;
 			Reporting~>reportEvent(Logger::Error, "aeordering_events_failed", eventContent);
 		end if;
 		auditEvent := null;

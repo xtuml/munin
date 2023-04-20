@@ -168,8 +168,8 @@ begin
       // For now assume this is not allowed. TODO Check to see if the same event type can legitimately occur in different Job Types and Sequences
       logMessage := "AESequenceDC::eventDefinition : The event type provided in the initialisation data has been seen elsewhere , Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType;
 	  Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	  eventContent := "JobName = " & theJobDefn.jobName  & " : SequenceDefinition = " & theSequenceDefn.sequenceDefinitionName & " : EventType = " & theEventDefn.AEType & " : FailureReason = The event type provided in the initialisation data has been seen elsewhere";
-      Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
+	  eventContent := "FailureReason = The event type provided in the initialisation data has been seen elsewhere" & " : JobName = " & theJobDefn.jobName  & " : SequenceDefinition = " & theSequenceDefn.sequenceDefinitionName & " : EventType = " & theEventDefn.AEType;
+      Reporting~>reportEvent(Logger::Error, "svdc_invalid_event_definition", eventContent);
     end if;
   end if;
   
@@ -201,7 +201,7 @@ begin
             else
               logMessage := "AESequenceDC::eventDefinition : Invalid Constraint Value provided : " & previousEventType.constraintValue & "in Job Name = " & jobName;
 	          Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	          eventContent := "JobName = " & jobName  & " : ConstraintValue = " & previousEventType.constraintValue & " : FailureReason = Invalid Constraint Value provided";
+	          eventContent := "FailureReason = Invalid Constraint Value provided" & " : JobName = " & jobName  & " : ConstraintValue = " & previousEventType.constraintValue;
 	          Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
             end if;
             if theConstraintDefn /= null then
@@ -213,7 +213,7 @@ begin
           else
             logMessage := "AESequenceDC::eventDefinition : Invalid Constraint Definition provided : " & previousEventType.constraintDefId & "in Job Name = " & jobName;
 	        Logger::log(Logger::Error, "AESequenceDC", logMessage);            
-	        eventContent := "JobName = " & jobName  & " : ConstraintDefId = " & previousEventType.constraintDefId & " : FailureReason = Invalid Constraint Definition provided";
+	        eventContent := "FailureReason = Invalid Constraint Definition provided" & " : JobName = " & jobName  & " : ConstraintDefId = " & previousEventType.constraintDefId;
 	        Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
           end if;
         else
