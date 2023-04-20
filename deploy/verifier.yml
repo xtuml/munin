@@ -19,4 +19,4 @@ services:
       - "./JobIdStore:/root/JobIdStore"
       - "./verifier-processed:/root/processed"
     restart: on-failure
-    command: "-h -configPath config/ -log-config log-config/log-config-verifier.xml -preinit schedule/startup.sch -util Inspector -inspector-port 1 -startJobGroup 00 -endJobGroup FF"
+    command: "-configPath config/ -log-config log-config/log-config-verifier.xml -preinit schedule/startup.sch -util Inspector -inspector-port 1 -startJobGroup 00 -endJobGroup FF"

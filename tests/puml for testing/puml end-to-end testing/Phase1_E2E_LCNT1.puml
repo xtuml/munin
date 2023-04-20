@@ -1,9 +1,9 @@
 @startuml
-partition "Intra Job Invariant Job" {
+partition "Loop Count Job" {
 group "Single Sequence"
   #green:SCJAa;
   :SCJAb;
-  :SCJBa;
+  :SCJBa,LCNT,user=SCJE(0),name=LC1;
   :SCJBb;
   :SCJBc,IINV,name=SCJInvA;
   :SCJC;
