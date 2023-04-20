@@ -2,6 +2,7 @@
 public instance service AEReception::JobEventFile.addEvent ( nodeName : in string,
                                                             eventJsonObject : in JSON::JSONObject ) is
 auditEvent : JSON::JSONObject;
+eventContent : string;
 
 begin
     
@@ -33,6 +34,8 @@ begin
     end if;
     
     this.auditEvents := this.auditEvents & JSON::to_json(auditEvent);
+    eventContent := "JobId = " & auditEvent["jobId"].data.str & " : EventId = " & auditEvent["eventId"].data.str & " : EventType = " & auditEvent["eventType"].data.str;
+    Reporting~>reportEvent(Logger::Information, "reception_event_added", eventContent);
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

@@ -84,7 +84,7 @@ begin
 	    logMessage := "AEReception::Reception.receiving_audit_event : Invalid JSON type: " & element_received.kind'image;
 	    Logger::log(Logger::Error, "AEReception", logMessage);
 		eventContent := "FailureReason = Invalid JSON type = " & element_received.kind'image;;
-		Reporting~>reportEvent(Logger::Error, "reception_file_process_errror", eventContent);
+		Reporting~>reportEvent(Logger::Error, "reception_file_process_error", eventContent);
     end if;
     
     // process the next data item or finish
@@ -166,12 +166,10 @@ processFile : boolean := true;
 eventContent : string;
 
 begin
-	logMessage := "AEReception::Reception.parsing";
-	Logger::log(Logger::Information, "AEReception", logMessage);
 
     // Read the file and parse
 	eventContent := "FileProcessed = " & this.filePath;;
-	Reporting~>reportEvent(Logger::Information, "reception_file_pprocessed", eventContent);
+	Reporting~>reportEvent(Logger::Information, "reception_file_processed", eventContent);
     json_string := Filesystem::read_file(Filesystem::filename(this.filePath));
     json_element := JSON::parse(json_string);
     if validate = true then
@@ -193,7 +191,7 @@ begin
         logMessage := "AEReception::Reception.parsing : Incorrect JSON format for file: " & this.filePath & "\n" & JSON::dump(validation_result, true);
         Logger::log(Logger::Error, "AEReception", logMessage);
 		eventContent := "FailureReason = Incorrect JSON format for file = " & this.filePath;;
-		Reporting~>reportEvent(Logger::Error, "reception_file_process_errror", eventContent);
+		Reporting~>reportEvent(Logger::Error, "reception_file_process_error", eventContent);
         generate Reception.parse_failed() to this;
     end if;
 
@@ -203,14 +201,14 @@ exception
 	   logMessage := "AEReception::Reception.parsing : Failed to parse JSON for file: " & this.filePath;
 	   Logger::log(Logger::Error, "AEReception", logMessage);
 		eventContent := "FailureReason = Failed to parse JSON for file = " & this.filePath;;
-		Reporting~>reportEvent(Logger::Error, "reception_file_process_errror", eventContent);
+		Reporting~>reportEvent(Logger::Error, "reception_file_process_error", eventContent);
 	   generate Reception.parse_failed() to this;
 	   
 	when others =>
 	   logMessage := "AEReception::Reception.parsing : Could not read file: " & this.filePath;
 	   Logger::log(Logger::Error, "AEReception", logMessage);
 		eventContent := "FailureReason = Could not read file = " & this.filePath;;
-		Reporting~>reportEvent(Logger::Error, "reception_file_process_errror", eventContent);
+		Reporting~>reportEvent(Logger::Error, "reception_file_process_error", eventContent);
 	   generate Reception.parse_failed() to this;
 
 end state;
