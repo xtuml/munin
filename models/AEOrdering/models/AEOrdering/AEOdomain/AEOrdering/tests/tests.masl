@@ -103,9 +103,9 @@ begin
 		end if;
 	end loop;
 	
-	dynamicControlDefinition := find_one _TEST_Req_IF_Verification_dynamicControlDefinition(jobTypeName = "AEOrdering-Test" and dynamicControlName = "cccLOOPCOUNT" and dynamicControlType = DynamicControlTypeEnum.LOOPCOUNT and 
+	dynamicControlDefinition := find_one _TEST_Req_IF_Verification_dynamicControlDefinition(jobTypeName = "AEOrdering-Test" and dynamicControlName = "cccLOOPCOUNT" and dynamicControlType = "LOOPCOUNT" and 
 		                                                                                sourceEventType = "bbb" and sourceOccurrenceId = 1 and userEventType = "ccc" and userOccurrenceId = 1);
-    Assertions::assertTrue((dynamicControlDefinition /= null), "Test Config Test Data: Failed to find dynamic control definition definition jobTypeName = AEOrdering-Test and dynamicControlName = cccLOOPCOUNT and dynamicControlType = DynamicControlTypeEnum.LOOPCOUNT and sourceEventType = bbb and sourceOccurrenceId = 1 and userEventType = ccc and userOccurrenceId = 1");
+    Assertions::assertTrue((dynamicControlDefinition /= null), "Test Config Test Data: Failed to find dynamic control definition definition jobTypeName = AEOrdering-Test and dynamicControlName = cccLOOPCOUNT and dynamicControlType = LOOPCOUNT and sourceEventType = bbb and sourceOccurrenceId = 1 and userEventType = ccc and userOccurrenceId = 1");
 	
 
 end service;

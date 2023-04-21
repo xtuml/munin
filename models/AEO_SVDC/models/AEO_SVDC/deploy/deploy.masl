@@ -29,7 +29,7 @@ public service AEOrdering::Req_IF_Verification~>audit_event ( jobId : in string,
                                                              auditEventId : in string,
                                                              auditEventTime : in string,
                                                              prevAuditEventIds : in sequence of string,
-                                                             reportableAuditEventDataItems : in sequence of ReportableAuditEventDataType ) is
+                                                             reportableAuditEventDataItems : in AEOrdering::sequence of ReportableAuditEventDataType ) is
 auditEventData: sequence of AESequenceDC::auditEventDataStructure;
 begin
   for dataItem in reportableAuditEventDataItems loop
@@ -80,7 +80,7 @@ public service AEOrdering::Req_IF_Verification~>eventDefinition ( jobName : in s
                                                                  sequenceName : in string,
                                                                  eventType : in string,
                                                                  occurrenceId : in integer,
-                                                                 previousEventTypes : in sequence of PreviousEventType,
+                                                                 previousEventTypes : in AEOrdering::sequence of PreviousEventType,
                                                                  isSequenceStart : in boolean,
                                                                  isSequenceEnd : in boolean,
                                                                  isBreak : in boolean ) is
@@ -122,7 +122,7 @@ end service;
 //! ACTIVITY BEGIN. '7bdff90a-d2ba-47e3-8082-eb657e8e6496' DO NOT EDIT THIS LINE.
 public service AEOrdering::Req_IF_Verification~>intraJobInvariantDefinition ( auditEventDataName : in string,
                                                                              jobDefinitionName : in string,
-                                                                             associatedEvents : in sequence of IntraJobInvDataType ) is
+                                                                             associatedEvents : in AEOrdering::sequence of IntraJobInvDataType ) is
 assocEvents: sequence of AESequenceDC::intraJobInvDataStructure;
 begin
   for evt in associatedEvents loop
@@ -137,7 +137,7 @@ public service AEOrdering::Req_IF_Verification~>extraJobInvariantDefinition ( au
                                                                              sourceJobDefnName : in string,
                                                                              sourceEventType : in string,
                                                                              sourceOccurrenceId : in integer,
-                                                                             userEvents : in sequence of UserEventDataType ) is
+                                                                             userEvents : in AEOrdering::sequence of UserEventDataType ) is
 userEventData: sequence of AESequenceDC::userEventDataStructure;
 begin
   for evt in userEvents loop
@@ -150,7 +150,7 @@ end service;
 //! ACTIVITY BEGIN. 'b82cb07b-04f9-42a5-bd42-7bcf30e67f04' DO NOT EDIT THIS LINE.
 public service AEOrdering::Req_IF_Verification~>dynamicControlDefinition ( jobTypeName : in string,
                                                                           dynamicControlName : in string,
-                                                                          dynamicControlType : in DynamicControlTypeEnum,
+                                                                          dynamicControlType : in string,
                                                                           sourceEventType : in string,
                                                                           sourceOccurrenceId : in integer,
                                                                           userEventType : in string,
@@ -158,13 +158,8 @@ public service AEOrdering::Req_IF_Verification~>dynamicControlDefinition ( jobTy
 sVDCDynamicControlType : AESequenceDC::dynamicControlTypeEnum;
 
 begin
-  if dynamicControlType = AEOrdering::DynamicControlTypeEnum.BRANCHCOUNT then
-  	sVDCDynamicControlType := AESequenceDC::dynamicControlTypeEnum.BRANCHCOUNT;
-  elsif dynamicControlType = AEOrdering::DynamicControlTypeEnum.LOOPCOUNT then
-  	sVDCDynamicControlType := AESequenceDC::dynamicControlTypeEnum.LOOPCOUNT;
-  end if;
   
-  AESequenceDC::dynamicControlDefinition(jobTypeName, dynamicControlName, sVDCDynamicControlType, sourceEventType, sourceOccurrenceId, userEventType, userOccurrenceId);
+  AESequenceDC::dynamicControlDefinition(jobTypeName, dynamicControlName, AESequenceDC::dynamicControlTypeEnum'value(dynamicControlType), sourceEventType, sourceOccurrenceId, userEventType, userOccurrenceId);
   
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
