@@ -185,7 +185,7 @@ begin
 		eventDataTypeJSONObject := JSON::get_object(eventDataTypeJSONElement);
 		eventDataType := JSON::get_string(eventDataTypeJSONObject["EventDataType"]);
 		if eventDataType = "EXTRAJOBINV" then
-			sourceJobDefintion := JSON::get_boolean(eventDataTypeJSONObject["SourceJobDefintion"]);
+			sourceJobDefintion := JSON::get_boolean(eventDataTypeJSONObject["SourceJobDefinition"]);
 			if sourceJobDefintion = true then
 				eventDataName := JSON::get_string(eventDataTypeJSONObject["EventDataName"]);
 				eventTypeName := JSON::get_string(eventDataTypeJSONObject["SourceEventType"]);
