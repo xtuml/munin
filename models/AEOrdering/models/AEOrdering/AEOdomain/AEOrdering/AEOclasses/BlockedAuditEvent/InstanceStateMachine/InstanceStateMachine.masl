@@ -31,8 +31,8 @@ begin
 	cancel this.blockedEventTimer;
 	auditEvent := this -> R4.AuditEvent;
 	job := auditEvent -> R9.Job;
-	failureReason := "JobId = " & job.jobId & " : AuditEventId = " & this.auditEventId & " : AuditEventType = " & auditEvent.eventType &
-	                 " : FailureReason = The reported event has been blocked longer than the blocked event time";
+	failureReason := "JobId = " & job.jobId & " : FailureReason = The reported event has been blocked longer than the blocked event time : AuditEventId = " & 
+	                    this.auditEventId & " : AuditEventType = " & auditEvent.eventType ;
 	unlink this R4 auditEvent;
 	failedAuditEvent := create FailedAuditEvent(auditEventId => this.auditEventId, failureTime => timestamp'now, failureReason => failureReason);
 	link failedAuditEvent R4 auditEvent;

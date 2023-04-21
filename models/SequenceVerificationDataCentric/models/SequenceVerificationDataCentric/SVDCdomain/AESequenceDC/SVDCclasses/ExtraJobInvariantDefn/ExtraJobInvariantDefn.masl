@@ -30,13 +30,13 @@ begin
     else
       logMessage := "AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn : Invalid Event Definition provided : " & invariantEventDefn.eventTypeName & "for Extra Job Invariant Name = " & invariantName;
 	  Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	  eventContent := "EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName & " : FailureReason = Invalid Event Definition provided for Extra Job Invariant Name";
+	  eventContent := "FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
 	  Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
 	end if;              
   else
     logMessage := "AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn : Invalid Job Definition provided : " & jobDefnName & "for Extra Job Invariant Name = " & invariantName;
 	Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	eventContent := "JobName = " & jobDefnName & " : InvariantName = " & invariantName & " : FailureReason = Invalid Job Definition provided for Extra Job Invariant Name";
+	eventContent := "FailureReason = Invalid Job Definition provided for Extra Job Invariant Name" & " : JobName = " & jobDefnName & " : InvariantName = " & invariantName;
 	Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
   end if;
 
@@ -74,13 +74,13 @@ begin
     else
       logMessage := "AESequenceDC::ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn : Invalid Event Definition provided : " & invariantEventDefn.eventTypeName & "for Extra Job Invariant Name = " & invariantName;
 	  Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	  eventContent := "EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName & " : FailureReason = Invalid Event Definition provided for Extra Job Invariant Name";
+	  eventContent := "FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
 	  Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
 	end if;              
   else
     logMessage := "AESequenceDC::ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn : Invalid Job Definition provided : " & jobDefnName & "for Extra Job Invariant Name = " & invariantName;
 	Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	eventContent := "JobName = " & jobDefnName & " : InvariantName = " & invariantName & " : FailureReason = Invalid Job Definition provided for Extra Job Invariant Name";
+	eventContent := "FailureReason = Invalid Job Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
 	Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
   end if;  
 

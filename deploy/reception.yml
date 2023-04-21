@@ -13,8 +13,8 @@ services:
     volumes:
       - "./reception-config:/root/config"
       - "./log-config:/root/log-config"
-      - "./logs:/var/log/reception"
+      - "./logs/reception:/var/log/reception"
       - "./aer-incoming:/root/incoming"
       - "./verifier-incoming:/root/outgoing"
     restart: on-failure
-    command: "-configPath config/ -log-config log-config/log-config-reception.xml -preinit schedule/startup.sch -util Inspector -inspector-port 0"
+    command: "-configPath config/ -log-config log-config/log-config-reception.xml -log-param instance_index=1 -preinit schedule/startup.sch -util Inspector -inspector-port 0"

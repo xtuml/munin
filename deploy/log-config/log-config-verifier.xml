@@ -58,7 +58,7 @@
     <logger>
         <name>Verifier</name>
         <format>
-            <pattern><timestamp decimal="none"/> <proirity/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
+            <pattern><param name="instance_index" default="0"/> <message/></pattern>
             <file>
                 <path>/var/log/verifier/Verifier.log</path> <!-- Name of the log file -->
                 <archive>

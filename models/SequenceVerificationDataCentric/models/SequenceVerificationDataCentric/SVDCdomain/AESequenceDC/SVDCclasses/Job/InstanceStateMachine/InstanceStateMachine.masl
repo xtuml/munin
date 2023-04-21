@@ -624,7 +624,7 @@ begin
   // Log info: Audit Event Sequence Verification has been informed of Job failure
   logMessage := "AESequenceDC::Job.JobFailed : Job Failed - jobId = " & this.jobID & " due to: " & failureReason;
   Logger::log(Logger::Error, "AESequenceDC", logMessage);
-  eventContent := "JobId = " & this.jobID & " :  FailureReason = " & failureReason;
+  eventContent := "FailureReason = " & failureReason & " : JobId = " & this.jobID;
   Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
   
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
@@ -656,7 +656,7 @@ begin
       // Log info: Audit Event Sequence Verification has been informed of Job completion
   logMessage := "AESequenceDC::Job.JobGoneHorriblyWrong : Job gone horribly wrong - a follow on event for a completed or failed job has been received - jobId = " & this.jobID;
   Logger::log(Logger::Error, "AESequenceDC", logMessage);
-  eventContent := "JobId = " & this.jobID  & " : FailureReason = Job gone horribly wrong - a follow on event for a completed or failed job has been received";
+  eventContent := "FailureReason = Job gone horribly wrong - a follow on event for a completed or failed job has been received" & " : JobId = " & this.jobID;
   Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
 
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.

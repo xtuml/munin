@@ -1,5 +1,5 @@
 <log>
-    <default name="Verifier"/> <!-- The default log file name - Should not be used as two loggers are defined -->
+    <default name="Reception"/> <!-- The default log file name - Should not be used as two loggers are defined -->
 
     <logger>
         <name>AEReception</name>
@@ -22,7 +22,7 @@
     <logger>
         <name>Reception</name>
         <format>
-            <pattern><timestamp decimal="none"/> <proirity/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
+            <pattern><param name="instance_index" default="0"/> <message/></pattern>
             <file>
                 <path>/var/log/reception/Reception.log</path> <!-- Name of the log file -->
                 <archive>

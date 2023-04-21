@@ -13,10 +13,11 @@ services:
     volumes:
       - "./plus2json-deployed/generated-config:/root/config"
       - "./log-config:/root/log-config"
-      - "./logs:/var/log/verifier"
+      - "./logs/verifier:/var/log/verifier"
       - "./InvariantStore:/root/InvariantStore"
       - "./verifier-incoming:/root/incoming"
       - "./JobIdStore:/root/JobIdStore"
       - "./verifier-processed:/root/processed"
     restart: on-failure
-    command: "-configPath config/ -log-config log-config/log-config-verifier.xml -preinit schedule/startup.sch -util Inspector -inspector-port 1 -startJobGroup 00 -endJobGroup FF"
+    command: "-configPath config/ -log-config log-config/log-config-verifier.xml -log-param instance_index=1 -preinit schedule/startup.sch -util Inspector -inspector-port 1 -startJobGroup 00 -endJobGroup FF"
+
