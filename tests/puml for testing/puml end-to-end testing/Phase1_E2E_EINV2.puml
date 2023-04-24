@@ -1,9 +1,11 @@
 @startuml
 
 partition "Single Complex Job" {
- :SourceJobDefinitionName="Extra Job Invariant Source Job",SourceExtraJobInvariantName="AUTH_TOKEN_A"|
+ :SourceJobDefinitionName="Extra Job Invariant Source Job",
+ SourceExtraJobInvariantName="AUTH_TOKEN_A"|
  detach
- :SourceJobDefinitionName="Other EINV Source Job",SourceExtraJobInvariantName="AUTH_TOKEN_B"|
+ :SourceJobDefinitionName="Other EINV Source Job",
+ SourceExtraJobInvariantName="AUTH_TOKEN_B"|
  detach
 group "Single Sequence"
   #green:SCJAa;
