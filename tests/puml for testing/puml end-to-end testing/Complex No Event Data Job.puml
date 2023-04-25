@@ -1,0 +1,41 @@
+@startuml
+
+partition "Complex No Event Data Job" {
+
+group "Single Complex Sequence"
+  #green:SCJAa;
+  :SCJAb;
+  :SCJBa;
+  :SCJBb;
+  :SCJBc;
+  :SCJC;
+  if (XOR) then ("error")
+    :SJCDa;
+    fork
+    :SJCDb;
+      :SCJG;
+      :SJCFa;
+    fork again
+      :SCJP;
+      #red:SCJQ;
+      detach
+    fork again
+      :SCJC;
+      repeat
+        :SCJD;
+        :SCJE;
+      repeat while
+      :SCJF;
+      :SCJD;
+      #red:SCJG;
+    end fork
+    :SCJH;
+    #red:SCJJ;
+    detach
+  else ("normal")
+    #red:SCJR;
+    detach
+  endif
+end group
+}
+@enduml
