@@ -1,29 +1,22 @@
 version: "3.9"
 services:
-  aereception:
-    image: "ghcr.io/xtuml/aereception"
-    volumes:
-      - "./reception-config:/root/config"
-      - "./aer-incoming:/root/incoming"
-      - "./verifier-incoming:/root/outgoing"
-    command: "-configPath config/ -preinit schedule/startup.sch"
   aeo_svdc-1:
     image: "ghcr.io/xtuml/aeo_svdc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20001:20001"
+      - "30001:30001"
+      - "40001:40001"
     volumes:
       - "./plus2json-deployed/generated-config:/root/config"
+      - "./log-config:/root/log-config"
+      - "./logs/verifier:/var/log/verifier"
       - "./InvariantStore:/root/InvariantStore"
       - "./verifier-incoming:/root/incoming"
       - "./JobIdStore:/root/JobIdStore"
       - "./verifier-processed:/root/processed"
-      - "./log/AEOrdering:/var/log/AEOrdering"
-    command: "-log-config config/logging.xml -log-param instance_index=1 -configPath config/ -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 7F"
-  aeo_svdc-2:
-    image: "ghcr.io/xtuml/aeo_svdc"
-    volumes:
-      - "./plus2json-deployed/generated-config:/root/config"
-      - "./InvariantStore:/root/InvariantStore"
-      - "./verifier-incoming:/root/incoming"
-      - "./JobIdStore:/root/JobIdStore"
-      - "./verifier-processed:/root/processed"
-      - "./log/AEOrdering:/var/log/AEOrdering"
-    command: "-log-config config/logging.xml -log-param instance_index=2 -configPath config/ -preinit schedule/startup.sch -startJobGroup 80 -endJobGroup FF"
+    restart: on-failure
+    command: "-configPath config/ -log-config log-config/log-config-verifier.xml -log-param instance_index=1 -preinit schedule/startup.sch -util Inspector -inspector-port 1 -startJobGroup 00 -endJobGroup FF"

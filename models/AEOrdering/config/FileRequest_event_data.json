@@ -9,4 +9,46 @@
       "EventDataItemName" : "numPackets"
     }
   ]
-}]
+},
+{
+  "EventDataName": "ASSEMBLETYPE",
+  "EventDataType": "INTRAJOBINV",
+  "SourceEventType": "AssemblePacket",
+  "SourceEventOccurrenceId": 1,
+  "UserEvents": [
+      {
+          "UserEventDataItemName": "ASSEMBLETYPE",
+          "UserEventType": "TransferPacket",
+          "UserEventOccurrenceId": 1
+      },
+      {
+          "UserEventDataItemName": "ASSEMBLETYPE",
+          "UserEventType": "CorruptedPacketError",
+          "UserEventOccurrenceId": 1
+      }
+  ]
+},
+{
+  "SourceJobDefinition" : false,
+  "SourceEventDataName": "PACKETTYPE",
+  "EventDataType": "EXTRAJOBINV",
+  "SourceJobDefinitionName": "SourceFileRequest",
+  "UserEvents": [
+      {
+          "UserEventDataItemName": "PACKETTYPE",
+          "UserEventType": "RequestFile",
+          "UserEventOccurrenceId": 1
+      },
+      {
+          "UserEventDataItemName": "PACKETTYPE",
+          "UserEventType": "TransferPacket",
+          "UserEventOccurrenceId": 1
+      },
+      {
+          "UserEventDataItemName": "PACKETTYPE",
+          "UserEventType": "TransferResultStatus",
+          "UserEventOccurrenceId": 1
+      }
+  ]
+}
+]

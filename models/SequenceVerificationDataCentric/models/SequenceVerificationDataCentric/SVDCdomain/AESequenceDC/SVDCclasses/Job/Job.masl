@@ -4,8 +4,8 @@ logMessage : string;
 begin
 	
 	// This is just a progress message - the failure is reported in the state machine
-	logMessage := "AESequenceDC::Job.failJob function entered";
-	Logger::log(Logger::Information, "AESequenceDC", logMessage);
+	logMessage := "AESequenceDC::Job.failJob : failed job ";
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	
 		
 	generate Job.jobFailed(failureReason) to this;

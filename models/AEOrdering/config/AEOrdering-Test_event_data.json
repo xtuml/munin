@@ -1,58 +1,32 @@
 [{
+  "SourceJobDefinition" : true,
   "EventDataName": "Data1",
   "EventDataType": "EXTRAJOBINV",
-  "SourceEventJobDefinitionName": "AEOrdering-Test",
   "SourceEventType": "aaa",
-  "SourceEventOccurrenceId": 1,
-  "UserEvents": [
-    {
-      "JobDefinitionName": "Other-Test-Job",
-      "UserEventType": "Other-aaa",
-      "OccurrenceId": 1,
-      "UserEventDataItemName" : "Other-Data1"
-    },
-    {
-      "JobDefinitionName": "Other-Test-Job",
-      "UserEventType": "Other-bbb",
-      "OccurrenceId": 1,
-      "UserEventDataItemName" : "Data1"
-    }
-  ]
+  "SourceEventOccurrenceId": 1
 },
 {
   "EventDataName": "Data2",
   "EventDataType": "INTRAJOBINV",
-  "JobDefinitionName": "AEOrdering-Test",
-  "Events": [
+  "SourceEventType": "aaa",
+  "SourceEventOccurrenceId": 1,
+  "UserEvents": [
     {
-      "EventType": "aaa",
-      "OccurrenceId": 1,
-      "EventDataItemName" : "Data2"
+      "UserEventType": "bbb",
+      "UserEventOccurrenceId": 1,
+      "UserEventDataItemName" : "Data2"
     },
     {
-      "EventType": "bbb",
-      "OccurrenceId": 1,
-      "EventDataItemName" : "Data2"
-    },
-    {
-      "EventType": "ccc",
-      "OccurrenceId": 1,
-      "EventDataItemName" : "Data2"
+      "UserEventType": "ccc",
+      "UserEventOccurrenceId": 1,
+      "UserEventDataItemName" : "Data2"
     }
   ]
 },
 {
+  "SourceJobDefinition" : true,
   "EventDataName": "Data4",
   "EventDataType": "EXTRAJOBINV",
-  "SourceEventJobDefinitionName": "AEOrdering-Test",
   "SourceEventType": "ddd",
-  "SourceEventOccurrenceId": 1,
-  "UserEvents": [
-    {
-      "JobDefinitionName": "Other-Test-Job",
-      "UserEventType": "Other-ddd",
-      "OccurrenceId": 1,
-      "UserEventDataItemName" : "Other-Data1"
-    }
-  ]
+  "SourceEventOccurrenceId": 1
 }]

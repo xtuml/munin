@@ -6,13 +6,15 @@ services:
       context: .
       args:
         EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
-#    ports:
-#      - "20000:20000"
-#      - "30000:30000"
-#      - "40000:40000"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
     volumes:
       - "./reception-config:/root/config"
+      - "./log-config:/root/log-config"
+      - "./logs/reception:/var/log/reception"
       - "./aer-incoming:/root/incoming"
       - "./verifier-incoming:/root/outgoing"
     restart: on-failure
-    command: "-configPath config/ -preinit schedule/startup.sch -util Inspector -inspector-port 0"
+    command: "-configPath config/ -log-config log-config/log-config-reception.xml -log-param instance_index=1 -preinit schedule/startup.sch -util Inspector -inspector-port 0"

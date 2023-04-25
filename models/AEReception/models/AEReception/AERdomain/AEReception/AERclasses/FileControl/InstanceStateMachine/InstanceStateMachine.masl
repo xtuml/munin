@@ -32,8 +32,8 @@ begin
 					link this R1 eventFile;
 					generate FileControl.allocateFile(eventFile) to this;
 					fileAssigned := true;
-					logMessage := "AEReception::FileControl.assignFile - assigning file " & eventFile.fileName;
-					Logger::log(Logger::Information, "AEReception", logMessage);
+					logMessage := "AEReception::FileControl.assignFile : assigning file " & eventFile.fileName;
+					Logger::log(Logger::Debug, "AEReception", logMessage);
 					exit; // for loop
 				end if;
 			end if;
@@ -58,9 +58,6 @@ validate : boolean := false;
 
 begin
 	
-	logMessage := "AEReception::FileControl.ProcessingFile";
-	Logger::log(Logger::Information, "AEReception", logMessage);
-		
 	// create the reception job and link to the event file it has to process
 	receptionSpec := find_one ReceptionSpec();
 	fileToBeProcessed := receptionSpec.processingDirectory & "/" & eventFile.fileName;
@@ -87,9 +84,6 @@ receptionSpec : instance of ReceptionSpec;
 currentJobs : sequence of instance of Reception;
 
 begin
-	
-//	logMessage := "AEReception::FileControl.WaitingForCapacity";
-//	Logger::log(Logger::Information, "AEReception", logMessage);
 	
 	cancel this.fileControlTimer;
 	receptionSpec := find_one ReceptionSpec();
