@@ -111,3 +111,12 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '1fae3fd3-f668-4d24-97fa-75b2906bda39' DO NOT EDIT THIS LINE.
+public service AEOrdering::Reporting~>reportEvent ( eventPriority : in Logger::Priority,
+                                                   eventLabel : in string,
+                                                   eventContent : in string ) is
+begin
+	Logger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

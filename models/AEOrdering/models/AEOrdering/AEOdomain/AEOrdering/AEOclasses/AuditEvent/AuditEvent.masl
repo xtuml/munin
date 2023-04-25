@@ -15,11 +15,9 @@ blockedAuditEvent : instance of BlockedAuditEvent;
 failedAuditEvent : instance of FailedAuditEvent;
 previousJob : instance of Job;
 previousAuditEvent : instance of PreviousAuditEvent;
+eventContent : string;
 
 begin
-	
-	logMessage := "AEOrdering::AuditEvent.createAuditEvent";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	
 	// verify that the audit event does not already exist
 	auditEvent := find_one AuditEvent(auditEventId = auditEventId);
@@ -28,6 +26,8 @@ begin
 			                            reportedNodeName => nodeName, reportedAuditEventTime => auditEventTime, reportedPrevEventIds => prevAuditEventIds, 
 			                            eventCreationTime => timestamp'now, eventState => EventStateEnum.BLOCKED, auditEventData => auditEventData);
 		link auditEvent R9 job;
+		eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
+		Reporting~>reportEvent(Logger::Information, "aeordering_events_processed", eventContent);
 		for prevEventId in prevAuditEventIds loop
 			previousAuditEvent := find_one (auditEvent -> R13.PreviousAuditEvent)(previousAuditEventId = prevEventId and auditEventId = auditEvent.auditEventId);
 			if previousAuditEvent = null then
@@ -54,13 +54,17 @@ begin
 					auditEvent.linkPreviousEvents(job);
 					job.totalOutOfSequence := job.totalOutOfSequence + 1;
 					generate BlockedAuditEvent.eventBlocked() to blockedAuditEvent;
+					eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType;
+					Reporting~>reportEvent(Logger::Information, "aeordering_events_blocked", eventContent);
 				end;
 			when EventStateEnum.FAILED =>
 				begin
 					failedAuditEvent := create FailedAuditEvent(auditEventId => auditEventId, failureTime => timestamp'now, failureReason => failureReason);
 					link failedAuditEvent R4 auditEvent;
-					logMessage := "AEOrdering::AuditEvent.createAuditEvent - " & failureReason;
-					Logger::log(Logger::Error, "Monitored System Failure", logMessage);
+					logMessage := "AEOrdering::AuditEvent.createAuditEvent : " & failureReason;
+					Logger::log(Logger::Error, "AEOrdering", logMessage);
+					eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType & " : FailureReason = " & failureReason;
+					Reporting~>reportEvent(Logger::Error, "aeordering_events_failed", eventContent);
 				end;
 		end case;
 	else
@@ -68,13 +72,19 @@ begin
 		// the audit event already exists check if it was in a previous job or for the same job and report the failure
 		previousJob := auditEvent -> R9.Job;
 		if previousJob = job then
-			failureReason := "Audit Event has previously been reported for the same job, jobId = " & job.jobId & ", auditEventId = " & auditEventId;
+			logMessage := "AEOrdering::AuditEvent.createAuditEvent : Audit Event has previously been reported for the same job, jobId = " & job.jobId & ", auditEventId = " & auditEventId;
+			Logger::log(Logger::Error, "AEOrdering", logMessage);
+			failureReason := "Audit Event has previously been reported for the same job";
+			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType & " : FailureReason = " & failureReason;
+			Reporting~>reportEvent(Logger::Error, "aeordering_events_failed", eventContent);
 		else
-			failureReason := "Audit Event has previously been reported for a different job, jobId = " & job.jobId & ", auditEventId = " & auditEventId & ", previous jobId = " & previousJob.jobId;
+			logMessage := "AEOrdering::AuditEvent.createAuditEvent : Audit Event has previously been reported for a different job, jobId = " & job.jobId & ", auditEventId = " & auditEventId & ", previous jobId = " & previousJob.jobId;
+			Logger::log(Logger::Error, "AEOrdering", logMessage);
+			failureReason := "Audit Event has previously been reported for a different job. PreviousJobId = " & previousJob.jobId;
+			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType & " : FailureReason = " & failureReason;
+			Reporting~>reportEvent(Logger::Error, "aeordering_events_failed", eventContent);
 		end if;
 		auditEvent := null;
-		logMessage := "AEOrdering::AuditEvent.createAuditEvent - " & failureReason;
-		Logger::log(Logger::Error, "Monitored System Failure", logMessage);
 	
 	end if;
 	
@@ -95,9 +105,6 @@ previousEventsReported : boolean := false;
 
 begin
 	
-	logMessage := "AEOrdering::AuditEvent.setEventState";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
 	// verify that this is an allowed event
 	if (job -> R2.InProgressJob /= null) and Application.validEvent(this, failureReason) then
 		
@@ -106,8 +113,8 @@ begin
 		eventTime := timestamp'parse(this.reportedAuditEventTime);
 		if eventTime + eventType.staleAuditEventDuration < timestamp'now then
 			this.eventState := EventStateEnum.FAILED;
-			failureReason := "The reported event is older than the stale event time out, auditEventId = " & auditEventId & ",eventTime = " & eventTime'image & 
-			                 "reportedTime = " & this.eventCreationTime'image; 
+			failureReason := "JobId = " & job.jobId &  " : AuditEventId = " & auditEventId & " : EventTime = " & eventTime'image & 
+			                 " : ReportedTime = " & this.eventCreationTime'image & " : FailureReason = The reported event is older than the stale event time out"; 
 		elsif this.reportedPrevEventIds'length = 0 then
 			// this is a therefore we can report it first event 
 			link this R10 job;

@@ -1,0 +1,77 @@
+-- BP 7.1.6 content: Interface syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO C_I
+	VALUES ("03e663e9-0c9f-4de8-9ed1-3a0528196981",
+	"00000000-0000-0000-0000-000000000000",
+	'Reporting',
+	'');
+INSERT INTO C_EP
+	VALUES ("62ae7807-3f5a-4606-8256-4a5575d66dba",
+	"03e663e9-0c9f-4de8-9ed1-3a0528196981",
+	-1,
+	'reportEvent',
+	'',
+	1);
+INSERT INTO C_IO
+	VALUES ("62ae7807-3f5a-4606-8256-4a5575d66dba",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'reportEvent',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_PP
+	VALUES ("4bf081a0-7d78-4c81-a8d7-a7e070f357d3",
+	"62ae7807-3f5a-4606-8256-4a5575d66dba",
+	"41797fc8-a1f2-45fa-8437-7b9b11084d99",
+	'eventPriority',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO S_DT_PROXY
+	VALUES ("41797fc8-a1f2-45fa-8437-7b9b11084d99",
+	"00000000-0000-0000-0000-000000000000",
+	'Logger::Priority',
+	'',
+	'',
+	'../Shared.xtuml');
+INSERT INTO C_PP
+	VALUES ("f621629c-d2ba-4ef3-97bf-2e5108b6c775",
+	"62ae7807-3f5a-4606-8256-4a5575d66dba",
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	'eventLabel',
+	'',
+	0,
+	'',
+	"4bf081a0-7d78-4c81-a8d7-a7e070f357d3");
+INSERT INTO S_DT_PROXY
+	VALUES ("ca05455a-8231-467f-be9a-63be44793e6a",
+	"00000000-0000-0000-0000-000000000000",
+	'string',
+	'',
+	'',
+	'../../../types/types.xtuml');
+INSERT INTO C_PP
+	VALUES ("1151ae85-5428-4e7e-a01e-124d358b2c8a",
+	"62ae7807-3f5a-4606-8256-4a5575d66dba",
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	'eventContent',
+	'',
+	0,
+	'',
+	"f621629c-d2ba-4ef3-97bf-2e5108b6c775");
+INSERT INTO PE_PE
+	VALUES ("03e663e9-0c9f-4de8-9ed1-3a0528196981",
+	1,
+	"d4422526-1dd9-43ae-aeb1-16b02ebbf976",
+	"00000000-0000-0000-0000-000000000000",
+	6);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("d4422526-1dd9-43ae-aeb1-16b02ebbf976",
+	"00000000-0000-0000-0000-000000000000",
+	"93a25cc9-604e-47d9-928e-aad6575c0677",
+	'Shared',
+	'',
+	0,
+	'../Shared.xtuml');

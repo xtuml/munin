@@ -24,9 +24,6 @@ logMessage : string;
 fileStatus : Filesystem::file_status;
 
 begin
-	logMessage := "IStore::InvStore.StoreLoaded";
-	Logger::log(Logger::Information, "IStore", logMessage);
-
  	cancel this.storeTimer;
 	if Filesystem::lock_file(Filesystem::filename(this.invStoreName), Filesystem::ExclusiveLock, lock, false) then
         fileStatus := Filesystem::get_file_status(Filesystem::filename(this.invStoreName));
@@ -88,9 +85,10 @@ begin
 	end if;
 exception
 	when others => 
-		logMessage := "IStore::InvStore.StoreLoaded - failed to load invariant store";
+		logMessage := "IStore::InvStore.StoreLoaded : failed to load invariant store";
 		Logger::log(Logger::Information, "IStore", logMessage);
-
+		raise program_error;
+		
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -101,8 +99,6 @@ fileStatus : Filesystem::file_status;
 
 begin
 
-	logMessage := "IStore::InvStore.StoreChecked";
-	Logger::log(Logger::Information, "IStore", logMessage);
 	cancel this.storeTimer;
 	
 	if Filesystem::file_exists(this.invStoreName) then
@@ -113,7 +109,7 @@ begin
 			schedule this.storeTimer generate InvStore.checkStore() to this delay this.loadRate;
 		end if;
 	else
-		logMessage := "InvStore.StoreChecked, failed to locate invariant store. Specified file = " & string(this.invStoreName);
+		logMessage := "InvStore.StoreChecked : failed to locate invariant store. Specified file = " & string(this.invStoreName);
 		Logger::log(Logger::Error, "IStore", logMessage);
 		raise program_error;
 	end if;
@@ -121,9 +117,9 @@ begin
 exception
 	when others => 	
 	
-		logMessage := "AEOrdering::InvStore.StoreChecked, failed to load invariant store";
+		logMessage := "AEOrdering::InvStore.StoreChecked : failed to load invariant store";
 		Logger::log(Logger::Error, "IStore", logMessage);
-		
+		raise program_error;
 	
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

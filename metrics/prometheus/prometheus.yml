@@ -10,15 +10,16 @@ scrape_configs:
       - targets:
         - cadvisor:8080
 
-  - job_name: deploy-aereception-1
-    scrape_interval: 5s
-    static_configs:
-      - targets:
-        - cadvisor:8080
-
-  - job_name: deploy-aeo_svdc-1-1
+  - job_name: protocol-verifier
     scrape_interval: 5s
     static_configs:
       - targets:
         - cadvisor:8080
         - grok_exporter:9144
+
+#  - job_name: deploy-aeo_svdc-1-1
+#    scrape_interval: 5s
+#      - targets:
+#    static_configs:
+#        - cadvisor:8080
+#        - grok_exporter:9144

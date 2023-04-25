@@ -31,7 +31,8 @@ services:
       - 9144:9144
     volumes:
       - ./grok_exporter:/etc/grok_exporter
-      - ../deploy/log/AEOrdering:/var/log/AEOrdering
+      - "../deploy/logs/reception:/var/log/reception"
+      - "../deploy/logs/verifier:/var/log/verifier"
     restart: unless-stopped
 
   cadvisor:

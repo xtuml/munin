@@ -11,8 +11,6 @@ invStore : instance of InvStore;
 logMessage : string;
 
 begin
-	logMessage := "IStore::persistInvariant";
-	Logger::log(Logger::Information, "IStore", logMessage);
 	invariant := find_one Invariant(invariantName = invariantName and invariantValue = invariantValue);
 	if invariant = null then
 		invariant := create Invariant(invariantName => invariantName, invariantValue => invariantValue, validFrom => validFrom, validTo => validTo, 
@@ -39,8 +37,8 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '0d534fb3-4054-4fcf-9f2e-7b7f3f7ed3c6' DO NOT EDIT THIS LINE.
-private service IStore::restoreNamedInvariant ( invariantName : in string,
-                                               invariantValue : in string ) is
+public service IStore::restoreNamedInvariant ( invariantName : in string,
+                                              invariantValue : in string ) is
 logMessage : string;
 invariant : instance of Invariant;
 invStore : instance of InvStore;
@@ -48,8 +46,6 @@ invariantToReport : persistedInvariantStructure;
 invariantsToReport : sequence of persistedInvariantStructure;
 
 begin
-	logMessage := "IStore::restoreNamedInvariant";
-	Logger::log(Logger::Information, "IStore", logMessage);
 	invariant := find_one Invariant(invariantName = invariantName and invariantValue = invariantValue);
 	if invariant /= null then
 		invariantToReport.invariantName := invariant.invariantName;

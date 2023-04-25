@@ -12,6 +12,7 @@ theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
 logMessage : string;
+eventContent : string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobDefnName);
@@ -27,12 +28,16 @@ begin
       theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = invariantEventDefn.occurrenceId);
       link newInvariant R20 theEventOccInSeqDefn;
     else
-      logMessage := "Invalid Event Definition provided : " & invariantEventDefn.eventTypeName & "for Extra Job Invariant Name = " & invariantName;
+      logMessage := "AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn : Invalid Event Definition provided : " & invariantEventDefn.eventTypeName & "for Extra Job Invariant Name = " & invariantName;
 	  Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	  eventContent := "FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
+	  Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
 	end if;              
   else
-    logMessage := "Invalid Job Definition provided : " & jobDefnName & "for Extra Job Invariant Name = " & invariantName;
-	Logger::log(Logger::Error, "AESequenceDC", logMessage);            
+    logMessage := "AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn : Invalid Job Definition provided : " & jobDefnName & "for Extra Job Invariant Name = " & invariantName;
+	Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	eventContent := "FailureReason = Invalid Job Definition provided for Extra Job Invariant Name" & " : JobName = " & jobDefnName & " : InvariantName = " & invariantName;
+	Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
   end if;
 
 end service;
@@ -51,6 +56,7 @@ theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
 logMessage : string;
+eventContent : string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobDefnName);
@@ -66,12 +72,16 @@ begin
       theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = invariantEventDefn.occurrenceId);
       link theInvariantDefn R21 theEventOccInSeqDefn;
     else
-      logMessage := "Invalid Event Definition provided : " & invariantEventDefn.eventTypeName & "for Extra Job Invariant Name = " & invariantName;
+      logMessage := "AESequenceDC::ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn : Invalid Event Definition provided : " & invariantEventDefn.eventTypeName & "for Extra Job Invariant Name = " & invariantName;
 	  Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	  eventContent := "FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
+	  Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
 	end if;              
   else
-    logMessage := "Invalid Job Definition provided : " & jobDefnName & "for Extra Job Invariant Name = " & invariantName;
-	Logger::log(Logger::Error, "AESequenceDC", logMessage);            
+    logMessage := "AESequenceDC::ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn : Invalid Job Definition provided : " & jobDefnName & "for Extra Job Invariant Name = " & invariantName;
+	Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	eventContent := "FailureReason = Invalid Job Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
+	Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
   end if;  
 
 end service;
@@ -136,15 +146,15 @@ begin
   	              
   	       else
   	              
-             logMessage := "Something went wrong restoring the Extra-Job Invariant's state " & restoredInvariant.extraJobInvariantName;
-             Logger::log(Logger::Information, "AESequenceDC", logMessage);
+             logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : Something went wrong restoring the Extra-Job Invariant's state " & restoredInvariant.extraJobInvariantName;
+             Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   	                                                          
   	       end if; 
   	       
   	     else
   	     
-             logMessage := "The restored Extra-Job Invariant is already present in the cache " & restoredInvariant.extraJobInvariantName;
-             Logger::log(Logger::Information, "AESequenceDC", logMessage);
+             logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The restored Extra-Job Invariant is already present in the cache " & restoredInvariant.extraJobInvariantName;
+             Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   	     
   	     end if;  
 
@@ -154,15 +164,15 @@ begin
                     
          else
                   
-           logMessage := "The Extra-Job Invariant has not been restored successfully " & restoredInvariant.extraJobInvariantName;
-           Logger::log(Logger::Information, "AESequenceDC", logMessage);
+           logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The Extra-Job Invariant has not been restored successfully " & restoredInvariant.extraJobInvariantName;
+           Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   	                                                          
          end if;  
                 
        else
                 
-         logMessage := "The Extra-Job Invariant to be restored does not match any known definition " & restoredInvariant.extraJobInvariantName;
-         Logger::log(Logger::Information, "AESequenceDC", logMessage);
+         logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The Extra-Job Invariant to be restored does not match any known definition " & restoredInvariant.extraJobInvariantName;
+         Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   	                                                                           
        end if;     
  
