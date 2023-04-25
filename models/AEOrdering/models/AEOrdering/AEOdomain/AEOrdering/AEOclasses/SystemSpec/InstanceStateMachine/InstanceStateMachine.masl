@@ -71,6 +71,9 @@ midnight : timestamp;
 fileControl : instance of FileControl;
 invariantStoreLoadRate : duration;
 filePermissions : Filesystem::permissions;
+constrainingDataItem : instance of DataItemType;
+constrainingDataItemName : string;
+intraJobInvDataItems : set of instance of DataItemType;
 
 begin
     
@@ -224,6 +227,23 @@ begin
             for dynamicControl in (job -> R12.AuditEventType -> R19.DynamicControl) loop
             	Req_IF_Verification~>dynamicControlDefinition(job.jobTypeName, dynamicControl.dynamicControlName, dynamicControl.controlType, dynamicControl.eventType, dynamicControl.occurrenceId, dynamicControl.userEventType, dynamicControl.userOccurrenceId);
             end loop;
+            
+	        // report the latest set of intra job inv event data to the sequence domain
+	        intraJobInvDataItems := job -> R14.DataItemType(dataItemType = "INTRAJOBINV");
+	        if intraJobInvDataItems'length > 0 then
+		        for dataItemType in intraJobInvDataItems loop
+		        	associatedEvent := emptyAssociatedEvent;
+		            associatedEvent.auditEventType := dataItemType.eventType;
+		            associatedEvent.occurrenceId := dataItemType.occurrenceId;
+		            associatedEvent.alternativeDataItemName := dataItemType.dataItemName;
+		            associatedEvents := associatedEvents & associatedEvent;
+		            constrainingDataItem := dataItemType -> R18.isConstrainedBy.DataItemType;
+		            if constrainingDataItem /= null then
+		               constrainingDataItemName := constrainingDataItem.dataItemName;
+		           end if;
+		        end loop;
+	            Req_IF_Verification~>intraJobInvariantDefinition(constrainingDataItemName, job.jobTypeName, associatedEvents);
+	         end if;
         end loop;
         
         // report the latest set of extra job inv event data to the sequence domain
@@ -240,22 +260,6 @@ begin
                     userEvents := userEvents & userEvent;
                 end loop;
                 Req_IF_Verification~>extraJobInvariantDefinition(dataItemType.dataItemName, dataItemType.jobTypeName, dataItemType.eventType, dataItemType.occurrenceId, userEvents);
-            end if;
-        end loop;
-
-        // report the latest set of extra job inv event data to the sequence domain
-        for dataItemType in find DataItemType(dataItemType = "INTRAJOBINV") loop
-            if dataItemType -> R18.isConstrainedBy.DataItemType = null then
-                // build up the event data items
-                associatedEvents := emptyAssociatedEvents;
-                for constrainedDataItem in dataItemType -> R18.constrains.DataItemType loop
-                    associatedEvent := emptyAssociatedEvent;
-                    associatedEvent.auditEventType := constrainedDataItem.eventType;
-                    associatedEvent.occurrenceId := constrainedDataItem.occurrenceId;
-                    associatedEvent.alternativeDataItemName := constrainedDataItem.dataItemName;
-                    associatedEvents := associatedEvents & associatedEvent;
-                end loop;
-                Req_IF_Verification~>intraJobInvariantDefinition(dataItemType.dataItemName, dataItemType.jobTypeName, associatedEvents);
             end if;
         end loop;
 
