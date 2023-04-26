@@ -5,9 +5,9 @@ group "Loop Count Sequence"
   :LCJAb;
   :LCJBa,LCNT,user=LCJE(0),name=LC1;
   :LCJBb;
-  :LCJBc,IINV,name=LCJInvA;
+  :LCJBc;
   :LCJC;
-  if (XOR) then ("error")
+  if (XOR) then ("normal")
     :SJCDa;
     fork
       :LCJC;
@@ -26,10 +26,10 @@ group "Loop Count Sequence"
       :LCJP;
       #red:LCJQ;
     end fork
-    :LCJH,IINV,USER,name=LCJInvA;
+    :LCJH;
     #red:LCJJ;
     detach
-  else ("normal")
+  else ("error")
     #red:LCJR;
     detach
   endif
