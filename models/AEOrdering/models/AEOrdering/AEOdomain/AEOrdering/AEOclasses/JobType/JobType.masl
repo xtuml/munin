@@ -25,7 +25,7 @@ constraintValue : string;
 hasDynamicControl : boolean := false;
 dynamicControl : instance of DynamicControl;
 dynamicControlName : string;
-dynamicControlType : DynamicControlTypeEnum;
+dynamicControlType : string;
 userEventType : string;
 userOccurrenceId : integer;
 
@@ -65,7 +65,7 @@ begin
 					if dynamicControlJSONObject'contains("DynamicControlName") and dynamicControlJSONObject'contains("DynamicControlType") and dynamicControlJSONObject'contains("UserEventType") and dynamicControlJSONObject'contains("UserOccurrenceId") then
 						hasDynamicControl := true;
 						dynamicControlName := JSON::get_string(dynamicControlJSONObject["DynamicControlName"]);
-						dynamicControlType := DynamicControlTypeEnum'value(JSON::get_string(dynamicControlJSONObject["DynamicControlType"]));
+						dynamicControlType := JSON::get_string(dynamicControlJSONObject["DynamicControlType"]);
 						userEventType := JSON::get_string(dynamicControlJSONObject["UserEventType"]);
 						userOccurrenceId := JSON::get_integer(dynamicControlJSONObject["UserOccurrenceId"]); 
 					end if;
