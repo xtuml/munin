@@ -206,7 +206,7 @@ begin
         
         // now check for any event data definition
         // TODO check the schema here
-        for jobType in find JobType() loop
+        for jobType in find JobType() ordered_by (jobTypeName) loop
             fileName := Filesystem::filename(this.configFilePath & jobType.jobTypeName & "_event_data.json");
             if Filesystem::file_exists(fileName) then
                 eventDataTypesJSONString := Filesystem::read_file(fileName);
