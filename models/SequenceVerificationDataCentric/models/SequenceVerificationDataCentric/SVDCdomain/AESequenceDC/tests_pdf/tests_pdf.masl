@@ -477,7 +477,7 @@ begin
   theAuditEventData := emptyAuditEventData;
   acceptOrderedEvent ("1670246893","ProtProc-0001","CS1-G","ComplexSunnyDay1",previousEvents,"Event34",theAuditEventData);
   previousEvents := ("Event24");
-  theAuditEventData := emptyAuditEventData;
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_A", "ProtectedFact_A1");
   acceptOrderedEvent ("1670246892","ProtProc-0001","CS1-D","ComplexSunnyDay1",previousEvents,"Event46",theAuditEventData);
   previousEvents := ("Event46");
   theAuditEventData := emptyAuditEventData;
@@ -526,7 +526,7 @@ begin
   Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 3, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
   Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 2, "Wrong number of BRANCHCOUNT control definitions created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
   Assertions::assertTrue(theIntraJobInvariantDefinitions'length = 1, "Wrong number of Intra-Job Invariant definitions created: " & (theIntraJobInvariantDefinitions'length)'image);
-  Assertions::assertTrue(theIntraJobInvariantUsages'length = 9, "Wrong number of Intra-Job Invariant usages created: " & (theIntraJobInvariantUsages'length)'image);
+  Assertions::assertTrue(theIntraJobInvariantUsages'length = 10, "Wrong number of Intra-Job Invariant usages created: " & (theIntraJobInvariantUsages'length)'image);
   //
   for theJob in theJobs loop
     Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);

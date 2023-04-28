@@ -66,7 +66,7 @@ begin
   // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 10 branches
   // This test does not reveal any erroneous behaviour of the twin
   //
-  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_1", "10");
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_1", "10") & (aeDataKindEnum.MERGECOUNT, "Merge_Counter_1", "10");
   acceptOrderedEvent ("1620920000","Test-0001","BCFA","Branch_Count_Job",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData :=  emptyAuditEventData;
   previousEvents := ("Ev301");

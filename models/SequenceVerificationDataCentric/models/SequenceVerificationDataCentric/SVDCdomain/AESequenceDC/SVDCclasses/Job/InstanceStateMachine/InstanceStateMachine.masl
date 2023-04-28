@@ -65,7 +65,8 @@ instanceForkFound : boolean;
 logMessage : string;
 failureMessage : string;
 creationErrorMessage : string;
-
+eventDataCheckHasPassed : boolean;
+failureReason : string;
 
 begin
   // Check to see if we've seen this event instance before
@@ -156,11 +157,7 @@ begin
                       newEvent.ProcessAuditEventData (aeData);
                       auditEventDataProcessed := true;
                     end if;  
-      
-
-
-
-              
+                  
                     // Add logic for incrementing Loop Count
                     theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
                     if theUserDynamicControlDefn /= null then                      
@@ -168,25 +165,26 @@ begin
                       
                       theUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = theUserDynamicControlDefn.dynamicControlName );
                       if theUserDynamicControl /= null and theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
-                        if (theUserDynamicControl -> R36) = null then
+                        //MUN2-65 if (theUserDynamicControl -> R36) = null then
                           link theUserDynamicControl R36 newEvent;
-                        end if;                      
+                        //MUN2-65 end if;                      
                     
                         if theUserDynamicControl.expectedDynamicControlValue > 0 then
                           if theUserDynamicControl.currentDynamicControlValue < theUserDynamicControl.expectedDynamicControlValue then
                             theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
                           else
                             this.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
-                          end if;                 
+                          end if;
+                          // TODO: Should there be an else clause here that deals with an expected DynamicControlValue not being > 0?                  
                         end if;  
                         
 	                  else
-                        logMessage := "AESequenceDC::Job.JobInProgress : This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+                      logMessage := "AESequenceDC::Job.JobInProgress : This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
 	                    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	                  end if;  
 	                  
 	                else 
-	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
+	                  // This event doesn't have a loop count defined on it and so can be ignored
 	                end if;  
 
                     // Check to see if this is a break event causing us to exit a loop and cancel the loop count
@@ -215,6 +213,8 @@ begin
  
                         theUserDynamicControl := newEvent -> R36;
                         if theUserDynamicControl = null then
+                          // An additional 'usage' DynamicControl that is separate from the 'source' DynamicControl instance is created 
+                          // in order to support nested forks.
                           theUserDynamicControl := create unique DynamicControl (expectedDynamicControlValue => theSourceDynamicControl.expectedDynamicControlValue,
                             	                                                 currentDynamicControlValue => 0,
                             	                                                 isUser => true);
@@ -232,7 +232,7 @@ begin
 	                  end if;  
 	                  
 	                else 
-	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
+	                  // This event doesn't have a branch count defined on it and so can be ignored
 	                end if;  
 
                     // Add logic for incrementing Branch Count - to count branches from a fork we have to look to see if the previous event was the fork event with a branch count on it.
@@ -293,6 +293,10 @@ begin
                       
                       theUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = theUserDynamicControlDefn.dynamicControlName);
                       if theUserDynamicControl /= null then
+                        // TODO An additional 'usage' DynamicControl will need to be created to support nested merge points (similar to BRANCHCOUNT processing above)
+                        
+                        // The following test is necessary because this logic is executed 
+                        // for EACH previous event of which there will be many at a merge point.
                         if (theUserDynamicControl -> R36) = null then
                           link theUserDynamicControl R36 newEvent;
                         end if;                      
@@ -309,6 +313,14 @@ begin
 	                else 
 	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
 	                end if;  
+                    
+                    //MUN2-65 Addition
+                    // ...and now check that the received audit event data matches that which is expected
+                    newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+                    if eventDataCheckHasPassed /= true then
+                      this.failJob(failureReason);
+                    end if;   
+                    // End of MUN2-65 Addition
                     
                   else
                     //Log Job failure: Previous event is valid but is part of a broken sequence
@@ -410,10 +422,15 @@ begin
 
 
 
-          // Process the audit event data for this first event
-          newEvent.ProcessAuditEventData (aeData);    
-
-        
+          // Process the audit event data for this new event
+          newEvent.ProcessAuditEventData (aeData);
+          
+          // ...and then check that the received audit event data matches that which is expected
+          newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+          if eventDataCheckHasPassed /= true then
+            this.failJob(failureReason);
+          end if;
+          
         else
           // We have a valid new event type and no previous event. This should indicate the start of
           // a new sequence within a Job yet the definition is ambiguous about which start event it is
@@ -537,7 +554,7 @@ begin
         end if;
       elsif theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then
 //        if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
-        theForkAuditEvent := theDynamicControl -> R36;
+//MUN2-65        theForkAuditEvent := theDynamicControl -> R36;
 
         if theDynamicControl -> R36 /= null then
         // We have a user dynamic control so check its values
