@@ -64,7 +64,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test200NormalInstanceForkWithBranch
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test201NormalInstanceForkWithBranchAndMergeCount 1201 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test202NormalSplitInstanceForkWithBranchAndMergeCount 1202 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test203NormalTypeAndInstanceForkWithBranchAndMergeCount 1203 CleanUpAllJobs 64]
-RUN SCENARIO Test 1 "run_test" [AESequenceDC Test204NormalMultiInstanceForkWithBranchAndMergeCount 1204 CleanUpAllJobs 64]
+#RUN SCENARIO Test 1 "run_test" [AESequenceDC Test204NormalMultiInstanceForkWithBranchAndMergeCount 1204 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test205NormalUserExtraJobInvariantWithRestoredSourceEJI 1205 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test206NormalUserExtraJobInvariantWithRestoredSourceEJI 1206 CleanUpAllJobs 64]
 

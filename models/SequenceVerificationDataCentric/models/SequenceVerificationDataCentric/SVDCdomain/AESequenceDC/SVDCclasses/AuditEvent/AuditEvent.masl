@@ -425,13 +425,13 @@ begin
   theReceivedCarriedExtraJobInvariantDefn := this -> R23 -> R28;
   theReceivedCarriedIntraJobInvariantDefn := this -> R23 -> R26;
   
-  //if theExpectedSourceDynamicControlDefs /= theReceivedSourceDynamicControlDefs then
-  //  checkHasPassed := false;
-  //  failureReason := "The dynamic controls provided as sources on received on event: " & this.AuditEventId & " do not match what was expected in the definition";
-  //elsif theExpectedUsageDynamicControlDef /= theReceivedUsageDynamicControlDef then
-  //  checkHasPassed := false;
-  //  failureReason := "The dynamic control usage received on event: " & this.AuditEventId & " does not match what was expected in the definition";
-  if theExpectedSourceExtraJobInvariantDef /= theReceivedProvidedExtraJobInvariantDef then
+  if theExpectedSourceDynamicControlDefs /= theReceivedSourceDynamicControlDefs then
+    checkHasPassed := false;
+    failureReason := "The dynamic controls provided as sources on received on event: " & this.AuditEventId & " do not match what was expected in the definition";
+  elsif theExpectedUsageDynamicControlDef /= theReceivedUsageDynamicControlDef then
+    checkHasPassed := false;
+    failureReason := "The dynamic control usage received on event: " & this.AuditEventId & " does not match what was expected in the definition";
+  elsif theExpectedSourceExtraJobInvariantDef /= theReceivedProvidedExtraJobInvariantDef then
     checkHasPassed := false;
     failureReason := "The PROVIDED extra job invariant expected on received event: " & this.AuditEventId & " does not match what was expected in the definition";
   elsif theExpectedUsageExtraJobInvariantDef /= theReceivedCarriedExtraJobInvariantDefn then

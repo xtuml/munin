@@ -156,18 +156,8 @@ begin
                     if auditEventDataProcessed = false then
                       newEvent.ProcessAuditEventData (aeData);
                       auditEventDataProcessed := true;
-                      
-                      // ...and then check that the received audit event data matches that which is expected
-                      newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
-                      if eventDataCheckHasPassed /= true then
-                        this.failJob(failureReason);
-                      end if;
                     end if;  
-      
-
-
-
-              
+                  
                     // Add logic for incrementing Loop Count
                     theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
                     if theUserDynamicControlDefn /= null then                      
@@ -189,13 +179,19 @@ begin
                         end if;  
                         
 	                  else
-                          logMessage := "This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+                        logMessage := "This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
 	                    Logger::log(Logger::Information, "AESequenceDC", logMessage);
 	                  end if;  
 	                  
 	                else 
-	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
+	                  // This event doesn't have a loop count defined on it and so can be ignored
 	                end if;  
+
+                    // ...and then check that the received audit event data matches that which is expected
+                    //MUN2-65 newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+                    //MUN2-65 if eventDataCheckHasPassed /= true then
+                    //MUN2-65   this.failJob(failureReason);
+                    //MUN2-65 end if;
 
                     // Check to see if this is a break event causing us to exit a loop and cancel the loop count
                     // TODO Is there a better way to do this now R36 and R37 have been added
@@ -242,7 +238,7 @@ begin
 	                  end if;  
 	                  
 	                else 
-	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
+	                  // This event doesn't have a branch count defined on it and so can be ignored
 	                end if;  
 
                     // Add logic for incrementing Branch Count - to count branches from a fork we have to look to see if the previous event was the fork event with a branch count on it.
@@ -323,6 +319,14 @@ begin
 	                else 
 	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
 	                end if;  
+                    
+                    //MUN2-65 Addition
+                    // ...and now check that the received audit event data matches that which is expected
+                    newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+                    if eventDataCheckHasPassed /= true then
+                      this.failJob(failureReason);
+                    end if;   
+                    // End of MUN2-65 Addition
                     
                   else
                     //Log Job failure: Previous event is valid but is part of a broken sequence
