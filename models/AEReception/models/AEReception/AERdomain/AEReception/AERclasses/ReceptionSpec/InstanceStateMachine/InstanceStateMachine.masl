@@ -15,12 +15,14 @@ configJSONString : string;
 configJSONElement : JSON::JSONElement;
 configJSONObject : JSON::JSONObject;
 configValidationResult : JSON::JSONObject;
+filePermissions : Filesystem::permissions;
 
 begin
 	
-	logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded";
-	Logger::log(Logger::Information, "AEReception", logMessage);
-	
+	filePermissions.group.read := true;
+	filePermissions.other.read := true;
+	filePermissions.group.write := true;
+	filePermissions.other.write := true;
 	// check the config file has not been removed
 	fileName := Filesystem::filename(this.configFilePath & this.configFile);
 	if Filesystem::file_exists(fileName) then
@@ -65,8 +67,12 @@ begin
 			if configJSONObject'contains("SchemaValidateFrequency") then
 				this.schemaValidateFrequency := JSON::get_integer(configJSONObject["SchemaValidateFrequency"]);
 			end if;
+			if configJSONObject'contains("FileControlWaitTime") then
+				this.fileControlWaitTime := duration'parse(JSON::get_string(configJSONObject["FileControlWaitTime"]));
+			end if;
     	else
-			Logger::log(Logger::Debug, "AEReception", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
+			logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded : Config file invalid:\n" & JSON::dump(configValidationResult, true);
+			Logger::log(Logger::Debug, "AEReception", logMessage);
 			raise JSON::JSONException("Config file invalid");
 		end if;
 
@@ -78,7 +84,7 @@ begin
 		// schedule to check the config file
 		schedule this.configTimer generate ReceptionSpec.checkConfigUpdate() to this delay this.specUpdateRate;
 	else
-		logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded, failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+		logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
 		Logger::log(Logger::Error, "AEReception", logMessage);
 		raise program_error;
 	end if;
@@ -87,14 +93,25 @@ begin
 	fileControl := find_one FileControl();
 	if fileControl = null then
 		fileControl := create unique FileControl(schemaValidationCount => 0, Current_State => Created);
+		filePermissions.group.read := true;
+		filePermissions.other.read := true;
+		filePermissions.group.write := true;
+		filePermissions.other.write := true;
+		// check the incoming directory exists and if not create it
+		if not Filesystem::file_exists(Filesystem::filename(this.incomingDirectory)) then
+			Filesystem::create_directory(Filesystem::filename(this.incomingDirectory));
+		end if;
+		Filesystem::add_permissions(Filesystem::filename(this.incomingDirectory),filePermissions);
 		// check the processing directory exists and if not create it
 		if not Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) then
 			Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
 		end if;
+		Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
 		// check the outgoing directory exists and if not create it
 		if not Filesystem::file_exists(Filesystem::filename(this.outgoingDirectory)) then
 			Filesystem::create_directory(Filesystem::filename(this.outgoingDirectory));
 		end if;
+		Filesystem::add_permissions(Filesystem::filename(this.outgoingDirectory),filePermissions);
 		schedule fileControl.fileControlTimer generate FileControl.checkCapacity() to fileControl delay @PT0S@;
 	end if;
 	
@@ -103,8 +120,9 @@ exception
 		raise program_error;
 	when others => 	
 	
-		logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded, failed to load configuration file";
+		logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded : failed to load configuration file";
 		Logger::log(Logger::Error, "AEReception", logMessage);
+		raise program_error;
 		
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -115,9 +133,6 @@ logMessage : string;
 fileStatus : Filesystem::file_status;
 
 begin
-
-	logMessage := "AEReception::ReceptionSpec.ConfigChecked";
-	Logger::log(Logger::Information, "AEReception", logMessage);
 	
 	if Filesystem::file_exists(Filesystem::filename(this.configFilePath & this.configFile)) then
 		fileStatus := Filesystem::get_file_status(Filesystem::filename(this.configFilePath & this.configFile));
@@ -127,7 +142,7 @@ begin
 			schedule this.configTimer generate ReceptionSpec.checkConfigUpdate() to this delay this.specUpdateRate;
 		end if;
 		else
-		logMessage := "AEReception::ReceptionSpec.ConfigChecked, failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+		logMessage := "AEReception::ReceptionSpec.ConfigChecked : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
 		Logger::log(Logger::Error, "AEReception", logMessage);
 		raise program_error;
 	end if;
@@ -135,9 +150,9 @@ begin
 exception
 	when others => 	
 	
-		logMessage := "AEReception::ReceptionSpec.ConfigChecked, failed to load configuration file";
+		logMessage := "AEReception::ReceptionSpec.ConfigChecked : failed to load configuration file";
 		Logger::log(Logger::Error, "AEReception", logMessage);
-		
+		raise program_error;		
 	
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

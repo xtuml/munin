@@ -103,9 +103,9 @@ begin
 		end if;
 	end loop;
 	
-	dynamicControlDefinition := find_one _TEST_Req_IF_Verification_dynamicControlDefinition(jobTypeName = "AEOrdering-Test" and dynamicControlName = "cccLOOPCOUNT" and dynamicControlType = DynamicControlTypeEnum.LOOPCOUNT and 
+	dynamicControlDefinition := find_one _TEST_Req_IF_Verification_dynamicControlDefinition(jobTypeName = "AEOrdering-Test" and dynamicControlName = "cccLOOPCOUNT" and dynamicControlType = "LOOPCOUNT" and 
 		                                                                                sourceEventType = "bbb" and sourceOccurrenceId = 1 and userEventType = "ccc" and userOccurrenceId = 1);
-    Assertions::assertTrue((dynamicControlDefinition /= null), "Test Config Test Data: Failed to find dynamic control definition definition jobTypeName = AEOrdering-Test and dynamicControlName = cccLOOPCOUNT and dynamicControlType = DynamicControlTypeEnum.LOOPCOUNT and sourceEventType = bbb and sourceOccurrenceId = 1 and userEventType = ccc and userOccurrenceId = 1");
+    Assertions::assertTrue((dynamicControlDefinition /= null), "Test Config Test Data: Failed to find dynamic control definition definition jobTypeName = AEOrdering-Test and dynamicControlName = cccLOOPCOUNT and dynamicControlType = LOOPCOUNT and sourceEventType = bbb and sourceOccurrenceId = 1 and userEventType = ccc and userOccurrenceId = 1");
 	
 
 end service;
@@ -1414,7 +1414,7 @@ fileControl : instance of FileControl;
 
 begin
 	
-  Filesystem::create_directory(targetDirectory);
+    Filesystem::create_directory(targetDirectory);
 	AEOrdering::clearDomain(true, true);
 	reportedEventDefinitions := find _TEST_Req_IF_Verification_eventDefinition();
 	delete reportedEventDefinitions;
@@ -1424,6 +1424,8 @@ begin
 	systemSpec.configFile := configFile;
 	Filesystem::touch_file(Filesystem::filename(systemSpec.configFilePath & configFile));
     
+    // verify the event definitions and event data definitions are correct
+    
 	// fire the timer to check the config file
 	generate SystemSpec.checkConfigUpdate() to systemSpec;
 	Test::service_event_queue();
@@ -1431,6 +1433,7 @@ begin
 	// move the first test file into the correct incoming directory
 	Filesystem::copy_file(testFileDir & testFile1, incomingDir & testFile1);
 	Filesystem::move_file(incomingDir & testFile1, targetDirectory & testFile1);
+	Test::service_event_queue();
 	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
 	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
 
@@ -1446,7 +1449,6 @@ begin
 	
 	// run the job again and verify that the job has not been created
 	fileControl := find_one FileControl();
-	fileControl.currentJobGroup := 1;
 	Filesystem::copy_file(testFileDir & testFile1, incomingDir & testFile1);
 	Filesystem::move_file(incomingDir & testFile1, targetDirectory & testFile1);
 	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));

@@ -215,7 +215,7 @@ begin
 	// this should force file control to detect the incoming files and assign
 	// one of them to be processed
 	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now);
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
 
 	// verify that we have one file that has been assigned 
  	eventFiles := find EventFile (assigned = true);

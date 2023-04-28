@@ -14,14 +14,12 @@ eventFile : instance of EventFile;
 fileToBeProcessed : Filesystem::filename;
 lock: Filesystem::file_lock;
 fileAssigned : boolean := false;
+filePermissions : Filesystem::permissions;
 
 begin
 
 	// find a file to process
 	receptionSpec := find_one ReceptionSpec();
-	if not Filesystem::file_exists(Filesystem::filename(receptionSpec.incomingDirectory)) then
-		Filesystem::create_directory(Filesystem::filename(receptionSpec.incomingDirectory));
-	end if;
 	fileNames := Filesystem::list_directory(Filesystem::filename(receptionSpec.incomingDirectory));
 	for currentFile in fileNames loop
 		begin
@@ -34,8 +32,8 @@ begin
 					link this R1 eventFile;
 					generate FileControl.allocateFile(eventFile) to this;
 					fileAssigned := true;
-					logMessage := "AEReception::FileControl.assignFile - assigning file " & eventFile.fileName;
-					Logger::log(Logger::Information, "AEReception", logMessage);
+					logMessage := "AEReception::FileControl.assignFile : assigning file " & eventFile.fileName;
+					Logger::log(Logger::Debug, "AEReception", logMessage);
 					exit; // for loop
 				end if;
 			end if;
@@ -44,7 +42,7 @@ begin
 		end;
 	end loop;
 	if fileAssigned = false then
-		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay @PT0S@;
+		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay receptionSpec.fileControlWaitTime;
 	end if;
 	
 end state;
@@ -60,9 +58,6 @@ validate : boolean := false;
 
 begin
 	
-	logMessage := "AEReception::FileControl.ProcessingFile";
-	Logger::log(Logger::Information, "AEReception", logMessage);
-		
 	// create the reception job and link to the event file it has to process
 	receptionSpec := find_one ReceptionSpec();
 	fileToBeProcessed := receptionSpec.processingDirectory & "/" & eventFile.fileName;
@@ -90,9 +85,6 @@ currentJobs : sequence of instance of Reception;
 
 begin
 	
-//	logMessage := "AEReception::FileControl.WaitingForCapacity";
-//	Logger::log(Logger::Information, "AEReception", logMessage);
-	
 	cancel this.fileControlTimer;
 	receptionSpec := find_one ReceptionSpec();
 	currentJobs := find Reception(receptionComplete = false);
@@ -100,7 +92,7 @@ begin
 		generate FileControl.checkForFile() to this;
 	else
 		// schedule to check for capacity. Should not be needed as conclusion of reception processing should force the check.
-		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay @PT1S@;
+		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay receptionSpec.fileControlWaitTime;
 	end if;
   
 end state;

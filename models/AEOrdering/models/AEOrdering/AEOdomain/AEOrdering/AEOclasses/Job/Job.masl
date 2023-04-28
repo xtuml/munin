@@ -7,9 +7,6 @@ archivedJob : instance of ArchivedJob;
 
 begin
 	
-	logMessage := "AEOrdering::Job.failJob";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
 	inProgressJob := this -> R2.InProgressJob;
 	if inProgressJob /= null then
 		unlink inProgressJob R2 this;
@@ -35,9 +32,9 @@ begin
 	Req_IF_Audited~>reportAuditFailure(this.jobId, failureReason);
 	
 	// now log the failure
-	logMessage := "Job failed - jobId = " & this.jobId & ", failureReason = " & failureReason;
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
+	logMessage := "AEOrdering::Job.failJob : " & failureReason;
+	Logger::log(Logger::Error, "AEOrdering", logMessage);
+	Reporting~>reportEvent(Logger::Information, "aeordering_job_failed", failureReason);
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -56,8 +53,6 @@ previousAuditEvents : sequence of instance of PreviousAuditEvent;
 
 begin
 
-	logMessage := "AEOrdering::Job.deleteJob";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	cancel this.jobTimer;
 	
 	// find all the audit events and delete them

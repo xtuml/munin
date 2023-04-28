@@ -13,9 +13,6 @@ fileName : Filesystem::filename;
 
 begin
 
-	logMessage := "AEOrdering::SystemSpec.ConfigChecked";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
 	fileName := Filesystem::filename(this.configFilePath & this.configFile);
 	if Filesystem::file_exists(fileName) then
 		fileStatus := Filesystem::get_file_status(fileName);
@@ -25,7 +22,7 @@ begin
 			schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
 		end if;
 		else
-		logMessage := "AEOrdering::ConfigChecked, failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+		logMessage := "AEOrdering::ConfigChecked : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
 		Logger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 	end if;
@@ -33,10 +30,10 @@ begin
 exception
 	when others => 	
 	
-		logMessage := "AEOrdering::SystemSpec.ConfigChecked, failed to load configuration file";
+		logMessage := "AEOrdering::SystemSpec.ConfigChecked : failed to load configuration file";
 		Logger::log(Logger::Error, "AEOrdering", logMessage);
+		raise program_error;
 		
-	
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -73,11 +70,19 @@ today : sequence of integer;
 midnight : timestamp;
 fileControl : instance of FileControl;
 invariantStoreLoadRate : duration;
+filePermissions : Filesystem::permissions;
+constrainingDataItem : instance of DataItemType;
+constrainingDataItemName : string;
+intraJobInvDataItems : set of instance of DataItemType;
 
 begin
     
-    logMessage := "AEOrdering::SystemSpec.ConfigUpdated";
-    Logger::log(Logger::Information, "AEOrdering", logMessage);
+	filePermissions.group.read := true;
+	filePermissions.other.read := true;
+	filePermissions.group.write := true;
+	filePermissions.other.write := true;
+	filePermissions.group.execute := true;
+	filePermissions.other.execute := false;
     
     // check the config file has not been removed
     fileName := Filesystem::filename(this.configFilePath & this.configFile);
@@ -107,6 +112,7 @@ begin
 				if Filesystem::file_exists(Filesystem::filename(this.incomingDirectory)) = false then
 					Filesystem::create_directory(Filesystem::filename(this.incomingDirectory));
 				end if;
+				Filesystem::add_permissions(Filesystem::filename(this.incomingDirectory),filePermissions);
             end if;
             if configJSONObject'contains("ProcessingDirectory") then
                 this.processingDirectory := JSON::get_string(configJSONObject["ProcessingDirectory"]);
@@ -114,6 +120,7 @@ begin
 				if Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) = false then
 					Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
 				end if;
+				Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
             end if;
             if configJSONObject'contains("ProcessedDirectory") then
                 this.processedDirectory := JSON::get_string(configJSONObject["ProcessedDirectory"]);
@@ -121,6 +128,7 @@ begin
 				if Filesystem::file_exists(Filesystem::filename(this.processedDirectory)) = false then
 					Filesystem::create_directory(Filesystem::filename(this.processedDirectory));
 				end if;
+				Filesystem::add_permissions(Filesystem::filename(this.processedDirectory),filePermissions);
             end if;
             if configJSONObject'contains("JobStoreLocation") then
                 jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);
@@ -134,6 +142,9 @@ begin
                 	this.invariantStoreLoadRate := invariantStoreLoadRate;
                 	Req_IF_InvariantStore~>setLoadRate(this.invariantStoreLoadRate);
                 end if;
+            end if;
+            if configJSONObject'contains("FileControlWaitTime") then
+                this.fileControlWaitTime := duration'parse(JSON::get_string(configJSONObject["FileControlWaitTime"]));
             end if;
             // read in the jobs that we expect to process
             if configJSONObject'contains("Jobs") and configJSONObject["Jobs"].kind = JSON::Array then
@@ -171,16 +182,20 @@ begin
                               jobType.updateAuditEventDurations(JSON::get_array(jobDefJSONObject["EventRules"]));
                             end if;
                         else
-                            Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true));
+                            logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true);
+                            Logger::log(Logger::Debug, logMessage);
                             raise JSON::JSONException("Config file invalid");
                         end if;
                     else
+                        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job config file not found: " & this.configFilePath & jobType.jobTypeName & ".json";
+                        Logger::log(Logger::Debug, "AEOrdering", logMessage);
                         raise program_error;
                     end if;
                 end loop;
             end if;
         else
-            Logger::log(Logger::Debug, "AEOrdering", "Config file invalid:\n" & JSON::dump(configValidationResult, true));
+            logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
+            Logger::log(Logger::Debug, "AEOrdering", logMessage);
             raise JSON::JSONException("Config file invalid");
         end if;
         
@@ -212,6 +227,23 @@ begin
             for dynamicControl in (job -> R12.AuditEventType -> R19.DynamicControl) loop
             	Req_IF_Verification~>dynamicControlDefinition(job.jobTypeName, dynamicControl.dynamicControlName, dynamicControl.controlType, dynamicControl.eventType, dynamicControl.occurrenceId, dynamicControl.userEventType, dynamicControl.userOccurrenceId);
             end loop;
+            
+	        // report the latest set of intra job inv event data to the sequence domain
+	        intraJobInvDataItems := job -> R14.DataItemType(dataItemType = "INTRAJOBINV");
+	        if intraJobInvDataItems'length > 0 then
+		        for dataItemType in intraJobInvDataItems loop
+		        	associatedEvent := emptyAssociatedEvent;
+		            associatedEvent.auditEventType := dataItemType.eventType;
+		            associatedEvent.occurrenceId := dataItemType.occurrenceId;
+		            associatedEvent.alternativeDataItemName := dataItemType.dataItemName;
+		            associatedEvents := associatedEvents & associatedEvent;
+		            constrainingDataItem := dataItemType -> R18.isConstrainedBy.DataItemType;
+		            if constrainingDataItem /= null then
+		               constrainingDataItemName := constrainingDataItem.dataItemName;
+		           end if;
+		        end loop;
+	            Req_IF_Verification~>intraJobInvariantDefinition(constrainingDataItemName, job.jobTypeName, associatedEvents);
+	         end if;
         end loop;
         
         // report the latest set of extra job inv event data to the sequence domain
@@ -231,22 +263,6 @@ begin
             end if;
         end loop;
 
-        // report the latest set of extra job inv event data to the sequence domain
-        for dataItemType in find DataItemType(dataItemType = "INTRAJOBINV") loop
-            if dataItemType -> R18.isConstrainedBy.DataItemType = null then
-                // build up the event data items
-                associatedEvents := emptyAssociatedEvents;
-                for constrainedDataItem in dataItemType -> R18.constrains.DataItemType loop
-                    associatedEvent := emptyAssociatedEvent;
-                    associatedEvent.auditEventType := constrainedDataItem.eventType;
-                    associatedEvent.occurrenceId := constrainedDataItem.occurrenceId;
-                    associatedEvent.alternativeDataItemName := constrainedDataItem.dataItemName;
-                    associatedEvents := associatedEvents & associatedEvent;
-                end loop;
-                Req_IF_Verification~>intraJobInvariantDefinition(dataItemType.dataItemName, dataItemType.jobTypeName, associatedEvents);
-            end if;
-        end loop;
-
         // if the job store does not exist then create it
         jobStore := find_one JobStore();
         if jobStore = null then
@@ -261,20 +277,20 @@ begin
         // schedule to check the config file
         schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
     else
-        logMessage := "AEOrdering::ConfigUpdated, failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+        logMessage := "AEOrdering::ConfigUpdated : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
         Logger::log(Logger::Error, "AEOrdering", logMessage);
         raise program_error;
     end if;
     
 exception
     when program_error =>
-        logMessage := "AEOrdering::SystemSpec.ConfigUpdated, failed to load configuration file";
+        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : failed to load configuration file";
         Logger::log(Logger::Error, "AEOrdering", logMessage);
         raise program_error;
     when others =>     
-    
-        logMessage := "AEOrdering::SystemSpec.ConfigUpdated, failed to load configuration file";
+        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : failed to load configuration file";
         Logger::log(Logger::Error, "AEOrdering", logMessage);
+        raise program_error;
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

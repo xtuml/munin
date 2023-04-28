@@ -2001,11 +2001,11 @@ begin
   previousEventTypes := ("BCFE",1,"","");
   eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false);
 
-  logMessage := "DEBUG: InitBranchCountDefinition scenario - Call for Merge Count follows";
-  Logger::log(Logger::Information, "AESequenceDC", logMessage);                       
+  logMessage := "AESequenceDC::OLD_InitBranchCountDefinition : OLD_InitBranchCountDefinition scenario - Call for Merge Count follows";
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);                       
   dynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
-  logMessage := "DEBUG: InitBranchCountDefinition scenario - Call for Branch Count follows";
-  Logger::log(Logger::Information, "AESequenceDC", logMessage);                       
+  logMessage := "AESequenceDC::OLD_InitBranchCountDefinition : OLD_InitBranchCountDefinition scenario - Call for Branch Count follows";
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);                       
   dynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
   
 //

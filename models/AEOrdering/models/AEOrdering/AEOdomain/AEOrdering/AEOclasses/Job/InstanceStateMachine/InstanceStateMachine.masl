@@ -11,10 +11,7 @@ logMessage : string;
 systemSpec : instance of SystemSpec;
 
 begin
-	
-	logMessage := "AEOrdering::Job.InProgress";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
+		
 	// start the maximum job time to verify that he job is complete 
 	systemSpec := find_one SystemSpec();
 	schedule this.jobTimer generate Job.jobCompleted() to this delay systemSpec.maximumJobTime;
@@ -31,8 +28,6 @@ systemSpec : instance of SystemSpec;
 
 begin
 	
-	logMessage := "AEOrdering::Job.Archived";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	cancel this.jobTimer;
 
 	// migrate to archived job
@@ -63,8 +58,6 @@ systemSpec : instance of SystemSpec;
 
 begin
 
-	logMessage := "AEOrdering::Job.Failed";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	cancel this.jobTimer;
 	
 	// add the job to the job store as there should be no more events
@@ -88,17 +81,16 @@ end state;
 
 //! ACTIVITY BEGIN. 'ee1fb944-54a4-406f-b70a-53153f627d75' 'd5e0d359-24ec-4439-bb79-74c7d3be2459' DO NOT EDIT THIS LINE.
 state AEOrdering::Job.VerifiedJobSuccess () is
-logMessage : string;
+failureReason : string;
 
 begin
 
-	logMessage := "AEOrdering::Job.VerifiedJobSucces";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	cancel this.jobTimer;
 	
 	// check if there are any outstanding blocked events
 	if (this -> R1.AuditEvent)'length > 0 then
-		this.failJob("Job has timed out with blocked events that were not processed.");
+		failureReason := "JobId = " & this.jobId & " : FailureReason = Job has timed out with blocked events that were not processed.";
+		this.failJob(failureReason);
 	else
 		// no outstanding blocked events so archive the job
 		generate Job.archiveJob() to this;

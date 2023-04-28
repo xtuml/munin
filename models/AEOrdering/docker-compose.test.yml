@@ -13,8 +13,9 @@ services:
       - "40000:40000"
     volumes:
       - "./test_results:/root/test_results"
+      - "./testing:/root/testing"
       - "./config:/root/config"
       - "./JobIdStore:/root/JobIdStore"
       - "./test-files:/root/test-files"
     entrypoint: ["/usr/bin/timeout", "3000s", "AEOrdering_transient_standalone"]
-    command: "-configPath config/ -configFile aeordering_spec_test.json -postinit schedule/test.sch -startJobGroup 00 -endJobGroup FF -util Inspector -inspector-port 0"
+    command: "-log-level Debug -configPath config/ -configFile aeordering_spec_test.json -postinit schedule/test.sch -startJobGroup 00 -endJobGroup FF -util Inspector -inspector-port 0"

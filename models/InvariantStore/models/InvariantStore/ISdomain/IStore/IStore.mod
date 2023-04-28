@@ -1,6 +1,6 @@
 domain IStore is
-  object Invariant;
   object InvStore;
+  object Invariant;
   public type persistedInvariantStructure is structure
     invariantName :string;
     invariantValue :string;
@@ -10,36 +10,24 @@ domain IStore is
     sourceAuditEventType :string;
     sourceAuditEventOccurrenceId :integer;
 end structure;
+    private service testInvariantStore (
+    );
+pragma test_only ( true ); pragma scenario ( 2 ); 
+    private service init (
+    );
+pragma scenario ( 1 ); 
     public service persistInvariant (
         invariantName : in string,        invariantValue : in string,        validFrom : in timestamp,        validTo : in timestamp,        sourceJobDefinitionType : in string,        sourceAuditEventType : in string,        sourceAuditEventOccurrenceId : in integer    );
     public service setLoadRate (
         loadRate : in duration    );
-    private service restoreNamedInvariant (
+    public service restoreNamedInvariant (
         invariantName : in string,        invariantValue : in string    );
-    private service init (
-    );
-pragma scenario ( 1 ); 
-    private service testInvariantStore (
-    );
-pragma test_only ( true ); pragma scenario ( 2 ); 
   terminator StoreClient is
     public service addInvariants (
         invariantsToReport : in sequence of persistedInvariantStructure    );
   end terminator;
   relationship R1 is InvStore unconditionally hasStored many Invariant,
     Invariant unconditionally isStoredIn one InvStore;
-  object Invariant is
-    invariantName : preferred  string;
-    invariantValue : preferred  string;
-    validFrom :   timestamp;
-    validTo :   timestamp;
-    sourceJobDefinitionType :   string;
-    sourceAuditEventType :   string;
-    sourceAuditEventOccurrenceId :   string;
-    invStoreName :   referential ( R1.isStoredIn.InvStore.invStoreName ) Filesystem::filename;
-    reportedToLocalClient :   boolean;
-    stored :   boolean;
-  end object;
   object InvStore is
     invStoreId :  unique integer;
     invStoreName : preferred  Filesystem::filename;
@@ -65,5 +53,17 @@ pragma test_only ( true ); pragma scenario ( 2 );
         loadStore => StoreLoaded,
         checkStore => StoreChecked      ); 
     end transition;
+  end object;
+  object Invariant is
+    invariantName : preferred  string;
+    invariantValue : preferred  string;
+    validFrom :   timestamp;
+    validTo :   timestamp;
+    sourceJobDefinitionType :   string;
+    sourceAuditEventType :   string;
+    sourceAuditEventOccurrenceId :   string;
+    invStoreName :   referential ( R1.isStoredIn.InvStore.invStoreName ) Filesystem::filename;
+    reportedToLocalClient :   boolean;
+    stored :   boolean;
   end object;
 end domain;

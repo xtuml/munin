@@ -10,9 +10,6 @@ fileControl : instance of FileControl;
 
 begin
 
-	logMessage := "AEOrdering::init";
-	Logger::log(Logger::Information, "AEOrdering", logMessage);
-	
 	// get the supplied command line option for the config file and verify it is valid
 	configFilePath := CommandLine::get_option_value("-configPath");
 	configFile := CommandLine::get_option_value("-configFile", "config.json");
@@ -20,27 +17,32 @@ begin
 		systemSpec := find_one SystemSpec();
 		if systemSpec = null then
 			systemSpec := create unique SystemSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, maxOutOfSequenceEvents => 10, 
-				                                   maximumJobTime => @PT10M@, jobCompletePeriod => @PT10M@, Current_State => Created);
+				                                   maximumJobTime => @PT10M@, jobCompletePeriod => @PT10M@, fileControlWaitTime => @PT1S@, Current_State => Created);
 		end if;
 		generate SystemSpec.loadConfig() to systemSpec;
 	else
-		logMessage := "AEOrdering::init, failed to locate config file. Specified file = " & configFilePath & configFile;
-		Logger::log(Logger::Information, "AEOrdering", logMessage);
+		logMessage := "AEOrdering::init : failed to locate config file. Specified file = " & configFilePath & configFile;
+		Logger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 	end if;
 
 	startJobGroup := integer'parse(CommandLine::get_option_value("-startJobGroup"),16);
 	endJobGroup := integer'parse(CommandLine::get_option_value("-endJobGroup"),16);
-	fileControl := find_one FileControl();
-	if fileControl = null then
-		fileControl := create unique FileControl(startJobGroup => startJobGroup, endJobGroup => endJobGroup, Current_State => Created);
-		schedule fileControl.fileTimer generate FileControl.selectFile() to fileControl delay @PT0S@;
+	// we need to create a file control for each job group
+	if (find FileControl())'length = 0 then
+		for jobGroup in startJobGroup .. endJobGroup loop
+			fileControl := find_one FileControl(fileControlId = jobGroup);
+			if fileControl = null then
+				fileControl := create FileControl(fileControlId => jobGroup, startJobGroup => startJobGroup, endJobGroup => endJobGroup, Current_State => Created);
+				schedule fileControl.fileTimer generate FileControl.selectFile() to fileControl delay @PT0S@;
+			end if;
+		end loop;
 	end if;
-	
+		
 exception
 	when others =>
 	
-		logMessage := "AEOrdering::init, failed during start up";
+		logMessage := "AEOrdering::init : failed during start up";
 		Logger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 	
