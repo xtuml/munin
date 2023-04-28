@@ -187,12 +187,6 @@ begin
 	                  // This event doesn't have a loop count defined on it and so can be ignored
 	                end if;  
 
-                    // ...and then check that the received audit event data matches that which is expected
-                    //MUN2-65 newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
-                    //MUN2-65 if eventDataCheckHasPassed /= true then
-                    //MUN2-65   this.failJob(failureReason);
-                    //MUN2-65 end if;
-
                     // Check to see if this is a break event causing us to exit a loop and cancel the loop count
                     // TODO Is there a better way to do this now R36 and R37 have been added
                     if theAeOccInSequenceDef.isBreak = true then
