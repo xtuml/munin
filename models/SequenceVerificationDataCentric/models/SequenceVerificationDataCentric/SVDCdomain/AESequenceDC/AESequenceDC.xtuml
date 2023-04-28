@@ -653,7 +653,7 @@ INSERT INTO GD_GE
 	"b84ab95a-4088-42f1-b46f-a70c6183f972",
 	94,
 	0,
-	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::Persistence_Prov_IF::Unnamed Interface');
+	'SequenceVerificationDataCentric::SVDCdomain::AESequenceDC::Persistence_Prov_IF::Persistence_Prov_IF');
 INSERT INTO GD_CON
 	VALUES ("af016193-943a-43d4-803b-a2e3d800bf6d",
 	"00000000-0000-0000-0000-000000000000");
@@ -1241,15 +1241,41 @@ INSERT INTO C_PO
 	'');
 INSERT INTO C_IR
 	VALUES ("b84ab95a-4088-42f1-b46f-a70c6183f972",
-	"00000000-0000-0000-0000-000000000000",
+	"5c49d63e-135f-48ac-95bc-d9faeedade6a",
 	"00000000-0000-0000-0000-000000000000",
 	"2503143a-e45a-4d27-b230-4f6bffe208eb");
 INSERT INTO C_P
 	VALUES ("b84ab95a-4088-42f1-b46f-a70c6183f972",
-	'Unnamed Interface',
+	'Persistence_Prov_IF',
 	'Unnamed Interface',
 	'',
-	'AESequenceDC::Persistence_Prov_IF::Unnamed Interface');
+	'AESequenceDC::Persistence_Prov_IF::Persistence_Prov_IF');
+INSERT INTO SPR_PEP
+	VALUES ("98b958d6-ed3f-4669-a6f1-5f26c56ff9a7",
+	"995ec859-32ad-460c-8007-69e34bd211ba",
+	"b84ab95a-4088-42f1-b46f-a70c6183f972");
+INSERT INTO SPR_PO
+	VALUES ("98b958d6-ed3f-4669-a6f1-5f26c56ff9a7",
+	'restoreInvariants',
+	'',
+	'',
+	3,
+	6,
+	15);
+INSERT INTO C_EP_PROXY
+	VALUES ("995ec859-32ad-460c-8007-69e34bd211ba",
+	"5c49d63e-135f-48ac-95bc-d9faeedade6a",
+	-1,
+	'restoreInvariants',
+	'',
+	15,
+	'../Shared/Persistence_Prov_IF/Persistence_Prov_IF.xtuml');
+INSERT INTO C_I_PROXY
+	VALUES ("5c49d63e-135f-48ac-95bc-d9faeedade6a",
+	"00000000-0000-0000-0000-000000000000",
+	'Persistence_Prov_IF',
+	'',
+	'../Shared/Persistence_Prov_IF/Persistence_Prov_IF.xtuml');
 INSERT INTO C_PO
 	VALUES ("7db39f0b-3dde-4a93-b48f-6b66f6500e0d",
 	"0c364501-cead-4520-a1cb-8f44e2211858",

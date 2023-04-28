@@ -173,8 +173,24 @@ end service;
 
 //! ACTIVITY BEGIN. 'ee7403ae-abfc-4f77-af8d-9f6ea68f6848' DO NOT EDIT THIS LINE.
 public service IStore::StoreClient~>addInvariants ( invariantsToReport : in sequence of persistedInvariantStructure ) is
+restoredInvariants: sequence of AESequenceDC::persistedInvariantStructure;
 begin
-  null;
+  for dataItem in invariantsToReport loop
+    declare
+      restoredInvariant: AESequenceDC::persistedInvariantStructure;
+    begin
+      restoredInvariant.invariantName := dataItem.invariantName;
+      restoredInvariant.invariantValue := dataItem.invariantValue;
+      restoredInvariant.validFrom := dataItem.validFrom;
+      restoredInvariant.validTo := dataItem.validTo;
+      restoredInvariant.sourceJobDefinitionType := dataItem.sourceJobDefinitionType;
+      restoredInvariant.sourceAuditEventType := dataItem.sourceAuditEventType;
+      restoredInvariant.sourceAuditEventOccurrenceId := dataItem.sourceAuditEventOccurrenceId;
+      restoredInvariants := restoredInvariants & restoredInvariant;
+    end;
+  end loop;
+
+  AESequenceDC::restoreInvariants(restoredInvariants);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

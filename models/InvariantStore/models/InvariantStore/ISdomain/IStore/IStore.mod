@@ -1,6 +1,6 @@
 domain IStore is
-  object InvStore;
   object Invariant;
+  object InvStore;
   public type persistedInvariantStructure is structure
     invariantName :string;
     invariantValue :string;
@@ -28,6 +28,18 @@ pragma scenario ( 1 );
   end terminator;
   relationship R1 is InvStore unconditionally hasStored many Invariant,
     Invariant unconditionally isStoredIn one InvStore;
+  object Invariant is
+    invariantName : preferred  string;
+    invariantValue : preferred  string;
+    validFrom :   timestamp;
+    validTo :   timestamp;
+    sourceJobDefinitionType :   string;
+    sourceAuditEventType :   string;
+    sourceAuditEventOccurrenceId :   string;
+    invStoreName :   referential ( R1.isStoredIn.InvStore.invStoreName ) Filesystem::filename;
+    reportedToLocalClient :   boolean;
+    stored :   boolean;
+  end object;
   object InvStore is
     invStoreId :  unique integer;
     invStoreName : preferred  Filesystem::filename;
@@ -53,17 +65,5 @@ pragma scenario ( 1 );
         loadStore => StoreLoaded,
         checkStore => StoreChecked      ); 
     end transition;
-  end object;
-  object Invariant is
-    invariantName : preferred  string;
-    invariantValue : preferred  string;
-    validFrom :   timestamp;
-    validTo :   timestamp;
-    sourceJobDefinitionType :   string;
-    sourceAuditEventType :   string;
-    sourceAuditEventOccurrenceId :   string;
-    invStoreName :   referential ( R1.isStoredIn.InvStore.invStoreName ) Filesystem::filename;
-    reportedToLocalClient :   boolean;
-    stored :   boolean;
   end object;
 end domain;
