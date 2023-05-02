@@ -1,10 +1,9 @@
 <log>
-    <default name="Verifier"/> <!-- The default log file name - Should not be used as two loggers are defined -->
-
     <logger>
         <name>AEOrdering</name>
         <format>
-            <pattern><timestamp decimal="none"/> <proirity/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
+            <pattern><timestamp decimal="none"/> <priority/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
+            <stderr/>
             <file>
                 <path>/var/log/verifier/AEOrdering.log</path> <!-- Name of the log file -->
                 <archive>
@@ -18,11 +17,11 @@
             </file>
         </format>
     </logger>
-
     <logger>
         <name>AESequenceDC</name>
         <format>
-            <pattern><timestamp decimal="none"/> <proirity/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
+            <pattern><timestamp decimal="none"/> <priority/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
+            <stderr/>
             <file>
                 <path>/var/log/verifier/AESequenceDC.log</path> <!-- Name of the log file -->
                 <archive>
@@ -36,11 +35,11 @@
             </file>
         </format>
     </logger>
-
     <logger>
         <name>IStore</name>
         <format>
-            <pattern><timestamp decimal="none"/> <proirity/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
+            <pattern><timestamp decimal="none"/> <priority/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
+            <stderr/>
             <file>
                 <path>/var/log/verifier/IStore.log</path> <!-- Name of the log file -->
                 <archive>
@@ -54,7 +53,6 @@
             </file>
         </format>
     </logger>
-
     <logger>
         <name>Verifier</name>
         <format>

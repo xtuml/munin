@@ -11,7 +11,7 @@ services:
       - "./logs/reception:/var/log/reception"
       - "./reception-incoming:/root/incoming"
       - "./verifier-incoming:/root/outgoing"
-    command: "-configPath config/ -configFile reception-config.json -log-config config/log-config-reception.xml -log-param instance_index=1 -preinit schedule/startup.sch -util Inspector -inspector-port 0"
+    command: "-configPath config/ -configFile reception-config.json -log-config config/log-config-reception.xml -log-level trace -preinit schedule/startup.sch -util Inspector -inspector-port 0"
   aeo_svdc:
     image: "ghcr.io/xtuml/aeo_svdc"
     ports:
@@ -25,5 +25,5 @@ services:
       - "./verifier-processed:/root/processed"
       - "./InvariantStore:/root/InvariantStore"
       - "./JobIdStore:/root/JobIdStore"
-    command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=1 -preinit schedule/startup.sch -util Inspector -inspector-port 2 -startJobGroup 00 -endJobGroup FF"
+    command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=1 -log-level trace -preinit schedule/startup.sch -util Inspector -inspector-port 2 -startJobGroup 00 -endJobGroup FF"
 
