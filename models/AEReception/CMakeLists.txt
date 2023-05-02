@@ -34,7 +34,7 @@ add_masl_domain(masl/${PROJECT_NAME}/${PROJECT_NAME}.mod
   EXTRA_ARGS ${EXTRA_MASL_ARGS} EXTRA_DOMAIN_PATHS /opt/masl/lib/masl
   JVM_ARGS
   -DreceptionConfigSchema="${CMAKE_INSTALL_PREFIX}/share/json/reception_config_schema.json"
-  -DauditEventSchema="${CMAKE_INSTALL_PREFIX}/share/json/audit_event_schema_with_nodes.json"
+  -DauditEventSchema="${CMAKE_INSTALL_PREFIX}/share/json/audit_event_schema.json"
 )
 generate_masl()
 
@@ -42,6 +42,5 @@ install(
   FILES
   schema/reception_config_schema.json
   schema/audit_event_schema.json
-  schema/audit_event_schema_with_nodes.json
   DESTINATION share/json
 )

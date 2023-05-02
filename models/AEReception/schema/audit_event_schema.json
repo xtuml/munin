@@ -15,10 +15,6 @@
       "description": "Name of the enclosing job definition",
       "type": "string"
     },
-    "applicationName": {
-      "description": "ID of the issuing application",
-      "type": "string"
-    },
     "eventType": {
       "description": "Name of the event type",
       "type": "string"
@@ -49,64 +45,7 @@
           "minItems": 1
         }
       ]
-    },
-    "__comment__": true
-  },
-  "required": ["jobId", "jobName", "applicationName", "eventType", "eventId", "timestamp"],
-  "additionalProperties": {
-    "$ref": "#/$defs/event_data"
-  },
-  "$defs": {
-    "event_data": {
-      "type": "object",
-      "oneOf": [
-        {"$ref": "#/$defs/invariant"},
-        {"$ref": "#/$defs/constraint"}
-      ],
-      "required": ["dataItemType", "value"]
-    },
-    "invariant": {
-      "description": "TODO",
-      "properties": {
-        "dataItemType": {
-          "enum": ["EXTRAJOBINV", "INTRAJOBINV"]
-        },
-        "value": {
-          "type": "string"
-        }
-      }
-    },
-    "constraint": {
-      "oneOf": [
-        {"$ref": "#/$defs/branch_count"},
-        {"$ref": "#/$defs/loop_count"}
-      ]
-    },
-    "branch_count": {
-      "description": "TODO",
-      "type": "object",
-      "properties": {
-        "dataItemType": {
-          "const": "BRANCHCOUNT"
-        },
-        "value": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
-    },
-    "loop_count": {
-      "description": "TODO",
-      "type": "object",
-      "properties": {
-        "dataItemType": {
-          "const": "LOOPCOUNT"
-        },
-        "value": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
     }
-  }
+  },
+  "required": ["jobId", "jobName", "eventType", "eventId", "timestamp"]
 }
