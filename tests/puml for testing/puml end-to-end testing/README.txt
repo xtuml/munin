@@ -16,5 +16,8 @@ Intra Job Invariant Job.puml
 Extra Job Invariant Source Job.puml
 Extra Job Invariant User Job.puml
 Loop Count Job.puml
+Branch Count Job 1.puml
+Branch Count Job 2.puml
+Complex Intra Invariant Job.puml
 
 This list will grow over time and hopefully can become the basis of end-to-end regression tests.
