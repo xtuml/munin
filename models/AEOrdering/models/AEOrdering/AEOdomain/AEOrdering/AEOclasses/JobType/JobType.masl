@@ -60,17 +60,18 @@ begin
 					isBreak := JSON::get_boolean(eventDefJSONObject["IsBreak"]);
 				end if;
 				// check for any dynamic controls
-				if eventDefJSONObject'contains("DynamicControl") and eventDefJSONObject["DynamicControl"].kind = JSON::Object then
-					dynamicControlJSONObject := JSON::get_object(eventDefJSONObject["DynamicControl"]);
-					if dynamicControlJSONObject'contains("DynamicControlName") and dynamicControlJSONObject'contains("DynamicControlType") and dynamicControlJSONObject'contains("UserEventType") and dynamicControlJSONObject'contains("UserOccurrenceId") then
-						hasDynamicControl := true;
-						dynamicControlName := JSON::get_string(dynamicControlJSONObject["DynamicControlName"]);
-						dynamicControlType := JSON::get_string(dynamicControlJSONObject["DynamicControlType"]);
-						userEventType := JSON::get_string(dynamicControlJSONObject["UserEventType"]);
-						userOccurrenceId := JSON::get_integer(dynamicControlJSONObject["UserOccurrenceId"]); 
-					end if;
+				if eventDefJSONObject'contains("DynamicControl") then
+				    for dynamicControlJSONElement in JSON::get_array(eventDefJSONObject["DynamicControl"]) loop
+                        dynamicControlJSONObject := JSON::get_object(dynamicControlJSONElement);
+                        hasDynamicControl := true;
+                        dynamicControlName := JSON::get_string(dynamicControlJSONObject["DynamicControlName"]);
+                        dynamicControlType := JSON::get_string(dynamicControlJSONObject["DynamicControlType"]);
+                        userEventType := JSON::get_string(dynamicControlJSONObject["UserEventType"]);
+                        userOccurrenceId := JSON::get_integer(dynamicControlJSONObject["UserOccurrenceId"]); 
+                        exit;  // currently we only support one dynamic control
+					end loop;
 				end if;
-				if eventDefJSONObject'contains("PreviousEvents") and eventDefJSONObject["PreviousEvents"].kind = JSON::Array then
+    			if eventDefJSONObject'contains("PreviousEvents") and eventDefJSONObject["PreviousEvents"].kind = JSON::Array then
 					for prevEventTypeJSONElement in JSON::get_array(eventDefJSONObject["PreviousEvents"]) loop
 						previousEventName := "";
 						previousEventOccurrenceId := 1;
@@ -120,6 +121,62 @@ begin
 					dynamicControl.userEventType := userEventType;
 					dynamicControl.userOccurrenceId := userOccurrenceId;
 				end if;
+
+				// check for event data
+				if eventDefJSONObject'contains("EventData") then
+				    for eventDataJSONElement in JSON::get_array(eventDefJSONObject["EventData"]) loop
+                        declare
+                            eventDataJSONObject: JSON::JSONObject;
+                            dataItemType: instance of DataItemType;
+                            sourceDataItemType: instance of DataItemType;
+                        begin
+				            eventDataJSONObject := JSON::get_object(eventDataJSONElement);
+
+				            // create a new event data item type and link to the current job
+				            dataItemType := create unique DataItemType();
+				            dataItemType.dataItemName := JSON::get_string(eventDataJSONObject["EventDataName"]);
+				            dataItemType.dataItemType := JSON::get_string(eventDataJSONObject["EventDataType"]);
+				            link dataItemType R14 this;
+				            link dataItemType R16 eventType;
+				            
+				            if eventDataJSONObject'contains("SourceEventDataName") then
+				                // search for source data item type for the current user data item type
+				                if dataItemType.dataItemType = "INTRAJOBINV" then
+				                    sourceDataItemType := find_one (
+				                        find (this->R12.AuditEventType) (
+				                            eventType = JSON::get_string(eventDataJSONObject["SourceEventType"]) and
+				                            occurrenceId = JSON::get_integer(eventDataJSONObject["SourceEventOccurrenceId"])
+				                        )->R16.DataItemType)(dataItemName = JSON::get_string(eventDataJSONObject["SourceEventDataName"]));
+				                    if sourceDataItemType /= null then
+				                        link sourceDataItemType R18.constrains dataItemType;
+				                    else
+                                        logMessage := "AEOrdering::JobType.loadEventTypes : Failed to process INTRAJOBINV event data item type for unknown Source Event Type " & JSON::get_string(eventDataJSONObject["SourceEventType"]) & ", Occurrence Id " & JSON::get_integer(eventDataJSONObject["SourceEventOccurrenceId"])'image;
+                                        Logger::log(Logger::Error, "AEOrdering", logMessage);
+                                        raise program_error;
+				                    end if;
+				                else
+				                    sourceDataItemType := find_one (
+				                        find JobType (jobTypeName = JSON::get_string(eventDataJSONObject["SourceJobDefinitionName"]))
+				                        ->R12.AuditEventType->R16.DataItemType)(dataItemName = JSON::get_string(eventDataJSONObject["SourceEventDataName"]));
+				                    if sourceDataItemType /= null then
+				                        link sourceDataItemType R18.constrains dataItemType;
+				                    else
+				                        // create a forward reference to a data item defined in a different job
+				                        link dataItemType R21 create SourceDataItemForwardReference(
+				                            dataItemTypeId => dataItemType.dataItemTypeId,
+				                            sourceJobTypeName => JSON::get_string(eventDataJSONObject["SourceJobDefinitionName"]),
+				                            sourceDataItemName => JSON::get_string(eventDataJSONObject["SourceEventDataName"])
+				                        );
+                                        logMessage := "AEOrdering::JobType.loadEventDataItemTypes : Failed to process EXTRAJOBINV event data item type for unknown Source Job Type " & JSON::get_string(eventDataJSONObject["SourceJobDefinitionName"]) & ", Event Data Name " & JSON::get_string(eventDataJSONObject["SourceEventDataName"]);
+                                        Logger::log(Logger::Error, "AEOrdering", logMessage);
+                                        raise program_error;
+				                    end if;
+				                end if;
+				            end if;
+				        end;
+				    end loop;
+				end if;
+	
 			end loop;
 		end if;
 	else
@@ -154,137 +211,6 @@ begin
 				auditEventType.blockedAuditEventDuration := duration'parse(JSON::get_string(eventRuleJSONObject["BlockedAuditEventDuration"]));
 			end if;
 		end if;
-	end loop;
-	
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '92f32a2d-c26e-437a-a132-bfcd1e409a15' DO NOT EDIT THIS LINE.
-public instance service AEOrdering::JobType.loadEventDataItemTypes ( eventDataTypesJSONArray : in JSON::JSONArray ) is
-logMessage : string;
-jobTypeName : string;
-eventTypeName : string;
-occurrenceId : integer;
-eventDataName : string;
-eventDataType : string;
-jobType : instance of JobType;
-sourceAuditEventType : instance of AuditEventType;
-auditEventType : instance of AuditEventType;
-eventTypeJSONElement : JSON::JSONElement;
-eventDefJSONObject : JSON::JSONObject;
-eventDataTypeJSONObject : JSON::JSONObject;
-userEventJSONObject : JSON::JSONObject;
-dataItemType : instance of DataItemType;
-constrainedDataItems : sequence of instance of DataItemType;
-constrainedDataItem : instance of DataItemType;
-sourceJobDefintion : boolean;
-
-begin
-	
-	for eventDataTypeJSONElement in eventDataTypesJSONArray loop
-		eventDataTypeJSONObject := JSON::get_object(eventDataTypeJSONElement);
-		eventDataType := JSON::get_string(eventDataTypeJSONObject["EventDataType"]);
-		if eventDataType = "EXTRAJOBINV" then
-			sourceJobDefintion := JSON::get_boolean(eventDataTypeJSONObject["SourceJobDefinition"]);
-			if sourceJobDefintion = true then
-				eventDataName := JSON::get_string(eventDataTypeJSONObject["EventDataName"]);
-				eventTypeName := JSON::get_string(eventDataTypeJSONObject["SourceEventType"]);
-				occurrenceId := JSON::get_integer(eventDataTypeJSONObject["SourceEventOccurrenceId"]);
-				sourceAuditEventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
-				if sourceAuditEventType = null then
-					logMessage := "AEOrdering::JobType.loadEventDataItemTypes : Failed to process EXTRAJOBINV event data item type for unknown Source Event Type " & eventTypeName & ", Occurrence Id " & occurrenceId'image;
-					Logger::log(Logger::Error, "AEOrdering", logMessage);
-					raise program_error;
-				end if;
-				dataItemType := find_one (jobType -> R14.DataItemType)(dataItemName = eventDataName);
-				if dataItemType = null then
-					dataItemType := create unique DataItemType(dataItemName => eventDataName, dataItemType => eventDataType);
-					link this R14 dataItemType;
-					link dataItemType R16 sourceAuditEventType;
-				end if;
-			else
-				eventDataName := JSON::get_string(eventDataTypeJSONObject["SourceEventDataName"]);
-				jobTypeName := JSON::get_string(eventDataTypeJSONObject["SourceJobDefinitionName"]);
-				jobType := find_one JobType(jobTypeName = jobTypeName);
-				if jobType = null then
-					logMessage := "AEOrdering::JobType.loadEventDataItemTypes : Failed to process EXTRAJOBINV Source Job Type " & jobTypeName;
-					Logger::log(Logger::Error, "AEOrdering", logMessage);
-					raise program_error;
-				end if;
-				dataItemType := find_one (jobType -> R14.DataItemType)(dataItemName = eventDataName);
-				if dataItemType = null then
-					logMessage := "AEOrdering::JobType.loadEventDataItemTypes : Failed to process EXTRAJOBINV event data item type for unknown Source Job Type " & jobTypeName & ", Event Data Name " & eventDataName;
-					Logger::log(Logger::Error, "AEOrdering", logMessage);
-					raise program_error;
-				end if;
-				if eventDataTypeJSONObject'contains("UserEvents") and eventDataTypeJSONObject["UserEvents"].kind = JSON::Array then
-					for eventDataItemsJSONElement in JSON::get_array(eventDataTypeJSONObject["UserEvents"]) loop
-						constrainedDataItems := dataItemType -> R18.constrains.DataItemType;
-						userEventJSONObject := JSON::get_object(eventDataItemsJSONElement);
-						eventTypeName := JSON::get_string(userEventJSONObject["UserEventType"]);
-						occurrenceId := JSON::get_integer(userEventJSONObject["UserEventOccurrenceId"]);
-						eventDataName := JSON::get_string(userEventJSONObject["UserEventDataItemName"]);
-						auditEventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
-						if auditEventType = null then
-							logMessage := "AEOrdering::JobType.loadEventDataItemTypes : Failed to process EXTRAJOBINV event data item type for unknown User Event Type " & eventTypeName & ", Occurrence Id " & occurrenceId'image;
-							Logger::log(Logger::Error, "AEOrdering", logMessage);
-							raise program_error;
-						end if;
-						// check that the data item has not already been created with a different data item type
-						if find_one (auditEventType -> R16.DataItemType)(dataItemName = eventDataName and dataItemType /= eventDataType) /= null then
-							logMessage := "AEOrdering::JobType.loadEventDataItemTypes : Failed to process EXTRAJOBINV event data item name already declared Event Data Name  " & eventDataName;
-							Logger::log(Logger::Error, "AEOrdering", logMessage);
-							raise program_error;
-						end if;
-						if find_one constrainedDataItems(jobTypeName = jobTypeName and eventType = eventTypeName and occurrenceId = occurrenceId and dataItemName = eventDataName) = null then
-							constrainedDataItem := create unique DataItemType(dataItemName => eventDataName, dataItemType => eventDataType);
-							link this R14 constrainedDataItem;
-							link constrainedDataItem R16 auditEventType;
-							link constrainedDataItem R18.isConstrainedBy dataItemType;
-						end if;
-					end loop;
-				end if;
-			end if;
-		elsif eventDataType = "INTRAJOBINV" then
-			// this is an intra job definition
-			eventDataName := JSON::get_string(eventDataTypeJSONObject["EventDataName"]);
-			eventTypeName := JSON::get_string(eventDataTypeJSONObject["SourceEventType"]);
-			occurrenceId := JSON::get_integer(eventDataTypeJSONObject["SourceEventOccurrenceId"]);
-			sourceAuditEventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
-			if sourceAuditEventType = null then
-				logMessage := "AEOrdering::JobType.loadEventDataItemTypes : Failed to process INTRAJOBINV event data item type for unknown Source Event Type " & eventTypeName & ", Occurrence Id " & occurrenceId'image;
-				Logger::log(Logger::Error, "AEOrdering", logMessage);
-				raise program_error;
-			end if;
-			dataItemType := find_one (jobType -> R14.DataItemType)(dataItemName = eventDataName);
-			if dataItemType = null then
-				dataItemType := create unique DataItemType(dataItemName => eventDataName, dataItemType => eventDataType);
-				link this R14 dataItemType;
-				link dataItemType R16 sourceAuditEventType;
-			end if;
-			if eventDataTypeJSONObject'contains("UserEvents") and eventDataTypeJSONObject["UserEvents"].kind = JSON::Array then
-				for eventDataItemsJSONElement in JSON::get_array(eventDataTypeJSONObject["UserEvents"]) loop
-					userEventJSONObject := JSON::get_object(eventDataItemsJSONElement);
-					eventTypeName := JSON::get_string(userEventJSONObject["UserEventType"]);
-					occurrenceId := JSON::get_integer(userEventJSONObject["UserEventOccurrenceId"]);
-					eventDataName := JSON::get_string(userEventJSONObject["UserEventDataItemName"]);
-					auditEventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
-					if auditEventType = null then
-						logMessage := "AEOrdering::JobType.loadEventDataItemTypes : Failed to process INTRAJOBINV event data item type for unknown User Event Type " & eventTypeName & ", Occurrence Id " & occurrenceId'image;
-						Logger::log(Logger::Error, "AEOrdering", logMessage);
-						raise program_error;
-					end if;
-					constrainedDataItems := dataItemType -> R18.constrains.DataItemType;
-					if find_one constrainedDataItems(jobTypeName = this.jobTypeName and eventType = eventTypeName and occurrenceId = occurrenceId and dataItemName = eventDataName) = null then
-						constrainedDataItem := create unique DataItemType(dataItemName => eventDataName, dataItemType => eventDataType);
-						link this R14 constrainedDataItem;
-						link constrainedDataItem R16 auditEventType;
-						link constrainedDataItem R18.isConstrainedBy dataItemType;
-					end if;
-				end loop;
-			end if;
-		end if;
-		
 	end loop;
 	
 end service;

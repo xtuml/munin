@@ -199,23 +199,15 @@ begin
             raise JSON::JSONException("Config file invalid");
         end if;
         
+        // resolve data item forward references
+        for dataItemForwardRef in find SourceDataItemForwardReference() loop
+            dataItemForwardRef.resolve();
+        end loop;
+        
         // set the config file mod time
         fileName := Filesystem::filename(this.configFilePath & this.configFile);
         fileStatus := Filesystem::get_file_status(Filesystem::filename(fileName));
         this.configFileModificationTime := fileStatus.modification_time;
-        
-        // now check for any event data definition
-        // TODO check the schema here
-        for jobType in find JobType() ordered_by (jobTypeName) loop
-            fileName := Filesystem::filename(this.configFilePath & jobType.jobTypeName & "_event_data.json");
-            if Filesystem::file_exists(fileName) then
-                eventDataTypesJSONString := Filesystem::read_file(fileName);
-                eventDataTypesJSONElement := JSON::parse(eventDataTypesJSONString);
-                
-                // extract the spec data items
-                jobType.loadEventDataItemTypes(JSON::get_array(eventDataTypesJSONElement));
-            end if;
-        end loop;
         
         // report the latest set of events to the sequence domain
         for job in find JobType() loop
