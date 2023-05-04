@@ -1,0 +1,79 @@
+{
+    "JobDefinitionName": "Branch Count Job 2",
+    "Events": [
+        {
+            "EventName": "BCJ2A",
+            "OccurrenceId": 0,
+            "SequenceName": "Branch Count Sequence 2",
+            "SequenceStart": true,
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "BCJ2B",
+            "OccurrenceId": 0,
+            "SequenceName": "Branch Count Sequence 2",
+            "DynamicControl": {
+                "DynamicControlName": "BCJ2BC2",
+                "DynamicControlType": "BRANCHCOUNT",
+                "UserEventType": "BCJ2B",
+                "UserOccurrenceId": 0
+            },
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "BCJ2A",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "BCJ2C",
+            "OccurrenceId": 0,
+            "SequenceName": "Branch Count Sequence 2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "BCJ2B",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "BCJ2D",
+            "OccurrenceId": 0,
+            "SequenceName": "Branch Count Sequence 2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "BCJ2C",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "BCJ2E",
+            "OccurrenceId": 0,
+            "SequenceName": "Branch Count Sequence 2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "BCJ2D",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "BCJ2F",
+            "OccurrenceId": 0,
+            "SequenceName": "Branch Count Sequence 2",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "BCJ2E",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        }
+    ]
+}
