@@ -1,0 +1,29 @@
+//! ACTIVITY BEGIN. '04749b6a-860c-4585-9214-393ebbdb0cc4' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::SystemSpec.lastModificationTime () return timestamp is
+fileName: Filesystem::filename;
+fileStatus: Filesystem::file_status;
+mostRecentModificationTime: timestamp;
+logMessage: string;
+begin
+	fileName := Filesystem::filename(this.configFilePath & this.configFile);
+    if Filesystem::file_exists(fileName) then
+        fileStatus := Filesystem::get_file_status(fileName);
+        mostRecentModificationTime := fileStatus.modification_time;
+    else
+		logMessage := "AEOrdering::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+		Logger::log(Logger::Error, "AEOrdering", logMessage);
+		raise program_error;
+    end if;
+    if Filesystem::file_exists(Filesystem::filename(this.jobDefinitionDirectory)) then
+        for jobDefinitionFile in Filesystem::list_directory(Filesystem::filename(this.jobDefinitionDirectory)) loop
+	        fileName := Filesystem::filename(this.jobDefinitionDirectory & "/" & string(jobDefinitionFile));
+            fileStatus := Filesystem::get_file_status(fileName);
+            if fileStatus.modification_time > mostRecentModificationTime then
+                mostRecentModificationTime := fileStatus.modification_time;
+            end if;
+        end loop;
+    end if;
+    return mostRecentModificationTime;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
