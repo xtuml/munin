@@ -2,6 +2,8 @@ version: "3.9"
 services:
   aereception:
     image: "ghcr.io/xtuml/aereception"
+    # Uncomment to change the number of reception instances. Note: when multiple insances are active, you must disable the port mapping
+    # scale: 3
     ports:
       - "20000:20000"
       - "30000:30000"
@@ -26,4 +28,18 @@ services:
       - "./InvariantStore:/root/InvariantStore"
       - "./JobIdStore:/root/JobIdStore"
     command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=1 -log-level trace -preinit schedule/startup.sch -util Inspector -inspector-port 2 -startJobGroup 00 -endJobGroup FF"
-
+  # Uncomment to add a second instance of protocol verifier. Note: you must change the 'startJobGroup' and 'endJobGroup' parameters of the first instance so there is no overlap.
+  # aeo_svdc-2:
+  #   image: "ghcr.io/xtuml/aeo_svdc"
+  #   ports:
+  #     - "20003:20003"
+  #     - "30003:30003"
+  #     - "40003:40003"
+  #   volumes:
+  #     - "./config:/root/config"
+  #     - "./logs/verifier:/var/log/verifier"
+  #     - "./verifier-incoming:/root/incoming"
+  #     - "./verifier-processed:/root/processed"
+  #     - "./InvariantStore:/root/InvariantStore"
+  #     - "./JobIdStore:/root/JobIdStore"
+  #   command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=2 -log-level trace -preinit schedule/startup.sch -util Inspector -inspector-port 3 -startJobGroup 80 -endJobGroup FF"
