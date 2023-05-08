@@ -150,31 +150,34 @@ begin
         // process job definitions
         if Filesystem::file_exists(Filesystem::filename(this.jobDefinitionDirectory)) then
             for jobDefinitionFile in Filesystem::list_directory(Filesystem::filename(this.jobDefinitionDirectory)) loop
-                jobTypeJSONString := Filesystem::read_file(Filesystem::filename(this.jobDefinitionDirectory & "/" & string(jobDefinitionFile)));
-                jobTypeJSONElement := JSON::parse(jobTypeJSONString);
-                jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, #PROP["jobDefinitionSchema"]#);
-                if JSON::get_boolean(jobTypeValidationResult["valid"]) then
-                    jobTypeJSONObject := JSON::get_object(jobTypeJSONElement);
-                    // find or create the job
-                    jobType := find_one JobType(jobTypeName = JSON::get_string(jobTypeJSONObject["JobDefinitionName"]));
-                    if jobType = null then
-                        jobType := create JobType(
-                            jobTypeName => JSON::get_string(jobTypeJSONObject["JobDefinitionName"]),
-                            deprecated => false,
-                            jobTypeExpiryTime => timestamp'now + duration'weeks(1000),
-                            staleAuditEventDuration => duration'weeks(1000),
-                            blockedAuditEventDuration => duration'weeks(1000),
-                            Current_State => Created
-                        );
-                        generate JobType.activateJobType() to jobType;
+                // if the file extension is ".json", assume the file is a job definition
+                if Strings::ends_with(jobDefinitionFile, ".json") then
+                    jobTypeJSONString := Filesystem::read_file(Filesystem::filename(this.jobDefinitionDirectory & "/" & string(jobDefinitionFile)));
+                    jobTypeJSONElement := JSON::parse(jobTypeJSONString);
+                    jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, #PROP["jobDefinitionSchema"]#);
+                    if JSON::get_boolean(jobTypeValidationResult["valid"]) then
+                        jobTypeJSONObject := JSON::get_object(jobTypeJSONElement);
+                        // find or create the job
+                        jobType := find_one JobType(jobTypeName = JSON::get_string(jobTypeJSONObject["JobDefinitionName"]));
+                        if jobType = null then
+                            jobType := create JobType(
+                                jobTypeName => JSON::get_string(jobTypeJSONObject["JobDefinitionName"]),
+                                deprecated => false,
+                                jobTypeExpiryTime => timestamp'now + duration'weeks(1000),
+                                staleAuditEventDuration => duration'weeks(1000),
+                                blockedAuditEventDuration => duration'weeks(1000),
+                                Current_State => Created
+                            );
+                            generate JobType.activateJobType() to jobType;
+                        end if;
+                        // extract the spec data items
+                        jobType.loadEventTypes(JSON::get_object(jobTypeJSONElement));
+                        // TODO update event specific rules
+                    else
+                        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid:\n" & JSON::dump(jobTypeValidationResult, true);
+                        Logger::log(Logger::Debug, logMessage);
+                        raise JSON::JSONException("Job definition file invalid");
                     end if;
-                    // extract the spec data items
-                    jobType.loadEventTypes(JSON::get_object(jobTypeJSONElement));
-                    // TODO update event specific rules
-                else
-                    logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid:\n" & JSON::dump(jobTypeValidationResult, true);
-                    Logger::log(Logger::Debug, logMessage);
-                    raise JSON::JSONException("Job definition file invalid");
                 end if;
             end loop;
         end if;

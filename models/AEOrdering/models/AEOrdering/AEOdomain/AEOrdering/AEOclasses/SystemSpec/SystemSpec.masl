@@ -5,21 +5,23 @@ fileStatus: Filesystem::file_status;
 mostRecentModificationTime: timestamp;
 logMessage: string;
 begin
-	fileName := Filesystem::filename(this.configFilePath & this.configFile);
+    fileName := Filesystem::filename(this.configFilePath & this.configFile);
     if Filesystem::file_exists(fileName) then
         fileStatus := Filesystem::get_file_status(fileName);
         mostRecentModificationTime := fileStatus.modification_time;
     else
-		logMessage := "AEOrdering::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-		Logger::log(Logger::Error, "AEOrdering", logMessage);
-		raise program_error;
+        logMessage := "AEOrdering::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        raise program_error;
     end if;
     if Filesystem::file_exists(Filesystem::filename(this.jobDefinitionDirectory)) then
         for jobDefinitionFile in Filesystem::list_directory(Filesystem::filename(this.jobDefinitionDirectory)) loop
-	        fileName := Filesystem::filename(this.jobDefinitionDirectory & "/" & string(jobDefinitionFile));
-            fileStatus := Filesystem::get_file_status(fileName);
-            if fileStatus.modification_time > mostRecentModificationTime then
-                mostRecentModificationTime := fileStatus.modification_time;
+            if Strings::ends_with(jobDefinitionFile, ".json") then
+                fileName := Filesystem::filename(this.jobDefinitionDirectory & "/" & string(jobDefinitionFile));
+                fileStatus := Filesystem::get_file_status(fileName);
+                if fileStatus.modification_time > mostRecentModificationTime then
+                    mostRecentModificationTime := fileStatus.modification_time;
+                end if;
             end if;
         end loop;
     end if;
