@@ -131,9 +131,9 @@ external influence.
 
 === 4.2 Application updates
 
-4.2.1 AEReception schema
+==== 4.2.1 AEReception schema
 
-4.2.1.1 "node" and "application"
+===== 4.2.1.1 "node" and "application"
 
 The reception schema has been updated to deprecate the usage of "nodes". Now
 event files must strictly contain an array of valid event objects. The
@@ -143,7 +143,7 @@ including it does not produce errors.
 Note: there may be more work to remove references to "node" and "applciation"
 from the models, but that work is outside the scope of this particular issue.
 
-4.2.1.2 Event data
+===== 4.2.1.2 Event data
 
 The format of event data (invariants and dynamic control values) in event
 instance streams has been simplified from an object that requires the event
@@ -173,7 +173,7 @@ Below is an example of an audit event which adheres to the new schema:
 The plus2json "--play" option has been updated to adhere to this new format for
 invariant values.
 
-4.2.2 Update job definition mechanism
+==== 4.2.2 Update job definition mechanism
 
 Before these changes, job definition files were stored in the `config/`
 directory and were required to be named with the exact name of the job
@@ -210,7 +210,7 @@ definition files at runtime. An issue has already been raised to test the
 config update mechanism and so this work will not be concerned with fixing it.
 <<dr-4>>
 
-4.2.3 Consolodation of event data definitions
+==== 4.2.3 Consolodation of event data definitions
 
 Before these changes, event data (invariant) definitions were given in a
 separate JSON file named as the job definition and suffixed with
