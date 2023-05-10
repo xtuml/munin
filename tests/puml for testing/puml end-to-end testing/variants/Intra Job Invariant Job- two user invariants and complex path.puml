@@ -1,0 +1,38 @@
+@startuml
+partition "Intra Job Invariant Job" {
+group "Intra Job Invariant Sequence"
+  #green:SCJAa;
+  :SCJAb;
+  :SCJBa;
+  :SCJBb;
+  :SCJBc,IINV,name=SCJInvA;
+  :SCJC;
+  if (XOR) then ("error")
+    :SJCDa;
+    fork
+      :SCJC;
+      repeat
+        :SCJDc;
+        :SCJE;
+      repeat while
+      :SCJF;
+      :SCJD,IINV,USER,name=SCJInvA;
+      :SCJG;
+    fork again
+    :SJCDb;
+      :SCJG;
+      :SJCFa;
+    fork again
+      :SCJP;
+      #red:SCJQ;
+    end fork
+    :SCJH,IINV,USER,name=SCJInvA;
+    #red:SCJJ;
+    detach
+  else ("normal")
+    #red:SCJR;
+    detach
+  endif
+end group
+}
+@enduml

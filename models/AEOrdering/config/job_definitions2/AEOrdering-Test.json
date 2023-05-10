@@ -1,0 +1,114 @@
+{
+  "JobDefinitionName": "AEOrdering-Test",
+  "Events": [
+    {
+      "EventName": "aaa",
+      "SequenceName": "SEQUENCE1",
+      "OccurrenceId": 1,
+      "Application": "app1",
+      "SequenceStart": true,
+      "EventData": [
+        {
+          "EventDataName": "Data1",
+          "EventDataType": "EXTRAJOBINV"
+        },
+        {
+          "EventDataName": "Data2",
+          "EventDataType": "INTRAJOBINV"
+        }
+      ]
+    },
+    {
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "aaa",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "SequenceName": "SEQUENCE1",
+      "EventName": "bbb",
+      "OccurrenceId": 1,
+      "Application": "app1",
+      "IsBreak": true,
+      "DynamicControl": [
+        {
+          "DynamicControlName": "cccLOOPCOUNT",
+          "DynamicControlType": "LOOPCOUNT",
+          "UserEventType": "ccc",
+          "UserOccurrenceId": 1
+        }
+      ],
+      "EventData": [
+        {
+          "EventDataName": "Data2",
+          "EventDataType": "INTRAJOBINV",
+          "SourceEventDataName": "Data2",
+          "SourceEventType": "aaa",
+          "SourceEventOccurrenceId": 1
+        }
+      ]
+    },
+    {
+      "EventName": "ccc",
+      "SequenceName": "SEQUENCE1",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "bbb",
+          "PreviousOccurrenceId": 1,
+          "ConstraintDefinitionId": "cccEventXOR",
+          "ConstraintValue": "XOR"
+        }
+      ],
+      "OccurrenceId": 1,
+      "Application": "app2",
+      "EventData": [
+        {
+          "EventDataName": "Data2",
+          "EventDataType": "INTRAJOBINV",
+          "SourceEventDataName": "Data2",
+          "SourceEventType": "aaa",
+          "SourceEventOccurrenceId": 1
+        }
+      ]
+    },
+    {
+      "EventName": "ddd",
+      "SequenceName": "SEQUENCE1",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "ccc",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "OccurrenceId": 1,
+      "Application": "app3",
+      "EventData": [
+        {
+          "EventDataName": "Data4",
+          "EventDataType": "EXTRAJOBINV"
+        }
+      ]
+    },
+    {
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "ddd",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "SequenceName": "SEQUENCE1",
+      "EventName": "eee",
+      "OccurrenceId": 1,
+      "Application": "app3",
+      "SequenceEnd": true
+    },
+    {
+      "SequenceName": "SEQUENCE2",
+      "EventName": "fff",
+      "OccurrenceId": 1,
+      "Application": "app4",
+      "SequenceStart": true,
+      "SequenceEnd": true
+    }
+  ]
+}

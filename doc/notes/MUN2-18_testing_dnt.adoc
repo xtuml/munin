@@ -1,0 +1,379 @@
+= Repository Structure Updates for Testing
+
+xtUML Project Design Note
+
+== 1 Abstract
+
+As we ramp up end to end testing, there arose a need to clean up the repository
+and establish some best practices for writing and executing tests. This work
+implements some changes to streamiline testing and presents recommendations for
+future organisation.
+
+== 2 Introduction and Background
+
+In the past the `deploy/` directory has been maintained as something of an
+example deployment location for end to end testing. It is not intended to be
+the final deployment configuration but rather an archetype for future
+deployment of the application.
+
+== 3 Requirements
+
+=== 3.1 Clean up `deploy/` directory
+
+3.1.1 Remove unnecessary files
+
+3.1.2 Document all config files and folders
+
+3.1.3 Combine Docker configurations into one Compose file
+
+=== 3.2 Update job definition mechanism
+
+3.2.1 Break dependency on file semantic names
+
+3.2.2 Do not require individual jobs to be registered in the config file
+
+=== 3.3 Schema cleanup and simplification
+
+3.3.1 Simplify event data schema to simple key/value pairs
+
+3.3.2 Consolodate event data definitions in the job definition file
+
+3.3.3 Remove deprecated "node" definitions from schemas
+
+== 4 Design
+
+=== 4.1 Updates to the `deploy/` directory
+
+The `deploy/` directory has been cleaned up and is now organised as follows:
+
+  .gitignore
+  InvariantStore/
+  JobIdStore/
+  config/
+    job_definitions/
+      .gitignore
+    log-config-reception.xml
+    log-config-verifier.xml
+    reception-config.json
+    verifier-config.json
+  docker-compose.yml
+  logs/
+    reception/
+    verifier/
+  reception-incoming/
+  verifier-incoming/
+  verifier-processed/
+
+
+==== `docker-compose.yml`
+
+The Docker Compose configurations for the protocol verifier and reception have
+been combined into one file. This allows both to be launched and torn down with
+a single invocation of `docker compose up` or `docker compose down`. Note also
+that the name `docker-compose.yml` allows the user to omit the `-f` argument on
+the command line as it is the default name for a compose file.
+
+The configuration is set up to launch a single instance of reception listenting
+for inspector connections on base port 0 and a single instance of protocol
+verifier listening for inspector connections on base port 2. Comments are
+included in the file with basic instructions for reconfiguring to enable
+multiple instances.
+
+==== `config/log-config-reception.xml`, `config/log-config-verifier.xml`, and `logs/`
+
+The two log config files control the way domain logs are handled. Each is
+configured to define a logger for each domain as well as a separate logger for
+reception and protocol verifier dedicated to logs that are to be scraped for
+metrics. Log files are stored in the `logs/` directory in the subdirectory
+which matches the process to which they belong. The domain loggers redirect to
+the console for debugging purposes and go to a separate rotated file named with
+the same name as the domain. The metrics log files are `Reception.log` and
+`Verifier.log` repectively and are also rotated. All loggers capture logs of
+all levels. Note that it is required to pass the process the `-log-level`
+argument on the command line to lower the minimum log level handled by the
+loggers. This is required even when the log configuration files set the
+appropriate minimum level. This command line option is passed automatically as
+configured in the `docker-compose.yml` file.
+
+==== `reception-config.json` and `verifier-config.json`
+
+These files contain the application level configuration for reception and
+protocol verifier respectively. These files are validated on parse and their
+schemas can be found in `models/AEReception/schema/reception_config_schema.json`
+and `models/AEOrdering/schema/ordering_config_schema.json`.
+
+One additional configuration item has been added to the ordering config.
+`JobDefinitionDirectory` specifies the path (relative to the current working
+directory) where the ordering domain should look for job definition JSON files
+(see next section).
+
+==== `job_definitions/`
+
+The `job_definitions/` directory is configured in the `verifier-config.json`
+file (see above) to be the location where ordering searches for job defintion
+files. Any `.json` file in this directory will be considered to be a job
+definition file and ordering will attempt to parse/load it. If the file does
+not parse or does not contain a valid job definition, ordering will raise an
+exception.
+
+==== `InvariantStore/`, `JobIdStore/`, `reception-incoming/`, `verifier-incoming/`, and `verifier-processed/`
+
+Each of the directories listed above is created by the application in the
+course of execution. `InvariantStore/` and `JobIdStore/` are used to share data
+between instances of the application via the filesystem. `reception-incoming/`,
+`verifier-incoming/`, and `verifier-processed/` are used to pass runtime event
+data through the pipeline. Input files must be copied into
+`reception-incoming/` where they are first processed. Note that files in
+`verifier-incoming/` are pre-processed and validated by reception. Manually
+copying files into that directory may cause crashes and other undefined
+behavior. In a real deployment scenario, this directory must be protected from
+external influence.
+
+=== 4.2 Application updates
+
+==== 4.2.1 AEReception schema
+
+===== 4.2.1.1 "node" and "application"
+
+The reception schema has been updated to deprecate the usage of "nodes". Now
+event files must strictly contain an array of valid event objects. The
+"application" property of event objects is no longer required, however
+including it does not produce errors.
+
+Note: there may be more work to remove references to "node" and "applciation"
+from the models, but that work is outside the scope of this particular issue.
+
+===== 4.2.1.2 Event data
+
+The format of event data (invariants and dynamic control values) in event
+instance streams has been simplified from an object that requires the event
+data type to a simple key value pair. The implication of this is that it is now
+much simpler for audit event producers to specify data items attached to
+events. It also means that reception cannot validate the datatype of the event
+data value before passing to ordering. If event data must be a specific type
+(e.g. branch count must be a non-negative integer), those conditions should be
+checked in ordering before being passed to sequence verification.
+
+Note: There is currently an issue preventing dynamic control values from being
+passed to SVDC. As part of this issue resolution, it should be ensured that the
+type validation is being properly applied. <<dr-2>>, <<dr-3>>
+
+Below is an example of an audit event which adheres to the new schema:
+
+  {
+    "jobName": "Intra Job Invariant Job",
+    "jobId": "c9c724f6-7c09-484d-b0a9-5ef0f054b90f",
+    "eventType": "IJIH",
+    "eventId": "781c01b0-34bf-4854-8deb-fb99f92f4d7b",
+    "previousEventIds": "3ee4b22d-7962-463e-b028-3cdd2862b2aa",
+    "IJIInvA": "3b79e457-3c70-439e-ac98-9a8d4b158e78",  # <-- this is the invariant value
+    "timestamp": "2023-05-08T12:58:11Z"
+  }
+
+The plus2json "--play" option has been updated to adhere to this new format for
+invariant values.
+
+==== 4.2.2 Update job definition mechanism
+
+Before these changes, job definition files were stored in the `config/`
+directory and were required to be named with the exact name of the job
+definition they contained. Additionly only jobs defined in the "Jobs" array in
+the main `verifier-config.json` file were loaded. This setup made it arduous to
+add or remove jobs from the configuration.
+
+Ordering has been updated such that any files with the extension `.json` in the
+`job_definitions/` directory are loaded as a job definition each time the
+configuration is loaded. The name of the job definition is taken from the
+property defined in the contents of the file and the filename is no longer
+semantically significant.
+
+Note: In the course of this work the mechanism to configure job-specific timing
+parameters (e.g. job expiry date) and event specific rules (e.g. max blocked
+duration) has been disabled as an expedient measure to complete this work.
+"TODO" comments have been placed in the locations where these parameters should
+be processed and reasonable defaults were given for jobs and events. We are not
+currently using any of these parameters in a meaningful way and so it has been
+determined to keep them disabled until we need to reenable them to meet client
+requirements.
+
+Note: Before this work, the config update process would only be triggered if
+the modification timestamp of the main config file was newer than it was at the
+time it was last processed. In order to limit impact, the process was updated
+to use the most recent modification timestamp of the config file and each of
+the files in the `job_definitions/` directory (if it exists). This means that
+all job defnitions are reloaded if any one definition changes. It may be
+desirable in the furture to be more strategic about reloading only config files
+which contain changes.
+
+Note: During testing of this work, a bug was found related to reloading job
+definition files at runtime. An issue has already been raised to test the
+config update mechanism and so this work will not be concerned with fixing it.
+<<dr-4>>
+
+==== 4.2.3 Consolodation of event data definitions
+
+Before these changes, event data (invariant) definitions were given in a
+separate JSON file named as the job definition and suffixed with
+"_event_data.json". The job definition schema has been updated to embed these
+definitions in the job definition file itself rather than having a separate
+file.
+
+At a high level there are three flavors of invariant definition:
+. Source invariant definition (extra- or intra- types)
+. Intrajob invariant user definition
+. Extrajob invariant user definition
+
+For all definitions, the name of the data item and the type ("EXTRAJOBINV" or
+"INTRAJOBINV") is required. For user definitions referring to an extrajob
+invariant, the source job definition name an source data name is required. For
+user definitions referring to an intrajob invariant, the source event type and
+occurence ID and the source data name is required.
+
+Below is an example of an invariant source definition on an event:
+
+  {
+      "EventName": "IJIBc",
+      "OccurrenceId": 0,
+      "SequenceName": "Intra Job Invariant Sequence",
+      "PreviousEvents": [
+          {
+              "PreviousEventName": "IJIBb",
+              "PreviousOccurrenceId": 0
+          }
+      ],
+      "EventData": [
+          {
+              "EventDataName": "IJIInvA",
+              "EventDataType": "INTRAJOBINV"
+          }
+      ],
+      "Application": "default_application_name"
+  },
+
+Below is an example of an intrajob invariant user definition on an event:
+
+  {
+      "EventName": "IJIH",
+      "OccurrenceId": 0,
+      "SequenceName": "Intra Job Invariant Sequence",
+      "PreviousEvents": [
+          {
+              "PreviousEventName": "IJIQ",
+              "PreviousOccurrenceId": 0
+          }
+      ],
+      "EventData": [
+          {
+              "EventDataName": "IJIInvA",
+              "EventDataType": "INTRAJOBINV",
+              "SourceEventDataName": "IJIInvA",
+              "SourceEventType": "IJIBc",
+              "SourceEventOccurrenceId": 0
+          }
+      ],
+      "Application": "default_application_name"
+  },
+
+Below is an example of an extrajob invariant user definition on an event:
+
+  {
+      "EventName": "EJID",
+      "OccurrenceId": 0,
+      "SequenceName": "EJI User Sequence",
+      "PreviousEvents": [
+          {
+              "PreviousEventName": "EJIC",
+              "PreviousOccurrenceId": 0
+          }
+      ],
+      "EventData": [
+          {
+              "EventDataName": "AUTH_TOKEN_A",
+              "EventDataType": "EXTRAJOBINV",
+              "SourceEventDataName": "AUTH_TOKEN_A",
+              "SourceJobDefinitionName": "Extra Job Invariant Source Job"
+          }
+      ],
+      "Application": "default_application_name"
+  },
+
+=== 4.3 Full example
+
+This section provides high level instructions for using the protocol verifier
+and plus2json to run an end to end example. It is assumed that the reader has
+pulled the latest code from the repository and built the protocol verifier
+docker images. It is also assumed that the reader has a copy of the latest
+`plus2json.pyz`. For brevity, the relative path to this Python package will be
+omitted from example command lines.
+
+The example does not require a specific PUML job definition file, however for
+the sake of this example, the file `tests/puml for testing/puml end-to-end testing/Simple Sequence Job.puml`
+will be used.
+
+. Navigate to the `deploy/` directory
+. Generate the job definition file:
+
+  python plus2json.pyz  "../tests/puml for testing/puml end-to-end testing/Simple Sequence Job.puml" -j --outdir config/job_definitions/
+
+. Launch the protocol verifier and reception services:
+
+  docker compose up --force-recreate
+
+. Generate example data into the incoming directory:
+
+  python plus2json.pyz  "../tests/puml for testing/puml end-to-end testing/Simple Sequence Job.puml" --play --outdir reception-incoming/
+
+. Note the output from the protocol verifier. Dump the verifier logs to see the success message:
+
+  cat logs/verifier/Verifier.log
+
+You should see something like this:
+
+ 1 aeordering_job_processed : JobId = 1d04be0f-4b50-4c73-aa02-f1d16e7dc2b1
+ 1 aeordering_events_processed : JobId = 1d04be0f-4b50-4c73-aa02-f1d16e7dc2b1 : EventId = febf938d-d870-4c22-a049-f11de98ba599 : EventType = SSJA
+ 1 svdc_new_job_started : JobId = 1d04be0f-4b50-4c73-aa02-f1d16e7dc2b1 : EventId = febf938d-d870-4c22-a049-f11de98ba599 : EventType = SSJA
+ 1 aeordering_events_processed : JobId = 1d04be0f-4b50-4c73-aa02-f1d16e7dc2b1 : EventId = 1177c808-5753-4ad3-b32c-b2b1b56d7beb : EventType = SSJB
+ 1 aeordering_events_processed : JobId = 1d04be0f-4b50-4c73-aa02-f1d16e7dc2b1 : EventId = 3bdb6567-5199-47c7-9194-e9bea06a178d : EventType = SSJC
+ 1 aeordering_events_processed : JobId = 1d04be0f-4b50-4c73-aa02-f1d16e7dc2b1 : EventId = 8f2fad67-ab46-434c-826a-386eca0c3cae : EventType = SSJD
+ 1 aeordering_events_processed : JobId = 1d04be0f-4b50-4c73-aa02-f1d16e7dc2b1 : EventId = e5fb2a1f-103a-4b33-b761-7c79ab65925d : EventType = SSJE
+ 1 svdc_job_success : JobId = 1d04be0f-4b50-4c73-aa02-f1d16e7dc2b1 : JobName = Simple Sequence Job
+
+== 5 Future Work and Recommendations
+
+=== 5.1 Separation of Deployment and Test Data
+
+The `deploy/` directory should be kept lean and clean. Do not commit any job
+definition `.json` files or `.puml` files to this directory. Do not commit any
+temporary files (e.g. `reception-incoming/`). It should be as close to a fresh
+deployment as possible. The intended use for the `deploy/` directory is as the
+testing space itself, not a storage location for test data.
+
+=== 5.2 Test Data
+
+The `tests/` location is a good place to keep PUML files for testing. It need
+not be changed, however I recommend that we avoid spaces in filenames and
+follow a reasonable pattern so that team members know which files are intended
+to be run and if they should expect the tests to pass. Any JSON job definition
+files or event streams committed in this directory should be deleted as soon as
+the bugs they work around are fixed.
+
+=== 5.3 Simulator
+
+The simulator works, but integration with plus2json is incomplete. We should
+consider how to bring these together in the future and consider whether or not
+to deprecate the simulator entirely in favor of extending the functionality of
+plus2json.
+
+=== 5.4 Automated testing with CI
+
+This work is well positioned to set up automated testing with our existing CI
+configuration. Before that can happen, we need to develop a robust mechanism
+for comparing actual and expected results.
+
+== 6 Document References
+
+. [[dr-1]] https://onefact.atlassian.net/browse/MUN2-18[Propose or review the testing structure in the repository structure]
+. [[dr-2]] https://onefact.atlassian.net/browse/MUN2-80[Branch Counts not getting through AEOrdering in End to End test]
+. [[dr-3]] https://onefact.atlassian.net/browse/MUN2-81[Add end to end support for Merge Count]
+. [[dr-4]] https://onefact.atlassian.net/browse/MUN2-9[Test out the configuration update mechanism]
+

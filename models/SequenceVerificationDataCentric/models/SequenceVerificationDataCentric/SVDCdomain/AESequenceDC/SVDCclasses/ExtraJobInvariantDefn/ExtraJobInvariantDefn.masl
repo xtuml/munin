@@ -107,14 +107,14 @@ begin
          restoredInvariant.sourceAuditEventOccurrenceId = theAEOccurrenceDefn.occurrenceNumberInSequence then
          // The restored invariant checks out against the source event definition
          
-         existingInvariant := find_one PersistedInvariant (extraJobInvName = restoredInvariant.extraJobInvariantName and
-         	                                               invariantValue = restoredInvariant.InvariantValue);
+         existingInvariant := find_one PersistedInvariant (extraJobInvName = restoredInvariant.invariantName and
+         	                                               invariantValue = restoredInvariant.invariantValue);
          if existingInvariant = null then                                              
 
            if restoredInvariant.validFrom > timestamp'now then
              // The Persistent Invariant will be valid in the future
-             theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.extraJobInvariantName,
-  	                                                                           invariantValue => restoredInvariant.InvariantValue,
+             theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.invariantName,
+  	                                                                           invariantValue => restoredInvariant.invariantValue,
   	                                                                           validFrom => restoredInvariant.validFrom, 
   	                                                                           validUntil => restoredInvariant.validTo,
   	                                                                           inForce => false, 
@@ -124,8 +124,8 @@ begin
   	       elsif restoredInvariant.validFrom < timestamp'now and 
   	             restoredInvariant.validTo > timestamp'now then
              // The Persistent Invariant is valid now
-             theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.extraJobInvariantName,
-  	                                                                           invariantValue => restoredInvariant.InvariantValue,
+             theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.invariantName,
+  	                                                                           invariantValue => restoredInvariant.invariantValue,
   	                                                                           validFrom => restoredInvariant.validFrom, 
   	                                                                           validUntil => restoredInvariant.validTo,
   	                                                                           inForce => true, 
@@ -134,8 +134,8 @@ begin
   	                                                          
   	       elsif restoredInvariant.validTo < timestamp'now then
              // The Persistent Invariant is out of date
-             theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.extraJobInvariantName,
-  	                                                                           invariantValue => restoredInvariant.InvariantValue,
+             theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.invariantName,
+  	                                                                           invariantValue => restoredInvariant.invariantValue,
   	                                                                           validFrom => restoredInvariant.validFrom, 
   	                                                                           validUntil => restoredInvariant.validTo,
   	                                                                           inForce => false, 
@@ -146,14 +146,14 @@ begin
   	              
   	       else
   	              
-             logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : Something went wrong restoring the Extra-Job Invariant's state " & restoredInvariant.extraJobInvariantName;
+             logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : Something went wrong restoring the Extra-Job Invariant's state " & restoredInvariant.invariantName;
              Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   	                                                          
   	       end if; 
   	       
   	     else
   	     
-             logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The restored Extra-Job Invariant is already present in the cache " & restoredInvariant.extraJobInvariantName;
+             logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The restored Extra-Job Invariant is already present in the cache " & restoredInvariant.invariantName;
              Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   	     
   	     end if;  
@@ -164,14 +164,14 @@ begin
                     
          else
                   
-           logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The Extra-Job Invariant has not been restored successfully " & restoredInvariant.extraJobInvariantName;
+           logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The Extra-Job Invariant has not been restored successfully " & restoredInvariant.invariantName;
            Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   	                                                          
          end if;  
                 
        else
                 
-         logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The Extra-Job Invariant to be restored does not match any known definition " & restoredInvariant.extraJobInvariantName;
+         logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The Extra-Job Invariant to be restored does not match any known definition " & restoredInvariant.invariantName;
          Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   	                                                                           
        end if;     

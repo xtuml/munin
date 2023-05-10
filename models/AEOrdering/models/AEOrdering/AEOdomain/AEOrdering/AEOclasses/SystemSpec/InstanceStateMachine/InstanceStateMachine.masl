@@ -13,19 +13,11 @@ fileName : Filesystem::filename;
 
 begin
 
-	fileName := Filesystem::filename(this.configFilePath & this.configFile);
-	if Filesystem::file_exists(fileName) then
-		fileStatus := Filesystem::get_file_status(fileName);
-		if fileStatus.modification_time /= this.configFileModificationTime then
-			generate SystemSpec.loadConfig() to this;
-		else
-			schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
-		end if;
-		else
-		logMessage := "AEOrdering::ConfigChecked : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-		Logger::log(Logger::Error, "AEOrdering", logMessage);
-		raise program_error;
-	end if;
+    if this.lastModificationTime() /= this.configFileModificationTime then
+        generate SystemSpec.loadConfig() to this;
+    else
+        schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
+    end if;
 	
 exception
 	when others => 	
@@ -41,19 +33,15 @@ end state;
 state AEOrdering::SystemSpec.ConfigUpdated () is
 logMessage : string;
 fileName : Filesystem::filename;
-fileStatus : Filesystem::file_status;
 jobType : instance of JobType;
 configJSONString : string;
 configJSONElement : JSON::JSONElement;
 configJSONObject : JSON::JSONObject;
 configValidationResult : JSON::JSONObject;
-jobDefJSONObject : JSON::JSONObject;
-jobDefinitionName : string;
 jobTypeJSONString : string;
 jobTypeJSONElement : JSON::JSONElement;
 jobTypeValidationResult : JSON::JSONObject;
-eventDataTypesJSONString : string;
-eventDataTypesJSONElement : JSON::JSONElement;
+jobTypeJSONObject : JSON::JSONObject;
 userEvent : UserEventDataType;
 emptyUserEvent : UserEventDataType;
 userEvents : sequence of UserEventDataType;
@@ -130,6 +118,9 @@ begin
 				end if;
 				Filesystem::add_permissions(Filesystem::filename(this.processedDirectory),filePermissions);
             end if;
+            if configJSONObject'contains("JobDefinitionDirectory") then
+                this.jobDefinitionDirectory := JSON::get_string(configJSONObject["JobDefinitionDirectory"]);
+            end if;
             if configJSONObject'contains("JobStoreLocation") then
                 jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);
             end if;
@@ -148,50 +139,7 @@ begin
             end if;
             // read in the jobs that we expect to process
             if configJSONObject'contains("Jobs") and configJSONObject["Jobs"].kind = JSON::Array then
-                for jobDefinitionElement in JSON::get_array(configJSONObject["Jobs"]) loop
-                    jobDefJSONObject := JSON::get_object(jobDefinitionElement);
-                    jobDefinitionName := JSON::get_string(jobDefJSONObject["JobDefinitionName"]);
-                    jobType := find_one JobType(jobTypeName = jobDefinitionName);
-                    if jobType = null then
-                        jobType := create JobType(jobTypeName => jobDefinitionName, deprecated => false, Current_State => Created);
-                        generate JobType.activateJobType() to jobType;
-                    end if;
-                    if jobDefJSONObject'contains("JobDeprecated") then
-                        jobType.deprecated := JSON::get_boolean(jobDefJSONObject["JobDeprecated"]);
-                        if jobType.deprecated = true then
-                            jobType.jobTypeExpiryTime := timestamp'parse(JSON::get_string(jobDefJSONObject["JobTypeExpiryDate"]));
-                            generate JobType.deprecateJobType() to jobType;
-                        else
-                            generate JobType.activateJobType() to jobType;
-                        end if;
-                    end if;
-                    jobType.staleAuditEventDuration := duration'parse(JSON::get_string(jobDefJSONObject["StaleAuditEventDuration"]));
-                    jobType.blockedAuditEventDuration := duration'parse(JSON::get_string(jobDefJSONObject["BlockedAuditEventDuration"]));
-
-                    // load in the audit eventTypes
-                    fileName := Filesystem::filename(this.configFilePath & jobType.jobTypeName & ".json");
-                    if Filesystem::file_exists(fileName) then
-                        jobTypeJSONString := Filesystem::read_file(fileName);
-                        jobTypeJSONElement := JSON::parse(jobTypeJSONString);
-                        jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, #PROP["jobDefinitionSchema"]#);
-                        if JSON::get_boolean(jobTypeValidationResult["valid"]) then
-                            // extract the spec data items
-                            jobType.loadEventTypes(JSON::get_object(jobTypeJSONElement));
-                            // now adjust stale and blocked audit event durations
-                            if jobDefJSONObject'contains("EventRules") and jobDefJSONObject["EventRules"].kind = JSON::Array then
-                              jobType.updateAuditEventDurations(JSON::get_array(jobDefJSONObject["EventRules"]));
-                            end if;
-                        else
-                            logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(jobTypeValidationResult, true);
-                            Logger::log(Logger::Debug, logMessage);
-                            raise JSON::JSONException("Config file invalid");
-                        end if;
-                    else
-                        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job config file not found: " & this.configFilePath & jobType.jobTypeName & ".json";
-                        Logger::log(Logger::Debug, "AEOrdering", logMessage);
-                        raise program_error;
-                    end if;
-                end loop;
+                // TODO process job specific parameters
             end if;
         else
             logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
@@ -199,23 +147,48 @@ begin
             raise JSON::JSONException("Config file invalid");
         end if;
         
-        // set the config file mod time
-        fileName := Filesystem::filename(this.configFilePath & this.configFile);
-        fileStatus := Filesystem::get_file_status(Filesystem::filename(fileName));
-        this.configFileModificationTime := fileStatus.modification_time;
+        // process job definitions
+        if Filesystem::file_exists(Filesystem::filename(this.jobDefinitionDirectory)) then
+            for jobDefinitionFile in Filesystem::list_directory(Filesystem::filename(this.jobDefinitionDirectory)) loop
+                // if the file extension is ".json", assume the file is a job definition
+                if Strings::ends_with(jobDefinitionFile, ".json") then
+                    jobTypeJSONString := Filesystem::read_file(Filesystem::filename(this.jobDefinitionDirectory & "/" & string(jobDefinitionFile)));
+                    jobTypeJSONElement := JSON::parse(jobTypeJSONString);
+                    jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, #PROP["jobDefinitionSchema"]#);
+                    if JSON::get_boolean(jobTypeValidationResult["valid"]) then
+                        jobTypeJSONObject := JSON::get_object(jobTypeJSONElement);
+                        // find or create the job
+                        jobType := find_one JobType(jobTypeName = JSON::get_string(jobTypeJSONObject["JobDefinitionName"]));
+                        if jobType = null then
+                            jobType := create JobType(
+                                jobTypeName => JSON::get_string(jobTypeJSONObject["JobDefinitionName"]),
+                                deprecated => false,
+                                jobTypeExpiryTime => timestamp'now + duration'weeks(52),
+                                staleAuditEventDuration => duration'hours(1),
+                                blockedAuditEventDuration => duration'hours(1),
+                                Current_State => Created
+                            );
+                            generate JobType.activateJobType() to jobType;
+                        end if;
+                        // extract the spec data items
+                        jobType.loadEventTypes(JSON::get_object(jobTypeJSONElement));
+                        // TODO update event specific rules
+                    else
+                        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid: " & string(jobDefinitionFile) & "\n" & JSON::dump(jobTypeValidationResult, true);
+                        Logger::log(Logger::Debug, logMessage);
+                        raise JSON::JSONException("Job definition file invalid");
+                    end if;
+                end if;
+            end loop;
+        end if;
         
-        // now check for any event data definition
-        // TODO check the schema here
-        for jobType in find JobType() loop
-            fileName := Filesystem::filename(this.configFilePath & jobType.jobTypeName & "_event_data.json");
-            if Filesystem::file_exists(fileName) then
-                eventDataTypesJSONString := Filesystem::read_file(fileName);
-                eventDataTypesJSONElement := JSON::parse(eventDataTypesJSONString);
-                
-                // extract the spec data items
-                jobType.loadEventDataItemTypes(JSON::get_array(eventDataTypesJSONElement));
-            end if;
+        // resolve data item forward references
+        for dataItemForwardRef in find SourceDataItemForwardReference() loop
+            dataItemForwardRef.resolve();
         end loop;
+        
+        // set the config file mod time
+        this.configFileModificationTime := this.lastModificationTime();
         
         // report the latest set of events to the sequence domain
         for job in find JobType() loop

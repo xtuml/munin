@@ -1,0 +1,273 @@
+{
+    "JobDefinitionName": "Complex No Event Data Job",
+    "Events": [
+        {
+            "EventName": "SCJAa",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "SequenceStart": true,
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJAb",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJAa",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJBa",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJAb",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJBb",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJBa",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJBc",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJBb",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJC",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJBc",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SJCDa",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJC",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "xorfork1",
+                    "ConstraintValue": "XOR"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SJCDb",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SJCDa",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "andfork2",
+                    "ConstraintValue": "AND"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJG",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SJCDb",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SJCFa",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJG",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJP",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SJCDa",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "andfork2",
+                    "ConstraintValue": "AND"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJQ",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJP",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJC",
+            "OccurrenceId": 1,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SJCDa",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "andfork2",
+                    "ConstraintValue": "AND"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJD",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJC",
+                    "PreviousOccurrenceId": 1
+                },
+                {
+                    "PreviousEventName": "SCJE",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJE",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJD",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJF",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJE",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJD",
+            "OccurrenceId": 1,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJF",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJG",
+            "OccurrenceId": 1,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJD",
+                    "PreviousOccurrenceId": 1
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJH",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SJCFa",
+                    "PreviousOccurrenceId": 0
+                },
+                {
+                    "PreviousEventName": "SCJG",
+                    "PreviousOccurrenceId": 1
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJJ",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJH",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "SCJR",
+            "OccurrenceId": 0,
+            "SequenceName": "Single Complex Sequence",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "SCJC",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "xorfork1",
+                    "ConstraintValue": "XOR"
+                }
+            ],
+            "Application": "default_application_name"
+        }
+    ]
+}

@@ -24,6 +24,11 @@ begin
   	                                                          Current_State => Pending );
   	                                         
     link newExtraJobInvariant R24 extraJobInvDefn;
+    
+    // Log info: Audit event data provided with this audit event has been captured
+	logMessage := "The persisted invariant " & newExtraJobInvariant.invariantName & " with value = " & newExtraJobInvariant.invariantValue & " has has been created";
+    Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+    
     generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
     sourceAEOccurrenceDefn := extraJobInvDefn -> R20;
     sourceEventDefn := sourceAEOccurrenceDefn -> R12 -> R1.AuditEventDefinition;

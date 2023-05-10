@@ -9,17 +9,19 @@ theSequenceDefn: instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
+theAuditEventDefinitions : set of instance of AuditEventDefinition;
 logMessage: string;
 eventContent : string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobName);
+  theAuditEventDefinitions := theJobDefn -> R7 -> R1.AuditEventDefinition;
   if theJobDefn /= null then
     newInvariant := create IntraJobInvariantDefn (jobName => theJobDefn.jobName, intraJobInvName => invariantName);
     link newInvariant R22 theJobDefn;
     
     for eachInvariantEventDefn in invariantEventDefns'elements loop
-      theEventDefn := find_one AuditEventDefinition (AEType = eachInvariantEventDefn.eventTypeName);
+      theEventDefn := find_one theAuditEventDefinitions (AEType = eachInvariantEventDefn.eventTypeName);
       if theEventDefn /= null then
         theSequenceDefn := theEventDefn -> R1.AESequenceDefinition;
         theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;

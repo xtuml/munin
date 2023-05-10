@@ -1,0 +1,59 @@
+{
+    "SpecUpdateRate": "PT2M",
+    "MaxOutOfSequenceEvents": 10,
+    "MaximumJobTime": "PT10M",
+    "JobCompletePeriod": "PT24H",
+    "IncomingDirectory": "incoming",
+    "ProcessingDirectory": "processing",
+    "ProcessedDirectory": "processed",
+    "EventThrottleRate": "PT0S",
+    "ReceptionDeletionTime": "PT10M",
+    "ConcurrentReceptionLimit": 1,
+    "JobStoreLocation": "./JobIdStore",
+    "JobStoreAgeLimit": "P7D",
+    "InvariantStoreLoadRate": "PT2M",
+    "Jobs": [
+        {
+            "JobDefinitionName": "Simple Job",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2023-12-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "Job with Simple Sequence",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "AND Fork",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "XOR Fork",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "AND Fork and Merge",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        },
+        {
+            "JobDefinitionName": "Job with Intra-Job Invariant",
+            "JobDeprecated": false,
+            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+            "StaleAuditEventDuration": "P99W",
+            "BlockedAuditEventDuration": "PT5M"
+        }
+    ]
+}

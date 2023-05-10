@@ -1,0 +1,12 @@
+
+@startuml 
+partition "Simple Intra Invariant Job" {
+  group "Simple Intra Invariant Sequence"
+      #green:SIJA,IINV,name=SIJnv;
+      :SIJB;
+      :SIJC;
+      :SIJD,IINV,USER,name=SIJnv;
+      #red:SIJE;
+  end group
+}
+@enduml

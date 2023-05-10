@@ -1,0 +1,17 @@
+@startuml
+partition "Extra Job Invariant User Job 2" {
+ :EINV,SRC,jobdefn="Extra Job Invariant Source Job",
+ name=AUTH_TOKEN_A|
+ detach
+group "EJI User Sequence 2"
+  #green:EJI2Aa;
+  :EJI2B;
+  :EJI2C;
+  :EJI2D,EINV,USER,name=AUTH_TOKEN_A;
+  :EJI2E;
+  :EJI2F;
+  #red:EJI2G,EINV,USER,name=AUTH_TOKEN_A;
+  detach
+end group
+}
+@enduml

@@ -205,7 +205,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '5f653156-31f3-4973-983d-7e8e9c0c7a14' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test74SingleEventForkAndMerge_SunnyDay1 () is
+private service AESequenceDC::Test200NormalInstanceForkWithBranchAndMergeCount () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
@@ -1030,8 +1030,8 @@ begin
   
   // Simulate the Persistence domain providing an updated set of invariants
   
-  restoredInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
-  restoredInvariant.InvariantValue := "Restore1";
+  restoredInvariant.invariantName := "PersistentInvariantTypeB";
+  restoredInvariant.invariantValue := "Restore1";
   restoredInvariant.validFrom := timestamp'now;
   restoredInvariant.validTo := restoredInvariant.validFrom + @P1D@;
   restoredInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
@@ -1103,8 +1103,8 @@ begin
   // This part of the test does not reveal any erroneous behaviour of the twin
   //
   
-  restoredInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
-  restoredInvariant.InvariantValue := "Restore2";
+  restoredInvariant.invariantName := "PersistentInvariantTypeB";
+  restoredInvariant.invariantValue := "Restore2";
   restoredInvariant.validFrom := timestamp'now;
   restoredInvariant.validTo := restoredInvariant.validFrom + @P1D@;
   restoredInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
@@ -1113,8 +1113,8 @@ begin
   
   restoredInvariants := restoredInvariants & restoredInvariant;
   
-  restoredInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
-  restoredInvariant.InvariantValue := "Restore3";
+  restoredInvariant.invariantName := "PersistentInvariantTypeB";
+  restoredInvariant.invariantValue := "Restore3";
   restoredInvariant.validFrom := timestamp'now;
   restoredInvariant.validTo := restoredInvariant.validFrom + @P1D@;
   restoredInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";
@@ -1438,8 +1438,8 @@ begin
   
   // Simulate the Persistence domain providing an updated set of invariants
   
-  restoredInvariant.extraJobInvariantName := "PersistentInvariantTypeB";
-  restoredInvariant.InvariantValue := "InvalidRestore";
+  restoredInvariant.invariantName := "PersistentInvariantTypeB";
+  restoredInvariant.invariantValue := "InvalidRestore";
   restoredInvariant.validFrom := timestamp'now;
   restoredInvariant.validTo := restoredInvariant.validFrom + @P1D@;
   restoredInvariant.sourceJobDefinitionType := "Auth_PersistentInvariantJob";

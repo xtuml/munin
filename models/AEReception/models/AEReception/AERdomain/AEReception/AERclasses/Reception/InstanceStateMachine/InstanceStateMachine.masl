@@ -177,11 +177,17 @@ begin
         Logger::log(Logger::Information, "AEReception", logMessage);
 		eventContent := "Validating JSON format for file = " & this.filePath;;
 		Reporting~>reportEvent(Logger::Information, "reception_file_validated", eventContent);
-	    validation_result := JSONValidation::validate(json_element, #PROP["auditEventSchema"]#);
-    
-	    if JSON::get_boolean(validation_result["valid"]) = false then
-	    	processFile := false;
-	    end if;
+		if json_element.kind = JSON::Array then
+		    for audit_event in JSON::get_array(json_element) loop
+				validation_result := JSONValidation::validate(audit_event, #PROP["auditEventSchema"]#);
+				if JSON::get_boolean(validation_result["valid"]) = false then
+					processFile := false;
+					exit;
+				end if;
+			end loop;
+		else
+			processFile := false;
+		end if;
 	end if;
 	if processFile = true then
         this.jsonElements := JSON::get_array(json_element);

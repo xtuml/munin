@@ -1,0 +1,38 @@
+@startuml
+partition "Loop Count Job" {
+group "Single Sequence"
+  #green:SCJAa;
+  :SCJAb;
+  :SCJBa,LCNT,user=SCJE(0),name=LC1;
+  :SCJBb;
+  :SCJBc,IINV,name=SCJInvA;
+  :SCJC;
+  if (XOR) then ("error")
+    :SJCDa;
+    fork
+      :SCJC;
+      repeat
+        :SCJDc;
+        :SCJE;
+      repeat while
+      :SCJF;
+      :SCJD;
+      :SCJG;
+    fork again
+    :SJCDb;
+      :SCJG;
+      :SJCFa;
+    fork again
+      :SCJP;
+      #red:SCJQ;
+    end fork
+    :SCJH,IINV,USER,name=SCJInvA;
+    #red:SCJJ;
+    detach
+  else ("normal")
+    #red:SCJR;
+    detach
+  endif
+end group
+}
+@enduml

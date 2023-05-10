@@ -83,7 +83,7 @@ begin
                 auditEventType := JSON::get_string(eventJsonObject["eventType"]);
                 auditEventId := JSON::get_string(eventJsonObject["eventId"]);
                 auditEventTime := JSON::get_string(eventJsonObject["timestamp"]);
-                application := JSON::get_string(eventJsonObject["applicationName"]);
+                application := "default_application_name";  // TODO remove this when the time is right
 
                 if eventJsonObject'contains("previousEventIds") then
                     if eventJsonObject["previousEventIds"].kind = JSON::String then
@@ -101,16 +101,15 @@ begin
                        eventDataName /= "eventType" and
                        eventDataName /= "eventId" and
                        eventDataName /= "timestamp" and
-                       eventDataName /= "applicationName" and
                        eventDataName /= "previousEventIds" then
                         declare
-                            eventDataItem: JSON::JSONObject;
+                            eventDataItem: JSON::JSONElement;
                         begin
-                            eventDataItem := JSON::get_object(eventJsonObject[eventDataName]);
-                            if eventDataItem["value"].kind = JSON::Integer then
-                                auditEventData.dataItems[eventDataName] := JSON::get_integer(eventDataItem["value"])'image;
-                            elsif eventDataItem["value"].kind = JSON::String then
-                                auditEventData.dataItems[eventDataName] := JSON::get_string(eventDataItem["value"]);
+                            eventDataItem := eventJsonObject[eventDataName];
+                            if eventDataItem.kind = JSON::String then
+                                auditEventData.dataItems[eventDataName] := JSON::get_string(eventDataItem);
+                            else
+                                auditEventData.dataItems[eventDataName] := JSON::get_raw_string(eventDataItem);
                             end if;
                         end;
                     end if;

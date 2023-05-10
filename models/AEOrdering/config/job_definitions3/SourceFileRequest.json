@@ -1,0 +1,30 @@
+{
+  "JobDefinitionName": "SourceFileRequest",
+  "Events": [
+    {
+      "EventName": "SourceRequestFile",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "client",
+      "SequenceStart": true
+    },
+    {
+      "EventName": "SourcePacketiseFile",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "server",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "RequestFile",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "EventData": [
+        {
+          "EventDataName": "PACKETTYPE",
+          "EventDataType": "EXTRAJOBINV"
+        }
+      ]
+    }
+  ]
+}

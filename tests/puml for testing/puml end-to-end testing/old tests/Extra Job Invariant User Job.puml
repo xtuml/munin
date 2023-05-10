@@ -1,0 +1,43 @@
+@startuml
+
+partition "Extra Job Invariant User Job" {
+ :SourceJobDefinitionName="Extra Job Invariant Source Job",
+ SourceExtraJobInvariantName="AUTH_TOKEN_A"|
+ detach
+group "EJI User Sequence"
+  #green:SCJAa;
+  :SCJAb;
+  :SCJBa;
+  :SCJBb;
+  :SCJBc;
+  :SCJC;
+  if (XOR) then ("error")
+    :SJCDa;
+    fork
+    :SJCDb;
+      :SCJG,EINV,USER,name=AUTH_TOKEN_A;
+      :SJCFa;
+    fork again
+      :SCJP;
+      #red:SCJQ;
+      detach
+    fork again
+      :SCJC;
+      repeat
+        :SCJDc;
+        :SCJE;
+      repeat while
+      :SCJF;
+      :SCJD;
+      #red:SCJG;
+    end fork
+    :SCJH;
+    #red:SCJJ,EINV,USER,name=AUTH_TOKEN_A;
+    detach
+  else ("normal")
+    #red:SCJR;
+    detach
+  endif
+end group
+}
+@enduml

@@ -35,7 +35,7 @@
         "OccurrenceId": {
           "description": "Secondary key to an event that appears more than once in a job",
           "type": "integer",
-          "minimum": -1
+          "minimum": 0
         },
         "Application": {
           "description": "The name of the issuing application.",
@@ -54,28 +54,104 @@
           "type": "boolean"
         },
         "DynamicControl" : {
-          "type": "object",
-          "properties": {
-            "DynamicControlName": {
-              "description": "The name of the control that is to be applied",
-              "type": "string"
+          "description": "Definition of event data values which constrain the flow of events",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "DynamicControlName": {
+                "description": "The name of the control that is to be applied",
+                "type": "string"
+              },
+              "DynamicControlType": {
+                "description": "The type of the control that is to be applied",
+                "enum": ["BRANCHCOUNT", "MERGECOUNT", "LOOPCOUNT"]
+              },
+              "UserEventType": {
+                "description": "The first user event type that the control operates on",
+                "type": "string"
+              },
+              "UserOccurrenceId": {
+                "description": "Secondary key to an event that appears more than once in a job",
+                "type": "integer",
+                "minimum": 0 
+              }
             },
-            "DynamicControlType": {
-              "description": "The type of the control that is to be applied",
-              "type": "string"
-            },
-            "UserEventType": {
-              "description": "The first user event type that the control operates on",
-              "type": "string"
-            },
-            "UserOccurrenceId": {
-              "description": "Secondary key to an event that appears more than once in a job",
-              "type": "integer",
-              "minimum": -1
-            }
+            "required": ["DynamicControlName", "DynamicControlType", "UserEventType", "UserOccurrenceId"],
+            "additionalProperties": false
           },
-          "required": ["DynamicControlName", "DynamicControlType", "UserEventType", "UserOccurrenceId"],
-          "additionalProperties": false
+          "minItems": 1
+        },
+        "EventData": {
+          "description": "Definition of event data values which are compared against one another at run time",
+          "type": "array",
+          "items": {
+            "oneOf": [{
+              "type": "object",
+              "properties": {
+                "EventDataName": {
+                  "description": "Name of the property which will carry this event data value",
+                  "type": "string"
+                },
+                "EventDataType": {
+                  "description": "The type of the event data to be carried",
+                  "enum": ["INTRAJOBINV", "EXTRAJOBINV"]
+                }
+              },
+              "required": ["EventDataName", "EventDataType"],
+              "additionalProperties": false
+            }, {
+              "type": "object",
+              "properties": {
+                "EventDataName": {
+                  "description": "Name of the property which will carry this event data value",
+                  "type": "string"
+                },
+                "EventDataType": {
+                  "description": "The type of the event data to be carried",
+                  "const": "INTRAJOBINV"
+                },
+                "SourceEventType": {
+                  "description": "Name of the event which produces the event data",
+                  "type": "string"
+                },
+                "SourceEventOccurrenceId": {
+                  "description": "Occurrence ID of the event which produces the event data",
+                  "type": "integer",
+                  "minimum": 0 
+                },
+                "SourceEventDataName": {
+                  "description": "Name of the property on the event which carries the event data value",
+                  "type": "string"
+                }
+              },
+              "required": ["EventDataName", "EventDataType", "SourceEventType", "SourceEventOccurrenceId", "SourceEventDataName"],
+              "additionalProperties": false
+            }, {
+              "type": "object",
+              "properties": {
+                "EventDataName": {
+                  "description": "Name of the property which will carry this event data value",
+                  "type": "string"
+                },
+                "EventDataType": {
+                  "description": "The type of the event data to be carried",
+                  "const": "EXTRAJOBINV"
+                },
+                "SourceJobDefinitionName": {
+                  "description": "Name of the external job definition where the event data is produced",
+                  "type": "string"
+                },
+                "SourceEventDataName": {
+                  "description": "Name of the property on the event which carries the event data value",
+                  "type": "string"
+                }
+              },
+              "required": ["EventDataName", "EventDataType", "SourceJobDefinitionName", "SourceEventDataName"],
+              "additionalProperties": false
+            }]
+          },
+          "minItems": 1
         },
         "PreviousEvents": {
           "type": "array",
@@ -89,7 +165,7 @@
               "PreviousOccurrenceId": {
                 "description": "Secondary key to an event that appears more than once in a job",
                 "type": "integer",
-                "minimum": -1
+                "minimum": 0 
               },
               "ConstraintDefinitionId": {
                 "description": "An identifier assigned to the constraint",
@@ -97,7 +173,7 @@
               },
               "ConstraintValue": {
                 "description": "The value associated with the constraint, e.g. XOR",
-                "type": "string"
+                "enum": ["AND", "XOR", "IOR"]
               }
             },
             "required": ["PreviousEventName", "PreviousOccurrenceId"],
