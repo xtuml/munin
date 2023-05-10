@@ -6,7 +6,17 @@
       "SequenceName": "SEQUENCE1",
       "OccurrenceId": 1,
       "Application": "app1",
-      "SequenceStart": true
+      "SequenceStart": true,
+      "EventData": [
+        {
+          "EventDataName": "Data1",
+          "EventDataType": "EXTRAJOBINV"
+        },
+        {
+          "EventDataName": "Data2",
+          "EventDataType": "INTRAJOBINV"
+        }
+      ]
     },
     {
       "PreviousEvents": [
@@ -20,12 +30,23 @@
       "OccurrenceId": 1,
       "Application": "app1",
       "IsBreak": true,
-      "DynamicControl" : {
-        "DynamicControlName" : "cccLOOPCOUNT",
-        "DynamicControlType" : "LOOPCOUNT",
-        "UserEventType" : "ccc",
-        "UserOccurrenceId" : 1
-      }
+      "DynamicControl": [
+        {
+          "DynamicControlName": "cccLOOPCOUNT",
+          "DynamicControlType": "LOOPCOUNT",
+          "UserEventType": "ccc",
+          "UserOccurrenceId": 1
+        }
+      ],
+      "EventData": [
+        {
+          "EventDataName": "Data2",
+          "EventDataType": "INTRAJOBINV",
+          "SourceEventDataName": "Data2",
+          "SourceEventType": "aaa",
+          "SourceEventOccurrenceId": 1
+        }
+      ]
     },
     {
       "EventName": "ccc",
@@ -34,12 +55,21 @@
         {
           "PreviousEventName": "bbb",
           "PreviousOccurrenceId": 1,
-          "ConstraintDefinitionId" : "cccEventXOR",
-          "ConstraintValue" : "XOR"
+          "ConstraintDefinitionId": "cccEventXOR",
+          "ConstraintValue": "XOR"
         }
       ],
       "OccurrenceId": 1,
-      "Application": "app2"
+      "Application": "app2",
+      "EventData": [
+        {
+          "EventDataName": "Data2",
+          "EventDataType": "INTRAJOBINV",
+          "SourceEventDataName": "Data2",
+          "SourceEventType": "aaa",
+          "SourceEventOccurrenceId": 1
+        }
+      ]
     },
     {
       "EventName": "ddd",
@@ -51,7 +81,13 @@
         }
       ],
       "OccurrenceId": 1,
-      "Application": "app3"
+      "Application": "app3",
+      "EventData": [
+        {
+          "EventDataName": "Data4",
+          "EventDataType": "EXTRAJOBINV"
+        }
+      ]
     },
     {
       "PreviousEvents": [

@@ -1,0 +1,136 @@
+{
+  "JobDefinitionName": "FileRequest",
+  "Events": [
+    {
+      "EventName": "RequestFile",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "default_application_name",
+      "SequenceStart": true,
+      "EventData": [
+        {
+          "EventDataName": "PACKETTYPE",
+          "EventDataType": "EXTRAJOBINV",
+          "SourceEventDataName": "PACKETTYPE",
+          "SourceJobDefinitionName": "SourceFileRequest"
+        }
+      ]
+    },
+    {
+      "EventName": "PacketiseFile",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "default_application_name",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "RequestFile",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "DynamicControl": [
+        {
+          "DynamicControlName": "numPackets",
+          "DynamicControlType": "LOOPCOUNT",
+          "UserEventType": "AssemblePacket",
+          "UserOccurrenceId": 1
+        }
+      ]
+    },
+    {
+      "EventName": "AssemblePacket",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "default_application_name",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "PacketiseFile",
+          "PreviousOccurrenceId": 1
+        },
+        {
+          "PreviousEventName": "TransferPacket",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "EventData": [
+        {
+          "EventDataName": "ASSEMBLETYPE",
+          "EventDataType": "INTRAJOBINV"
+        }
+      ]
+    },
+    {
+      "EventName": "TransferPacket",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "default_application_name",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "AssemblePacket",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "EventData": [
+        {
+          "EventDataName": "ASSEMBLETYPE",
+          "EventDataType": "INTRAJOBINV",
+          "SourceEventDataName": "ASSEMBLETYPE",
+          "SourceEventType": "AssemblePacket",
+          "SourceEventOccurrenceId": 1
+        },
+        {
+          "EventDataName": "PACKETTYPE",
+          "EventDataType": "EXTRAJOBINV",
+          "SourceEventDataName": "PACKETTYPE",
+          "SourceJobDefinitionName": "SourceFileRequest"
+        }
+      ]
+    },
+    {
+      "EventName": "CorruptedPacketError",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "default_application_name",
+      "IsBreak": true,
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "AssemblePacket",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "EventData": [
+        {
+          "EventDataName": "ASSEMBLETYPE",
+          "EventDataType": "INTRAJOBINV",
+          "SourceEventDataName": "ASSEMBLETYPE",
+          "SourceEventType": "AssemblePacket",
+          "SourceEventOccurrenceId": 1
+        }
+      ]
+    },
+    {
+      "EventName": "TransferResultStatus",
+      "OccurrenceId": 1,
+      "SequenceName": "Sequence",
+      "Application": "default_application_name",
+      "SequenceEnd": true,
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "TransferPacket",
+          "PreviousOccurrenceId": 1
+        },
+        {
+          "PreviousEventName": "CorruptedPacketError",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "EventData": [
+        {
+          "EventDataName": "PACKETTYPE",
+          "EventDataType": "EXTRAJOBINV",
+          "SourceEventDataName": "PACKETTYPE",
+          "SourceJobDefinitionName": "SourceFileRequest"
+        }
+      ]
+    }
+  ]
+}

@@ -163,9 +163,9 @@ begin
                             jobType := create JobType(
                                 jobTypeName => JSON::get_string(jobTypeJSONObject["JobDefinitionName"]),
                                 deprecated => false,
-                                jobTypeExpiryTime => timestamp'now + duration'weeks(1000),
-                                staleAuditEventDuration => duration'weeks(1000),
-                                blockedAuditEventDuration => duration'weeks(1000),
+                                jobTypeExpiryTime => timestamp'now + duration'weeks(52),
+                                staleAuditEventDuration => duration'hours(1),
+                                blockedAuditEventDuration => duration'hours(1),
                                 Current_State => Created
                             );
                             generate JobType.activateJobType() to jobType;
@@ -174,7 +174,7 @@ begin
                         jobType.loadEventTypes(JSON::get_object(jobTypeJSONElement));
                         // TODO update event specific rules
                     else
-                        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid:\n" & JSON::dump(jobTypeValidationResult, true);
+                        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid: " & string(jobDefinitionFile) & "\n" & JSON::dump(jobTypeValidationResult, true);
                         Logger::log(Logger::Debug, logMessage);
                         raise JSON::JSONException("Job definition file invalid");
                     end if;
