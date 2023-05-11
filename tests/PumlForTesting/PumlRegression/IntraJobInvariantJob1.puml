@@ -1,0 +1,30 @@
+@startuml
+partition "Intra Job Invariant Job" {
+group "Intra Job Invariant Sequence"
+  #green:IJIAa;
+  :IJIAb;
+  :IJIBa;
+  :IJIBb;
+  :IJIBc,IINV,name=IJIInvA;
+  :IJIC;
+  if (XOR) then ("normal")
+    :IJIDa;
+      :IJIC;
+      :IJIF;
+      :IJID;
+      :IJIG;
+    :IJIDb;
+      :IJIG,IINV,USER,name=IJIInvA;
+      :IJIFa;
+      :IJIP;
+      :IJIQ;
+    :IJIH,IINV,USER,name=IJIInvA;
+    #red:IJIJ;
+    detach
+  else ("error")
+    #red:IJIR;
+    detach
+  endif
+end group
+}
+@enduml

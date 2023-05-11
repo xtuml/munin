@@ -1,0 +1,41 @@
+@startuml
+
+partition "Complex Intra Invariant Job" {
+
+group "Complex Intra Invariant Sequence"
+  #green:CIIJAa;
+  :CIIJAb;
+  :CIIJBa,IINV,name=CIIJInvA;
+  :CIIJBb;
+  :CIIJBc;
+  :CIIJC;
+  if (XOR) then ("error")
+    :CIIJDa;
+    fork
+    :CIIJDb;
+      :CIIJG;
+      :CIIJFa;
+    fork again
+      :CIIJP;
+      #red:CIIJQ;
+      detach
+    fork again
+      :CIIJC;
+      repeat
+        :CIIJD;
+        :CIIJE;
+      repeat while
+      :CIIJF,IINV,USER,name=CIIJInvA;
+      :CIIJD;
+      #red:CIIJG;
+    end fork
+    :CIIJH,IINV,USER,name=CIIJInvA;
+    #red:CIIJJ;
+    detach
+  else ("normal")
+    #red:CIIJR;
+    detach
+  endif
+end group
+}
+@enduml
