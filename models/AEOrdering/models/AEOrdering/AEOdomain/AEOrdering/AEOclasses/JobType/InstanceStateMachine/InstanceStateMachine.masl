@@ -57,11 +57,10 @@ begin
 			dataItemType.deleteDataItemType();
 		end loop;
 				
-		dynamicControl :=  auditEventType -> R19.DynamicControl;
-		if dynamicControl /= null then
+		for dynamicControl in auditEventType -> R19.DynamicControl loop
 			unlink auditEventType R19 dynamicControl;
 			delete dynamicControl;
-		end if;
+		end loop;
 		
 		unlink auditEventType R12;
 		unlink auditEventType R7;
