@@ -1324,6 +1324,7 @@ testAuditEventData : AuditEventDataType;
 moreAuditEventData : AuditEventDataType;
 emptyAuditEventData : AuditEventDataType;
 verificationAuditEvent : instance of _TEST_Req_IF_Verification_audit_event;
+verificationFailedJobs : sequence of instance of _TEST_Req_IF_Verification_failedJob;
 
 begin
 	
@@ -1407,6 +1408,17 @@ begin
 	AEOrdering::deleteJob("1");
 	Assertions::assertTrue(((find Job())'length = 0), "Test Ordered Job With Data: Job has not been deleted");
 	
+	// test invalid dynamic control data	
+	auditEventTime := timestamp'now;
+	testAuditEventData.dataItems["cccLOOPCOUNT"] := "0";
+	AEOrdering::AcceptEvent("2", "node1", "app1", "aaa", "2-1", auditEventTime'image, emptyPrevEventIds, testAuditEventData);	
+	Test::service_event_queue();
+
+	// verify that the job was reported as failed to verification
+	verificationFailedJobs := find _TEST_Req_IF_Verification_failedJob();
+    Assertions::assertTrue((verificationFailedJobs'length = 1), "Test Job Failure: Invalid number of failed jobs event = " & verificationFailedJobs'length'image);
+    Assertions::assertTrue(((find verificationFailedJobs(jobId = "2"))'length = 1), "Test Job Failure: Failed to find failed job id = 2");
+	delete verificationFailedJobs;
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
