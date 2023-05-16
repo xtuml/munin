@@ -1338,6 +1338,9 @@ begin
 	Test::service_event_queue();
 	
 	prevEventIds := emptyPrevEventIds & "1"; 
+	testAuditEventData := emptyAuditEventData;
+	testAuditEventData.dataItems["cccLOOPCOUNT"] := "3";
+	testAuditEventData.dataItems["dddBRANCHCOUNT"] := "2";
 	AEOrdering::AcceptEvent("1", "node1", "app1", "bbb", "2", auditEventTime'image, prevEventIds, testAuditEventData);
 	Test::service_event_queue();
 	
@@ -1370,10 +1373,10 @@ begin
     for dataItem in verificationAuditEvent.reportableAuditEventDataItems loop
 	    if dataItem.dataName = "Data1" then
 		    Assertions::assertTrue((dataItem.dataValue = "Test1"), "Test Ordered Job: Failed as verification audit event data item Data 1 value /= Test1");
-		    Assertions::assertTrue((dataItem.dataKind = DataKindType.EXTRAJOBINV), "Test Ordered Job With Data: Failed as verification audit event data item Data 1 data kind /= EXTRAJOBINV");
+		    Assertions::assertTrue((dataItem.dataKind = "EXTRAJOBINV"), "Test Ordered Job With Data: Failed as verification audit event data item Data 1 data kind /= EXTRAJOBINV");
 	    elsif dataItem.dataName = "Data2" then
 		    Assertions::assertTrue((dataItem.dataValue = "Test2"), "Test Ordered Job: Failed as verification audit event data item Data 2 value /= Test2");
-		    Assertions::assertTrue((dataItem.dataKind = DataKindType.INTRAJOBINV), "Test Ordered Job With Data: Failed as verification audit event data item Data 1 data kind /= INTRAJOBINV");
+		    Assertions::assertTrue((dataItem.dataKind = "INTRAJOBINV"), "Test Ordered Job With Data: Failed as verification audit event data item Data 1 data kind /= INTRAJOBINV");
 	    end if;
 	end loop;
 	verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "4");
@@ -1382,7 +1385,20 @@ begin
     for dataItem in verificationAuditEvent.reportableAuditEventDataItems loop
 	    if dataItem.dataName = "Data4" then
 		    Assertions::assertTrue((dataItem.dataValue = "Test4"), "Test Ordered Job: Failed as verification audit event data item Data 1 value /= Test1");
-		    Assertions::assertTrue((dataItem.dataKind = DataKindType.EXTRAJOBINV), "Test Ordered Job With Data: Failed as verification audit event data item Data 1 data kind /= EXTRAJOBINV");
+		    Assertions::assertTrue((dataItem.dataKind = "EXTRAJOBINV"), "Test Ordered Job With Data: Failed as verification audit event data item Data 1 data kind /= EXTRAJOBINV");
+		end if;
+	end loop;
+	verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "2");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Ordered Job: Failed to find` verification audit event id = 2");
+    Assertions::assertTrue((verificationAuditEvent.reportableAuditEventDataItems'length = 2), "Test Ordered Job With Data: Failed as verification audit event data Items /= 2");
+    for dataItem in verificationAuditEvent.reportableAuditEventDataItems loop
+	    if dataItem.dataName = "cccLOOPCOUNT" then
+		    Assertions::assertTrue((dataItem.dataValue = "3"), "Test Ordered Job: Failed as verification audit event data item Data 1 value /= 3");
+		    Assertions::assertTrue((dataItem.dataKind = "LOOPCOUNT"), "Test Ordered Job With Data: Failed as verification audit event data item Data 1 data kind /= LOOPCOUNT");
+		end if;
+	    if dataItem.dataName = "dddBRANCHCOUNT" then
+		    Assertions::assertTrue((dataItem.dataValue = "2"), "Test Ordered Job: Failed as verification audit event data item Data 1 value /= 2");
+		    Assertions::assertTrue((dataItem.dataKind = "BRANCHCOUNT"), "Test Ordered Job With Data: Failed as verification audit event data item Data 1 data kind /= BRANCHCOUNT");
 		end if;
 	end loop;
 	

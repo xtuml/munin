@@ -59,18 +59,6 @@ begin
 				if eventDefJSONObject'contains("IsBreak") then
 					isBreak := JSON::get_boolean(eventDefJSONObject["IsBreak"]);
 				end if;
-				// check for any dynamic controls
-				if eventDefJSONObject'contains("DynamicControl") then
-				    for dynamicControlJSONElement in JSON::get_array(eventDefJSONObject["DynamicControl"]) loop
-                        dynamicControlJSONObject := JSON::get_object(dynamicControlJSONElement);
-                        hasDynamicControl := true;
-                        dynamicControlName := JSON::get_string(dynamicControlJSONObject["DynamicControlName"]);
-                        dynamicControlType := JSON::get_string(dynamicControlJSONObject["DynamicControlType"]);
-                        userEventType := JSON::get_string(dynamicControlJSONObject["UserEventType"]);
-                        userOccurrenceId := JSON::get_integer(dynamicControlJSONObject["UserOccurrenceId"]); 
-                        exit;  // currently we only support one dynamic control
-					end loop;
-				end if;
     			if eventDefJSONObject'contains("PreviousEvents") and eventDefJSONObject["PreviousEvents"].kind = JSON::Array then
 					for prevEventTypeJSONElement in JSON::get_array(eventDefJSONObject["PreviousEvents"]) loop
 						previousEventName := "";
@@ -109,17 +97,24 @@ begin
 					eventType.previousEventTypes := previousEventTypes;
 				end if;				
 				
-				// check if there is a dynamic control and if not create one
-				dynamicControl := eventType -> R19.DynamicControl;
-				if hasDynamicControl = true then
-					if dynamicControl = null then
-						dynamicControl := create unique DynamicControl();
-						link eventType R19 dynamicControl;
-					end if;
-					dynamicControl.dynamicControlName := dynamicControlName;
-					dynamicControl.controlType := dynamicControlType;
-					dynamicControl.userEventType := userEventType;
-					dynamicControl.userOccurrenceId := userOccurrenceId;
+				// check for any dynamic controls
+				if eventDefJSONObject'contains("DynamicControl") then
+				    for dynamicControlJSONElement in JSON::get_array(eventDefJSONObject["DynamicControl"]) loop
+                        dynamicControlJSONObject := JSON::get_object(dynamicControlJSONElement);
+                        dynamicControlName := JSON::get_string(dynamicControlJSONObject["DynamicControlName"]);
+                        dynamicControlType := JSON::get_string(dynamicControlJSONObject["DynamicControlType"]);
+                        userEventType := JSON::get_string(dynamicControlJSONObject["UserEventType"]);
+                        userOccurrenceId := JSON::get_integer(dynamicControlJSONObject["UserOccurrenceId"]); 
+						dynamicControl := find_one (eventType -> R19.DynamicControl)(dynamicControlName = dynamicControlName);
+						if dynamicControl = null then
+							dynamicControl := create unique DynamicControl();
+							link eventType R19 dynamicControl;
+							dynamicControl.dynamicControlName := dynamicControlName;
+							dynamicControl.controlType := dynamicControlType;
+							dynamicControl.userEventType := userEventType;
+							dynamicControl.userOccurrenceId := userOccurrenceId;
+						end if;
+					end loop;
 				end if;
 
 				// check for event data

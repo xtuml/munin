@@ -36,12 +36,15 @@ begin
     declare
       auditEventDataItem: AESequenceDC::auditEventDataStructure;
     begin
-      case dataItem.dataKind is
-        when AEOrdering::INTRAJOBINV => auditEventDataItem.aedKind := AESequenceDC::INTRAJOBINV;
-        when AEOrdering::EXTRAJOBINV => auditEventDataItem.aedKind := AESequenceDC::EXTRAJOBINV;
-        when AEOrdering::BRANCHCONSTRAINT => auditEventDataItem.aedKind := AESequenceDC::BRANCHCOUNT;
-        when AEOrdering::LOOPCONSTRAINT => auditEventDataItem.aedKind := AESequenceDC::LOOPCOUNT;
-      end case;
+      if dataItem.dataKind = "INTRAJOBINV" then
+        auditEventDataItem.aedKind := AESequenceDC::INTRAJOBINV;
+      elsif dataItem.dataKind = "EXTRAJOBINV" then
+        auditEventDataItem.aedKind := AESequenceDC::EXTRAJOBINV;
+      elsif dataItem.dataKind = "BRANCHCOUNT" then
+        auditEventDataItem.aedKind := AESequenceDC::BRANCHCOUNT;
+      elsif dataItem.dataKind = "LOOPCOUNT" then
+        auditEventDataItem.aedKind := AESequenceDC::LOOPCOUNT;
+      end if;
       auditEventDataItem.aedName := dataItem.dataName;
       auditEventDataItem.aedValue := dataItem.dataValue;
       auditEventData := auditEventData & auditEventDataItem;
