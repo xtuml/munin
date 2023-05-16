@@ -27,18 +27,26 @@ begin
 		job.outOfSequenceEventCount := (job -> R1.AuditEvent)'length;
 	end if;
 	
-	// build the audit data details to be reported
+	// build the audit data details to be reported for invariants
 	theAuditEventData := auditEvent.auditEventData;
 	for auditEventData in auditEvent -> R7.AuditEventType -> R16.DataItemType loop
 		if theAuditEventData.dataItems'contains(auditEventData.dataItemName) = true then
 			reportableAuditEventData.dataName := auditEventData.dataItemName;
-			reportableAuditEventData.dataKind := DataKindType'value(auditEventData.dataItemType);
+			reportableAuditEventData.dataKind := auditEventData.dataItemType;
 			reportableAuditEventData.dataValue := theAuditEventData.dataItems[auditEventData.dataItemName];
 			allReportableAuditEventData := allReportableAuditEventData & reportableAuditEventData;
 		end if;
 	end loop;
 	
-	// identify 
+	// build the audit data details to be reported for dynamic controls
+	for dynamicControl in auditEvent -> R7.AuditEventType -> R19.DynamicControl loop
+		if theAuditEventData.dataItems'contains(dynamicControl.dynamicControlName) = true then
+			reportableAuditEventData.dataName := dynamicControl.dynamicControlName;
+			reportableAuditEventData.dataKind := dynamicControl.controlType;
+			reportableAuditEventData.dataValue := theAuditEventData.dataItems[dynamicControl.dynamicControlName];
+			allReportableAuditEventData := allReportableAuditEventData & reportableAuditEventData;
+		end if;
+	end loop;
 	
 	Req_IF_Verification~>audit_event(job.jobId, auditEvent.reportedNodeName, auditEvent.reportedApplication, auditEvent.reportedEventType, 
 		                             auditEvent.auditEventId, auditEvent.reportedAuditEventTime, auditEvent.reportedPrevEventIds, allReportableAuditEventData);
