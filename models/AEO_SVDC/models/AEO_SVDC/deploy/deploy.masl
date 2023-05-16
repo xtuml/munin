@@ -44,6 +44,8 @@ begin
         auditEventDataItem.aedKind := AESequenceDC::BRANCHCOUNT;
       elsif dataItem.dataKind = "LOOPCOUNT" then
         auditEventDataItem.aedKind := AESequenceDC::LOOPCOUNT;
+      elsif dataItem.dataKind = "MERGECOUNT" then
+        auditEventDataItem.aedKind := AESequenceDC::MERGECOUNT;
       end if;
       auditEventDataItem.aedName := dataItem.dataName;
       auditEventDataItem.aedValue := dataItem.dataValue;

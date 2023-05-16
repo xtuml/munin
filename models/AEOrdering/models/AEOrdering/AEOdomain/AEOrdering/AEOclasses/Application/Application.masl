@@ -7,6 +7,8 @@ applicationEventTypes : sequence of instance of AuditEventType;
 eventType : instance of AuditEventType;
 validEvent : boolean := true;
 job : instance of Job;
+theAuditEventData : AuditEventDataType;
+dataValue : integer;
 
 begin
 
@@ -21,12 +23,31 @@ begin
 		failureReason := "JobId = " & job.jobId & " : ApplicationName = " & auditEvent.reportedApplication & " : FailureReason = Application is not allowed to be reported for event";
 	elsif eventType = null then
 		validEvent := false;
-		failureReason := "JobId = " & job.jobId & " :  NodeName = " & auditEvent.reportedNodeName & " : ApplicationName = " & auditEvent.reportedApplication &
-		                 " : EventType = " & auditEvent.reportedEventType & " : FailureReason = Event type is not allowed to be reported for node and application";
+		failureReason := "JobId = " & job.jobId & " : ApplicationName = " & auditEvent.reportedApplication &
+		                 " : EventType = " & auditEvent.reportedEventType & " : FailureReason = Event type is not allowed to be reported for application";
 	else
-		link eventType R7 auditEvent;
+		// check if the event has dynamic controls that the value is valid. Only integer balues are allowed and they have to be greater than 0
+		theAuditEventData := auditEvent.auditEventData;
+		for dynamicControl in auditEvent -> R7.AuditEventType -> R19.DynamicControl loop
+			if theAuditEventData.dataItems'contains(dynamicControl.dynamicControlName) = true then
+				dataValue := integer'parse(theAuditEventData.dataItems[dynamicControl.dynamicControlName]);
+				if dataValue < 1 then
+					failureReason := "JobId = " & job.jobId & " :  JobType = " & (eventType -> R12.JobType).jobTypeName & " : ApplicationName = " & auditEvent.reportedApplication &
+					                 " : EventType = " & auditEvent.reportedEventType & " : FailureReason = Event type has invalid dynamic control";
+					validEvent := false;
+				end if;
+			end if;
+		end loop;
+		if validEvent = true then
+			link eventType R7 auditEvent;
+		end if;
 	end if;
 	return validEvent;
+exception
+	when others =>
+		failureReason := "JobId = " & job.jobId & " :  JobType = " & (eventType -> R12.JobType).jobTypeName & " : ApplicationName = " & auditEvent.reportedApplication &
+		                 " : EventType = " & auditEvent.reportedEventType & " : FailureReason = Event type has invalid dynamic control";
+		return false;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
