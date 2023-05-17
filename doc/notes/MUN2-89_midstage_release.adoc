@@ -1,0 +1,90 @@
+= Phase 2 Stage 1 Mid-Stage Release
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note briefly documents a mid-stage release of the Protocol Verifier
+and associated support.
+
+== 2 Introduction and Background
+
+At Munin Phase 1 Stage 4 (March 2023) the repositories were tagged, and a
+release was delivered.  Work has continued using the 'main' branch in the
+repositories as the most recent (relatively) stable usage point.  However, the
+features that are supported are known only by those who follow the issue
+tracker and commit comments.
+
+However, now (May 2023) is a convenient time to update the community with
+additional relatively stable functionality and to be more explicit with
+what is and is not supported.  The end of the stage is not until late June
+2023.
+
+== 3 Supported Capabilities
+
+Find here a list of what is supported.  This list will get longer.  The
+_defacto_ way to discover what is supported is by finding the 'regression'
+folder among our tests.  This folder will always contain PLUS (PlantUML)
+job definitions that are known to run successfully.  Look for this folder
+to grow and grow as we test more and more scenarios.
+
+.Supported Capabilities
+[options="header"]
+|===
+| supported feature    | description
+| simple sequence      | straight line sequences
+| multi-sequence jobs  | jobs with multiple sequences
+| multiple end event   | sequences can have more than one ending
+| fork                 | AND forking
+| if/switch            | XOR fork
+| nested forks         | forks inside of forks (with limits '*')
+| intra-job invariants | named invariants carried within a single job
+| extra-job invariants | invariants defined in a source job and referenced in a user job
+|===
+
+'*' Nested forks should not be "tightly" nested.  At least one
+audit event should exist between the starting and ending of the
+nested forks.
+
+== 4 Unsupported Capabilities
+
+.Unsupported Capabilities
+[options="header"]
+|===
+| unsupported feature  | description
+| branch counts        | instance forks
+| merge counts         | instance merge
+|===
+
+== 5 Streamlined Workflow
+
+<<dr-2>> describes the streamlined workflow.  It is characterised by the
+following:
+
+. The Protocol Verifier is easier to build.
+. The Protocol Verifier is easier to start and stop.  A single Docker
+  'compose' file (by default) launches one instance of each of
+  AEReception and AEO_SVDC.
+. Audit Event data is now carried in the job definition JSON rather than
+  in a separate file.  This deprecates the separate '_event_data.json'
+  file.
+. Logging is substantially improved and support for a Prometheus-based
+  metrics server is in place (but not quite ready for active test).
+. Job definitions are discovered in a 'job_definitions' folder withing the
+  config directory.
+. 'plus2json' is updated to support these features.  An '--outdir' option
+  is supplied to allow job definition JSON to be placed directly into the
+  job_definitions folder.
+. The '--outdir' is also convenient to '--play' audit event instance data
+  directly into the 'incoming' folder of the Protocol Verifier.
+
+== 6 Document References
+
+. [[dr-1]] https://support.onefact.net/issues/MUN2-80[MUN2-80 - mid-stage release]
+. [[dr-2]] https://github.com/xtuml/munin/blob/main/doc/notes/MUN2-18_testing_dnt.adoc[Updated Workflow and Repository Setup]
+
+---
+
+This work is provided under non-disclosure agreement (NDA).
+
+---
