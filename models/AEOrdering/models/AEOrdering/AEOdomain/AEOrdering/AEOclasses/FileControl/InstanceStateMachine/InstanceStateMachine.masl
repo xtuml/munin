@@ -55,6 +55,7 @@ eventJsonObject : JSON::JSONObject;
 systemSpec : instance of SystemSpec;
 storedJobIdentifier : instance of StoredJobIdentifier;
 eventContent : string;
+dynamicControlJsonObject : JSON::JSONObject;
 
 begin
     // Read the file and parse
@@ -108,6 +109,19 @@ begin
                             eventDataItem := eventJsonObject[eventDataName];
                             if eventDataItem.kind = JSON::String then
                                 auditEventData.dataItems[eventDataName] := JSON::get_string(eventDataItem);
+                            elsif  eventDataItem.kind = JSON::Object then
+                            	dynamicControlJsonObject := JSON::get_object(eventDataItem);
+                            	if dynamicControlJsonObject'contains("value") then
+                            		if dynamicControlJsonObject["value"].kind = JSON::Integer then
+                                		auditEventData.dataItems[eventDataName] := JSON::get_integer(dynamicControlJsonObject["value"])'image;
+                                	elsif dynamicControlJsonObject["value"].kind = JSON::String then
+                                		auditEventData.dataItems[eventDataName] := JSON::get_string(dynamicControlJsonObject["value"]);
+                                	else
+                                		auditEventData.dataItems[eventDataName] := JSON::get_raw_string(eventDataItem);
+                                	end if;
+                                else
+	                                auditEventData.dataItems[eventDataName] := JSON::get_raw_string(eventDataItem);
+                                end if;
                             else
                                 auditEventData.dataItems[eventDataName] := JSON::get_raw_string(eventDataItem);
                             end if;
