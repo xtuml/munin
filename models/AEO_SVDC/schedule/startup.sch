@@ -1,5 +1,4 @@
 $TESTSCHEDULE
-PAUSE
 RUN SCENARIO IStore 1 "init"
 RUN SCENARIO AEOrdering 1 "init"
 RUN SCENARIO AESequenceDC 3 "InitSystemSpec"
