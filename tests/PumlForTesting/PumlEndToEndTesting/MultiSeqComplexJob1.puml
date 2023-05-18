@@ -1,0 +1,46 @@
+@startuml
+
+partition "Multi Sequence Complex Job 1" {
+ :EINV,SRC,jobdefn="Extra Job Invariant Source Job",
+ name=AUTH_TOKEN_A|
+ detach
+group "Complex Sequence 1"
+  #green:MSCJ1Aa;
+  :MSCJ1Ab;
+  :MSCJ1Ba,IINV,name=MSCJ1InvA;
+  #red:MSCJ1Bb;
+  detach
+end group  
+group "Complex Sequence 2"
+  #green:MSCJ1Bc;
+  :MSCJ1C;
+  if (XOR) then ("normal")
+    :MSCJ1Da;
+    fork
+    :MSCJ1Db;
+      :MSCJ1G,IINV,USER,name=MSCJ1InvA;
+      :MSCJ1Fa;
+    fork again
+      :MSCJ1P;
+      #red:MSCJ1Q;
+      detach
+    fork again
+      :MSCJ1C;
+      :MSCJ1F;
+      :MSCJ1D,EINV,USER,name=AUTH_TOKEN_A;
+      :MSCJ1Ga;
+    end fork
+  else ("error")
+    #red:MSCJ1R;
+    detach
+  endif
+  #red:MSCJ1X;
+  detach
+end group
+group "Complex Sequence 3"  
+    #green:MSCJ1H,IINV,USER,name=MSCJ1InvA;
+    #red:MSCJ1J;
+    detach
+end group
+}
+@enduml
