@@ -26,20 +26,24 @@ Find here a list of what is supported.  This list will get longer.  The
 _defacto_ way to discover what is supported is by finding the 'regression'
 folder among our tests.  This folder will always contain PLUS (PlantUML)
 job definitions that are known to run successfully.  Look for this folder
-to grow and grow as we test more and more scenarios.
+to grow and grow as we test more and more scenarios.  This folder of job
+definitions will serve as input to enhanced continuous integration (CI) testing.
 
 .Supported Capabilities
 [options="header"]
 |===
 | supported feature    | description
 | simple sequence      | straight line sequences
-| multi-sequence jobs  | jobs with multiple sequences
-| multiple end event   | sequences can have more than one ending
+| multi-sequence jobs  | job definitions with multiple concurrent sequences
+| multiple end event   | sequences that have more than one ending
 | fork                 | AND forking
-| if/switch            | XOR fork
+| if/switch            | exclusive OR (XOR) forking
 | nested forks         | forks inside of forks (with limits '*')
+| branch count         | instance forking with runtime branch counts
+| loop count           | constrained loops with runtime loop counts
 | intra-job invariants | named invariants carried within a single job
 | extra-job invariants | invariants defined in a source job and referenced in a user job
+| topology mixing      | various combinations of the above topology constructs
 |===
 
 '*' Nested forks should not be "tightly" nested.  At least one
@@ -52,8 +56,9 @@ nested forks.
 [options="header"]
 |===
 | unsupported feature  | description
-| branch counts        | instance forks
+| split                | inclusive OR (IOR) forking
 | merge counts         | instance merge
+| arbitrary mixing     | some combinations of topologies remain unsupported
 |===
 
 == 5 Streamlined Workflow
