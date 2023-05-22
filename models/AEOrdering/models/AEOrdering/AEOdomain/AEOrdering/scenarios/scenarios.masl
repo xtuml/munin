@@ -39,12 +39,12 @@ begin
 		end loop;
 	end if;
 		
-exception
-	when others =>
-	
-		logMessage := "AEOrdering::init : failed during start up";
-		Logger::log(Logger::Error, "AEOrdering", logMessage);
-		raise program_error;
+// exception
+// 	when others =>
+// 	
+// 		logMessage := "AEOrdering::init : failed during start up";
+// 		Logger::log(Logger::Error, "AEOrdering", logMessage);
+// 		raise program_error;
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
