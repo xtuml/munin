@@ -1,0 +1,76 @@
+@startuml
+
+partition "Kitchen Sink Job 2" {
+ :EINV,SRC,jobdefn="Extra Job Invariant Source Job",
+ name=AUTH_TOKEN_A|
+ detach
+group "Kitchen Sink Sequence 2"
+
+  #green:KSJ2A,LCNT,user=KSJ2AB,name=LC3,BCNT,user=KSJ2M,name=BC2,MCNT,user=KSJ2P,name=MC2;
+  :KSJ2B,LCNT,user=KSJ2E,name=LC1,LCNT,user=KSJ2H,name=LC2,IINV,name=KSJ2InvA;
+  :KSJ2C;
+  if (XOR) then ("normal")
+    :KSJ2AH;
+    fork
+      :KSJ2AJ;
+      repeat
+        :KSJ2D;
+        :KSJ2E,EINV,USER,name=AUTH_TOKEN_A;
+        :KSJ2F;
+      repeat while
+      :KSJ2G,IINV,USER,name=KSJ2InvA;
+      repeat
+        :KSJ2H;
+        :KSJ2I;
+        if (XOR) then ("error")
+          :KSJ2J;
+          break
+        else ("normal")
+          :KSJ2K;
+        endif
+      repeat while
+      :KSJ2L;
+    fork again
+      :KSJ2M;
+      :KSJ2N,EINV,USER,name=AUTH_TOKEN_A;
+      :KSJ2P;
+      if (XOR) then ("error")
+        #red:KSJ2Q;
+        detach
+      else ("normal")
+      :KSJ2R;  
+      endif
+      :KSJ2S;    
+    fork again
+      :KSJ2T,IINV,USER,name=KSJ2InvA;
+      #red:KSJ2U;
+      detach
+    fork again
+      :KSJ2V;
+      repeat
+        :KSJ2W;
+        :KSJ2X;
+      repeat while
+      :KSJ2Y,BCNT,name=BC1;
+      :KSJ2Z,EINV,USER,name=AUTH_TOKEN_A;
+      #red:KSJ2AA;
+      detach
+    fork again
+      :KSJ2AK;
+      repeat
+        :KSJ2AB;
+      repeat while
+      :KSJ2AC;
+      #red:KSJ2AD,IINV,USER,name=KSJ2InvA;
+      detach
+    end fork
+    :KSJ2AE,IINV,USER,name=KSJ2InvA;
+    #red:KSJ2AF;
+    detach
+  else ("error")
+    #red:KSJ2AG;
+    detach
+  endif
+end group
+}
+@enduml
