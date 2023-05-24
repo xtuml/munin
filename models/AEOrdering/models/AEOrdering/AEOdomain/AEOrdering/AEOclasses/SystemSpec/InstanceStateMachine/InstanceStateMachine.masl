@@ -10,11 +10,13 @@ state AEOrdering::SystemSpec.ConfigChecked () is
 logMessage : string;
 fileStatus : Filesystem::file_status;
 fileName : Filesystem::filename;
+configUpdates : boolean;
+updatedJobDefinitions : sequence of JobDefinitionFileType;
 
 begin
 
-    if this.lastModificationTime() /= this.configFileModificationTime then
-        generate SystemSpec.loadConfig() to this;
+    if this.locateUpdatedConfig(configUpdates, updatedJobDefinitions) = true then
+        generate SystemSpec.loadConfig(configUpdates, updatedJobDefinitions) to this;
     else
         schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
     end if;
@@ -30,7 +32,8 @@ end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'ff1e8b5d-11f3-496a-825a-79a87399f6d3' '2c9652a0-3e8f-4199-b65f-cee09cee74ea' DO NOT EDIT THIS LINE.
-state AEOrdering::SystemSpec.ConfigUpdated () is
+state AEOrdering::SystemSpec.ConfigUpdated ( configUpdates : in boolean,
+                                            jobDefinitionFiles : in sequence of JobDefinitionFileType ) is
 logMessage : string;
 fileName : Filesystem::filename;
 jobType : instance of JobType;
@@ -62,6 +65,7 @@ filePermissions : Filesystem::permissions;
 constrainingDataItem : instance of DataItemType;
 constrainingDataItemName : string;
 intraJobInvDataItems : set of instance of DataItemType;
+updatedJobTypes : sequence of instance of JobType;
 
 begin
     
@@ -74,7 +78,7 @@ begin
     
     // check the config file has not been removed
     fileName := Filesystem::filename(this.configFilePath & this.configFile);
-    if Filesystem::file_exists(fileName) then
+    if configUpdates and Filesystem::file_exists(fileName) then
         // read the contents of the config file 
         configJSONString := Filesystem::read_file(fileName);
         configJSONElement := JSON::parse(configJSONString);
@@ -146,124 +150,123 @@ begin
             Logger::log(Logger::Debug, "AEOrdering", logMessage);
             raise JSON::JSONException("Config file invalid");
         end if;
-        
-        // process job definitions
-        if Filesystem::file_exists(Filesystem::filename(this.jobDefinitionDirectory)) then
-            for jobDefinitionFile in Filesystem::list_directory(Filesystem::filename(this.jobDefinitionDirectory)) loop
-                // if the file extension is ".json", assume the file is a job definition
-                if Strings::ends_with(jobDefinitionFile, ".json") then
-                    jobTypeJSONString := Filesystem::read_file(Filesystem::filename(this.jobDefinitionDirectory & "/" & string(jobDefinitionFile)));
-                    jobTypeJSONElement := JSON::parse(jobTypeJSONString);
-                    jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, #PROP["jobDefinitionSchema"]#);
-                    if JSON::get_boolean(jobTypeValidationResult["valid"]) then
-                        jobTypeJSONObject := JSON::get_object(jobTypeJSONElement);
-                        // find or create the job
-                        jobType := find_one JobType(jobTypeName = JSON::get_string(jobTypeJSONObject["JobDefinitionName"]));
-                        if jobType = null then
-                            jobType := create JobType(
-                                jobTypeName => JSON::get_string(jobTypeJSONObject["JobDefinitionName"]),
-                                deprecated => false,
-                                jobTypeExpiryTime => timestamp'now + duration'weeks(52),
-                                staleAuditEventDuration => duration'hours(1),
-                                blockedAuditEventDuration => duration'hours(1),
-                                Current_State => Created
-                            );
-                            generate JobType.activateJobType() to jobType;
-                        end if;
-                        // extract the spec data items
-                        jobType.loadEventTypes(JSON::get_object(jobTypeJSONElement));
-                        // TODO update event specific rules
-                    else
-                        logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid: " & string(jobDefinitionFile) & "\n" & JSON::dump(jobTypeValidationResult, true);
-                        Logger::log(Logger::Debug, logMessage);
-                        raise JSON::JSONException("Job definition file invalid");
-                    end if;
-                end if;
-            end loop;
-        end if;
-        
-        // resolve data item forward references
-        for dataItemForwardRef in find SourceDataItemForwardReference() loop
-            dataItemForwardRef.resolve();
-        end loop;
-        
         // set the config file mod time
-        this.configFileModificationTime := this.lastModificationTime();
-        
-        // report the latest set of events to the sequence domain
-        for job in find JobType() loop
-            for auditEventType in (job -> R12.AuditEventType() ordered_by (auditEventTypeId)) loop
-                Req_IF_Verification~>eventDefinition(auditEventType.jobTypeName, auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, 
-                	                                 auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd, auditEventType.isBreak);
-            end loop;
-            // report any dynamic controls
-            for dynamicControl in (job -> R12.AuditEventType -> R19.DynamicControl) loop
-            	Req_IF_Verification~>dynamicControlDefinition(job.jobTypeName, dynamicControl.dynamicControlName, dynamicControl.controlType, dynamicControl.eventType, dynamicControl.occurrenceId, dynamicControl.userEventType, dynamicControl.userOccurrenceId);
-            end loop;
-            
-	        // report the latest set of intra job inv event data to the sequence domain
-	        intraJobInvDataItems := job -> R14.DataItemType(dataItemType = "INTRAJOBINV");
-	        if intraJobInvDataItems'length > 0 then
-		        for dataItemType in intraJobInvDataItems loop
-		        	associatedEvent := emptyAssociatedEvent;
-		            associatedEvent.auditEventType := dataItemType.eventType;
-		            associatedEvent.occurrenceId := dataItemType.occurrenceId;
-		            associatedEvent.alternativeDataItemName := dataItemType.dataItemName;
-		            associatedEvents := associatedEvents & associatedEvent;
-		            constrainingDataItem := dataItemType -> R18.isConstrainedBy.DataItemType;
-		            if constrainingDataItem /= null then
-		               constrainingDataItemName := constrainingDataItem.dataItemName;
-		           end if;
-		        end loop;
-	            Req_IF_Verification~>intraJobInvariantDefinition(constrainingDataItemName, job.jobTypeName, associatedEvents);
-	         end if;
-        end loop;
-        
-        // report the latest set of extra job inv event data to the sequence domain
-        for dataItemType in find DataItemType(dataItemType = "EXTRAJOBINV") loop
-            if dataItemType -> R18.isConstrainedBy.DataItemType = null then
-                // build up the event data items
-                userEvents := emptyUserEvents;
-                for constrainedDataItem in dataItemType -> R18.constrains.DataItemType loop
-                    userEvent := emptyUserEvent;
-                    userEvent.jobDefinitionName := constrainedDataItem.jobTypeName;
-                    userEvent.auditEventType := constrainedDataItem.eventType;
-                    userEvent.occurrenceId := constrainedDataItem.occurrenceId;
-                    userEvent.alternativeDataItemName := constrainedDataItem.dataItemName;
-                    userEvents := userEvents & userEvent;
-                end loop;
-                Req_IF_Verification~>extraJobInvariantDefinition(dataItemType.dataItemName, dataItemType.jobTypeName, dataItemType.eventType, dataItemType.occurrenceId, userEvents);
-            end if;
-        end loop;
-
-        // if the job store does not exist then create it
-        jobStore := find_one JobStore();
-        if jobStore = null then
-        	fileControl := find_one FileControl();
-        	jobStoreName := "JobIdStore" & "-" &  fileControl.startJobGroup'image & "-" & fileControl.endJobGroup'image;
-        	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, Current_State => Created);
-        	JobStore.loadJobStore();
-        	today := timestamp'now'split_ymd();
-        	midnight := timestamp'combine_ymd(today[1], today[2], today[3] + 1);
-        	schedule jobStore.jobStoreTimer generate JobStore.purgeJobStore() to jobStore at midnight; 
-        end if;
-        // schedule to check the config file
-        schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
+        this.configFileModificationTime := this.lastModificationTime();        
     else
         logMessage := "AEOrdering::ConfigUpdated : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
         Logger::log(Logger::Error, "AEOrdering", logMessage);
-        raise program_error;
     end if;
+    
+    // process job definitions
+    for jobDefinitionFile in jobDefinitionFiles loop
+    	if Filesystem::file_exists(Filesystem::filename(jobDefinitionFile.jobDefinitionFileName)) then
+            // if the file extension is ".json", assume the file is a job definition
+            if Strings::ends_with(jobDefinitionFile.jobDefinitionFileName, ".json") then
+                jobTypeJSONString := Filesystem::read_file(Filesystem::filename(jobDefinitionFile);
+                jobTypeJSONElement := JSON::parse(jobTypeJSONString);
+                jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, #PROP["jobDefinitionSchema"]#);
+                if JSON::get_boolean(jobTypeValidationResult["valid"]) then
+                    jobTypeJSONObject := JSON::get_object(jobTypeJSONElement);
+                    // find or create the job
+                    jobType := find_one JobType(jobTypeName = JSON::get_string(jobTypeJSONObject["JobDefinitionName"]));
+                    if jobType = null then
+                        jobType := create JobType(
+                            jobTypeName => JSON::get_string(jobTypeJSONObject["JobDefinitionName"]),
+                            deprecated => false,
+                            jobTypeExpiryTime => timestamp'now + duration'weeks(52),
+                            staleAuditEventDuration => duration'hours(1),
+                            blockedAuditEventDuration => duration'hours(1),
+                            jobDefinitionFileName => jobDefinitionFile.jobDefinitionFileName,
+                            lastModificationTime => jobDefinitionFile.lastModificationTime,
+                            Current_State => Created
+                        );
+                        generate JobType.activateJobType() to jobType;
+                    end if;
+                    // extract the spec data items
+                    jobType.loadEventTypes(JSON::get_object(jobTypeJSONElement));
+                    // TODO update event specific rules
+                    updatedJobTypes := updatedJobTypes & jobType;
+                else
+                    logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid: " & string(jobDefinitionFile) & "\n" & JSON::dump(jobTypeValidationResult, true);
+                    Logger::log(Logger::Debug, logMessage);
+                    raise JSON::JSONException("Job definition file invalid");
+                end if;
+            end if;
+        end if;
+	end loop;
+	
+    // resolve data item forward references
+    for dataItemForwardRef in find SourceDataItemForwardReference() loop
+        dataItemForwardRef.resolve();
+    end loop;
+    
+    // report the latest set of events to the sequence domain
+    for job in find updatedJobTypes() loop
+        for auditEventType in (job -> R12.AuditEventType() ordered_by (auditEventTypeId)) loop
+            Req_IF_Verification~>eventDefinition(auditEventType.jobTypeName, auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, 
+            	                                 auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd, auditEventType.isBreak);
+        end loop;
+        // report any dynamic controls
+        for dynamicControl in (job -> R12.AuditEventType -> R19.DynamicControl) loop
+        	Req_IF_Verification~>dynamicControlDefinition(job.jobTypeName, dynamicControl.dynamicControlName, dynamicControl.controlType, dynamicControl.eventType, dynamicControl.occurrenceId, dynamicControl.userEventType, dynamicControl.userOccurrenceId);
+        end loop;
+        
+        // report the latest set of intra job inv event data to the sequence domain
+        intraJobInvDataItems := job -> R14.DataItemType(dataItemType = "INTRAJOBINV");
+        if intraJobInvDataItems'length > 0 then
+	        for dataItemType in intraJobInvDataItems loop
+	        	associatedEvent := emptyAssociatedEvent;
+	            associatedEvent.auditEventType := dataItemType.eventType;
+	            associatedEvent.occurrenceId := dataItemType.occurrenceId;
+	            associatedEvent.alternativeDataItemName := dataItemType.dataItemName;
+	            associatedEvents := associatedEvents & associatedEvent;
+	            constrainingDataItem := dataItemType -> R18.isConstrainedBy.DataItemType;
+	            if constrainingDataItem /= null then
+	               constrainingDataItemName := constrainingDataItem.dataItemName;
+	           end if;
+	        end loop;
+            Req_IF_Verification~>intraJobInvariantDefinition(constrainingDataItemName, job.jobTypeName, associatedEvents);
+         end if;
+    end loop;
+        
+    // report the latest set of extra job inv event data to the sequence domain
+    for dataItemType in find DataItemType(dataItemType = "EXTRAJOBINV") loop
+        if dataItemType -> R18.isConstrainedBy.DataItemType = null then
+            // build up the event data items
+            userEvents := emptyUserEvents;
+            for constrainedDataItem in dataItemType -> R18.constrains.DataItemType loop
+                userEvent := emptyUserEvent;
+                userEvent.jobDefinitionName := constrainedDataItem.jobTypeName;
+                userEvent.auditEventType := constrainedDataItem.eventType;
+                userEvent.occurrenceId := constrainedDataItem.occurrenceId;
+                userEvent.alternativeDataItemName := constrainedDataItem.dataItemName;
+                userEvents := userEvents & userEvent;
+            end loop;
+            Req_IF_Verification~>extraJobInvariantDefinition(dataItemType.dataItemName, dataItemType.jobTypeName, dataItemType.eventType, dataItemType.occurrenceId, userEvents);
+        end if;
+    end loop;    
+    
+    // if the job store does not exist then create it
+    jobStore := find_one JobStore();
+    if jobStore = null then
+    	fileControl := find_one FileControl();
+    	jobStoreName := "JobIdStore" & "-" &  fileControl.startJobGroup'image & "-" & fileControl.endJobGroup'image;
+    	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, Current_State => Created);
+    	JobStore.loadJobStore();
+    	today := timestamp'now'split_ymd();
+    	midnight := timestamp'combine_ymd(today[1], today[2], today[3] + 1);
+    	schedule jobStore.jobStoreTimer generate JobStore.purgeJobStore() to jobStore at midnight; 
+    end if;
+    // schedule to check the config file
+    schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
     
 exception
     when program_error =>
         logMessage := "AEOrdering::SystemSpec.ConfigUpdated : failed to load configuration file";
         Logger::log(Logger::Error, "AEOrdering", logMessage);
-        raise program_error;
     when others =>     
         logMessage := "AEOrdering::SystemSpec.ConfigUpdated : failed to load configuration file";
         Logger::log(Logger::Error, "AEOrdering", logMessage);
-        raise program_error;
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

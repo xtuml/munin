@@ -29,3 +29,55 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '09b64602-e158-4716-a9b1-a304ca456f4f' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::SystemSpec.locateUpdatedConfig ( configUpdates : out boolean,
+                                                                    updatedJobDefinitions : out sequence of JobDefinitionFileType ) return boolean is
+icationTime: timestamp;
+jobType : instance of JobType;
+jobTypeUpdate : JobDefinitionFileType;
+
+begin
+    configUpdates := false;
+    fileName := Filesystem::filename(this.configFilePath & this.configFile);
+    if Filesystem::file_exists(fileName) then
+        fileStatus := Filesystem::get_file_status(fileName);
+	    if this.lastModificationTime() /= fileStatus.modification_time then
+    	    this.configFileModificationTime := fileStatus.modification_time;
+    	    configUpdates := true;
+    	end if;
+    else
+        logMessage := "AEOrdering::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
+    end if;
+    if Filesystem::file_exists(Filesystem::filename(this.jobDefinitionDirectory)) then
+        for jobDefinitionFile in Filesystem::list_directory(Filesystem::filename(this.jobDefinitionDirectory)) loop
+            if Strings::ends_with(jobDefinitionFile.filename, ".json") then
+                fileName := Filesystem::filename(this.jobDefinitionDirectory & "/") & jobDefinitionFile);
+                jobType := find_one JobType(jobDefinitionFileName = filename);
+                if jobType /= null then
+                	// job already exists so check if it has been updated
+	                fileStatus := Filesystem::get_file_status(fileName);
+    	            if fileStatus.modification_time > jobType.modificationTime then
+        	            jobTypeUpdate.lastModificationTime := fileStatus.modification_time;
+        	            jobTypeUpdate.jobDefinitionFileName := jobDefinitionFile.filename;
+        	            updatedJobDefinitions := updatedJobDefinitions & jobUpdateType;
+            	    end if;
+            	else
+            		jobTypeUpdate.lastModificationTime := fileStatus.modification_time;
+        	        jobTypeUpdate.jobDefinitionFileName := jobDefinitionFile.filename;
+      	            updatedJobDefinitions := updatedJobDefinitions & jobUpdateType;
+            	end if;
+            end if;
+        end loop;
+    else
+        logMessage := "AEOrdering::lastModificationTime : failed to locate job definition directory. Specified directory = " & this.jobDefinitionDirectory;
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
+    end if;
+    if configUpdates = true or updatedJobDefinitions'length > ) then
+    	return true; 
+    else
+    	return false;
+    end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
