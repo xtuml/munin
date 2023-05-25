@@ -12,8 +12,8 @@
     },
     "MaxOutOfSequenceEvents": {
       "description": "This is the consecutive maximum out of sequence events that can be received for a job before an error is declared.",
-      "type": "integer",
-      "minimum": 0
+      "type": "string",
+      "pattern": "^(0|([1-9][0-9]*))$"
     },
     "MaximumJobTime": {
       "description": "This is the maximum time it should take for a job to be finished. When this time has been reached after the job was started it shall be archived if there are no blocked events or failed if there are blocked events.",
@@ -72,7 +72,8 @@
         },
         "JobDeprecated": {
           "description": "A boolean value specifying if the job is deprecated. This flag can immediately invalidate future jobs of a specific type.",
-          "type": "boolean"
+          "type": "string",
+          "pattern": "^true|false$"
         },
         "JobTypeExpiryDate": {
           "description": "A timestamp value specifying the latest date at which the job type is valid.",
@@ -114,8 +115,8 @@
         },
         "OccurrenceId": {
           "description": "TODO",
-          "type": "integer",
-          "exclusiveMinimum": 0
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
         },
         "StaleAuditEventDuration": {
           "description": "A duration value specifying the maximum age of an event at the time it is received for it to be considered valid.",
