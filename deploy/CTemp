@@ -1,0 +1,254 @@
+{
+    "JobDefinitionName": "Multi Sequence Job 1",
+    "Events": [
+        {
+            "EventName": "MSJ1Aa",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-1",
+            "SequenceStart": true,
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1Ab",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-1",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Aa",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1Ba",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-1",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Ab",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1Bb",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-1",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Ba",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1Bc",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-1",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Bb",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "EventData": [
+                {
+                    "EventDataName": "MSJ1InvA",
+                    "EventDataType": "INTRAJOBINV"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1C",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-1",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Bc",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1Da",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "SequenceStart": true,
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1Ca",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Da",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "xorfork1",
+                    "ConstraintValue": "XOR"
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1F",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Ca",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1D",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1F",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1G",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1D",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1Db",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1G",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1G",
+            "OccurrenceId": 1,
+            "SequenceName": "Sequence MSJ1-2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Db",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "EventData": [
+                {
+                    "EventDataName": "MSJ1InvA",
+                    "EventDataType": "INTRAJOBINV",
+                    "SourceEventDataName": "MSJ1InvA",
+                    "SourceEventType": "MSJ1Bc",
+                    "SourceEventOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1Fa",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1G",
+                    "PreviousOccurrenceId": 1
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1P",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Fa",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1Q",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1P",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1H",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Q",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "EventData": [
+                {
+                    "EventDataName": "MSJ1InvA",
+                    "EventDataType": "INTRAJOBINV",
+                    "SourceEventDataName": "MSJ1InvA",
+                    "SourceEventType": "MSJ1Bc",
+                    "SourceEventOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1J",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1H",
+                    "PreviousOccurrenceId": 0
+                }
+            ],
+            "Application": "default_application_name"
+        },
+        {
+            "EventName": "MSJ1R",
+            "OccurrenceId": 0,
+            "SequenceName": "Sequence MSJ1-2",
+            "SequenceEnd": true,
+            "PreviousEvents": [
+                {
+                    "PreviousEventName": "MSJ1Da",
+                    "PreviousOccurrenceId": 0,
+                    "ConstraintDefinitionId": "xorfork1",
+                    "ConstraintValue": "XOR"
+                }
+            ],
+            "Application": "default_application_name"
+        }
+    ]
+}
