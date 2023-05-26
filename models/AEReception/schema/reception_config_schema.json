@@ -33,7 +33,8 @@
     },
     "MaxEventsPerFile": {
       "description": "The maximum number of events that should be processed from one reception file before the output files are generated.",
-      "type": "integer"
+      "type": "string",
+      "pattern": "^(0|([1-9][0-9]*))$"
     },
     "ReceptionDeletionTime": {
       "description": "When a file has been through reception the details of the reception processing shall be stored until this time expires.",
@@ -42,16 +43,18 @@
     },
     "ConcurrentReceptionLimit": {
       "description": "A number that indicates the limit of concurrent reception jobs that can be executing, e.g. 1 = one active reception job",
-      "type": "integer",
-      "exclusiveMinimum": 0
+      "type": "string",
+      "pattern": "^(0|([1-9][0-9]*))$"
     },
     "SchemaValidate": {
       "description": "A flag that indicates if schema validation should be performed",
-      "type": "boolean"
+      "type": "string",
+      "pattern": "^true|false$"
     },
     "SchemaValidateFrequency": {
       "description": "A number that indicates indicates the frequency that schema validation should be performed e.g. every 10th file processed, when the schemaValidate flag is set to true.",
-      "type": "integer"
+      "type": "string",
+      "pattern": "^(0|([1-9][0-9]*))$"
     },
     "FileControlWaitTime": {
       "description": "The frequency that the process shall check for new files or available capacity.",

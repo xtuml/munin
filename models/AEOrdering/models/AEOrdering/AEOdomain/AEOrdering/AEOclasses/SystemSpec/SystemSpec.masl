@@ -98,7 +98,7 @@ begin
                 this.specUpdateRate := duration'parse(JSON::get_string(configJSONObject["SpecUpdateRate"]));
             end if;
             if configJSONObject'contains("MaxOutOfSequenceEvents") then
-                this.maxOutOfSequenceEvents := JSON::get_integer(configJSONObject["MaxOutOfSequenceEvents"]);
+                this.maxOutOfSequenceEvents := integer'parse(JSON::get_string(configJSONObject["MaxOutOfSequenceEvents"]));
             end if;
             if configJSONObject'contains("MaximumJobTime") then
                 this.maximumJobTime := duration'parse(JSON::get_string(configJSONObject["MaximumJobTime"]));
