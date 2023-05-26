@@ -10,6 +10,7 @@ theAuditEventData : AuditEventDataType;
 reportableAuditEventData : ReportableAuditEventDataType;
 allReportableAuditEventData : sequence of ReportableAuditEventDataType;
 eventContent : string;
+auditEventTypes : set of instance of AuditEventType;
 
 begin
 		
@@ -29,7 +30,8 @@ begin
 	
 	// build the audit data details to be reported for invariants
 	theAuditEventData := auditEvent.auditEventData;
-	for auditEventData in auditEvent -> R7.AuditEventType -> R16.DataItemType loop
+	auditEventTypes := find AuditEventType(eventType = auditEvent.reportedEventType);
+	for auditEventData in auditEventTypes -> R16.DataItemType loop
 		if theAuditEventData.dataItems'contains(auditEventData.dataItemName) = true then
 			reportableAuditEventData.dataName := auditEventData.dataItemName;
 			reportableAuditEventData.dataKind := auditEventData.dataItemType;
@@ -39,7 +41,7 @@ begin
 	end loop;
 	
 	// build the audit data details to be reported for dynamic controls
-	for dynamicControl in auditEvent -> R7.AuditEventType -> R19.DynamicControl loop
+	for dynamicControl in auditEventTypes -> R19.DynamicControl loop
 		if theAuditEventData.dataItems'contains(dynamicControl.dynamicControlName) = true then
 			reportableAuditEventData.dataName := dynamicControl.dynamicControlName;
 			reportableAuditEventData.dataKind := dynamicControl.controlType;
