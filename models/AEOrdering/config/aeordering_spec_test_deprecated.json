@@ -1,6 +1,6 @@
 {
   "SpecUpdateRate": "PT2M",
-  "MaxOutOfSequenceEvents": 10,
+  "MaxOutOfSequenceEvents": "10",
   "MaximumJobTime": "PT10M",
   "JobCompletePeriod": "PT24H",
   "IncomingDirectory": "./incoming",
@@ -10,7 +10,7 @@
   "Jobs": [
     {
       "JobDefinitionName": "AEOrdering-Test",
-      "JobDeprecated": true,
+      "JobDeprecated": "true",
       "JobTypeExpiryDate": "2050-06-26T16:00:00Z",
       "StaleAuditEventDuration": "P99W",
       "BlockedAuditEventDuration": "PT5M",
@@ -18,14 +18,14 @@
         {
           "EventName": "aaa",
           "ApplicationName": "app1",
-          "OccurrenceId": 1,
+          "OccurrenceId": "1",
           "StaleAuditEventDuration": "PT1H",
           "BlockedAuditEventDuration": "PT1M"
         },
         {
           "EventName": "fff",
           "ApplicationName": "app4",
-          "OccurrenceId": 1,
+          "OccurrenceId": "1",
           "StaleAuditEventDuration": "PT2H",
           "BlockedAuditEventDuration": "PT2M"
         }
