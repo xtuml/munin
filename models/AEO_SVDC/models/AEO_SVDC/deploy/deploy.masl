@@ -29,7 +29,7 @@ public service AEOrdering::Req_IF_Verification~>audit_event ( jobId : in string,
                                                              auditEventId : in string,
                                                              auditEventTime : in string,
                                                              prevAuditEventIds : in sequence of string,
-                                                             reportableAuditEventDataItems : in sequence of ReportableAuditEventDataType ) is
+                                                             reportableAuditEventDataItems : in AEOrdering::sequence of ReportableAuditEventDataType ) is
 auditEventData: sequence of AESequenceDC::auditEventDataStructure;
 begin
   for dataItem in reportableAuditEventDataItems loop
@@ -85,7 +85,7 @@ public service AEOrdering::Req_IF_Verification~>eventDefinition ( jobName : in s
                                                                  sequenceName : in string,
                                                                  eventType : in string,
                                                                  occurrenceId : in integer,
-                                                                 previousEventTypes : in sequence of PreviousEventType,
+                                                                 previousEventTypes : in AEOrdering::sequence of PreviousEventType,
                                                                  isSequenceStart : in boolean,
                                                                  isSequenceEnd : in boolean,
                                                                  isBreak : in boolean ) is
@@ -127,7 +127,7 @@ end service;
 //! ACTIVITY BEGIN. '7bdff90a-d2ba-47e3-8082-eb657e8e6496' DO NOT EDIT THIS LINE.
 public service AEOrdering::Req_IF_Verification~>intraJobInvariantDefinition ( auditEventDataName : in string,
                                                                              jobDefinitionName : in string,
-                                                                             associatedEvents : in sequence of IntraJobInvDataType ) is
+                                                                             associatedEvents : in AEOrdering::sequence of IntraJobInvDataType ) is
 assocEvents: sequence of AESequenceDC::intraJobInvDataStructure;
 begin
   for evt in associatedEvents loop
@@ -142,7 +142,7 @@ public service AEOrdering::Req_IF_Verification~>extraJobInvariantDefinition ( au
                                                                              sourceJobDefnName : in string,
                                                                              sourceEventType : in string,
                                                                              sourceOccurrenceId : in integer,
-                                                                             userEvents : in sequence of UserEventDataType ) is
+                                                                             userEvents : in AEOrdering::sequence of UserEventDataType ) is
 userEventData: sequence of AESequenceDC::userEventDataStructure;
 begin
   for evt in userEvents loop
@@ -166,6 +166,19 @@ begin
   
   AESequenceDC::dynamicControlDefinition(jobTypeName, dynamicControlName, AESequenceDC::dynamicControlTypeEnum'value(dynamicControlType), sourceEventType, sourceOccurrenceId, userEventType, userOccurrenceId);
   
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '89b6daea-12e7-459f-a9d0-af317037cdf0' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>jobDefinition ( jobName : in string,
+                                                               eventDefinitions : in AEOrdering::sequence of EventDefinitionType ) is
+svdcEventDefinitions : sequence of AESequenceDC::eventDefinitionStructure;
+
+begin
+  
+  // call the public service
+  AESequenceDC::createJobDefinition(jobName, sequence of AESequenceDC::eventDefinitionStructure(eventDefinitions);
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -241,6 +254,15 @@ begin
   IStore::restoreNamedInvariant(extraJobInvariantName,
                                     invariantValue);
   
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '17c35c62-3772-4319-90a6-42d31e2a5036' DO NOT EDIT THIS LINE.
+public service AEOrdering::Reporting~>reportEvent ( eventPriority : in Logger::Priority,
+                                                   eventLabel : in string,
+                                                   eventContent : in string ) is
+begin
+	Logger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
