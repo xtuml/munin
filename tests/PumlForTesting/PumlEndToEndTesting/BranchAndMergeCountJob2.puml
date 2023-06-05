@@ -1,0 +1,18 @@
+
+@startuml 
+partition "Multi Sequence Branch And Merge Count Job 1" {
+  group "Multi Sequence Branch and Merge Count Sequence 1"
+      #green:MSBMCJ1A;
+      :MSBMCJ1B,BCNT,user=MSBMCJ1C,name=MSBMCJ1BC1,MCNT,user=MSBMCJ1G,name=MSBMCJ1MC1;
+      :MSBMCJ1C;
+      #red:MSBMCJ1D;
+      detach
+  end group    
+  group "Multi Sequence Branch and Merge Count Sequence 2"
+      #green:MSBMCJ1E;
+      :MSBMCJ1F;
+      :MSBMCJ1G;
+      #red:MSBMCJ1H;
+  end group
+}
+@enduml

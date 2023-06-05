@@ -1,0 +1,33 @@
+@startuml
+partition "Multi Sequence Job 1" {
+group "Sequence MSJ1-1"
+  #green:MSJ1Aa;
+  :MSJ1Ab;
+  :MSJ1Ba;
+  :MSJ1Bb;
+  :MSJ1Bc,IINV,name=MSJ1InvA;
+  #red:MSJ1C;
+  detach
+end group
+group "Sequence MSJ1-2"  
+  #green:MSJ1Da;
+  if (XOR) then ("normal")
+      :MSJ1Ca;
+      :MSJ1F;
+      :MSJ1D;
+      :MSJ1G;
+    :MSJ1Db;
+      :MSJ1G,IINV,USER,name=MSJ1InvA;
+      :MSJ1Fa;
+      :MSJ1P;
+      :MSJ1Q;
+    :MSJ1H,IINV,USER,name=MSJ1InvA;
+    #red:MSJ1J;
+    detach
+  else ("error")
+    #red:MSJ1R;
+    detach
+  endif
+end group
+}
+@enduml

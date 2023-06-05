@@ -1,0 +1,15 @@
+
+@startuml 
+partition "Simple Intra Invariant Multi Occurrence Job" {
+  group "Simple Intra Invariant Multi Occurrence Sequence"
+      #green:SIMOJA,IINV,name=SIMOJnv;
+      :SIMOJB;
+      :SIMOJC;
+      :SIMOJB,IINV,USER,name=SIMOJnv;
+      :SIMOJD;
+      :SIMOJE;
+      :SIMOJD,IINV,USER,name=SIMOJnv;
+      #red:SIMOJD;
+  end group
+}
+@enduml
