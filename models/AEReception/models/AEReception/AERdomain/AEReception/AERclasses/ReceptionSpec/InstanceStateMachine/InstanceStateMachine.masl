@@ -53,19 +53,19 @@ begin
 				this.receptionDeletionTime := duration'parse(JSON::get_string(configJSONObject["ReceptionDeletionTime"]));
 			end if;
 			if configJSONObject'contains("ConcurrentReceptionLimit") then
-				this.concurrentReceptionLimit := JSON::get_integer(configJSONObject["ConcurrentReceptionLimit"]);
+				this.concurrentReceptionLimit := integer'parse(JSON::get_string(configJSONObject["ConcurrentReceptionLimit"]));
 			end if;
 			if configJSONObject'contains("OutgoingDirectory") then
 				this.outgoingDirectory := JSON::get_string(configJSONObject["OutgoingDirectory"]);
 			end if;
 			if configJSONObject'contains("MaxEventsPerFile") then
-				this.maxEventsPerFile := JSON::get_integer(configJSONObject["MaxEventsPerFile"]);
+				this.maxEventsPerFile := integer'parse(JSON::get_string(configJSONObject["MaxEventsPerFile"]));
 			end if;
 			if configJSONObject'contains("SchemaValidate") then
-				this.schemaValidate := JSON::get_boolean(configJSONObject["SchemaValidate"]);
+				this.schemaValidate := boolean'parse(JSON::get_string(configJSONObject["SchemaValidate"]));
 			end if;
 			if configJSONObject'contains("SchemaValidateFrequency") then
-				this.schemaValidateFrequency := JSON::get_integer(configJSONObject["SchemaValidateFrequency"]);
+				this.schemaValidateFrequency := integer'parse(JSON::get_string(configJSONObject["SchemaValidateFrequency"]));
 			end if;
 			if configJSONObject'contains("FileControlWaitTime") then
 				this.fileControlWaitTime := duration'parse(JSON::get_string(configJSONObject["FileControlWaitTime"]));
