@@ -511,8 +511,8 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '589ab0f0-596d-403d-8d6a-7a6004724b5d' DO NOT EDIT THIS LINE.
-private service AESequenceDC::createJobDefinition ( jobName : in string,
-                                                   eventDefinitions : in sequence of eventDefinitionStructure ) is
+public service AESequenceDC::createJobDefinition ( jobName : in string,
+                                                  eventDefinitions : in sequence of eventDefinitionStructure ) is
 theJobDefn : instance of JobDefinition;
 logMessage : string;
 begin
