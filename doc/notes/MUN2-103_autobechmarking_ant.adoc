@@ -1,0 +1,95 @@
+= Automated Benchmarking
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note provides requirements and thoughts for an automated performance
+benchmark of the Protocol Verifier.
+
+== 2 Introduction and Background
+
+The Protocol Verifier has throughput requirements.  It is important to
+understand the capacity of the Protocol Verifier and to track this
+capacity as the Protcol Verifier is changed and enhanced.
+
+See <<dr-2>> for background.
+
+== 3 Requirements
+
+For the purposes of this work, "automated" can be as simple as a command
+line utility similar to the `regression.sh` script.
+
+=== 3.1 Isolation Throughput
+
+. Measure the capacity of a single AEReception instance in isolation
+  (without AEO_SVDC).
+. Measure the capacity of a single AEO_SVDC instance in isolation
+  (without AEReception).
+
+=== 3.2 General Throughput
+
+Measure the throughput of the combined AER + AEO_SVDC as a single instance
+of each.
+
+=== 3.3 Multi-Instance Throughput
+
+Measure the throughput of a reasonable multi-instance configuration (of
+say 16 instances).
+
+=== 3.4 Consistent Platform
+
+Benchmarking must be based upon a consistent platform.  Ideally this is
+running on an AWS platform.  (Note that because other parties will be
+testing PV performance, it is possible to relax the AWS requirement.)
+
+=== 3.5 Tracking
+
+Provide a means to track performance results together with the date and
+branch that a benchmark was run and allow this data to accumulate over
+time.
+
+Track (at least):
+
+* date and time of test
+* branch or tag of repository
+* configuration (number of instances of each component)
+* platform configuration (CPUs, memory, EC2 flavor, filesystem type, etc.)
+* total number of jobs processed
+* total number of events processed
+* events per unit time (per second)
+* jobs per unit time (per second)
+
+== 4 Analysis
+
+=== 4.1 Thoughts
+
+* Consider populating the reception-incoming folder with all audit event
+instance files before starting the PV.  Document the approximate time it
+takes to start the PV.
+* Consider selecting a set of job definitions that will remain fixed for
+the duration of Munin development, perhaps the 16 regression tests that we
+have as of June 2023.
+* Consider the separation of these tests into a separate folder.
+* Consider a run-time of more than 1 minute but less than 10 minutes.
+(My expectations are that performance will increase ten to one
+hundredfold.)
+
+== 5 Work Required
+
+TBD
+
+== 6 Acceptance Test
+
+TBD
+
+== 7 Document References
+
+. [[dr-1]] https://support.onefact.net/issues/MUN2-103[MUN2-103 - benchmark automation]
+. [[dr-2]] link:MUN-151_scaling_ant.adoc[Munin Scaling Analysis Note]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
