@@ -314,14 +314,6 @@ begin
 	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
 	                end if;  
                     
-                    //MUN2-65 Addition
-                    // ...and now check that the received audit event data matches that which is expected
-                    newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
-                    if eventDataCheckHasPassed /= true then
-                      this.failJob(failureReason);
-                    end if;   
-                    // End of MUN2-65 Addition
-                    
                   else
                     //Log Job failure: Previous event is valid but is part of a broken sequence
                     this.sequencingFailed := true;
@@ -358,6 +350,14 @@ begin
           end if;
         end loop; //End of loop over each previous event id  
         
+        //MUN2-65 Addition
+        // ...and now check that the received audit event data matches that which is expected
+        newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+        if eventDataCheckHasPassed /= true then
+          this.failJob(failureReason);
+        end if;   
+        // End of MUN2-65 Addition
+                    
         // Need to increment the branch extent for this sequence for this new event as part of the Hanrahan algorithm  
         currentSequence := newEvent -> R11;
         if currentSequence /= null then
