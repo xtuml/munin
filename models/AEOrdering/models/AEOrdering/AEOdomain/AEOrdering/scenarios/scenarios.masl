@@ -10,22 +10,6 @@ fileControl : instance of FileControl;
 
 begin
 
-	// get the supplied command line option for the config file and verify it is valid
-	configFilePath := CommandLine::get_option_value("-configPath");
-	configFile := CommandLine::get_option_value("-configFile", "config.json");
-	if Filesystem::file_exists(Filesystem::filename(configFilePath & configFile)) then 
-		systemSpec := find_one SystemSpec();
-		if systemSpec = null then
-			systemSpec := create unique SystemSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, maxOutOfSequenceEvents => 10, 
-				                                   maximumJobTime => @PT10M@, jobCompletePeriod => @PT10M@, fileControlWaitTime => @PT1S@, Current_State => Created);
-		end if;
-		generate SystemSpec.loadConfig() to systemSpec;
-	else
-		logMessage := "AEOrdering::init : failed to locate config file. Specified file = " & configFilePath & configFile;
-		Logger::log(Logger::Error, "AEOrdering", logMessage);
-		raise program_error;
-	end if;
-
 	startJobGroup := integer'parse(CommandLine::get_option_value("-startJobGroup"),16);
 	endJobGroup := integer'parse(CommandLine::get_option_value("-endJobGroup"),16);
 	// we need to create a file control for each job group
@@ -39,6 +23,23 @@ begin
 		end loop;
 	end if;
 		
+	// get the supplied command line option for the config file and verify it is valid
+	configFilePath := CommandLine::get_option_value("-configPath");
+	configFile := CommandLine::get_option_value("-configFile", "config.json");
+	if Filesystem::file_exists(Filesystem::filename(configFilePath & configFile)) then 
+		systemSpec := find_one SystemSpec();
+		if systemSpec = null then
+			systemSpec := create unique SystemSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, maxOutOfSequenceEvents => 10, 
+				                                   maximumJobTime => @PT10M@, jobCompletePeriod => @PT10M@, fileControlWaitTime => @PT1S@, Current_State => Created);
+		end if;
+		systemSpec.loadConfigFile();
+		generate SystemSpec.checkConfigUpdate() to systemSpec;
+	else
+		logMessage := "AEOrdering::init : failed to locate config file. Specified file = " & configFilePath & configFile;
+		Logger::log(Logger::Error, "AEOrdering", logMessage);
+		raise program_error;
+	end if;
+
 exception
 	when others =>
 	
