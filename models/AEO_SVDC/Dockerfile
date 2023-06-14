@@ -1,4 +1,12 @@
 ################################################################################
+# DOMAIN IMAGES                                                                #
+################################################################################
+ARG VERSION_TAG=latest
+FROM ghcr.io/xtuml/aeordering:${VERSION_TAG} as aeordering
+FROM ghcr.io/xtuml/istore:${VERSION_TAG} as istore
+FROM ghcr.io/xtuml/aesequencedc:${VERSION_TAG} as aesequencedc
+
+################################################################################
 # BASE BUILD                                                                   #
 ################################################################################
 
@@ -47,13 +55,13 @@ FROM build-base AS build-release
 # copy includes and libs from the domains
 RUN mkdir -p /install/include
 RUN mkdir -p /install/lib
-COPY --from="ghcr.io/xtuml/aeordering" /install/include/ /install/include
-COPY --from="ghcr.io/xtuml/aeordering" /install/lib/ /install/lib
-COPY --from="ghcr.io/xtuml/aeordering" /install/share/ /install/share
-COPY --from="ghcr.io/xtuml/istore" /install/include/ /install/include
-COPY --from="ghcr.io/xtuml/istore" /install/lib/ /install/lib
-COPY --from="ghcr.io/xtuml/aesequencedc" /install/include/ /install/include
-COPY --from="ghcr.io/xtuml/aesequencedc" /install/lib/ /install/lib
+COPY --from=aeordering /install/include/ /install/include
+COPY --from=aeordering /install/lib/ /install/lib
+COPY --from=aeordering /install/share/ /install/share
+COPY --from=istore /install/include/ /install/include
+COPY --from=istore /install/lib/ /install/lib
+COPY --from=aesequencedc /install/include/ /install/include
+COPY --from=aesequencedc /install/lib/ /install/lib
 
 # perform the build
 RUN cmake /root -G Ninja -DEXTRA_MASL_ARGS="${EXTRA_MASL_ARGS}" -DCMAKE_INSTALL_PREFIX=/install
