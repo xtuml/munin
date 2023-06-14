@@ -1,4 +1,4 @@
-name: Test
+name: Build and Test
 on:
 
   # run on PRs to main
@@ -9,9 +9,9 @@ on:
   push:
     branches: [ main ]
 
-  # run daily at 4am UTC
-  #schedule:
-  #  - cron: '0 4 * * *'
+  # run when we create new releases
+  release:
+    types: [published]
 
   # run manually
   workflow_dispatch:
@@ -342,7 +342,9 @@ jobs:
         with:
           context: models/${{ env.PROJECT_NAME }}
           tags: ${{ steps.meta.outputs.tags }}
-          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
+          build-args: |
+            EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
+            VERSION_TAG=${{ steps.meta.outputs.version }}
           push: true
 
 
