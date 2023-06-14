@@ -49,12 +49,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate docker metadata
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}
+
       - name: Build image (prod)
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
         uses: docker/build-push-action@v3
         with:
           context: models/${{ env.PROJECT_NAME }}
-          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           target: install-release
           build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
           push: true
@@ -106,12 +113,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate docker metadata
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}
+
       - name: Build image (prod)
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
         uses: docker/build-push-action@v3
         with:
           context: models/${{ env.PROJECT_NAME }}
-          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           target: install-release
           build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
           push: true
@@ -162,12 +176,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate docker metadata
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}
+
       - name: Build image (prod)
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
         uses: docker/build-push-action@v3
         with:
           context: models/${{ env.PROJECT_NAME }}
-          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           target: install-release
           build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
           push: true
@@ -218,12 +239,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate docker metadata
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}
+
       - name: Build image (prod)
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
         uses: docker/build-push-action@v3
         with:
           context: models/${{ env.PROJECT_NAME }}
-          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           target: install-release
           build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
           push: true
@@ -275,12 +303,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate docker metadata
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}
+
       - name: Build image (prod)
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
         uses: docker/build-push-action@v3
         with:
           context: models/${{ env.PROJECT_NAME }}
-          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           target: install-release
           build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
           push: true
@@ -326,12 +361,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate docker metadata
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DEPLOYMENT_LOWER }}
+
       - name: Build image (prod)
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || steps.check-modified.outputs.any_modified == 'true'
         uses: docker/build-push-action@v3
         with:
           context: models/${{ env.PROJECT_NAME }}
-          tags: ghcr.io/xtuml/${{ steps.lowercase.outputs.DEPLOYMENT_LOWER }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
           push: true
 
