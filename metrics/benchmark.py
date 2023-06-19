@@ -56,12 +56,14 @@ if __name__ == '__main__':
 
         evts = events.values()
         print(f'Total number of events: {len(evts)}')
+        print(f'Total number of events (Received by Reception): {len(list(filter(lambda e: e.received is not None, evts)))}')
         print(f'Total number of events (Written by Reception): {len(list(filter(lambda e: e.written is not None, evts)))}')
-        print(f'Total number of events (Loaded by ordering): {len(list(filter(lambda e: e.ordering_received is not None, evts)))}')
+        print(f'Total number of events (Loaded by Ordering): {len(list(filter(lambda e: e.ordering_received is not None, evts)))}')
         print(f'Total number of events (Received by SVDC): {len(list(filter(lambda e: e.svdc_received is not None, evts)))}')
         print(f'Total number of events (Processed by SVDC): {len(list(filter(lambda e: e.processed is not None, evts)))}')
 
-        evts = list(filter(lambda e: e.processed is not None, evts))
+        evts = list(filter(lambda e: e.received is not None and e.processed is not None, evts))
+        print(f'Total number of events (in calc): {len(evts)}')
         if len(evts) > 0:
             td = max(map(lambda e: e.processed or datetime.min, evts)) - min(map(lambda e: e.received or datetime.max, evts))
             print(f'Total time: {td.total_seconds():.3f}')
