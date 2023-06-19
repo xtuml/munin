@@ -643,6 +643,10 @@ begin
   Logger::log(Logger::Error, "AESequenceDC", logMessage);
   eventContent := "FailureReason = " & failureReason & " : JobId = " & this.jobID;
   Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
+  for evt in this->R3.AuditEvent loop
+	  eventContent := "EventId = " & evt.AuditEventId;
+	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
+  end loop;
   
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
@@ -751,6 +755,10 @@ begin
   Logger::log(Logger::Debug, "Monitored System Status", logMessage);
   eventContent := "JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
   Reporting~>reportEvent(Logger::Information, "svdc_job_success", eventContent);
+  for evt in this->R3.AuditEvent loop
+	  eventContent := "EventId = " & evt.AuditEventId;
+	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
+  end loop;
   
   // The Job is thus near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();

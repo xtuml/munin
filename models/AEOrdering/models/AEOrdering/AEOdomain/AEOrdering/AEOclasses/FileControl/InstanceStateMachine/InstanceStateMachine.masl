@@ -136,7 +136,7 @@ begin
 	                AEOrdering::AcceptEvent(jobId, node, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData);
 	            else
 					Logger::log(Logger::Error, "AEOrdering", "AEOrdering::FileControl.FileProcessed : Duplicate Job Id identified, Job Id = " & jobId);
-					eventContent := "JobId = " & jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType & " : FailureReason = Duplicate Job Id identified";
+					eventContent := "JobId = " & jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType & " : FailureReason = Duplicate Job Id identified";
 					Reporting~>reportEvent(Logger::Error, "aeordering_duplicate_job", eventContent);
 	            end if;
             end;
