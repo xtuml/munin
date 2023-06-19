@@ -5,7 +5,7 @@ input:
   paths: 
     - /var/log/reception/Reception.log
     - /var/log/verifier/Verifier.log
-  #readall: true
+  readall: true
   fail_on_missing_logfile: false
 imports:
 - type: grok_patterns
@@ -15,34 +15,59 @@ metrics:
 - type: counter
   name: reception_file_processed
   help: Number of files processed by the AEReception domain.
-  match: '%{NUMBER:pv_index} reception_file_processed'
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_file_processed'
   path: /var/log/reception/Reception.log
   labels:
-    pv_index: '{{.pv_index}}'
+    timestamp: '{{.timestamp}}'
 - type: counter
-  name: reception_file_validated
-  help: Number of files validated against the JSON schema by the AEReception domain.
-  match: '%{NUMBER:pv_index} reception_file_validated'
+  name: reception_event_received
+  help: Number of events parsed from input files in the AEReception domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_event_received : EventId = %{UUID:event_id}'
   path: /var/log/reception/Reception.log
   labels:
-    pv_index: '{{.pv_index}}'
+    timestamp: '{{.timestamp}}'
+    event_id: '{{.event_id}}'
+- type: counter
+  name: reception_event_valid
+  help: Number of events validated against the JSON schema by the AEReception domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_event_valid : EventId = %{UUID:event_id}'
+  path: /var/log/reception/Reception.log
+  labels:
+    timestamp: '{{.timestamp}}'
+    event_id: '{{.event_id}}'
+- type: counter
+  name: reception_event_invalid
+  help: Number of events that failed to be validated against the JSON schema by the AEReception domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_event_invalid : EventId = %{UUID:event_id}'
+  path: /var/log/reception/Reception.log
+  labels:
+    timestamp: '{{.timestamp}}'
+    event_id: '{{.event_id}}'
 - type: counter
   name: reception_event_added
   help: Number of events added by the AEReception domain.
-  match: '%{NUMBER:pv_index} reception_event_added : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_event_added : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type}'
   path: /var/log/reception/Reception.log
   labels:
-    pv_index: '{{.pv_index}}'
+    timestamp: '{{.timestamp}}'
     job_id: '{{.job_id}}'
     event_id: '{{.event_id}}'
     event_type: '{{.event_type}}'
 - type: counter
-  name: reception_file_process_error
-  help: Number of failures processing the incoming file by the AEReception domain.
-  match: '%{NUMBER:pv_index} reception_file_process_error : FailureReason = %{WORD:failure_reason}'
+  name: reception_event_written
+  help: Number of events that were written to files for the AEOrdering domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_event_written : EventId = %{UUID:event_id}'
   path: /var/log/reception/Reception.log
   labels:
-    pv_index: '{{.pv_index}}'
+    timestamp: '{{.timestamp}}'
+    event_id: '{{.event_id}}'
+- type: counter
+  name: reception_file_process_error
+  help: Number of failures processing the incoming file by the AEReception domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_file_process_error : FailureReason = %{WORD:failure_reason}'
+  path: /var/log/reception/Reception.log
+  labels:
+    timestamp: '{{.timestamp}}'
     failure_reason: '{{.failure_reason}}'
 # Verifier metrics
 - type: counter
