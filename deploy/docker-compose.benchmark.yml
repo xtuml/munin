@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   aereception:
-    image: "ghcr.io/xtuml/aereception"
+    image: "ghcr.io/xtuml/aereception:main"
     deploy:
       replicas: 8
     volumes:
@@ -11,7 +11,7 @@ services:
       - "./verifier-incoming:/root/outgoing"
     command: "-configPath config/ -configFile reception-config.json -log-config config/log-config-reception.xml -log-level trace -preinit schedule/startup.sch -util MetaData"
   aeo_svdc-1:
-    image: "ghcr.io/xtuml/aeo_svdc"
+    image: "ghcr.io/xtuml/aeo_svdc:main"
     volumes:
       - "./config:/root/config"
       - "./logs/verifier:/var/log/verifier"
@@ -21,7 +21,7 @@ services:
       - "./JobIdStore:/root/JobIdStore"
     command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=1 -log-level trace -preinit schedule/startup.sch -util MetaData -startJobGroup 00 -endJobGroup 3F"
   aeo_svdc-2:
-    image: "ghcr.io/xtuml/aeo_svdc"
+    image: "ghcr.io/xtuml/aeo_svdc:main"
     volumes:
       - "./config:/root/config"
       - "./logs/verifier:/var/log/verifier"
@@ -31,7 +31,7 @@ services:
       - "./JobIdStore:/root/JobIdStore"
     command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=2 -log-level trace -preinit schedule/startup.sch -util MetaData -startJobGroup 40 -endJobGroup 7F"
   aeo_svdc-3:
-    image: "ghcr.io/xtuml/aeo_svdc"
+    image: "ghcr.io/xtuml/aeo_svdc:main"
     volumes:
       - "./config:/root/config"
       - "./logs/verifier:/var/log/verifier"
@@ -41,7 +41,7 @@ services:
       - "./JobIdStore:/root/JobIdStore"
     command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=3 -log-level trace -preinit schedule/startup.sch -util MetaData -startJobGroup 80 -endJobGroup BF"
   aeo_svdc-4:
-    image: "ghcr.io/xtuml/aeo_svdc"
+    image: "ghcr.io/xtuml/aeo_svdc:main"
     volumes:
       - "./config:/root/config"
       - "./logs/verifier:/var/log/verifier"

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# authenticate with Github
+docker login ghcr.io
+
 # prepare the deploy folder
 echo "Preparing deploy location..."
 cd ../deploy
