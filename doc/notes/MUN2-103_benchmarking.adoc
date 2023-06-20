@@ -1,0 +1,338 @@
+= Performance Benchmarking
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+We need an automated and repeatable way to get a general idea of the
+performance of the protocol verifier. This note describes the requirements and
+design to achieve benchmarking.
+
+== 2 Introduction and Background
+
+During the preliminary scaling phase, we tested the concept of "swim lanes" to
+scale the protocol verifier horizontally by assigning each job to an
+independent instance of the protocol verifier. We roughly measured the
+performance of the application at this time, but since the protocol verifier is
+constantly waiting for input and therefore never "done", the measurement was
+imprecise.
+
+== 3 Requirements
+
+=== 3.1 Throughput
+
+The throughput of the system in events-per-second (EPS) shall be measured as
+the single overall metric to evaluate performance
+
+=== 3.2 Consistent Input
+
+The input to the test shall be generated from a set of job definitions of
+various sizes and levels of complexity. The input events shall be shuffled to
+exercise the ability of the protocol verify to sort out of order events.
+
+=== 3.4 Consistent Platform
+
+The configuration paramters (number of parallel instances) and hardware
+platform shall be chosen to be a reasonable configuration.
+
+=== 3.5 Tracking
+
+All details of configuration and input data shall be tracked for each test.
+
+* Date and time of test
+* Branch or tag of repository
+* Configuration (number of instances of each component)
+* Platform configuration (CPUs, memory, EC2 flavor, filesystem type, etc.)
+* Events-per-second (EPS)
+
+== 4 Analysis
+
+=== 4.1 Event Generation (plus2json)
+
+The `plus2json` tool was extended to support generating specific volumes of
+event data based on a set of job definitions. The user can specify the total
+number of events and the approximate batch size desired. `plus2json` will then
+loop through the loaded job definitions creating events until the desired batch
+size is reached. Then the batch is shuffled and written to a JSON file. This
+continues until the total number of events is reached. This data was then
+placed in the `reception-incoming` directory before the start of the test. When
+the application is launched with `docker compose up`, it will process all of
+the data in the incoming directory until all events have been processed.
+"Priming" the reception data in this way assures that event generation cannot
+be a bottleneck.
+
+=== 4.2 Event Lifecycle
+
+A series of key "lifecycle" events for an instance of an audit event were
+identified. They are:
+
+. Event Received (reception)
+. Event Validated
+. Event Written
+. Event Received (ordering)
+. Event Received (sequence verification)
+. Event Processed
+
+The protocol verifier domains were updated to produce a reporting log message
+at each of these key moments in the processing of an audit event, attaching the
+ID of the event in question. The logging configuration was updated to prepend a
+timestamp to every metric log message to allow calculating relevant time
+deltas.
+
+Below is a more in depth description of each lifecycle event.
+
+==== 4.2.1 Event Received (reception)
+
+This event is logged after an input file is parsed into a JSON object, but
+before any validation or other processing takes place. This is the earliest
+moment where an event ID is known.
+
+==== 4.2.2 Event Validated
+
+This event is logged after an event is validated (or invalidated) by the JSON
+schema checker. This event is omitted if schema validation is disabled.
+
+==== 4.2.3 Event Written
+
+This event is logged after an event is written to a file in the outgoing
+directory (incoming for protocol verifier). Because events are written to files
+in batch, many events will have almost the same event written time.
+
+==== 4.2.4 Event Received (ordering)
+
+This event is logged after an input file is parsed in the AEOrdering domain.
+Like the first "event received" event, this is the first time that the backend
+protocol verifier process has access to an event ID.
+
+==== 4.2.4 Event Received (sequence verification)
+
+This event is logged when SVDC receives an event from AEOrdering. Although this
+is within the same process, it is helpful to distinguish the sorting phase of
+the event's lifecycle from the part where it is checked against the job
+definition itself.
+
+==== 4.2.5 Event Processed
+
+This event is logged when the job associated with the event is marked as
+succeeded or failed. Because various constraints are checked only after all
+events for a particular job have been processed, none of the events are logged
+as processed until the job itself is complete. Conversely, once a job is
+completed, the events associated with that job will not be checked again for
+any reason.
+
+=== 4.3 Data Processing
+
+The existing Prometheus setup was used to access the reporting data and
+calculate performance figures. A Python script was written to scrape the
+endpoint provided by `grok_exporter` and process the events organizing them by
+event ID. The script filters only the events which went completely through the
+system. It then selects the earliest occurrence of the "Event Received
+(reception)" event and the latest occurrence of the "Event Processed" event and
+takes the difference in time between them. Dividing the total count of events
+by the time delta gives the performance EPS number.
+
+A script was created to string all the steps together so they can be run
+repeatedly on a remote server.
+
+=== 4.4 Platform and Results Tracking
+
+An AWS EC2 instance was launched and provisioned with access to the Git
+repository and the Github Container Registry where the Docker images are
+deployed. Once set up and verified, the instance was imaged and the AMI is held
+in the One Fact AWS account. The image can be launched and the script can be
+run on any future versions of the Docker images.
+
+For this phase, the testing was done on an AWS EC2 instance of the "m5.2xlarge"
+type. This instance type has 8 parallel processors and 32 GB of memory.
+
+The detailed tracking and test results can be found in the spreadsheet at <<dr-3>>
+
+== 5 Comments and Future Work
+
+=== 5.1 Reliability of Timestamps
+
+At the moment, we are relying on the logging framework to prepend log records
+with timestamps. This has the potential of introducing error in the measurement
+if the logging is delayed or if clocks drift in a distributed test. At the
+moment it is not considered to be a high risk and it is expected that the
+averaging effect of a large amount of test data will mitigate any issues.
+
+=== 5.2 Timing Sensitivity and Missing Events
+
+The automated script itself is relatively brittle. It seems to be quite
+sensitive to how and when the protocol verifier is launched and sometimes it
+inexpelicably loses data. Additionally, about 5% of events are being dropped
+somewhere along the path between reception and SVDC even though the data
+represents correct jobs according to their definitions. These issues need to be
+addressed in future work, however they were deemed minor enough as to be
+reasonably ignored for the purpose of this work.
+
+=== 5.4 Messaging Framework
+
+Many of the implications of this work as well as the infrastructure itself are
+likely to change soon as we move away from file-based message passing to
+another publish/subscribe messaging scheme. In the future we will likely
+migrate our testing off of EC2 and onto something more scalable like Kubernetes
+or AWS ECS.
+
+=== 5.5 "Knobs and Dials"
+
+This work focused on collecting a single data point which represents the EPS of
+the system under reasonable configuration parameters. In the future we will
+want to do much more testing of the system under different input conditions and
+configuration scenarios. We will likely want to plot the results of these tests
+against the various input dimensions to understand their affect on the system.
+
+Here are a handful of knobs and dials identified:
+
+* Schema validation on/off
+* Number of instances (Reception, PV)
+* Platform details
+* Job definition profile (level of complexity)
+* Ordered/unordered event streams
+* Volume/duration of testing
+
+== 6 Initial analysis
+
+Before the data processing and event lifecycle aspects of this project were
+fully developed, and informal analysis was performed. In the informal analysis,
+much more time was spent "turning the knobs and dials" to identify bottlenecks.
+Below is a copy of an email sent to the team with the results and analysis:
+
+Team,
+
+I’ve done some initial benchmark testing. I have learned some quite interesting
+things and would like to share my initial results.
+
+I am getting a bit ahead of myself — a big part of the work I am doing is
+setting things up such that the testing can be repeatable. For now I have done
+a series of tests on my personal laptop (2021 MacBook Pro with M1 Pro and 32GB
+RAM) and I have been measuring time with the stopwatch on my phone, so it is
+rough numbers at best!
+
+I have modified plus2json to be able to process the PLUS definitions in the
+regression folder and generate a certain number of events. It cycles through
+each job definition and produces an event sequence for each until it gets to
+500 events and then it writes those events to a file. Before it writes the
+file, it can shuffle the events so they are not in any particular order.
+Individual files will have events from many different jobs all scrambled
+together. It keeps writing files in this way until it writes 10,000 total
+events. I have control over the number of events per file (“batch size”) and
+the total number of events through additional parameters. I can also disable
+the shuffling. What I end up with is 20 input files each with ~500 events.
+
+For each test, I would position the event files in the “incoming” directory and
+then launch the PV with “docker compose up”. I would start the timer when I saw
+that the services were instantiated and I would stop the timer once the console
+output stopped moving (very precise!)
+
+I started by testing our current configuration in the deployment folder with no
+changes. It was bad — ~6:15 to process all the events (~25 events per second).
+We need to process all 10K events in 5-10s to hit the numbers Cort dropped in
+the chat. I noticed immediately that it seemed as though AEO_SVDC was spending
+a lot of time waiting on Reception. I already suspected that JSON validation
+may be the culprit, but more on that later.
+
+Next, I increased the number of instances of reception to 16. This had a
+massive effect and the whole system processed in ~1:15. I observed that because
+Reception processes a whole input file at once, the effectiveness of scaling
+reception is related to how many input files there are. With 20 input files,
+theoretically 16 Reception instances are no better than 10 since we would
+expect 8 of them to sit idle while 4 processed the final files. This effect
+would not be as pronounced with a constant stream of event files and it would
+disappear entirely if we end up receiving events one at a time through our
+messaging system. You will start seeing a theme here — not only are we
+interacting with file I/O, but files act as buffered chunks of data rather than
+a stream which has all sorts of strange consequences.
+
+At this point, I decided to test AEO_SVDC independently so I allowed Reception
+to process all the input data and copied it to the side for testing with
+AEO_SVDC by itself. The first run took ~30s — much better! With 1 instance on
+my machine we are within a factor of 3-6 of our target. I increased the number
+of instances to 4 and it finished in ~15s. I increased again to 16 and it
+finished somewhere from 10-15s. At this point, the precision of my measurement
+was becoming a problem. I settled on 4 as a good number of instances for our
+testing for now.
+
+I then turned my attention back to reception. I reduced the number of instances
+to 8 and actually got slightly better performance from Reception. My hypothesis
+is that the reduced overhead plus the chunking effect mentioned above but the
+difference was so slight that it was within margin for error with my methods.
+It was taking about 1 minute.
+
+I disabled JSON validation and ran again with 8 instances and reception
+finished in 0:15 — wow! I knew it would be bad, but it is clearly the biggest
+problem I found so far. I expected the validation to be slow. Because of a
+limitation in the C++ code generation, nested objects are stored as raw
+strings. Then when you attempt to access them, the utility domain will parse
+them. This means that when you traverse complicated nested JSON structures, the
+data is constantly getting parsed and serialized again. The validation routine
+traverses not only the input data but also the schemas which are also
+represented as JSON objects (and very complicated and multifaceted!). I think
+the number of times we parse per validation is a pretty high order polynomial.
+Another problem with the validation is that it loads and parses the schema from
+a file on every validation. This doesn’t make things much worse at the moment
+since it is already being parsed many times per validation (as described
+above), but once we fix the core problem we can clean up this inefficiency too.
+
+The next test I did was to test how much impact the implementation of the file
+search in Ordering was having. My baseline was the 30s run of AEO_SVDC by
+itself with only one instance. I modified plus2json to only produce UUIDs
+ending in “00”. I used Reception to process that data by itself and ended up
+with a "verifier-incoming” directory with just “00” as a subdirectory. I ran
+this with a single instance of ADO_SVDC configured with the range “00 to 00”.
+This was something I did not expect — it took ~2:15, 4.5x longer than the
+baseline. I performed the test multiple times because I didn’t believe it at
+first and got the same results. My hypothesis at the moment is that it has
+something to do with a an instance population or a sequence getting very large
+and degrading performance, but that’s just grasping at straws. There is clearly
+another dynamic in play here other than just the number of file accesses.
+
+The final test I did was to compare ordered events versus shuffled. This was
+interesting. I generated 2 sets of data with plus2json — one shuffled and the
+other ordered. I ran both through Reception and saved to the side. One thing I
+noticed was that the shuffled data resulted in ~3000 separate files in
+“verifier-incoming” meaning it had ~3.3 events per file on average. The ordered
+data on the other hand resulted in only 715 files with an average of ~14 events
+per file. I thought I understood this, but each input file from plus2json has
+all the events for a single job (no job is split over multiple files), so I’m
+not sure why this is happening. In any case, it was no surprise that AEO_SVDC
+performed better with sorted data — ~17s with 1 instance and ~9s with 4
+instances.
+
+One final note is that Ordering is a pain in the butt for testing. I was
+getting a lot of failures at first for max out of sequence events, so I had to
+bump that up. Even then I was getting several failures that I didn’t understand
+(but an overall low percentage of the events so I ignored them). Also, if I
+waited too long the events would be stale and I would have to regenerate them.
+
+Here are some conclusions from this series of tests: In the best case scenario,
+we are about 1.5-3x slower than our target. With 4 instances, AEO_SVDC
+completes in 15s. Without validation enabled and with 8 instances, Reception
+matches that. I am optimistic. JSON validation is our biggest performance
+problem. I see it as an absolute requirement to have enabled for every piece of
+user data that enters our system, so we need to find a way to solve it. The
+first step is to get Tristan’s help to fix the code gen, but if that’s still
+too slow we might need to find a different validator that is faster than the
+pure MASL one I wrote. Our file passing technique has more impact than just
+file I/O speed. I think when we implement a messaging solution we will also
+have the option to process smooth streams of data rather than discrete files
+and this will improve our ability to scale.
+
+My next steps are to improve my ability to measure the actual processing time
+of events and get this running in a more streamlined way for deployment on an
+AWS server.
+
+-Levi
+
+== 7 Document References
+
+. [[dr-1]] https://support.onefact.net/issues/MUN2-103[MUN2-103 - benchmark automation]
+. [[dr-2]] link:MUN-103_autobenchmarking_ant.adoc[Munin Benchmarking Analysis Note]
+. [[dr-3]] link:https://docs.google.com/spreadsheets/d/1qGSIY1e__F1KimFhKmhg76OiMWvRqn_P5cWUVYPWyg4/edit[Test results spreadsheet]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
