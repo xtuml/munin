@@ -1,0 +1,31 @@
+@startuml
+partition "Protocol Verifier Job 1" {
+  group "Protocol Verifier Sequence 1"
+    #green:PVJobStart;
+    if ("XOR") then ("pass")
+      :PVSequencingStart;
+      if ("XOR") then ("pass")
+        :PVEventProcessingComplete;
+        if ("XOR") then ("pass")
+          :PVConstraintCheckPassed;
+          if ("XOR") then ("pass")
+            :PVJobSuccessful;
+            if ("XOR") then ("fail")
+              :PVJobFails;
+            endif
+          else ("fail")
+            :PVJobFails;
+          endif
+        else ("fail")
+          :PVJobFails;
+        endif
+      else ("fail")
+        :PVJobFails;
+      endif  
+    else ("fail")
+      :PVJobFails;
+    endif  
+    #red:PVJobDeleted;  
+  end group
+}
+@enduml
