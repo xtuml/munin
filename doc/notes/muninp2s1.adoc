@@ -1,0 +1,83 @@
+= Munin Phase 2 Stage 1 Release Letter
+
+Dear Tower2 Team,
+
+I am pleased to announce the completion of Munin phase 2 stage 1.  This
+stage was characterised by end-to-end rationalisation and testing of the
+Protocol Verifier.  Automation and ease of use increased substantially.
+This stage saw integration of the Protocol Verifier into workflows within
+the test (and integration) and partner2 teams.  These flows together with
+that of the 1F engineering team were demonstrated at PV-2023.
+
+**Protocol Verifier Rationalisation**
+
+The Protocol Verifier (PV) and 'plus2json' now support all of the same
+features.  Job definitions that can be processed by 'plus2json' can then
+be consumed as configuration for the PV.  Event instance streams that can
+be "played" by 'plus2json' are now verified by the PV.  The topology
+features supported within the tool chain are now consistent end-to-end.
+
+**PLUS Language and Unhappy Path Expression**
+
+The PLUS language (based on PlantUML Activity Diagrams) has stabilised.  A
+new feature to declare an extra-job invariant allows reference to an
+invariant defined in a previously run job.  This functionality is
+implemented in 'plus2json' and the PV.
+
+The expression of "Unhappy Paths" is defined in PLUS.  The syntax for
+defining unhappy path audit events and marking certain events as
+'critical' has been agreed upon.  This has not been implemented in the PV
+yet, and will come in stage 2.
+
+**End-to-end Integration Testing**
+
+20 (or so and growing) job definitions have been crafted for testing
+purposes.  These job definitions represent audit event flows of varying
+topologies including AND/XOR forks, merges, branches, loops, split
+sequences and combinations thereof.  A regression test suite is defined
+which includes an automation script to process the job definitions with
+'plus2json', launch the PV and then play audit event instance streams
+interpretively with 'plus2json --play'.  Success/fail criteria are checked
+to complete the regression automation.
+
+**Performance Benchmarking**
+
+An exciting development in this stage is the automation of performance
+benchmarking.  We can now measure the throughput of the Protocol Verifier
+measured in audit events per second (EPS).  Like the regression test
+suite, the benchmark is automated to run easily from the command line.  A
+fixed configuration of the PV is defined on an EC2 instance, and then a
+large volume of audit event instances are fed to the PV.  The audit event
+instance streams are derived from a subset of the regression test suite
+and shuffled.  The PV is instrumented to help the engineering team
+understand flow through the various links in the verification chain.
+Results are recorded with links to the date and build version of the PV.
+This benchmark will be run (at least) once during each stage of the
+project.  The design and source code of this benchmarking utility have
+been shared with the test and integration team to inform their own
+performance testing.
+
+**PV-2023**
+
+The release letter would be incomplete without mention of the Protocol
+Verification 2023 Mini-Conference (PV-2023).  A physical gathering of all
+key project parties was arranged and hosted in London.  Attendance was
+around 30 individuals from 7 or 8 different teams.  Each teams presented
+their work in a technically appropriate, compelling and often entertaining
+format.  A great deal of knowledge was exchanged as well as collaborative
+connections made.  In virtually all aspects, the conference was a success.
+Many thanks to all participants!
+
+On behalf of my team, I request your acceptance of this delivery.
+
+Kind regards,
+Cort and the 1F Consortium
+
+links:
+
+* [Performance Benchmarking Design Note]
+* https://github.com/xtuml/plus2json[plus2json GitHub repository]
+* https://github.com/xtuml/plus2json/releases/tag/v1.0.0[plus2json Munin Phase 2 Stage 1 release tag]
+* https://github.com/xtuml/munin[Munin GitHub repository]
+* https://onefact.atlassian.net/jira/software/projects/MUN2/boards/2/roadmap[JIRA issue tracking]
+
