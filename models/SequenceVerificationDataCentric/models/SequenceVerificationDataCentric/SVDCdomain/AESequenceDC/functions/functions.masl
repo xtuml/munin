@@ -331,14 +331,16 @@ public service AESequenceDC::createSVDCsystemSpec ( maxIntraSequenceEventTimeout
                                                    waitPeriodForAllJobsCompletedCheck : in duration,
                                                    waitPeriodForJobDeletion : in duration,
                                                    waitPeriodForInvariantDeletion : in duration,
-                                                   timeoutPeriodForRetreivingStoredInvariants : in duration ) is
+                                                   timeoutPeriodForRetreivingStoredInvariants : in duration,
+                                                   timeoutPeriodForHangingJob : in duration ) is
 theSVDCSystemSpec : instance of SystemSpecification;
 begin
   theSVDCSystemSpec := create unique SystemSpecification (intraSequenceEventTimeoutPeriod => maxIntraSequenceEventTimeoutPeriod,
   	                                                      checkJobDefReadyForDeletionPeriod => waitPeriodForAllJobsCompletedCheck,
   	                                                      jobDeletionWaitPeriod => waitPeriodForJobDeletion,
   	                                                      sourceExtraJobInvariantDeletionPeriod => waitPeriodForInvariantDeletion,
-  	                                                      persistentInvariantRestoreTimeoutPeriod => timeoutPeriodForRetreivingStoredInvariants);
+  	                                                      persistentInvariantRestoreTimeoutPeriod => timeoutPeriodForRetreivingStoredInvariants,              
+  	                                                      jobHangingTimeoutPeriod => timeoutPeriodForHangingJob);
   //
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

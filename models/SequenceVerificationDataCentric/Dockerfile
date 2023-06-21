@@ -2,7 +2,7 @@
 # BASE BUILD                                                                   #
 ################################################################################
 
-FROM levistarrett/masl-base:v3 AS build-base
+FROM levistarrett/masl-base:v2 AS build-base
 
 ARG EXTRA_MASL_ARGS=
 
@@ -19,7 +19,7 @@ ADD CMakeLists.txt /root/CMakeLists.txt
 # BASE INSTALL                                                                 #
 ################################################################################
 
-FROM levistarrett/masl-base:v3 AS install-base
+FROM levistarrett/masl-base:v2 AS install-base
 
 # copy schedules
 ADD schedule /root/schedule

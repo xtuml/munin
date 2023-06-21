@@ -1,0 +1,27 @@
+@startuml
+
+partition "Adjacent Features Job 1" {
+group "Adjacent Features Sequence 1"
+
+  #green:AFJ1A;
+  if (XOR) then ("normal")
+    :FIXA;
+    fork
+    :FIXB;
+      repeat
+        :AFJ1B;
+        :AFJ1C;
+      repeat while
+    fork again
+      :AFJ1D;
+    end fork
+    :AFJ1E;
+    #red:AFJ1F;
+    detach
+  else ("error")
+    #red:AFJ1G;
+    detach
+  endif
+end group
+}
+@enduml

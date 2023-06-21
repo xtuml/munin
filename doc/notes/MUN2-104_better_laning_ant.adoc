@@ -1,0 +1,181 @@
+= Improved Preliminary Scaling
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note outlines considerations for improved performance in anticipation
+of moving to messaging based inter-domain communication.
+
+== 2 Introduction and Background
+
+<<dr-2>> documents an analysis of scaling for Munin.  It identified
+inherent properties of the Protocol Verifier and the data streams from
+which strategies for scaling can be inferred.  It is recommended to review
+that analysis before reading this document.  A key concept illustrated in
+that analysis was overlooked in the preliminary scaling implementation.
+This present analysis brings that key concept back as well as other simple
+improvements.
+
+The P1V1 release of Protocol Verifier exhibited a behaviour of using 100%
+of the CPU even when the PV was not processing any data.  This has been
+improved, but the PV continues to use the file system inefficiently.
+
+In the single lane configuration AEOrdering::FileControl has 256 instance
+state machines interrogating the file system continuously.  There needs to
+be one instance only.  This change by itself will make a big difference.
+
+Addressing the issues identified in this analysis has to potential to
+increase Protocol Verifier throughput by a factor 100 or more in the
+single instance case.
+
+== 3 Requirements
+
+=== 3.1 Correct Application of Stream Splitting
+
+Stream splitting shall be employed to optimise performance (rather than
+degrade it).
+
+=== 3.2 Reduction of Polling
+
+An efficient strategy of polling shall be employed that minimises polling
+misses.
+
+CPU usage while the Protocol Verifier is idle (no audit event data files
+being processed) shall approach 0%.
+
+=== 3.3 Preparation for Messaging Fabric
+
+The stream-splitting strategy at the heart of Protocol Verifier
+scalability shall be preserved as the PV moves to use a message passing
+mechanism for inter-domain communication.
+
+== 4 Analysis
+
+The present file I/O oriented Protocol Verifier can be made vastly more
+efficient by re-implementing the organisation of the file system event
+stream folders and querying the file system more carefully.
+
+=== 4.1 Key Problems
+
+. Mismatch between file system folder structure and configuration of lanes.
+. Over-polling of file system folders in a while loop (or state loop).
+. Unnecessary file I/O (e.g. file movement).
+
+=== 4.2 Key (Easy) Changes
+
+. Matched Folder Structure
+  .. Each instance of reception should poll a single incoming folder.
+  .. Each instance of ordering/verification should poll a single incoming
+     folder (not 256) (as described in <<dr-2>>).
+. Smarter Polling
+  .. Poll an incoming folder on a timer with a reasonable duration (e.g. 100ms).
+  .. When a file is found, process it.
+  .. Look for another file immediately (timer delay 0), if found process it.
+  .. When no file is found, use the timer again.
+. File Movement Avoidance
+  .. Avoid moving files when they do not need to be moved (e.g. from
+     incoming to processing).  When a single instance is reading the file,
+     it can be read once and moved directly to processed
+     (ordering/verification).
+
+More sophisticated changes could be made with a bit more effort by
+enabling asynchronous notification capability to the Filesystem utility
+domain.  See <<dr-3>>.  This should be considered as an alternative to
+inter-process messaging, although there will be other reasons we need the
+inter-process messaging.
+
+=== 4.3 Correct Stream Splitting
+
+Stream splitting can be improved simply by matching the file system
+structure to the configuration of the Protocol Verifier (correct number of
+lanes).
+
+==== 4.3.1 Single Instance Example
+
+The present form of stream splitting employs a fixed number (maximum) of
+folders in the exchange between reception and ordering/verification.  A
+fixed 256 folders are used even in the single instance configuration.
+This may not affect reception much, but has a large impact on
+ordering/verification.  It effectively "hides" the audit event instance
+file in a forest of folders!  Ordering/verification must "find" an
+incoming file from among a multiplicity of incoming folders.  In the case
+of a pair of single instances, ordering/verification must interrogate 256
+different folders resulting in an average of 128 I/O operations per event
+file.  The implementation in AEOrdering runs 256 concurrent state machines
+to continually interrogate these folders.  It need run only one and find
+the file every time!
+
+=== 4.4 Minimising File I/O
+
+==== 4.4.1 Goal:  Minimal Reads and Writes
+
+Ideally, the Protocol Verifier will perform exactly one file I/O (read
++ write) per audit event file in reception and then again in
+ordering/verification.  For reception, a single read would occur in
+`reception-incoming` and a single write would occur to
+`verifier-incoming`.  For ordering/verification, a single read would occur
+in `verifier-incoming` and single write would occur to
+`verifier-processed`.  (Reception may be required to move a file to
+avoid/reduce contention with other instances of reception, but maybe not.)
+
+===== 4.4.1.1 Asynchronous Operation
+
+In asynchronous operations, the ideal can be achieved if messaging
+results in notification to the receiving domain.  As we move to
+asynchronous messaging, we will be able to approach the ideal.
+
+===== 4.4.1.2 Polled Operation
+
+Polling is inherently less efficient than purely asynchronous operation.
+However, there are smart ways to poll to minimise the differences.  In
+many cases, an application that polls intelligently can approach the
+efficiency of purely asynchronous I/O.
+
+When polling finds what it is looking for on the first try, it equals the
+efficiency of asynchronous operation.  Therefore, when polling, care must
+be taken to avoid repeatedly looking for and not finding what is being
+sought.
+
+. Smarter Polling
+  .. Poll an incoming folder on a timer with a reasonable duration (e.g. 100ms).
+  .. When a file is found, process it.
+  .. Look for another file immediately (timer delay 0), if found process it.
+  .. When no file is found, use the timer again.
+
+=== 4.5 File Movement Avoidance
+
+It may be a requirement for reception to move a file before it reads it,
+because multiple instances of reception are operating in the same incoming
+directory.  However, this may be unnecessary for ordering/verification,
+because there is no contention within the directory structure of this
+domain.
+
+=== 4.6 Contention for "First File"
+
+It occurs to me that our Filesystem utility will return the list of files
+in a directory in a consistent manner.  And that all instances of
+reception will try to lock the first file found.  This would cause
+something of a "guaranteed contention".  If reception were to select
+different (other than first), it may reduce the occurrence of a missed lock.
+
+== 5 Work Required
+
+TBD
+
+== 6 Acceptance Test
+
+Run the automated performance benchmark before and after these changes.
+Note the differences.
+
+== 7 Document References
+
+. [[dr-1]] https://support.onefact.net/issues/MUN2-104[MUN2-104 - improved laning]
+. [[dr-2]] link:MUN-151_scaling_ant.adoc[Munin Scaling Analysis Note]
+. [[dr-3]] https://lwn.net/Articles/604686/[inotify API]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---

@@ -251,9 +251,9 @@ begin
                         jobType := create JobType(
                             jobTypeName => JSON::get_string(jobTypeJSONObject["JobDefinitionName"]),
                             deprecated => false,
-                            jobTypeExpiryTime => timestamp'now + duration'weeks(52),
-                            staleAuditEventDuration => duration'hours(1),
-                            blockedAuditEventDuration => duration'hours(1),
+                            jobTypeExpiryTime => timestamp'now + duration'hours(23),
+                            staleAuditEventDuration => duration'hours(23),
+                            blockedAuditEventDuration => duration'hours(12),
                             jobDefinitionFileName => Filesystem::filename(jobDefinitionFile.jobDefinitionFileName),
                             modificationTime => jobDefinitionFile.lastModificationTime,
                             Current_State => Created

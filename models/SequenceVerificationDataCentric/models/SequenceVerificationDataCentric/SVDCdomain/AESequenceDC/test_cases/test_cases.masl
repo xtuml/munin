@@ -1005,7 +1005,7 @@ end service;
 
 //! ACTIVITY BEGIN. '7ea44b46-f490-40d4-9dc1-d5cd69340148' DO NOT EDIT THIS LINE.
 private service AESequenceDC::Test36ErrorDetection () is
-theAJob : instance of Job;
+theJobs : set of instance of Job;
 theGJob : instance of Job;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
@@ -1025,6 +1025,7 @@ begin
   acceptOrderedEvent ("1620920006","authoriser-1234","AuthoriserSendWidgets","Job_Alpha","Ev6","Ev7",theAuditEventData);
   // Job complete being injected here is an error condition because this should not occur until all events for a Job have been received
   // Invoke interaction from AEOrdering called JobComplete which is interpreted as Job Timeout in this domain
+  // This will push the job into the job timed out state and report failure and start the job deletion timer
   jobComplete ("Job_Alpha");
 //
 //  
@@ -1044,19 +1045,18 @@ begin
   if (Test::get_scheduled_timers ())'length /= 0 then
     Test::fire_scheduled_timers();
   end if;
+  // Firing scheduled timers above will delete Job_Alpha
   // Invoke interaction from AEOrdering called JobComplete which is interpreted as Job Timeout in this domain
   jobComplete ("Job_Gamma");
   //
   Test::service_event_queue();
-  theAJob := find_one Job (jobID = "Job_Alpha");
+  
+  theJobs := find Job ();
   theGJob := find_one Job (jobID = "Job_Gamma");
 //  theSequences := theJobs -> R10;
 //  theAuditEvents := theSequences -> R11;
   
-  //Assertions::assertTrue(theJobs'length = 2, "Wrong number of jobs created: " & (theJobs'length)'image);
-  //Assertions::assertTrue(theSequences'length = 4, "Wrong number of sequences created: " & (theSequences'length)'image);
-  //Assertions::assertTrue(theAuditEvents'length = 25, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
-  Assertions::assertTrue(theAJob.jobCompleted = false, "Job is completed but shouldn't have: " & theAJob.jobID);
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs remain: " & (theJobs'length)'image);
   Assertions::assertTrue(theGJob.jobCompleted, "Job is incomplete: " & theGJob.jobID);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
