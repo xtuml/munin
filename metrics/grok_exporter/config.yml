@@ -5,60 +5,89 @@ input:
   paths: 
     - /var/log/reception/Reception.log
     - /var/log/verifier/Verifier.log
-  #readall: true
+  # readall: true
   fail_on_missing_logfile: false
 imports:
 - type: grok_patterns
   dir: ./logstash-patterns-core/patterns
+grok_patterns:
+- 'FAILURE_REASON [a-zA-Z ]+'
 metrics:
 # Reception metrics
 - type: counter
   name: reception_file_processed
   help: Number of files processed by the AEReception domain.
-  match: '%{NUMBER:pv_index} reception_file_processed'
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_file_processed'
   path: /var/log/reception/Reception.log
   labels:
-    pv_index: '{{.pv_index}}'
+    timestamp: '{{.timestamp}}'
 - type: counter
-  name: reception_file_validated
-  help: Number of files validated against the JSON schema by the AEReception domain.
-  match: '%{NUMBER:pv_index} reception_file_validated'
+  name: reception_event_received
+  help: Number of events parsed from input files in the AEReception domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_event_received : EventId = %{UUID:event_id}'
   path: /var/log/reception/Reception.log
   labels:
-    pv_index: '{{.pv_index}}'
+    timestamp: '{{.timestamp}}'
+    event_id: '{{.event_id}}'
+- type: counter
+  name: reception_event_valid
+  help: Number of events validated against the JSON schema by the AEReception domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_event_valid : EventId = %{UUID:event_id}'
+  path: /var/log/reception/Reception.log
+  labels:
+    timestamp: '{{.timestamp}}'
+    event_id: '{{.event_id}}'
+- type: counter
+  name: reception_event_invalid
+  help: Number of events that failed to be validated against the JSON schema by the AEReception domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_event_invalid : EventId = %{UUID:event_id}'
+  path: /var/log/reception/Reception.log
+  labels:
+    timestamp: '{{.timestamp}}'
+    event_id: '{{.event_id}}'
 - type: counter
   name: reception_event_added
   help: Number of events added by the AEReception domain.
-  match: '%{NUMBER:pv_index} reception_event_added : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_event_added : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type}'
   path: /var/log/reception/Reception.log
   labels:
-    pv_index: '{{.pv_index}}'
+    timestamp: '{{.timestamp}}'
     job_id: '{{.job_id}}'
     event_id: '{{.event_id}}'
     event_type: '{{.event_type}}'
 - type: counter
-  name: reception_file_process_error
-  help: Number of failures processing the incoming file by the AEReception domain.
-  match: '%{NUMBER:pv_index} reception_file_process_error : FailureReason = %{WORD:failure_reason}'
+  name: reception_event_written
+  help: Number of events that were written to files for the AEOrdering domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_event_written : EventId = %{UUID:event_id}'
   path: /var/log/reception/Reception.log
   labels:
-    pv_index: '{{.pv_index}}'
+    timestamp: '{{.timestamp}}'
+    event_id: '{{.event_id}}'
+- type: counter
+  name: reception_file_process_error
+  help: Number of failures processing the incoming file by the AEReception domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} reception_file_process_error : FailureReason = %{FAILURE_REASON:failure_reason}'
+  path: /var/log/reception/Reception.log
+  labels:
+    timestamp: '{{.timestamp}}'
     failure_reason: '{{.failure_reason}}'
 # Verifier metrics
 - type: counter
   name: aeordering_job_processed
   help: Number of jobs processed by the AEOrdering domain.
-  match: '%{NUMBER:pv_index} aeordering_job_processed : JobId = %{UUID:job_id}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} aeordering_job_processed : JobId = %{UUID:job_id}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     job_id: '{{.job_id}}'
 - type: counter
   name: aeordering_events_processed
   help: Number of events processed by the AEOrdering domain.
-  match: '%{NUMBER:pv_index} aeordering_events_processed : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} aeordering_events_processed : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     job_id: '{{.job_id}}'
     event_id: '{{.event_id}}'
@@ -66,9 +95,10 @@ metrics:
 - type: counter
   name: aeordering_events_blocked
   help: Number of events blocked by the AEOrdering domain.
-  match: '%{NUMBER:pv_index} aeordering_events_blocked : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} aeordering_events_blocked : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     job_id: '{{.job_id}}'
     event_id: '{{.event_id}}'
@@ -76,9 +106,10 @@ metrics:
 - type: counter
   name: aeordering_events_failed
   help: Number of events blocked by the AEOrdering domain.
-  match: '%{NUMBER:pv_index} aeordering_events_failed : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type} : FailureReason = %{WORD:failure_reason}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} aeordering_events_failed : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type} : FailureReason = %{FAILURE_REASON:failure_reason}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     job_id: '{{.job_id}}'
     event_id: '{{.event_id}}'
@@ -87,9 +118,10 @@ metrics:
 - type: counter
   name: aeordering_duplicate_job
   help: Number of duplicate jobs identified by the AEOrdering domain.
-  match: '%{NUMBER:pv_index} aeordering_duplicate_job : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type} : FailureReason = %{WORD:failure_reason}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} aeordering_duplicate_job : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type} : FailureReason = %{FAILURE_REASON:failure_reason}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     job_id: '{{.job_id}}'
     event_id: '{{.event_id}}'
@@ -98,27 +130,39 @@ metrics:
 - type: counter
   name: aeordering_file_processing_failure
   help: Number of failures processing incoming file by the AEOrdering domain.
-  match: '%{NUMBER:pv_index} aeordering_file_processing_failure : File = %{WORD:filename} : FailureReason = %{WORD:failure_reason}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} aeordering_file_processing_failure : File = %{WORD:filename} : FailureReason = %{FAILURE_REASON:failure_reason}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     filename: '{{.filename}}'
     failure_reason: '{{.failure_reason}}'
 - type: counter
   name: aeordering_job_failed
   help: Number of job failures by the AEOrdering domain.
-  match: '%{NUMBER:pv_index} aeordering_job_failed : JobId = %{UUID:job_id} : FailureReason = %{WORD:failure_reason}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} aeordering_job_failed : JobId = %{UUID:job_id} : FailureReason = %{FAILURE_REASON:failure_reason}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     job_id: '{{.job_id}}'
     failure_reason: '{{.failure_reason}}'
 - type: counter
-  name: svdc_new_job_started
-  help: Number of job starting in the SVDC domain.
-  match: '%{NUMBER:pv_index} svdc_new_job_started : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type}'
+  name: svdc_event_received
+  help: Number of events received by the SVDC domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_event_received : EventId = %{UUID:event_id}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
+    pv_index: '{{.pv_index}}'
+    event_id: '{{.event_id}}'
+- type: counter
+  name: svdc_new_job_started
+  help: Number of job starting in the SVDC domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_new_job_started : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type}'
+  path: /var/log/verifier/Verifier.log
+  labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     job_id: '{{.job_id}}'
     event_id: '{{.event_id}}'
@@ -126,35 +170,39 @@ metrics:
 - type: counter
   name: svdc_job_failed
   help: Number of job failures detected by the SVDC domain.
-  match: '%{NUMBER:pv_index} svdc_job_failed : JobId = %{UUID:job_id} : FailureReason = %{WORD:failure_reason}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_job_failed : JobId = %{UUID:job_id} : FailureReason = %{FAILURE_REASON:failure_reason}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     job_id: '{{.job_id}}'
     failure_reason: '{{.failure_reason}}'
 - type: counter
   name: svdc_job_definition_failed
   help: Number of job definition failures detected by the SVDC domain.
-  match: '%{NUMBER:pv_index} svdc_job_definition_failed : FailureReason = %{WORD:failure_reason}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_job_definition_failed : FailureReason = %{FAILURE_REASON:failure_reason}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     failure_reason: '{{.failure_reason}}'
 - type: counter
   name: svdc_job_success
   help: Number of successful jobs completed by the SVDC domain.
-  match: '%{NUMBER:pv_index} svdc_job_success : JobId = %{UUID:job_id} : JobName = %{WORD:job_name}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_job_success : JobId = %{UUID:job_id} : JobName = %{WORD:job_name}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     job_id: '{{.job_id}}'
     job_name: '{{.job_name}}'
 - type: counter
   name: svdc_invalid_event
   help: Number of invalid events reported by the SCDC domain.
-  match: '%{NUMBER:pv_index} svdc_invalid_event : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type} : FailureReason = %{WORD:failure_reason}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_invalid_event : JobId = %{UUID:job_id} : EventId = %{UUID:event_id} : EventType = %{WORD:event_type} : FailureReason = %{FAILURE_REASON:failure_reason}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     job_id: '{{.job_id}}'
     event_id: '{{.event_id}}'
@@ -163,10 +211,20 @@ metrics:
 - type: counter
   name: svdc_invalid_event_definition
   help: Number of event definition failures detected by the SVDC domain.
-  match: '%{NUMBER:pv_index} svdc_invalid_event_definition : FailureReason = %{WORD:failure_reason}'
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_invalid_event_definition : FailureReason = %{FAILURE_REASON:failure_reason}'
   path: /var/log/verifier/Verifier.log
   labels:
+    timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     failure_reason: '{{.failure_reason}}'
+- type: counter
+  name: svdc_event_processed
+  help: Number of events received by the SVDC domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_event_processed : EventId = %{UUID:event_id}'
+  path: /var/log/verifier/Verifier.log
+  labels:
+    timestamp: '{{.timestamp}}'
+    pv_index: '{{.pv_index}}'
+    event_id: '{{.event_id}}'
 server:
   port: 9144
