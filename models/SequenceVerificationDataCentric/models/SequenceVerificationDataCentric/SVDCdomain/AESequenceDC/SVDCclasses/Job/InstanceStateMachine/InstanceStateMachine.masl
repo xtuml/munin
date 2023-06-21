@@ -740,7 +740,7 @@ begin
   
   
   this.sequencingFailed := true;
-  this.failJob("The job has timed out because it hasn't seen a complete expected sequence of events within the Job Hanging Timeout Period for jobId = " & this.jobID );              
+  this.failJob("The job has timed out because it hasn't seen a complete expected sequence of events within the Job Hanging Timeout Period or because of a blocked event timeout for jobId = " & this.jobID );              
   
   // TODO: Consider adding a jobTimedOut (boolean) attribute to Job and set this to true on
   //       entry to this state such that it can be used in test assertions (because you cannot
