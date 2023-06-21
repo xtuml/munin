@@ -1,0 +1,29 @@
+@startuml
+partition "Protocol Verifier Job 2" {
+  group "Protocol Verifier Sequence 2"
+    #green:PVJobStart;
+    switch ("XOR")
+      case ("all good")
+        :PVSequencingStart;
+        :PVEventProcessingComplete;
+        :PVConstraintCheckPassed;          
+        :PVJobSuccessful;
+      case ("invariant failure")
+        :PVSequencingStart;
+        :PVEventProcessingComplete;
+        :PVConstraintCheckPassed;          
+        :PVJobFails;      
+      case ("constraint failure")
+        :PVSequencingStart;
+        :PVEventProcessingComplete;       
+        :PVJobFails;      
+      case ("sequencing failure")
+        :PVSequencingStart;       
+        :PVJobFails;      
+      case ("early failure")  
+        :PVJobFails;      
+    endswitch  
+    #red:PVJobDeleted;  
+  end group
+}
+@enduml
