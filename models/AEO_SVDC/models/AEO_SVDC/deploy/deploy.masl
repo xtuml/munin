@@ -169,6 +169,19 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '89b6daea-12e7-459f-a9d0-af317037cdf0' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>jobDefinition ( jobName : in string,
+                                                               eventDefinitions : in sequence of EventDefinitionType ) is
+svdcEventDefinitions : sequence of AESequenceDC::eventDefinitionStructure;
+
+begin
+  
+  // call the public service
+  AESequenceDC::createJobDefinition(jobName, sequence of AESequenceDC::eventDefinitionStructure(eventDefinitions));
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
 //! ACTIVITY BEGIN. 'b83bba7e-1748-4ae6-955f-3ec8cbbcfca2' DO NOT EDIT THIS LINE.
 public service AESequenceDC::JobAdmin~>deleteJob ( jobID : in string ) is
 begin
@@ -241,6 +254,15 @@ begin
   IStore::restoreNamedInvariant(extraJobInvariantName,
                                     invariantValue);
   
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '17c35c62-3772-4319-90a6-42d31e2a5036' DO NOT EDIT THIS LINE.
+public service AEOrdering::Reporting~>reportEvent ( eventPriority : in Logger::Priority,
+                                                   eventLabel : in string,
+                                                   eventContent : in string ) is
+begin
+  null;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

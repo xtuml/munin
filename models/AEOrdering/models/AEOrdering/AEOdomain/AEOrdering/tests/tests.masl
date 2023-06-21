@@ -23,7 +23,7 @@ end service;
 
 //! ACTIVITY BEGIN. 'b99cf356-baee-45eb-a09a-1b65922b2b33' DO NOT EDIT THIS LINE.
 private service AEOrdering::testConfigTestData () is
-reportEventDefinition :  instance of _TEST_Req_IF_Verification_eventDefinition;
+reportedJobDefinitions : sequence of instance of _TEST_Req_IF_Verification_jobDefinition;
 intraEventDataDef : instance of _TEST_Req_IF_Verification_intraJobInvariantDefinition;
 extraEventDataDef : instance of _TEST_Req_IF_Verification_extraJobInvariantDefinition;
 dynamicControlDefinition : instance of _TEST_Req_IF_Verification_dynamicControlDefinition;
@@ -31,41 +31,55 @@ dynamicControlDefinition : instance of _TEST_Req_IF_Verification_dynamicControlD
 begin
 	
 	// When the domain has started it should report the details of the event definitions to verifications
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "aaa" and occurrenceId = 1 and isSequenceStart = true and isSequenceEnd = false and isBreak = false);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = aaa and occurrenceId = 1 and isSequenceStart = true and isSequenceEnd = false and isBreak = false");
-    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 0), "Unexepected previous event types eventType = aaa");
 
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "bbb" and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = true);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = bbb and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = true");
-    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = bbb");
-	for previousEventType in reportEventDefinition.previousEventTypes loop
-		Assertions::assertTrue((previousEventType.previousEventTypeName = "aaa" and previousEventType.occurrenceId = 1), "");
-	end loop;
+	reportedJobDefinitions := find _TEST_Req_IF_Verification_jobDefinition();
+	Assertions::assertTrue((reportedJobDefinitions'length = 2), "Test Config File: Failed to find the correct number of reported event definitions, expected 2 found " & (reportedJobDefinitions'length)'image);
 	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "ccc" and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = false);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = ccc and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = false");
-    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = ccc");
-	for previousEventType in reportEventDefinition.previousEventTypes loop
-		Assertions::assertTrue((previousEventType.previousEventTypeName = "bbb" and previousEventType.occurrenceId = 1 and previousEventType.constraintDefinitionId = "cccEventXOR" and previousEventType.constraintValue = "XOR"), "");
+	for jobDefinition in reportedJobDefinitions loop
+		if jobDefinition.jobName = "AEOrdering-Test" then
+			if jobDefinition.eventDefinitions'length = 6 then
+				for reportEventDefinition in jobDefinition.eventDefinitions loop
+					if reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "aaa" and reportEventDefinition.occurrenceId = 1 then
+						null;
+					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "bbb" and reportEventDefinition.occurrenceId = 1 then
+					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = bbb");
+						for previousEventType in reportEventDefinition.previousEventTypes loop
+							Assertions::assertTrue((previousEventType.previousEventTypeName = "aaa" and previousEventType.occurrenceId = 1), "");
+						end loop;
+					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "ccc" and reportEventDefinition.occurrenceId = 1 then
+					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = ccc");
+						for previousEventType in reportEventDefinition.previousEventTypes loop
+							Assertions::assertTrue((previousEventType.previousEventTypeName = "bbb" and previousEventType.occurrenceId = 1 and previousEventType.constraintDefinitionId = "cccEventXOR" and previousEventType.constraintValue = "XOR"), "");
+						end loop;
+					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "ddd" and reportEventDefinition.occurrenceId = 1 then
+					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = ddd");
+						for previousEventType in reportEventDefinition.previousEventTypes loop
+							Assertions::assertTrue((previousEventType.previousEventTypeName = "ccc" and previousEventType.occurrenceId = 1), "");
+						end loop;
+					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "eee" and reportEventDefinition.occurrenceId = 1 then
+					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = eee");
+						for previousEventType in reportEventDefinition.previousEventTypes loop
+							Assertions::assertTrue((previousEventType.previousEventTypeName = "ddd" and previousEventType.occurrenceId = 1), "");
+						end loop;
+					elsif reportEventDefinition.sequenceName = "SEQUENCE2" and reportEventDefinition.eventType = "fff" and reportEventDefinition.occurrenceId = 1 then
+					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 0), "Unexepected previous event types eventType = fff");
+					else
+						Assertions::assertTrue(false, "Unknown reported event definitions for AEOrdering-Test");  
+					end if;
+				end loop;
+			else
+				Assertions::assertTrue(false, "Test Config File: Failed to find the correct number of reported event definitions for AEOrdering-Test, expected 6 found " & (jobDefinition.eventDefinitions'length)'image);  
+			end if;
+		elsif jobDefinition.jobName = "Other-Test-Job" then
+			if jobDefinition.eventDefinitions'length = 3 then
+				null;
+			else
+				Assertions::assertTrue(false, "Test Config File: Failed to find the correct number of reported event definitions for Other-Test-Job, expected 3 found " & (jobDefinition.eventDefinitions'length)'image);  
+			end if;
+		else
+			Assertions::assertTrue(false, "Test Config File: Unknown job reported, jobName = " & jobDefinition.jobName);  
+		end if;
 	end loop;
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "ddd" and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = false);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = ddd and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = false and isBreak = false");
-    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = ddd");
-	for previousEventType in reportEventDefinition.previousEventTypes loop
-		Assertions::assertTrue((previousEventType.previousEventTypeName = "ccc" and previousEventType.occurrenceId = 1), "");
-	end loop;
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE1" and eventType = "eee" and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = true and isBreak = false);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = eee and occurrenceId = 1 and isSequenceStart = false and isSequenceEnd = true and isBreak = false");
-    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = eee");
-	for previousEventType in reportEventDefinition.previousEventTypes loop
-		Assertions::assertTrue((previousEventType.previousEventTypeName = "ddd" and previousEventType.occurrenceId = 1), "");
-	end loop;
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "AEOrdering-Test" and sequenceName = "SEQUENCE2" and eventType = "fff" and occurrenceId = 1 and isSequenceStart = true and isSequenceEnd = true and isBreak = false);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = AEOrdering-Test, sequenceName = SEQUENCE1, eventType = fff and occurrenceId = 1 and isSequenceStart = true and isSequenceEnd = true and isBreak = false");
-    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 0), "Unexepected previous event types eventType = fff");
 	
 	extraEventDataDef := find_one _TEST_Req_IF_Verification_extraJobInvariantDefinition(auditEventDataName = "Data1" and sourceJobDefnName = "AEOrdering-Test" and sourceEventType = "aaa" and sourceOccurrenceId = 1);
     Assertions::assertTrue((extraEventDataDef /= null), "Test Config Test Data: Failed to find extra job invariant event data definition auditEventDataName = Data1, jobName = AEOrdering-Test, sourceEventType = aaa and occurrenceId = 1");
@@ -1093,16 +1107,15 @@ end service;
 
 //! ACTIVITY BEGIN. 'fb14d3d5-6028-4549-a932-5c42dd68b596' DO NOT EDIT THIS LINE.
 private service AEOrdering::testConfigFile () is
-reportedEventDefinitions : sequence of instance of _TEST_Req_IF_Verification_eventDefinition;
-reportEventDefinition :  instance of _TEST_Req_IF_Verification_eventDefinition;
+reportedEventJobDefinitions : sequence of instance of _TEST_Req_IF_Verification_jobDefinition;
 systemSpec : instance of SystemSpec;
 configFile : string := "config.json";
 
 begin
 	
 	AEOrdering::clearDomain(true, true);
-	reportedEventDefinitions := find _TEST_Req_IF_Verification_eventDefinition();
-	delete reportedEventDefinitions;
+	reportedEventJobDefinitions := find _TEST_Req_IF_Verification_jobDefinition();
+	delete reportedEventJobDefinitions;
 	systemSpec := find_one SystemSpec();
 	systemSpec.configFile := configFile;
 	Filesystem::touch_file(Filesystem::filename(systemSpec.configFilePath & configFile));
@@ -1111,85 +1124,63 @@ begin
 	generate SystemSpec.checkConfigUpdate() to systemSpec;
 	Test::service_event_queue();
 	
-	// When the domain has started it should report the details of the event definitions to verifications
-    reportedEventDefinitions := find _TEST_Req_IF_Verification_eventDefinition();
-	Assertions::assertTrue((reportedEventDefinitions'length = 25), "Test Config File: Failed to find the correct number of reported event definitions, expected 25 found " & (reportedEventDefinitions'length)'image);  
-    
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent1" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent1 and occurrenceId = 1");
+	// When the domain has started it should report the details of the Job definitions to verifications
+	reportedEventJobDefinitions := find _TEST_Req_IF_Verification_jobDefinition();
+	Assertions::assertTrue((reportedEventJobDefinitions'length = 2), "Test Config File: Failed to find the correct number of reported event definitions, expected 2 found " & (reportedEventJobDefinitions'length)'image);
 	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent2" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent2 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent3" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent3 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent4" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent4 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent5" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent5 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent6" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent6 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent7" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent7 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent8" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent8 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent9" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent9 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent10" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent10 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent11" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent11 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent12" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent12 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence1" and eventType = "TestEvent13" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence1, eventType = TestEvent13 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence2" and eventType = "TestEvent14" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence2, eventType = TestEvent14 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence2" and eventType = "TestEvent15" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence2, eventType = TestEvent15 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence3" and eventType = "TestEvent16" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence3, eventType = TestEvent16 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job1" and sequenceName = "Sequence3" and eventType = "TestEvent17" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job1, sequenceName = Sequence3, eventType = TestEvent17 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent18" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent18 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent19" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent19 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent20" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent20 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent21" and occurrenceId = 2);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent21 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent20" and occurrenceId = 3);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent20 and occurrenceId = 2");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent21" and occurrenceId = 4);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent21 and occurrenceId = 2");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent24" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent24 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent25" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent25 and occurrenceId = 1");
-	
+	for jobDefinition in reportedEventJobDefinitions loop
+		if jobDefinition.jobName = "Job1" then
+			if jobDefinition.eventDefinitions'length = 17 then
+				for reportEventDefinition in jobDefinition.eventDefinitions loop
+					if reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent1" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent2" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent3" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent4" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent5" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent6" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent7" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent8" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent9" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent10" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent11" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent12" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence1" and reportEventDefinition.eventType = "TestEvent13" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence2" and reportEventDefinition.eventType = "TestEvent14" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence2" and reportEventDefinition.eventType = "TestEvent15" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence3" and reportEventDefinition.eventType = "TestEvent16" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence3" and reportEventDefinition.eventType = "TestEvent17" and reportEventDefinition.occurrenceId = 1 then
+					   null;
+					else
+						Assertions::assertTrue(false, "Unknown reported event definitions for Job 1");  
+					end if;
+				end loop;
+			else
+				Assertions::assertTrue(false, "Test Config File: Failed to find the correct number of reported event definitions for Job 1, expected 17 found " & (jobDefinition.eventDefinitions'length)'image);  
+			end if;
+		elsif jobDefinition.jobName = "Job2" then
+			if jobDefinition.eventDefinitions'length = 8 then
+				for reportEventDefinition in jobDefinition.eventDefinitions loop
+					if reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent18" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent19" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent20" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent21" and reportEventDefinition.occurrenceId = 2 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent20" and reportEventDefinition.occurrenceId = 3 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent21" and reportEventDefinition.occurrenceId = 4 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent24" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent25" and reportEventDefinition.occurrenceId = 1 then
+					   null;
+					else
+						Assertions::assertTrue(false, "Unknown reported event definitions for Job 2");  
+					end if;
+				end loop;
+			else
+				Assertions::assertTrue(false, "Test Config File: Failed to find the correct number of reported event definitions for Job 2, expected 8 found " & (jobDefinition.eventDefinitions'length)'image);  
+			end if;
+		else
+			Assertions::assertTrue(false, "Test Config File: Unknown job reported, jobName = " & jobDefinition.jobName);  
+		end if;
+	end loop;
+		
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -1433,8 +1424,7 @@ testFileDir : Filesystem::filename := "test-files/";
 incomingDir :  Filesystem::filename := "test-files/incoming/";
 targetDirectory : Filesystem::filename := "test-files/incoming/01/";
 testFile1 : Filesystem::filename := "FileRequest_HappyPath.json";
-reportedEventDefinitions : sequence of instance of _TEST_Req_IF_Verification_eventDefinition;
-reportEventDefinition :  instance of _TEST_Req_IF_Verification_eventDefinition;
+reportedEventJobDefinitions : sequence of instance of _TEST_Req_IF_Verification_jobDefinition;
 verificationAuditEvents : sequence of instance of _TEST_Req_IF_Verification_audit_event;
 verificationAuditEvent : instance of _TEST_Req_IF_Verification_audit_event;
 jobId : string := "95a3b3a7-fada-41d5-b7e2-902079e810d5";
@@ -1449,8 +1439,8 @@ begin
 	
     Filesystem::create_directory(targetDirectory);
 	AEOrdering::clearDomain(true, true);
-	reportedEventDefinitions := find _TEST_Req_IF_Verification_eventDefinition();
-	delete reportedEventDefinitions;
+	reportedEventJobDefinitions := find _TEST_Req_IF_Verification_jobDefinition();
+	delete reportedEventJobDefinitions;
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
     delete verificationAuditEvents;
 	systemSpec := find_one SystemSpec();
@@ -1500,41 +1490,45 @@ begin
     Assertions::assertTrue((storedJobIdentifier = null), "Test Job Complete: Failed to find StoredJobIdentifier");
 	
 	// test adding in a new job definition file
-	reportedEventDefinitions := find _TEST_Req_IF_Verification_eventDefinition();
-	delete reportedEventDefinitions;
+	reportedEventJobDefinitions := find _TEST_Req_IF_Verification_jobDefinition();
+	delete reportedEventJobDefinitions;
 	Filesystem::copy_file(Filesystem::filename("config/") & jobDefinitionFile, Filesystem::filename("config/") & newJobDefinitionFile);
 	Filesystem::move_file(Filesystem::filename("config/") & newJobDefinitionFile, Filesystem::filename(systemSpec.jobDefinitionDirectory & "/") & newJobDefinitionFile);
 	generate SystemSpec.checkConfigUpdate() to systemSpec;
 	Test::service_event_queue();
 	Filesystem::delete_file(Filesystem::filename(systemSpec.jobDefinitionDirectory & "/") & newJobDefinitionFile);
 
-    reportedEventDefinitions := find _TEST_Req_IF_Verification_eventDefinition();
-	Assertions::assertTrue((reportedEventDefinitions'length = 8), "Test Config File: Failed to find the correct number of reported event definitions, expected 8 found " & (reportedEventDefinitions'length)'image);  
 
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent18" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent18 and occurrenceId = 1");
+
+
+	reportedEventJobDefinitions := find _TEST_Req_IF_Verification_jobDefinition();
+	Assertions::assertTrue((reportedEventJobDefinitions'length = 1), "Test File Ingest: Failed to find the correct number of reported event definitions, expected 1 found " & (reportedEventJobDefinitions'length)'image);
 	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent19" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent19 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent20" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent20 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent21" and occurrenceId = 2);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent21 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent20" and occurrenceId = 3);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent20 and occurrenceId = 2");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent21" and occurrenceId = 4);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent21 and occurrenceId = 2");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent24" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent24 and occurrenceId = 1");
-	
-    reportEventDefinition := find_one _TEST_Req_IF_Verification_eventDefinition(jobName = "Job2" and sequenceName = "Sequence4" and eventType = "TestEvent25" and occurrenceId = 1);
-    Assertions::assertTrue((reportEventDefinition /= null), "Test Config Test Data: Failed to find event definition jobName = Job2, sequenceName = Sequence1, eventType = TestEvent25 and occurrenceId = 1");
-		
+	for jobDefinition in reportedEventJobDefinitions loop
+		if jobDefinition.jobName = "Job2" then
+			if jobDefinition.eventDefinitions'length = 8 then
+				for reportEventDefinition in jobDefinition.eventDefinitions loop
+					if reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent18" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent19" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent20" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent21" and reportEventDefinition.occurrenceId = 2 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent20" and reportEventDefinition.occurrenceId = 3 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent21" and reportEventDefinition.occurrenceId = 4 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent24" and reportEventDefinition.occurrenceId = 1 or
+					   reportEventDefinition.sequenceName = "Sequence4" and reportEventDefinition.eventType = "TestEvent25" and reportEventDefinition.occurrenceId = 1 then
+					   null;
+					else
+						Assertions::assertTrue(false, "Unknown reported event definitions for Job 2");  
+					end if;
+				end loop;
+			else
+				Assertions::assertTrue(false, "Test Config File: Failed to find the correct number of reported event definitions for Job 1, expected 17 found " & (jobDefinition.eventDefinitions'length)'image);  
+			end if;
+		else
+			Assertions::assertTrue(false, "Test Config File: Unknown job reported, jobName = " & jobDefinition.jobName);  
+		end if;
+	end loop;
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

@@ -231,6 +231,8 @@ constrainingDataItem : instance of DataItemType;
 constrainingDataItemName : string;
 intraJobInvDataItems : set of instance of DataItemType;
 updatedJobTypes : sequence of instance of JobType;
+eventDefinitions : sequence of EventDefinitionType;
+emptyEventDefinitions : sequence of EventDefinitionType;
 
 begin
     // process job definitions
@@ -278,10 +280,12 @@ begin
     
     // report the latest set of events to the sequence domain
     for job in find updatedJobTypes() loop
+    	eventDefinitions := emptyEventDefinitions;
         for auditEventType in (job -> R12.AuditEventType() ordered_by (auditEventTypeId)) loop
-            Req_IF_Verification~>eventDefinition(auditEventType.jobTypeName, auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, 
+            eventDefinitions := eventDefinitions & (auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, 
             	                                 auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd, auditEventType.isBreak);
         end loop;
+        Req_IF_Verification~>jobDefinition(job.jobTypeName, eventDefinitions);
         // report any dynamic controls
         for dynamicControl in (job -> R12.AuditEventType -> R19.DynamicControl) loop
         	Req_IF_Verification~>dynamicControlDefinition(job.jobTypeName, dynamicControl.dynamicControlName, dynamicControl.controlType, dynamicControl.eventType, dynamicControl.occurrenceId, dynamicControl.userEventType, dynamicControl.userOccurrenceId);
