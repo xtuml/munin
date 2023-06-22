@@ -66,9 +66,12 @@ logMessage : string;
 failureMessage : string;
 creationErrorMessage : string;
 eventDataCheckHasPassed : boolean;
+theSystemSpec : instance of SystemSpecification;
 failureReason : string;
 
 begin
+  // Reset the jobHangingTimer if it is set
+  cancel this.jobHangingTimer;
   // Check to see if we've seen this event instance before
   existingEvent := find_one AuditEvent (AuditEventId = eventId);
   if existingEvent = null then
@@ -472,6 +475,10 @@ begin
   
   end if;  
 //  
+  // Set a timer to timeout if the job hangs waiting for another event
+  theSystemSpec := find_one SystemSpecification();
+  schedule this.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;    
+  
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -643,6 +650,10 @@ begin
   Logger::log(Logger::Error, "AESequenceDC", logMessage);
   eventContent := "FailureReason = " & failureReason & " : JobId = " & this.jobID;
   Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
+  for evt in this->R3.AuditEvent loop
+	  eventContent := "EventId = " & evt.AuditEventId;
+	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
+  end loop;
   
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
@@ -708,12 +719,15 @@ begin
   aeSequenceDefs := this -> R8 -> R7;
   sequencesForJob := this -> R10;
   completeSequences := find sequencesForJob (isComplete = true);
+  theSystemSpec := find_one SystemSpecification();
   if aeSequenceDefs'length = completeSequences'length then
     // All sequences for the Job appear to be complete - but just in case there's a late delivery of the first
     // event in a previously unseen optional branch of one of those sequences then give a short period for it to 
     // arrive before moving the Job into the JobCompleted state.
-    theSystemSpec := find_one SystemSpecification();
     schedule this.jobEventTimer generate Job.jobComplete() to this delay theSystemSpec.intraSequenceEventTimeoutPeriod;
+  else
+    // The job or sequence is waiting for another event to arrive but one doesn't happen
+    schedule this.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;    
   end if;
         
 end state;
@@ -727,6 +741,10 @@ begin
   
   logMessage := "AESequenceDC::Job.JobTimeoutReported : The Job has been reported having timed out - jobId = " & this.jobID;
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+  
+  
+  this.sequencingFailed := true;
+  this.failJob("The job has timed out because it hasn't seen a complete expected sequence of events within the Job Hanging Timeout Period or because of a blocked event timeout for jobId = " & this.jobID );              
   
   // TODO: Consider adding a jobTimedOut (boolean) attribute to Job and set this to true on
   //       entry to this state such that it can be used in test assertions (because you cannot
@@ -751,6 +769,10 @@ begin
   Logger::log(Logger::Debug, "Monitored System Status", logMessage);
   eventContent := "JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
   Reporting~>reportEvent(Logger::Information, "svdc_job_success", eventContent);
+  for evt in this->R3.AuditEvent loop
+	  eventContent := "EventId = " & evt.AuditEventId;
+	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
+  end loop;
   
   // The Job is thus near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();

@@ -6,7 +6,7 @@ RUN SCENARIO AESequenceDC 2 "InitCyclicTopologyEventDefinition"
 RUN SCENARIO AESequenceDC 3 "InitSystemSpec"
 RUN SCENARIO AESequenceDC 4 "InitForkAndMergeTopologyEventDefinition"
 RUN SCENARIO AESequenceDC 5 "InitIntraJobInvariantDefinition"
-RUN SCENARIO AESequenceDC 6 "InitBranchCountDefinitionEnhanced"
+RUN SCENARIO AESequenceDC 901 "InitBranchCountDefinitionEnhanced"
 RUN SCENARIO AESequenceDC 7 "InitPersistentInvariantAuthAndBankTransferDefinition"
 RUN SCENARIO AESequenceDC 8 "InitEventDefinitionForInclusiveOR"
 RUN SCENARIO AESequenceDC 9 "InitLoopBreakEventDefinition"
@@ -14,7 +14,6 @@ RUN SCENARIO AESequenceDC 501 "InitComplexEventSequence1Definition"
 RUN SCENARIO AESequenceDC 502 "InitComplexEventSequence2Definition"
 RUN SCENARIO AESequenceDC 503 "InitComplexEventSequence3Definition"
 RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
-
 
 # run normal path tests
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test01NormalPath 1001 CleanUpAllJobs 64]
@@ -136,6 +135,8 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test19StartOfNewJobForDeprecatedJob
 
 # DO NOT ADD TESTS BEYOND THIS POINT AS SPECIFICATION INSTANCES HAVE BEEN DAMAGED
 
+# test the use of create job definition
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test61CreateJobDefinition 1300 CleanUpAllJobs 64]
 
 # This final test cleans out all the event definitions and so occurs at the end
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test09CorrectDeletionOfDefinitions 1009 CleanUpAllJobs 64]

@@ -10,11 +10,9 @@ echo "Done."
 puml_files=$(ls -1 ../tests/PumlForTesting/PumlRegression/*.puml | sort)
 
 # generate job definitions
-for fn in ${puml_files}; do
-  echo "Generating job definition for '${fn}'..."
-  python ../bin/plus2json.pyz ${fn} --job --outdir config/job_definitions
-  echo "Done."
-done
+echo "Generating job definitions..."
+echo ${puml_files} | xargs python ../bin/plus2json.pyz --job -o config/job_definitions
+echo "Done."
 
 # launch the protocol verifier
 echo "Launching protocol verifier..."
@@ -24,7 +22,7 @@ echo "Done."
 # play all jobs
 for fn in ${puml_files}; do
   echo "Generating runtime event data for '${fn}'..."
-  python ../bin/plus2json.pyz ${fn} --play --outdir reception-incoming
+  python ../bin/plus2json.pyz --play -o reception-incoming ${fn}
   echo "Done."
   sleep 1
 done

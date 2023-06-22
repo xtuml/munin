@@ -23,12 +23,12 @@
     <logger>
         <name>Reception</name>
         <format>
-            <pattern><param name="instance_index" default="0"/> <message/></pattern>
+            <pattern><timestamp/> <message/></pattern>
             <file>
                 <path>/var/log/reception/Reception.log</path> <!-- Name of the log file -->
                 <archive>
                     <rotate>
-                        <size units="MiB">5</size> <!-- When to rotate  -->
+                        <size units="MiB">50</size> <!-- When to rotate  -->
                     </rotate>
                     <extension>timestamp</extension> <!-- What extension to use on archived log files -->
                     <compress>true</compress> <!-- If archived files should be compressed -->

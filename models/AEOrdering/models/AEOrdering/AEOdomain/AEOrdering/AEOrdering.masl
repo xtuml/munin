@@ -94,11 +94,18 @@ end service;
 //! ACTIVITY BEGIN. '36ba89ad-64aa-4fc7-85dc-c9d22ae2f8f8' DO NOT EDIT THIS LINE.
 public service AEOrdering::Req_IF_Verification~>dynamicControlDefinition ( jobTypeName : in string,
                                                                           dynamicControlName : in string,
-                                                                          dynamicControlType : in DynamicControlTypeEnum,
+                                                                          dynamicControlType : in string,
                                                                           sourceEventType : in string,
                                                                           sourceOccurrenceId : in integer,
                                                                           userEventType : in string,
                                                                           userOccurrenceId : in integer ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b3d49062-9b2e-4c74-ad0b-d21254027deb' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>jobDefinition () is
 begin
   null;
 end service;

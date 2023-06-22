@@ -54,7 +54,7 @@ begin
 					auditEvent.linkPreviousEvents(job);
 					job.totalOutOfSequence := job.totalOutOfSequence + 1;
 					generate BlockedAuditEvent.eventBlocked() to blockedAuditEvent;
-					eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType;
+					eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
 					Reporting~>reportEvent(Logger::Information, "aeordering_events_blocked", eventContent);
 				end;
 			when EventStateEnum.FAILED =>
@@ -63,7 +63,7 @@ begin
 					link failedAuditEvent R4 auditEvent;
 					logMessage := "AEOrdering::AuditEvent.createAuditEvent : " & failureReason;
 					Logger::log(Logger::Error, "AEOrdering", logMessage);
-					eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType & " : FailureReason = " & failureReason;
+					eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType & " : FailureReason = " & failureReason;
 					Reporting~>reportEvent(Logger::Error, "aeordering_events_failed", eventContent);
 				end;
 		end case;
@@ -75,13 +75,13 @@ begin
 			logMessage := "AEOrdering::AuditEvent.createAuditEvent : Audit Event has previously been reported for the same job, jobId = " & job.jobId & ", auditEventId = " & auditEventId;
 			Logger::log(Logger::Error, "AEOrdering", logMessage);
 			failureReason := "Audit Event has previously been reported for the same job";
-			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType & " : FailureReason = " & failureReason;
+			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType & " : FailureReason = " & failureReason;
 			Reporting~>reportEvent(Logger::Error, "aeordering_events_failed", eventContent);
 		else
 			logMessage := "AEOrdering::AuditEvent.createAuditEvent : Audit Event has previously been reported for a different job, jobId = " & job.jobId & ", auditEventId = " & auditEventId & ", previous jobId = " & previousJob.jobId;
 			Logger::log(Logger::Error, "AEOrdering", logMessage);
 			failureReason := "Audit Event has previously been reported for a different job. PreviousJobId = " & previousJob.jobId;
-			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " EventType = " & auditEventType & " : FailureReason = " & failureReason;
+			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType & " : FailureReason = " & failureReason;
 			Reporting~>reportEvent(Logger::Error, "aeordering_events_failed", eventContent);
 		end if;
 		auditEvent := null;
