@@ -30,7 +30,9 @@ begin
 		systemSpec := find_one SystemSpec();
 		if systemSpec = null then
 			systemSpec := create unique SystemSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, maxOutOfSequenceEvents => 10, 
-				                                   maximumJobTime => @PT10M@, jobCompletePeriod => @PT10M@, fileControlWaitTime => @PT1S@, Current_State => Created);
+				                                   maximumJobTime => @PT10M@, jobCompletePeriod => @PT10M@, fileControlWaitTime => @PT1S@, 
+				                                   defaultJobExpiryDuration => duration'weeks(52), defaultStaleAuditEventDuration => duration'hours(24),
+				                                   defaultBlockedAuditEventDuration => duration'hours(24), Current_State => Created);
 		end if;
 		systemSpec.loadConfigFile();
 		generate SystemSpec.checkConfigUpdate() to systemSpec;

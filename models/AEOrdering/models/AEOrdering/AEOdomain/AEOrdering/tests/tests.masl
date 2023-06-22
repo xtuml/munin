@@ -1124,6 +1124,9 @@ begin
 	generate SystemSpec.checkConfigUpdate() to systemSpec;
 	Test::service_event_queue();
 	
+	Assertions::assertTrue((systemSpec.defaultBlockedAuditEventDuration = @PT24H@), "Test Config File: Failed to set defaultBlockedAuditEventDuration, expected 24H found " & (systemSpec.defaultBlockedAuditEventDuration)'image);  
+	Assertions::assertTrue((systemSpec.defaultStaleAuditEventDuration = @PT24H@), "Test Config File: Failed to set defaultStaleAuditEventDuration, expected 24H found " & (systemSpec.defaultStaleAuditEventDuration)'image);  
+
 	// When the domain has started it should report the details of the Job definitions to verifications
 	reportedEventJobDefinitions := find _TEST_Req_IF_Verification_jobDefinition();
 	Assertions::assertTrue((reportedEventJobDefinitions'length = 2), "Test Config File: Failed to find the correct number of reported event definitions, expected 2 found " & (reportedEventJobDefinitions'length)'image);
