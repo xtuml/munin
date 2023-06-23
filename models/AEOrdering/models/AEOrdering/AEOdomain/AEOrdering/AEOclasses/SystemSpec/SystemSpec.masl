@@ -133,6 +133,15 @@ begin
             if configJSONObject'contains("JobDefinitionDirectory") then
                 this.jobDefinitionDirectory := JSON::get_string(configJSONObject["JobDefinitionDirectory"]);
             end if;
+            if configJSONObject'contains("DefaultJobExpiryDuration") then
+                this.defaultJobExpiryDuration := duration'parse(JSON::get_string(configJSONObject["DefaultJobExpiryDuration"]));
+            end if;
+            if configJSONObject'contains("DefaultStaleAuditEventDuration") then
+                this.defaultJobExpiryDuration := duration'parse(JSON::get_string(configJSONObject["DefaultStaleAuditEventDuration"]));
+            end if;
+            if configJSONObject'contains("DefaultBlockedAuditEventDuration") then
+                this.defaultBlockedAuditEventDuration := duration'parse(JSON::get_string(configJSONObject["DefaultBlockedAuditEventDuration"]));
+            end if;
             if configJSONObject'contains("JobStoreLocation") then
                 jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);
             end if;
@@ -231,6 +240,8 @@ constrainingDataItem : instance of DataItemType;
 constrainingDataItemName : string;
 intraJobInvDataItems : set of instance of DataItemType;
 updatedJobTypes : sequence of instance of JobType;
+eventDefinitions : sequence of EventDefinitionType;
+emptyEventDefinitions : sequence of EventDefinitionType;
 
 begin
     // process job definitions
@@ -249,9 +260,9 @@ begin
                         jobType := create JobType(
                             jobTypeName => JSON::get_string(jobTypeJSONObject["JobDefinitionName"]),
                             deprecated => false,
-                            jobTypeExpiryTime => timestamp'now + duration'weeks(52),
-                            staleAuditEventDuration => duration'hours(1),
-                            blockedAuditEventDuration => duration'hours(1),
+                            jobTypeExpiryTime => timestamp'now + this.defaultJobExpiryDuration,
+                            staleAuditEventDuration => this.defaultStaleAuditEventDuration,
+                            blockedAuditEventDuration => this.defaultBlockedAuditEventDuration,
                             jobDefinitionFileName => Filesystem::filename(jobDefinitionFile.jobDefinitionFileName),
                             modificationTime => jobDefinitionFile.lastModificationTime,
                             Current_State => Created
@@ -278,10 +289,12 @@ begin
     
     // report the latest set of events to the sequence domain
     for job in find updatedJobTypes() loop
+    	eventDefinitions := emptyEventDefinitions;
         for auditEventType in (job -> R12.AuditEventType() ordered_by (auditEventTypeId)) loop
-            Req_IF_Verification~>eventDefinition(auditEventType.jobTypeName, auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, 
+            eventDefinitions := eventDefinitions & (auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, 
             	                                 auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd, auditEventType.isBreak);
         end loop;
+        Req_IF_Verification~>jobDefinition(job.jobTypeName, eventDefinitions);
         // report any dynamic controls
         for dynamicControl in (job -> R12.AuditEventType -> R19.DynamicControl) loop
         	Req_IF_Verification~>dynamicControlDefinition(job.jobTypeName, dynamicControl.dynamicControlName, dynamicControl.controlType, dynamicControl.eventType, dynamicControl.occurrenceId, dynamicControl.userEventType, dynamicControl.userOccurrenceId);

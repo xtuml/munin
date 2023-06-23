@@ -1005,7 +1005,7 @@ end service;
 
 //! ACTIVITY BEGIN. '7ea44b46-f490-40d4-9dc1-d5cd69340148' DO NOT EDIT THIS LINE.
 private service AESequenceDC::Test36ErrorDetection () is
-theAJob : instance of Job;
+theJobs : set of instance of Job;
 theGJob : instance of Job;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
@@ -1025,6 +1025,7 @@ begin
   acceptOrderedEvent ("1620920006","authoriser-1234","AuthoriserSendWidgets","Job_Alpha","Ev6","Ev7",theAuditEventData);
   // Job complete being injected here is an error condition because this should not occur until all events for a Job have been received
   // Invoke interaction from AEOrdering called JobComplete which is interpreted as Job Timeout in this domain
+  // This will push the job into the job timed out state and report failure and start the job deletion timer
   jobComplete ("Job_Alpha");
 //
 //  
@@ -1044,19 +1045,18 @@ begin
   if (Test::get_scheduled_timers ())'length /= 0 then
     Test::fire_scheduled_timers();
   end if;
+  // Firing scheduled timers above will delete Job_Alpha
   // Invoke interaction from AEOrdering called JobComplete which is interpreted as Job Timeout in this domain
   jobComplete ("Job_Gamma");
   //
   Test::service_event_queue();
-  theAJob := find_one Job (jobID = "Job_Alpha");
+  
+  theJobs := find Job ();
   theGJob := find_one Job (jobID = "Job_Gamma");
 //  theSequences := theJobs -> R10;
 //  theAuditEvents := theSequences -> R11;
   
-  //Assertions::assertTrue(theJobs'length = 2, "Wrong number of jobs created: " & (theJobs'length)'image);
-  //Assertions::assertTrue(theSequences'length = 4, "Wrong number of sequences created: " & (theSequences'length)'image);
-  //Assertions::assertTrue(theAuditEvents'length = 25, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
-  Assertions::assertTrue(theAJob.jobCompleted = false, "Job is completed but shouldn't have: " & theAJob.jobID);
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs remain: " & (theJobs'length)'image);
   Assertions::assertTrue(theGJob.jobCompleted, "Job is incomplete: " & theGJob.jobID);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -4138,6 +4138,86 @@ begin
   for thePersistedInvariant in thePersistedInvariants loop
     thePersistedInvariant.deletePersistedInvariant();   
   end loop;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9d4bf09e-cc24-4ab6-8731-c78313ddf574' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test61CreateJobDefinition () is
+previousEventTypes : sequence of eventStructure;
+eventDefinition : eventDefinitionStructure;
+eventDefinitions : sequence of eventDefinitionStructure;
+jobDefn : instance of JobDefinition;
+theAuditEventDefs : sequence of instance of AuditEventDefinition;
+
+begin
+  //
+  // Job TestJob, Sequence 1 TestTransfer
+  // 
+  eventDefinition := ("TestTransfer","TestInput",1,previousEventTypes,true,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestInput",1,"","");
+  eventDefinition := ("TestTransfer","TestWrite",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestWrite",1,"","");
+  eventDefinition := ("TestTransfer","TestJustificationWrite",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestJustificationWrite",1,"","");
+  eventDefinition := ("TestTransfer","TestWidgets",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestWidgets",1,"","");
+  eventDefinition := ("TestTransfer","TestWidgetRequest",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestWidgetRequest",1,"","");
+  eventDefinition := ("TestTransfer","TestJustification",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestJustification",1,"","");
+  eventDefinition := ("TestTransfer","TestSendWidgets",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestSendWidgets",1,"","");
+  eventDefinition := ("TestTransfer","TestReceiveWidgets",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestReceiveWidgets",1,"Cons1","AND");
+  eventDefinition := ("TestTransfer","TestProcessedRequest",1,previousEventTypes,false,true,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestProcessedRequest",1,"Cons1","AND");
+  eventDefinition := ("TestTransfer","TestRead",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestRead",1,"","");
+  eventDefinition := ("TestTransfer","TestWritePayload",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestWritePayload",1,"","");
+  eventDefinition := ("TestTransfer","TestReadPayload",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestReadPayload",1,"","");
+  eventDefinition := ("TestTransfer","TestGatewayWrite",1,previousEventTypes,false,true,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  AESequenceDC::createJobDefinition("TestJob", eventDefinitions);
+
+
+  jobDefn := find_one JobDefinition (jobName = "TestJob");
+  theAuditEventDefs := jobDefn -> R7.AESequenceDefinition -> R1.AuditEventDefinition;
+  Assertions::assertTrue(jobDefn /= null, "Job definition not created - jobName : testJob");
+  Assertions::assertTrue(theAuditEventDefs'length = 13, "Wrong number of event definitions created: " & (theAuditEventDefs'length)'image);
+
+
+
+//
+//
+//
+//
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
