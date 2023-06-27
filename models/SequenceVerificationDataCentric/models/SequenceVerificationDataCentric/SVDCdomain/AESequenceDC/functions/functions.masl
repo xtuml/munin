@@ -13,6 +13,9 @@ logMessage : string;
 eventContent : string;
 
 begin
+  // Report the event
+  eventContent := "EventId = " & id;
+  Reporting~>reportEvent(Logger::Error, "svdc_event_received", eventContent);
   // Check to see if the received event is part of a Job that is already being processed
   existingJob := find_only Job (jobID = jobId);
   if existingJob /= null then
@@ -509,6 +512,28 @@ begin
     
     generate Job.StoredInvariantsReceived () to eachJob;
   end loop;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '589ab0f0-596d-403d-8d6a-7a6004724b5d' DO NOT EDIT THIS LINE.
+public service AESequenceDC::createJobDefinition ( jobName : in string,
+                                                  eventDefinitions : in sequence of eventDefinitionStructure ) is
+theJobDefn : instance of JobDefinition;
+logMessage : string;
+begin
+  theJobDefn := find_one JobDefinition (jobName = jobName);
+  if theJobDefn = null then
+    // Event Definition for new Job so create the Job Definition
+    theJobDefn := create unique JobDefinition (jobName => jobName, isDeprecated => false, isSuspended => false, Current_State => Active);
+    for eventDefinition in eventDefinitions loop
+    	AESequenceDC::eventDefinition(jobName, eventDefinition.sequenceName, eventDefinition.eventType, eventDefinition.occurrenceId, 
+    		                          eventDefinition.previousEventTypes, eventDefinition.isSequenceStart, eventDefinition.isSequenceEnd, eventDefinition.isBreak);
+    end loop;
+  else
+    logMessage := "AESequenceDC::createJobDefinition :  Updates for existing jobs not supported: Job Name = " & jobName;
+    Logger::log(Logger::Debug, "AESequenceDC", logMessage);            
+  end if;
+     
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

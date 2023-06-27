@@ -4141,3 +4141,83 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '9d4bf09e-cc24-4ab6-8731-c78313ddf574' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test61CreateJobDefinition () is
+previousEventTypes : sequence of eventStructure;
+eventDefinition : eventDefinitionStructure;
+eventDefinitions : sequence of eventDefinitionStructure;
+jobDefn : instance of JobDefinition;
+theAuditEventDefs : sequence of instance of AuditEventDefinition;
+
+begin
+  //
+  // Job TestJob, Sequence 1 TestTransfer
+  // 
+  eventDefinition := ("TestTransfer","TestInput",1,previousEventTypes,true,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestInput",1,"","");
+  eventDefinition := ("TestTransfer","TestWrite",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestWrite",1,"","");
+  eventDefinition := ("TestTransfer","TestJustificationWrite",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestJustificationWrite",1,"","");
+  eventDefinition := ("TestTransfer","TestWidgets",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestWidgets",1,"","");
+  eventDefinition := ("TestTransfer","TestWidgetRequest",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestWidgetRequest",1,"","");
+  eventDefinition := ("TestTransfer","TestJustification",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestJustification",1,"","");
+  eventDefinition := ("TestTransfer","TestSendWidgets",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestSendWidgets",1,"","");
+  eventDefinition := ("TestTransfer","TestReceiveWidgets",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestReceiveWidgets",1,"Cons1","AND");
+  eventDefinition := ("TestTransfer","TestProcessedRequest",1,previousEventTypes,false,true,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestProcessedRequest",1,"Cons1","AND");
+  eventDefinition := ("TestTransfer","TestRead",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestRead",1,"","");
+  eventDefinition := ("TestTransfer","TestWritePayload",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestWritePayload",1,"","");
+  eventDefinition := ("TestTransfer","TestReadPayload",1,previousEventTypes,false,false,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  previousEventTypes := ("TestReadPayload",1,"","");
+  eventDefinition := ("TestTransfer","TestGatewayWrite",1,previousEventTypes,false,true,false);
+  eventDefinitions := eventDefinitions & eventDefinition;
+  
+  AESequenceDC::createJobDefinition("TestJob", eventDefinitions);
+
+
+  jobDefn := find_one JobDefinition (jobName = "TestJob");
+  theAuditEventDefs := jobDefn -> R7.AESequenceDefinition -> R1.AuditEventDefinition;
+  Assertions::assertTrue(jobDefn /= null, "Job definition not created - jobName : testJob");
+  Assertions::assertTrue(theAuditEventDefs'length = 13, "Wrong number of event definitions created: " & (theAuditEventDefs'length)'image);
+
+
+
+//
+//
+//
+//
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

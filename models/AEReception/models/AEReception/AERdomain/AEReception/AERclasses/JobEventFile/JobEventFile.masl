@@ -34,6 +34,7 @@ begin
     end if;
     
     this.auditEvents := this.auditEvents & JSON::to_json(auditEvent);
+    this.eventIds := this.eventIds & JSON::get_string(auditEvent["eventId"]);
     eventContent := "JobId = " & auditEvent["jobId"].data.str & " : EventId = " & auditEvent["eventId"].data.str & " : EventType = " & auditEvent["eventType"].data.str;
     Reporting~>reportEvent(Logger::Information, "reception_event_added", eventContent);
 
@@ -43,6 +44,7 @@ end service;
 //! ACTIVITY BEGIN. '5cc58897-99d1-449c-86b2-e9139892f24f' DO NOT EDIT THIS LINE.
 public instance service AEReception::JobEventFile.writeJobEventFile () is
 receptionSpec : instance of ReceptionSpec;
+eventContent : string;
 
 begin
 	receptionSpec := find_one ReceptionSpec();	
@@ -52,6 +54,10 @@ begin
 	else
 		raise program_error;
 	end if;
+	for eventId in this.eventIds loop
+		eventContent := "EventId = " & eventId;
+		Reporting~>reportEvent(Logger::Information, "reception_event_written", eventContent);
+	end loop;
 	this.jobEventFileGenerated := true;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
