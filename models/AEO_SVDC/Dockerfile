@@ -10,7 +10,7 @@ FROM ghcr.io/xtuml/aesequencedc:${VERSION_TAG} as aesequencedc
 # BASE BUILD                                                                   #
 ################################################################################
 
-FROM levistarrett/masl-base:v2 AS build-base
+FROM levistarrett/masl-base:v3.0.1 AS build-base
 
 ARG EXTRA_MASL_ARGS=
 
@@ -26,7 +26,7 @@ ADD CMakeLists.txt /root/CMakeLists.txt
 # BASE INSTALL                                                                 #
 ################################################################################
 
-FROM levistarrett/masl-base:v2 AS install-base
+FROM levistarrett/masl-base:v3.0.1 AS install-base
 
 # copy schedules
 ADD schedule /root/schedule
