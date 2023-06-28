@@ -2,30 +2,78 @@
 partition "Protocol Verifier Job 1" {
   group "Protocol Verifier Sequence 1"
     #green:PVJobStart;
+    note right
+      "Sourced from 
+      job creation in AEO"
+    endnote
     if ("XOR") then ("pass")
       :PVSequencingStart;
+      note left
+        "Sourced from 
+        job creation in SVDC"
+      endnote
       if ("XOR") then ("pass")
         :PVEventProcessingComplete;
+        note left
+          "Sourced from the start of 
+          Assessing Constraints in SVDC"
+        endnote
         if ("XOR") then ("pass")
           :PVConstraintCheckPassed;
+          note left
+            "Sourced from the start of 
+            Assessing Invariants in SVDC"
+          endnote
           if ("XOR") then ("pass")
             :PVJobSuccessful;
+            note left
+              "Sourced from the start of 
+              Job Successful in SVDC"
+            endnote
             if ("XOR") then ("fail")
               :PVJobFails;
+              note left
+                "Sourced from the start of 
+                job.failJob in SVDC or 
+                Job Failed in AEO"
+              endnote
             endif
           else ("fail")
             :PVJobFails;
+            note right
+              "Sourced from the start of
+              job.failJob in SVDC or 
+              Job Failed in AEO"
+            endnote
           endif
         else ("fail")
           :PVJobFails;
+          note right
+            "Sourced from the start of
+            job.failJob in SVDC or 
+            Job Failed in AEO"
+          endnote
         endif
       else ("fail")
         :PVJobFails;
+        note right
+          "Sourced from the start of
+          job.failJob in SVDC or 
+          Job Failed in AEO"
+        endnote
       endif  
     else ("fail")
       :PVJobFails;
+      note right
+        "Sourced from 
+        Job Failed state in AEO"
+      endnote
     endif  
     #red:PVJobDeleted;  
+    note right
+      "Sourced from 
+      Job Deleted state in AEO"
+    endnote
   end group
 }
 @enduml
