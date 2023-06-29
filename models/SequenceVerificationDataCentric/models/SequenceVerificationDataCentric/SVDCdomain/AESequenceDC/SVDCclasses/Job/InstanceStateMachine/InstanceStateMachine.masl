@@ -3,10 +3,10 @@ state AESequenceDC::Job.JobInProgress ( eventId : in string,
                                        prevAEIds : in sequence of string,
                                        aeType : in string,
                                        aeData : in sequence of auditEventDataStructure ) is
-newEvent : instance of AuditEvent;
-existingEvent : instance of AuditEvent;
-theEventType : instance of AuditEventDefinition;
-prevEvent : instance of AuditEvent;
+newEvent : instance of SequencedAuditEvent;
+existingEvent : instance of SequencedAuditEvent;
+theEventType : instance of SequencedAuditEventDefinition;
+prevEvent : instance of SequencedAuditEvent;
 prevEventIsValid : boolean;
 theAeSequenceDef : instance of AESequenceDefinition;
 theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
@@ -73,12 +73,12 @@ begin
   // Reset the jobHangingTimer if it is set
   cancel this.jobHangingTimer;
   // Check to see if we've seen this event instance before
-  existingEvent := find_one AuditEvent (AuditEventId = eventId);
+  existingEvent := find_one SequencedAuditEvent (AuditEventId = eventId);
   if existingEvent = null then
     // The received event has not been seen before, so link the new event to this Job.
-    newEvent := create AuditEvent (AuditEventId => eventId, seenAsPreviousEvent => false);
+    newEvent := create SequencedAuditEvent (AuditEventId => eventId, seenAsPreviousEvent => false);
     link this R3 newEvent;
-    theEventType := find_only AuditEventDefinition (AEType = aeType);
+    theEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
     if theEventType /= null then
       // We have a valid event type
       link newEvent R2 theEventType;
@@ -98,7 +98,7 @@ begin
         auditEventDataProcessed := false;
         for aPrevEventId in prevAEIds loop 
           // Need to locate the previous event as defined in the event parameter
-          prevEvent := find_one AuditEvent (AuditEventId = aPrevEventId);
+          prevEvent := find_one SequencedAuditEvent (AuditEventId = aPrevEventId);
           if prevEvent /= null then
             prevAeOccInSequenceDef := prevEvent -> R13;
             // Find the occurrence definitions for the events that are expected to follow that one as our new event should be one of those
@@ -491,10 +491,10 @@ theConstraintDefns : sequence of instance of ConstraintDefinition;
 theConstrainedSeqPairDefns : sequence of instance of AEInSequencePairDefn;
 eachConstrainedSeqPairDefn : instance of AEInSequencePairDefn;
 theConstrainedAuditEventPairs : sequence of instance of AuditEventPair;
-thePreviousAuditEvents : set of instance of AuditEvent;
+thePreviousAuditEvents : set of instance of SequencedAuditEvent;
 theFollowingAuditEventPairs : sequence of instance of AuditEventPair;
-theForkAuditEvent : instance of AuditEvent;
-theBranchedEvents : set of instance of AuditEvent;
+theForkAuditEvent : instance of SequencedAuditEvent;
+theBranchedEvents : set of instance of SequencedAuditEvent;
 validatedConstraint : boolean;
 validatedDynamicControl : boolean;
 logMessage : string;
@@ -804,9 +804,9 @@ end state;
 state AESequenceDC::Job.AssessingIntraJobInvariants () is
 expectedIntraJobInvDefns : set of instance of IntraJobInvariantDefn;
 theExpectedIntraJobInvDefn : instance of IntraJobInvariantDefn;
-theJobsAuditEvents : set of instance of AuditEvent;
-theInvariantAuditEvents : set of instance of AuditEvent;
-theJobsInvariantAuditEvents : set of instance of AuditEvent;
+theJobsAuditEvents : set of instance of SequencedAuditEvent;
+theInvariantAuditEvents : set of instance of SequencedAuditEvent;
+theJobsInvariantAuditEvents : set of instance of SequencedAuditEvent;
 theIntraJobInvariant : instance of TransientInvariant;
 intraJobInvariantCheckPassed : boolean;
 matched : boolean;
@@ -874,9 +874,9 @@ end state;
 state AESequenceDC::Job.AssessingLocalExtraJobInvariants () is
 expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
 theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;
-theJobsAuditEvents : set of instance of AuditEvent;
-theInvariantAuditEvents : set of instance of AuditEvent;
-theJobsInvariantAuditEvents : set of instance of AuditEvent;
+theJobsAuditEvents : set of instance of SequencedAuditEvent;
+theInvariantAuditEvents : set of instance of SequencedAuditEvent;
+theJobsInvariantAuditEvents : set of instance of SequencedAuditEvent;
 theTransientExtraJobInvariant : instance of TransientInvariant;
 thePersistedExtraJobInvariant : instance of PersistedInvariant;
 theRestoredPersistentInvariant : instance of PersistedInvariant;
@@ -944,9 +944,9 @@ end state;
 state AESequenceDC::Job.ReassessingExtraJobInvariants () is
 expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
 theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;
-theJobsAuditEvents : set of instance of AuditEvent;
-theInvariantAuditEvents : set of instance of AuditEvent;
-theJobsInvariantAuditEvents : set of instance of AuditEvent;
+theJobsAuditEvents : set of instance of SequencedAuditEvent;
+theInvariantAuditEvents : set of instance of SequencedAuditEvent;
+theJobsInvariantAuditEvents : set of instance of SequencedAuditEvent;
 theTransientExtraJobInvariant : instance of TransientInvariant;
 thePersistedExtraJobInvariant : instance of PersistedInvariant;
 thePersistedExtraJobInvariants : set of instance of PersistedInvariant;

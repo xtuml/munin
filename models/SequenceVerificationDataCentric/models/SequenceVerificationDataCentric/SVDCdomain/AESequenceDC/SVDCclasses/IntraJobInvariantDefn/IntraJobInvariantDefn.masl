@@ -4,12 +4,12 @@ public service AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn (
                                                                                 invariantEventDefns : in sequence of eventStructure ) is
 newInvariant : instance of IntraJobInvariantDefn;
 theJobDefn : instance of JobDefinition;
-theEventDefn : instance of AuditEventDefinition;
+theEventDefn : instance of SequencedAuditEventDefinition;
 theSequenceDefn: instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
-theAuditEventDefinitions : set of instance of AuditEventDefinition;
+theAuditEventDefinitions : set of instance of SequencedAuditEventDefinition;
 logMessage: string;
 eventContent : string;
 

@@ -20,15 +20,15 @@ end service;
 
 //! ACTIVITY BEGIN. '29df042e-fb35-4443-881f-62ea6991447a' DO NOT EDIT THIS LINE.
 public instance service AESequenceDC::Job.deleteJob () is
-theAuditEvents : set of instance of AuditEvent;
-theAuditEvent : instance of AuditEvent;
-theNextAuditEvent : instance of AuditEvent;
-theNextAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theAuditEvent : instance of SequencedAuditEvent;
+theNextAuditEvent : instance of SequencedAuditEvent;
+theNextAuditEvents : set of instance of SequencedAuditEvent;
 theSequences : set of instance of Sequence;
 theJobDef : instance of JobDefinition;
 theAuditEventPairs : set of instance of AuditEventPair;
 theAuditEventPair : instance of AuditEventPair;
-theAuditEventDefinition : instance of AuditEventDefinition;
+theAuditEventDefinition : instance of SequencedAuditEventDefinition;
 theTransientInvariant : instance of TransientInvariant;
 thePersistedInvariant : instance of PersistedInvariant;
 theDynamicControls : set of instance of DynamicControl;

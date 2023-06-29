@@ -1,14 +1,14 @@
 //! ACTIVITY BEGIN. '1c910ac3-72cf-4b5c-9022-936017cad0c7' DO NOT EDIT THIS LINE.
-public service AESequenceDC::AuditEvent.AddEventForNewJob ( jobId : in string,
-                                                           eventId : in string,
-                                                           prevAEIds : in sequence of string,
-                                                           aeType : in string,
-                                                           aeData : in sequence of auditEventDataStructure ) is
+public service AESequenceDC::SequencedAuditEvent.AddEventForNewJob ( jobId : in string,
+                                                                    eventId : in string,
+                                                                    prevAEIds : in sequence of string,
+                                                                    aeType : in string,
+                                                                    aeData : in sequence of auditEventDataStructure ) is
 newJob :  instance of Job;
-newEvent : instance of AuditEvent;
-oldEvent : instance of AuditEvent;
-newEventType : instance of AuditEventDefinition;
-prevEvent : instance of AuditEvent;
+newEvent : instance of SequencedAuditEvent;
+oldEvent : instance of SequencedAuditEvent;
+newEventType : instance of SequencedAuditEventDefinition;
+prevEvent : instance of SequencedAuditEvent;
 theAeSequenceDef : instance of AESequenceDefinition;
 theAeInSequenceDef : instance of AEInSequenceDefinition;
 theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
@@ -24,15 +24,15 @@ empty : sequence of string;
 emptyString : sequence of string := empty & ("");
 
 begin
-  oldEvent := find_one AuditEvent (AuditEventId = eventId);
+  oldEvent := find_one SequencedAuditEvent (AuditEventId = eventId);
   // Check to see if we've seen this event instance before
   if (oldEvent = null) then
     //We have a new job and this event must be a valid initial event for a Job
     newJob := create Job (jobID => jobId, sequencingFailed => false, jobCompleted => false, Current_State => JobInProgress );
-    newEvent := create AuditEvent (AuditEventId => eventId);
+    newEvent := create SequencedAuditEvent (AuditEventId => eventId);
   
     link newJob R3 newEvent;
-    newEventType := find_only AuditEventDefinition (AEType = aeType);
+    newEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
     if (newEventType /= null) and ((prevAEIds = empty) or (prevAEIds = emptyString)) then
   	  //We have a valid event type and no previous events
   	  // So check that it is also the first event of a sequence in that Job
@@ -90,11 +90,11 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '26822f33-6a72-4785-a400-7c11e5d71d99' DO NOT EDIT THIS LINE.
-public instance service AESequenceDC::AuditEvent.AddEventTBD () is
+public instance service AESequenceDC::SequencedAuditEvent.AddEventTBD () is
 newJob :  instance of Job;
-newEvent : instance of AuditEvent;
-newEventType : instance of AuditEventDefinition;
-prevEvent : instance of AuditEvent;
+newEvent : instance of SequencedAuditEvent;
+newEventType : instance of SequencedAuditEventDefinition;
+prevEvent : instance of SequencedAuditEvent;
 
 begin
   null;
@@ -110,14 +110,14 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'f6c7376e-a155-480d-8007-f3c3ebc441aa' DO NOT EDIT THIS LINE.
-public instance service AESequenceDC::AuditEvent.TestPreviousEventIsValid ( prevEventInstance : in instance of AuditEvent,
-                                                                           previousEventIsValid : out boolean ) is
+public instance service AESequenceDC::SequencedAuditEvent.TestPreviousEventIsValid ( prevEventInstance : in instance of AuditEvent,
+                                                                                    previousEventIsValid : out boolean ) is
 //The Audit Event instance on which this operation is invoked is newEvent
 // The input parameter is prevEventInstance
 
 //prevEventInstance : instance of AuditEvent;
-theAuditEventDefinition : instance of AuditEventDefinition;
-prevAuditEventDefinition : instance of AuditEventDefinition;
+theAuditEventDefinition : instance of SequencedAuditEventDefinition;
+prevAuditEventDefinition : instance of SequencedAuditEventDefinition;
 thisEventInSequence : instance of AEInSequenceDefinition;
 prevEventOccInSequence : instance of AEOccurrenceInSequenceDefinition;
 intersectionEventOccsInSequence : set of instance of AEOccurrenceInSequenceDefinition;
@@ -157,9 +157,9 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'c6026915-9e48-40be-868c-610fa28ecd6a' DO NOT EDIT THIS LINE.
-public instance service AESequenceDC::AuditEvent.ProcessAuditEventData ( aeData : in sequence of auditEventDataStructure ) is
+public instance service AESequenceDC::SequencedAuditEvent.ProcessAuditEventData ( aeData : in sequence of auditEventDataStructure ) is
 theJob : instance of Job;
-theEventType : instance of AuditEventDefinition;
+theEventType : instance of SequencedAuditEventDefinition;
 theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
 aeDataElement : auditEventDataStructure;
 newIntraJobInvariant : instance of TransientInvariant;
@@ -386,8 +386,8 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'e261f65f-eac2-47c7-beee-253b667a440a' DO NOT EDIT THIS LINE.
-public instance service AESequenceDC::AuditEvent.CheckEventCarriesExpectedEventData ( checkHasPassed : out boolean,
-                                                                                     failureReason : out string ) is
+public instance service AESequenceDC::SequencedAuditEvent.CheckEventCarriesExpectedEventData ( checkHasPassed : out boolean,
+                                                                                              failureReason : out string ) is
 theEventOccurrenceInSeqDef : instance of AEOccurrenceInSequenceDefinition;
 theExpectedSourceDynamicControlDefs : set of instance of DynamicControlDefinition;
 theExpectedUsageDynamicControlDef : instance of DynamicControlDefinition;

@@ -5,8 +5,8 @@ public service AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariant
                                                                                       lifetime : in duration ) is
 newInvariant : instance of ExtraJobInvariantDefn;
 theJobDefn : instance of JobDefinition;
-theJobsEvents : set of instance of AuditEventDefinition;
-theEventDefn : instance of AuditEventDefinition;
+theJobsEvents : set of instance of SequencedAuditEventDefinition;
+theEventDefn : instance of SequencedAuditEventDefinition;
 theSequenceDefn: instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
@@ -49,8 +49,8 @@ public service AESequenceDC::ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn
                                                                                   invariantEventDefn : in eventStructure ) is
 theInvariantDefn : instance of ExtraJobInvariantDefn;
 theJobDefn : instance of JobDefinition;
-theJobsEvents : set of instance of AuditEventDefinition;
-theEventDefn : instance of AuditEventDefinition;
+theJobsEvents : set of instance of SequencedAuditEventDefinition;
+theEventDefn : instance of SequencedAuditEventDefinition;
 theSequenceDefn: instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
@@ -90,7 +90,7 @@ end service;
 //! ACTIVITY BEGIN. '0c9559e6-7737-4888-8934-fea07df4a274' DO NOT EDIT THIS LINE.
 public instance service AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition ( restoredInvariant : in persistedInvariantStructure ) is
 theAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
-theEventDefn : instance of AuditEventDefinition;
+theEventDefn : instance of SequencedAuditEventDefinition;
 theJobDefn : instance of JobDefinition;
 theRestoredPersistentInvariant : instance of PersistedInvariant;
 existingInvariant : instance of PersistedInvariant;

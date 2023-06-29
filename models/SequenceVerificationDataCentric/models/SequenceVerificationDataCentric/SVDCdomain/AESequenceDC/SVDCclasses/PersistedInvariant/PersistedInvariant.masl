@@ -7,7 +7,7 @@ endTime : timestamp;
 existingExtraJobInvariant : instance of PersistedInvariant;
 newExtraJobInvariant : instance of PersistedInvariant;
 sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
-sourceEventDefn : instance of AuditEventDefinition;
+sourceEventDefn : instance of SequencedAuditEventDefinition;
 sourceJobDefn : instance of JobDefinition;
 logMessage : string;
 
@@ -53,7 +53,7 @@ end service;
 //! ACTIVITY BEGIN. '2869fcaf-8e75-459e-8a4b-c88648b57c5f' DO NOT EDIT THIS LINE.
 public instance service AESequenceDC::PersistedInvariant.deletePersistedInvariant () is
 theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
-theProvidingAuditEvent : instance of AuditEvent;
+theProvidingAuditEvent : instance of SequencedAuditEvent;
 
 logMessage : string;
 
