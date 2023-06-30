@@ -21,7 +21,7 @@ begin
   theJobDefn := theDynamicControlDefn -> R32;
   
   Assertions::assertTrue(theDynamicControlDefn.dynamicControlName = "Counter_1", "Loop Counter not created as expected: " & theDynamicControlDefn.dynamicControlName);
-  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType);
+  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.SequencedAuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.SequencedAuditEventDefinition).AEType);
 //  Assertions::assertTrue((theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType = "LCLB", "User Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType);
   Assertions::assertTrue(theJobDefn.jobName = "LoopCountJob", "Job not created as expected: " & theJobDefn.jobName);
   
@@ -155,7 +155,7 @@ begin
   theJobDefn := theDynamicControlDefn -> R32;
   
   Assertions::assertTrue(theDynamicControlDefn.dynamicControlName = "Counter_1", "Loop Counter not created as expected: " & theDynamicControlDefn.dynamicControlName);
-  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType);
+  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.SequencedAuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.SequencedAuditEventDefinition).AEType);
 //  Assertions::assertTrue((theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType = "LCLB", "User Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType);
   Assertions::assertTrue(theJobDefn.jobName = "LoopCountJob", "Job not created as expected: " & theJobDefn.jobName);
   

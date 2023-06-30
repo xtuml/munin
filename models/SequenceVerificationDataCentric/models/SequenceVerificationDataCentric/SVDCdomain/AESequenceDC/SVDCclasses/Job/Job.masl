@@ -34,15 +34,15 @@ thePersistedInvariant : instance of PersistedInvariant;
 theDynamicControls : set of instance of DynamicControl;
 
 begin
-  theAuditEvents := this -> R3;
+  theAuditEvents := this -> R10 -> R11;
   for theAuditEvent in theAuditEvents'elements loop
-    theNextAuditEvents := theAuditEvent -> R4.has_next.AuditEvent;
+    theNextAuditEvents := theAuditEvent -> R4.has_next.SequencedAuditEvent;
     for theNextAuditEvent in theNextAuditEvents loop
       theAuditEventPair := theAuditEvent with theNextAuditEvent -> R4.has_next.AuditEventPair;
       if (theAuditEventPair -> R15) /= null then
         unlink (theAuditEventPair -> R15) R15 theAuditEventPair;
       end if;
-      unlink theAuditEvent R4.has_next.AuditEvent theNextAuditEvent using theAuditEventPair;
+      unlink theAuditEvent R4.has_next.SequencedAuditEvent theNextAuditEvent using theAuditEventPair;
       delete theAuditEventPair;
     end loop;
     if (theAuditEvent -> R11) /= null then
@@ -51,9 +51,6 @@ begin
     if (theAuditEvent -> R2) /= null then
       unlink (theAuditEvent -> R2) R2 theAuditEvent;
     end if;
-    if (theAuditEvent -> R3) /= null then      
-      unlink (theAuditEvent -> R3) R3 theAuditEvent;  
-    end if;  
     if (theAuditEvent -> R13) /= null then      
       unlink (theAuditEvent -> R13) R13 theAuditEvent;  
     end if;  

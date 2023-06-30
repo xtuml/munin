@@ -4208,7 +4208,7 @@ begin
 
 
   jobDefn := find_one JobDefinition (jobName = "TestJob");
-  theAuditEventDefs := jobDefn -> R7.AESequenceDefinition -> R1.AuditEventDefinition;
+  theAuditEventDefs := jobDefn -> R7.AESequenceDefinition -> R1.SequencedAuditEventDefinition;
   Assertions::assertTrue(jobDefn /= null, "Job definition not created - jobName : testJob");
   Assertions::assertTrue(theAuditEventDefs'length = 13, "Wrong number of event definitions created: " & (theAuditEventDefs'length)'image);
 

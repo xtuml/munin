@@ -8,6 +8,7 @@ theJobDefn : instance of JobDefinition;
 theJobsEvents : set of instance of SequencedAuditEventDefinition;
 theEventDefn : instance of SequencedAuditEventDefinition;
 theSequenceDefn: instance of AESequenceDefinition;
+theSequenceDefns: set of instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
@@ -17,12 +18,15 @@ eventContent : string;
 begin
   theJobDefn := find_one JobDefinition (jobName = jobDefnName);
   if theJobDefn /= null then
-    theJobsEvents := theJobDefn -> R7 -> R1.AuditEventDefinition;
+    theJobsEvents := theJobDefn -> R7 -> R1.SequencedAuditEventDefinition;
   
     theEventDefn := find_one theJobsEvents (AEType = invariantEventDefn.eventTypeName);
     if theEventDefn /= null then
       newInvariant := create ExtraJobInvariantDefn (extraJobInvName => invariantName, lifetime => lifetime);
-      theSequenceDefn := theEventDefn -> R1.AESequenceDefinition;
+      theSequenceDefns := theEventDefn -> R1.AESequenceDefinition;
+      
+      theSequenceDefn := find_one theSequenceDefns (jobName = jobDefnName);
+            
       theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
       theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
       theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = invariantEventDefn.occurrenceId);
@@ -52,6 +56,7 @@ theJobDefn : instance of JobDefinition;
 theJobsEvents : set of instance of SequencedAuditEventDefinition;
 theEventDefn : instance of SequencedAuditEventDefinition;
 theSequenceDefn: instance of AESequenceDefinition;
+theSequenceDefns: set of instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
@@ -60,13 +65,16 @@ eventContent : string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobDefnName);
-  theJobsEvents := theJobDefn -> R7 -> R1.AuditEventDefinition;
+  theJobsEvents := theJobDefn -> R7 -> R1.SequencedAuditEventDefinition;
   
   theEventDefn := find_one theJobsEvents (AEType = invariantEventDefn.eventTypeName);
   if theEventDefn /= null then
     theInvariantDefn := find_one ExtraJobInvariantDefn (extraJobInvName = invariantName);
     if theInvariantDefn /= null then
-      theSequenceDefn := theEventDefn -> R1.AESequenceDefinition;
+      theSequenceDefns := theEventDefn -> R1.AESequenceDefinition;
+      
+      theSequenceDefn := find_one theSequenceDefns (jobName = jobDefnName);
+      
       theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
       theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
       theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = invariantEventDefn.occurrenceId);
@@ -100,7 +108,7 @@ logMessage : string;
 
 begin
       theAEOccurrenceDefn := this -> R20;
-      theEventDefn := theAEOccurrenceDefn -> R12 -> R1.AuditEventDefinition;
+      theEventDefn := theAEOccurrenceDefn -> R12 -> R1.SequencedAuditEventDefinition;
       theJobDefn := theAEOccurrenceDefn -> R12 -> R1.AESequenceDefinition -> R7;
       if restoredInvariant.sourceJobDefinitionType = theJobDefn.jobName and
          restoredInvariant.sourceAuditEventType = theEventDefn.AEType and

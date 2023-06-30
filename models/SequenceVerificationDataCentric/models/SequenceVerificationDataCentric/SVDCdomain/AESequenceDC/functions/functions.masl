@@ -7,7 +7,9 @@ public service AESequenceDC::acceptOrderedEvent ( ae_time : in string,
                                                  id : in string,
                                                  auditEventData : in sequence of auditEventDataStructure ) is
 existingJob : instance of Job;
-theAuditEventDefinition : instance of SequencedAuditEventDefinition;
+theSeqAuditEventDefinition : instance of SequencedAuditEventDefinition;
+aeSequenceDefs : set of instance of AESequenceDefinition;
+theSequenceDef : instance of AESequenceDefinition;
 theJobDefinition : instance of JobDefinition;
 logMessage : string;
 eventContent : string;
@@ -24,10 +26,16 @@ begin
   else
     // The received event must be for a new job, but before the event can be accepted we need to verify that 
     // the JobDefinition for this new job is neither Suspended nor Deprecated (if it is, the event cannot be accepted)
-    theAuditEventDefinition := find_only SequencedAuditEventDefinition (AEType = ae_type);
-    if theAuditEventDefinition /= null then
-      // The ae_type is a known type - use this to find which JobDefinition it relates to and then verify that it is ACTIVE.
-      theJobDefinition := theAuditEventDefinition -> R1.AESequenceDefinition -> R7;
+    theSeqAuditEventDefinition := find_only SequencedAuditEventDefinition (AEType = ae_type);
+    if theSeqAuditEventDefinition /= null then
+      // The ae_type is a known sequenced event type - use this to find which JobDefinition it relates to and then verify that it is ACTIVE.
+
+      aeSequenceDefs := theSeqAuditEventDefinition -> R1.AESequenceDefinition;
+      
+      //TODO Replace this next line with something that takes account of JobName when that is available
+      theSequenceDef := find_one aeSequenceDefs ();
+      
+      theJobDefinition := theSequenceDef -> R7;
       if (theJobDefinition.isSuspended = true) or (theJobDefinition.isDeprecated = true)then
         // Log info: The accepted event is for a new Job that has a non-active JobDefinition 
         logMessage := "AESequenceDC::acceptorderedEvent : The event - AuditEventId = " & id & "cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
@@ -141,7 +149,7 @@ begin
     link theEventOccInSeqDef R12 theEventInSeqDef;
   else
     // The event definition has been seen before which could indicate the repetition of an event type in a sequence
-    theEventDefnsInSequence := theSequenceDefn -> R1.AuditEventDefinition;
+    theEventDefnsInSequence := theSequenceDefn -> R1.SequencedAuditEventDefinition;
     matchingEventDefn := find_one theEventDefnsInSequence (AEType = eventType);
     if matchingEventDefn /= null then
       // We have already seen this event type which could be because of a placeholder event definition or because of a repeated occurrence of an event definition

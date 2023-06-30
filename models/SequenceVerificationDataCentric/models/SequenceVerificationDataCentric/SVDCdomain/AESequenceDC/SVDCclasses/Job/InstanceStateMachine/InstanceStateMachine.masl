@@ -77,7 +77,6 @@ begin
   if existingEvent = null then
     // The received event has not been seen before, so link the new event to this Job.
     newEvent := create SequencedAuditEvent (AuditEventId => eventId, seenAsPreviousEvent => false);
-    link this R3 newEvent;
     theEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
     if theEventType /= null then
       // We have a valid event type
@@ -85,7 +84,11 @@ begin
       
       // Next, determine if the received event is of a type that is expected for the stated previous event - firstly
       // find the set of occurrences of the received event type for the sequence
-      theSequenceDef := theEventType -> R1.AESequenceDefinition;
+      aeSequenceDefs := theEventType -> R1.AESequenceDefinition;
+      
+      // TODO Fix this next line when jobType is available through the interface
+      theSequenceDef := find_one aeSequenceDefs();
+      
       theAeInSequenceDef := theSequenceDef with theEventType -> R1.AEInSequenceDefinition;
       theAeOccurrencesInSequenceDef := theAeInSequenceDef -> R12;
       
@@ -125,7 +128,7 @@ begin
                   // Link the new event to the previous event to capture the sequence we are seeing
                   newAuditEventPair := create AuditEventPair (previousAuditEventId => prevEvent.AuditEventId,
                                                               nextAuditEventId => newEvent.AuditEventId);
-                  link newEvent R4.has_previous.AuditEvent prevEvent using newAuditEventPair;
+                  link newEvent R4.has_previous.SequencedAuditEvent prevEvent using newAuditEventPair;
                   link newAuditEventPair R15 theAeInSequencePairDefn;
                 else
                     this.sequencingFailed := true;
@@ -502,7 +505,7 @@ failureReason: string;
 
 begin
   // Need to check that constraints are honoured	
-  theAuditEventPairs := this -> R3 -> R4.has_next.AuditEventPair;
+  theAuditEventPairs := this -> R10 -> R11 -> R4.has_next.AuditEventPair;
   validatedConstraint := true;
   for eachAuditEventPair in theAuditEventPairs loop
     theConstraintDefn := eachAuditEventPair -> R15 -> R16;
@@ -522,7 +525,7 @@ begin
         // Find the constrained event pairs - the graph edges after the XOR node - in this Job
         theConstrainedAuditEventPairs := (theConstrainedSeqPairDefns -> R15) intersection theAuditEventPairs;
         // Find the preceding XOR graph nodes
-        thePreviousAuditEvents := theConstrainedAuditEventPairs -> R4.has_previous.AuditEvent;
+        thePreviousAuditEvents := theConstrainedAuditEventPairs -> R4.has_previous.SequencedAuditEvent;
         // Check that after an XOR fork event there is a single branch.      
         // This is a sound check since exactly one branch will follow each XOR fork audit event.
         for thePreviousAuditEvent in thePreviousAuditEvents loop
@@ -650,7 +653,7 @@ begin
   Logger::log(Logger::Error, "AESequenceDC", logMessage);
   eventContent := "FailureReason = " & failureReason & " : JobId = " & this.jobID;
   Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
-  for evt in this->R3.AuditEvent loop
+  for evt in this->R10->R11.SequencedAuditEvent loop
 	  eventContent := "EventId = " & evt.AuditEventId;
 	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
   end loop;
@@ -769,7 +772,7 @@ begin
   Logger::log(Logger::Debug, "Monitored System Status", logMessage);
   eventContent := "JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
   Reporting~>reportEvent(Logger::Information, "svdc_job_success", eventContent);
-  for evt in this->R3.AuditEvent loop
+  for evt in this->R10->R11.SequencedAuditEvent loop
 	  eventContent := "EventId = " & evt.AuditEventId;
 	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
   end loop;
@@ -817,8 +820,8 @@ logMessage : string;
 begin
 // Checking Intra Job Invariants if any
       intraJobInvariantCheckPassed := true;
-      theJobsAuditEvents := this -> R3;
-      expectedIntraJobInvDefns := this -> R3 -> R13 -> R19;
+      theJobsAuditEvents := this -> R10 -> R11;
+      expectedIntraJobInvDefns := this -> R10 -> R11 -> R13 -> R19;
       for theExpectedIntraJobInvDefn in expectedIntraJobInvDefns loop
         theInvariantAuditEvents := theExpectedIntraJobInvDefn -> R19 -> R13;
         // This finds the set of audit events that are expected to have invariants attached
@@ -893,8 +896,8 @@ begin
   // Checking Extra Job Invariants
       matched := false;
       extraJobInvariantCheckPassed := true;
-      theJobsAuditEvents := this -> R3;
-      expectedUserExtraJobInvDefns := this -> R3 -> R13 -> R21;
+      theJobsAuditEvents := this -> R10 -> R11;
+      expectedUserExtraJobInvDefns := this -> R10 -> R11 -> R13 -> R21;
       for theExpectedUserExtraJobInvDefn in expectedUserExtraJobInvDefns loop
         theInvariantAuditEvents := theExpectedUserExtraJobInvDefn -> R21 -> R13;
         // This finds the set of audit events that are expected to have invariants attached
@@ -962,8 +965,8 @@ begin
   // Checking Extra Job Invariants including those recovered from the persistent invariant store
       matched := false;
       extraJobInvariantCheckPassed := true;
-      theJobsAuditEvents := this -> R3;
-      expectedUserExtraJobInvDefns := this -> R3 -> R13 -> R21;
+      theJobsAuditEvents := this -> R10 -> R11;
+      expectedUserExtraJobInvDefns := this -> R10 -> R11 -> R13 -> R21;
       for theExpectedUserExtraJobInvDefn in expectedUserExtraJobInvDefns loop
         theInvariantAuditEvents := theExpectedUserExtraJobInvDefn -> R21 -> R13;
         // This finds the set of audit events that are expected to have invariants attached

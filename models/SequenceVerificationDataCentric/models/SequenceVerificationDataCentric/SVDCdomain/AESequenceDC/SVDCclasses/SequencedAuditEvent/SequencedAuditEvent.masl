@@ -10,6 +10,7 @@ oldEvent : instance of SequencedAuditEvent;
 newEventType : instance of SequencedAuditEventDefinition;
 prevEvent : instance of SequencedAuditEvent;
 theAeSequenceDef : instance of AESequenceDefinition;
+theAeSequenceDefs : set of instance of AESequenceDefinition;
 theAeInSequenceDef : instance of AEInSequenceDefinition;
 theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
 theAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
@@ -31,13 +32,15 @@ begin
     newJob := create Job (jobID => jobId, sequencingFailed => false, jobCompleted => false, Current_State => JobInProgress );
     newEvent := create SequencedAuditEvent (AuditEventId => eventId);
   
-    link newJob R3 newEvent;
     newEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
     if (newEventType /= null) and ((prevAEIds = empty) or (prevAEIds = emptyString)) then
   	  //We have a valid event type and no previous events
   	  // So check that it is also the first event of a sequence in that Job
       link newEvent R2 newEventType;
-      theAeSequenceDef := newEventType -> R1.AESequenceDefinition;
+      theAeSequenceDefs := newEventType -> R1.AESequenceDefinition;
+      // TODO Replace this next line with something using JobType when that is added to the interface
+      theAeSequenceDef := find_one theAeSequenceDefs();
+      
       theJobDef := theAeSequenceDef -> R7;
       theAeInSequenceDef := theAeSequenceDef with newEventType -> R1.AEInSequenceDefinition;
       theAeOccurrencesInSequenceDef := theAeInSequenceDef -> R12;
@@ -110,7 +113,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'f6c7376e-a155-480d-8007-f3c3ebc441aa' DO NOT EDIT THIS LINE.
-public instance service AESequenceDC::SequencedAuditEvent.TestPreviousEventIsValid ( prevEventInstance : in instance of AuditEvent,
+public instance service AESequenceDC::SequencedAuditEvent.TestPreviousEventIsValid ( prevEventInstance : in instance of SequencedAuditEvent,
                                                                                     previousEventIsValid : out boolean ) is
 //The Audit Event instance on which this operation is invoked is newEvent
 // The input parameter is prevEventInstance
@@ -126,17 +129,22 @@ thisAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
 theseAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
 possibleAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
 theSequenceDef : instance of AESequenceDefinition;
+aeSequenceDefs : set of instance of AESequenceDefinition;
 theJob : instance of Job;
 isValidEventPair : boolean := false;
 
 begin
-  theJob := this -> R3;
+  theJob := this -> R11 -> R10;
  
   theAuditEventDefinition := this -> R2;
   prevEventOccInSequence := prevEventInstance -> R13;
   
   if prevEventOccInSequence.isSequenceEnd = false then
-    theSequenceDef := theAuditEventDefinition -> R1.AESequenceDefinition;
+    aeSequenceDefs := theAuditEventDefinition -> R1.AESequenceDefinition;
+    
+    // TODO Replace the following line with something that is aware of JobType
+    theSequenceDef := find_one aeSequenceDefs ();
+    
     thisEventInSequence := theAuditEventDefinition with theSequenceDef -> R1.AEInSequenceDefinition;
     theseAeOccurrencesInSequenceDef := thisEventInSequence -> R12;
     possibleAeOccurrencesInSequenceDef := prevEventOccInSequence -> R6.precedes.AEOccurrenceInSequenceDefinition;
@@ -190,7 +198,7 @@ totalDynamicControls : set of instance of DynamicControl;
     
     begin
       // Capture any audit event data associated with this audit event
-      theJob := this -> R3;
+      theJob := this -> R11 -> R10;
       theEventType := this -> R2;
       theAeOccInSequenceDef := this -> R13;
       for aeDataElement in aeData loop

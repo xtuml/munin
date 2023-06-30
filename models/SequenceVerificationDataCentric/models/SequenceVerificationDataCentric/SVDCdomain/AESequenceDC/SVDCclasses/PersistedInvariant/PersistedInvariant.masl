@@ -31,7 +31,7 @@ begin
     
     generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
     sourceAEOccurrenceDefn := extraJobInvDefn -> R20;
-    sourceEventDefn := sourceAEOccurrenceDefn -> R12 -> R1.AuditEventDefinition;
+    sourceEventDefn := sourceAEOccurrenceDefn -> R12 -> R1.SequencedAuditEventDefinition;
     sourceJobDefn := sourceAEOccurrenceDefn -> R12 -> R1.AESequenceDefinition -> R7;
     
     Persistence_Req_IF~>PersistInvariant(newExtraJobInvariant.invariantName, 
