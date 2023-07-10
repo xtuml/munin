@@ -13,7 +13,7 @@ services:
       - "./logs/reception:/var/log/reception"
       - "./reception-incoming:/root/incoming"
       - "./verifier-incoming:/root/outgoing"
-    command: "-configPath config/ -configFile reception-config.json -log-config config/log-config-reception.xml -log-level trace -preinit schedule/startup.sch -util Inspector -inspector-port 0"
+    command: "-configPath config/ -configFile reception-config.json -log-config config/log-config-reception.xml -log-level AEReception=trace -log-level Reception=trace -preinit schedule/startup.sch -util Inspector -inspector-port 0"
   aeo_svdc:
     image: "ghcr.io/xtuml/aeo_svdc"
     ports:
@@ -27,7 +27,7 @@ services:
       - "./verifier-processed:/root/processed"
       - "./InvariantStore:/root/InvariantStore"
       - "./JobIdStore:/root/JobIdStore"
-    command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=1 -log-level trace -preinit schedule/startup.sch -util Inspector -inspector-port 2 -startJobGroup 00 -endJobGroup FF"
+    command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -preinit schedule/startup.sch -util Inspector -inspector-port 2 -startJobGroup 00 -endJobGroup FF"
   # Uncomment to add a second instance of protocol verifier. Note: you must change the 'startJobGroup' and 'endJobGroup' parameters of the first instance so there is no overlap.
   # aeo_svdc-2:
   #   image: "ghcr.io/xtuml/aeo_svdc"
@@ -42,4 +42,4 @@ services:
   #     - "./verifier-processed:/root/processed"
   #     - "./InvariantStore:/root/InvariantStore"
   #     - "./JobIdStore:/root/JobIdStore"
-  #   command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=2 -log-level trace -preinit schedule/startup.sch -util Inspector -inspector-port 3 -startJobGroup 80 -endJobGroup FF"
+  #   command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=2 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -preinit schedule/startup.sch -util Inspector -inspector-port 3 -startJobGroup 80 -endJobGroup FF"
