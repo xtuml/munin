@@ -398,6 +398,29 @@ begin
 		Assertions::assertTrue((job.outOfSequenceEventCount = 0), "Test Out of Order Job: Failed out of sequence event count = " & job.outOfSequenceEventCount'image);
     end if;
    
+    inProgressJob := find_one InProgressJob(jobId = "4");
+	Assertions::assertTrue((inProgressJob /= null), "Test Out of Order Job: Failed to find Failed Job 4");
+    if inProgressJob /= null then
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "27", "");
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "28", "27");
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "29", "28");
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "30", "38");
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "31", "29");
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "32", "29");
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "33", "30");
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "34", "31");
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "34", "32");
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "34", "33");
+		AEOrdering::checkOrder(inProgressJob -> R2.Job, "35", "34");
+		// verify that the out of sequence counts are all zero for the job
+		job := inProgressJob -> R2.Job;
+		Assertions::assertTrue((job.maxOutOfSequence = 3), "Test Out of Order Job: Failed max out sequence = " & job.maxOutOfSequence'image);
+		// verify that the out of sequence counts are all zero for the job
+		Assertions::assertTrue((inProgressJob -> R2.Job).totalOutOfSequence = 4, "Test Out of Order Job: Failed total out of sequence = " & job.totalOutOfSequence'image);
+		// verify that the out of sequence counts are all zero for the job
+		Assertions::assertTrue((job.outOfSequenceEventCount = 0), "Test Out of Order Job: Failed out of sequence event count = " & job.outOfSequenceEventCount'image);
+    end if;
+   
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -1015,6 +1038,118 @@ begin
     verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "26");
     Assertions::assertTrue((verificationAuditEvent /= null), "Test Out of Order Job: Failed to find verification audit event id = 26");
     Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 1 and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first] = "25"), "Test Out of Order Job: Failed as verification audit event id = 26 reported prevEventIds was invalid");
+
+	delete verificationAuditEvents;
+	
+
+
+	// job 4
+	// all prev ids are received before forwarding followed by events
+	AEOrdering::AcceptEvent("4", "node1", "app1", "aaa", "27", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	Test::service_event_queue();
+
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 1), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "27");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Out of Order Job: Failed to find verification audit event id = 27");
+
+	delete verificationAuditEvents;
+	
+	prevEventIds := emptyPrevEventIds & "27"; 
+	AEOrdering::AcceptEvent("4", "node1", "app1", "bbb", "28", auditEventTime'image, prevEventIds, auditEventData);
+	Test::service_event_queue();
+	
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 1), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "28");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Out of Order Job: Failed to find verification audit event id = 28");
+    Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 1 and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first] = "27"), "Test Out of Order Job: Failed as verification audit event id = 27 reported prevEventIds was invalid");
+
+	delete verificationAuditEvents;
+	
+	prevEventIds := emptyPrevEventIds & "31" & "32" & "33"; 
+	AEOrdering::AcceptEvent("4", "node2", "app3", "eee", "34", auditEventTime'image, prevEventIds, auditEventData);
+	Test::service_event_queue();
+	
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+	
+	prevEventIds := emptyPrevEventIds & "29"; 
+	AEOrdering::AcceptEvent("4", "node2", "app3", "ddd", "31", auditEventTime'image, prevEventIds, auditEventData);	
+	Test::service_event_queue();
+
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+	
+	prevEventIds := emptyPrevEventIds & "29"; 
+	AEOrdering::AcceptEvent("4", "node2", "app3", "ddd", "32", auditEventTime'image, prevEventIds, auditEventData);	
+	Test::service_event_queue();
+	
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+	
+	prevEventIds := emptyPrevEventIds & "28"; 
+	AEOrdering::AcceptEvent("4", "node1", "app2", "ccc", "29", auditEventTime'image, prevEventIds, auditEventData);
+	Test::service_event_queue();
+
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 3), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "29");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Out of Order Job: Failed to find verification audit event id = 29");
+    Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 1 and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first] = "28"), "Test Out of Order Job: Failed as verification audit event id = 28 reported prevEventIds was invalid");
+
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "31");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Out of Order Job: Failed to find verification audit event id = 31");
+    Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 1 and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first] = "29"), "Test Out of Order Job: Failed as verification audit event id = 29 reported prevEventIds was invalid");
+
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "32");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Out of Order Job: Failed to find verification audit event id = 32");
+    Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 1 and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first] = "29"), "Test Out of Order Job: Failed as verification audit event id = 29 reported prevEventIds was invalid");
+
+	delete verificationAuditEvents;
+	
+	prevEventIds := emptyPrevEventIds & "30"; 
+	AEOrdering::AcceptEvent("4", "node2", "app3", "ddd", "33", auditEventTime'image, prevEventIds, auditEventData);	
+	Test::service_event_queue();
+
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+	
+	prevEventIds := emptyPrevEventIds & "28"; 
+	AEOrdering::AcceptEvent("4", "node1", "app2", "ccc", "30", auditEventTime'image, prevEventIds, auditEventData);
+	Test::service_event_queue();
+
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 3), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "30");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Out of Order Job: Failed to find verification audit event id = 30");
+    Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 1 and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first] = "28"), "Test Out of Order Job: Failed as verification audit event id = 28 reported prevEventIds was invalid");
+
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "33");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Out of Order Job: Failed to find verification audit event id = 33");
+    Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 1 and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first] = "30"), "Test Out of Order Job: Failed as verification audit event id = 30 reported prevEventIds was invalid");
+
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "34");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Out of Order Job: Failed to find verification audit event id = 34");
+    Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 3 and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first] = "31" and 
+    	                    verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first + 1] = "32" and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first + 2] = "33"), "Test Out of Order Job: Failed as verification audit event id = 34 reported prevEventIds was invalid");
+
+	delete verificationAuditEvents;
+	
+	prevEventIds := emptyPrevEventIds & "34"; 
+	AEOrdering::AcceptEvent("4", "node2", "app4", "fff", "35", auditEventTime'image, prevEventIds, auditEventData);
+	Test::service_event_queue();
+	
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 1), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "35");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Out of Order Job: Failed to find verification audit event id = 35");
+    Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 1 and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first] = "34"), "Test Out of Order Job: Failed as verification audit event id = 34 reported prevEventIds was invalid");
 
 	delete verificationAuditEvents;
 	
