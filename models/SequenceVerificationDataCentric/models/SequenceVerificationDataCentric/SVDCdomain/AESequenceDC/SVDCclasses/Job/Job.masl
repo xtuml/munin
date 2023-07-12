@@ -22,6 +22,7 @@ end service;
 public instance service AESequenceDC::Job.deleteJob () is
 theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEvent : instance of SequencedAuditEvent;
+theOrphanedAuditEvents : set of instance of SequencedAuditEvent;
 theNextAuditEvent : instance of SequencedAuditEvent;
 theNextAuditEvents : set of instance of SequencedAuditEvent;
 theSequences : set of instance of Sequence;
@@ -53,6 +54,9 @@ begin
     end if;
     if (theAuditEvent -> R13) /= null then      
       unlink (theAuditEvent -> R13) R13 theAuditEvent;  
+    end if;  
+    if (theAuditEvent -> R44) /= null then      
+      unlink (theAuditEvent -> R44) R44 theAuditEvent;  
     end if;  
     
     // Delete the associated Intra Job Invariants
@@ -94,6 +98,23 @@ begin
   end loop;
   
   delete theAuditEvents;
+  
+  theOrphanedAuditEvents := this -> R44;
+  if theOrphanedAuditEvents /= null then
+  
+    for theOrphanedAuditEvent in theOrphanedAuditEvents loop
+      if (theOrphanedAuditEvent -> R2) /= null then
+        unlink (theOrphanedAuditEvent -> R2) R2 theOrphanedAuditEvent;
+      end if;
+      if (theOrphanedAuditEvent -> R13) /= null then      
+        unlink (theOrphanedAuditEvent -> R13) R13 theOrphanedAuditEvent;  
+      end if;  
+    end loop;
+    
+    unlink theOrphanedAuditEvents R44 this;
+    delete theOrphanedAuditEvents;
+  end if;
+  
   theSequences := this -> R10;
   if theSequences /= null then
     for theSequence in theSequences loop

@@ -77,6 +77,9 @@ begin
   if existingEvent = null then
     // The received event has not been seen before, so link the new event to this Job.
     newEvent := create SequencedAuditEvent (AuditEventId => eventId, seenAsPreviousEvent => false);
+    // We need to link all events to the Job in which they are seen even if they are not correctly sequenced
+    link this R44 newEvent;
+    
     theEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
     if theEventType /= null then
       // We have a valid event type

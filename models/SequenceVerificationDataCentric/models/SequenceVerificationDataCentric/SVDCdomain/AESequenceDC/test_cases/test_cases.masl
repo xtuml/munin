@@ -3307,7 +3307,7 @@ begin
   Test::service_event_queue();
   
   // Fire the timer that waits for alternative branch events on Job_Alpha to arrive - this mimics the situation where 
-  // the events for Job_Alpha that follow (see befar) arrive too late to be processed but the Job proceeds (wrongly) on
+  // the events for Job_Alpha that follow (see below) arrive too late to be processed but the Job proceeds (wrongly) on
   // on basis that all sequences must have been received.
   theJob := find_only Job(jobID = "Job_Alpha");
   Test::fire_timer(theJob.jobEventTimer);
