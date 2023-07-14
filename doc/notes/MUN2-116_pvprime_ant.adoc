@@ -56,6 +56,10 @@ A simple and expedient solution would be to use our logger and scrape the
 log files post processing.  This lacks some real-time nature but
 sufficiently demonstrates the protocol verification capability.  The
 logger could be configured with a channel/stream specific to the PV.
+This logger channel is best indirected behind a terminator.  The
+terminator service can call the logger (for now).  Such indirection will
+allow us to easily move to different reporting mechanism/implemetation
+(such as a Kafka topic) in the future.
 
 This is the direction we will head first.
 
@@ -76,10 +80,20 @@ runtime audit event instance production.
 
 == 5 Work Required
 
-=== 5.1 Define a PV Logger Channel
+=== 5.1 Define a Reporting Channel
 
-Define and add a new channel to the existing MASL Logger with a name such
-as "PV" or "PROTVER" or some such.
+Define a new terminator service to be invoked from the application to
+deliver audit event instance information including jobID, eventType,
+eventID, previousEventIds, etc.
+
+NOTE:  This information is PVprime information not information from the
+       application data stream.  We do not want to leak application level
+       information into the PVprime audit event stream.
+
+Provide a mechanism using the existing MASL Logger to make PV events
+distinguishable within the log files (such as "PV" or "PROTVER").
+
+Call the logger from within the terminator service.
 
 === 5.2 Identify Key Application Events
 
