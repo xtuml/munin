@@ -15,6 +15,13 @@
         "$ref": "#/$defs/event"
       },
       "minItems": 1
+    },
+    "UnhappyEvents": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/unhappyevent"
+      },
+      "minItems": 1
     }
   },
   "required": ["JobDefinitionName", "Events"],
@@ -51,6 +58,10 @@
         },
         "IsBreak": {
           "description": "A flag denoting whether or not this event is used to break out of a control e.g. loop",
+          "type": "boolean"
+        },
+        "IsCritical": {
+          "description": "A flag denoting that the event is critical in the scope of unhappy events",
           "type": "boolean"
         },
         "DynamicControl" : {
@@ -184,6 +195,24 @@
       },
       "required": ["EventName", "SequenceName", "OccurrenceId", "Application"],
       "additionalProperties": false
-    }
+    },
+    "unhappyevent": {
+      "description": "Definition of an unhappy event type",
+      "type": "object",
+      "properties": {
+        "EventName": {
+          "description": "The name of the event.",
+          "type": "string"
+        },
+        "PackageName": {
+          "description": "The name of the package.",
+          "type": "string"
+        },
+        "Application": {
+          "description": "The name of the issuing application.",
+          "type": "string"
+      },
+      "required": ["EventName", "PackageName", "Application"],
+      "additionalProperties": false
   }
 }
