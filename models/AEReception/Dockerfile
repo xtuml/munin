@@ -2,7 +2,7 @@
 # BASE BUILD                                                                   #
 ################################################################################
 
-FROM levistarrett/masl-base:v3.0.1 AS build-base
+FROM levistarrett/masl-base:v4.0.0-beta2 AS build-base
 
 ARG EXTRA_MASL_ARGS=
 
@@ -22,7 +22,7 @@ ADD schema /root/schema
 # BASE INSTALL                                                                 #
 ################################################################################
 
-FROM levistarrett/masl-base:v3.0.1 AS install-base
+FROM levistarrett/masl-base:v4.0.0-beta2 AS install-base
 
 # copy configuration
 ADD schedule /root/schedule
