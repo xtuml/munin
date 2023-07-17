@@ -34,7 +34,7 @@ FROM levistarrett/masl-base:v4.0.0-beta2 AS install-base
 ADD schedule /root/schedule
 
 # configure the library path
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/install/lib
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/install/lib:/opt/cppkafka/lib:/opt/rdkafka/lib
 
 # add the install location to the path
 ENV PATH=$PATH:/install/bin
