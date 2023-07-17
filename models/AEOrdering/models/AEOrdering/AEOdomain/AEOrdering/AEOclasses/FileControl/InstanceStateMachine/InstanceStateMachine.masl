@@ -133,7 +133,7 @@ begin
                 storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId); 
                 if storedJobIdentifier = null then
 	                // we have now read the event so process it
-	                AEOrdering::AcceptEvent(jobId, node, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData.dataItems);
+	                AEOrdering::AcceptEvent(jobId, node, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData);
 	            else
 					Logger::log(Logger::Error, "AEOrdering", "AEOrdering::FileControl.FileProcessed : Duplicate Job Id identified, Job Id = " & jobId);
 					eventContent := "JobId = " & jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType & " : FailureReason = Duplicate Job Id identified";
