@@ -25,6 +25,9 @@ find_package(Sqlite3 REQUIRED)
 find_package(Boost REQUIRED QUIET COMPONENTS system regex)
 link_libraries(Boost::boost Boost::regex)
 
+include_directories("/install/include")
+link_directories("/install/lib")
+
 add_custom_target (masl-core)
 set_property (TARGET masl-core PROPERTY MAIN_JAR /opt/masl/lib/masl-core.jar)
 
@@ -38,6 +41,7 @@ add_masl_domain(masl/${PROJECT_NAME}/${PROJECT_NAME}.mod
   -DreceptionConfigSchema="${CMAKE_INSTALL_PREFIX}/share/json/reception_config_schema.json"
   -DauditEventSchema="${CMAKE_INSTALL_PREFIX}/share/json/audit_event_schema.json"
 )
+add_masl_project(masl/Reception_proc/Reception_proc.prj EXTRA_ARGS ${EXTRA_MASL_ARGS} EXTRA_DOMAIN_PATHS /root/masl/AEReception /install/lib/masl /opt/masl/lib/masl)
 generate_masl()
 
 install(

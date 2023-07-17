@@ -1,4 +1,10 @@
 ################################################################################
+# DOMAIN IMAGES                                                                #
+################################################################################
+ARG VERSION_TAG=latest
+FROM ghcr.io/xtuml/aeordering:${VERSION_TAG} as aeordering
+
+################################################################################
 # BASE BUILD                                                                   #
 ################################################################################
 
@@ -37,7 +43,7 @@ ENV PATH=$PATH:/install/bin
 RUN mkdir -p /root/incoming /root/processing /root/processed
 
 # set the entrypoint
-ENTRYPOINT ["/install/bin/AEReception_transient_standalone"]
+ENTRYPOINT ["/install/bin/Reception_proc_transient"]
 
 
 
@@ -72,6 +78,12 @@ COPY --from=build-test /build/cmake-masl/build/AEReception_OOA/AEReception_trans
 # build stage
 FROM build-base AS build-release
 
+RUN mkdir -p /install/include
+RUN mkdir -p /install/lib
+COPY --from=aeordering /install/include/ /install/include
+COPY --from=aeordering /install/lib/ /install/lib
+COPY --from=aeordering /install/share/ /install/share
+
 # perform the build
 RUN cmake /root -G Ninja -DEXTRA_MASL_ARGS="${EXTRA_MASL_ARGS}" -DCMAKE_INSTALL_PREFIX=/install
 RUN ninja install
@@ -85,7 +97,7 @@ LABEL org.opencontainers.image.source https://github.com/xtuml/munin
 COPY --from=build-release /install/include /install/include
 COPY --from=build-release /install/lib /install/lib
 COPY --from=build-release /install/share /install/share
-RUN mkdir -p /install/bin
+COPY --from=build-release /install/bin /install/bin
 COPY --from=build-release /build/cmake-masl/build/AEReception_OOA/AEReception_transient_standalone /install/bin
 
 # copy in the MASL interfaces
