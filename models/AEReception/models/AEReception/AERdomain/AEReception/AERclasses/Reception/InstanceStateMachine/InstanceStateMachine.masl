@@ -90,7 +90,44 @@ begin
 					logMessage := "AEReception::Reception.receiving_audit_event : Audit event with blank node name";
 					Logger::log(Logger::Warning, "AEReception", logMessage);
 				end if;
-				jobEventFile.addEvent(this.currentNodeName, json_object);
+				//jobEventFile.addEvent(this.currentNodeName, json_object);
+				
+				// publish the event to ordering
+				declare
+				  prevIds: sequence of string;
+				  evtData: dictionary;
+				begin
+					if json_object'contains("previousEventIds") then
+						for prev_id_json in JSON::get_array(json_object["previousEventIds"]) loop
+							prevIds := prevIds & JSON::get_string(prev_id_json);
+						end loop;
+					end if;
+					for key in json_object'keys loop
+						if key /= "jobId" and
+						   key /= "jobName" and
+						   key /= "eventType" and
+						   key /= "eventId" and
+						   key /= "timestamp" and
+						   key /= "previousEventIds" then
+							if json_object[key].kind = JSON::String then
+								evtData[key] := JSON::get_string(json_object[key]);
+							else
+								evtData[key] := JSON::dump(json_object[key]);
+							end if;
+						end if;
+					end loop;
+					Ordering~>AcceptEvent(
+						JSON::get_string(json_object["jobId"]),
+						this.currentNodeName,
+						JSON::get_string(json_object["applicationName"]),
+						JSON::get_string(json_object["eventType"]),
+						JSON::get_string(json_object["eventId"]),
+						JSON::get_string(json_object["timestamp"]),
+						prevIds,
+						evtData
+					);
+				end;
+				
 				this.eventsProcessed := this.eventsProcessed + 1;
 				event_received := true;
         	end if;
