@@ -7,6 +7,8 @@ public service AEReception::Ordering~>AcceptEvent (
   auditEventTime : in string,
   prevAuditEventIds : in sequence of string,
   auditEventData : in dictionary) is
+evtData: AEOrdering::AuditEventDataType;
 begin
-  AEOrdering::AcceptEvent(jobId, nodeName, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData);
+  evtData.dataItems := auditEventData;
+  AEOrdering::AcceptEvent(jobId, nodeName, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, evtData);
 end service;
