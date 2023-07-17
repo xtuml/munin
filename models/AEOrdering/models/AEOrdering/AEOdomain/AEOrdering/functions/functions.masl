@@ -6,7 +6,7 @@ public service AEOrdering::AcceptEvent ( jobId : in string,
                                         auditEventId : in string,
                                         auditEventTime : in string,
                                         prevAuditEventIds : in sequence of string,
-                                        auditEventData : in AuditEventDataType ) is
+                                        auditEventData : in dictionary of string ) is
 logMessage : string;
 job : instance of Job;
 inProgressJob : instance of InProgressJob;
@@ -17,6 +17,7 @@ jobFailureReason : string;
 failureReason : string;
 systemSpec : instance of SystemSpec;
 eventContent : string;
+auditEventDataStore: AuditEventDataType;
 
 begin
 
@@ -39,7 +40,8 @@ begin
 	elsif job -> R2.ArchivedJob /= null then
 		jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job is already archived";
 	end if;
-	auditEvent := AuditEvent.createAuditEvent(job, nodeName, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData, failureReason);
+	auditEventDataStore.dataItems := auditEventData;
+	auditEvent := AuditEvent.createAuditEvent(job, nodeName, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventDataStore, failureReason);
 	
 	// check if the audit event is blocked
 	if auditEvent = null or job -> R2.ArchivedJob /= null or job -> R2.FailedJob /= null then
