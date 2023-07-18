@@ -1,0 +1,273 @@
+= Inter-domain Messaging
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+In order to meet deployment and scaling requirements, the protocol verifier needs
+a mechanism for communicating between domains deployed in separate processes and
+potentially on different physical nodes. This mechanism will also be necessary
+for communication with external systems (both input and output).
+
+== 2 Introduction and Background
+
+Initially, the protocol verifier was deployed as a single process which took
+event files as input and produced logging and key metric output. During the
+initial scaling phase, it was observed that the job of input data validation and
+processing was logically separate from the job of sequencing and validation. It
+was also noted that the key logical unit of work is the job and therefore it is
+advantages for each job to be processed entirely by a single process to reduce
+coordination overhead. The reception and sequence verification chunks of the
+application were separated into distinct processes using the filesystem as a
+communication medium. In this way we were able to scale each independently and
+produce a proof of concept that increased throughput significantly.
+
+Although this proof of concept was simple and convenient, the use of the
+filesystem introduces overhead and integration problems. We need to replace this
+mechanism with a more well suited alternative.
+
+== 3 Requirements
+
+=== 3.1 Basic requirement
+
+The mechanism must enable the delivery of arbitrary payloads between running
+domain processes in a way that is accessible from modeled action bodies.
+
+=== 3.2 Standard technology
+
+The mechanism must be based on an existing "off the shelf" messaging solution.
+
+=== 3.3 Enterprise ready
+
+The chosen solution must be proven in enterprise applications and meet our
+throughput and configuration requirements.
+
+=== 3.4 Minimal model impact
+
+The mechanism must not impact the modeling process. Ideally, the messaging layer
+will be completely separate from the application models.
+
+== 4 Analysis/Design
+
+=== 4.1 General Direction
+
+Because of the asynchronous nature of the messages we are sending (you could call
+them "events"), a publish/subscribe model is perfect to meet our requirements.
+
+During initial analysis, MQTT, DDS, and Kafka were considered as options. Kafka
+was chosen based on perceived alignment with the project goals and familiarity
+of internal team members. That being said, the design and implementation of the
+prototype is sufficiently generic as to support a change in underlying technology
+at a later time.
+
+=== 4.2 High Level Design
+
+At a high level, the mechanism will provide a mapping between modeled constructs
+and Kafka components.
+
+Public domain services are each mapped to a Kafka topic. Calls to public domain 
+services where the required domain is _not_ part of the deployment (interface
+only domains) are mapped to a call to `publish` on the topic corresponding to
+the domain service. A separate thread is started in each process which
+subscribes to topics corresponding to its domains' public services and forwards
+them to the appropriate implementation when they arrive.
+
+The client libraries and the Kafka broker itself are components we will be using
+"off the shelf".
+
+=== 4.3 MASL software architecture inter-domain linking
+
+The domain is the compilation unit for the MASL code generator. Each domain is
+generated with a complete set of files implementing all internal behavior as
+well as a set of header files which define public types and the signatures of
+public domain services.
+
+Each public domain service is also provided with an "interceptor" which is used
+to register a function definition as the implementation for a particular
+declaration at runtime. When the dynamic library for the full domain is loaded,
+a registration routine is executed at load time which links the implementation
+of the service with its declaration.
+
+This mechanism allows domains to be compiled completely independently. It also
+can be used to hook into public domain services externally via the service
+interceptor.
+
+=== 4.4 MASL software architecture plugin framework
+
+The MASL architecture is designed around a core runtime library that is required
+by every application. Extensions to this library can be loaded at runtime by
+dynamically loading the associated libraries with `dlopen`. Extensions are
+included by passing the `-util` flag to a generated application at runtime. This
+design allows MASL architects to provide a rich set of tools and features while
+maintaining a nimble core set of capabilities.
+
+When an extension is loaded at runtime, it is common to load a supporting
+library specific to each domain which has been produced in the code generation
+phase. These domain specific libraries contain bindings into the modeled
+application for the extension.
+
+=== 4.5 Kafka extension
+
+A new extension has been created to plug into the MASL architecture and provide
+support for messaging with Kafka. The extension consists of three major
+components:
+
+* The consumer
+* The producer
+* The service handlers
+
+The consumer is created as a singleton instance. The consumer connects to the
+Kafka broker, subscribes to a set of topics, and perpetually waits for messages
+in its own thread. The consumer is configured to initialise only if there is at
+least one public domain service marked as a Kafka topic.
+
+The producer is created as a singleton instance. When invoked by one of the
+domain libraries, the producer packages the payload into a message instance and
+publishes to the appropriate topic.
+
+The service handlers are registered at load time by the domain-specific dynamic
+libraries. Each handler implements a method `getInvoker` which takes a reference
+to a stream of data. The implementation of each handler is aware of the
+signature of the public domain service it corresponds to and can unpack each
+parameter value before calling the domain service via its interceptor.
+
+Custom input and output streams have been created which know how to pack and
+unpack MASL datatypes into byte streams. These are used both by the service
+handlers and in the publish functions.
+
+=== 4.6 Code generation for domain-specific libraries
+
+There are three primary components of the required code generation:
+
+* Service handlers and registration
+* Publish functions
+* Type serialisation/deserialisation
+
+Service handlers as described in the previous section are generated specific to
+the parameters of each public domain service. Code to register these with the
+consumer at load time is also generated.
+
+Publish functions are generated for each public domain service. These functions
+are the converse of the service handlers and serialise the parameter data as a
+stream of bytes before passing them as the payload to the producer.
+
+Additional implementations are generated for the input/output stream which can
+handle user defined types which are declared in the domain.
+
+The service handlers are generated into the "full" library and the publish
+functions are generated into the "interface" library. At load time, domains
+which are included in the process ("full domains") load the library containing
+the service handler registrations and domains which are interface only
+("interface only") load the library containing the publish functions.
+
+=== 4.7 Kafka configuration
+
+==== 4.7.1 Topic names and namespaces
+
+Topics are named according to the following scheme:
+
+  <namespace>.<domain_name>_service<service ID>
+
+The namespace is a string tag which allows multiple instances of the application
+to operate independently of one another. Consider the proposal to have a second
+protocol verifier ("PV Prime") monitoring the production deployment of the
+protocol verifier. It is possible that these two logically separate applications
+would need to operate in the same Kafka network and the namespace provides a way
+to keep their events separated. By default the namespace is "default", however
+it can be changed by passing "-kafka-namespace" on the command line.
+
+The service ID is an integer value unique to each service in a domain. The ID
+was chosen to key the topic instead of the name to avoid collisions with
+overloaded domain services.
+
+==== 4.7.2 Broker list
+
+In order to function, the Kafka utility must be provided with a comma delimited
+"broker list". This is done by passing the list on the command line with the 
+"-kafka-broker-list" option. This option is required.
+
+==== 4.7.3 Group ID
+
+Kafka allows consumers to be grouped using a "group ID". Each message belonging
+to a topic will be delivered to exactly one consumer in each group (see more
+discussion on partitioning in the next section). By default, the group ID is a
+randomly generated string ensuring that each time the application is launched it
+will receive all of the events for each subscribed topic. This value can be
+changed by passing the "-kafka-group-id" option.
+
+==== 4.7.4. Marking
+
+The code generator only generates bindings for public domain services wich are
+marked with the "kafka_topic" pragma.
+
+== 5 Comments and Future Work
+
+=== 5.1 Partitions
+
+In its default configuration, the Kafka broker will deliver each event for a
+topic to exactly one consumer in each group. If all consumers have a unique
+group ID, the event will be delivered to all consumers. If all consumers have a
+common group ID, the event will be delivered to only one consumer. In the second
+case, the consumer chosen to receive the event is chosen by the broker and is
+random from the perspective of the application.
+
+Kafka supports partitioning topics using a key. This guarantees that all events
+for a topic with the same partition key are guaranteed to be delivered to the
+same consumer instance.
+
+The partition mechanism seems to be exactly what we need to satisfy our
+requirement that all audit events for a given job instance must be processed by
+the same process. We could use a hash of the job ID as the partition key to
+assure a single PV instance processes each job.
+
+More research and development is needed to fully understand partitions and how
+they can be leveraged, especially concerning the behavior when processes fail
+and restart or otherwise do not finish jobs.
+
+=== 5.2 Security, authentication, encryption, compression, etc.
+
+This initial prototyping has used mostly default configuration. Going forward to
+deployment readiness we will need to consider how to keep the messaging traffic
+secure without excess impact on performance. More research is needed.
+
+=== 5.3 Fault tolerance/offset commits
+
+A Kafka consumer must "commit" its "offset" in the current partition. If the
+consumer receives a message but crashes before committing, the message will be
+reallocated to another consumer. At the moment the consumer is configured to
+auto-commit (commit as soon as receiving the message). More research is needed
+to determine the best strategy for committing to satisfy our requirements.
+
+=== 5.4 Performance
+
+The major improvement in performance expected from this work is increased
+ability to efficiently scale and deploy in a distributed cluster. It would be
+easy to sabotage our performance goals with inefficiencies in the implementation
+of the consumer and/or producer. The code needs to be inspected and reviewed
+carefully to assure it is configured and implemented properly.
+
+=== 5.5 Topic creation
+
+Topics are created automatically by the application. More research is needed to
+decide whether or not to pursue auto-configuration of topics or to configure
+them manually in the broker configuration.
+
+=== 5.6 Error handling
+
+Currently the Kafka utility is written to expect success. More time needs to be
+spent properly catching and handling error conditions.
+
+== 6 Document References
+
+. [[dr-1]] https://onefact.atlassian.net/browse/MUN2-120[MUN2-120 - Prototype inter domain communication with Kafka]
+. [[dr-2]] https://kafka.apache.org/[Apache Kafka (homepage)]
+. [[dr-3]] https://github.com/confluentinc/librdkafka[librdkafka - Kafka client library]
+. [[dr-4]] https://github.com/mfontanini/cppkafka[cppkafka - high level C++ wrapper around librdkafka]
+. [[dr-5]] https://hub.docker.com/r/wurstmeister/kafka[Kafka docker image]
+. [[dr-6]] https://hub.docker.com/r/wurstmeister/zookeeper[Zookeeper docker image]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
