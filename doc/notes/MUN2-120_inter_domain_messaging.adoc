@@ -16,7 +16,7 @@ event files as input and produced logging and key metric output. During the
 initial scaling phase, it was observed that the job of input data validation and
 processing was logically separate from the job of sequencing and validation. It
 was also noted that the key logical unit of work is the job and therefore it is
-advantages for each job to be processed entirely by a single process to reduce
+advantageous for each job to be processed entirely by a single process to reduce
 coordination overhead. The reception and sequence verification chunks of the
 application were separated into distinct processes using the filesystem as a
 communication medium. In this way we were able to scale each independently and
