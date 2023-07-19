@@ -1,0 +1,5 @@
+public service AEOrdering::Req_IF_Verification~>failedJob ( jobId: in string,
+                                                            failureReason: in string ) is
+begin
+  AESequenceDC::failedJob(jobId, failureReason);
+end service;
