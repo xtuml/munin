@@ -1,0 +1,19 @@
+@startuml
+partition "Protocol Verifier Job 3" {
+  group "Protocol Verifier Sequence 3"
+    #green:PVJobStart;
+    :PVSequencingStart;
+    :PVEventProcessingComplete;
+    :PVConstraintCheckPassed;
+    #gold:PVJobSuccessful,CRITICAL;
+    #red:PVJobDeleted;  
+    detach
+  end group
+}
+package "Unsequenced Events" {
+  :OrderingJobFails;
+  kill
+  :SequenceVerificationJobFails;
+  kill 
+}
+@enduml
