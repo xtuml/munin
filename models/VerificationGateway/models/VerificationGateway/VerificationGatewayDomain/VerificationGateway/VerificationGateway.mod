@@ -1,8 +1,6 @@
 domain VerificationGateway is
   object InstrumentationEvent;
   object VerifiableJob;
-  private type timer is inst_ref<Timer>
-  ;
   private type duration is integer
   ;
     public service acceptInstrumentationEventForJob (
@@ -27,7 +25,7 @@ domain VerificationGateway is
 //!The unique identifier assigned to the VerifiableJob for use within this domain. The ID of the 'client' Job is not to be used for this purpose, in order that the client's identifier is not leaked beyond where necessary.
     jobKey : preferred unique integer;
     lastReceivedEventKey :   referential ( R2.last_received.InstrumentationEvent.eventKey ) integer;
-    public instance service createVerifiableJob (
+    public  service createVerifiableJob (
         clientJobId : in string,        clientEventId : in string,        clientEventType : in string    );
      state ProcessingEventsForJob(        nextEventId : in string,        nextEventType : in string);
      state Deleting();
