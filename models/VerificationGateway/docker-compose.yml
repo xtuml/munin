@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  aeordering:
+    image: "ghcr.io/xtuml/verificationgateway"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
