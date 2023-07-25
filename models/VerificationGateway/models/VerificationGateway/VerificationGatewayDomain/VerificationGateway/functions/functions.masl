@@ -1,0 +1,19 @@
+//! ACTIVITY BEGIN. '59811702-2748-41d5-a595-a4a3cf71db6f' DO NOT EDIT THIS LINE.
+public service VerificationGateway::acceptInstrumentationEventForJob ( clientJobId : in string,
+                                                                      clientEventId : in string,
+                                                                      clientEventType : in string ) is
+existingVerifiableJob : instance of VerifiableJob;
+
+begin
+  existingVerifiableJob := find_only VerifiableJob (clientJobId = clientJobId);
+  if existingVerifiableJob = null then
+    // This is the first event received for a Job we have not seen before - so create a new
+    // instance of VerifiableJob and its first InstrumentationEvent. 
+    VerifiableJob.createVerifiableJob(clientJobId, clientEventId, clientEventType);
+  else
+    //We have an existing Job and this event should be the next in sequence for that Job
+    generate VerifiableJob.nextEventForExistingJob (clientEventId, clientEventType) to existingVerifiableJob;
+  end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

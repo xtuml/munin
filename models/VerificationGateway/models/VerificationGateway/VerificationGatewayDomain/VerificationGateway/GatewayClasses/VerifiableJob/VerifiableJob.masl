@@ -1,0 +1,17 @@
+//! ACTIVITY BEGIN. '1ae29fe4-1651-42e4-9a90-ca9365640fb0' DO NOT EDIT THIS LINE.
+public instance service VerificationGateway::VerifiableJob.createVerifiableJob ( clientJobId : in string,
+                                                                                clientEventId : in string,
+                                                                                clientEventType : in string ) is
+newVerifiableJob : instance of VerifiableJob;
+firstInstrumentationEventForJob : instance of InstrumentationEvent;
+
+begin
+  newVerifiableJob := create unique VerifiableJob (clientJobId => clientJobId);
+  firstInstrumentationEventForJob := create unique InstrumentationEvent (clientEventId => clientEventId, 
+  	                                                                     clientEventType => clientEventType);
+  link newVerifiableJob R1 firstInstrumentationEventForJob;
+  link newVerifiableJob R2 firstInstrumentationEventForJob;
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
