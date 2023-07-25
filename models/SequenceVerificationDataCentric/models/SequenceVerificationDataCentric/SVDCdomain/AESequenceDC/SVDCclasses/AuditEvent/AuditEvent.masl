@@ -22,6 +22,8 @@ failureReason : string;
 eventContent : string;
 empty : sequence of string;
 emptyString : sequence of string := empty & ("");
+instrumentationEventId : string;
+instrumentationEventType : string;
 
 begin
   oldEvent := find_one AuditEvent (AuditEventId = eventId);
@@ -57,7 +59,13 @@ begin
 	    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 		eventContent := "JobId = " & newJob.jobID & " : EventId = " & eventId & " : EventType = " & newEventType.AEType;
 		Reporting~>reportEvent(Logger::Information, "svdc_new_job_started", eventContent);
-     
+        
+        // ...and then report that job sequencing has started for the new job as part of the 
+        // verification of the Protocol Verifier itself.
+        instrumentationEventId := "Unused";
+        instrumentationEventType := "SVDC_PVSequencingStart";
+        BehaviourVerification~>sendInstrumentationEvent(jobId, instrumentationEventId, instrumentationEventType);
+        
         // Process the audit event data for this new event      
         newEvent.ProcessAuditEventData (aeData);
       
