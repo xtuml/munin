@@ -13,9 +13,6 @@ WORKDIR /build
 ADD masl /root/masl
 ADD CMakeLists.txt /root/CMakeLists.txt
 
-# copy configuration
-ADD schema /root/schema
-
 
 
 ################################################################################
@@ -24,7 +21,7 @@ ADD schema /root/schema
 
 FROM levistarrett/masl-base:v3.0.1 AS install-base
 
-# copy configuration
+# copy schedules
 ADD schedule /root/schedule
 
 # configure the library path
