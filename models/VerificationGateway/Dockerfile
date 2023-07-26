@@ -53,7 +53,6 @@ FROM install-base AS install-test
 COPY --from=build-test /build /build
 COPY --from=build-test /install/include /install/include
 COPY --from=build-test /install/lib /install/lib
-COPY --from=build-test /install/share /install/share
 RUN mkdir -p /install/bin
 COPY --from=build-test /build/cmake-masl/build/VerificationGateway_OOA/VerificationGateway_transient_standalone /install/bin
 
@@ -78,7 +77,6 @@ LABEL org.opencontainers.image.source https://github.com/xtuml/munin
 # copy the includes, libs, and bins
 COPY --from=build-release /install/include /install/include
 COPY --from=build-release /install/lib /install/lib
-COPY --from=build-release /install/share /install/share
 RUN mkdir -p /install/bin
 COPY --from=build-release /build/cmake-masl/build/VerificationGateway_OOA/VerificationGateway_transient_standalone /install/bin
 
