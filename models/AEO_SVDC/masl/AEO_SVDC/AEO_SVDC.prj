@@ -53,6 +53,12 @@ project AEO_SVDC is
     terminator Req_IF_InvariantStore is
       public service setLoadRate ( loadRate: in duration );       
     end terminator;
+    
+    terminator BehaviourVerification is
+      public service sendInstrumentationEvent (jobID : in string,
+                                               eventID : in string,
+                                               eventType : in string);
+    end terminator;
 
   end domain;
   
