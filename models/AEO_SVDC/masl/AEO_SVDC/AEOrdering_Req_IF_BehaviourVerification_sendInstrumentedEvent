@@ -1,0 +1,6 @@
+public service AEOrdering::Req_IF_BehaviourVerification~>sendInstrumentationEvent ( jobID: in string,
+                                                                             eventID: in string,
+                                                                             eventType: in string ) is
+begin
+  VerificationGateway::acceptInstrumentationEventForJob(jobID, eventID, eventType );
+end service;

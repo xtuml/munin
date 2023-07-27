@@ -129,7 +129,9 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '1abe36cd-fe6d-4caa-a40a-77c6b7386a71' DO NOT EDIT THIS LINE.
-public service AEOrdering::BehaviourVerification~>sendInstrumentedEvent () is
+public service AEOrdering::Req_IF_BehaviourVerification~>sendInstrumentedEvent ( jobID : in string,
+                                                                                eventID : in string,
+                                                                                eventType : in string ) is
 begin
   null;
 end service;
