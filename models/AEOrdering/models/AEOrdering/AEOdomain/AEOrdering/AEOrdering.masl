@@ -105,7 +105,8 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'b3d49062-9b2e-4c74-ad0b-d21254027deb' DO NOT EDIT THIS LINE.
-public service AEOrdering::Req_IF_Verification~>jobDefinition () is
+public service AEOrdering::Req_IF_Verification~>jobDefinition ( jobName : in string,
+                                                               eventDefinitions : in sequence of EventDefinitionType ) is
 begin
   null;
 end service;
@@ -124,6 +125,13 @@ public service AEOrdering::Reporting~>reportEvent ( eventPriority : in Logger::P
                                                    eventContent : in string ) is
 begin
 	Logger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '1abe36cd-fe6d-4caa-a40a-77c6b7386a71' DO NOT EDIT THIS LINE.
+public service AEOrdering::BehaviourVerification~>sendInstrumentedEvent () is
+begin
+  null;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
