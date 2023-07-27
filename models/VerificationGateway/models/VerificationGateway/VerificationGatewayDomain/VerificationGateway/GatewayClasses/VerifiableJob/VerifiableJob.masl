@@ -6,14 +6,21 @@ newVerifiableJob : instance of VerifiableJob;
 firstInstrumentationEventForJob : instance of InstrumentationEvent;
 
 begin
+  // Create the new Job
   newVerifiableJob := create unique VerifiableJob (clientJobId => clientJobId,
-  	                                               Current_State => ProcessingEventsForJob
-  );
+  	                                               Current_State => ProcessingEventsForJob);
+  	                                               
+  // Create the first event for the new job and link it up appropriately
   firstInstrumentationEventForJob := create unique InstrumentationEvent (clientEventId => clientEventId, 
   	                                                                     clientEventType => clientEventType);
   link newVerifiableJob R1 firstInstrumentationEventForJob;
   link newVerifiableJob R2 firstInstrumentationEventForJob;
   
+  // Use the firstInstrumentationEvent to verify the behaviour of the Job within the client application.
+  Verification~>verifyInstrumentationEvent(firstInstrumentationEventForJob.jobKey'image,
+    	                                   firstInstrumentationEventForJob.eventKey'image,
+    	                                   firstInstrumentationEventForJob.clientEventType,         
+                                           firstInstrumentationEventForJob.assignedPreviousEventKey'image);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

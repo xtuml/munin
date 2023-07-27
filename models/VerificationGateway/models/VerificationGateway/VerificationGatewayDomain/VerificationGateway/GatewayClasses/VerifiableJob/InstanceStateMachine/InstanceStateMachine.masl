@@ -14,7 +14,14 @@ begin
     // previousInstrumentationEvent by re-linking R2 and link R3 in readiness for the next event.
     unlink this R2 previousInstrumentationEvent;
     link this R2 newInstrumentationEvent;
-    link previousInstrumentationEvent R3.is_followed_by newInstrumentationEvent; 
+    link previousInstrumentationEvent R3.is_followed_by newInstrumentationEvent;
+    
+    // Having stitched the events appropriately use the newInstrumentationEvent to to verify the behaviour 
+    // of the Job within the client application.
+    Verification~>verifyInstrumentationEvent(newInstrumentationEvent.jobKey'image,
+    	                                     newInstrumentationEvent.eventKey'image,
+    	                                     newInstrumentationEvent.clientEventType,         
+                                             newInstrumentationEvent.assignedPreviousEventKey'image);
   else
     // TODO
   end if;
