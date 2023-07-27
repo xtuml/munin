@@ -2,5 +2,5 @@ public service AESequenceDC::BehaviourVerification~>sendInstrumentationEvent ( j
                                                                                eventID: in string,
                                                                                eventType: in string ) is
 begin
-  null;
+  VerificationGateway::acceptInstrumentationEventForJob(jobID, eventID, eventType );
 end service;
