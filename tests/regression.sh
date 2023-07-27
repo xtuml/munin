@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# print plus2json version
+P2J="python ../bin/plus2json.pyz"
+$P2J -v
+
 # prepare the deploy folder
 echo "Preparing deploy location..."
 cd ../deploy
@@ -11,7 +15,7 @@ puml_files=$(ls -1 ../tests/PumlForTesting/PumlRegression/*.puml | sort)
 
 # generate job definitions
 echo "Generating job definitions..."
-echo ${puml_files} | xargs python ../bin/plus2json.pyz --job -o config/job_definitions
+echo ${puml_files} | xargs $P2J --job -o config/job_definitions
 echo "Done."
 
 # launch the protocol verifier
@@ -22,7 +26,7 @@ echo "Done."
 # play all jobs
 for fn in ${puml_files}; do
   echo "Generating runtime event data for '${fn}'..."
-  python ../bin/plus2json.pyz --play -o reception-incoming ${fn}
+  $P2J --play -o reception-incoming ${fn}
   echo "Done."
   sleep 1
 done
