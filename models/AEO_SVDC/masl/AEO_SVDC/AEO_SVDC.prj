@@ -91,6 +91,13 @@ project AEO_SVDC is
   end domain;
 
   domain VerificationGateway is
+  
+  terminator Verification is
+      public service verifyInstrumentationEvent ( jobKey : in string,
+      	                                          eventId : in string,
+      	                                          eventType : in string,
+                                                  previousEventId : in string);       
+    end terminator;
   end domain;
   
   domain JSONValidation is
