@@ -1,8 +1,6 @@
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '1b4d6696-fede-4817-8e1d-cec3f3b6ac26' DO NOT EDIT THIS LINE.
-state AESequenceDC::UnhappyJob.JobInProgress ( eventId : in string,
-                                              prevAEIds : in sequence of string,
-                                              aeType : in string,
-                                              aeData : in sequence of auditEventDataStructure ) is
+state AESequenceDC::UnhappyJob.JobInProgress () is
+theJob : instance of Job;
 newEvent : instance of SequencedAuditEvent;
 existingEvent : instance of SequencedAuditEvent;
 theEventType : instance of SequencedAuditEventDefinition;
@@ -21,6 +19,8 @@ theAeInSequencePairDefn : instance of AEInSequencePairDefn;
 existingAuditEventPair : instance of AuditEventPair;
 newAuditEventPair : instance of AuditEventPair;
 theAuditEventPairs : set of instance of AuditEventPair;
+allAuditEventPairs : set of instance of AuditEventPair;
+thisJobsAuditEventPairs : set of instance of AuditEventPair;
 currentSequence : instance of Sequence;
 newSequence : instance of Sequence;
 incompleteSequences : set of instance of Sequence;
@@ -70,15 +70,17 @@ theSystemSpec : instance of SystemSpecification;
 failureReason : string;
 
 begin
+  theJob := this -> R45;
+  	
   // Reset the jobHangingTimer if it is set
-  cancel this.jobHangingTimer;
+  cancel theJob.jobHangingTimer;
   // Check to see if we've seen this event instance before
   existingEvent := find_one SequencedAuditEvent (AuditEventId = eventId);
   if existingEvent = null then
     // The received event has not been seen before, so link the new event to this Job.
     newEvent := create SequencedAuditEvent (AuditEventId => eventId, seenAsPreviousEvent => false);
     // We need to link all events to the Job in which they are seen even if they are not correctly sequenced
-    link this R44 newEvent;
+    link theJob R44 newEvent;
     
     theEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
     if theEventType /= null then
@@ -134,8 +136,8 @@ begin
                   link newEvent R4.has_previous.SequencedAuditEvent prevEvent using newAuditEventPair;
                   link newAuditEventPair R15 theAeInSequencePairDefn;
                 else
-                    this.sequencingFailed := true;
-                    this.failJob("The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId & " and Previous Event Id = " & prevEvent.AuditEventId );              
+                    theJob.sequencingFailed := true;
+                    theJob.failJob("The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId & " and Previous Event Id = " & prevEvent.AuditEventId );              
                 end if;  
              
                 // Now test to see if this is a valid event sequence
@@ -170,7 +172,7 @@ begin
                     // Add logic for incrementing Loop Count
                     theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
                     if theUserDynamicControlDefn /= null then                      
-                      thisJobsDynamicControls := this -> R35;
+                      thisJobsDynamicControls := theJob -> R35;
                       
                       theUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = theUserDynamicControlDefn.dynamicControlName );
                       if theUserDynamicControl /= null and theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
@@ -182,7 +184,7 @@ begin
                           if theUserDynamicControl.currentDynamicControlValue < theUserDynamicControl.expectedDynamicControlValue then
                             theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
                           else
-                            this.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
+                            theJob.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
                           end if;
                           // TODO: Should there be an else clause here that deals with an expected DynamicControlValue not being > 0?                  
                         end if;  
@@ -199,7 +201,7 @@ begin
                     // Check to see if this is a break event causing us to exit a loop and cancel the loop count
                     // TODO Is there a better way to do this now R36 and R37 have been added
                     if theAeOccInSequenceDef.isBreak = true then
-                      thisJobsDynamicControls := this -> R35;
+                      thisJobsDynamicControls := theJob -> R35;
                       theCurrentDynamicControls := find thisJobsDynamicControls (expectedDynamicControlValue > 0);
                       for theCurrentDynamicControl in theCurrentDynamicControls loop
                         theCurrentDynamicControlDefn := theCurrentDynamicControl -> R29;
@@ -229,7 +231,7 @@ begin
                             	                                                 isUser => true);
                           link theUserDynamicControl R36 newEvent;
                           link theUserDynamicControl R29 theUserDynamicControlDefn;
-                          link theUserDynamicControl R35 this;
+                          link theUserDynamicControl R35 theJob;
 
                         else
                           //this.failJob("This event already has a user branch count associated with it for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
@@ -237,7 +239,7 @@ begin
                         end if;  
                     
 	                  else
-                        this.failJob("The fork point has been found but no corresponding source branch count is associated with it for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
+                        theJob.failJob("The fork point has been found but no corresponding source branch count is associated with it for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
 	                  end if;  
 	                  
 	                else 
@@ -260,7 +262,9 @@ begin
                     // can occur anywhere with any number of branches.
                     
                     theAeInSequencePairDefn := theAeOccInSequenceDef with prevAeOccInSequenceDef -> R6.follows.AEInSequencePairDefn;
-                    theAuditEventPairs := theAeInSequencePairDefn -> R15;
+                    allAuditEventPairs := theAeInSequencePairDefn -> R15;
+                    thisJobsAuditEventPairs := theJob -> R44 -> R4.has_next.AuditEventPair;
+                    theAuditEventPairs := allAuditEventPairs intersection thisJobsAuditEventPairs;
                     if theAuditEventPairs'length > 1 then
                       // There is either an instance fork or a loop so check that the AuditEventPairs have a common previous event to find the instance fork
                       for eachAuditEventPair in theAuditEventPairs loop
@@ -280,12 +284,12 @@ begin
                             logMessage := "AESequenceDC::Job.JobInProgress : Valid Branch Count found on instance fork in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType;
 	                        Logger::log(Logger::Debug, "AESequenceDC", logMessage);                       
                           else
-                            this.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);                         
+                            theJob.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);                         
                           end if;
 
                         else
                           // An instance fork has occurred but the Job Definition does not expect this to occur at this point in the sequence.
-                          this.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);
+                          theJob.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);
                         end if;
                       else
                         // There is no instance fork here so carry on
@@ -298,7 +302,7 @@ begin
                     // Add logic for setting Merge Count
                     theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
                     if theUserDynamicControlDefn /= null and theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.MERGECOUNT then                      
-                      thisJobsDynamicControls := this -> R35;
+                      thisJobsDynamicControls := theJob -> R35;
                       
                       theUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = theUserDynamicControlDefn.dynamicControlName);
                       if theUserDynamicControl /= null then
@@ -325,36 +329,36 @@ begin
                     
                   else
                     //Log Job failure: Previous event is valid but is part of a broken sequence
-                    this.sequencingFailed := true;
-                    this.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
+                    theJob.sequencingFailed := true;
+                    theJob.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
                   end if;  
           
                 else
                   //Log Job failure: Previous event is not valid for this sequence
-                  this.sequencingFailed := true;
-                  this.failJob("The type of a previous event provided is not known or not valid - Event Id = " & aPrevEventId);
+                  theJob.sequencingFailed := true;
+                  theJob.failJob("The type of a previous event provided is not known or not valid - Event Id = " & aPrevEventId);
          
                 end if;
               else
                 // The received event is a sequence start event but it has a previous event with it. This is an error condition
-                this.sequencingFailed := true;
-                this.failJob("This is a sequence start event with a previous event which can't happen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
+                theJob.sequencingFailed := true;
+                theJob.failJob("This is a sequence start event with a previous event which can't happen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
               end if;  
             elsif possibleAeOccInSequenceDef'length = 0 then
               // There is no available definition for this situation so the sequence is broken.
-              this.sequencingFailed := true;
-              this.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
+              theJob.sequencingFailed := true;
+              theJob.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
         
             else
               // There are multiple possible Audit Event Occurrences In the Sequence Definition 
               // TODO What does this circumstance imply and what can we do about it.
-              this.sequencingFailed := true;
-              this.failJob("There are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
+              theJob.sequencingFailed := true;
+              theJob.failJob("There are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
             end if;
           else
             // The previous event id provided in the audit event data is not recognised as a previous event 
-            this.sequencingFailed := true;
-            this.failJob("The previous event id provided in the audit event data is not recognised as a previous event - in Job = " & this.jobID & " provided previous event id = " & aPrevEventId);
+            theJob.sequencingFailed := true;
+            theJob.failJob("The previous event id provided in the audit event data is not recognised as a previous event - in Job = " & this.jobID & " provided previous event id = " & aPrevEventId);
             
           end if;
         end loop; //End of loop over each previous event id  
@@ -363,7 +367,7 @@ begin
         // ...and now check that the received audit event data matches that which is expected
         newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
         if eventDataCheckHasPassed /= true then
-          this.failJob(failureReason);
+          theJob.failJob(failureReason);
         end if;   
         // End of MUN2-65 Addition
                     
@@ -374,8 +378,8 @@ begin
               
         else
           //Log Job failure: Previous event is valid but is part of a broken sequence
-          this.sequencingFailed := true;
-          this.failJob("No current sequence has been found for this audit event - Event Type = " & (newEvent -> R2).AEType);
+          theJob.sequencingFailed := true;
+          theJob.failJob("No current sequence has been found for this audit event - Event Type = " & (newEvent -> R2).AEType);
         end if;  
 
       else
@@ -388,7 +392,7 @@ begin
           link newEvent R13 theAeOccInSequenceDef;
           //TODO Validate the new sequence is in the correct order
           // Check that no other sequences for the same Job are still in progress
-          sequencesForJob := this -> R10;
+          sequencesForJob := theJob -> R10;
           incompleteSequences := find sequencesForJob (isComplete = false);
           if incompleteSequences'length = 0 then
             // Log info: Received a new sequence start event for an existing Job but other sequences are complete
@@ -397,7 +401,7 @@ begin
 	        
 	        // This must be the first start event seen for a new sequence so create and link the sequence
 	        newSequence := create unique Sequence (isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
-	        link newSequence R10 this;
+	        link newSequence R10 theJob;
 	        link newSequence R11 newEvent;
 	        link newSequence R14 theSequenceDef;
 	        
@@ -423,7 +427,7 @@ begin
 	        if (newEvent -> R11) = null then
 	          // This must be the first start event seen for a new sequence so create and link the sequence
 	          newSequence := create unique Sequence (isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
-	          link newSequence R10 this;
+	          link newSequence R10 theJob;
 	          link newSequence R11 newEvent;
 	          link newSequence R14 theSequenceDef;          
 	        end if;
@@ -437,15 +441,15 @@ begin
           // ...and then check that the received audit event data matches that which is expected
           newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
           if eventDataCheckHasPassed /= true then
-            this.failJob(failureReason);
+            theJob.failJob(failureReason);
           end if;
           
         else
           // We have a valid new event type and no previous event. This should indicate the start of
           // a new sequence within a Job yet the definition is ambiguous about which start event it is
           // TODO Check: Can this ever happen and if so what can we do about it?
-          this.sequencingFailed := true;
-          this.failJob("An event starting a new sequence has been received but there is no matching start event definition for Job = " & this.jobID & ", with audit event type = " & theEventType.AEType);
+          theJob.sequencingFailed := true;
+          theJob.failJob("An event starting a new sequence has been received but there is no matching start event definition for Job = " & this.jobID & ", with audit event type = " & theEventType.AEType);
         end if; 
       end if;    
  
@@ -461,8 +465,8 @@ begin
           generate Job.endEventInSequenceDetected(currentSequence) to this;
         else
           //Log Job failure: This event marks the end of a sequence but is part of a broken sequence
-          this.sequencingFailed := true;
-          this.failJob("This event marks the end of a sequence but is part of a broken sequence - Event Type = " & theEventType.AEType);
+          theJob.sequencingFailed := true;
+          theJob.failJob("This event marks the end of a sequence but is part of a broken sequence - Event Type = " & theEventType.AEType);
         end if;
   
       end if;
@@ -470,26 +474,27 @@ begin
       
     else
       // Log error: unrecognised event type received
-      this.sequencingFailed := true;
-      this.failJob("An unrecognised event type - " & aeType & "has been received for - jobId = " & this.jobID);
+      theJob.sequencingFailed := true;
+      theJob.failJob("An unrecognised event type - " & aeType & "has been received for - jobId = " & this.jobID);
     //
     end if;
   else
     // Log error: The audit event id received has been seen before
-    this.sequencingFailed := true;
-    this.failJob("The audit event id received has been seen before - event id " & eventId & " , jobId = " & this.jobID);
+    theJob.sequencingFailed := true;
+    theJob.failJob("The audit event id received has been seen before - event id " & eventId & " , jobId = " & this.jobID);
   
   end if;  
 //  
   // Set a timer to timeout if the job hangs waiting for another event
   theSystemSpec := find_one SystemSpecification();
-  schedule this.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;    
+  schedule theJob.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;    
   
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '9bb70ec1-ce80-4b43-b34b-afff9cafd28c' DO NOT EDIT THIS LINE.
 state AESequenceDC::UnhappyJob.AssessingJobConstraints () is
+theJob : instance of Job;
 eachAuditEventPair : instance of AuditEventPair;
 theAuditEventPairs : sequence of instance of AuditEventPair;
 theConstraintDefn : instance of ConstraintDefinition;
@@ -507,8 +512,9 @@ logMessage : string;
 failureReason: string;
 
 begin
-  // Need to check that constraints are honoured	
-  theAuditEventPairs := this -> R10 -> R11 -> R4.has_next.AuditEventPair;
+  // Need to check that constraints are honoured
+  theJob := this -> R45;	
+  theAuditEventPairs := theJob -> R10 -> R11 -> R4.has_next.AuditEventPair;
   validatedConstraint := true;
   for eachAuditEventPair in theAuditEventPairs loop
     theConstraintDefn := eachAuditEventPair -> R15 -> R16;
@@ -553,7 +559,7 @@ begin
     
   begin
     validatedDynamicControl := true;
-    theDynamicControls := this -> R35;
+    theDynamicControls := theJob -> R35;
     for theDynamicControl in theDynamicControls loop
       theDynamicControlDefn := theDynamicControl -> R29;
       if theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
@@ -602,23 +608,23 @@ begin
     if (validatedConstraint = false) and (validatedDynamicControl = true) then
       // Only the constraint checks have failed
       failureReason := "one or more constraint checks have failed";
-      generate Job.jobFailed(failureReason) to this;
+      generate Job.jobFailed(failureReason) to theJob;
     else
       if (validatedConstraint = true) and (validatedDynamicControl = false) then
         // Only the dynamic control checks have failed
         failureReason := "one or more dynamic control checks have failed";
-        generate Job.jobFailed(failureReason) to this;
+        generate Job.jobFailed(failureReason) to theJob;
       else
         // Both checks must have failed
         failureReason := "one or more constraint checks AND one or more dynamic control checks have failed";
-        generate Job.jobFailed(failureReason) to this;
+        generate Job.jobFailed(failureReason) to theJob;
       end if;
     end if;
   else
     // All constraint and dynamic control checks have passed for this Job
     logMessage := "AESequenceDC::Job.AssessingJobConstraints : Constraint and dynamic control checks passed for - jobId = " & this.jobID;
     Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-    generate Job.constraintCheckSuccessful() to this;
+    generate Job.constraintCheckSuccessful() to theJob;
   end if;
   
 //  if validatedConstraint = false then
@@ -636,55 +642,56 @@ end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '2a25ccf6-a82a-414f-99a3-e76cad5ca8e7' DO NOT EDIT THIS LINE.
-state AESequenceDC::UnhappyJob.JobFailed ( failureReason : in string ) is
+state AESequenceDC::UnhappyJob.JobFailed () is
 logMessage : string;
 theSystemSpec : instance of SystemSpecification;
+theJob : instance of Job;
 eventContent : string;
 
 begin
+  theJob := this -> R45;
   // Cancel the jobDeletionTimer (that may have been set in previous states) in preparation
   // for being set again within this state.
-  cancel this.jobDeletionTimer;
+  cancel theJob.jobDeletionTimer;
   
   // The following line is necessary because it is possible for JobFailed to be received when the Job has completed
   // Current policy is that FailJob from AEOrdering trumps all behaviour in SVDC and so even a completed Job will be
   // set to JobFailed in this situation. Consequently it seems appropriate to clear the jobCompleted boolean
-  this.jobCompleted := false;
+  theJob.jobCompleted := false;
   
   // Log info: Audit Event Sequence Verification has been informed of Job failure
   logMessage := "AESequenceDC::Job.JobFailed : Job Failed - jobId = " & this.jobID & " due to: " & failureReason;
   Logger::log(Logger::Error, "AESequenceDC", logMessage);
   eventContent := "FailureReason = " & failureReason & " : JobId = " & this.jobID;
   Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
-  for evt in this->R10->R11.SequencedAuditEvent loop
+  for evt in theJob->R10->R11.SequencedAuditEvent loop
 	  eventContent := "EventId = " & evt.AuditEventId;
 	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
   end loop;
   
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
-  schedule this.jobDeletionTimer generate Job.endOfLifeReached() to this delay theSystemSpec.jobDeletionWaitPeriod;
+  schedule theJob.jobDeletionTimer generate Job.endOfLifeReached() to this delay theSystemSpec.jobDeletionWaitPeriod;
   //          
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '6c7a7aa0-6ace-4ebb-ae23-a49738f5cff5' DO NOT EDIT THIS LINE.
-state AESequenceDC::UnhappyJob.JobGoneHorriblyWrong ( eventId : in string,
-                                                     prevAEIds : in sequence of string,
-                                                     aeType : in string,
-                                                     aeData : in sequence of auditEventDataStructure ) is
+state AESequenceDC::UnhappyJob.JobGoneHorriblyWrong () is
+theJob : instance of Job;
 logMessage : string;
 theSystemSpec : instance of SystemSpecification;
 eventContent : string;
 
 begin
-    // Cancel the jobDeletionTimer (that may have been set in previous states) in preparation
+  theJob := this -> R45;
+  // Cancel the jobDeletionTimer (that may have been set in previous states) in preparation
   // for being set again within this state.
-  cancel this.jobDeletionTimer;
+  cancel theJob.jobDeletionTimer;
   
   // The following line is necessary because it seems appropriate to clear the jobCompleted boolean if further
   // events are received after the Job completed
-  this.jobCompleted := false;
+  theJob.jobCompleted := false;
 
   // Log error: new follow on event received for completed or failed Job
       // Log info: Audit Event Sequence Verification has been informed of Job completion
@@ -695,13 +702,14 @@ begin
 
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
-  schedule this.jobDeletionTimer generate Job.endOfLifeReached() to this delay theSystemSpec.jobDeletionWaitPeriod;
+  schedule theJob.jobDeletionTimer generate Job.endOfLifeReached() to theJob delay theSystemSpec.jobDeletionWaitPeriod;
   //
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '75e9c6ef-bb5a-4a23-b694-7b4f08d12658' DO NOT EDIT THIS LINE.
-state AESequenceDC::UnhappyJob.AssessingSequenceCompletion ( thePotentiallyCompletedSequence : in instance of Sequence ) is
+state AESequenceDC::UnhappyJob.AssessingSequenceCompletion () is
+theJob : instance of Job;
 aeSequenceDefs : set of instance of AESequenceDefinition;
 completeSequences : set of instance of Sequence;
 sequencesForJob : set of instance of Sequence;
@@ -709,6 +717,7 @@ theSystemSpec : instance of SystemSpecification;
 logMessage : string;
  
 begin
+  theJob := this -> R45;
   // Log info: Audit Event Sequence Verification is checking for completion of a Sequence or Job
   logMessage := "AESequenceDC::Job.AssessingSequenceCompletion : Checking for completion of a Sequence or Job - jobId = " & this.jobID & " ,sequenceId = " & thePotentiallyCompletedSequence.sequenceId'image & " and branch extent = " & thePotentiallyCompletedSequence.branchExtent'image;
   Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
@@ -722,18 +731,18 @@ begin
   end if;  
    
   // Then check to see if the job is complete
-  aeSequenceDefs := this -> R8 -> R7;
-  sequencesForJob := this -> R10;
+  aeSequenceDefs := theJob -> R8 -> R7;
+  sequencesForJob := theJob -> R10;
   completeSequences := find sequencesForJob (isComplete = true);
   theSystemSpec := find_one SystemSpecification();
   if aeSequenceDefs'length = completeSequences'length then
     // All sequences for the Job appear to be complete - but just in case there's a late delivery of the first
     // event in a previously unseen optional branch of one of those sequences then give a short period for it to 
     // arrive before moving the Job into the JobCompleted state.
-    schedule this.jobEventTimer generate Job.jobComplete() to this delay theSystemSpec.intraSequenceEventTimeoutPeriod;
+    schedule theJob.jobEventTimer generate Job.jobComplete() to theJob delay theSystemSpec.intraSequenceEventTimeoutPeriod;
   else
     // The job or sequence is waiting for another event to arrive but one doesn't happen
-    schedule this.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;    
+    schedule theJob.jobHangingTimer generate Job.jobTimedOut() to theJob delay theSystemSpec.jobHangingTimeoutPeriod;    
   end if;
         
 end state;
@@ -741,16 +750,17 @@ end state;
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '5a3cb934-b549-421a-b824-170ff5c11d8c' DO NOT EDIT THIS LINE.
 state AESequenceDC::UnhappyJob.JobTimeoutReported () is
+theJob : instance of Job;
 logMessage : string;
 begin
   // TODO: Can a jobFailed event occur once this state is reached?
-  
+  theJob := this -> R45;  
   logMessage := "AESequenceDC::Job.JobTimeoutReported : The Job has been reported having timed out - jobId = " & this.jobID;
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   
   
-  this.sequencingFailed := true;
-  this.failJob("The job has timed out because it hasn't seen a complete expected sequence of events within the Job Hanging Timeout Period or because of a blocked event timeout for jobId = " & this.jobID );              
+  theJob.sequencingFailed := true;
+  theJob.failJob("The job has timed out because it hasn't seen a complete expected sequence of events within the Job Hanging Timeout Period or because of a blocked event timeout for jobId = " & this.jobID );              
   
   // TODO: Consider adding a jobTimedOut (boolean) attribute to Job and set this to true on
   //       entry to this state such that it can be used in test assertions (because you cannot
@@ -761,6 +771,7 @@ end state;
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '47d37031-2bca-4048-b632-dbe36f694b15' DO NOT EDIT THIS LINE.
 state AESequenceDC::UnhappyJob.JobSuccessful () is
+theJob : instance of Job;
 logMessage : string;
 theSystemSpec : instance of SystemSpecification;
 eventContent : string;
@@ -768,34 +779,37 @@ jobDefinition : instance of JobDefinition;
 
 begin
   // Job is considered to have completed - Record and log this fact.
-  this.jobCompleted := true;
-  jobDefinition := this -> R8.JobDefinition;
+  theJob := this -> R45;
+  theJob.jobCompleted := true;
+  jobDefinition := theJob -> R8.JobDefinition;
   // Log info: Audit Event Sequence Verification has determined that the Job is Complete
   logMessage := "AESequenceDC::Job.JobSuccessful : Sequence Verification determines that the Job - jobId = " & this.jobID & " is complete.";
   Logger::log(Logger::Debug, "Monitored System Status", logMessage);
   eventContent := "JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
   Reporting~>reportEvent(Logger::Information, "svdc_job_success", eventContent);
-  for evt in this->R10->R11.SequencedAuditEvent loop
+  for evt in theJob->R10->R11.SequencedAuditEvent loop
 	  eventContent := "EventId = " & evt.AuditEventId;
 	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
   end loop;
   
   // The Job is thus near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
-  schedule this.jobDeletionTimer generate Job.endOfLifeReached() to this delay theSystemSpec.jobDeletionWaitPeriod;
+  schedule theJob.jobDeletionTimer generate Job.endOfLifeReached() to theJob delay theSystemSpec.jobDeletionWaitPeriod;
   //
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '6ddd74ff-3685-4ce8-873d-88deb4dd203a' DO NOT EDIT THIS LINE.
 state AESequenceDC::UnhappyJob.Deleted () is
+theJob : instance of Job;
 logMessage : string;
 theJobID : string;
 
 begin
+  theJob := this -> R45;
   // The Job has reached the end of its useful life and can be deleted.
   theJobID := this.jobID;
-  this.deleteJob();
+  theJob.deleteJob();
   
   // Synchronise the deletion of any counterpart Job instances in other domains.
   JobAdmin~>deleteJob(theJobID);
@@ -808,14 +822,81 @@ end state;
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '3d40e011-f4c0-4303-84cb-67971879ef1b' DO NOT EDIT THIS LINE.
 state AESequenceDC::UnhappyJob.AssessingIntraJobInvariants () is
+theJob : instance of Job;
+expectedIntraJobInvDefns : set of instance of IntraJobInvariantDefn;
+theExpectedIntraJobInvDefn : instance of IntraJobInvariantDefn;
+theJobsAuditEvents : set of instance of SequencedAuditEvent;
+theInvariantAuditEvents : set of instance of SequencedAuditEvent;
+theJobsInvariantAuditEvents : set of instance of SequencedAuditEvent;
+theIntraJobInvariant : instance of TransientInvariant;
+intraJobInvariantCheckPassed : boolean;
+matched : boolean;
+invariantValue : string := "";
+failureReason : string;
+logMessage : string;
+
+begin
+// Checking Intra Job Invariants if any
+      theJob := this -> R45;
+      intraJobInvariantCheckPassed := true;
+      theJobsAuditEvents := theJob -> R10 -> R11;
+      expectedIntraJobInvDefns := theJob -> R10 -> R11 -> R13 -> R19;
+      for theExpectedIntraJobInvDefn in expectedIntraJobInvDefns loop
+        theInvariantAuditEvents := theExpectedIntraJobInvDefn -> R19 -> R13;
+        // This finds the set of audit events that are expected to have invariants attached
+        theJobsInvariantAuditEvents :=  theJobsAuditEvents intersection theInvariantAuditEvents;
+        for eachJobsInvariantAuditEvent in theJobsInvariantAuditEvents loop
+          theIntraJobInvariant := eachJobsInvariantAuditEvent -> R23;
+          if theIntraJobInvariant /= null then
+            if invariantValue = "" then
+              invariantValue := theIntraJobInvariant.invariantValue;
+            else  
+              if invariantValue /= theIntraJobInvariant.invariantValue then
+                intraJobInvariantCheckPassed := false;
+              end if;
+            end if;    
+          else
+            // No invariant provided with the audit event when expected
+            intraJobInvariantCheckPassed := false;
+          end if;  
+        end loop;
+      end loop;
+      
+      if intraJobInvariantCheckPassed then
+        logMessage := "AESequenceDC::Job.AssessingIntraJobInvariants : Intra-Job Invariant check passed for - jobId = " & this.jobID;
+        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+        generate Job.intraJobInvariantCheckSuccessful() to theJob;
+      else
+        failureReason := "Check of Intra-Job Invariants Failed";
+        generate Job.jobFailed(failureReason) to theJob;
+      end if;  
+  
+end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' 'fd6d660a-729b-4c97-bac8-4ac9d91c0784' DO NOT EDIT THIS LINE.
 state AESequenceDC::UnhappyJob.AwaitingPersistenceService () is
+theJob : instance of Job;
+theSystemSpec : instance of SystemSpecification;
+failureReason : string;
+logMessage : string;
+
+begin
+  theJob := this -> R45;
+
+  //TODO Remove debug message
+  logMessage := "AESequenceDC::Job.AwaitingPersistenceService : Entered state Awaiting Persistence Service for - jobId = " & this.jobID;
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+  
+  theSystemSpec := find_one SystemSpecification ();
+  failureReason := " Request for invariants from the persistence store has timed out meaning the Extra Job Invariant Check has failed " & this.jobID;
+  schedule theJob.jobInvariantSyncTimer generate Job.persistenceSyncTimedOut(failureReason) to theJob delay theSystemSpec.persistentInvariantRestoreTimeoutPeriod;
+end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' 'e1f39efc-b3ea-46c6-93b0-3c18e2b50ed6' DO NOT EDIT THIS LINE.
 state AESequenceDC::UnhappyJob.AssessingLocalExtraJobInvariants () is
+theJob : instance of Job;
 expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
 theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;
 theJobsAuditEvents : set of instance of SequencedAuditEvent;
@@ -835,10 +916,11 @@ logMessage : string;
 
 begin      
   // Checking Extra Job Invariants
+      theJob := this -> R45;
       matched := false;
       extraJobInvariantCheckPassed := true;
-      theJobsAuditEvents := this -> R10 -> R11;
-      expectedUserExtraJobInvDefns := this -> R10 -> R11 -> R13 -> R21;
+      theJobsAuditEvents := theJob -> R10 -> R11;
+      expectedUserExtraJobInvDefns := theJob -> R10 -> R11 -> R13 -> R21;
       for theExpectedUserExtraJobInvDefn in expectedUserExtraJobInvDefns loop
         theInvariantAuditEvents := theExpectedUserExtraJobInvDefn -> R21 -> R13;
         // This finds the set of audit events that are expected to have invariants attached
@@ -863,7 +945,7 @@ begin
             // Check to see if there is a stored persistent invariant 
             Persistence_Req_IF~>RestoreNamedInvariant(theTransientExtraJobInvariant.extraJobInvName,
             	                               theTransientExtraJobInvariant.invariantValue);
-            generate Job.WaitForStoredInvariants() to this;   
+            generate Job.WaitForStoredInvariants() to theJob;   
             extraJobInvariantCheckPassed := false;
             exit;
           end if;      
@@ -875,7 +957,7 @@ begin
       if extraJobInvariantCheckPassed then
         logMessage := "AESequenceDC::Job.AssessingLocalExtraJobInvariants : Extra-Job Invariant check passed for - jobId = " & this.jobID;
         Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-        generate Job.extraJobInvariantCheckSuccessful() to this;
+        generate Job.extraJobInvariantCheckSuccessful() to theJob;
       else
         logMessage := "AESequenceDC::Job.AssessingLocalExtraJobInvariants : Local Extra-Job Invariants insufficient so checking stored value for - jobId = " & this.jobID;
         Logger::log(Logger::Debug, "AESequenceDC", logMessage);
@@ -886,6 +968,7 @@ end state;
 
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '992d116a-ad28-4ca1-b731-d3a598f05bf6' DO NOT EDIT THIS LINE.
 state AESequenceDC::UnhappyJob.ReassessingExtraJobInvariants () is
+theJob : instance of Job;
 expectedUserExtraJobInvDefns : set of instance of ExtraJobInvariantDefn;
 theExpectedUserExtraJobInvDefn : instance of ExtraJobInvariantDefn;
 theJobsAuditEvents : set of instance of SequencedAuditEvent;
@@ -902,12 +985,13 @@ logMessage : string;
 
 begin  
   // Clear the time
-  cancel this.jobInvariantSyncTimer;    
+  theJob := this -> R45;
+  cancel theJob.jobInvariantSyncTimer;    
   // Checking Extra Job Invariants including those recovered from the persistent invariant store
       matched := false;
       extraJobInvariantCheckPassed := true;
-      theJobsAuditEvents := this -> R10 -> R11;
-      expectedUserExtraJobInvDefns := this -> R10 -> R11 -> R13 -> R21;
+      theJobsAuditEvents := theJob -> R10 -> R11;
+      expectedUserExtraJobInvDefns := theJob -> R10 -> R11 -> R13 -> R21;
       for theExpectedUserExtraJobInvDefn in expectedUserExtraJobInvDefns loop
         theInvariantAuditEvents := theExpectedUserExtraJobInvDefn -> R21 -> R13;
         // This finds the set of audit events that are expected to have invariants attached
@@ -940,10 +1024,10 @@ begin
       if extraJobInvariantCheckPassed then
         logMessage := "AESequenceDC::Job.ReassessingExtraJobInvariants : Extra-Job Invariant check passed for - jobId = " & this.jobID;
         Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-        generate Job.extraJobInvariantCheckSuccessful() to this;
+        generate Job.extraJobInvariantCheckSuccessful() to theJob;
       else
         failureReason := "Extra-Job Invariant check failed including checking stored invariants";
-        generate Job.jobFailed (failureReason) to this;
+        generate Job.jobFailed (failureReason) to theJob;
       end if;  
   
 end state;

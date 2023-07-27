@@ -5,6 +5,7 @@ public service AESequenceDC::SequencedAuditEvent.AddEventForNewJob ( jobId : in 
                                                                     aeType : in string,
                                                                     aeData : in sequence of auditEventDataStructure ) is
 newJob :  instance of Job;
+newHappyJob : instance of HappyJob;
 newEvent : instance of SequencedAuditEvent;
 oldEvent : instance of SequencedAuditEvent;
 newEventType : instance of SequencedAuditEventDefinition;
@@ -29,7 +30,9 @@ begin
   // Check to see if we've seen this event instance before
   if (oldEvent = null) then
     //We have a new job and this event must be a valid initial event for a Job
-    newJob := create Job (jobID => jobId, sequencingFailed => false, jobCompleted => false, Current_State => JobInProgress );
+    newJob := create Job (jobID => jobId, sequencingFailed => false, jobCompleted => false );
+    newHappyJob := create HappyJob (jobID => jobId, Current_State => JobInProgress );
+    link newHappyJob R45 newJob;
     newEvent := create SequencedAuditEvent (AuditEventId => eventId);
   
     newEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
