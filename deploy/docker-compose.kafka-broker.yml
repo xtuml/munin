@@ -17,6 +17,6 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       AUTO_CREATE_TOPICS: true
-      KAFKA_CREATE_TOPICS: "default.AEOrdering_service0:1:1"
+      KAFKA_CREATE_TOPICS: "default.AEOrdering_service0:1:1,default.AEReception_service0:1:1"
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock

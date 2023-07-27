@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  frec_aer:
+    image: "ghcr.io/xtuml/frec_aer"
+    ports:
+      - "20001:20000"
+      - "30001:30000"
+      - "40001:40000"
+    volumes:
+      - "./config:/root/config"
+      - "./logs/reception:/var/log/reception"
+      - "./reception-incoming:/root/incoming"
+      - "./reception-processed:/root/processed"
+    command: "-configPath config/ -configFile reception-config.json -log-config config/log-config-reception.xml -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup.sch -util Inspector -util Kafka -kafka-broker-list kafka:9093"
+  aeo_svdc:
+    image: "ghcr.io/xtuml/aeo_svdc"
+    volumes:
+      - "./config:/root/config"
+      - "./logs/verifier:/var/log/verifier"
+      - "./verifier-processed:/root/processed"
+      - "./InvariantStore:/root/InvariantStore"
+      - "./JobIdStore:/root/JobIdStore"
+    command: "-configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup FF -util Kafka -kafka-broker-list kafka:9093"
+networks:
+  default:
+    name: deploy_default
+    external: true

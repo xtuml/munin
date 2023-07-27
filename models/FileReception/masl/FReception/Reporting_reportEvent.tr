@@ -1,0 +1,4 @@
+public service FReception::Reporting~>reportEvent (        eventPriority : in Logger::Priority,        eventLabel : in string,        eventContent : in string) is
+begin
+	Logger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
+end service;

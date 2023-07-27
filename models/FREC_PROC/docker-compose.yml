@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  frec_proc:
+    image: "ghcr.io/xtuml/frec_proc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    volumes:
+      - "./config:/root/config"
+      - "./aer-incoming:/root/incoming"
+      - "./aer-processed:/root/processed"
+    command: "-configPath config/ -configFile file-reception-config.json -preinit schedule/startup.sch -util Inspector -util Kafka -kafka-broker-list kafka:9093"
+networks:
+  default:
+    name: deploy_default
+    external: true

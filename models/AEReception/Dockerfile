@@ -54,6 +54,12 @@ ENTRYPOINT ["/install/bin/Reception_proc_transient"]
 # build stage
 FROM build-base AS build-test
 
+RUN mkdir -p /install/include
+RUN mkdir -p /install/lib
+COPY --from=aeordering /install/include/ /install/include
+COPY --from=aeordering /install/lib/ /install/lib
+COPY --from=aeordering /install/share/ /install/share
+
 # perform the build
 RUN cmake /root -G Ninja -DCMAKE_BUILD_TYPE=Debug -DEXTRA_MASL_ARGS="${EXTRA_MASL_ARGS}" -DCMAKE_INSTALL_PREFIX=/install
 RUN ninja install
@@ -68,7 +74,6 @@ COPY --from=build-test /install/lib /install/lib
 COPY --from=build-test /install/share /install/share
 RUN mkdir -p /install/bin
 COPY --from=build-test /build/cmake-masl/build/AEReception_OOA/AEReception_transient_standalone /install/bin
-
 
 
 ################################################################################

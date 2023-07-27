@@ -73,7 +73,6 @@ jobStore : instance of JobStore;
 jobStoreName : string := "JobIdStore.log";
 today : sequence of integer;
 midnight : timestamp;
-fileControl : instance of FileControl;
 invariantStoreLoadRate : duration;
 
 begin
@@ -106,30 +105,6 @@ begin
             if configJSONObject'contains("JobCompletePeriod") then
                 this.jobCompletePeriod := duration'parse(JSON::get_string(configJSONObject["JobCompletePeriod"]));
             end if;
-            if configJSONObject'contains("IncomingDirectory") then
-                this.incomingDirectory := JSON::get_string(configJSONObject["IncomingDirectory"]);
-                // check if the directory exists and if not create it
-				if Filesystem::file_exists(Filesystem::filename(this.incomingDirectory)) = false then
-					Filesystem::create_directory(Filesystem::filename(this.incomingDirectory));
-				end if;
-				Filesystem::add_permissions(Filesystem::filename(this.incomingDirectory),filePermissions);
-            end if;
-            if configJSONObject'contains("ProcessingDirectory") then
-                this.processingDirectory := JSON::get_string(configJSONObject["ProcessingDirectory"]);
-                // check if the directory exists and if not create it
-				if Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) = false then
-					Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
-				end if;
-				Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
-            end if;
-            if configJSONObject'contains("ProcessedDirectory") then
-                this.processedDirectory := JSON::get_string(configJSONObject["ProcessedDirectory"]);
-                // check if the directory exists and if not create it
-				if Filesystem::file_exists(Filesystem::filename(this.processedDirectory)) = false then
-					Filesystem::create_directory(Filesystem::filename(this.processedDirectory));
-				end if;
-				Filesystem::add_permissions(Filesystem::filename(this.processedDirectory),filePermissions);
-            end if;
             if configJSONObject'contains("JobDefinitionDirectory") then
                 this.jobDefinitionDirectory := JSON::get_string(configJSONObject["JobDefinitionDirectory"]);
             end if;
@@ -155,9 +130,6 @@ begin
                 	Req_IF_InvariantStore~>setLoadRate(this.invariantStoreLoadRate);
                 end if;
             end if;
-            if configJSONObject'contains("FileControlWaitTime") then
-                this.fileControlWaitTime := duration'parse(JSON::get_string(configJSONObject["FileControlWaitTime"]));
-            end if;
         else
             logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
             Logger::log(Logger::Debug, "AEOrdering", logMessage);
@@ -173,8 +145,7 @@ begin
     // if the job store does not exist then create it
     jobStore := find_one JobStore();
     if jobStore = null then
-    	fileControl := find_one FileControl();
-    	jobStoreName := "JobIdStore" & "-" &  fileControl.startJobGroup'image & "-" & fileControl.endJobGroup'image;
+    	jobStoreName := "JobIdStore" & "-" &  this.startJobGroup'image & "-" & this.endJobGroup'image;
     	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, Current_State => Created);
     	JobStore.loadJobStore();
     	today := timestamp'now'split_ymd();

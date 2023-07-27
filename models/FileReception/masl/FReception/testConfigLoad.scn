@@ -1,0 +1,38 @@
+private service FReception::testConfigLoad () is
+fileReceptionSpec : instance of FileReceptionSpec;
+configFile : string := "test_config.json";
+
+begin
+
+	// clear the domain down
+	FReception::clearDomain();
+	
+	// the config file should have been loaded so we want to check that the spec class has been created corretcly
+	fileReceptionSpec := find_one FileReceptionSpec ();
+	Assertions::assertTrue(fileReceptionSpec.concurrentReceptionLimit = 1, "invalid  concurrentReceptionLimit, expected 1 found " & fileReceptionSpec.concurrentReceptionLimit'image);
+	Assertions::assertTrue(fileReceptionSpec.processedDirectory = "./processed", "invalid  processedDirectory, expected ./processed found " & fileReceptionSpec.processedDirectory);
+	Assertions::assertTrue(fileReceptionSpec.incomingDirectory = "./incoming", "invalid  processingDirectory, expected ./incoming found " & fileReceptionSpec.incomingDirectory);
+	Assertions::assertTrue(fileReceptionSpec.specUpdateRate = @PT2M@, "invalid specUpdateRate, expected 2M found " & fileReceptionSpec.specUpdateRate'image);
+	// fire the timer to check if the config class has not been as the config file has not changed
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'minutes(2));
+	Assertions::assertTrue(fileReceptionSpec.concurrentReceptionLimit = 1, "invalid  concurrentReceptionLimit, expected 1 found " & fileReceptionSpec.concurrentReceptionLimit'image);
+	Assertions::assertTrue(fileReceptionSpec.processedDirectory = "./processed", "invalid  processedDirectory, expected ./processed found " & fileReceptionSpec.processedDirectory);
+	Assertions::assertTrue(fileReceptionSpec.incomingDirectory = "./incoming", "invalid  processingDirectory, expected ./incoming found " & fileReceptionSpec.incomingDirectory);
+	Assertions::assertTrue(fileReceptionSpec.specUpdateRate = @PT2M@, "invalid specUpdateRate, expected 2M found " & fileReceptionSpec.specUpdateRate'image);
+	
+	// put a new config file in place
+	fileReceptionSpec.configFile := configFile;
+	Filesystem::touch_file(Filesystem::filename(fileReceptionSpec.configFilePath & configFile));
+	
+	// fire the timer to check the config file
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'minutes(2));
+	
+	// verify that the config file has been updated
+	Assertions::assertTrue(fileReceptionSpec.concurrentReceptionLimit = 10, "invalid  concurrentReceptionLimit, expected 10 found " & fileReceptionSpec.concurrentReceptionLimit'image);
+	Assertions::assertTrue(fileReceptionSpec.processedDirectory = "./processed-test", "invalid  processedDirectory, expected ./processed-test found " & fileReceptionSpec.processedDirectory);
+	Assertions::assertTrue(fileReceptionSpec.incomingDirectory = "./incoming-test", "invalid  processingDirectory, expected ./incoming-test found " & fileReceptionSpec.incomingDirectory);
+	Assertions::assertTrue(fileReceptionSpec.specUpdateRate = @PT10M@, "invalid specUpdateRate, expected 10M found " & fileReceptionSpec.specUpdateRate'image);
+
+end service;

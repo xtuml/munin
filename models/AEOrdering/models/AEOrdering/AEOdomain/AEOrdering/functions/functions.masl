@@ -17,52 +17,57 @@ jobFailureReason : string;
 failureReason : string;
 systemSpec : instance of SystemSpec;
 eventContent : string;
+rawJobId : UUID::raw_uuid;
+lane : integer;
 
 begin
 
 	logMessage := "AEOrdering::AcceptEvent : jobId = " & jobId & ", auditEventType = " & auditEventType & ", auditEventId = " & auditEventId;
 	Logger::log(Logger::Debug, "AEOrdering", logMessage);
+	systemSpec := find_one SystemSpec();
+	rawJobId := UUID::extract_raw(UUID::formatted_uuid(jobId));
+	lane := integer(rawJobId[rawJobId'last]);
+	if lane >= systemSpec.startJobGroup and lane <= systemSpec.endJobGroup then
 	
-	job := find_one Job(jobId = jobId);
-	if job = null then
-		job := create Job(jobId => jobId, outOfSequenceEventCount => 0, jobStartTime => timestamp'now, totalOutOfSequence => 0, maxOutOfSequence => 0, Current_State => Created);
-		inProgressJob := create InProgressJob(jobId => job.jobId);
-		link inProgressJob R2 job;
-		generate Job.jobStarted() to job;
-		eventContent := "JobId = " & job.jobId;
-		Reporting~>reportEvent(Logger::Information, "aeordering_job_processed", eventContent);
-	end if;
-	
-	// create the audit event
-	if job -> R2.FailedJob /= null then
-		jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job has failed";
-	elsif job -> R2.ArchivedJob /= null then
-		jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job is already archived";
-	end if;
-	auditEvent := AuditEvent.createAuditEvent(job, nodeName, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData, failureReason);
-	
-	// check if the audit event is blocked
-	if auditEvent = null or job -> R2.ArchivedJob /= null or job -> R2.FailedJob /= null then
-		job.failJob(jobFailureReason);
-	elsif auditEvent -> R4.BlockedAuditEvent /= null then
-		link auditEvent R1 job;
-		job.outOfSequenceEventCount := (job -> R1.AuditEvent)'length;
-		// if this out of sequence event count is higher than the current max out of sequence then update the current max out of sequence
-		if job.outOfSequenceEventCount > job.maxOutOfSequence then
-			job.maxOutOfSequence := job.outOfSequenceEventCount;
-		end if;
-		// if we have exceeded the max out of sequence events then fail the job
-		systemSpec := find_one SystemSpec();
-		if job.outOfSequenceEventCount >= systemSpec.maxOutOfSequenceEvents then
-			failureReason := "JobId = " & job.jobId & "FailureReason = Maximum out of sequence events reached, max = " & systemSpec.maxOutOfSequenceEvents'image;
-			job.failJob(failureReason);
+		job := find_one Job(jobId = jobId);
+		if job = null then
+			job := create Job(jobId => jobId, outOfSequenceEventCount => 0, jobStartTime => timestamp'now, totalOutOfSequence => 0, maxOutOfSequence => 0, Current_State => Created);
+			inProgressJob := create InProgressJob(jobId => job.jobId);
+			link inProgressJob R2 job;
+			generate Job.jobStarted() to job;
+			eventContent := "JobId = " & job.jobId;
+			Reporting~>reportEvent(Logger::Information, "aeordering_job_processed", eventContent);
 		end if;
 		
-	// check if we need to report a jobFailure
-	elsif auditEvent -> R4.FailedAuditEvent /= null and job -> R2.InProgressJob /= null then
-		job.failJob(failureReason);
+		// create the audit event
+		if job -> R2.FailedJob /= null then
+			jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job has failed";
+		elsif job -> R2.ArchivedJob /= null then
+			jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job is already archived";
+		end if;
+		auditEvent := AuditEvent.createAuditEvent(job, nodeName, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData, failureReason);
+		
+		// check if the audit event is blocked
+		if auditEvent = null or job -> R2.ArchivedJob /= null or job -> R2.FailedJob /= null then
+			job.failJob(jobFailureReason);
+		elsif auditEvent -> R4.BlockedAuditEvent /= null then
+			link auditEvent R1 job;
+			job.outOfSequenceEventCount := (job -> R1.AuditEvent)'length;
+			// if this out of sequence event count is higher than the current max out of sequence then update the current max out of sequence
+			if job.outOfSequenceEventCount > job.maxOutOfSequence then
+				job.maxOutOfSequence := job.outOfSequenceEventCount;
+			end if;
+			// if we have exceeded the max out of sequence events then fail the job
+			if job.outOfSequenceEventCount >= systemSpec.maxOutOfSequenceEvents then
+				failureReason := "JobId = " & job.jobId & "FailureReason = Maximum out of sequence events reached, max = " & systemSpec.maxOutOfSequenceEvents'image;
+				job.failJob(failureReason);
+			end if;
+			
+		// check if we need to report a jobFailure
+		elsif auditEvent -> R4.FailedAuditEvent /= null and job -> R2.InProgressJob /= null then
+			job.failJob(failureReason);
+		end if;
 	end if;
-
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

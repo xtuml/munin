@@ -1,0 +1,20 @@
+//!This domain receives audit events from the monitored system. The domain is responsible for decoding 
+//!the event messages from the form in which they are received to a form that can be used within this 
+//!verification model.
+//!
+//!Any errors in the formatting of the received audit events will be notified through the Logging 
+//!required interface.
+//!
+//!There may be multiple versions of this domain:
+//!1. To receive and decode audit events in batch file format
+//!2. To receive and decode events live from the monitored system
+domain FReception is
+  terminator Reporting is
+    public service reportEvent (
+        eventPriority : in Logger::Priority,        eventLabel : in string,        eventContent : in string    );
+  end terminator;
+  terminator Reception is
+    public service AcceptEvents (
+        auditEvents : in string    );
+  end terminator;
+end domain;

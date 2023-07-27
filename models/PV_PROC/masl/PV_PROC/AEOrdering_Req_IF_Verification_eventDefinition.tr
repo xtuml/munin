@@ -1,0 +1,34 @@
+public service AEOrdering::Req_IF_Verification~>eventDefinition ( jobName: in string,
+                                                                  sequenceName: in string,
+                                                                  eventType: in string,
+                                                                  occurrenceId: in integer,
+                                                                  previousEventTypes: in sequence of PreviousEventType,
+                                                                  isSequenceStart: in boolean,
+                                                                  isSequenceEnd: in boolean,
+                                                                  isBreak: in boolean ) is
+prevEventTypes: sequence of AESequenceDC::eventStructure;
+begin
+  // convert the AEOrdering type to an AESequenceDC type
+  for previousEventType in previousEventTypes loop
+    declare
+      prevEventType: AESequenceDC::eventStructure;
+    begin
+      prevEventType.eventTypeName := previousEventType.previousEventTypeName;
+      prevEventType.occurrenceId := previousEventType.occurrenceId;
+      prevEventType.constraintDefId := previousEventType.constraintDefinitionId;
+      prevEventType.constraintValue := previousEventType.constraintValue;
+      prevEventTypes := prevEventTypes & prevEventType;
+    end;
+  end;
+  // call the public service
+  AESequenceDC::eventDefinition(
+    jobName,
+    sequenceName,
+    eventType,
+    occurrenceId,
+    prevEventTypes,
+    isSequenceStart,
+    isSequenceEnd,
+    isBreak
+  );
+end service;

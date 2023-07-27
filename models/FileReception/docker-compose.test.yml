@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+ freception_test:
+    image: "ghcr.io/xtuml/freception:test"
+    build:
+      context: .
+      target: install-test
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    volumes:
+      - "./test_results:/root/test_results"
+      - "./testing:/root/testing"
+      - "./config:/root/config"
+      - "./schedule:/root/schedule"
+
+    entrypoint: ["/usr/bin/timeout", "3000s", "FReception_transient_standalone"]
+    command: "-log-level Debug -configPath config/ -postinit schedule/test.sch -util Inspector -inspector-port 0"

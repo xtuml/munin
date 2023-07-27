@@ -1,0 +1,40 @@
+project FREC_AER is
+
+  domain AEReception is
+
+    terminator Ordering is
+
+      public service AcceptEvent (
+        jobId : in string,
+        nodeName : in string,
+        application : in string,
+        auditEventType : in string,
+        auditEventId : in string,
+        auditEventTime : in string,
+        prevAuditEventIds : in sequence of string,
+        auditEventData : in dictionary
+      );
+
+    end terminator;
+    
+  end domain;
+
+  domain FReception is
+    
+    terminator Reception is
+    
+      public service AcceptEvents (
+          auditEvents : in string    );
+    
+    end terminator;
+  
+  end domain;
+  
+  domain JSON is
+  end domain;
+
+  domain JSONValidation is
+  end domain;
+
+
+end project;

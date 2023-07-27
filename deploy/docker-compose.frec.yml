@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  frec_proc:
+    image: "ghcr.io/xtuml/frec_proc"
+    volumes:
+      - "./config:/root/config"
+      - "./reception-incoming:/root/incoming"
+      - "./reception-processed:/root/processed"
+    command: "-configPath config/ -configFile file-reception-config.json -log-config config/log-config-reception.xml -preinit schedule/startup.sch -util Inspector -util Kafka -kafka-broker-list kafka:9093"
+networks:
+  default:
+    name: deploy_default
+    external: true

@@ -1,0 +1,21 @@
+//! ACTIVITY BEGIN. 'c748771a-bf31-4db7-9186-80c0156c071c' DO NOT EDIT THIS LINE.
+private service AEReception::AcceptEvents ( auditEvents : in string ) is
+receptionSpec : instance of ReceptionSpec;
+receptionJob : instance of Reception;
+
+begin
+	
+	receptionSpec := find_one ReceptionSpec();
+	receptionJob := create unique Reception (aeDelay => receptionSpec.eventThrottleRate, eventsProcessed => 0, Current_State => starting);
+	if receptionSpec.schemaValidate = true then
+		receptionSpec.schemaValidationCount := receptionSpec.schemaValidationCount + 1;
+		if receptionSpec.schemaValidationCount = receptionSpec.schemaValidateFrequency then
+			receptionJob.validate := true;
+			receptionSpec.schemaValidationCount := 0;
+		end if;
+	end if;
+	generate Reception.ready_to_parse(auditEvents) to receptionJob;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

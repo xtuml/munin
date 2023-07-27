@@ -1,0 +1,33 @@
+private service FReception::init () is
+configFilePath : string;
+configFile: string;
+logMessage : string;
+fileReceptionSpec : instance of FileReceptionSpec;
+
+begin
+
+	// get the supplied command line option for the config file and verify it is valid
+	configFilePath := CommandLine::get_option_value("-configPath");
+	configFile := CommandLine::get_option_value("-configFile", "config.json");
+	if Filesystem::file_exists(Filesystem::filename(configFilePath & configFile)) then
+		fileReceptionSpec := find_one FileReceptionSpec();
+		if fileReceptionSpec = null then
+			fileReceptionSpec := create unique FileReceptionSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, 
+				                                   processedDirectory => "./processed", concurrentReceptionLimit => 1, 
+				                                   fileControlWaitTime => @PT1S@, Current_State => Created);
+		end if;
+		generate FileReceptionSpec.loadConfig() to fileReceptionSpec;
+	else
+		logMessage := "FileReception::init : failed to locate config file. Specified file = " & configFilePath & configFile;
+		Logger::log(Logger::Information, "FileReception", logMessage);
+		raise program_error;
+	end if;
+
+exception
+	when others =>
+	
+		logMessage := "FileReception::init : failed during start up";
+		Logger::log(Logger::Error, "FileReception", logMessage);
+		raise program_error;
+	
+end service;

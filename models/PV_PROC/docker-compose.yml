@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  pv_proc:
+    image: "ghcr.io/xtuml/pv_proc"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20001:20000"
+      - "30001:30000"
+      - "40001:40000"
+    volumes:
+      - "./config:/root/config"
+      - "./test-files/logs/reception:/var/log/reception"
+      - "./test-files/logs/verifier:/var/log/verifier"
+      - "./test-files/reception-incoming:/root/incoming"
+      - "./test-files/reception-processed:/root/processed"
+      - "./test-files/InvariantStore:/root/InvariantStore"
+      - "./test-files/JobIdStore:/root/JobIdStore"
+    command: "-configPath config/ -configFile pv-config.json  -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup FF -util Inspector -inspector-port 0"
+networks:
+  default:
+    name: deploy_default
+    external: true

@@ -1,0 +1,302 @@
+//! ACTIVITY BEGIN. 'cfe13ecd-5838-4f1a-bed3-73b4306cc1e4' DO NOT EDIT THIS LINE.
+private service FReception::basicTest01 () is
+incomingDirectory: readonly Filesystem::filename := "./incoming/";
+testDirectory: readonly Filesystem::filename := "./testing/";
+testFile: readonly Filesystem::filename := "basicTest01.json";
+logMessage : string;
+fileReceptionSpec : instance of FileReceptionSpec;
+directoryName : Filesystem::filename;
+filename : Filesystem::filename;
+directoryList : set of Filesystem::filename;
+jsonString: string;
+jsonElement: JSON::JSONElement;
+jsonElements : JSON::JSONArray;
+eventJsonObject : JSON::JSONObject;
+prevAuditEventIds : sequence of string;
+receptionAcceptEvents : sequence of instance of _TEST_Reception_AcceptEvents;
+receptionAcceptEvent : instance of _TEST_Reception_AcceptEvents;
+
+begin
+
+  // clear the domain down
+  fileReceptionSpec := find_one FileReceptionSpec();
+  directoryName := Filesystem::filename(fileReceptionSpec.processedDirectory);
+  FReception::clearDomain();
+  
+  // Copy a file into the incoming folder, wait for the file to be processed and
+  // assure the correct terminator message has been called
+  
+  // copy the test file into the incoming directory
+  Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
+  
+  // service the event queues and scheduled timers up to 2s in the future
+  Test::service_event_queue();
+  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+//  Test::service_event_queue();
+//  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+//  Test::service_event_queue();
+//  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+//  Test::service_event_queue();
+//  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+  
+  // confirm that the file content has been sent to reception
+  receptionAcceptEvents:= find _TEST_Reception_AcceptEvents();
+  Assertions::assertTrue((receptionAcceptEvents'length = 1), "Invalid number of reception accept events = " & receptionAcceptEvents'length'image);
+
+  // read the events
+  receptionAcceptEvent := find_one receptionAcceptEvents();
+  jsonString := receptionAcceptEvent.auditEvents;
+  jsonElement := JSON::parse(jsonString);
+  jsonElements := JSON::get_array(jsonElement);
+  // verify that there are 3 events
+  Assertions::assertTrue(jsonElements'length = 7, "Expected 7 events file contains " & jsonElements'length'image);  
+  
+  // confirm that the data has not been altered
+  eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
+  Assertions::assertEquals("This is a comment near the beginning.", JSON::get_string(eventJsonObject["__comment__"]));
+
+  Assertions::assertEquals("node1", JSON::get_string(jsonElements[jsonElements'first + 1]));
+
+  eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 2]);
+  Assertions::assertEquals("This is a comment in the middle.", JSON::get_string(eventJsonObject["__comment__"]));
+
+  eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 3]);
+  Assertions::assertEquals("This is a comment inside the next-level object.", JSON::get_string(eventJsonObject["__comment__"]));
+  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
+  Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["eventId"]));
+  Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = false), "basicTest01: Failed as verification reported prevEventIds was invalid");
+  Assertions::assertEquals("2021-05-13T10:07:34Z", JSON::get_string(eventJsonObject["timestamp"]));
+  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
+  
+  eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 4]);
+  Assertions::assertEquals("This is a comment inside the next-level object.", JSON::get_string(eventJsonObject["__comment__"]));
+  Assertions::assertEquals("TestEvent2", JSON::get_string(eventJsonObject["eventType"]));
+  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
+  Assertions::assertEquals("735cc6c2-05e1-437f-a3e8-3b2cc36803a4", JSON::get_string(eventJsonObject["eventId"]));
+  Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = true), "basicTest01: Failed as verification reported prevEventIds was invalid");
+  Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["previousEventIds"]));
+  Assertions::assertEquals("2021-05-13T10:07:35Z", JSON::get_string(eventJsonObject["timestamp"]));
+  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
+ 
+  eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 5]);
+  Assertions::assertEquals("This is a comment inside the next-level object.", JSON::get_string(eventJsonObject["__comment__"]));
+  Assertions::assertEquals("TestEvent3", JSON::get_string(eventJsonObject["eventType"]));
+  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
+  Assertions::assertEquals("daf4d86c-084b-49cc-acfb-f558eeef6e80", JSON::get_string(eventJsonObject["eventId"]));
+  Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = true), "basicTest01: Failed as verification reported prevEventIds was invalid");
+  if eventJsonObject["previousEventIds"].kind = JSON::Array then
+	  for prev_id in JSON::get_array(eventJsonObject["previousEventIds"]) loop
+	    prevAuditEventIds := prevAuditEventIds & JSON::get_string(prev_id);
+	  end loop;
+      Assertions::assertTrue((prevAuditEventIds'get_unique intersection "dea5b47b-438b-47b0-8046-585254327fd2")'length = 1, "Missing previous audit event id: " & "dea5b47b-438b-47b0-8046-585254327fd2");
+      Assertions::assertTrue((prevAuditEventIds'get_unique intersection "735cc6c2-05e1-437f-a3e8-3b2cc36803a4")'length = 1, "Missing previous audit event id: " & "735cc6c2-05e1-437f-a3e8-3b2cc36803a4");
+  end if;
+  Assertions::assertEquals("2021-05-13T10:07:36Z", JSON::get_string(eventJsonObject["timestamp"]));
+  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
+  
+  eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 6]);
+  Assertions::assertEquals("This is a comment at the end.", JSON::get_string(eventJsonObject["__comment__"]));
+
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'e9657e0d-db6e-4a3e-801d-13a32e5a8ce8' DO NOT EDIT THIS LINE.
+private service FReception::testConfigLoad () is
+fileReceptionSpec : instance of FileReceptionSpec;
+configFile : string := "test_config.json";
+
+begin
+
+	// clear the domain down
+	FReception::clearDomain();
+	
+	// the config file should have been loaded so we want to check that the spec class has been created corretcly
+	fileReceptionSpec := find_one FileReceptionSpec ();
+	Assertions::assertTrue(fileReceptionSpec.concurrentReceptionLimit = 1, "invalid  concurrentReceptionLimit, expected 1 found " & fileReceptionSpec.concurrentReceptionLimit'image);
+	Assertions::assertTrue(fileReceptionSpec.processedDirectory = "./processed", "invalid  processedDirectory, expected ./processed found " & fileReceptionSpec.processedDirectory);
+	Assertions::assertTrue(fileReceptionSpec.incomingDirectory = "./incoming", "invalid  processingDirectory, expected ./incoming found " & fileReceptionSpec.incomingDirectory);
+	Assertions::assertTrue(fileReceptionSpec.specUpdateRate = @PT2M@, "invalid specUpdateRate, expected 2M found " & fileReceptionSpec.specUpdateRate'image);
+	// fire the timer to check if the config class has not been as the config file has not changed
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'minutes(2));
+	Assertions::assertTrue(fileReceptionSpec.concurrentReceptionLimit = 1, "invalid  concurrentReceptionLimit, expected 1 found " & fileReceptionSpec.concurrentReceptionLimit'image);
+	Assertions::assertTrue(fileReceptionSpec.processedDirectory = "./processed", "invalid  processedDirectory, expected ./processed found " & fileReceptionSpec.processedDirectory);
+	Assertions::assertTrue(fileReceptionSpec.incomingDirectory = "./incoming", "invalid  processingDirectory, expected ./incoming found " & fileReceptionSpec.incomingDirectory);
+	Assertions::assertTrue(fileReceptionSpec.specUpdateRate = @PT2M@, "invalid specUpdateRate, expected 2M found " & fileReceptionSpec.specUpdateRate'image);
+	
+	// put a new config file in place
+	fileReceptionSpec.configFile := configFile;
+	Filesystem::touch_file(Filesystem::filename(fileReceptionSpec.configFilePath & configFile));
+	
+	// fire the timer to check the config file
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'minutes(2));
+	
+	// verify that the config file has been updated
+	Assertions::assertTrue(fileReceptionSpec.concurrentReceptionLimit = 10, "invalid  concurrentReceptionLimit, expected 10 found " & fileReceptionSpec.concurrentReceptionLimit'image);
+	Assertions::assertTrue(fileReceptionSpec.processedDirectory = "./processed-test", "invalid  processedDirectory, expected ./processed-test found " & fileReceptionSpec.processedDirectory);
+	Assertions::assertTrue(fileReceptionSpec.incomingDirectory = "./incoming-test", "invalid  processingDirectory, expected ./incoming-test found " & fileReceptionSpec.incomingDirectory);
+	Assertions::assertTrue(fileReceptionSpec.specUpdateRate = @PT10M@, "invalid specUpdateRate, expected 10M found " & fileReceptionSpec.specUpdateRate'image);
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'f1c56d38-3ae4-4b1c-951b-875c33126fa4' DO NOT EDIT THIS LINE.
+private service FReception::clearDomain () is
+begin
+	
+	// delete all the event files
+	for eventFile in find EventFile() loop
+		unlink eventFile R1;
+		delete eventFile;
+	end loop;
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '6833cc13-d55a-4773-9b80-bd74486f4763' DO NOT EDIT THIS LINE.
+private service FReception::testFileCapacityManagement () is
+incomingDirectory: readonly Filesystem::filename := "./incoming/";
+testDirectory: readonly Filesystem::filename := "./testing/";
+testFile: readonly Filesystem::filename := "capacityTest01.json";
+testFile2: readonly Filesystem::filename := "capacityTest02.json";
+testFile3: readonly Filesystem::filename := "capacityTest03.json";
+testFile4: readonly Filesystem::filename := "capacityTest04.json";
+prevEventFiles : sequence of instance of EventFile;
+eventFile : instance of EventFile;
+fileReceptionSpec : instance of FileReceptionSpec;
+jobId1 : string := "8a783c30-3161-4cca-9ac1-37f6b50fe6e1";
+auditEventId1 : string := "dea5b47b-438b-47b0-8046-585254327f21";
+jobId2 : string := "8a783c30-3161-4cca-9ac1-37f6b50fe6e2";
+auditEventId2 : string := "dea5b47b-438b-47b0-8046-585254327fd2";
+
+directoryName : Filesystem::filename;
+filename : Filesystem::filename;
+directoryList : set of Filesystem::filename;
+jsonString: string;
+jsonElement: JSON::JSONElement;
+jsonElements : JSON::JSONArray;
+eventJsonObject : JSON::JSONObject;
+prevAuditEventIds : sequence of string;
+
+receptionAcceptEvents : sequence of instance of _TEST_Reception_AcceptEvents;
+jobId : string;
+eventId : string;
+
+fileControl : instance of FileControl;
+
+begin
+
+	// clear the domain down
+	fileReceptionSpec := find_one FileReceptionSpec();
+	FReception::clearDomain();
+	receptionAcceptEvents:= find _TEST_Reception_AcceptEvents();
+	delete receptionAcceptEvents;
+	fileReceptionSpec.concurrentReceptionLimit := 1;
+	  
+	// copy the test file into the incoming directory
+	Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
+	Filesystem::copy_file(testDirectory & testFile2, incomingDirectory & testFile2);
+
+	// service the event queues and scheduled timers up to 2s in the future
+	// this should force file control to detect the incoming files and assign
+	// one of them to be processed
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+
+	receptionAcceptEvents:= find _TEST_Reception_AcceptEvents();
+	Assertions::assertTrue((receptionAcceptEvents'length = 1), "Invalid number of reception accept events = " & receptionAcceptEvents'length'image);
+
+
+   	for receptionAcceptEvent in receptionAcceptEvents loop
+		jsonString := receptionAcceptEvent.auditEvents;
+		jsonElement := JSON::parse(jsonString);
+		jsonElements := JSON::get_array(jsonElement);
+		// verify that there are 1 events
+		Assertions::assertTrue(jsonElements'length = 2, "Expected 2 events file contains " & jsonElements'length'image);  
+		Assertions::assertEquals("node1", JSON::get_string(jsonElements[jsonElements'first]));
+		
+		// confirm that the single audit event has the correct parameter values
+		eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 1]);
+		jobId := JSON::get_string(eventJsonObject["jobId"]);
+		eventId := JSON::get_string(eventJsonObject["eventId"]);
+		
+		if not (jobId = "8a783c30-3161-4cca-9ac1-37f6b50fe6e1" and eventId = "dea5b47b-438b-47b0-8046-585254327f21" or 
+  		        jobId = "8a783c30-3161-4cca-9ac1-37f6b50fe6e2" and eventId = "dea5b47b-438b-47b0-8046-585254327fd2") then
+			Assertions::assertTrue(false, "Invalid event file assigned");
+		end if;
+	end loop;		
+	
+	delete receptionAcceptEvents;
+	
+	// force the next file to be processed
+	fileControl := find_one FileControl();
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+	
+	receptionAcceptEvents:= find _TEST_Reception_AcceptEvents();
+	Assertions::assertTrue((receptionAcceptEvents'length = 1), "Invalid number of reception accept events = " & receptionAcceptEvents'length'image);
+
+   	for receptionAcceptEvent in receptionAcceptEvents loop
+		jsonString := receptionAcceptEvent.auditEvents;
+		jsonElement := JSON::parse(jsonString);
+		jsonElements := JSON::get_array(jsonElement);
+		// verify that there are 1 events
+		Assertions::assertTrue(jsonElements'length = 2, "Expected 2 events file contains " & jsonElements'length'image);
+		Assertions::assertEquals("node1", JSON::get_string(jsonElements[jsonElements'first]));
+		
+		// confirm that the single audit event has the correct parameter values
+		eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 1]);
+		jobId := JSON::get_string(eventJsonObject["jobId"]);
+		eventId := JSON::get_string(eventJsonObject["eventId"]);
+		
+		if not (jobId = "8a783c30-3161-4cca-9ac1-37f6b50fe6e1" and eventId = "dea5b47b-438b-47b0-8046-585254327f21" or 
+  		        jobId = "8a783c30-3161-4cca-9ac1-37f6b50fe6e2" and eventId = "dea5b47b-438b-47b0-8046-585254327fd2") then
+			Assertions::assertTrue(false, "Invalid event file assigned");
+		end if;
+	end loop;		
+
+	delete receptionAcceptEvents;
+	
+	
+	// increase the capacity to 2
+	fileReceptionSpec := find_one FileReceptionSpec();
+	directoryName := Filesystem::filename(fileReceptionSpec.processedDirectory);
+	FReception::clearDomain();
+	fileReceptionSpec.concurrentReceptionLimit := 2;
+
+	// copy the test file into the incoming directory
+	Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
+	Filesystem::copy_file(testDirectory & testFile2, incomingDirectory & testFile2);
+	Filesystem::copy_file(testDirectory & testFile3, incomingDirectory & testFile3);
+	Filesystem::copy_file(testDirectory & testFile4, incomingDirectory & testFile4);
+
+	// service the event queues and scheduled timers up to 2s in the future
+	// this should force file control to detect the incoming files and assign
+	// one of them to be processed
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+
+	receptionAcceptEvents:= find _TEST_Reception_AcceptEvents();
+	Assertions::assertTrue((receptionAcceptEvents'length = 2), "Invalid number of reception accept events = " & receptionAcceptEvents'length'image);
+
+	delete receptionAcceptEvents;
+
+	// force the next file to be processed
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+			
+	receptionAcceptEvents:= find _TEST_Reception_AcceptEvents();
+	Assertions::assertTrue((receptionAcceptEvents'length = 2), "Invalid number of reception accept events = " & receptionAcceptEvents'length'image);
+	
+	// reset the capacity to 1
+	fileReceptionSpec.concurrentReceptionLimit := 1;
+	
+	// test the reception deletion time
+	Test::service_event_queue();
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
+		
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

@@ -1,0 +1,10 @@
+private service FReception::clearDomain () is
+begin
+	
+	// delete all the event files
+	for eventFile in find EventFile() loop
+		unlink eventFile R1;
+		delete eventFile;
+	end loop;
+
+end service;

@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  frec_aer:
+    image: "ghcr.io/xtuml/frec_aer"
+    build:
+      context: .
+      args:
+        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
+    ports:
+      - "20002:20000"
+      - "30002:30000"
+      - "40002:40000"
+    volumes:
+      - "./config:/root/config"
+      - "../test-files/aer-incoming:/root/incoming"
+      - "../test-files/aer-processed:/root/processed"
+    command: "-configPath config/ -configFile reception-config.json -preinit schedule/startup.sch -util Inspector -util Kafka -kafka-broker-list kafka:9093"
+networks:
+  default:
+    name: deploy_default
+    external: true
