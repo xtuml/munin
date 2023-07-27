@@ -74,6 +74,12 @@ project AEO_SVDC is
                                              invariantValue: in string );       
     end terminator;
 
+    terminator BehaviourVerification is
+      public service sendInstrumentationEvent (jobID : in string,
+                                               eventID : in string,
+                                               eventType : in string);
+    end terminator;
+
   end domain;
   
   domain IStore is
