@@ -666,7 +666,7 @@ begin
   Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
   for evt in theJob->R10->R11.SequencedAuditEvent loop
 	  eventContent := "EventId = " & evt.AuditEventId;
-	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
+	  Reporting~>reportEvent(Logger::Information, "svdc_event_processed", eventContent);
   end loop;
   
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
@@ -789,7 +789,7 @@ begin
   Reporting~>reportEvent(Logger::Information, "svdc_job_success", eventContent);
   for evt in theJob->R10->R11.SequencedAuditEvent loop
 	  eventContent := "EventId = " & evt.AuditEventId;
-	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
+	  Reporting~>reportEvent(Logger::Information, "svdc_event_processed", eventContent);
   end loop;
   
   // The Job is thus near the end of it's useful life - wait a bit longer and then trigger its final demise.

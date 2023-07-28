@@ -17,7 +17,7 @@ eventContent : string;
 begin
   // Report the event
   eventContent := "EventId = " & id;
-  Reporting~>reportEvent(Logger::Error, "svdc_event_received", eventContent);
+  Reporting~>reportEvent(Logger::Information, "svdc_event_received", eventContent);
   // Check to see if the received event is part of a Job that is already being processed
   existingJob := find_only Job (jobID = jobId);
   if existingJob /= null then
