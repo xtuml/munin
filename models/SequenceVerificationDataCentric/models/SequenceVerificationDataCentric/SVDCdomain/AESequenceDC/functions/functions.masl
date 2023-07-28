@@ -7,7 +7,9 @@ public service AESequenceDC::acceptOrderedEvent ( ae_time : in string,
                                                  id : in string,
                                                  auditEventData : in sequence of auditEventDataStructure ) is
 existingJob : instance of Job;
-theAuditEventDefinition : instance of AuditEventDefinition;
+theSeqAuditEventDefinition : instance of SequencedAuditEventDefinition;
+aeSequenceDefs : set of instance of AESequenceDefinition;
+theSequenceDef : instance of AESequenceDefinition;
 theJobDefinition : instance of JobDefinition;
 logMessage : string;
 eventContent : string;
@@ -15,7 +17,7 @@ eventContent : string;
 begin
   // Report the event
   eventContent := "EventId = " & id;
-  Reporting~>reportEvent(Logger::Error, "svdc_event_received", eventContent);
+  Reporting~>reportEvent(Logger::Information, "svdc_event_received", eventContent);
   // Check to see if the received event is part of a Job that is already being processed
   existingJob := find_only Job (jobID = jobId);
   if existingJob /= null then
@@ -24,10 +26,16 @@ begin
   else
     // The received event must be for a new job, but before the event can be accepted we need to verify that 
     // the JobDefinition for this new job is neither Suspended nor Deprecated (if it is, the event cannot be accepted)
-    theAuditEventDefinition := find_only AuditEventDefinition (AEType = ae_type);
-    if theAuditEventDefinition /= null then
-      // The ae_type is a known type - use this to find which JobDefinition it relates to and then verify that it is ACTIVE.
-      theJobDefinition := theAuditEventDefinition -> R1.AESequenceDefinition -> R7;
+    theSeqAuditEventDefinition := find_only SequencedAuditEventDefinition (AEType = ae_type);
+    if theSeqAuditEventDefinition /= null then
+      // The ae_type is a known sequenced event type - use this to find which JobDefinition it relates to and then verify that it is ACTIVE.
+
+      aeSequenceDefs := theSeqAuditEventDefinition -> R1.AESequenceDefinition;
+      
+      //TODO Replace this next line with something that takes account of JobName when that is available
+      theSequenceDef := find_one aeSequenceDefs ();
+      
+      theJobDefinition := theSequenceDef -> R7;
       if (theJobDefinition.isSuspended = true) or (theJobDefinition.isDeprecated = true)then
         // Log info: The accepted event is for a new Job that has a non-active JobDefinition 
         logMessage := "AESequenceDC::acceptorderedEvent : The event - AuditEventId = " & id & "cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
@@ -37,7 +45,7 @@ begin
       else     
         //We have a new job and this event should be tested as a valid initial event for a Job
         //AuditEvent.AddEventForNewJob (jobId => jobId, eventID => id, prevEventId => prev, aeType => ae_type);
-        AuditEvent.AddEventForNewJob (jobId, id, prevAEIds, ae_type, auditEventData);
+        SequencedAuditEvent.AddEventForNewJob (jobId, id, prevAEIds, ae_type, auditEventData);
       end;
     else
       // Log info: Report that the specified audit event type (ae_type) does not exist.
@@ -92,11 +100,11 @@ public service AESequenceDC::eventDefinition ( jobName : in string,
                                               isBreak : in boolean ) is
 theJobDefn : instance of JobDefinition;
 theSequenceDefn : instance of AESequenceDefinition;
-theEventDefn : instance of AuditEventDefinition;
-theEventDefnsInSequence : set of instance of AuditEventDefinition;
-matchingEventDefn : instance of AuditEventDefinition;
-thePrevEventDefn : instance of AuditEventDefinition;
-thePlaceholderEventDefn : instance of AuditEventDefinition;
+theEventDefn : instance of SequencedAuditEventDefinition;
+theEventDefnsInSequence : set of instance of SequencedAuditEventDefinition;
+matchingEventDefn : instance of SequencedAuditEventDefinition;
+thePrevEventDefn : instance of SequencedAuditEventDefinition;
+thePlaceholderEventDefn : instance of SequencedAuditEventDefinition;
 theEventInSeqDef : instance of AEInSequenceDefinition;
 thePlaceholderEventInSeqDef : instance of AEInSequenceDefinition;
 theEventOccInSeqDef : instance of AEOccurrenceInSequenceDefinition;
@@ -125,10 +133,10 @@ begin
     link theSequenceDefn R7 theJobDefn;
   end if;
    
-  theEventDefn := find_one AuditEventDefinition (AEType = eventType);
+  theEventDefn := find_one SequencedAuditEventDefinition (AEType = eventType);
   if theEventDefn = null then
     // The event definition hasn't been seen before so is a valid addition
-    theEventDefn := create unique AuditEventDefinition (AEType => eventType); 
+    theEventDefn := create unique SequencedAuditEventDefinition (AEType => eventType); 
     theEventInSeqDef := create AEInSequenceDefinition (AEDefinitionId => theEventDefn.AEDefinitionId, AESequenceId => theSequenceDefn.AESequenceId);
     link theEventDefn R1 theSequenceDefn using theEventInSeqDef;
     theEventOccInSeqDef := create AEOccurrenceInSequenceDefinition (
@@ -141,7 +149,7 @@ begin
     link theEventOccInSeqDef R12 theEventInSeqDef;
   else
     // The event definition has been seen before which could indicate the repetition of an event type in a sequence
-    theEventDefnsInSequence := theSequenceDefn -> R1.AuditEventDefinition;
+    theEventDefnsInSequence := theSequenceDefn -> R1.SequencedAuditEventDefinition;
     matchingEventDefn := find_one theEventDefnsInSequence (AEType = eventType);
     if matchingEventDefn /= null then
       // We have already seen this event type which could be because of a placeholder event definition or because of a repeated occurrence of an event definition
@@ -177,7 +185,7 @@ begin
   end if;
   
   for previousEventType in previousEventTypes'elements loop
-      thePrevEventDefn := find_one AuditEventDefinition (AEType = previousEventType.eventTypeName);
+      thePrevEventDefn := find_one SequencedAuditEventDefinition (AEType = previousEventType.eventTypeName);
       if thePrevEventDefn /= null then
         thePrevEventInSeqDefn :=  thePrevEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
         existingEventOccurrencesInSeqDefn := thePrevEventInSeqDefn -> R12;
@@ -247,7 +255,7 @@ begin
         end if;
       else
         // We have a reference to a forward event which is possible in the case of cyclic sequences so create a placeholder event
-        thePlaceholderEventDefn := create unique AuditEventDefinition (AEType => previousEventType.eventTypeName); 
+        thePlaceholderEventDefn := create unique SequencedAuditEventDefinition (AEType => previousEventType.eventTypeName); 
         thePlaceholderEventInSeqDef := create AEInSequenceDefinition (AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, AESequenceId => theSequenceDefn.AESequenceId);
         link thePlaceholderEventDefn R1 theSequenceDefn using thePlaceholderEventInSeqDef;
         thePlaceholderEventOccInSeqDef := create AEOccurrenceInSequenceDefinition (
@@ -476,7 +484,7 @@ end service;
 public service AESequenceDC::restoreInvariants ( restoredInvariants : in sequence of persistedInvariantStructure ) is
 theRestoredExtraJobInvDefn : instance of ExtraJobInvariantDefn;
 theAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
-theEventDefn : instance of AuditEventDefinition;
+theEventDefn : instance of SequencedAuditEventDefinition;
 theJobDefn : instance of JobDefinition;
 theJobs : set of instance of Job;
 theRestoredPersistentInvariant : instance of PersistedInvariant;
