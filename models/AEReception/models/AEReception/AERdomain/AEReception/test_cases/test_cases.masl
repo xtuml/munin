@@ -6,6 +6,7 @@ logMessage : string;
 receptionSpec : instance of ReceptionSpec;
 orderingAcceptEvents : sequence of instance of _TEST_Ordering_AcceptEvent;
 orderingAcceptEvent : instance of _TEST_Ordering_AcceptEvent;
+json_element: JSON::JSONElement;
 
 begin
 
@@ -15,6 +16,15 @@ begin
   
   // Open the file and read in the events
   auditEvents := Filesystem::read_file(testFile);
+  
+  json_element := JSON::parse(auditEvents);
+  if json_element.kind = JSON::Array then
+     for elementReceived in JSON::get_array(json_element) loop
+       if elementReceived.kind = JSON::Object then
+         AEReception::AcceptEvents(JSON::dump(elementReceived));  
+       end if;
+     end loop;
+  end if;
   
   // invoke the accept events service
   AEReception::AcceptEvents(auditEvents); 
@@ -34,7 +44,7 @@ begin
   Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length = 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
   Assertions::assertEquals("2021-05-13T10:07:34Z", orderingAcceptEvent.auditEventTime);
   Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  Assertions::assertEquals("node1", orderingAcceptEvent.nodeName);
+  Assertions::assertEquals("NoNode", orderingAcceptEvent.nodeName);
  
   // confirm that the second audit event has the correct parameter values
   orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent2");
@@ -44,7 +54,7 @@ begin
   Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length > 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
   Assertions::assertEquals("2021-05-13T10:07:35Z", orderingAcceptEvent.auditEventTime);
   Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  Assertions::assertEquals("node1", orderingAcceptEvent.nodeName);
+  Assertions::assertEquals("NoNode", orderingAcceptEvent.nodeName);
  
   // confirm that the third audit event has the correct parameter values
   orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent3");
@@ -54,7 +64,7 @@ begin
   Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length > 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
   Assertions::assertEquals("2021-05-13T10:07:36Z", orderingAcceptEvent.auditEventTime);
   Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  Assertions::assertEquals("node1", orderingAcceptEvent.nodeName);
+  Assertions::assertEquals("NoNode", orderingAcceptEvent.nodeName);
 
   Assertions::assertTrue((orderingAcceptEvent.prevAuditEventIds'get_unique intersection "dea5b47b-438b-47b0-8046-585254327fd2")'length = 1, "Missing previous audit event id: " & "dea5b47b-438b-47b0-8046-585254327fd2");
   Assertions::assertTrue((orderingAcceptEvent.prevAuditEventIds'get_unique intersection "735cc6c2-05e1-437f-a3e8-3b2cc36803a4")'length = 1, "Missing previous audit event id: " & "735cc6c2-05e1-437f-a3e8-3b2cc36803a4");
@@ -76,13 +86,11 @@ begin
 	// the config file should have been loaded so we want to check that the spec class has been created corretcly
 	receptionSpec := find_one ReceptionSpec ();
 	Assertions::assertTrue(receptionSpec.receptionDeletionTime = @PT10M@, "invalid  receptionDeletionTime, expected 10M found " & receptionSpec.receptionDeletionTime'image);
-	Assertions::assertTrue(receptionSpec.eventThrottleRate = @PT0S@, "invalid  eventThrottleRate, expected 0S found " & receptionSpec.eventThrottleRate'image);
 	Assertions::assertTrue(receptionSpec.specUpdateRate = @PT2M@, "invalid specUpdateRate, expected 2M found " & receptionSpec.specUpdateRate'image);
 	// fire the timer to check if the config class has not been as the config file has not changed
 	Test::service_event_queue();
 	Test::fire_scheduled_timers(timestamp'now + duration'minutes(2));
 	Assertions::assertTrue(receptionSpec.receptionDeletionTime = @PT10M@, "invalid  receptionDeletionTime, expected 10M found " & receptionSpec.receptionDeletionTime'image);
-	Assertions::assertTrue(receptionSpec.eventThrottleRate = @PT0S@, "invalid  eventThrottleRate, expected 0 found " & receptionSpec.eventThrottleRate'image);
 	Assertions::assertTrue(receptionSpec.specUpdateRate = @PT2M@, "invalid specUpdateRate, expected 2M found " & receptionSpec.specUpdateRate'image);
 	
 	// put a new config file in place
@@ -95,7 +103,6 @@ begin
 	
 	// verify that the config file has been updated
 	Assertions::assertTrue(receptionSpec.receptionDeletionTime = @PT20M@, "invalid  receptionDeletionTime, expected 20M found " & receptionSpec.receptionDeletionTime'image);
-	Assertions::assertTrue(receptionSpec.eventThrottleRate = @PT10S@, "invalid  eventThrottleRate, expected 10 found " & receptionSpec.eventThrottleRate'image);
 	Assertions::assertTrue(receptionSpec.specUpdateRate = @PT10M@, "invalid specUpdateRate, expected 10M found " & receptionSpec.specUpdateRate'image);
 
 end service;
@@ -110,206 +117,6 @@ begin
 		delete reception;
 	end loop;
 	
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '9bc7953d-2ce6-4eb0-aab2-a6edd9e89113' DO NOT EDIT THIS LINE.
-private service AEReception::testEventThrottling () is
-testFile: readonly Filesystem::filename := "./testing/eventThrottleTest01.json";
-receptionJobs : sequence of instance of Reception;
-receptionSpec : instance of ReceptionSpec;
-auditEvents : string;
-prevAuditEventIds : sequence of string;
-orderingAcceptEvents : sequence of instance of _TEST_Ordering_AcceptEvent;
-orderingAcceptEvent : instance of _TEST_Ordering_AcceptEvent;
-
-begin
-
-	// clear the domain down and the outgoing directory
-	receptionSpec := find_one ReceptionSpec();
-	orderingAcceptEvents := find _TEST_Ordering_AcceptEvent();
-	delete orderingAcceptEvents;
-	AEReception::clearDomain();
-	
-	// set the throttle rate to be 1 second
-	receptionSpec.eventThrottleRate := @PT1S@;
-	receptionSpec.maxEventsPerReceptionJob := 1;
-	  
-	// Open the file and read in the events
-	auditEvents := Filesystem::read_file(testFile);
-  
-	// invoke the accept events service
-	AEReception::AcceptEvents(auditEvents);
-	
-	// service the event queues
-	Test::service_event_queue();
-	
-	// verify that there are 1 events
-	orderingAcceptEvents := find _TEST_Ordering_AcceptEvent();
-	Assertions::assertTrue(orderingAcceptEvents'length = 1, "Expected 1 event found " & orderingAcceptEvents'length'image);  
-	  
-	// confirm that the first audit event has the correct parameter values
-  	orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent");
-  	Assertions::assertTrue(orderingAcceptEvent /= null, "basicTest01: Failed to find TestEvent");
-  	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", orderingAcceptEvent.jobId);
-  	Assertions::assertEquals("b181fbef-c315-4f39-ae1d-dd5adc778df3", orderingAcceptEvent.auditEventId);
-  	Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length = 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
-  	Assertions::assertEquals("2021-05-13T10:07:34.000000Z", orderingAcceptEvent.auditEventTime);
-  	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  	Assertions::assertEquals("node1", orderingAcceptEvent.nodeName);
-
-	// verify that the reception job is not complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (receptionJobs'length)'image);
-	
-	// remove the reported events
-	delete orderingAcceptEvents;
-	
-	// service the event queues and scheduled timers up to 1s in the future
-	// this should force reception to process the next event
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-
-	// verify that there are 1 events
-	orderingAcceptEvents := find _TEST_Ordering_AcceptEvent();
-	Assertions::assertTrue(orderingAcceptEvents'length = 1, "Expected 1 event found " & orderingAcceptEvents'length'image);  
-	  
-	// confirm that the first audit event has the correct parameter values
-  	orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent2");
-  	Assertions::assertTrue(orderingAcceptEvent /= null, "basicTest01: Failed to find TestEvent2");
-  	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", orderingAcceptEvent.jobId);
-  	Assertions::assertEquals("debc5e43-c040-462b-8cf1-11dc88c24abf", orderingAcceptEvent.auditEventId);
-  	Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length > 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
-	Assertions::assertEquals("b181fbef-c315-4f39-ae1d-dd5adc778df3", orderingAcceptEvent.prevAuditEventIds[orderingAcceptEvent.prevAuditEventIds'first]);
-  	Assertions::assertEquals("2021-05-13T10:07:35.000000Z", orderingAcceptEvent.auditEventTime);
-  	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  	Assertions::assertEquals("node1", orderingAcceptEvent.nodeName);
-
-	// verify that the reception job is not complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (receptionJobs'length)'image);
-
-	// remove the reported events
-	delete orderingAcceptEvents;
-	
-	// service the event queues and scheduled timers up to 1s in the future
-	// this should force reception to process the next event
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-
-	// verify that there are 1 events
-	orderingAcceptEvents := find _TEST_Ordering_AcceptEvent();
-	Assertions::assertTrue(orderingAcceptEvents'length = 1, "Expected 1 event found " & orderingAcceptEvents'length'image);  
-	  
-	// confirm that the first audit event has the correct parameter values
-  	orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent3");
-  	Assertions::assertTrue(orderingAcceptEvent /= null, "basicTest01: Failed to find TestEvent3");
-  	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", orderingAcceptEvent.jobId);
-  	Assertions::assertEquals("a8947745-b9ae-418c-98d0-abf2149ddacd", orderingAcceptEvent.auditEventId);
-  	Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length > 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
-	Assertions::assertEquals("debc5e43-c040-462b-8cf1-11dc88c24abf", orderingAcceptEvent.prevAuditEventIds[orderingAcceptEvent.prevAuditEventIds'first]);
-  	Assertions::assertEquals("2021-05-13T10:07:36.000000Z", orderingAcceptEvent.auditEventTime);
-  	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  	Assertions::assertEquals("node1", orderingAcceptEvent.nodeName);
-	
-	// verify that the reception job is not complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 1, "wrong number of reception jobs, expected 1 found: " & (receptionJobs'length)'image);
-
-	// remove the reported events
-	delete orderingAcceptEvents;
-	
-	// service the event queues and scheduled timers up to 1s in the future
-	// this should force reception to process the next event
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-	
-	// clear the domain down and the outgoing directory
-	receptionSpec := find_one ReceptionSpec();
-	AEReception::clearDomain();
-	
-	// set the throttle rate to be 1 second
-	receptionSpec.eventThrottleRate := @PT1S@;
-	// set the max events per file and re run the file
-	receptionSpec.maxEventsPerReceptionJob := 2;
-	  
-	// invoke the accept events service
-	AEReception::AcceptEvents(auditEvents);
-
-	// service the event queues
-	Test::service_event_queue();
-
-	// verify that there are 2 events
-	orderingAcceptEvents := find _TEST_Ordering_AcceptEvent();
-	Assertions::assertTrue(orderingAcceptEvents'length = 2, "Expected 1 event found " & orderingAcceptEvents'length'image);  
-	  
-	// confirm that the first audit event has the correct parameter values
-  	orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent");
-  	Assertions::assertTrue(orderingAcceptEvent /= null, "basicTest01: Failed to find TestEvent");
-  	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", orderingAcceptEvent.jobId);
-  	Assertions::assertEquals("b181fbef-c315-4f39-ae1d-dd5adc778df3", orderingAcceptEvent.auditEventId);
-  	Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length = 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
-  	Assertions::assertEquals("2021-05-13T10:07:34.000000Z", orderingAcceptEvent.auditEventTime);
-  	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  	Assertions::assertEquals("node1", orderingAcceptEvent.nodeName);
-	  
-	// confirm that the secon audit event has the correct parameter values
-  	orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent2");
-  	Assertions::assertTrue(orderingAcceptEvent /= null, "basicTest01: Failed to find TestEvent2");
-  	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", orderingAcceptEvent.jobId);
-  	Assertions::assertEquals("debc5e43-c040-462b-8cf1-11dc88c24abf", orderingAcceptEvent.auditEventId);
-  	Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length > 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
-	Assertions::assertEquals("b181fbef-c315-4f39-ae1d-dd5adc778df3", orderingAcceptEvent.prevAuditEventIds[orderingAcceptEvent.prevAuditEventIds'first]);
-  	Assertions::assertEquals("2021-05-13T10:07:35.000000Z", orderingAcceptEvent.auditEventTime);
-  	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  	Assertions::assertEquals("node1", orderingAcceptEvent.nodeName);
-  	
-	// verify that the reception job is not complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (receptionJobs'length)'image);
-
-	// remove the reported events
-	delete orderingAcceptEvents;
-	
-	// service the event queues and scheduled timers up to 1s in the future
-	// this should force reception to process the next event
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-
-	// verify that there are 1 events
-	orderingAcceptEvents := find _TEST_Ordering_AcceptEvent();
-	Assertions::assertTrue(orderingAcceptEvents'length = 1, "Expected 1 event found " & orderingAcceptEvents'length'image);  
-	  
-	// confirm that the first audit event has the correct parameter values
-  	orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent3");
-  	Assertions::assertTrue(orderingAcceptEvent /= null, "basicTest01: Failed to find TestEvent3");
-  	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", orderingAcceptEvent.jobId);
-  	Assertions::assertEquals("a8947745-b9ae-418c-98d0-abf2149ddacd", orderingAcceptEvent.auditEventId);
-  	Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length > 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
-	Assertions::assertEquals("debc5e43-c040-462b-8cf1-11dc88c24abf", orderingAcceptEvent.prevAuditEventIds[orderingAcceptEvent.prevAuditEventIds'first]);
-  	Assertions::assertEquals("2021-05-13T10:07:36.000000Z", orderingAcceptEvent.auditEventTime);
-  	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  	Assertions::assertEquals("node1", orderingAcceptEvent.nodeName);
-  	
-	// verify that the reception job is not complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 1, "wrong number of reception jobs, expected 1 found: " & (receptionJobs'length)'image);
-	
-	// remove the reported events
-	delete orderingAcceptEvents;
-	
-	// test the reception deletion time
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'minutes(10));
-	
-	// verify that all the reception jobs and event files have been cleared down
-   	receptionJobs := find Reception ();
-	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (receptionJobs'length)'image);
-
-	// reset the throttle rate to be 1 second
-	receptionSpec.eventThrottleRate := @PT0S@;
-	receptionSpec.maxEventsPerReceptionJob := 0;
-  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

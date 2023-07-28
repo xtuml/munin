@@ -31,9 +31,6 @@ begin
 			if configJSONObject'contains("SpecUpdateRate") then
 				this.specUpdateRate := duration'parse(JSON::get_string(configJSONObject["SpecUpdateRate"]));
 			end if;
-			if configJSONObject'contains("EventThrottleRate") then
-				this.eventThrottleRate := duration'parse(JSON::get_string(configJSONObject["EventThrottleRate"]));
-			end if;
 			if configJSONObject'contains("ReceptionDeletionTime") then
 				this.receptionDeletionTime := duration'parse(JSON::get_string(configJSONObject["ReceptionDeletionTime"]));
 			end if;

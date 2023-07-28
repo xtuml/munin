@@ -14,7 +14,6 @@ begin
 		receptionSpec := find_one ReceptionSpec();
 		if receptionSpec = null then
 			receptionSpec := create unique ReceptionSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, 
-				                                   eventThrottleRate => @PT1S@, 
 				                                   receptionDeletionTime => @PT10M@, 
 				                                   Current_State => Created);
 		end if;

@@ -54,13 +54,9 @@ begin
    	for receptionAcceptEvent in receptionAcceptEvents loop
 		jsonString := receptionAcceptEvent.auditEvents;
 		jsonElement := JSON::parse(jsonString);
-		jsonElements := JSON::get_array(jsonElement);
-		// verify that there are 1 events
-		Assertions::assertTrue(jsonElements'length = 2, "Expected 2 events file contains " & jsonElements'length'image);  
-		Assertions::assertEquals("node1", JSON::get_string(jsonElements[jsonElements'first]));
 		
 		// confirm that the single audit event has the correct parameter values
-		eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 1]);
+		eventJsonObject := JSON::get_object(jsonElement);
 		jobId := JSON::get_string(eventJsonObject["jobId"]);
 		eventId := JSON::get_string(eventJsonObject["eventId"]);
 		
@@ -83,13 +79,9 @@ begin
    	for receptionAcceptEvent in receptionAcceptEvents loop
 		jsonString := receptionAcceptEvent.auditEvents;
 		jsonElement := JSON::parse(jsonString);
-		jsonElements := JSON::get_array(jsonElement);
-		// verify that there are 1 events
-		Assertions::assertTrue(jsonElements'length = 2, "Expected 2 events file contains " & jsonElements'length'image);
-		Assertions::assertEquals("node1", JSON::get_string(jsonElements[jsonElements'first]));
 		
 		// confirm that the single audit event has the correct parameter values
-		eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 1]);
+		eventJsonObject := JSON::get_object(jsonElement);
 		jobId := JSON::get_string(eventJsonObject["jobId"]);
 		eventId := JSON::get_string(eventJsonObject["eventId"]);
 		

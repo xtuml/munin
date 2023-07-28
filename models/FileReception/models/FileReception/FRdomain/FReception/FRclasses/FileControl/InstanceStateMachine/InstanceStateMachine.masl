@@ -54,6 +54,7 @@ logMessage : string;
 fileToBeProcessed : string;
 auditEvents : string;
 fileReceptionSpec : instance of FileReceptionSpec;
+jsonElement : JSON::JSONElement;
 
 begin
 	
@@ -61,7 +62,14 @@ begin
 	fileReceptionSpec := find_one FileReceptionSpec();
 	fileToBeProcessed := fileReceptionSpec.processedDirectory & "/" & eventFile.fileName;
     auditEvents := Filesystem::read_file(Filesystem::filename(fileToBeProcessed));
-    Reception~>AcceptEvents(auditEvents);
+	jsonElement := JSON::parse(auditEvents);
+	if jsonElement.kind = JSON::Array then
+		for elementReceived in JSON::get_array(jsonElement) loop
+			if elementReceived.kind = JSON::Object then
+				Reception~>AcceptEvents(JSON::dump(elementReceived));
+			end if;
+		end loop;
+	end if;
 	// check for more capacity
 	generate FileControl.checkCapacity() to this;
 	

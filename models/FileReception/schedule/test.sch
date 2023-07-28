@@ -1,4 +1,5 @@
 $TESTSCHEDULE
+PAUSE
 
 # initialize domain
 RUN SCENARIO FReception 1 "init"
