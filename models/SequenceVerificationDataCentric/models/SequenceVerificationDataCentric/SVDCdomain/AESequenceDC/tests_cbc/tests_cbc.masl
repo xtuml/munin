@@ -3,7 +3,7 @@ private service AESequenceDC::Test63InvalidLoopWithNonIntegerLoopCount () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 theDynamicControlDefn : instance of DynamicControlDefinition;
@@ -21,7 +21,7 @@ begin
   theJobDefn := theDynamicControlDefn -> R32;
   
   Assertions::assertTrue(theDynamicControlDefn.dynamicControlName = "Counter_1", "Loop Counter not created as expected: " & theDynamicControlDefn.dynamicControlName);
-  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType);
+  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.SequencedAuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.SequencedAuditEventDefinition).AEType);
 //  Assertions::assertTrue((theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType = "LCLB", "User Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType);
   Assertions::assertTrue(theJobDefn.jobName = "LoopCountJob", "Job not created as expected: " & theJobDefn.jobName);
   
@@ -72,7 +72,7 @@ private service AESequenceDC::Test29NormalBranchCountWithSameSourceAndUserEvent 
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -137,7 +137,7 @@ private service AESequenceDC::Test64InvalidLoopWithLoopCountExceedingExpectedVal
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 theDynamicControlDefn : instance of DynamicControlDefinition;
@@ -155,7 +155,7 @@ begin
   theJobDefn := theDynamicControlDefn -> R32;
   
   Assertions::assertTrue(theDynamicControlDefn.dynamicControlName = "Counter_1", "Loop Counter not created as expected: " & theDynamicControlDefn.dynamicControlName);
-  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.AuditEventDefinition).AEType);
+  Assertions::assertTrue((theDynamicControlDefn -> R30 -> R12 -> R1.SequencedAuditEventDefinition).AEType = "LCLA", "Source Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R30 -> R12 -> R1.SequencedAuditEventDefinition).AEType);
 //  Assertions::assertTrue((theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType = "LCLB", "User Event for Dynamic Control is incorrect: " & (theDynamicControlDefn -> R31 -> R12 -> R1.AuditEventDefinition).AEType);
   Assertions::assertTrue(theJobDefn.jobName = "LoopCountJob", "Job not created as expected: " & theJobDefn.jobName);
   
@@ -209,7 +209,7 @@ private service AESequenceDC::Test200NormalInstanceForkWithBranchAndMergeCount (
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -275,7 +275,7 @@ private service AESequenceDC::Test250IllegalInstanceForkAndMergePath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -335,7 +335,7 @@ private service AESequenceDC::Test251IllegalSplitInstanceForkAndMergePath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -416,7 +416,7 @@ private service AESequenceDC::Test252IllegalInstanceAndTypeForkAndMergePath () i
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -489,7 +489,7 @@ private service AESequenceDC::Test203NormalTypeAndInstanceForkWithBranchAndMerge
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -567,7 +567,7 @@ private service AESequenceDC::Test201NormalInstanceForkWithBranchAndMergeCount (
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -633,7 +633,7 @@ private service AESequenceDC::Test202NormalSplitInstanceForkWithBranchAndMergeCo
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -720,7 +720,7 @@ private service AESequenceDC::Test254IllegalInstanceForkWithIncorrectBranchAndMe
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -783,7 +783,7 @@ private service AESequenceDC::Test255IllegalSplitInstanceForkWithBranchAndMergeC
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -867,7 +867,7 @@ private service AESequenceDC::Test204NormalMultiInstanceForkWithBranchAndMergeCo
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -941,7 +941,7 @@ private service AESequenceDC::Test205NormalUserExtraJobInvariantWithRestoredSour
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 theUserInvariants : set of instance of TransientInvariant;
@@ -1081,7 +1081,7 @@ private service AESequenceDC::Test206NormalUserExtraJobInvariantWithRestoredSour
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 theUserInvariants : set of instance of TransientInvariant;
@@ -1221,7 +1221,7 @@ private service AESequenceDC::Test256TimeoutDueToNoRestoredExtraJobInvariant () 
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 theUserInvariants : set of instance of TransientInvariant;
@@ -1349,7 +1349,7 @@ private service AESequenceDC::Test257InvalidRestoredExtraJobInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 theUserInvariants : set of instance of TransientInvariant;

@@ -20,29 +20,44 @@ end service;
 
 //! ACTIVITY BEGIN. '29df042e-fb35-4443-881f-62ea6991447a' DO NOT EDIT THIS LINE.
 public instance service AESequenceDC::Job.deleteJob () is
-theAuditEvents : set of instance of AuditEvent;
-theAuditEvent : instance of AuditEvent;
-theNextAuditEvent : instance of AuditEvent;
-theNextAuditEvents : set of instance of AuditEvent;
+theHappyJob : instance of HappyJob;
+theUnhappyJob : instance of UnhappyJob;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theAuditEvent : instance of SequencedAuditEvent;
+theOrphanedAuditEvents : set of instance of SequencedAuditEvent;
+theNextAuditEvent : instance of SequencedAuditEvent;
+theNextAuditEvents : set of instance of SequencedAuditEvent;
 theSequences : set of instance of Sequence;
 theJobDef : instance of JobDefinition;
 theAuditEventPairs : set of instance of AuditEventPair;
 theAuditEventPair : instance of AuditEventPair;
-theAuditEventDefinition : instance of AuditEventDefinition;
+theAuditEventDefinition : instance of SequencedAuditEventDefinition;
 theTransientInvariant : instance of TransientInvariant;
 thePersistedInvariant : instance of PersistedInvariant;
 theDynamicControls : set of instance of DynamicControl;
 
 begin
-  theAuditEvents := this -> R3;
+  theHappyJob := this -> R45.HappyJob;
+  if theHappyJob /= null then
+    unlink theHappyJob R45 this;
+    delete theHappyJob;
+  else  
+    theUnhappyJob := this -> R45.UnhappyJob;
+    if theUnhappyJob /= null then
+      unlink theUnhappyJob R45 this;
+      delete theUnhappyJob;
+    end if;  
+  end if;  
+  
+  theAuditEvents := this -> R10 -> R11;
   for theAuditEvent in theAuditEvents'elements loop
-    theNextAuditEvents := theAuditEvent -> R4.has_next.AuditEvent;
+    theNextAuditEvents := theAuditEvent -> R4.has_next.SequencedAuditEvent;
     for theNextAuditEvent in theNextAuditEvents loop
       theAuditEventPair := theAuditEvent with theNextAuditEvent -> R4.has_next.AuditEventPair;
       if (theAuditEventPair -> R15) /= null then
         unlink (theAuditEventPair -> R15) R15 theAuditEventPair;
       end if;
-      unlink theAuditEvent R4.has_next.AuditEvent theNextAuditEvent using theAuditEventPair;
+      unlink theAuditEvent R4.has_next.SequencedAuditEvent theNextAuditEvent using theAuditEventPair;
       delete theAuditEventPair;
     end loop;
     if (theAuditEvent -> R11) /= null then
@@ -51,11 +66,11 @@ begin
     if (theAuditEvent -> R2) /= null then
       unlink (theAuditEvent -> R2) R2 theAuditEvent;
     end if;
-    if (theAuditEvent -> R3) /= null then      
-      unlink (theAuditEvent -> R3) R3 theAuditEvent;  
-    end if;  
     if (theAuditEvent -> R13) /= null then      
       unlink (theAuditEvent -> R13) R13 theAuditEvent;  
+    end if;  
+    if (theAuditEvent -> R44) /= null then      
+      unlink (theAuditEvent -> R44) R44 theAuditEvent;  
     end if;  
     
     // Delete the associated Intra Job Invariants
@@ -97,6 +112,23 @@ begin
   end loop;
   
   delete theAuditEvents;
+  
+  theOrphanedAuditEvents := this -> R44;
+  if theOrphanedAuditEvents /= null then
+  
+    for theOrphanedAuditEvent in theOrphanedAuditEvents loop
+      if (theOrphanedAuditEvent -> R2) /= null then
+        unlink (theOrphanedAuditEvent -> R2) R2 theOrphanedAuditEvent;
+      end if;
+      if (theOrphanedAuditEvent -> R13) /= null then      
+        unlink (theOrphanedAuditEvent -> R13) R13 theOrphanedAuditEvent;  
+      end if;  
+    end loop;
+    
+    unlink theOrphanedAuditEvents R44 this;
+    delete theOrphanedAuditEvents;
+  end if;
+  
   theSequences := this -> R10;
   if theSequences /= null then
     for theSequence in theSequences loop

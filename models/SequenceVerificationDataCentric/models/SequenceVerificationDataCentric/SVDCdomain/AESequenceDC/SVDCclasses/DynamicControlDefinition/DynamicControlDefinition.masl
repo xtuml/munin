@@ -6,8 +6,9 @@ public service AESequenceDC::DynamicControlDefinition.createDynamicControlDefini
                                                                                       sourceOccurrenceId : in integer ) is
 theJobDefn : instance of JobDefinition;
 newDynamicControlDefn : instance of DynamicControlDefinition;
-sourceAuditEventDefn : instance of AuditEventDefinition;
+sourceAuditEventDefn : instance of SequencedAuditEventDefinition;
 sourceSequenceDefn : instance of AESequenceDefinition;
+sourceSequenceDefns : set of instance of AESequenceDefinition;
 sourceAEInSequenceDefn : instance of AEInSequenceDefinition;
 sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 sourceAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
@@ -21,10 +22,13 @@ begin
     link newDynamicControlDefn R32 theJobDefn;
     
     // Find the source AEOccurrenceInSequenceDefinition
-    sourceAuditEventDefn := find_one AuditEventDefinition (AEType = sourceEventType);
+    sourceAuditEventDefn := find_one SequencedAuditEventDefinition (AEType = sourceEventType);
     if sourceAuditEventDefn /= null then
-      // TODO: The following line will need to change if Audit Event Names are not unique across all Job Definitions
-      sourceSequenceDefn := sourceAuditEventDefn -> R1.AESequenceDefinition;
+      sourceSequenceDefns := sourceAuditEventDefn -> R1.AESequenceDefinition;
+      
+      // TODO: The following line will need to change when JobType is available as an input parameter
+      sourceSequenceDefn := find_one sourceSequenceDefns ();
+      
       if sourceSequenceDefn /= null then
         sourceAEInSequenceDefn := sourceAuditEventDefn with sourceSequenceDefn -> R1.AEInSequenceDefinition;
         sourceAEOccurrenceDefns := sourceAEInSequenceDefn -> R12;
@@ -72,8 +76,9 @@ public service AESequenceDC::DynamicControlDefinition.linkUserEventDefn ( jobNam
                                                                          userOccurrenceId : in integer ) is
 theJobDefn : instance of JobDefinition;
 theDynamicControlDefn : instance of DynamicControlDefinition;
-userAuditEventDefn : instance of AuditEventDefinition;
+userAuditEventDefn : instance of SequencedAuditEventDefinition;
 userSequenceDefn : instance of AESequenceDefinition;
+userSequenceDefns : set of instance of AESequenceDefinition;
 userAEInSequenceDefn : instance of AEInSequenceDefinition;
 userAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 userAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
@@ -86,10 +91,13 @@ begin
                                                               dynamicControlType = dynamicControlType );
   if theDynamicControlDefn /= null then
     // Find the source AEOccurrenceInSequenceDefinition
-    userAuditEventDefn := find_one AuditEventDefinition (AEType = userEventType);
+    userAuditEventDefn := find_one SequencedAuditEventDefinition (AEType = userEventType);
     if userAuditEventDefn /= null then
-      // TODO: The following line will need to change if Audit Event Names are not unique across all Job Definitions
-      userSequenceDefn := userAuditEventDefn -> R1.AESequenceDefinition;
+      userSequenceDefns := userAuditEventDefn -> R1.AESequenceDefinition;
+      
+      //TODO Check this line is working (it's repeated in other functions too)
+      userSequenceDefn := find_one userSequenceDefns (jobName = jobName);
+      
       if userSequenceDefn /= null then
         userAEInSequenceDefn := userAuditEventDefn with userSequenceDefn -> R1.AEInSequenceDefinition;
         userAEOccurrenceDefns := userAEInSequenceDefn -> R12;

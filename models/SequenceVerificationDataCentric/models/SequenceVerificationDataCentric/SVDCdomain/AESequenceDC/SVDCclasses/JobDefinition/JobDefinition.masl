@@ -5,9 +5,9 @@ theSequenceDefn : instance of AESequenceDefinition;
 thePrevSequenceDefn : instance of AESequenceDefinition;
 theNextSequenceDefn : instance of AESequenceDefinition;
 theSequenceDefns : set of instance of AESequenceDefinition;
-theEventDefn : instance of AuditEventDefinition;
-theEventDefns : set of instance of AuditEventDefinition;
-thePrevEventDefn : instance of AuditEventDefinition;
+theEventDefn : instance of SequencedAuditEventDefinition;
+theEventDefns : set of instance of SequencedAuditEventDefinition;
+thePrevEventDefn : instance of SequencedAuditEventDefinition;
 theEventInSeqDef : instance of AEInSequenceDefinition;
 theEventsInSeqDefns : set of instance of AEInSequenceDefinition;
 theEventOccInSeqDef : instance of AEOccurrenceInSequenceDefinition;
@@ -77,7 +77,7 @@ begin
     
     theSequenceDefns := this -> R7; 
     for theSequenceDefn in theSequenceDefns'elements loop
-      theEventDefns := theSequenceDefn -> R1.AuditEventDefinition;
+      theEventDefns := theSequenceDefn -> R1.SequencedAuditEventDefinition;
       for theEventDefn in theEventDefns loop
         theEventInSeqDef := theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
         theEventOccurrencesInSeqDef := theEventInSeqDef -> R12;
@@ -115,14 +115,6 @@ begin
         delete theEventInSeqDef; 
       end loop;
       delete theEventDefns;
-      thePrevSequenceDefn := theSequenceDefn -> R9.follows;
-      if thePrevSequenceDefn /= null then
-        unlink theSequenceDefn R9.follows thePrevSequenceDefn;
-      end if;
-      theNextSequenceDefn := theSequenceDefn -> R9.precedes;
-      if theNextSequenceDefn /= null then
-        unlink theSequenceDefn R9.precedes theNextSequenceDefn;
-      end if;
      end loop;
      unlink this R7 theSequenceDefns;
     delete theSequenceDefns;

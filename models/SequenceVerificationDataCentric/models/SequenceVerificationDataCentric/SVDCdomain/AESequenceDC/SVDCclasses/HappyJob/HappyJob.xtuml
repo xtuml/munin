@@ -1,0 +1,108 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("bbae135f-0f84-4f36-8ace-87a2e1bbca52",
+	'HappyJob',
+	29,
+	'HJOB',
+	'A transaction through the monitored system which comprises a sequence of known events. This system is looking for unknown events or 
+events out of sequence to indicate an error in the monitored system. In this subtype of Job only so called happy path events have 
+been seen and so the full set of checks can be applied. Ideally, the Job will only ever be in this subtype.',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_NBATTR
+	VALUES ("41b10a33-5d78-4a95-927f-19335d343027",
+	"bbae135f-0f84-4f36-8ace-87a2e1bbca52");
+INSERT INTO O_BATTR
+	VALUES ("41b10a33-5d78-4a95-927f-19335d343027",
+	"bbae135f-0f84-4f36-8ace-87a2e1bbca52");
+INSERT INTO O_ATTR
+	VALUES ("41b10a33-5d78-4a95-927f-19335d343027",
+	"bbae135f-0f84-4f36-8ace-87a2e1bbca52",
+	"965893f7-19c3-4030-bea7-d06136be9f6a",
+	'current_state',
+	'',
+	'',
+	'current_state',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000006",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("bbae135f-0f84-4f36-8ace-87a2e1bbca52",
+	"f50894a2-8c45-468f-896f-f76df8bebddc",
+	0,
+	"57838f77-04c2-459e-984c-bf6ae53bfbd8",
+	"0beea49a-9838-4348-8704-6690a306ab7b",
+	"e5cee18a-24cd-4afb-b805-f7af16520537",
+	"f7266a00-b25c-4874-8b58-8838f40a0709",
+	"965893f7-19c3-4030-bea7-d06136be9f6a",
+	"d7a3f80e-93b6-4039-90e3-00a45b0a5438",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'Job',
+	'jobID',
+	'R45');
+INSERT INTO R_RGO_PROXY
+	VALUES ("bbae135f-0f84-4f36-8ace-87a2e1bbca52",
+	"0beea49a-9838-4348-8704-6690a306ab7b",
+	"e5cee18a-24cd-4afb-b805-f7af16520537",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("57838f77-04c2-459e-984c-bf6ae53bfbd8",
+	"f50894a2-8c45-468f-896f-f76df8bebddc",
+	0,
+	"0beea49a-9838-4348-8704-6690a306ab7b",
+	"f7266a00-b25c-4874-8b58-8838f40a0709",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("965893f7-19c3-4030-bea7-d06136be9f6a",
+	"bbae135f-0f84-4f36-8ace-87a2e1bbca52",
+	"57838f77-04c2-459e-984c-bf6ae53bfbd8",
+	"f50894a2-8c45-468f-896f-f76df8bebddc",
+	1,
+	'jobID');
+INSERT INTO O_BATTR_PROXY
+	VALUES ("57838f77-04c2-459e-984c-bf6ae53bfbd8",
+	"f50894a2-8c45-468f-896f-f76df8bebddc",
+	'../Job/Job.xtuml');
+INSERT INTO O_ATTR
+	VALUES ("965893f7-19c3-4030-bea7-d06136be9f6a",
+	"bbae135f-0f84-4f36-8ace-87a2e1bbca52",
+	"00000000-0000-0000-0000-000000000000",
+	'jobID',
+	'',
+	'',
+	'jobID',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_ID
+	VALUES (0,
+	"bbae135f-0f84-4f36-8ace-87a2e1bbca52");
+INSERT INTO O_OIDA
+	VALUES ("965893f7-19c3-4030-bea7-d06136be9f6a",
+	"bbae135f-0f84-4f36-8ace-87a2e1bbca52",
+	0,
+	'jobID');
+INSERT INTO O_ID
+	VALUES (1,
+	"bbae135f-0f84-4f36-8ace-87a2e1bbca52");
+INSERT INTO O_ID
+	VALUES (2,
+	"bbae135f-0f84-4f36-8ace-87a2e1bbca52");
+INSERT INTO PE_PE
+	VALUES ("bbae135f-0f84-4f36-8ace-87a2e1bbca52",
+	1,
+	"77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("77d985a2-3f8c-4dd0-beb1-075cd7ba4385",
+	"00000000-0000-0000-0000-000000000000",
+	"be1840aa-9d3d-4f55-baec-da45c54219a5",
+	'SVDCclasses',
+	'',
+	0,
+	'../SVDCclasses.xtuml');

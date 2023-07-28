@@ -3,7 +3,7 @@ private service AESequenceDC::Test01NormalPath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -67,7 +67,7 @@ private service AESequenceDC::Test02NormalPath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -119,7 +119,7 @@ private service AESequenceDC::Test03NormalPath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -176,7 +176,7 @@ private service AESequenceDC::Test04NormalCyclicPath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -212,7 +212,7 @@ private service AESequenceDC::Test05NormalCyclicPath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -250,7 +250,7 @@ private service AESequenceDC::Test06NormalCyclicPath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -291,7 +291,7 @@ private service AESequenceDC::Test07NormalCyclicPath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -342,7 +342,7 @@ private service AESequenceDC::Test31ErrorDetection () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -393,7 +393,7 @@ private service AESequenceDC::Test32ErrorDetection () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -444,7 +444,7 @@ private service AESequenceDC::Test33ErrorDetection () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -495,7 +495,7 @@ private service AESequenceDC::Test08NormalPath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -588,7 +588,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -602,7 +602,7 @@ private service AESequenceDC::Test34ErrorDetection () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -657,7 +657,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -671,7 +671,7 @@ private service AESequenceDC::Test35ErrorDetection () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -725,7 +725,7 @@ private service AESequenceDC::Test09CorrectDeletionOfDefinitions () is
 theJobDef : instance of JobDefinition;
 theJobDefs : set of instance of JobDefinition;
 theSeqDefs : set of instance of AESequenceDefinition;
-theAEDefs : set of instance of AuditEventDefinition;
+theAEDefs : set of instance of SequencedAuditEventDefinition;
 theAEInSeqDefs : set of instance of AEInSequenceDefinition;
 theAEOccInSeqDefs : set of instance of AEOccurrenceInSequenceDefinition;
 theAEOccPairDefs : set of instance of AEInSequencePairDefn;
@@ -750,7 +750,7 @@ begin
    
   theJobDefs := find JobDefinition();
   theSeqDefs := find AESequenceDefinition();
-  theAEDefs := find AuditEventDefinition();
+  theAEDefs := find SequencedAuditEventDefinition();
   theAEInSeqDefs := find AEInSequenceDefinition();
   theAEOccInSeqDefs := find AEOccurrenceInSequenceDefinition();
   theAEOccPairDefs := find AEInSequencePairDefn();
@@ -770,7 +770,7 @@ private service AESequenceDC::Test10NormalPath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -873,7 +873,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -887,7 +887,7 @@ private service AESequenceDC::Test11NormalPath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -994,7 +994,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -1092,7 +1092,7 @@ private service AESequenceDC::Test38AnomalousCondition () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -1199,7 +1199,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -1213,7 +1213,7 @@ private service AESequenceDC::Test39ErrorDetection () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theTimers : sequence of timer;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
@@ -1298,7 +1298,7 @@ theAJob : instance of Job;
 theGJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -1383,7 +1383,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -1399,7 +1399,7 @@ theAJob : instance of Job;
 theGJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -1481,7 +1481,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -1498,7 +1498,7 @@ theAJob : instance of Job;
 theGJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -1584,7 +1584,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -1601,7 +1601,7 @@ theAJob : instance of Job;
 theGJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 //emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -1692,7 +1692,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -1708,7 +1708,7 @@ theAJob : instance of Job;
 theGJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -1802,7 +1802,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -1817,7 +1817,7 @@ private service AESequenceDC::Test12NormalForkAndMergePath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -1866,7 +1866,7 @@ private service AESequenceDC::Test46ErrorDetectionForkAndMerge () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -1913,7 +1913,7 @@ private service AESequenceDC::Test47ErrorDetectionForkAndMerge () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -1960,7 +1960,7 @@ private service AESequenceDC::Test48ErrorDetectionIllegalSequenceEnd () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -2013,7 +2013,7 @@ private service AESequenceDC::Test13NormalInstanceForkAndMergePath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -2078,7 +2078,7 @@ private service AESequenceDC::Test49ErrorDetectionIllegalSequenceEnd () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -2120,7 +2120,7 @@ private service AESequenceDC::Test50ErrorDetectionInstanceForkAndMergePath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -2179,7 +2179,7 @@ private service AESequenceDC::Test51ErrorDetectionInstanceForkAndMergePath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -2238,7 +2238,7 @@ private service AESequenceDC::Test57MissingInvariants () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -2296,7 +2296,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -2311,7 +2311,7 @@ private service AESequenceDC::Test15NormalSplitInstanceForkAndMergePath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -2397,7 +2397,7 @@ private service AESequenceDC::Test16NormalInstanceAndTypeForkAndMergePath () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -2627,7 +2627,7 @@ private service AESequenceDC::Test52ErrorDetectionInstanceAndTypeForkAndMergePat
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -2699,7 +2699,7 @@ theAJob : instance of Job;
 theGJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -2785,7 +2785,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -2800,7 +2800,7 @@ private service AESequenceDC::Test17NormalXORConstraint () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -2868,7 +2868,7 @@ theAJob : instance of Job;
 theGJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -2955,7 +2955,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -2970,7 +2970,7 @@ private service AESequenceDC::Test21NormalIntraJobInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -3041,7 +3041,7 @@ private service AESequenceDC::Test55InvalidIntraJobInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -3107,7 +3107,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -3122,7 +3122,7 @@ private service AESequenceDC::Test56InvalidIntraJobInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -3182,7 +3182,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -3197,7 +3197,7 @@ private service AESequenceDC::Test22NormalSourceExtraJobInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 previousEvents : sequence of string;
 empty : sequence of string;
 theAuditEventData : sequence of auditEventDataStructure;
@@ -3268,7 +3268,7 @@ private service AESequenceDC::Test53aErrorDetectionANDConstraintViolation () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 
@@ -3307,7 +3307,7 @@ begin
   Test::service_event_queue();
   
   // Fire the timer that waits for alternative branch events on Job_Alpha to arrive - this mimics the situation where 
-  // the events for Job_Alpha that follow (see befar) arrive too late to be processed but the Job proceeds (wrongly) on
+  // the events for Job_Alpha that follow (see below) arrive too late to be processed but the Job proceeds (wrongly) on
   // on basis that all sequences must have been received.
   theJob := find_only Job(jobID = "Job_Alpha");
   Test::fire_timer(theJob.jobEventTimer);
@@ -3376,7 +3376,7 @@ begin
   //...and finally test that all the jobs and their associated sequences and events have been clean up appropriately.
   theJobs := find Job();
   theSequences := find Sequence();
-  theAuditEvents := find AuditEvent();
+  theAuditEvents := find SequencedAuditEvent();
   
   Assertions::assertTrue(theJobs'length = 0, "Not all jobs were deleted - number of Jobs remaining = " & (theJobs'length)'image);
   Assertions::assertTrue(theSequences'length = 0, "Not all sequences were deleted - number of sequences remaining = " & (theSequences'length)'image);
@@ -3390,7 +3390,7 @@ private service AESequenceDC::Test23NormalUserExtraJobInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 theUserInvariants : set of instance of TransientInvariant;
@@ -3542,7 +3542,7 @@ private service AESequenceDC::Test24MultipleInForcePersistentInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 theUserInvariants : set of instance of TransientInvariant;
@@ -3736,7 +3736,7 @@ private service AESequenceDC::Test58InvalidUserExtraJobInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 theUserInvariants : set of instance of TransientInvariant;
@@ -3868,7 +3868,7 @@ private service AESequenceDC::Test59InvalidUserExtraJobInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 //theUserInvariants : set of instance of TransientInvariant;
@@ -4001,7 +4001,7 @@ private service AESequenceDC::Test60StalePersistedInvariant () is
 theJob : instance of Job;
 theJobs : set of instance of Job;
 theSequences : set of instance of Sequence;
-theAuditEvents : set of instance of AuditEvent;
+theAuditEvents : set of instance of SequencedAuditEvent;
 theAuditEventData : sequence of auditEventDataStructure;
 emptyAuditEventData : sequence of auditEventDataStructure;
 theUserInvariants : set of instance of TransientInvariant;
@@ -4147,7 +4147,7 @@ previousEventTypes : sequence of eventStructure;
 eventDefinition : eventDefinitionStructure;
 eventDefinitions : sequence of eventDefinitionStructure;
 jobDefn : instance of JobDefinition;
-theAuditEventDefs : sequence of instance of AuditEventDefinition;
+theAuditEventDefs : sequence of instance of SequencedAuditEventDefinition;
 
 begin
   //
@@ -4208,7 +4208,7 @@ begin
 
 
   jobDefn := find_one JobDefinition (jobName = "TestJob");
-  theAuditEventDefs := jobDefn -> R7.AESequenceDefinition -> R1.AuditEventDefinition;
+  theAuditEventDefs := jobDefn -> R7.AESequenceDefinition -> R1.SequencedAuditEventDefinition;
   Assertions::assertTrue(jobDefn /= null, "Job definition not created - jobName : testJob");
   Assertions::assertTrue(theAuditEventDefs'length = 13, "Wrong number of event definitions created: " & (theAuditEventDefs'length)'image);
 
