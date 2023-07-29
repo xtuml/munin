@@ -99,10 +99,10 @@ project AEO_SVDC is
   domain VerificationGateway is
   
   terminator Verification is
-      public service verifyInstrumentationEvent ( jobKey : in string,
-      	                                          eventId : in string,
+      public service verifyInstrumentationEvent ( jobID : in string,
+      	                                          eventID : in string,
       	                                          eventType : in string,
-                                                  previousEventId : in string);       
+                                                  previousEventID : in string);       
     end terminator;
   end domain;
   
