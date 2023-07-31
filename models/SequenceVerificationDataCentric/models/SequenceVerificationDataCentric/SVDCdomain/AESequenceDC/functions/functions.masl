@@ -3,14 +3,21 @@ public service AESequenceDC::acceptOrderedEvent ( ae_time : in string,
                                                  app : in string,
                                                  ae_type : in string,
                                                  jobId : in string,
+                                                 jobName : in string,
                                                  prevAEIds : in sequence of string,
                                                  id : in string,
                                                  auditEventData : in sequence of auditEventDataStructure ) is
 existingJob : instance of Job;
+existingJobs : set of instance of Job;
 theSeqAuditEventDefinition : instance of SequencedAuditEventDefinition;
+theUnseqAuditEventDefinition : instance of UnsequencedAuditEventDefinition;
+eventsSequenceDefs : set of instance of AESequenceDefinition;
+jobsSequenceDefs : set of instance of AESequenceDefinition;
 aeSequenceDefs : set of instance of AESequenceDefinition;
 theSequenceDef : instance of AESequenceDefinition;
-theJobDefinition : instance of JobDefinition;
+//theJobDefinition : instance of JobDefinition;
+knownJobDefinition : instance of JobDefinition;
+theUnhappyJob : instance of UnhappyJob;
 logMessage : string;
 eventContent : string;
 
@@ -18,42 +25,75 @@ begin
   // Report the event
   eventContent := "EventId = " & id;
   Reporting~>reportEvent(Logger::Information, "svdc_event_received", eventContent);
-  // Check to see if the received event is part of a Job that is already being processed
-  existingJob := find_only Job (jobID = jobId);
-  if existingJob /= null then
-    //We have an existing Job and this event should be the next in sequence for that Job
-    generate Job.newEventForExistingJob (id, prevAEIds, ae_type, auditEventData) to existingJob;
-  else
-    // The received event must be for a new job, but before the event can be accepted we need to verify that 
-    // the JobDefinition for this new job is neither Suspended nor Deprecated (if it is, the event cannot be accepted)
-    theSeqAuditEventDefinition := find_only SequencedAuditEventDefinition (AEType = ae_type);
-    if theSeqAuditEventDefinition /= null then
-      // The ae_type is a known sequenced event type - use this to find which JobDefinition it relates to and then verify that it is ACTIVE.
-
-      aeSequenceDefs := theSeqAuditEventDefinition -> R1.AESequenceDefinition;
-      
-      //TODO Replace this next line with something that takes account of JobName when that is available
-      theSequenceDef := find_one aeSequenceDefs ();
-      
-      theJobDefinition := theSequenceDef -> R7;
-      if (theJobDefinition.isSuspended = true) or (theJobDefinition.isDeprecated = true)then
-        // Log info: The accepted event is for a new Job that has a non-active JobDefinition 
-        logMessage := "AESequenceDC::acceptorderedEvent : The event - AuditEventId = " & id & "cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
-        Logger::log(Logger::Debug, "AESequenceDC", logMessage);        
-        eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = The event cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
-        Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
-      else     
-        //We have a new job and this event should be tested as a valid initial event for a Job
-        //AuditEvent.AddEventForNewJob (jobId => jobId, eventID => id, prevEventId => prev, aeType => ae_type);
-        SequencedAuditEvent.AddEventForNewJob (jobId, id, prevAEIds, ae_type, auditEventData);
-      end;
-    else
-      // Log info: Report that the specified audit event type (ae_type) does not exist.
-      logMessage := "AESequenceDC::acceptorderedEvent : Accepted event is of an unknown type - AEType = " & ae_type;
-      Logger::log(Logger::Error, "AESequenceDC", logMessage); 
-      eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown type";
+  //NEW Check the jobType refers to a known JobDefinition
+  knownJobDefinition := find_only JobDefinition (jobName = jobName);
+  if knownJobDefinition /= null then
+  
+  
+  
+  
+    if (knownJobDefinition.isSuspended = true) or (knownJobDefinition.isDeprecated = true)then
+      // Log info: The accepted event is for a new Job that has a non-active JobDefinition 
+      logMessage := "AESequenceDC::acceptorderedEvent : The event - AuditEventId = " & id & "cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);        
+      eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = The event cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
       Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
+    else    
+        
+        
+        
+         
+      existingJobs := knownJobDefinition -> R8;
+      // Check to see if the received event is part of a Job that is already being processed
+      existingJob := find_only existingJobs (jobID = jobId);
+      if existingJob /= null then
+        //We have an existing Job and this event should be the next in sequence for that Job
+        generate Job.newEventForExistingJob (id, prevAEIds, ae_type, auditEventData) to existingJob;
+      else
+        // The received event must be for a new job, but before the event can be accepted we need to verify that 
+        // the JobDefinition for this new job is neither Suspended nor Deprecated (if it is, the event cannot be accepted)
+        // We also need to check whether the event received is a known happy event type, an unhappy event type or an unknown event type
+        theSeqAuditEventDefinition := find_only SequencedAuditEventDefinition (AEType = ae_type);
+        theUnseqAuditEventDefinition := find_only UnsequencedAuditEventDefinition (UnsequencedAEType = ae_type);
+        if theSeqAuditEventDefinition /= null then
+        
+        
+        // Find the possible sequence definitions associated with this audit event definition.
+        //eventsSequenceDefs := theSeqAuditEventDefinition -> R1.AESequenceDefinition;
+        // Find the possible sequence definitions associated with this job definition.
+        //jobsSequenceDefs := knownJobDefinition -> R7;
+        // The intersection of these 2 sets will be a set with a single sequence definition
+        //aeSequenceDefs := jobsSequenceDefs intersection eventsSequenceDefs;
+        // As an event definition can only occur once in any given Job Definition then the following is safe
+        //theSequenceDef := find_one aeSequenceDefs ();
+      
+          //We have a new job and this event should be tested as a valid initial event for a Job
+          //AuditEvent.AddEventForNewJob (jobId => jobId, eventID => id, prevEventId => prev, aeType => ae_type);
+          SequencedAuditEvent.AddEventForNewJob (jobId, jobName, id, prevAEIds, ae_type, auditEventData);
+        end if;
+      elsif theUnseqAuditEventDefinition /= null then
+        // TODO Create UnhappyJob
+        theUnhappyJob := create UnhappyJob (jobID => this.jobID, Current_State => Created );
+        // Link UnhappyJob to Job
+        link theUnhappyJob R45 this;
+        // Generate firstUnhappyEvent event to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
+        generate UnhappyJob.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to this;
+      
+      else
+        // Log info: Report that the specified audit event type (ae_type) does not exist.
+        logMessage := "AESequenceDC::acceptorderedEvent : Accepted event is of an unknown type - AEType = " & ae_type;
+        Logger::log(Logger::Error, "AESequenceDC", logMessage); 
+        eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
+        Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
+      end if;
     end if;
+  else
+    // Log info: Report that the specified audit event type (ae_type) does not exist.
+    logMessage := "AESequenceDC::acceptorderedEvent : The specified Job Type is unknown = " & jobName;
+    Logger::log(Logger::Error, "AESequenceDC", logMessage); 
+    eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Job type";
+    Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
+    
   end if;
   //
   //

@@ -4,6 +4,7 @@ theJob : instance of Job;
 newEvent : instance of SequencedAuditEvent;
 existingEvent : instance of SequencedAuditEvent;
 theEventType : instance of SequencedAuditEventDefinition;
+theUnseqEventType : instance of UnsequencedAuditEventDefinition;
 prevEvent : instance of SequencedAuditEvent;
 prevEventIsValid : boolean;
 theAeSequenceDef : instance of AESequenceDefinition;
@@ -75,16 +76,19 @@ begin
   // Reset the jobHangingTimer if it is set
   cancel theJob.jobHangingTimer;
   // Check to see if we've seen this event instance before
-  existingEvent := find_one SequencedAuditEvent (AuditEventId = eventId);
-  if existingEvent = null then
+//  existingEvent := find_one SequencedAuditEvent (AuditEventId = eventId);
+//  if existingEvent = null then
     // The received event has not been seen before, so link the new event to this Job.
-    newEvent := create SequencedAuditEvent (AuditEventId => eventId, seenAsPreviousEvent => false);
-    // We need to link all events to the Job in which they are seen even if they are not correctly sequenced
-    link theJob R44 newEvent;
     
     theEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
+    theUnseqEventType := find_only UnsequencedAuditEventDefinition (UnsequencedAEType = aeType);
+    
     if theEventType /= null then
-      // We have a valid event type
+      // We have a valid sequenced event type
+      newEvent := create SequencedAuditEvent (AuditEventId => eventId, seenAsPreviousEvent => false);
+      // We need to link all events to the Job in which they are seen even if they are not correctly sequenced
+      link theJob R44 newEvent;
+      // and to the sequenced event definition
       link newEvent R2 theEventType;
       
       // Next, determine if the received event is of a type that is expected for the stated previous event - firstly
@@ -471,6 +475,9 @@ begin
   
       end if;
       
+    elsif theUnseqEventType /= null then
+      // We've seen another unsequenced event type
+      // TODO sort out behaviour for unsequenced event
       
     else
       // Log error: unrecognised event type received
@@ -478,12 +485,12 @@ begin
       theJob.failJob("An unrecognised event type - " & aeType & "has been received for - jobId = " & this.jobID);
     //
     end if;
-  else
+//  else
     // Log error: The audit event id received has been seen before
-    theJob.sequencingFailed := true;
-    theJob.failJob("The audit event id received has been seen before - event id " & eventId & " , jobId = " & this.jobID);
+//    theJob.sequencingFailed := true;
+//    theJob.failJob("The audit event id received has been seen before - event id " & eventId & " , jobId = " & this.jobID);
   
-  end if;  
+//  end if;  
 //  
   // Set a timer to timeout if the job hangs waiting for another event
   theSystemSpec := find_one SystemSpecification();

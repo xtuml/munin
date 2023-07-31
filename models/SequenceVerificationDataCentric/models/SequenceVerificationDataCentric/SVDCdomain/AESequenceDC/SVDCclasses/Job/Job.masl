@@ -147,3 +147,28 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. 'db347d85-0ef8-469b-a066-39e28a893522' DO NOT EDIT THIS LINE.
+public instance service AESequenceDC::Job.migrateToUnhappyJob ( eventId : in string,
+                                                               prevAEIds : in sequence of string,
+                                                               aeType : in string,
+                                                               aeData : in sequence of auditEventDataStructure ) is
+theHappyJob : instance of HappyJob;
+theUnhappyJob : instance of UnhappyJob;
+begin
+  // Unlink HappyJob from Job
+  theHappyJob := this -> R45.HappyJob;
+  if theHappyJob /= null then
+    unlink theHappyJob R45 this;
+    // Delete the Happy Job
+    delete theHappyJob;
+  end if;
+    
+  // Create UnhappyJob in some Created state
+  theUnhappyJob := create UnhappyJob (jobID => this.jobID, Current_State => Created );
+  // Link UnhappyJob to Job
+  link theUnhappyJob R45 this;
+  // Generate firstUnhappyEvent event to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
+  generate UnhappyJob.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to this;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
