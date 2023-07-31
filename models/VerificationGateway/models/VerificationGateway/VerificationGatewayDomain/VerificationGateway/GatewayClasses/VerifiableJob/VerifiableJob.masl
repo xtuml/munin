@@ -24,3 +24,24 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '97da32e3-248e-4c1d-b0c4-918f05c1e2f7' DO NOT EDIT THIS LINE.
+public instance service VerificationGateway::VerifiableJob.deleteVerifiableJob () is
+theLastInstrumentationEvent : instance of InstrumentationEvent;
+theInstrumentationEvents : set of instance of InstrumentationEvent;
+
+begin
+  theLastInstrumentationEvent := this -> R2;
+  unlink this R2 theLastInstrumentationEvent;
+  theInstrumentationEvents := this -> R1;
+  for theInstrumentationEvent in theInstrumentationEvents loop
+    unlink this R1 theInstrumentationEvent;
+    if (theInstrumentationEvent -> R3.is_followed_by) /= null then
+      unlink (theInstrumentationEvent -> R3.is_followed_by) R3 theInstrumentationEvent;
+    end if;
+  end loop;
+  delete theInstrumentationEvents;
+  delete this;
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

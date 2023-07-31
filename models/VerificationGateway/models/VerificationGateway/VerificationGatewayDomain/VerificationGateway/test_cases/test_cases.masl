@@ -1,0 +1,13 @@
+//! ACTIVITY BEGIN. '74bb4962-4081-40ca-94e7-642cc940aa5b' DO NOT EDIT THIS LINE.
+private service VerificationGateway::Test001_BasicPVInstrumentationSequence () is
+begin
+  //
+  acceptInstrumentationEventForJob("Job001","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVEventProcessingComplete");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobSuccessful");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobDeleted");
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
