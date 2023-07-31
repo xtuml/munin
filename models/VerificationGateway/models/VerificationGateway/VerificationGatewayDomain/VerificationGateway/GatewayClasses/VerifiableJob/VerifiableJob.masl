@@ -36,7 +36,7 @@ begin
   for theInstrumentationEvent in theInstrumentationEvents loop
     unlink this R1 theInstrumentationEvent;
     if (theInstrumentationEvent -> R3.is_followed_by) /= null then
-      unlink (theInstrumentationEvent -> R3.is_followed_by) R3 theInstrumentationEvent;
+      unlink (theInstrumentationEvent -> R3.is_followed_by) R3.is_followed_by theInstrumentationEvent;
     end if;
   end loop;
   delete theInstrumentationEvents;
