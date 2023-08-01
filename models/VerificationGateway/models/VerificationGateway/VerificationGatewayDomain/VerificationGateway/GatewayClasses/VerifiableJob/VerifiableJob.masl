@@ -39,8 +39,12 @@ begin
       unlink (theInstrumentationEvent -> R3.is_followed_by) R3.is_preceded_by theInstrumentationEvent;
     end if;
   end loop;
-  //delete theInstrumentationEvents;
-  //delete this;
+  
+  // ...and then delete all the InstrumentationEvents for the VerifiableJob 
+  delete theInstrumentationEvents;
+  
+  //...and finally delete this VerifiableJob
+  delete this;
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
