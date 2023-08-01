@@ -8,6 +8,10 @@ begin
   acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVConstraintCheckPassed");
   acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobSuccessful");
   acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobDeleted");
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
