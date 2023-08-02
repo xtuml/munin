@@ -1,11 +1,15 @@
 //! ACTIVITY BEGIN. '79ee457c-fada-4ebb-8735-1e0b3b4a1284' '7795cd6a-5c92-4b51-bb32-bf049e02c445' DO NOT EDIT THIS LINE.
 state AESequenceDC::HappyJob.JobInProgress () is
 theJob : instance of Job;
-newEvent : instance of SequencedAuditEvent;
+theJobDef : instance of JobDefinition;
+newSeqEvent : instance of SequencedAuditEvent;
+newEvent : instance of AuditEvent;
 existingEvent : instance of SequencedAuditEvent;
 theEventType : instance of SequencedAuditEventDefinition;
+possibleEventTypes : set of instance of SequencedAuditEventDefinition;
 theUnseqEventType : instance of UnsequencedAuditEventDefinition;
 prevEvent : instance of SequencedAuditEvent;
+prevEvt : instance of AuditEvent;
 prevEventIsValid : boolean;
 theAeSequenceDef : instance of AESequenceDefinition;
 theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
@@ -14,14 +18,17 @@ prevAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
 expectedAeOccsInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
 possibleAeOccInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
 theAeInSequenceDef : instance of AEInSequenceDefinition;
+theEventsSequenceDefs : set of instance of AESequenceDefinition;
+theJobsSequenceDefs : set of instance of AESequenceDefinition;
 aeSequenceDefs : set of instance of AESequenceDefinition;
 theSequenceDef : instance of AESequenceDefinition;
 theAeInSequencePairDefn : instance of AEInSequencePairDefn;
-existingAuditEventPair : instance of AuditEventPair;
-newAuditEventPair : instance of AuditEventPair;
-theAuditEventPairs : set of instance of AuditEventPair;
-allAuditEventPairs : set of instance of AuditEventPair;
-thisJobsAuditEventPairs : set of instance of AuditEventPair;
+existingAuditEventPair : instance of SequencedAuditEventPair;
+newAuditEventPair : instance of SequencedAuditEventPair;
+theAuditEventPairs : set of instance of SequencedAuditEventPair;
+allAuditEventPairs : set of instance of SequencedAuditEventPair;
+thisJobsAuditEventPairs : set of instance of SequencedAuditEventPair;
+newAuditEventLink : instance of AuditEventLink;
 currentSequence : instance of Sequence;
 newSequence : instance of Sequence;
 incompleteSequences : set of instance of Sequence;
@@ -69,47 +76,58 @@ creationErrorMessage : string;
 eventDataCheckHasPassed : boolean;
 theSystemSpec : instance of SystemSpecification;
 failureReason : string;
+auditEventType : string;
+auditEventId : string;
+jobType : string;
+prevAuditEventIds : sequence of string;
+auditEventData : sequence of auditEventDataStructure;
+
 
 begin
-  theJob := this -> R45;
+
+    //Map the event parameters to local variables
+    auditEventType := aeType;
+    auditEventId := eventId;
+    jobType := jobName;
+    prevAuditEventIds := prevAEIds;
+    auditEventData := aeData;
+  
+    theJob := this -> R45;
   	
-  // Reset the jobHangingTimer if it is set
-  cancel theJob.jobHangingTimer;
-  // Check to see if we've seen this event instance before
-//  existingEvent := find_one SequencedAuditEvent (AuditEventId = eventId);
-// if existingEvent = null then
-    // The received event has not been seen before, so link the new event to this Job.
-//    newEvent := create SequencedAuditEvent (AuditEventId => eventId, seenAsPreviousEvent => false);
-    // We need to link all events to the Job in which they are seen even if they are not correctly sequenced
-//    link theJob R44 newEvent;
+    // Reset the jobHangingTimer if it is set
+    cancel theJob.jobHangingTimer;
     
-    theEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
+    theEventType := find_only SequencedAuditEventDefinition (AEType = auditEventType);
     if theEventType /= null then
       // We have a valid event type
-      newEvent := create SequencedAuditEvent (AuditEventId => eventId, seenAsPreviousEvent => false);
+      newSeqEvent := create SequencedAuditEvent (AuditEventId => auditEventId, seenAsPreviousEvent => false);
+      newEvent := create AuditEvent (AEId => auditEventId);
+      link newSeqEvent R46 newEvent;
       // We need to link all events to the Job in which they are seen even if they are not correctly sequenced
-      link theJob R44 newEvent;
+      link theJob R44 newSeqEvent;
       // and to the sequenced event definition
-      link newEvent R2 theEventType;
-      
-      // Next, determine if the received event is of a type that is expected for the stated previous event - firstly
-      // find the set of occurrences of the received event type for the sequence
-      aeSequenceDefs := theEventType -> R1.AESequenceDefinition;
-      
-      // TODO Fix this next line when jobType is available through the interface
+      link newSeqEvent R2 theEventType;
+
+      theJobDef = find_one JobDefinition (jobName = jobType);
+      possibleEventTypes := theJobDef -> R43.SequencedAuditEventDefinition;
+
+      theEventsSequenceDefs := theEventType -> R1.AESequenceDefinition;
+      theJobsSequenceDefs := theJobDef -> R7;
+      aeSequenceDefs := theEventsSequenceDefs intersection theJobsSequenceDefs;
+      // As in Highlander - There can be only one!
       theSequenceDef := find_one aeSequenceDefs();
       
       theAeInSequenceDef := theSequenceDef with theEventType -> R1.AEInSequenceDefinition;
       theAeOccurrencesInSequenceDef := theAeInSequenceDef -> R12;
       
       // ...and then check that just one of these matches with an event occurrence that is expected for the previous event
-      if (prevAEIds /= empty) and (prevAEIds /= emptyPrevId) then
+      if (prevAuditEventIds /= empty) and (prevAuditEventIds /= emptyPrevId) then
         // Log info: Event has previous event ids
-        logMessage := "AESequenceDC::Job.JobInProgress : Follow on event (" & eventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAEIds'length'image & " previous event ids";
+        logMessage := "AESequenceDC::Job.JobInProgress : Follow on event (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
 	    Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
 
         auditEventDataProcessed := false;
-        for aPrevEventId in prevAEIds loop 
+        for aPrevEventId in prevAuditEventIds loop 
           // Need to locate the previous event as defined in the event parameter
           prevEvent := find_one SequencedAuditEvent (AuditEventId = aPrevEventId);
           if prevEvent /= null then
@@ -122,8 +140,8 @@ begin
             if (possibleAeOccInSequenceDef'length = 1) then
               theAeOccInSequenceDef := find_one possibleAeOccInSequenceDef ();
               // We have found the occurrence definition class to link with the new event
-              if (newEvent -> R13 = null) then
-                link theAeOccInSequenceDef R13 newEvent;
+              if (newSeqEvent -> R13 = null) then
+                link theAeOccInSequenceDef R13 newSeqEvent;
               end if;
           
               if theAeOccInSequenceDef.isSequenceStart = false then
@@ -131,22 +149,30 @@ begin
                 // We have a follow on event for an existing Job with a valid previous event
                 theAeInSequencePairDefn := theAeOccInSequenceDef with prevAeOccInSequenceDef -> R6.follows.AEInSequencePairDefn;
                 // Check that the previous event has not already been seen with this event as that would be an error
-                existingAuditEventPair := find_one AuditEventPair (previousAuditEventId = prevEvent.AuditEventId and
-                	                                               nextAuditEventId = newEvent.AuditEventId);
+                existingAuditEventPair := find_one SequencedAuditEventPair (previousAuditEventId = prevEvent.AuditEventId and
+                	                                               nextAuditEventId = newSeqEvent.AuditEventId);
                
                 if existingAuditEventPair = null then
                   // Link the new event to the previous event to capture the sequence we are seeing
-                  newAuditEventPair := create AuditEventPair (previousAuditEventId => prevEvent.AuditEventId,
-                                                              nextAuditEventId => newEvent.AuditEventId);
-                  link newEvent R4.has_previous.SequencedAuditEvent prevEvent using newAuditEventPair;
+                  newAuditEventPair := create SequencedAuditEventPair (previousAuditEventId => prevEvent.AuditEventId,
+                                                              nextAuditEventId => newSeqEvent.AuditEventId);
+                  link newSeqEvent R4.has_previous.SequencedAuditEvent prevEvent using newAuditEventPair;
                   link newAuditEventPair R15 theAeInSequencePairDefn;
+                  
+                  // Also maintain the R47 link which links sequenced and unsequenced events
+                  // This is necessary for the critical event check
+                  prevEvt := prevEvent -> R46;
+                  newAuditEventLink := create AuditEventLink (previousAEId => prevEvt.AEId,
+                  	                                         nextAEId => newEvent.AEId);
+                  link newEvent R47.has_previous.AuditEvent prevEvt using newAuditEventLink;
+                  
                 else
                     theJob.sequencingFailed := true;
-                    theJob.failJob("The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId & " and Previous Event Id = " & prevEvent.AuditEventId );              
+                    theJob.failJob("The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId & " and Previous Event Id = " & prevEvent.AuditEventId );              
                 end if;  
              
                 // Now test to see if this is a valid event sequence
-                newEvent.TestPreviousEventIsValid (prevEvent, prevEventIsValid); 
+                newSeqEvent.TestPreviousEventIsValid (prevEvent, prevEventIsValid); 
                 if prevEventIsValid then
                   // Previous event is valid 
                   //logMessage := "AESequenceDC::Job.JobInProgress : Previous event is valid - jobId = " & this.jobID & ", audit event sequence = " & theSequenceDef.sequenceDefinitionName & ", current event type = " & theEventType.AEType;
@@ -154,8 +180,8 @@ begin
                   // The new event is a follow on event to the previous event so we know it is part of the same sequence as the previous event
                   currentSequence := prevEvent -> R11;
                   if currentSequence /= null then
-                    if (newEvent -> R11 = null) then
-                      link newEvent R11 currentSequence;
+                    if (newSeqEvent -> R11 = null) then
+                      link newSeqEvent R11 currentSequence;
                     end if;  
                     if prevEvent.seenAsPreviousEvent = false then
                       //Implementation of part of the Hanrahan algorithm
@@ -170,7 +196,7 @@ begin
                     // checking we haven't already added the audit event data for this event
                     // This approach is a bit clunky but ensures we don't try to add the audit event data more than once
                     if auditEventDataProcessed = false then
-                      newEvent.ProcessAuditEventData (aeData);
+                      newSeqEvent.ProcessAuditEventData (auditEventData);
                       auditEventDataProcessed := true;
                     end if;  
                   
@@ -182,14 +208,14 @@ begin
                       theUserDynamicControl := find_one thisJobsDynamicControls (dynamicControlName = theUserDynamicControlDefn.dynamicControlName );
                       if theUserDynamicControl /= null and theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
                         //MUN2-65 if (theUserDynamicControl -> R36) = null then
-                          link theUserDynamicControl R36 newEvent;
+                          link theUserDynamicControl R36 newSeqEvent;
                         //MUN2-65 end if;                      
                     
                         if theUserDynamicControl.expectedDynamicControlValue > 0 then
                           if theUserDynamicControl.currentDynamicControlValue < theUserDynamicControl.expectedDynamicControlValue then
                             theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
                           else
-                            theJob.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
+                            theJob.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId ); 
                           end if;
                           // TODO: Should there be an else clause here that deals with an expected DynamicControlValue not being > 0?                  
                         end if;  
@@ -227,14 +253,14 @@ begin
                       theSourceDynamicControl := find_one theDynamicControls (isUser = false);
                       if theSourceDynamicControl /= null then
  
-                        theUserDynamicControl := newEvent -> R36;
+                        theUserDynamicControl := newSeqEvent -> R36;
                         if theUserDynamicControl = null then
                           // An additional 'usage' DynamicControl that is separate from the 'source' DynamicControl instance is created 
                           // in order to support nested forks.
                           theUserDynamicControl := create unique DynamicControl (expectedDynamicControlValue => theSourceDynamicControl.expectedDynamicControlValue,
                             	                                                 currentDynamicControlValue => 0,
                             	                                                 isUser => true);
-                          link theUserDynamicControl R36 newEvent;
+                          link theUserDynamicControl R36 newSeqEvent;
                           link theUserDynamicControl R29 theUserDynamicControlDefn;
                           link theUserDynamicControl R35 theJob;
 
@@ -244,7 +270,7 @@ begin
                         end if;  
                     
 	                  else
-                        theJob.failJob("The fork point has been found but no corresponding source branch count is associated with it for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
+                        theJob.failJob("The fork point has been found but no corresponding source branch count is associated with it for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId ); 
 	                  end if;  
 	                  
 	                else 
@@ -268,7 +294,7 @@ begin
                     
                     theAeInSequencePairDefn := theAeOccInSequenceDef with prevAeOccInSequenceDef -> R6.follows.AEInSequencePairDefn;
                     allAuditEventPairs := theAeInSequencePairDefn -> R15;
-                    thisJobsAuditEventPairs := theJob -> R44 -> R4.has_next.AuditEventPair;
+                    thisJobsAuditEventPairs := theJob -> R44 -> R4.SequencedAuditEventPair;
                     theAuditEventPairs := allAuditEventPairs intersection thisJobsAuditEventPairs;
                     if theAuditEventPairs'length > 1 then
                       // There is either an instance fork or a loop so check that the AuditEventPairs have a common previous event to find the instance fork
@@ -316,11 +342,11 @@ begin
                         // The following test is necessary because this logic is executed 
                         // for EACH previous event of which there will be many at a merge point.
                         if (theUserDynamicControl -> R36) = null then
-                          link theUserDynamicControl R36 newEvent;
+                          link theUserDynamicControl R36 newSeqEvent;
                         end if;                      
                         if theUserDynamicControl.expectedDynamicControlValue > 0 then
                           // The current Merge count value is set to the number of previous event ids
-                          theUserDynamicControl.currentDynamicControlValue := prevAEIds'length;                                           
+                          theUserDynamicControl.currentDynamicControlValue := prevAuditEventIds'length;                                           
                         end if;  
 	                  else
                         logMessage := "AESequenceDC::Job.JobInProgress : There is no event using a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
@@ -347,7 +373,7 @@ begin
               else
                 // The received event is a sequence start event but it has a previous event with it. This is an error condition
                 theJob.sequencingFailed := true;
-                theJob.failJob("This is a sequence start event with a previous event which can't happen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
+                theJob.failJob("This is a sequence start event with a previous event which can't happen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newSeqEvent.AuditEventId);
               end if;  
             elsif possibleAeOccInSequenceDef'length = 0 then
               // There is no available definition for this situation so the sequence is broken.
@@ -358,7 +384,7 @@ begin
               // There are multiple possible Audit Event Occurrences In the Sequence Definition 
               // TODO What does this circumstance imply and what can we do about it.
               theJob.sequencingFailed := true;
-              theJob.failJob("There are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newEvent.AuditEventId);
+              theJob.failJob("There are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & ", current event type = " & theEventType.AEType & ". event id = " & newSeqEvent.AuditEventId);
             end if;
           else
             // The previous event id provided in the audit event data is not recognised as a previous event 
@@ -370,21 +396,21 @@ begin
         
         //MUN2-65 Addition
         // ...and now check that the received audit event data matches that which is expected
-        newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+        newSeqEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
         if eventDataCheckHasPassed /= true then
           theJob.failJob(failureReason);
         end if;   
         // End of MUN2-65 Addition
                     
         // Need to increment the branch extent for this sequence for this new event as part of the Hanrahan algorithm  
-        currentSequence := newEvent -> R11;
+        currentSequence := newSeqEvent -> R11;
         if currentSequence /= null then
           currentSequence.branchExtent := currentSequence.branchExtent + 1;
               
         else
           //Log Job failure: Previous event is valid but is part of a broken sequence
           theJob.sequencingFailed := true;
-          theJob.failJob("No current sequence has been found for this audit event - Event Type = " & (newEvent -> R2).AEType);
+          theJob.failJob("No current sequence has been found for this audit event - Event Type = " & (newSeqEvent -> R2).AEType);
         end if;  
 
       else
@@ -394,7 +420,7 @@ begin
         if theAeOccInSequenceDef /= null then
           // The new event type is one that starts a sequence even though it's for an existing Job. This indicates a follow on sequence for an existing Job
           // This is expected when a start event is seen for a new sequence in an existing Job
-          link newEvent R13 theAeOccInSequenceDef;
+          link newSeqEvent R13 theAeOccInSequenceDef;
           //TODO Validate the new sequence is in the correct order
           // Check that no other sequences for the same Job are still in progress
           sequencesForJob := theJob -> R10;
@@ -407,7 +433,7 @@ begin
 	        // This must be the first start event seen for a new sequence so create and link the sequence
 	        newSequence := create unique Sequence (isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
 	        link newSequence R10 theJob;
-	        link newSequence R11 newEvent;
+	        link newSequence R11 newSeqEvent;
 	        link newSequence R14 theSequenceDef;
 	        
 	      else
@@ -419,7 +445,7 @@ begin
 	        for incompleteSequence in incompleteSequences loop
 	          if (incompleteSequence -> R14) = theSequenceDef then
 	            // We have an incomplete sequence of the same type as the new event belongs to so this must be another start event for that sequence
-	            link incompleteSequence R11 newEvent;
+	            link incompleteSequence R11 newSeqEvent;
 	            // So increment the branch extent
 	            incompleteSequence.branchExtent := incompleteSequence.branchExtent + 1;
                 // Log info: Received a new sequence start event that is an additional start event for an existing sequence
@@ -429,11 +455,11 @@ begin
 	          end if;
 	        end loop;
 	        // If the new start sequence event didn't match any existing sequences then it must be a new sequence
-	        if (newEvent -> R11) = null then
+	        if (newSeqEvent -> R11) = null then
 	          // This must be the first start event seen for a new sequence so create and link the sequence
 	          newSequence := create unique Sequence (isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
 	          link newSequence R10 theJob;
-	          link newSequence R11 newEvent;
+	          link newSequence R11 newSeqEvent;
 	          link newSequence R14 theSequenceDef;          
 	        end if;
 	      end if;  
@@ -441,10 +467,10 @@ begin
 
 
           // Process the audit event data for this new event
-          newEvent.ProcessAuditEventData (aeData);
+          newSeqEvent.ProcessAuditEventData (auditEventData);
           
           // ...and then check that the received audit event data matches that which is expected
-          newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+          newSeqEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
           if eventDataCheckHasPassed /= true then
             theJob.failJob(failureReason);
           end if;
@@ -464,7 +490,7 @@ begin
       // Check to see if the received event marks an end point in the current sequence and if so check whether or
       // not it completes the sequence (note that sequences can have multiple end points due to branching)
       if (theAeOccInSequenceDef /= null) and (theAeOccInSequenceDef.isSequenceEnd) = true then
-        currentSequence := newEvent -> R11;
+        currentSequence := newSeqEvent -> R11;
         if currentSequence /= null then
           // Check to to see if the 'end point' event in the sequence also marks the sequence end.
           generate Job.endEventInSequenceDetected(currentSequence) to this;
@@ -479,24 +505,18 @@ begin
     elsif theUnseqEventType /= null then
       // We've seen an unsequenced event type
       // Migrate from HappyJob to UnhappyJob
-      theJob.migrateToUnhappyJob();
+      theJob.migrateToUnhappyJob(auditEventId, prevAuditEventIds, auditEventType, auditEventData);
                  
     else
       // Log error: unrecognised event type received
       theJob.sequencingFailed := true;
-      theJob.failJob("An unrecognised event type - " & aeType & "has been received for - jobId = " & this.jobID);
+      theJob.failJob("An unrecognised event type - " & auditEventType & "has been received for - jobId = " & this.jobID);
     //
     end if;
-//  else
-    // Log error: The audit event id received has been seen before
-//    theJob.sequencingFailed := true;
-//    theJob.failJob("The audit event id received has been seen before - event id " & eventId & " , jobId = " & this.jobID);
-  
-//  end if;  
-//  
-  // Set a timer to timeout if the job hangs waiting for another event
-  theSystemSpec := find_one SystemSpecification();
-  schedule theJob.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;    
+    //  
+   // Set a timer to timeout if the job hangs waiting for another event
+    theSystemSpec := find_one SystemSpecification();
+    schedule theJob.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;    
   
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -504,15 +524,15 @@ end state;
 //! ACTIVITY BEGIN. '79ee457c-fada-4ebb-8735-1e0b3b4a1284' 'eb73ac80-8d84-4fc3-8026-5f5e09a088b2' DO NOT EDIT THIS LINE.
 state AESequenceDC::HappyJob.AssessingJobConstraints () is
 theJob : instance of Job;
-eachAuditEventPair : instance of AuditEventPair;
-theAuditEventPairs : sequence of instance of AuditEventPair;
+eachAuditEventPair : instance of SequencedAuditEventPair;
+theAuditEventPairs : sequence of instance of SequencedAuditEventPair;
 theConstraintDefn : instance of ConstraintDefinition;
 theConstraintDefns : sequence of instance of ConstraintDefinition;
 theConstrainedSeqPairDefns : sequence of instance of AEInSequencePairDefn;
 eachConstrainedSeqPairDefn : instance of AEInSequencePairDefn;
-theConstrainedAuditEventPairs : sequence of instance of AuditEventPair;
+theConstrainedAuditEventPairs : sequence of instance of SequencedAuditEventPair;
 thePreviousAuditEvents : set of instance of SequencedAuditEvent;
-theFollowingAuditEventPairs : sequence of instance of AuditEventPair;
+theFollowingAuditEventPairs : sequence of instance of SequencedAuditEventPair;
 theForkAuditEvent : instance of SequencedAuditEvent;
 theBranchedEvents : set of instance of SequencedAuditEvent;
 validatedConstraint : boolean;
@@ -523,7 +543,7 @@ failureReason: string;
 begin
   // Need to check that constraints are honoured
   theJob := this -> R45;	
-  theAuditEventPairs := theJob -> R10 -> R11 -> R4.has_next.AuditEventPair;
+  theAuditEventPairs := theJob -> R10 -> R11 -> R4.SequencedAuditEventPair;
   validatedConstraint := true;
   for eachAuditEventPair in theAuditEventPairs loop
     theConstraintDefn := eachAuditEventPair -> R15 -> R16;
@@ -547,7 +567,7 @@ begin
         // Check that after an XOR fork event there is a single branch.      
         // This is a sound check since exactly one branch will follow each XOR fork audit event.
         for thePreviousAuditEvent in thePreviousAuditEvents loop
-          theFollowingAuditEventPairs := thePreviousAuditEvent -> R4.has_next.AuditEventPair;
+          theFollowingAuditEventPairs := thePreviousAuditEvent -> R4.SequencedAuditEventPair;
           if theFollowingAuditEventPairs'length /= 1 then
             validatedConstraint := false;
             logMessage := "AESequenceDC::Job.AssessingJobConstraints : XOR Constraint failed for Job = " & this.jobID & " at event " & (thePreviousAuditEvent -> R2).AEType & " with " & theFollowingAuditEventPairs'length'image & " branches following the XOR node";

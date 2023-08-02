@@ -57,47 +57,31 @@ begin
         theUnseqAuditEventDefinition := find_only UnsequencedAuditEventDefinition (UnsequencedAEType = ae_type);
         if theSeqAuditEventDefinition /= null then
         
-        
-        // Find the possible sequence definitions associated with this audit event definition.
-        //eventsSequenceDefs := theSeqAuditEventDefinition -> R1.AESequenceDefinition;
-        // Find the possible sequence definitions associated with this job definition.
-        //jobsSequenceDefs := knownJobDefinition -> R7;
-        // The intersection of these 2 sets will be a set with a single sequence definition
-        //aeSequenceDefs := jobsSequenceDefs intersection eventsSequenceDefs;
-        // As an event definition can only occur once in any given Job Definition then the following is safe
-        //theSequenceDef := find_one aeSequenceDefs ();
-      
           //We have a new job and this event should be tested as a valid initial event for a Job
-          //AuditEvent.AddEventForNewJob (jobId => jobId, eventID => id, prevEventId => prev, aeType => ae_type);
           SequencedAuditEvent.AddEventForNewJob (jobId, jobName, id, prevAEIds, ae_type, auditEventData);
-        end if;
-      elsif theUnseqAuditEventDefinition /= null then
-        // TODO Create UnhappyJob
-        theUnhappyJob := create UnhappyJob (jobID => this.jobID, Current_State => Created );
-        // Link UnhappyJob to Job
-        link theUnhappyJob R45 this;
-        // Generate firstUnhappyEvent event to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
-        generate UnhappyJob.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to this;
+        elsif theUnseqAuditEventDefinition /= null then
+        
+          //We have received an unhappy path event as the first event in this new job        
+          UnsequencedAuditEvent.AddEventForNewUnhappyJob (jobId, jobName, id, prevAEIds, ae_type, auditEventData);
       
-      else
-        // Log info: Report that the specified audit event type (ae_type) does not exist.
-        logMessage := "AESequenceDC::acceptorderedEvent : Accepted event is of an unknown type - AEType = " & ae_type;
-        Logger::log(Logger::Error, "AESequenceDC", logMessage); 
-        eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
-        Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
+        else
+          // Log info: Report that the specified audit event type (ae_type) does not exist.
+          logMessage := "AESequenceDC::acceptorderedEvent : Accepted event is of an unknown type - AEType = " & ae_type;
+          Logger::log(Logger::Error, "AESequenceDC", logMessage); 
+          eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
+          Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
+        end if;
       end if;
-    end if;
+    end if;  
   else
-    // Log info: Report that the specified audit event type (ae_type) does not exist.
+    // Log info: Report that the specified job definition as indicated by jobName does not exist.
     logMessage := "AESequenceDC::acceptorderedEvent : The specified Job Type is unknown = " & jobName;
     Logger::log(Logger::Error, "AESequenceDC", logMessage); 
     eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Job type";
     Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
     
   end if;
-  //
-  //
-  //
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

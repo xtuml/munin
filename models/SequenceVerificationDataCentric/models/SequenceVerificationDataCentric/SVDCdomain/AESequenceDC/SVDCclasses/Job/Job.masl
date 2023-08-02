@@ -29,8 +29,8 @@ theNextAuditEvent : instance of SequencedAuditEvent;
 theNextAuditEvents : set of instance of SequencedAuditEvent;
 theSequences : set of instance of Sequence;
 theJobDef : instance of JobDefinition;
-theAuditEventPairs : set of instance of AuditEventPair;
-theAuditEventPair : instance of AuditEventPair;
+theAuditEventPairs : set of instance of SequencedAuditEventPair;
+theAuditEventPair : instance of SequencedAuditEventPair;
 theAuditEventDefinition : instance of SequencedAuditEventDefinition;
 theTransientInvariant : instance of TransientInvariant;
 thePersistedInvariant : instance of PersistedInvariant;
@@ -53,7 +53,7 @@ begin
   for theAuditEvent in theAuditEvents'elements loop
     theNextAuditEvents := theAuditEvent -> R4.has_next.SequencedAuditEvent;
     for theNextAuditEvent in theNextAuditEvents loop
-      theAuditEventPair := theAuditEvent with theNextAuditEvent -> R4.has_next.AuditEventPair;
+      theAuditEventPair := theAuditEvent with theNextAuditEvent -> R4.SequencedAuditEventPair;
       if (theAuditEventPair -> R15) /= null then
         unlink (theAuditEventPair -> R15) R15 theAuditEventPair;
       end if;
