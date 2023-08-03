@@ -88,7 +88,6 @@ begin
     //Map the event parameters to local variables
     auditEventType := aeType;
     auditEventId := eventId;
-    jobType := jobName;
     prevAuditEventIds := prevAEIds;
     auditEventData := aeData;
   
@@ -100,15 +99,15 @@ begin
     theEventType := find_only SequencedAuditEventDefinition (AEType = auditEventType);
     if theEventType /= null then
       // We have a valid event type
-      newSeqEvent := create SequencedAuditEvent (AuditEventId => auditEventId, seenAsPreviousEvent => false);
       newEvent := create AuditEvent (AEId => auditEventId);
+      newSeqEvent := create SequencedAuditEvent (AuditEventId => auditEventId, seenAsPreviousEvent => false, AEId => newEvent.AEId);
       link newSeqEvent R46 newEvent;
       // We need to link all events to the Job in which they are seen even if they are not correctly sequenced
       link theJob R44 newSeqEvent;
       // and to the sequenced event definition
       link newSeqEvent R2 theEventType;
 
-      theJobDef = find_one JobDefinition (jobName = jobType);
+      theJobDef := theJob -> R8;
       possibleEventTypes := theJobDef -> R43.SequencedAuditEventDefinition;
 
       theEventsSequenceDefs := theEventType -> R1.AESequenceDefinition;
@@ -294,7 +293,7 @@ begin
                     
                     theAeInSequencePairDefn := theAeOccInSequenceDef with prevAeOccInSequenceDef -> R6.follows.AEInSequencePairDefn;
                     allAuditEventPairs := theAeInSequencePairDefn -> R15;
-                    thisJobsAuditEventPairs := theJob -> R44 -> R4.SequencedAuditEventPair;
+                    thisJobsAuditEventPairs := theJob -> R44 -> R4.has_next.SequencedAuditEventPair;
                     theAuditEventPairs := allAuditEventPairs intersection thisJobsAuditEventPairs;
                     if theAuditEventPairs'length > 1 then
                       // There is either an instance fork or a loop so check that the AuditEventPairs have a common previous event to find the instance fork
@@ -543,7 +542,7 @@ failureReason: string;
 begin
   // Need to check that constraints are honoured
   theJob := this -> R45;	
-  theAuditEventPairs := theJob -> R10 -> R11 -> R4.SequencedAuditEventPair;
+  theAuditEventPairs := theJob -> R10 -> R11 -> R4.has_next.SequencedAuditEventPair;
   validatedConstraint := true;
   for eachAuditEventPair in theAuditEventPairs loop
     theConstraintDefn := eachAuditEventPair -> R15 -> R16;
@@ -567,7 +566,7 @@ begin
         // Check that after an XOR fork event there is a single branch.      
         // This is a sound check since exactly one branch will follow each XOR fork audit event.
         for thePreviousAuditEvent in thePreviousAuditEvents loop
-          theFollowingAuditEventPairs := thePreviousAuditEvent -> R4.SequencedAuditEventPair;
+          theFollowingAuditEventPairs := thePreviousAuditEvent -> R4.has_next.SequencedAuditEventPair;
           if theFollowingAuditEventPairs'length /= 1 then
             validatedConstraint := false;
             logMessage := "AESequenceDC::Job.AssessingJobConstraints : XOR Constraint failed for Job = " & this.jobID & " at event " & (thePreviousAuditEvent -> R2).AEType & " with " & theFollowingAuditEventPairs'length'image & " branches following the XOR node";

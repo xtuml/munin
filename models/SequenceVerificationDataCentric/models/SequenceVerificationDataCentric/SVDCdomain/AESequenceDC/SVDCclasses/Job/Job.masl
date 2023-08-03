@@ -53,7 +53,7 @@ begin
   for theAuditEvent in theAuditEvents'elements loop
     theNextAuditEvents := theAuditEvent -> R4.has_next.SequencedAuditEvent;
     for theNextAuditEvent in theNextAuditEvents loop
-      theAuditEventPair := theAuditEvent with theNextAuditEvent -> R4.SequencedAuditEventPair;
+      theAuditEventPair := theAuditEvent with theNextAuditEvent -> R4.has_next.SequencedAuditEventPair;
       if (theAuditEventPair -> R15) /= null then
         unlink (theAuditEventPair -> R15) R15 theAuditEventPair;
       end if;
@@ -168,7 +168,7 @@ begin
   // Link UnhappyJob to Job
   link theUnhappyJob R45 this;
   // Generate firstUnhappyEvent event to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
-  generate UnhappyJob.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to this;
+  generate UnhappyJob.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to theUnhappyJob;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

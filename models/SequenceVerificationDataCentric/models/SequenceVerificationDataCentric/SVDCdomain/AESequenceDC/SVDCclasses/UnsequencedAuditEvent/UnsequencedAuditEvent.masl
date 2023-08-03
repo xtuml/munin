@@ -1,10 +1,10 @@
 //! ACTIVITY BEGIN. 'f378ab4f-745f-4cd3-bf43-8096f6c77d8d' DO NOT EDIT THIS LINE.
-public instance service AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob ( jobId : in string,
-                                                                                      jobName : in string,
-                                                                                      eventId : in string,
-                                                                                      prevAEIds : in sequence of string,
-                                                                                      aeType : in string,
-                                                                                      aeData : in sequence of auditEventDataStructure ) is
+public service AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob ( jobId : in string,
+                                                                             jobName : in string,
+                                                                             eventId : in string,
+                                                                             prevAEIds : in sequence of string,
+                                                                             aeType : in string,
+                                                                             aeData : in sequence of auditEventDataStructure ) is
 newJob : instance of Job;
 newUnhappyJob : instance of UnhappyJob;
 newUnhappyEvent : instance of UnsequencedAuditEvent;
@@ -23,9 +23,9 @@ begin
     newJob := create Job (jobID => jobId, sequencingFailed => true, jobCompleted => false );
     newUnhappyJob := create UnhappyJob (jobID => jobId, Current_State => Created );
     link newUnhappyJob R45 newJob;
-    newUnhappyEvent := create UnsequencedAuditEvent (unsequencedAuditEventId => eventId);
-    link newUnhappyEvent R3 newJob;
     newEvent := create AuditEvent (AEId => eventId);
+    newUnhappyEvent := create UnsequencedAuditEvent (unsequencedAuditEventId => eventId, AEId => newEvent.AEId);
+    link newUnhappyEvent R3 newJob;
     link newUnhappyEvent R46 newEvent;
     
     newEventType := find_only UnsequencedAuditEventDefinition (UnsequencedAEType = aeType);
@@ -37,7 +37,7 @@ begin
         link newJob R8 theJobDefinition;
 
         // Generate firstUnhappyEvent event to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
-        generate UnhappyJob.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to this;
+        generate UnhappyJob.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to newUnhappyJob;
 
 	    eventContent := "JobId = " & newJob.jobID & " : EventId = " & eventId & " : EventType = " & newEventType.UnsequencedAEType;
 	    Reporting~>reportEvent(Logger::Information, "svdc_new_unhappy_job_started", eventContent);

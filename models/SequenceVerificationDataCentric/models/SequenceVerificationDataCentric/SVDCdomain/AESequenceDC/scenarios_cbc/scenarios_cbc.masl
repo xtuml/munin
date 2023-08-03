@@ -8,34 +8,34 @@ begin
   //
   // Job BranchCountJob, Sequence BranchCountSequence
   // 
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFA",1,previousEventTypes,true,false,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFA",1,previousEventTypes,true,false,false,true);
   previousEventTypes := ("BCFA",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFB",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFB",1,previousEventTypes,false,false,false,true);
   previousEventTypes := ("BCFB",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFC",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFC",1,previousEventTypes,false,false,false,true);
   previousEventTypes := ("BCFC",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFD",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFD",1,previousEventTypes,false,false,false,true);
   previousEventTypes := ("BCFD",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFE",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFE",1,previousEventTypes,false,false,false,true);
   previousEventTypes := ("BCFE",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false,true);
 
   dynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
   dynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
   
 //
   previousEventTypes := empty;
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFA",1,previousEventTypes,true,false,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFA",1,previousEventTypes,true,false,false,true);
   previousEventTypes := ("SSUFA",1,"","");
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFB",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFB",1,previousEventTypes,false,false,false,true);
   previousEventTypes := ("SSUFB",1,"","");
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFC",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFC",1,previousEventTypes,false,false,false,true);
   previousEventTypes := ("SSUFC",1,"","");
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFD",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFD",1,previousEventTypes,false,false,false,true);
   previousEventTypes := ("SSUFD",1,"","");
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFE",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFE",1,previousEventTypes,false,false,false,true);
   previousEventTypes := ("SSUFE",1,"","");
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFF",1,previousEventTypes,false,true,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFF",1,previousEventTypes,false,true,false,true);
 
   dynamicControlDefinition("BranchSameSourceAndUserJob", "Branch_SameSourceAndUser_1", dynamicControlTypeEnum.BRANCHCOUNT, "SSUFB",1,"SSUFB",1);
 //

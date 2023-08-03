@@ -38,11 +38,11 @@ begin
     newJob := create Job (jobID => jobId, sequencingFailed => false, jobCompleted => false );
     newHappyJob := create HappyJob (jobID => jobId, Current_State => JobInProgress );
     link newHappyJob R45 newJob;
-    newSeqEvent := create SequencedAuditEvent (AuditEventId => eventId); 
     newEvent := create AuditEvent (AEId => eventId);
+    newSeqEvent := create SequencedAuditEvent (AuditEventId => eventId, AEId => newEvent.AEId); 
     link newSeqEvent R46 newEvent;
     newEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
-    theJobDef = find_one JobDefinition (jobName = jobName);
+    theJobDef := find_one JobDefinition (jobName = jobName);
     possibleEventTypes := theJobDef -> R43.SequencedAuditEventDefinition;
     
     if (newEventType /= null) and (newEventType intersection possibleEventTypes /= null) and ((prevAEIds = empty) or (prevAEIds = emptyString)) then
@@ -64,7 +64,7 @@ begin
         link newSeqEvent R13 theAeOccInSequenceDef;
         newSequence := create unique Sequence(isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
         link newSequence R10 newJob;
-        link newSequence R11 newEvent;
+        link newSequence R11 newSeqEvent;
         link newSequence R14 theAeSequenceDef;
    
         link newJob R8 theJobDef;
@@ -76,10 +76,10 @@ begin
 		Reporting~>reportEvent(Logger::Information, "svdc_new_job_started", eventContent);
      
         // Process the audit event data for this new event      
-        newEvent.ProcessAuditEventData (aeData);
+        newSeqEvent.ProcessAuditEventData (aeData);
       
         // ...and then check that the received audit event data matches that which is expected
-        newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+        newSeqEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
         if eventDataCheckHasPassed /= true then
           newJob.failJob(failureReason);
         end if;
