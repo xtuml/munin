@@ -54,6 +54,25 @@
         </format>
     </logger>
     <logger>
+        <name>VerificationGateway</name>
+        <level>trace</level>
+        <format>
+            <pattern><timestamp decimal="none"/> <priority/> : <logger/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
+            <stderr/>
+            <file>
+                <path>/var/log/verifier/VerificationGateway.log</path> <!-- Name of the log file -->
+                <archive>
+                    <rotate>
+                        <size units="MiB">10</size> <!-- When to rotate  -->
+                    </rotate>
+                    <extension>timestamp</extension> <!-- What extension to use on archived log files -->
+                    <compress>true</compress> <!-- If archived files should be compressed -->
+                    <purge units="count">10</purge> <!-- How many archive to keep -->
+                </archive>
+            </file>
+        </format>
+    </logger>
+    <logger>
         <name>Verifier</name>
         <format>
           <pattern><timestamp/> <param name="instance_index" default="0"/> <message/></pattern>
