@@ -35,6 +35,15 @@ theAuditEventDefinition : instance of SequencedAuditEventDefinition;
 theTransientInvariant : instance of TransientInvariant;
 thePersistedInvariant : instance of PersistedInvariant;
 theDynamicControls : set of instance of DynamicControl;
+theSupertypeAuditEvent : instance of AuditEvent;
+theSupertypeAuditEvents : set of instance of AuditEvent;
+theSupertypeAuditEvents1 : set of instance of AuditEvent;
+theSupertypeAuditEvents2 : set of instance of AuditEvent;
+theSupertypeAuditEvents3 : set of instance of AuditEvent;
+theUnhappyAuditEvents : set of instance of UnsequencedAuditEvent;
+theUnhappyAuditEvent : instance of UnsequencedAuditEvent;
+theNextSupertypeAuditEvents : set of instance of AuditEvent;
+theSupertypeAuditEventLink : instance of AuditEventLink;
 
 begin
   theHappyJob := this -> R45.HappyJob;
@@ -50,6 +59,15 @@ begin
   end if;  
   
   theAuditEvents := this -> R10 -> R11;
+  theUnhappyAuditEvents := this -> R3;
+  theOrphanedAuditEvents := this -> R44;
+  theSupertypeAuditEvents1 := theAuditEvents -> R46;
+  theSupertypeAuditEvents2 := theUnhappyAuditEvents -> R46;
+  theSupertypeAuditEvents3 := theOrphanedAuditEvents -> R46;  
+  theSupertypeAuditEvents := theSupertypeAuditEvents1 & theSupertypeAuditEvents2 & theSupertypeAuditEvents3;
+  
+  theAuditEvents := theSupertypeAuditEvents -> R46.SequencedAuditEvent;
+
   for theAuditEvent in theAuditEvents'elements loop
     theNextAuditEvents := theAuditEvent -> R4.has_next.SequencedAuditEvent;
     for theNextAuditEvent in theNextAuditEvents loop
@@ -109,9 +127,53 @@ begin
       delete theDynamicControl;
     end loop;
      
+    theSupertypeAuditEvent := theAuditEvent -> R46;
+    if theSupertypeAuditEvent /= null then
+      theNextSupertypeAuditEvents := theSupertypeAuditEvent -> R47.has_next.AuditEvent;
+      for theNextSupertypeAuditEvent in theNextSupertypeAuditEvents loop
+        theSupertypeAuditEventLink := theSupertypeAuditEvent with theNextSupertypeAuditEvent -> R47.has_next.AuditEventLink;
+        unlink theSupertypeAuditEvent R47.has_next.AuditEvent theNextSupertypeAuditEvent using theSupertypeAuditEventLink;
+        delete theSupertypeAuditEventLink;
+      end loop;
+    end if;
+    
   end loop;
   
+  // Unlink and delete all the associatives first and then unlink the supertype subtype relationship
+  for theAuditEvent in theAuditEvents loop
+    theSupertypeAuditEvent := theAuditEvent -> R46;
+    unlink theAuditEvent R46 theSupertypeAuditEvent;
+  end loop;
+
+  theUnhappyAuditEvents := theSupertypeAuditEvents -> R46.UnsequencedAuditEvent;
+  
+  for theUnhappyAuditEvent in theUnhappyAuditEvents loop
+    if (theUnhappyAuditEvent -> R41) /= null then
+      unlink (theUnhappyAuditEvent -> R41) R41 theUnhappyAuditEvent;
+    end if;  
+    if (theUnhappyAuditEvent -> R3) /= null then
+      unlink (theUnhappyAuditEvent -> R3) R3 theUnhappyAuditEvent;
+    end if;  
+
+    theSupertypeAuditEvent := theUnhappyAuditEvent -> R46;
+    if theSupertypeAuditEvent /= null then
+      theNextSupertypeAuditEvents := theSupertypeAuditEvent -> R47.has_next.AuditEvent;
+      for theNextSupertypeAuditEvent in theNextSupertypeAuditEvents loop
+        theSupertypeAuditEventLink := theSupertypeAuditEvent with theNextSupertypeAuditEvent -> R47.has_next.AuditEventLink;
+        unlink theSupertypeAuditEvent R47.has_next.AuditEvent theNextSupertypeAuditEvent using theSupertypeAuditEventLink;
+        delete theSupertypeAuditEventLink;
+      end loop;
+    end if;
+  end loop;
+  // Unlink and delete all the associatives first and then unlink the supertype subtype relationship
+  for theUnhappyAuditEvent in theUnhappyAuditEvents loop
+    theSupertypeAuditEvent := theUnhappyAuditEvent -> R46;
+    unlink theUnhappyAuditEvent R46 theSupertypeAuditEvent;
+  end loop;
+   
   delete theAuditEvents;
+  delete theUnhappyAuditEvents;
+  delete theSupertypeAuditEvents;
   
   theOrphanedAuditEvents := this -> R44;
   if theOrphanedAuditEvents /= null then

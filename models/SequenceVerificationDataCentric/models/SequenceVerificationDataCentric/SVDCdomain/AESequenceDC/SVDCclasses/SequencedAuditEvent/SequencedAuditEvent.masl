@@ -43,7 +43,7 @@ begin
     link newSeqEvent R46 newEvent;
     newEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
     theJobDef := find_one JobDefinition (jobName = jobName);
-    possibleEventTypes := theJobDef -> R43.SequencedAuditEventDefinition;
+    possibleEventTypes := theJobDef -> R7 -> R1.SequencedAuditEventDefinition;
     
     if (newEventType /= null) and (newEventType intersection possibleEventTypes /= null) and ((prevAEIds = empty) or (prevAEIds = emptyString)) then
   	  //We have a valid event type and no previous events
