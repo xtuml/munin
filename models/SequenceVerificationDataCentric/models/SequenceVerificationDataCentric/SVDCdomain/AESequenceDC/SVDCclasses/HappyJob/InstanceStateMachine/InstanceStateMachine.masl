@@ -97,6 +97,8 @@ begin
     cancel theJob.jobHangingTimer;
     
     theEventType := find_only SequencedAuditEventDefinition (AEType = auditEventType);
+    theUnseqEventType := find_only UnsequencedAuditEventDefinition (UnsequencedAEType = auditEventType);
+    
     if theEventType /= null then
       // We have a valid event type
       newEvent := create AuditEvent (AEId => auditEventId);
@@ -122,7 +124,7 @@ begin
       // ...and then check that just one of these matches with an event occurrence that is expected for the previous event
       if (prevAuditEventIds /= empty) and (prevAuditEventIds /= emptyPrevId) then
         // Log info: Event has previous event ids
-        logMessage := "AESequenceDC::Job.JobInProgress : Follow on event (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
+        logMessage := "AESequenceDC::HappyJob.JobInProgress : Follow on event (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
 	    Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
 
         auditEventDataProcessed := false;
@@ -220,7 +222,7 @@ begin
                         end if;  
                         
 	                  else
-                      logMessage := "AESequenceDC::Job.JobInProgress : This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+                      logMessage := "AESequenceDC::HappyJob.JobInProgress : This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
 	                    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	                  end if;  
 	                  
@@ -311,7 +313,7 @@ begin
                         if thePrevUserDynamicControl /= null and thePrevUserDynamicControl.isUser then                        
                           thePrevUserDynamicControlDefn := thePrevUserDynamicControl -> R29;
                           if thePrevUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT and thePrevUserDynamicControl.expectedDynamicControlValue > 0 then
-                            logMessage := "AESequenceDC::Job.JobInProgress : Valid Branch Count found on instance fork in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType;
+                            logMessage := "AESequenceDC::HappyJob.JobInProgress : Valid Branch Count found on instance fork in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType;
 	                        Logger::log(Logger::Debug, "AESequenceDC", logMessage);                       
                           else
                             theJob.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " at Event Type = " & (prevEvent -> R2).AEType);                         
@@ -348,7 +350,7 @@ begin
                           theUserDynamicControl.currentDynamicControlValue := prevAuditEventIds'length;                                           
                         end if;  
 	                  else
-                        logMessage := "AESequenceDC::Job.JobInProgress : There is no event using a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
+                        logMessage := "AESequenceDC::HappyJob.JobInProgress : There is no event using a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID;
 	                    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	                  end if;  
 
@@ -426,7 +428,7 @@ begin
           incompleteSequences := find sequencesForJob (isComplete = false);
           if incompleteSequences'length = 0 then
             // Log info: Received a new sequence start event for an existing Job but other sequences are complete
-	        logMessage := "AESequenceDC::Job.JobInProgress : A further new sequence has been started for - jobId = " & this.jobID & ", with audit event = " & theEventType.AEType;
+	        logMessage := "AESequenceDC::HappyJob.JobInProgress : A further new sequence has been started for - jobId = " & this.jobID & ", with audit event = " & theEventType.AEType;
 	        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	        
 	        // This must be the first start event seen for a new sequence so create and link the sequence
@@ -437,7 +439,7 @@ begin
 	        
 	      else
             // Log info: Received a new sequence start event for an existing Job - but other sequences are still in progress
-	        logMessage := "AESequenceDC::Job.JobInProgress : A new sequence start event has been seen with other sequences incomplete for - jobId = " & this.jobID & ", with audit event = " & theEventType.AEType;
+	        logMessage := "AESequenceDC::HappyJob.JobInProgress : A new sequence start event has been seen with other sequences incomplete for - jobId = " & this.jobID & ", with audit event = " & theEventType.AEType;
 	        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	        
 	        // Need to check if an incomplete sequence is one of the right type for this event
@@ -448,7 +450,7 @@ begin
 	            // So increment the branch extent
 	            incompleteSequence.branchExtent := incompleteSequence.branchExtent + 1;
                 // Log info: Received a new sequence start event that is an additional start event for an existing sequence
-	            logMessage := "AESequenceDC::Job.JobInProgress : An additional sequence start event has been seen for an existing sequence for - jobId = " & this.jobID & ", in sequence = " & incompleteSequence.AESequenceId'image & "with audit event type = " & theEventType.AEType;
+	            logMessage := "AESequenceDC::HappyJob.JobInProgress : An additional sequence start event has been seen for an existing sequence for - jobId = " & this.jobID & ", in sequence = " & incompleteSequence.AESequenceId'image & "with audit event type = " & theEventType.AEType;
 	            Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	            
 	          end if;
@@ -515,7 +517,7 @@ begin
     //  
    // Set a timer to timeout if the job hangs waiting for another event
     theSystemSpec := find_one SystemSpecification();
-    schedule theJob.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;    
+    schedule theJob.jobHangingTimer generate Job.jobTimedOut() to theJob delay theSystemSpec.jobHangingTimeoutPeriod;    
   
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

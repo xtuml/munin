@@ -36,8 +36,8 @@ begin
       if theJobDefinition /= null then
         link newJob R8 theJobDefinition;
 
-        // Generate firstUnhappyEvent event to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
-        generate UnhappyJob.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to newUnhappyJob;
+        // Generate firstUnhappyEvent event polymorphically to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
+        generate Job.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to newJob;
 
 	    eventContent := "JobId = " & newJob.jobID & " : EventId = " & eventId & " : EventType = " & newEventType.UnsequencedAEType;
 	    Reporting~>reportEvent(Logger::Information, "svdc_new_unhappy_job_started", eventContent);

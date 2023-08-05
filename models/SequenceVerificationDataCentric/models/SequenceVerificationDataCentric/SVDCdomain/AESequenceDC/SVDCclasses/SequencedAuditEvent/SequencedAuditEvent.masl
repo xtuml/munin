@@ -41,6 +41,7 @@ begin
     newEvent := create AuditEvent (AEId => eventId);
     newSeqEvent := create SequencedAuditEvent (AuditEventId => eventId, AEId => newEvent.AEId); 
     link newSeqEvent R46 newEvent;
+    link newSeqEvent R44 newJob;
     newEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
     theJobDef := find_one JobDefinition (jobName = jobName);
     possibleEventTypes := theJobDef -> R7 -> R1.SequencedAuditEventDefinition;
@@ -229,14 +230,14 @@ totalDynamicControls : set of instance of DynamicControl;
                   link newIntraJobInvariant R23 this;
                   link newIntraJobInvariant R26 theIntraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
-	              logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : ProcessAuditEventData " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType & " with value = " & newIntraJobInvariant.invariantValue;
+	              logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType & " with value = " & newIntraJobInvariant.invariantValue;
 	              Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
 	            else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
 	            end if;                 
               else
                 // Log warning: The audit event data type provided with this audit event is of a disallowed type for this type of audit event
-	            logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " is disallowed for this type of audit event = " & theEventType.AEType;
+	            logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " is disallowed for this type of audit event = " & theEventType.AEType;
 	            Logger::log(Logger::Debug, "AESequenceDC", logMessage);                
                 theJob.failJob("Invalid audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
               end if;
@@ -277,7 +278,7 @@ totalDynamicControls : set of instance of DynamicControl;
                   link theUserExtraJobInvariant R23 this;
                   link theUserExtraJobInvariant R28 theUserExtraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
-	              logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType;
+	              logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType;
 	              Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
 	            else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        

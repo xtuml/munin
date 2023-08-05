@@ -216,7 +216,13 @@ public instance service AESequenceDC::Job.migrateToUnhappyJob ( eventId : in str
                                                                aeData : in sequence of auditEventDataStructure ) is
 theHappyJob : instance of HappyJob;
 theUnhappyJob : instance of UnhappyJob;
+logMessage : string;
+
+
 begin
+  logMessage := "AESequenceDC::Job.migrateToUnhappyJob : Migration from Happy Job to Unhappy Job for - jobId = " & this.jobID;
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+
   // Unlink HappyJob from Job
   theHappyJob := this -> R45.HappyJob;
   if theHappyJob /= null then
@@ -229,8 +235,16 @@ begin
   theUnhappyJob := create UnhappyJob (jobID => this.jobID, Current_State => Created );
   // Link UnhappyJob to Job
   link theUnhappyJob R45 this;
+  
+  // Set sequencing failed to true
+  this.sequencingFailed := true;
+  
   // Generate firstUnhappyEvent event to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
-  generate UnhappyJob.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to theUnhappyJob;
+
+  logMessage := "AESequenceDC::Job.migrateToUnhappyJob : Unhappy Job created for - jobId = " & this.jobID;
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+
+  generate Job.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to this;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

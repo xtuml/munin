@@ -24,6 +24,10 @@ theExtraJobInvariantDefns : set of instance of ExtraJobInvariantDefn;
 theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theDynamicControlDefns : set of instance of DynamicControlDefinition;
 theDynamicControlDefn : instance of DynamicControlDefinition;
+theUnseqDefns : set of instance of UnsequencedAuditEventDefinition;
+theUnseqEventInJobDef : instance of UnsequencedAEDefnInJobDefn;
+theCriticalEventDefns : set of instance of SequencedAuditEventDefinition;
+theCriticalEventInJobDefn : instance of CriticalEventDefnForJobDefn;
 theJobs: set of instance of Job;
 theJob: instance of Job;
 logMessage : string;
@@ -73,6 +77,29 @@ begin
       unlink this R32 theDynamicControlDefn;
       delete theDynamicControlDefn;
     end loop;
+
+    // Delete the Unsequenced event definitions
+    theUnseqDefns := this -> R39.UnsequencedAuditEventDefinition;
+    for theUnseqDefn in theUnseqDefns loop
+      theUnseqEventInJobDef := theUnseqDefn with this -> R39.UnsequencedAEDefnInJobDefn;
+      if theUnseqEventInJobDef /= null then
+        unlink this R39 theUnseqDefn using theUnseqEventInJobDef;
+        delete theUnseqEventInJobDef;
+      end if;  
+    end loop;
+    delete theUnseqDefns;
+
+    // Delete the Critical event definitions
+    theCriticalEventDefns := this -> R43.SequencedAuditEventDefinition;
+    for theCriticalEventDefn in theCriticalEventDefns loop
+      theCriticalEventInJobDefn := theCriticalEventDefn with this -> R43.CriticalEventDefnForJobDefn;
+      if theCriticalEventInJobDefn /= null then
+        unlink this R43 theCriticalEventDefn using theCriticalEventInJobDefn;
+        delete theCriticalEventInJobDefn;
+      end if;  
+    end loop;
+    
+
     // Delete the Sequences and their associated audit event definitions
     
     theSequenceDefns := this -> R7; 

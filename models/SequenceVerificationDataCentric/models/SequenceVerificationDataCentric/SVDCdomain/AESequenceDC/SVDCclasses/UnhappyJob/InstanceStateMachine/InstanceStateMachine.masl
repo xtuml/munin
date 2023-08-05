@@ -58,6 +58,9 @@ begin
     link theJob R44 newSeqEvent;
     // and to the sequenced event definition
     link newSeqEvent R2 theEventType;
+    logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Happy event seen in Unhappy Job (" ; //& auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
+    
   end if;
 
 // THIS SECTION HANDLES UNHAPPY EVENTS SEEN IN AN UNHAPPY JOB   
@@ -71,6 +74,9 @@ begin
     link theJob R3 newUnseqEvent;
     // and to the sequenced event definition
     link newUnseqEvent R41 theUnseqEventType;
+
+    logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Unhappy event seen in Unhappy Job (" ; //& auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
     
    // TODO Add possible section to deal with an Unhappy Event being marked as a Job End event
    if theUnseqEventType.isEndEvent then
@@ -83,7 +89,7 @@ begin
   if (theEventType /= null) or (theUnseqEventType /= null) then        
     if (prevAuditEventIds /= empty) and (prevAuditEventIds /= emptyPrevId) then
       // Log info: Event has previous event ids
-      logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Follow on event in Unhappy Job (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
+      logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Follow on event in Unhappy Job (" ; //& auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
 	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
 
       //auditEventDataProcessed := false;
@@ -183,11 +189,15 @@ begin
   Logger::log(Logger::Error, "AESequenceDC", logMessage);
   eventContent := "FailureReason = " & failureReason & " : JobId = " & this.jobID;
   Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
-  for evt in theJob->R10->R11.SequencedAuditEvent loop
+  for evt in theJob-> R44.SequencedAuditEvent loop
 	  eventContent := "EventId = " & evt.AuditEventId;
-	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
+	  Reporting~>reportEvent(Logger::Information, "svdc_happy_event_processed", eventContent);
   end loop;
-  
+  for evt in theJob-> R3.UnsequencedAuditEvent loop
+	  eventContent := "EventId = " & evt.unsequencedAuditEventId;
+	  Reporting~>reportEvent(Logger::Information, "svdc_unhappy_event_processed", eventContent);
+  end loop;
+    
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
   schedule theJob.jobDeletionTimer generate Job.endOfLifeReached() to this delay theSystemSpec.jobDeletionWaitPeriod;
@@ -265,9 +275,13 @@ begin
   Logger::log(Logger::Debug, "Monitored System Status", logMessage);
   eventContent := "JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
   Reporting~>reportEvent(Logger::Information, "svdc_job_success", eventContent);
-  for evt in theJob->R10->R11.SequencedAuditEvent loop
+  for evt in theJob-> R44.SequencedAuditEvent loop
 	  eventContent := "EventId = " & evt.AuditEventId;
-	  Reporting~>reportEvent(Logger::Error, "svdc_event_processed", eventContent);
+	  Reporting~>reportEvent(Logger::Information, "svdc_happy_event_processed", eventContent);
+  end loop;
+  for evt in theJob-> R3.UnsequencedAuditEvent loop
+	  eventContent := "EventId = " & evt.unsequencedAuditEventId;
+	  Reporting~>reportEvent(Logger::Information, "svdc_unhappy_event_processed", eventContent);
   end loop;
   
   // The Job is thus near the end of it's useful life - wait a bit longer and then trigger its final demise.

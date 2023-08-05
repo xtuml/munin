@@ -14,6 +14,7 @@ RUN SCENARIO AESequenceDC 501 "InitComplexEventSequence1Definition"
 RUN SCENARIO AESequenceDC 502 "InitComplexEventSequence2Definition"
 RUN SCENARIO AESequenceDC 503 "InitComplexEventSequence3Definition"
 RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
+RUN SCENARIO AESequenceDC 902 "InitSimpleJobWithUnhappyEvents"
 
 # run normal path tests
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test01NormalPath 1001 CleanUpAllJobs 64]
@@ -128,6 +129,10 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test107ComplexSequence_RainyDay8_In
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test108ComplexSequence_RainyDay9_InvalidExtraJobInvariantNameUsedInInstanceFork 1108 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test109ComplexSequence_RainyDay10_InvalidBreakOutOfLoop 1109 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test110ComplexSequence_RainyDay10_InvalidInstanceFork 1110 CleanUpAllJobs 64]
+
+# Unhappy Path Tests
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test901SimpleUnhappyEvent 1901 CleanUpAllJobs 64]
+
 
 # The following Tests will delete some or all of the JobDefinitions so beware!!!!
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test18DeprecationAndDeletionOfActiveJobDefinition 1018 CleanUpAllJobs 64]
