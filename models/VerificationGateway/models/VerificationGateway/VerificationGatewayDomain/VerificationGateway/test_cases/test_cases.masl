@@ -55,3 +55,45 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '09aa901b-39ce-4e7b-aabf-f02b70489582' DO NOT EDIT THIS LINE.
+private service VerificationGateway::Test003_MultipleInterleavedJobsPVInstrumentationSequence () is
+begin
+  //
+  //Job001, Job002 & Job003 interleaved but incorrect sequence for each job
+  acceptInstrumentationEventForJob("Job001","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("Job002","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("Job003","Unused","AEO_PVJobStart");
+  //
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  //
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVEventProcessingComplete");
+  acceptInstrumentationEventForJob("Job002","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("Job002","Unused","SVDC_PVEventProcessingComplete");
+  acceptInstrumentationEventForJob("Job003","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("Job003","Unused","SVDC_PVEventProcessingComplete");
+  //
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  //
+  acceptInstrumentationEventForJob("Job003","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("Job003","Unused","SVDC_PVJobSuccessful");
+  acceptInstrumentationEventForJob("Job002","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("Job002","Unused","SVDC_PVJobSuccessful");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobSuccessful");
+  //
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  //
+  acceptInstrumentationEventForJob("Job002","Unused","SVDC_PVJobDeleted");
+  acceptInstrumentationEventForJob("Job003","Unused","SVDC_PVJobDeleted");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobDeleted");
+  //
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

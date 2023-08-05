@@ -31,8 +31,13 @@ end service;
 public instance service VerificationGateway::VerifiableJob.deleteVerifiableJob () is
 theLastInstrumentationEvent : instance of InstrumentationEvent;
 theInstrumentationEvents : set of instance of InstrumentationEvent;
+logMessage : string;
 
 begin
+  // Log info: Report that this VerifianleJob is being deleted. 
+  logMessage := "Deleting Job " & this.jobKey'image & " and all its InstrumentationEvents";
+  Logger::log(Logger::Debug, "VerificationGateway", logMessage);
+  
   theLastInstrumentationEvent := this -> R2;
   unlink this R2 theLastInstrumentationEvent;
   theInstrumentationEvents := this -> R1;
