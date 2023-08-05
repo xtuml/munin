@@ -15,3 +15,43 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '58f996f5-ff7e-4423-8bf6-f638da62ab98' DO NOT EDIT THIS LINE.
+private service VerificationGateway::Test002_MultipleJobPVInstrumentationSequence () is
+begin
+  //
+  //Job001 - Normal Sequence
+  acceptInstrumentationEventForJob("Job001","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVEventProcessingComplete");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobSuccessful");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobDeleted");
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
+  //Job002 - Normal Sequence
+  acceptInstrumentationEventForJob("Job002","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("Job002","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("Job002","Unused","SVDC_PVEventProcessingComplete");
+  acceptInstrumentationEventForJob("Job002","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("Job002","Unused","SVDC_PVJobSuccessful");
+  acceptInstrumentationEventForJob("Job002","Unused","SVDC_PVJobDeleted");
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
+  //Job003 - Normal Sequence
+  acceptInstrumentationEventForJob("Job003","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("Job003","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("Job003","Unused","SVDC_PVEventProcessingComplete");
+  acceptInstrumentationEventForJob("Job003","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("Job003","Unused","SVDC_PVJobSuccessful");
+  acceptInstrumentationEventForJob("Job003","Unused","SVDC_PVJobDeleted");
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
