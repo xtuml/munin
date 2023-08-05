@@ -135,3 +135,30 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '9c039b1d-716a-4ad3-897c-11b9fd6ad829' DO NOT EDIT THIS LINE.
+private service VerificationGateway::Test051_UnhappyJob_SequenceVerificationFailsAndTerminates () is
+theVerifiableJobs : set of instance of VerifiableJob;
+theInstrumentationEvents : set of instance of InstrumentationEvent;
+
+begin
+  //
+  acceptInstrumentationEventForJob("Job001","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobFails");
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
+  // ...and finally check that the state of the VerifiableJobs & InstrumentationEvents are as expected.
+  theVerifiableJobs := find VerifiableJob ();
+  Assertions::assertTrue(theVerifiableJobs'length = 1, "Wrong number of VerifiableJobs created: " & (theVerifiableJobs'length)'image);
+  for theVerifiableJob in theVerifiableJobs loop
+    theInstrumentationEvents := theVerifiableJob -> R1;
+    Assertions::assertTrue(theInstrumentationEvents'length = 3, "Wrong number of InstrumentationEvents created for VerifiableJob : " & theVerifiableJob.jobKey'image & " - the incorrect number of events = " & (theInstrumentationEvents'length)'image); 
+  end loop;
+
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
