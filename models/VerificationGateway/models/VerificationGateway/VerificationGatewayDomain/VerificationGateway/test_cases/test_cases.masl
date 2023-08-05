@@ -15,14 +15,14 @@ begin
   // Process all the events on the event queue.
   Test::service_event_queue();
   
-  // ...and finally check that the state of the VerifiableJobs & InstrumentationEvent sare as expected.
+  // ...and finally check that the state of the VerifiableJobs & InstrumentationEvents are as expected.
   theVerifiableJobs := find VerifiableJob ();
   Assertions::assertTrue(theVerifiableJobs'length = 1, "Wrong number of VerifiableJobs created: " & (theVerifiableJobs'length)'image);
   for theVerifiableJob in theVerifiableJobs loop
     theInstrumentationEvents := theVerifiableJob -> R1;
-    Assertions::assertTrue(theInstrumentationEvents'length = 6, "Wrong number of InstruentationEvents created: " & (theInstrumentationEvents'length)'image); 
+    Assertions::assertTrue(theInstrumentationEvents'length = 6, "Wrong number of InstrumentationEvents created for VerifiableJob : " & theVerifiableJob.jobKey'image & " - the incorrect number of events = " & (theInstrumentationEvents'length)'image); 
   end loop;
-  
+
 end service;
 //
 //
@@ -30,6 +30,9 @@ end service;
 
 //! ACTIVITY BEGIN. '58f996f5-ff7e-4423-8bf6-f638da62ab98' DO NOT EDIT THIS LINE.
 private service VerificationGateway::Test002_MultipleJobPVInstrumentationSequence () is
+theVerifiableJobs : set of instance of VerifiableJob;
+theInstrumentationEvents : set of instance of InstrumentationEvent;
+
 begin
   //
   //Job001 - Normal Sequence
@@ -65,11 +68,22 @@ begin
   // Process all the events on the event queue.
   Test::service_event_queue();
   
+   // ...and finally check that the state of the VerifiableJobs & InstrumentationEvents are as expected.
+  theVerifiableJobs := find VerifiableJob ();
+  Assertions::assertTrue(theVerifiableJobs'length = 3, "Wrong number of VerifiableJobs created: " & (theVerifiableJobs'length)'image);
+  for theVerifiableJob in theVerifiableJobs loop
+    theInstrumentationEvents := theVerifiableJob -> R1;
+    Assertions::assertTrue(theInstrumentationEvents'length = 6, "Wrong number of InstrumentationEvents created for VerifiableJob : " & theVerifiableJob.jobKey'image & " - the incorrect number of events = " & (theInstrumentationEvents'length)'image); 
+  end loop;
+  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '09aa901b-39ce-4e7b-aabf-f02b70489582' DO NOT EDIT THIS LINE.
 private service VerificationGateway::Test003_MultipleInterleavedJobsPVInstrumentationSequence () is
+theVerifiableJobs : set of instance of VerifiableJob;
+theInstrumentationEvents : set of instance of InstrumentationEvent;
+
 begin
   //
   //Job001, Job002 & Job003 interleaved but incorrect sequence for each job
@@ -106,6 +120,17 @@ begin
   //
   // Process all the events on the event queue.
   Test::service_event_queue();
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
+   // ...and finally check that the state of the VerifiableJobs & InstrumentationEvents are as expected.
+  theVerifiableJobs := find VerifiableJob ();
+  Assertions::assertTrue(theVerifiableJobs'length = 3, "Wrong number of VerifiableJobs created: " & (theVerifiableJobs'length)'image);
+  for theVerifiableJob in theVerifiableJobs loop
+    theInstrumentationEvents := theVerifiableJob -> R1;
+    Assertions::assertTrue(theInstrumentationEvents'length = 6, "Wrong number of InstrumentationEvents created for VerifiableJob : " & theVerifiableJob.jobKey'image & " - the incorrect number of events = " & (theInstrumentationEvents'length)'image); 
+  end loop;
   
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
