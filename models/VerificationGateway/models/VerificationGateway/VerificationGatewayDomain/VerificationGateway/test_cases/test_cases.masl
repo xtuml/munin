@@ -162,3 +162,61 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. 'f727d4d9-fe05-447d-a4c1-17a71cd112d9' DO NOT EDIT THIS LINE.
+private service VerificationGateway::Test052_UnhappyJob_AEOReportsJobFailDuringSequenceVerificationThenTerminates () is
+theVerifiableJobs : set of instance of VerifiableJob;
+theInstrumentationEvents : set of instance of InstrumentationEvent;
+
+begin
+  //
+  acceptInstrumentationEventForJob("Job001","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("Job001","Unused","AEO_PVJobFails");
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
+  // ...and finally check that the state of the VerifiableJobs & InstrumentationEvents are as expected.
+  theVerifiableJobs := find VerifiableJob ();
+  Assertions::assertTrue(theVerifiableJobs'length = 1, "Wrong number of VerifiableJobs created: " & (theVerifiableJobs'length)'image);
+  for theVerifiableJob in theVerifiableJobs loop
+    theInstrumentationEvents := theVerifiableJob -> R1;
+    Assertions::assertTrue(theInstrumentationEvents'length = 3, "Wrong number of InstrumentationEvents created for VerifiableJob : " & theVerifiableJob.jobKey'image & " - the incorrect number of events = " & (theInstrumentationEvents'length)'image); 
+  end loop;
+
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7b4fa1f9-b080-478a-91ce-3f1c89035110' DO NOT EDIT THIS LINE.
+private service VerificationGateway::Test053_UnhappyJob_AEOReportsJobFailDuringSequenceVerificationButContinues () is
+theVerifiableJobs : set of instance of VerifiableJob;
+theInstrumentationEvents : set of instance of InstrumentationEvent;
+
+begin
+  //
+  acceptInstrumentationEventForJob("Job001","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("Job001","Unused","AEO_PVJobFails");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVEventProcessingComplete");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobSuccessful");
+  acceptInstrumentationEventForJob("Job001","Unused","SVDC_PVJobDeleted");
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
+  // ...and finally check that the state of the VerifiableJobs & InstrumentationEvents are as expected.
+  theVerifiableJobs := find VerifiableJob ();
+  Assertions::assertTrue(theVerifiableJobs'length = 1, "Wrong number of VerifiableJobs created: " & (theVerifiableJobs'length)'image);
+  for theVerifiableJob in theVerifiableJobs loop
+    theInstrumentationEvents := theVerifiableJob -> R1;
+    Assertions::assertTrue(theInstrumentationEvents'length = 7, "Wrong number of InstrumentationEvents created for VerifiableJob : " & theVerifiableJob.jobKey'image & " - the incorrect number of events = " & (theInstrumentationEvents'length)'image); 
+  end loop;
+
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
