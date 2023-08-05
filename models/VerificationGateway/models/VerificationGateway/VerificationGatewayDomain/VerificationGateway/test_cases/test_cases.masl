@@ -1,5 +1,8 @@
 //! ACTIVITY BEGIN. '74bb4962-4081-40ca-94e7-642cc940aa5b' DO NOT EDIT THIS LINE.
 private service VerificationGateway::Test001_BasicPVInstrumentationSequence () is
+theVerifiableJobs : set of instance of VerifiableJob;
+theInstrumentationEvents : set of instance of InstrumentationEvent;
+
 begin
   //
   acceptInstrumentationEventForJob("Job001","Unused","AEO_PVJobStart");
@@ -12,7 +15,17 @@ begin
   // Process all the events on the event queue.
   Test::service_event_queue();
   
+  // ...and finally check that the state of the VerifiableJobs & InstrumentationEvent sare as expected.
+  theVerifiableJobs := find VerifiableJob ();
+  Assertions::assertTrue(theVerifiableJobs'length = 1, "Wrong number of VerifiableJobs created: " & (theVerifiableJobs'length)'image);
+  for theVerifiableJob in theVerifiableJobs loop
+    theInstrumentationEvents := theVerifiableJob -> R1;
+    Assertions::assertTrue(theInstrumentationEvents'length = 6, "Wrong number of InstruentationEvents created: " & (theInstrumentationEvents'length)'image); 
+  end loop;
+  
 end service;
+//
+//
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '58f996f5-ff7e-4423-8bf6-f638da62ab98' DO NOT EDIT THIS LINE.
