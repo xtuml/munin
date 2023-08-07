@@ -3,10 +3,16 @@ state VerificationGateway::VerifiableJob.ProcessingEventsForJob ( nextEventId : 
                                                                  nextEventType : in string ) is
 newInstrumentationEvent : instance of InstrumentationEvent;
 previousInstrumentationEvent : instance of InstrumentationEvent;
+eventUUID : string;
 
 begin
-  // Create a new instance of InstrumentationEvent and link it up to the Job via R1 and R2
-  newInstrumentationEvent := create unique InstrumentationEvent (clientEventId => nextEventId, clientEventType => nextEventType);
+  // Create a new instance of InstrumentationEvent (with a generated UUID as its identifier) and
+  // link it up to the Job via R1 and R2
+  eventUUID := string(UUID::generate_formatted());
+  
+  newInstrumentationEvent := create InstrumentationEvent (eventKey => eventUUID,
+  	                                                      clientEventId => nextEventId,
+  	                                                      clientEventType => nextEventType);
   
   link this R1 newInstrumentationEvent;
   previousInstrumentationEvent := this -> R2;
@@ -19,10 +25,10 @@ begin
     
     // Having stitched the events appropriately use the newInstrumentationEvent to to verify the behaviour 
     // of the Job within the client application.
-    Verification~>verifyInstrumentationEvent((newInstrumentationEvent.jobKey)'image,
-    	                                     (newInstrumentationEvent.eventKey)'image,
+    Verification~>verifyInstrumentationEvent(newInstrumentationEvent.jobKey,
+    	                                     newInstrumentationEvent.eventKey,
     	                                     newInstrumentationEvent.clientEventType,         
-                                             (newInstrumentationEvent.assignedPreviousEventKey)'image);
+                                             newInstrumentationEvent.assignedPreviousEventKey);
   else
     // TODO
   end if;

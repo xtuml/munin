@@ -5,6 +5,7 @@ public service VerificationGateway::VerifiableJob.createVerifiableJob ( clientJo
 newVerifiableJob : instance of VerifiableJob;
 firstInstrumentationEventForJob : instance of InstrumentationEvent;
 jobUUID : string;
+eventUUID : string;
 
 begin
   // Create the new Job assigning it a generated UUID as its identifier.
@@ -14,9 +15,13 @@ begin
   	                                        clientJobId => clientJobId,
   	                                        Current_State => ProcessingEventsForJob);
   	                                               
-  // Create the first event for the new job and link it up appropriately
-  firstInstrumentationEventForJob := create unique InstrumentationEvent (clientEventId => clientEventId, 
-  	                                                                     clientEventType => clientEventType);
+  // Create the first event for the new job (assigning it a generated UUID as its identifier) and link
+  // it up appropriately
+  eventUUID := string(UUID::generate_formatted());
+  
+  firstInstrumentationEventForJob := create InstrumentationEvent (eventKey => eventUUID,
+  	                                                              clientEventId => clientEventId, 
+  	                                                              clientEventType => clientEventType);
   	                                                                     
   link newVerifiableJob R1 firstInstrumentationEventForJob;
   link newVerifiableJob R2 firstInstrumentationEventForJob;
