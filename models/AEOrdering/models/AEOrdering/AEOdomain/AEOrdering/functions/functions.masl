@@ -74,7 +74,13 @@ job : instance of Job;
 begin
 	job := find_one Job(jobId = jobId);
 	if job /= null then
-		job.jobDeleted();
+		// check if we have any blocked events and if so fail the job otherwise delete the job
+		if (job -> R9.AuditEvent -> R4.BlockedAuditEvent)'length > 0 then
+			job.failJob("JobId = " & job.jobId & " : FailureReason = Job ended with blocked events");
+		else
+			job.jobDeleted();
+			Req_IF_Verification~>jobComplete(jobId);
+		end if;
 	end if;
 	
 end service;

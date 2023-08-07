@@ -37,38 +37,42 @@ begin
 	
 	for jobDefinition in reportedJobDefinitions loop
 		if jobDefinition.jobName = "AEOrdering-Test" then
-			if jobDefinition.eventDefinitions'length = 6 then
+			if jobDefinition.eventDefinitions'length = 8 then
 				for reportEventDefinition in jobDefinition.eventDefinitions loop
-					if reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "aaa" and reportEventDefinition.occurrenceId = 1 then
+					if reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "aaa" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
 						null;
-					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "bbb" and reportEventDefinition.occurrenceId = 1 then
+					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "bbb" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
 					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = bbb");
 						for previousEventType in reportEventDefinition.previousEventTypes loop
 							Assertions::assertTrue((previousEventType.previousEventTypeName = "aaa" and previousEventType.occurrenceId = 1), "");
 						end loop;
-					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "ccc" and reportEventDefinition.occurrenceId = 1 then
+					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "ccc" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
 					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = ccc");
 						for previousEventType in reportEventDefinition.previousEventTypes loop
 							Assertions::assertTrue((previousEventType.previousEventTypeName = "bbb" and previousEventType.occurrenceId = 1 and previousEventType.constraintDefinitionId = "cccEventXOR" and previousEventType.constraintValue = "XOR"), "");
 						end loop;
-					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "ddd" and reportEventDefinition.occurrenceId = 1 then
+					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "ddd" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
 					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = ddd");
 						for previousEventType in reportEventDefinition.previousEventTypes loop
 							Assertions::assertTrue((previousEventType.previousEventTypeName = "ccc" and previousEventType.occurrenceId = 1), "");
 						end loop;
-					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "eee" and reportEventDefinition.occurrenceId = 1 then
+					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "eee" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
 					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = eee");
 						for previousEventType in reportEventDefinition.previousEventTypes loop
 							Assertions::assertTrue((previousEventType.previousEventTypeName = "ddd" and previousEventType.occurrenceId = 1), "");
 						end loop;
-					elsif reportEventDefinition.sequenceName = "SEQUENCE2" and reportEventDefinition.eventType = "fff" and reportEventDefinition.occurrenceId = 1 then
+					elsif reportEventDefinition.sequenceName = "SEQUENCE2" and reportEventDefinition.eventType = "fff" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
+					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 0), "Unexepected previous event types eventType = fff");
+					elsif reportEventDefinition.sequenceName = "" and reportEventDefinition.eventType = "yyy" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = false then
+					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 0), "Unexepected previous event types eventType = fff");
+					elsif reportEventDefinition.sequenceName = "" and reportEventDefinition.eventType = "zzz" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = false then
 					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 0), "Unexepected previous event types eventType = fff");
 					else
 						Assertions::assertTrue(false, "Unknown reported event definitions for AEOrdering-Test");  
 					end if;
 				end loop;
 			else
-				Assertions::assertTrue(false, "Test Config File: Failed to find the correct number of reported event definitions for AEOrdering-Test, expected 6 found " & (jobDefinition.eventDefinitions'length)'image);  
+				Assertions::assertTrue(false, "Test Config File: Failed to find the correct number of reported event definitions for AEOrdering-Test, expected 8 found " & (jobDefinition.eventDefinitions'length)'image);  
 			end if;
 		elsif jobDefinition.jobName = "Other-Test-Job" then
 			if jobDefinition.eventDefinitions'length = 3 then
@@ -284,7 +288,7 @@ begin
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
     Assertions::assertTrue((verificationAuditEvents'length = 6), "Test Ordered Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
 
-    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "1");
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "1" and jobName = "AEOrdering-Test");
     Assertions::assertTrue((verificationAuditEvent /= null), "Test Ordered Job: Failed to find` verification audit event id = 1");
     Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 0), "Test Ordered Job: Failed as verification audit event id = 1 reported prevEventIds was invalid");
 
@@ -518,6 +522,7 @@ auditEventTime : timestamp;
 job : instance of Job;
 verificationAuditEvents : sequence of instance of _TEST_Req_IF_Verification_audit_event;
 verificationAuditEvent : instance of _TEST_Req_IF_Verification_audit_event;
+verificationFailedJobs : sequence of instance of _TEST_Req_IF_Verification_failedJob;
 prevEventIds : sequence of string;
 emptyPrevEventIds : sequence of string;
 auditEventData : AuditEventDataType;
@@ -573,6 +578,7 @@ begin
     Assertions::assertTrue((verificationAuditEvent /= null), "Test Job Complete: Failed to find verification audit event id = 3");
     Assertions::assertTrue((verificationAuditEvent.prevAuditEventIds'length = 1 and verificationAuditEvent.prevAuditEventIds[verificationAuditEvent.prevAuditEventIds'first] = "2"), "Test Job Complete: Failed as verification audit event id = 2 reported prevEventIds was invalid");
 	AEOrdering::checkJobComplete();
+	delete verificationAuditEvents;
 	
 	// create a failed job
 	auditEventTime := timestamp'now - @PT24H@;
@@ -587,6 +593,26 @@ begin
 	end if;
 	// verify that the job was completed
 	AEOrdering::checkJobComplete();
+	
+	// create a blocked job
+	verificationFailedJobs := find _TEST_Req_IF_Verification_failedJob();
+	delete verificationFailedJobs;
+	auditEventTime := timestamp'now;
+	prevEventIds := emptyPrevEventIds & "1"; 
+	AEOrdering::AcceptEvent("3", "node1", "app1", "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);	
+	job := find_one Job(jobId = "3");
+	if job /= null then
+		// the job should be failed so generate the delete job event
+		AEOrdering::deleteJob("3");;
+		Test::service_event_queue();
+		Test::service_event_queue();
+		verificationFailedJobs := find _TEST_Req_IF_Verification_failedJob(jobId = "3");
+	    Assertions::assertTrue((verificationFailedJobs'length = 1), "Test Job Failure: Invalid number of failed jobs event = " & verificationFailedJobs'length'image);
+	    Assertions::assertTrue(((find verificationFailedJobs(jobId = "3"))'length = 1), "Test Job Failure: Failed to find failed job id = 3");
+		delete verificationFailedJobs;
+	else
+		Test::fail("", 1, "Test Job Complete: Failed to find Failed Job");
+	end if;
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
