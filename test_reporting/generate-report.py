@@ -22,37 +22,37 @@ def gen_report():
                 if not isinstance(results, list):
                     results = [results]
                 for result in results:
-                    summary['tests'] = summary['tests'] + \
-                        1 if 'tests' in summary else 1
-                    suiteName = result['suiteName']
-                    testName = result['testName']
-                    status = result['result']
-                    log = result['details'] if status not in [
-                        'SUCCEEDED', 'SKIPPED'] else ''
-                    timestamp = result['timestamp']
-                    duration = parse_duration(result['duration'])
-                    if '-check' in sys.argv and status in ['FAILED', 'ERROR']:
-                        sys.exit(1)
-                    if suiteName not in testcases:
-                        testcases[suiteName] = []
-                    tc = TestCase(
-                        testName, timestamp=timestamp,
-                        elapsed_sec=duration.total_seconds())
-                    if status == 'FAILED':
-                        tc.add_failure_info(message=next(
-                            iter(log.splitlines()), ''), output=log)
-                        summary['failures'] = summary['failures'] + \
-                            1 if 'failures' in summary else 1
-                    elif status == 'ERROR':
-                        tc.add_error_info(message=next(
-                            iter(log.splitlines()), ''), output=log)
-                        summary['errors'] = summary['errors'] + \
-                            1 if 'errors' in summary else 1
-                    elif status == 'SKIPPED':
-                        tc.add_skipped_info()
-                        summary['skipped'] = summary['skipped'] + \
-                            1 if 'skipped' in summary else 1
-                    testcases[suiteName].append(tc)
+                    match result:
+                        case {'suiteName': suiteName, 'testName': testName, 'result': status, 'timestamp': timestamp, 'duration': duration}:
+                            duration = parse_duration(duration)
+                            summary['tests'] = summary['tests'] + \
+                                1 if 'tests' in summary else 1
+                            log = result['details'] if 'details' in result and status not in [
+                                'SUCCEEDED', 'SKIPPED'] else ''
+                            if '-check' in sys.argv and status in ['FAILED', 'ERROR']:
+                                sys.exit(1)
+                            if suiteName not in testcases:
+                                testcases[suiteName] = []
+                            tc = TestCase(
+                                testName, timestamp=timestamp,
+                                elapsed_sec=duration.total_seconds())
+                            if status == 'FAILED':
+                                tc.add_failure_info(message=next(
+                                    iter(log.splitlines()), ''), output=log)
+                                summary['failures'] = summary['failures'] + \
+                                    1 if 'failures' in summary else 1
+                            elif status == 'ERROR':
+                                tc.add_error_info(message=next(
+                                    iter(log.splitlines()), ''), output=log)
+                                summary['errors'] = summary['errors'] + \
+                                    1 if 'errors' in summary else 1
+                            elif status == 'SKIPPED':
+                                tc.add_skipped_info()
+                                summary['skipped'] = summary['skipped'] + \
+                                    1 if 'skipped' in summary else 1
+                            testcases[suiteName].append(tc)
+                        case _:
+                            pass  # ignoring other JSON objects
 
     if '-check' not in sys.argv:
         results_path = os.path.join(OUTPUT_DIR, f'{sys.argv[1].replace("/", "_")}-{now.strftime("%Y-%m-%d-%H%M%S")}-results.xml')
