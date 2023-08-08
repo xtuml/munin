@@ -17,6 +17,8 @@ jobFailureReason : string;
 failureReason : string;
 systemSpec : instance of SystemSpec;
 eventContent : string;
+instrumentationEventId : string;
+instrumentationEventType : string;
 
 begin
 
@@ -31,6 +33,12 @@ begin
 		generate Job.jobStarted() to job;
 		eventContent := "JobId = " & job.jobId;
 		Reporting~>reportEvent(Logger::Information, "aeordering_job_processed", eventContent);
+		
+		// ...and then report that AEO has started processing a new job as part of the 
+        // verification of the Protocol Verifier itself.
+        instrumentationEventId := "Unused";
+        instrumentationEventType := "AEO_PVJobStart";
+        Req_IF_BehaviourVerification~>sendInstrumentationEvent(job.jobId, instrumentationEventId, instrumentationEventType);
 	end if;
 	
 	// create the audit event
