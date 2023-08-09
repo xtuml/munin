@@ -4142,7 +4142,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '9d4bf09e-cc24-4ab6-8731-c78313ddf574' DO NOT EDIT THIS LINE.
-private service AESequenceDC::Test61CreateJobDefinition () is
+private service AESequenceDC::Test65CreateJobDefinition () is
 previousEventTypes : sequence of eventStructure;
 eventDefinition : eventDefinitionStructure;
 eventDefinitions : sequence of eventDefinitionStructure;
@@ -4153,55 +4153,55 @@ begin
   //
   // Job TestJob, Sequence 1 TestTransfer
   // 
-  eventDefinition := ("TestTransfer","TestInput",1,previousEventTypes,true,false,false,true);
+  eventDefinition := ("TestTransfer","TestInput",1,previousEventTypes,true,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestInput",1,"","");
-  eventDefinition := ("TestTransfer","TestWrite",1,previousEventTypes,false,false,false,true);
+  eventDefinition := ("TestTransfer","TestWrite",1,previousEventTypes,false,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestWrite",1,"","");
-  eventDefinition := ("TestTransfer","TestJustificationWrite",1,previousEventTypes,false,false,false,true);
+  eventDefinition := ("TestTransfer","TestJustificationWrite",1,previousEventTypes,false,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestJustificationWrite",1,"","");
-  eventDefinition := ("TestTransfer","TestWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition := ("TestTransfer","TestWidgets",1,previousEventTypes,false,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestWidgets",1,"","");
-  eventDefinition := ("TestTransfer","TestWidgetRequest",1,previousEventTypes,false,false,false,true);
+  eventDefinition := ("TestTransfer","TestWidgetRequest",1,previousEventTypes,false,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestWidgetRequest",1,"","");
-  eventDefinition := ("TestTransfer","TestJustification",1,previousEventTypes,false,false,false,true);
+  eventDefinition := ("TestTransfer","TestJustification",1,previousEventTypes,false,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestJustification",1,"","");
-  eventDefinition := ("TestTransfer","TestSendWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition := ("TestTransfer","TestSendWidgets",1,previousEventTypes,false,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestSendWidgets",1,"","");
-  eventDefinition := ("TestTransfer","TestReceiveWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition := ("TestTransfer","TestReceiveWidgets",1,previousEventTypes,false,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestReceiveWidgets",1,"Cons1","AND");
-  eventDefinition := ("TestTransfer","TestProcessedRequest",1,previousEventTypes,false,true,false,true);
+  eventDefinition := ("TestTransfer","TestProcessedRequest",1,previousEventTypes,false,true,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestProcessedRequest",1,"Cons1","AND");
-  eventDefinition := ("TestTransfer","TestRead",1,previousEventTypes,false,false,false,true);
+  eventDefinition := ("TestTransfer","TestRead",1,previousEventTypes,false,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestRead",1,"","");
-  eventDefinition := ("TestTransfer","TestWritePayload",1,previousEventTypes,false,false,false,true);
+  eventDefinition := ("TestTransfer","TestWritePayload",1,previousEventTypes,false,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestWritePayload",1,"","");
-  eventDefinition := ("TestTransfer","TestReadPayload",1,previousEventTypes,false,false,false,true);
+  eventDefinition := ("TestTransfer","TestReadPayload",1,previousEventTypes,false,false,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   previousEventTypes := ("TestReadPayload",1,"","");
-  eventDefinition := ("TestTransfer","TestGatewayWrite",1,previousEventTypes,false,true,false,true);
+  eventDefinition := ("TestTransfer","TestGatewayWrite",1,previousEventTypes,false,true,false,true,false);
   eventDefinitions := eventDefinitions & eventDefinition;
   
   AESequenceDC::createJobDefinition("TestJob", eventDefinitions);

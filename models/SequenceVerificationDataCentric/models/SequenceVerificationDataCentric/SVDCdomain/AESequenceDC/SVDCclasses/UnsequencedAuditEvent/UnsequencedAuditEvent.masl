@@ -6,6 +6,7 @@ public service AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob ( jo
                                                                              aeType : in string,
                                                                              aeData : in sequence of auditEventDataStructure ) is
 newJob : instance of Job;
+oldEvent : instance of UnsequencedAuditEvent;
 newUnhappyJob : instance of UnhappyJob;
 newUnhappyEvent : instance of UnsequencedAuditEvent;
 newEvent : instance of AuditEvent;
@@ -16,6 +17,9 @@ eventContent : string;
 
 begin
 
+  oldEvent := find_one UnsequencedAuditEvent (unsequencedAuditEventId = eventId);
+  // Check to see if we've seen this event instance before
+  if (oldEvent = null) then
     //We have received an unhappy path event as the first event in the Job. So we need to create a new job 
     // with its corresponding UnhappyJob subtype and this event is an unsequenced event for a Job
     // Note: SequencingFailed is marked true for an UnhappyJob
@@ -56,6 +60,15 @@ begin
 	  Logger::log(Logger::Error, "AESequenceDC", logMessage);
  
     end if;
+  else
+      // Log error: The audit event id received has been seen before
+	  logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewJob : The audit event has been seen before for jobId = " & jobId & ", Initial audit event = " & aeType;
+	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+      eventContent := "JobId = " & jobId & " : FailureReason = The audit event has been seen before"  & " : EventId = " & eventId & " : EventType = " & aeType;
+	  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
+
+   
+  end if;  
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

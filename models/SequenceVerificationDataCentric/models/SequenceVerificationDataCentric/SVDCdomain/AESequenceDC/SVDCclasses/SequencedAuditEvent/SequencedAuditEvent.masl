@@ -99,8 +99,9 @@ begin
       // Log error: The audit event id received has been seen before
 	  logMessage := "AESequenceDC::SequencedAuditEvent.AddEventForNewJob : The audit event has been seen before for jobId = " & jobId & ", Initial audit event = " & aeType;
 	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-	  eventContent := "JobId = " & " : FailureReason = The audit event has been seen before" & jobId & " : EventId = " & eventId & " : EventType = " & aeType;
-	  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
+      eventContent := "JobId = " & jobId & " : FailureReason = The audit event has been seen before"  & " : EventId = " & eventId & " : EventType = " & aeType;
+	  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
+
    
   end if;  
   //

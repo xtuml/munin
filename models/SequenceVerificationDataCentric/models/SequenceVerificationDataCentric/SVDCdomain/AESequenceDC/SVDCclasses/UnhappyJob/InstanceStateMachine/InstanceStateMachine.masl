@@ -3,7 +3,7 @@ state AESequenceDC::UnhappyJob.JobInProgress () is
 theJob : instance of Job;
 newSeqEvent : instance of SequencedAuditEvent;
 newEvent : instance of AuditEvent;
-existingEvent : instance of SequencedAuditEvent;
+existingEvent : instance of AuditEvent;
 theEventType : instance of SequencedAuditEventDefinition;
 theUnseqEventType : instance of UnsequencedAuditEventDefinition;
 prevEvt : instance of AuditEvent;
@@ -32,6 +32,7 @@ auditEventType : string;
 auditEventId : string;
 prevAuditEventIds : sequence of string;
 auditEventData : sequence of auditEventDataStructure;
+eventContent : string;
 
 begin
   auditEventType := aeType;
@@ -44,6 +45,9 @@ begin
   // Reset the jobHangingTimer if it is set
   cancel theJob.jobHangingTimer;
     
+  existingEvent := find_one AuditEvent (AEId = auditEventId);
+  if existingEvent = null then
+  
   theEventType := find_only SequencedAuditEventDefinition (AEType = auditEventType);
   theUnseqEventType := find_only UnsequencedAuditEventDefinition (UnsequencedAEType = auditEventType);
 
@@ -161,8 +165,14 @@ begin
 
   // Set a timer to timeout if the job hangs waiting for another event
   theSystemSpec := find_one SystemSpecification();
-  schedule theJob.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;    
-  
+  schedule theJob.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;  
+    
+  else
+    theJob.sequencingFailed := true;
+    theJob.failJob("This event has an identifier that's been seen before. Identifiers must be unique for a Job to be valid - Event Type = " & auditEventType);
+    eventContent := "JobId = " & theJob.jobID & " : FailureReason = The audit event has been seen before"  & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
+	Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
+  end if;   
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

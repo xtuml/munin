@@ -4,7 +4,7 @@ theJob : instance of Job;
 theJobDef : instance of JobDefinition;
 newSeqEvent : instance of SequencedAuditEvent;
 newEvent : instance of AuditEvent;
-existingEvent : instance of SequencedAuditEvent;
+existingEvent : instance of AuditEvent;
 theEventType : instance of SequencedAuditEventDefinition;
 possibleEventTypes : set of instance of SequencedAuditEventDefinition;
 theUnseqEventType : instance of UnsequencedAuditEventDefinition;
@@ -81,26 +81,32 @@ auditEventId : string;
 jobType : string;
 prevAuditEventIds : sequence of string;
 auditEventData : sequence of auditEventDataStructure;
+eventContent : string;
 
 
 begin
 
-    //Map the event parameters to local variables
-    auditEventType := aeType;
-    auditEventId := eventId;
-    prevAuditEventIds := prevAEIds;
-    auditEventData := aeData;
-  
-    theJob := this -> R45;
+  //Map the event parameters to local variables
+  auditEventType := aeType;
+  auditEventId := eventId;
+  prevAuditEventIds := prevAEIds;
+  auditEventData := aeData;
+
+  theJob := this -> R45;
   	
-    // Reset the jobHangingTimer if it is set
-    cancel theJob.jobHangingTimer;
+  // Reset the jobHangingTimer if it is set
+  cancel theJob.jobHangingTimer;
+  
+  existingEvent := find_one AuditEvent (AEId = auditEventId);
+  if existingEvent = null then
+  
     
     theEventType := find_only SequencedAuditEventDefinition (AEType = auditEventType);
     theUnseqEventType := find_only UnsequencedAuditEventDefinition (UnsequencedAEType = auditEventType);
     
     if theEventType /= null then
       // We have a valid event type
+    
       newEvent := create AuditEvent (AEId => auditEventId);
       newSeqEvent := create SequencedAuditEvent (AuditEventId => auditEventId, seenAsPreviousEvent => false, AEId => newEvent.AEId);
       link newSeqEvent R46 newEvent;
@@ -517,7 +523,15 @@ begin
     //  
    // Set a timer to timeout if the job hangs waiting for another event
     theSystemSpec := find_one SystemSpecification();
-    schedule theJob.jobHangingTimer generate Job.jobTimedOut() to theJob delay theSystemSpec.jobHangingTimeoutPeriod;    
+    schedule theJob.jobHangingTimer generate Job.jobTimedOut() to theJob delay theSystemSpec.jobHangingTimeoutPeriod; 
+    
+  else
+    theJob.sequencingFailed := true;
+    theJob.failJob("This event has an identifier that's been seen before. Identifiers must be unique for a Job to be valid - Event Type = " & auditEventType);
+    eventContent := "JobId = " & theJob.jobID & " : FailureReason = The audit event has been seen before"  & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
+	Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
+  
+  end if;     
   
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

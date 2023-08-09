@@ -143,67 +143,67 @@ begin
   //
   // Job BankTransferJob, Sequence 1 NearSideBankTransfer
   // 
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","NearInput",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","NearInput",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("NearInput",1,"","");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","NearPartWrite",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","NearPartWrite",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("NearPartWrite",1,"","");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","NearJustificationWrite",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","NearJustificationWrite",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("NearJustificationWrite",1,"","");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentRequestWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentRequestWidgets",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AgentRequestWidgets",1,"","");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","AuthoriserReadWidgetRequest",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AuthoriserReadWidgetRequest",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AuthoriserReadWidgetRequest",1,"","");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","AuthoriserParsedJustification",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AuthoriserParsedJustification",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AuthoriserParsedJustification",1,"","");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","AuthoriserSendWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AuthoriserSendWidgets",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AuthoriserSendWidgets",1,"","");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentReceiveWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentReceiveWidgets",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AgentReceiveWidgets",1,"Cons1","AND");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentProcessedRequest",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentProcessedRequest",1,previousEventTypes,false,true,false,true,false);
   previousEventTypes := ("AgentReceiveWidgets",1,"Cons1","AND");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentPartRead",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentPartRead",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AgentPartRead",1,"","");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentWritePayload",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","AgentWritePayload",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AgentWritePayload",1,"","");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","GatewayReadPayload",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","GatewayReadPayload",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("GatewayReadPayload",1,"","");
-  eventDefinition ("BankTransferJob","NearSideBankTransfer","GatewayWritePayload",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("BankTransferJob","NearSideBankTransfer","GatewayWritePayload",1,previousEventTypes,false,true,false,true,false);
   //
   // Job BankTransferJob, Sequence 2 Mid
   //
   previousEventTypes := empty;
-  eventDefinition ("BankTransferJob","Mid","MidProcessPayload",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("BankTransferJob","Mid","MidProcessPayload",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("MidProcessPayload",1,"Cons2","XOR");
-  eventDefinition ("BankTransferJob","Mid","MidWritePayload",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("BankTransferJob","Mid","MidWritePayload",1,previousEventTypes,false,true,false,true,false);
   // New definition added here for testing of Exclusive OR constraint
   previousEventTypes := ("MidProcessPayload",1,"Cons2","XOR");
-  eventDefinition ("BankTransferJob","Mid","MidPayloadError",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("BankTransferJob","Mid","MidPayloadError",1,previousEventTypes,false,true,false,true,false);
   //
   // Job BankTransferJob, Sequence 3 FarSide
   //
   previousEventTypes := empty;
-  eventDefinition ("BankTransferJob","FarSide","FarInput",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("BankTransferJob","FarSide","FarInput",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("FarInput",1,"","");
-  eventDefinition ("BankTransferJob","FarSide","FarOutput",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("BankTransferJob","FarSide","FarOutput",1,previousEventTypes,false,true,false,true,false);
   //
   // Job AuthJob, Sequence 1 Auth
   //
   previousEventTypes := empty;
-  eventDefinition ("AuthJob","Auth","AuthoriserSendOrderRequest",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("AuthJob","Auth","AuthoriserSendOrderRequest",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("AuthoriserSendOrderRequest",1,"","");
-  eventDefinition ("AuthJob","Auth","AuthReceiveRequest",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("AuthJob","Auth","AuthReceiveRequest",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AuthReceiveRequest",1,"","");
-  eventDefinition ("AuthJob","Auth","AuthSendMidRequest",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("AuthJob","Auth","AuthSendMidRequest",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AuthSendMidRequest",1,"","");
-  eventDefinition ("AuthJob","Auth","AuthReceiveMidResponse",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("AuthJob","Auth","AuthReceiveMidResponse",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AuthReceiveMidResponse",1,"","");
-  eventDefinition ("AuthJob","Auth","AuthSendMidRequest",2,previousEventTypes,false,false,false,true);
+  eventDefinition ("AuthJob","Auth","AuthSendMidRequest",2,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AuthSendMidRequest",2,"","");
-  eventDefinition ("AuthJob","Auth","AuthReceiveMidResponse",2,previousEventTypes,false,false,false,true);
+  eventDefinition ("AuthJob","Auth","AuthReceiveMidResponse",2,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AuthReceiveMidResponse",2,"","");
-  eventDefinition ("AuthJob","Auth","AuthSendResponse",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("AuthJob","Auth","AuthSendResponse",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("AuthSendResponse",1,"","");
-  eventDefinition ("AuthJob","Auth","AuthoriserReceiveOrder",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("AuthJob","Auth","AuthoriserReceiveOrder",1,previousEventTypes,false,true,false,true,false);
 //
 //
 //
@@ -836,13 +836,13 @@ begin
   //
   // Job CyclicJob, Sequence CyclicSequence
   // 
-  eventDefinition ("CyclicJob","CyclicSequence","A",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("CyclicJob","CyclicSequence","A",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("A",1,"","") & ("C",1,"","");
-  eventDefinition ("CyclicJob","CyclicSequence","B",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("CyclicJob","CyclicSequence","B",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("B",1,"","");
-  eventDefinition ("CyclicJob","CyclicSequence","C",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("CyclicJob","CyclicSequence","C",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("C",1,"","");
-  eventDefinition ("CyclicJob","CyclicSequence","D",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("CyclicJob","CyclicSequence","D",1,previousEventTypes,false,true,false,true,false);
 
 //
 //
@@ -1013,19 +1013,19 @@ begin
   // Job BranchedJob, Sequence BranchedSequence
   // 
   previousEventTypes := empty;
-  eventDefinition ("BranchedJob","BranchedSequence","FMA",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("BranchedJob","BranchedSequence","FMA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("FMA",1,"","");
-  eventDefinition ("BranchedJob","BranchedSequence","FMB",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BranchedJob","BranchedSequence","FMB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("FMB",1,"","");
-  eventDefinition ("BranchedJob","BranchedSequence","FMC",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BranchedJob","BranchedSequence","FMC",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("FMB",1,"","");
-  eventDefinition ("BranchedJob","BranchedSequence","FMD",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BranchedJob","BranchedSequence","FMD",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("FMB",1,"","");
-  eventDefinition ("BranchedJob","BranchedSequence","FME",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BranchedJob","BranchedSequence","FME",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("FMC",1,"","") & ("FMD",1,"","") & ("FME",1,"","");
-  eventDefinition ("BranchedJob","BranchedSequence","FMF",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BranchedJob","BranchedSequence","FMF",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("FMF",1,"","");
-  eventDefinition ("BranchedJob","BranchedSequence","FMG",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("BranchedJob","BranchedSequence","FMG",1,previousEventTypes,false,true,false,true,false);
   
   dynamicControlDefinition("BranchedJob", "TypeFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "FMA",1,"FMB",1);
   dynamicControlDefinition("BranchedJob", "TypeFork_2", dynamicControlTypeEnum.MERGECOUNT, "FMA",1,"FMF",1);
@@ -1035,32 +1035,32 @@ begin
 // This is provided to test a defensive feature of the model and should not be permitted in normal circumstances
 // IllegalJob and IllegalSequence
   previousEventTypes := empty;
-  eventDefinition ("IllegalJob","IllegalSequence","MALA",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("IllegalJob","IllegalSequence","MALA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("MALA",1,"","");
-  eventDefinition ("IllegalJob","IllegalSequence","MALB",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IllegalJob","IllegalSequence","MALB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("MALB",1,"","");
-  eventDefinition ("IllegalJob","IllegalSequence","MALC",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("IllegalJob","IllegalSequence","MALC",1,previousEventTypes,false,true,false,true,false);
   previousEventTypes := ("MALC",1,"","");
-  eventDefinition ("IllegalJob","IllegalSequence","MALD",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IllegalJob","IllegalSequence","MALD",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("MALD",1,"","");
-  eventDefinition ("IllegalJob","IllegalSequence","MALE",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("IllegalJob","IllegalSequence","MALE",1,previousEventTypes,false,true,false,true,false);
 //
 // This definition is for testing instance fork and merge
 // InstForkJob and InstForkSequence
 // Note that for an instance fork there is no fork visible in the definition. This is a simple linear sequence
 //
   previousEventTypes := empty;
-  eventDefinition ("InstForkJob","InstForkSequence","IFA",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("InstForkJob","InstForkSequence","IFA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("IFA",1,"","");
-  eventDefinition ("InstForkJob","InstForkSequence","IFB",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("InstForkJob","InstForkSequence","IFB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IFB",1,"","");
-  eventDefinition ("InstForkJob","InstForkSequence","IFC",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("InstForkJob","InstForkSequence","IFC",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IFC",1,"","");
-  eventDefinition ("InstForkJob","InstForkSequence","IFD",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("InstForkJob","InstForkSequence","IFD",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IFD",1,"","");
-  eventDefinition ("InstForkJob","InstForkSequence","IFE",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("InstForkJob","InstForkSequence","IFE",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IFE",1,"","");
-  eventDefinition ("InstForkJob","InstForkSequence","IFF",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("InstForkJob","InstForkSequence","IFF",1,previousEventTypes,false,true,false,true,false);
 
   dynamicControlDefinition("InstForkJob", "InstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "IFA",1,"IFB",1);
   dynamicControlDefinition("InstForkJob", "InstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "IFA",1,"IFD",1);
@@ -1068,15 +1068,15 @@ begin
   // Job SplitBranchedJob, Sequence ForkSequence
   // 
   previousEventTypes := empty;
-  eventDefinition ("SplitBranchedJob","ForkSequence","SFMA",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("SplitBranchedJob","ForkSequence","SFMA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("SFMA",1,"","");
-  eventDefinition ("SplitBranchedJob","ForkSequence","SFMB",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("SplitBranchedJob","ForkSequence","SFMB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("SFMB",1,"","");
-  eventDefinition ("SplitBranchedJob","ForkSequence","SFMC",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("SplitBranchedJob","ForkSequence","SFMC",1,previousEventTypes,false,true,false,true,false);
   previousEventTypes := ("SFMB",1,"","");
-  eventDefinition ("SplitBranchedJob","ForkSequence","SFMD",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("SplitBranchedJob","ForkSequence","SFMD",1,previousEventTypes,false,true,false,true,false);
   previousEventTypes := ("SFMB",1,"","");
-  eventDefinition ("SplitBranchedJob","ForkSequence","SFME",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("SplitBranchedJob","ForkSequence","SFME",1,previousEventTypes,false,true,false,true,false);
 
   //
   // Job SplitBranchedJob, Sequence MergeSequence
@@ -1084,35 +1084,35 @@ begin
   
   
   previousEventTypes := empty;
-  eventDefinition ("SplitBranchedJob","MergeSequence","SFMC1",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("SplitBranchedJob","MergeSequence","SFMC1",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := empty;
-  eventDefinition ("SplitBranchedJob","MergeSequence","SFMD1",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("SplitBranchedJob","MergeSequence","SFMD1",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := empty;
-  eventDefinition ("SplitBranchedJob","MergeSequence","SFME1",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("SplitBranchedJob","MergeSequence","SFME1",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("SFMC1",1,"","") & ("SFMD1",1,"","") & ("SFME1",1,"","");
-  eventDefinition ("SplitBranchedJob","MergeSequence","SFMF",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("SplitBranchedJob","MergeSequence","SFMF",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("SFMF",1,"","");
-  eventDefinition ("SplitBranchedJob","MergeSequence","SFMG",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("SplitBranchedJob","MergeSequence","SFMG",1,previousEventTypes,false,true,false,true,false);
 
 // This definition is for testing a split instance fork and merge
 // SplitInstForkJob and SplitInstForkSequence
 // Note that for an instance fork there is no fork visible in the definition. This is a simple linear sequence
 //
   previousEventTypes := empty;
-  eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFA",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("SIFA",1,"","");
-  eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFB",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("SIFB",1,"","");
-  eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFC",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("SplitInstForkJob","SplitInstForkSequence","SIFC",1,previousEventTypes,false,true,false,true,false);
   
 // SplitInstForkJob and SplitInstMergeSequence
 //
   previousEventTypes := empty;
-  eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFD",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFD",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("SIFD",1,"","");
-  eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFE",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFE",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("SIFE",1,"","");
-  eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFF",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFF",1,previousEventTypes,false,true,false,true,false);
 
   dynamicControlDefinition("SplitInstForkJob", "SplitInstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "SIFA",1,"SIFB",1);
   dynamicControlDefinition("SplitInstForkJob", "SplitInstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "SIFA",1,"SIFE",1);
@@ -1121,19 +1121,19 @@ begin
   // Job MultiForkJob, Sequence MultiForkSequence
   // 
   previousEventTypes := empty;
-  eventDefinition ("MultiForkJob","MultiForkSequence","MFMA",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("MFMA",1,"","");
-  eventDefinition ("MultiForkJob","MultiForkSequence","MFMB",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("MFMB",1,"","");
-  eventDefinition ("MultiForkJob","MultiForkSequence","MFMC",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMC",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("MFMC",1,"","");
-  eventDefinition ("MultiForkJob","MultiForkSequence","MFMD",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMD",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("MFMD",1,"","");
-  eventDefinition ("MultiForkJob","MultiForkSequence","MFME",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFME",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("MFME",1,"","");
-  eventDefinition ("MultiForkJob","MultiForkSequence","MFMF",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMF",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("MFMF",1,"","");
-  eventDefinition ("MultiForkJob","MultiForkSequence","MFMG",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("MultiForkJob","MultiForkSequence","MFMG",1,previousEventTypes,false,true,false,true,false);
   
   dynamicControlDefinition("MultiForkJob", "MultiFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "MFMA",1,"MFMB",1);
   dynamicControlDefinition("MultiForkJob", "MultiFork_2", dynamicControlTypeEnum.BRANCHCOUNT, "MFMA",1,"MFMC",1);
@@ -1458,45 +1458,45 @@ begin
   //
   // Job BankTransferJob, Sequence 1 NearSideBankTransfer
   // 
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_NearInput",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_NearInput",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("IOR_NearInput",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_NearPartWrite",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_NearPartWrite",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IOR_NearPartWrite",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_NearJustificationWrite",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_NearJustificationWrite",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IOR_NearJustificationWrite",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentRequestWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentRequestWidgets",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IOR_AgentRequestWidgets",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AuthoriserReadWidgetRequest",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AuthoriserReadWidgetRequest",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IOR_AuthoriserReadWidgetRequest",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AuthoriserParsedJustification",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AuthoriserParsedJustification",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IOR_AuthoriserParsedJustification",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AuthoriserSendWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AuthoriserSendWidgets",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IOR_AuthoriserSendWidgets",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentReceiveWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentReceiveWidgets",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IOR_AgentReceiveWidgets",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentProcessedRequest",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentProcessedRequest",1,previousEventTypes,false,true,false,true,false);
   previousEventTypes := ("IOR_AgentReceiveWidgets",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentPartRead",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentPartRead",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IOR_AgentPartRead",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentWritePayload",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_AgentWritePayload",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IOR_AgentWritePayload",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_GatewayReadPayload",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_GatewayReadPayload",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("IOR_GatewayReadPayload",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_GatewayWritePayload",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_NearSideBankTransfer","IOR_GatewayWritePayload",1,previousEventTypes,false,true,false,true,false);
   //
   // Job BankTransferJob, Sequence 2 Mid
   //
   previousEventTypes := empty;
-  eventDefinition ("IOR_BankTransferJob","IOR_Mid","IOR_MidProcessPayload",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_Mid","IOR_MidProcessPayload",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("IOR_MidProcessPayload",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_Mid","IOR_MidWritePayload",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_Mid","IOR_MidWritePayload",1,previousEventTypes,false,true,false,true,false);
   //
   // Job BankTransferJob, Sequence 3 FarSide
   //
   previousEventTypes := empty;
-  eventDefinition ("IOR_BankTransferJob","IOR_FarSide","IOR_FarInput",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_FarSide","IOR_FarInput",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("IOR_FarInput",1,"","");
-  eventDefinition ("IOR_BankTransferJob","IOR_FarSide","IOR_FarOutput",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("IOR_BankTransferJob","IOR_FarSide","IOR_FarOutput",1,previousEventTypes,false,true,false,true,false);
   //
 
 //
@@ -1669,68 +1669,68 @@ begin
   // Job Auth_PersistentInvariantJob, Sequence 1 Auth_PersistentInvariant
   //
   previousEventTypes := empty;
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthoriserSendOrderRequest",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthoriserSendOrderRequest",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("EAuthoriserSendOrderRequest",1,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveRequest",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveRequest",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAuthReceiveRequest",1,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendMidRequest",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendMidRequest",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAuthSendMidRequest",1,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveMidResponse",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveMidResponse",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAuthReceiveMidResponse",1,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendMidRequest",2,previousEventTypes,false,false,false,true);
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendMidRequest",2,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAuthSendMidRequest",2,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveMidResponse",2,previousEventTypes,false,false,false,true);
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthReceiveMidResponse",2,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAuthReceiveMidResponse",2,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendResponse",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthSendResponse",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAuthSendResponse",1,"","");
-  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthoriserReceiveOrder",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("Auth_PersistentInvariantJob","Auth_PersistentInvariant","EAuthoriserReceiveOrder",1,previousEventTypes,false,true,false,true,false);
   //
   //
   // Job BankTransferJob, Sequence 1 NearSideBankTransfer
   // 
   previousEventTypes := empty;
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearInput",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearInput",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("ENearInput",1,"","");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearPartWrite",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearPartWrite",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("ENearPartWrite",1,"","");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearJustificationWrite",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","ENearJustificationWrite",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("ENearJustificationWrite",1,"","");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentRequestWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentRequestWidgets",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAgentRequestWidgets",1,"","");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAuthoriserReadWidgetRequest",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAuthoriserReadWidgetRequest",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAuthoriserReadWidgetRequest",1,"","");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAuthoriserParsedJustification",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAuthoriserParsedJustification",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAuthoriserParsedJustification",1,"","");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAuthoriserSendWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAuthoriserSendWidgets",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAuthoriserSendWidgets",1,"","");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentReceiveWidgets",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentReceiveWidgets",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAgentReceiveWidgets",1,"Cons1","AND");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentProcessedRequest",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentProcessedRequest",1,previousEventTypes,false,true,false,true,false);
   previousEventTypes := ("EAgentReceiveWidgets",1,"Cons1","AND");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentPartRead",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentPartRead",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAgentPartRead",1,"","");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentWritePayload",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EAgentWritePayload",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EAgentWritePayload",1,"","");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EGatewayReadPayload",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EGatewayReadPayload",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("EGatewayReadPayload",1,"","");
-  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EGatewayWritePayload",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("EBankTransferJob","ENearSideBankTransfer","EGatewayWritePayload",1,previousEventTypes,false,true,false,true,false);
   //
   // Job BankTransferJob, Sequence 2 Mid
   //
   previousEventTypes := empty;
-  eventDefinition ("EBankTransferJob","EMid","EMidProcessPayload",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("EBankTransferJob","EMid","EMidProcessPayload",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("EMidProcessPayload",1,"Cons2","XOR");
-  eventDefinition ("EBankTransferJob","EMid","EMidWritePayload",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("EBankTransferJob","EMid","EMidWritePayload",1,previousEventTypes,false,true,false,true,false);
   // New definition added here for testing of Exclusive OR constraint
   previousEventTypes := ("EMidProcessPayload",1,"Cons2","XOR");
-  eventDefinition ("EBankTransferJob","EMid","EMidPayloadError",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("EBankTransferJob","EMid","EMidPayloadError",1,previousEventTypes,false,true,false,true,false);
   //
   // Job BankTransferJob, Sequence 3 FarSide
   //
   previousEventTypes := empty;
-  eventDefinition ("EBankTransferJob","EFarSide","EFarInput",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("EBankTransferJob","EFarSide","EFarInput",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("EFarInput",1,"","");
-  eventDefinition ("EBankTransferJob","EFarSide","EFarOutput",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("EBankTransferJob","EFarSide","EFarOutput",1,previousEventTypes,false,true,false,true,false);
   //
 //  invariantEventType := ("ENearInput",1,"","");
 //  ExtraJobInvariantDefn.linkUserExtraJobInvariantDefn("EBankTransferJob","PersistentInvariantTypeB",invariantEventType);
@@ -1808,17 +1808,17 @@ begin
   //
   // Job LoopWithBreakJob, Sequence LoopWithBreakSequence
   // 
-  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LA",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("LA",1,"","") & ("LD",1,"","");
-  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LB",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("LB",1,"","");
-  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LC",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LC",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("LC",1,"CFork","XOR");
-  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LD",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LD",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("LC",1,"CFork","XOR");
-  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LCError",1,previousEventTypes,false,false,true,true);
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LCError",1,previousEventTypes,false,false,true,true,false);
   previousEventTypes := ("LD",1,"","") & ("LCError",1,"","");
-  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LE",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LE",1,previousEventTypes,false,true,false,true,false);
   //
   dynamicControlDefinition("LoopWithBreakJob", "Counter_L1", dynamicControlTypeEnum.LOOPCOUNT, "LA",1,"LB",1);
   //
@@ -1842,80 +1842,80 @@ begin
   //
   // Event definitions for section 1 of sequence...
   previousEventTypes := empty;
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-A",1,previousEventTypes,true,false,false,true);  
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-A",1,previousEventTypes,true,false,false,true,false);  
   previousEventTypes := ("CS1-A",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-B",1,previousEventTypes,false,false,false,true); 
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-B",1,previousEventTypes,false,false,false,true,false); 
   previousEventTypes := ("CS1-B",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-C",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-C",1,previousEventTypes,false,false,false,true,false);
   // Event definitions for section 2 of sequence...
   // Start of first loop in section 2.
   previousEventTypes := ("CS1-C",1,"MultiWayANDFork","AND") & ("CS1-F",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-D",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-D",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-D",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-E",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-E",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-E",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-F",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-F",1,previousEventTypes,false,false,false,true,false);
   // End of first loop of events in section 2.
   previousEventTypes := ("CS1-F",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-G",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-G",1,previousEventTypes,false,false,false,true,false);
   // Start of second loop in section 2 of sequence - this loop includes an XOR break-out alternative at event CS1-E
   previousEventTypes := ("CS1-G",1,"","") & ("CS1-F",2,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-D",2,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-D",2,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-D",2,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-E",2,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-E",2,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-E",2,"LoopBreakoutAtCS1-E2","XOR");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-F",2,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-F",2,previousEventTypes,false,false,false,true,false);
   // End of second loop in section2 of sequence
   //
   // ...and now the remaining event definitions for section 2 of sequence.
   previousEventTypes := ("CS1-E",2,"LoopBreakoutAtCS1-E2","XOR");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-T",1,previousEventTypes,false,false,true,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-T",1,previousEventTypes,false,false,true,true,false);
   previousEventTypes := ("CS1-F",2,"","") & ("CS1-T",1,"","") & ("CS1-M",1,"ErrorAtCS1-M1","XOR");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-H",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-H",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-H",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-J",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-J",1,previousEventTypes,false,true,false,true,false);
   //
   // Event definitions for section 3 of sequence...
   previousEventTypes := ("CS1-C",1,"MultiWayANDFork","AND");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-K",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-K",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-K",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-L",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-L",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-L",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-M",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-M",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-M",1,"ErrorAtCS1-M1","XOR");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-N",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-N",1,previousEventTypes,false,true,false,true,false);
   //
   // Event definitions for section 4 of sequence...
   previousEventTypes := ("CS1-C",1,"MultiWayANDFork","AND");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-P",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-P",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-P",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-Q",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-Q",1,previousEventTypes,false,true,false,true,false);
   //
   // Event definitions for section 5 of sequence...
   previousEventTypes := ("CS1-C",1,"MultiWayANDFork","AND");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-C",2,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-C",2,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-C",2,"","") & ("CS1-E",3,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-D",3,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-D",3,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-D",3,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-E",3,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-E",3,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-E",3,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-F",3,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-F",3,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-F",3,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-D",4,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-D",4,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-D",4,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-G",2,previousEventTypes,false,true,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-G",2,previousEventTypes,false,true,false,true,false);
   //
   // Event definitions for section 6 of sequence...
   previousEventTypes := ("CS1-C",1,"MultiWayANDFork","AND") & ("CS1-S",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-S",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-S",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-S",1,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-D",5,previousEventTypes,false,false,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-D",5,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("CS1-D",5,"","");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-E",4,previousEventTypes,false,true,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-E",4,previousEventTypes,false,true,false,true,false);
   //
   // Event definitions for section 7 of sequence...
   previousEventTypes := ("CS1-C",1,"ErrorAtCS1-C1","XOR");
-  eventDefinition ("ComplexJob1","ComplexSequence","CS1-R",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("ComplexJob1","ComplexSequence","CS1-R",1,previousEventTypes,false,true,false,true,false);
   //
   // Now, set up the dynamic control definitions for 'ComplexJob1'...
   dynamicControlDefinition("ComplexJob1", "LC1", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-E",1);
@@ -1932,13 +1932,13 @@ begin
   
   // Now define the event definitions for 'GenerateAuthorisationTokenJob'...
   previousEventTypes := empty;
-  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-A",1,previousEventTypes,true,false,false,true);  
+  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-A",1,previousEventTypes,true,false,false,true,false);  
   previousEventTypes := ("TOK-A",1,"","");
-  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-B",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-B",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("TOK-B",1,"","");
-  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-C",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-C",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("TOK-C",1,"","");
-  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-D",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("GenerateAuthorisationTokenJob","GenerateAuthorisationToken","TOK-D",1,previousEventTypes,false,true,false,true,false);
   
   //Define the source of the ExtraJobInvariant 'AUTH_TOKEN_A' in the 'GenerateAuthorisationTokenJob' that is used by
   // event occurrences CS1-E,1 & CS1-L,1 & CS1-F,3 in the 'ComplexJob1'.
@@ -1958,17 +1958,17 @@ begin
   //
   // Job LoopCountJob, Sequence LoopCountSequence
   // 
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLA",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("LCLA",1,"","") & ("LCLD",1,"","");
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLB",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("LCLB",1,"","");
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLC",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLC",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("LCLC",1,"CFork","XOR");
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLD",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLD",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("LCLC",1,"CFork","XOR");
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLCError",1,previousEventTypes,false,false,true,true);
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLCError",1,previousEventTypes,false,false,true,true,false);
   previousEventTypes := ("LCLD",1,"","") & ("LCLCError",1,"","");
-  eventDefinition ("LoopCountJob","LoopCountSequence","LCLE",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("LoopCountJob","LoopCountSequence","LCLE",1,previousEventTypes,false,true,false,true,false);
 
   dynamicControlDefinition("LoopCountJob", "Counter_1", dynamicControlTypeEnum.LOOPCOUNT, "LCLA",1,"LCLB",1);
 //
@@ -1989,17 +1989,17 @@ begin
   //
   // Job BranchCountJob, Sequence BranchCountSequence
   // 
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFA",1,previousEventTypes,true,false,false,true);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("BCFA",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFB",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("BCFB",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFC",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFC",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("BCFC",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFD",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFD",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("BCFD",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFE",1,previousEventTypes,false,false,false,true);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFE",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("BCFE",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false,true);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false,true,false);
 
   logMessage := "AESequenceDC::OLD_InitBranchCountDefinition : OLD_InitBranchCountDefinition scenario - Call for Merge Count follows";
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);                       

@@ -122,7 +122,8 @@ public service AESequenceDC::eventDefinition ( jobName : in string,
                                               isSequenceStart : in boolean,
                                               isSequenceEnd : in boolean,
                                               isBreak : in boolean,
-                                              isSequenced : in boolean ) is
+                                              isHappy : in boolean,
+                                              isCritical : in boolean ) is
 theJobDefn : instance of JobDefinition;
 theSequenceDefn : instance of AESequenceDefinition;
 theEventDefn : instance of SequencedAuditEventDefinition;
@@ -141,6 +142,7 @@ newEventInSeqPairDef : instance of AEInSequencePairDefn;
 theConstraintDefn : instance of ConstraintDefinition;
 theUnseqEventDefn : instance of UnsequencedAuditEventDefinition;
 theUnseqEventDefnInJobDefn  : instance of UnsequencedAEDefnInJobDefn;
+newCriticalEventDefnInJobDefn : instance of CriticalEventDefnForJobDefn;
 logMessage : string;
 previousEventType : eventStructure;
 eventContent : string; 
@@ -152,21 +154,30 @@ begin
     // Event Definition for new Job so create the Job Definition
     theJobDefn := create unique JobDefinition (jobName => jobName, isDeprecated => false, isSuspended => false, Current_State => Active);
   end if; 
-     
-  theSequenceDefn := find_one AESequenceDefinition (sequenceDefinitionName = sequenceName);
-  if theSequenceDefn = null then
-    // Event Definition for new Sequence so create the Sequence Definition
-    theSequenceDefn := create unique AESequenceDefinition (sequenceDefinitionName => sequenceName);
-    link theSequenceDefn R7 theJobDefn;
-  end if;
+
+  if isHappy then
+    // We have a definition for a Sequenced (or Happy) Event 
+       
+    theSequenceDefn := find_one AESequenceDefinition (sequenceDefinitionName = sequenceName);
+    if theSequenceDefn = null then
+      // Event Definition for new Sequence so create the Sequence Definition
+      theSequenceDefn := create unique AESequenceDefinition (sequenceDefinitionName => sequenceName);
+      link theSequenceDefn R7 theJobDefn;
+    end if;
    
-  if isSequenced then
-  
-  // We have a definition for a Sequenced (or Happy) Event 
     theEventDefn := find_one SequencedAuditEventDefinition (AEType = eventType);
     if theEventDefn = null then
       // The event definition hasn't been seen before so is a valid addition
       theEventDefn := create unique SequencedAuditEventDefinition (AEType => eventType); 
+
+      // Capture whether this is a critical event in the happy path      
+      if isCritical then
+        newCriticalEventDefnInJobDefn := create CriticalEventDefnForJobDefn (AEDefinitionId => theEventDefn.AEDefinitionId,
+        	                                                                 jobName => jobName);
+        link theEventDefn R43 theJobDefn using newCriticalEventDefnInJobDefn;
+        
+      end if;  
+      
       theEventInSeqDef := create AEInSequenceDefinition (AEDefinitionId => theEventDefn.AEDefinitionId, AESequenceId => theSequenceDefn.AESequenceId);
       link theEventDefn R1 theSequenceDefn using theEventInSeqDef;
       theEventOccInSeqDef := create AEOccurrenceInSequenceDefinition (
@@ -319,7 +330,7 @@ begin
     end loop;
   
   else
-   // We have a definition for a Unsequenced (or Unhappy) Event 
+   // We have a definition for a Unhappy (or Unsequenced) Event 
     theUnseqEventDefn := find_one UnsequencedAuditEventDefinition (UnsequencedAEType = eventType);
     if theUnseqEventDefn = null then
         theUnseqEventDefn := create unique UnsequencedAuditEventDefinition (UnsequencedAEType => eventType);
@@ -329,6 +340,14 @@ begin
   
     else
       // TODO We have seen this definition before so for now we'll ignore a repetition
+    end if;
+    
+    // The following checks that an unappy event is not marked as a critical event as that combination is not allowed
+    if isCritical then
+      logMessage := "AESequenceDC::eventDefinition : The event type provided in the initialisation data is marked as Critical and an Unhappy Event - this combination is not allowed, Job Definition = " & theJobDefn.jobName & ", Event type = " & theEventDefn.AEType;
+      Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	  eventContent := "FailureReason = The event type provided in the initialisation data is marked as Critical and an Unhappy Event - this combination is not allowed " & " : JobName = " & theJobDefn.jobName  & " : EventType = " & theEventDefn.AEType;
+      Reporting~>reportEvent(Logger::Error, "svdc_invalid_event_definition", eventContent);
     end if;
   end if;  
 
@@ -578,7 +597,7 @@ begin
     for eventDefinition in eventDefinitions loop
     	AESequenceDC::eventDefinition(jobName, eventDefinition.sequenceName, eventDefinition.eventType, eventDefinition.occurrenceId, 
     		                          eventDefinition.previousEventTypes, eventDefinition.isSequenceStart, eventDefinition.isSequenceEnd, 
-    		                          eventDefinition.isBreak, eventDefinition.isSequenced);
+    		                          eventDefinition.isBreak, eventDefinition.isHappy, eventDefinition.isCritical);
     end loop;
   else
     logMessage := "AESequenceDC::createJobDefinition :  Updates for existing jobs not supported: Job Name = " & jobName;

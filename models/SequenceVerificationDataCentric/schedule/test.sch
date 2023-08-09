@@ -141,7 +141,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test19StartOfNewJobForDeprecatedJob
 # DO NOT ADD TESTS BEYOND THIS POINT AS SPECIFICATION INSTANCES HAVE BEEN DAMAGED
 
 # test the use of create job definition
-RUN SCENARIO Test 1 "run_test" [AESequenceDC Test61CreateJobDefinition 1300 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test65CreateJobDefinition 1300 CleanUpAllJobs 64]
 
 # This final test cleans out all the event definitions and so occurs at the end
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test09CorrectDeletionOfDefinitions 1009 CleanUpAllJobs 64]
