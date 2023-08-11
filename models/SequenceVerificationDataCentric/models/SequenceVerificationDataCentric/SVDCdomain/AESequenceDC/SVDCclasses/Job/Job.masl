@@ -29,12 +29,21 @@ theNextAuditEvent : instance of SequencedAuditEvent;
 theNextAuditEvents : set of instance of SequencedAuditEvent;
 theSequences : set of instance of Sequence;
 theJobDef : instance of JobDefinition;
-theAuditEventPairs : set of instance of AuditEventPair;
-theAuditEventPair : instance of AuditEventPair;
+theAuditEventPairs : set of instance of SequencedAuditEventPair;
+theAuditEventPair : instance of SequencedAuditEventPair;
 theAuditEventDefinition : instance of SequencedAuditEventDefinition;
 theTransientInvariant : instance of TransientInvariant;
 thePersistedInvariant : instance of PersistedInvariant;
 theDynamicControls : set of instance of DynamicControl;
+theSupertypeAuditEvent : instance of AuditEvent;
+theSupertypeAuditEvents : set of instance of AuditEvent;
+theSupertypeAuditEvents1 : set of instance of AuditEvent;
+theSupertypeAuditEvents2 : set of instance of AuditEvent;
+theSupertypeAuditEvents3 : set of instance of AuditEvent;
+theUnhappyAuditEvents : set of instance of UnsequencedAuditEvent;
+theUnhappyAuditEvent : instance of UnsequencedAuditEvent;
+theNextSupertypeAuditEvents : set of instance of AuditEvent;
+theSupertypeAuditEventLink : instance of AuditEventLink;
 
 begin
   theHappyJob := this -> R45.HappyJob;
@@ -50,10 +59,19 @@ begin
   end if;  
   
   theAuditEvents := this -> R10 -> R11;
+  theUnhappyAuditEvents := this -> R3;
+  theOrphanedAuditEvents := this -> R44;
+  theSupertypeAuditEvents1 := theAuditEvents -> R46;
+  theSupertypeAuditEvents2 := theUnhappyAuditEvents -> R46;
+  theSupertypeAuditEvents3 := theOrphanedAuditEvents -> R46;  
+  theSupertypeAuditEvents := theSupertypeAuditEvents1 & theSupertypeAuditEvents2 & theSupertypeAuditEvents3;
+  
+  theAuditEvents := theSupertypeAuditEvents -> R46.SequencedAuditEvent;
+
   for theAuditEvent in theAuditEvents'elements loop
     theNextAuditEvents := theAuditEvent -> R4.has_next.SequencedAuditEvent;
     for theNextAuditEvent in theNextAuditEvents loop
-      theAuditEventPair := theAuditEvent with theNextAuditEvent -> R4.has_next.AuditEventPair;
+      theAuditEventPair := theAuditEvent with theNextAuditEvent -> R4.has_next.SequencedAuditEventPair;
       if (theAuditEventPair -> R15) /= null then
         unlink (theAuditEventPair -> R15) R15 theAuditEventPair;
       end if;
@@ -109,9 +127,53 @@ begin
       delete theDynamicControl;
     end loop;
      
+    theSupertypeAuditEvent := theAuditEvent -> R46;
+    if theSupertypeAuditEvent /= null then
+      theNextSupertypeAuditEvents := theSupertypeAuditEvent -> R47.has_next.AuditEvent;
+      for theNextSupertypeAuditEvent in theNextSupertypeAuditEvents loop
+        theSupertypeAuditEventLink := theSupertypeAuditEvent with theNextSupertypeAuditEvent -> R47.has_next.AuditEventLink;
+        unlink theSupertypeAuditEvent R47.has_next.AuditEvent theNextSupertypeAuditEvent using theSupertypeAuditEventLink;
+        delete theSupertypeAuditEventLink;
+      end loop;
+    end if;
+    
   end loop;
   
+  // Unlink and delete all the associatives first and then unlink the supertype subtype relationship
+  for theAuditEvent in theAuditEvents loop
+    theSupertypeAuditEvent := theAuditEvent -> R46;
+    unlink theAuditEvent R46 theSupertypeAuditEvent;
+  end loop;
+
+  theUnhappyAuditEvents := theSupertypeAuditEvents -> R46.UnsequencedAuditEvent;
+  
+  for theUnhappyAuditEvent in theUnhappyAuditEvents loop
+    if (theUnhappyAuditEvent -> R41) /= null then
+      unlink (theUnhappyAuditEvent -> R41) R41 theUnhappyAuditEvent;
+    end if;  
+    if (theUnhappyAuditEvent -> R3) /= null then
+      unlink (theUnhappyAuditEvent -> R3) R3 theUnhappyAuditEvent;
+    end if;  
+
+    theSupertypeAuditEvent := theUnhappyAuditEvent -> R46;
+    if theSupertypeAuditEvent /= null then
+      theNextSupertypeAuditEvents := theSupertypeAuditEvent -> R47.has_next.AuditEvent;
+      for theNextSupertypeAuditEvent in theNextSupertypeAuditEvents loop
+        theSupertypeAuditEventLink := theSupertypeAuditEvent with theNextSupertypeAuditEvent -> R47.has_next.AuditEventLink;
+        unlink theSupertypeAuditEvent R47.has_next.AuditEvent theNextSupertypeAuditEvent using theSupertypeAuditEventLink;
+        delete theSupertypeAuditEventLink;
+      end loop;
+    end if;
+  end loop;
+  // Unlink and delete all the associatives first and then unlink the supertype subtype relationship
+  for theUnhappyAuditEvent in theUnhappyAuditEvents loop
+    theSupertypeAuditEvent := theUnhappyAuditEvent -> R46;
+    unlink theUnhappyAuditEvent R46 theSupertypeAuditEvent;
+  end loop;
+   
   delete theAuditEvents;
+  delete theUnhappyAuditEvents;
+  delete theSupertypeAuditEvents;
   
   theOrphanedAuditEvents := this -> R44;
   if theOrphanedAuditEvents /= null then
@@ -144,6 +206,45 @@ begin
     unlink theJobDef R8 this;
   end if;  
   delete this;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'db347d85-0ef8-469b-a066-39e28a893522' DO NOT EDIT THIS LINE.
+public instance service AESequenceDC::Job.migrateToUnhappyJob ( eventId : in string,
+                                                               prevAEIds : in sequence of string,
+                                                               aeType : in string,
+                                                               aeData : in sequence of auditEventDataStructure ) is
+theHappyJob : instance of HappyJob;
+theUnhappyJob : instance of UnhappyJob;
+logMessage : string;
+
+
+begin
+  logMessage := "AESequenceDC::Job.migrateToUnhappyJob : Migration from Happy Job to Unhappy Job for - jobId = " & this.jobID;
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+
+  // Unlink HappyJob from Job
+  theHappyJob := this -> R45.HappyJob;
+  if theHappyJob /= null then
+    unlink theHappyJob R45 this;
+    // Delete the Happy Job
+    delete theHappyJob;
+  end if;
+    
+  // Create UnhappyJob in some Created state
+  theUnhappyJob := create UnhappyJob (jobID => this.jobID, Current_State => Created );
+  // Link UnhappyJob to Job
+  link theUnhappyJob R45 this;
+  
+  // Set sequencing failed to true
+  this.sequencingFailed := true;
+  
+  // Generate firstUnhappyEvent event to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
+
+  logMessage := "AESequenceDC::Job.migrateToUnhappyJob : Unhappy Job created for - jobId = " & this.jobID;
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+
+  generate Job.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to this;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

@@ -1,16 +1,21 @@
 //! ACTIVITY BEGIN. '1c910ac3-72cf-4b5c-9022-936017cad0c7' DO NOT EDIT THIS LINE.
 public service AESequenceDC::SequencedAuditEvent.AddEventForNewJob ( jobId : in string,
+                                                                    jobName : in string,
                                                                     eventId : in string,
                                                                     prevAEIds : in sequence of string,
                                                                     aeType : in string,
                                                                     aeData : in sequence of auditEventDataStructure ) is
 newJob :  instance of Job;
 newHappyJob : instance of HappyJob;
-newEvent : instance of SequencedAuditEvent;
+newEvent : instance of AuditEvent;
+newSeqEvent : instance of SequencedAuditEvent;
 oldEvent : instance of SequencedAuditEvent;
 newEventType : instance of SequencedAuditEventDefinition;
+possibleEventTypes : set of instance of SequencedAuditEventDefinition;
 prevEvent : instance of SequencedAuditEvent;
 theAeSequenceDef : instance of AESequenceDefinition;
+theEventsSequenceDefs : set of instance of AESequenceDefinition;
+theJobsSequenceDefs : set of instance of AESequenceDefinition;
 theAeSequenceDefs : set of instance of AESequenceDefinition;
 theAeInSequenceDef : instance of AEInSequenceDefinition;
 theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
@@ -33,42 +38,49 @@ begin
     newJob := create Job (jobID => jobId, sequencingFailed => false, jobCompleted => false );
     newHappyJob := create HappyJob (jobID => jobId, Current_State => JobInProgress );
     link newHappyJob R45 newJob;
-    newEvent := create SequencedAuditEvent (AuditEventId => eventId);
-  
+    newEvent := create AuditEvent (AEId => eventId);
+    newSeqEvent := create SequencedAuditEvent (AuditEventId => eventId, AEId => newEvent.AEId); 
+    link newSeqEvent R46 newEvent;
+    link newSeqEvent R44 newJob;
     newEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
-    if (newEventType /= null) and ((prevAEIds = empty) or (prevAEIds = emptyString)) then
+    theJobDef := find_one JobDefinition (jobName = jobName);
+    possibleEventTypes := theJobDef -> R7 -> R1.SequencedAuditEventDefinition;
+    
+    if (newEventType /= null) and (newEventType intersection possibleEventTypes /= null) and ((prevAEIds = empty) or (prevAEIds = emptyString)) then
   	  //We have a valid event type and no previous events
   	  // So check that it is also the first event of a sequence in that Job
-      link newEvent R2 newEventType;
-      theAeSequenceDefs := newEventType -> R1.AESequenceDefinition;
-      // TODO Replace this next line with something using JobType when that is added to the interface
+      link newSeqEvent R2 newEventType;
+      theEventsSequenceDefs := newEventType -> R1.AESequenceDefinition;
+      theJobsSequenceDefs := theJobDef -> R7;
+      theAeSequenceDefs := theEventsSequenceDefs intersection theJobsSequenceDefs;
+      // As in Highlander - There can be only one!
       theAeSequenceDef := find_one theAeSequenceDefs();
       
-      theJobDef := theAeSequenceDef -> R7;
+      
       theAeInSequenceDef := theAeSequenceDef with newEventType -> R1.AEInSequenceDefinition;
       theAeOccurrencesInSequenceDef := theAeInSequenceDef -> R12;
       //TODO should the following be a find and then check there is only one since more than one would be a definition error
       theAeOccInSequenceDef := find_one theAeOccurrencesInSequenceDef (isSequenceStart = true);
       if theAeOccInSequenceDef /= null then
-        link newEvent R13 theAeOccInSequenceDef;
+        link newSeqEvent R13 theAeOccInSequenceDef;
         newSequence := create unique Sequence(isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
         link newSequence R10 newJob;
-        link newSequence R11 newEvent;
+        link newSequence R11 newSeqEvent;
         link newSequence R14 theAeSequenceDef;
    
         link newJob R8 theJobDef;
         //The the first event for this new Job is a valid event type for starting the sequence
         // Log info: new Job and event sequence started
-        logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : New Job started - jobId = " & newJob.jobID & ", Initial audit event: " & eventId & " of type " & newEventType.AEType;
+        logMessage := "AESequenceDC::SequencedAuditEvent.AddEventForNewJob : New Job started - jobId = " & newJob.jobID & ", Initial audit event: " & eventId & " of type " & newEventType.AEType;
 	    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 		eventContent := "JobId = " & newJob.jobID & " : EventId = " & eventId & " : EventType = " & newEventType.AEType;
 		Reporting~>reportEvent(Logger::Information, "svdc_new_job_started", eventContent);
      
         // Process the audit event data for this new event      
-        newEvent.ProcessAuditEventData (aeData);
+        newSeqEvent.ProcessAuditEventData (aeData);
       
         // ...and then check that the received audit event data matches that which is expected
-        newEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
+        newSeqEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
         if eventDataCheckHasPassed /= true then
           newJob.failJob(failureReason);
         end if;
@@ -85,10 +97,11 @@ begin
     end if;
   else
       // Log error: The audit event id received has been seen before
-	  logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : The audit event has been seen before for jobId = " & jobId & ", Initial audit event = " & aeType;
+	  logMessage := "AESequenceDC::SequencedAuditEvent.AddEventForNewJob : The audit event has been seen before for jobId = " & jobId & ", Initial audit event = " & aeType;
 	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-	  eventContent := "JobId = " & " : FailureReason = The audit event has been seen before" & jobId & " : EventId = " & eventId & " : EventType = " & aeType;
-	  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
+      eventContent := "JobId = " & jobId & " : FailureReason = The audit event has been seen before"  & " : EventId = " & eventId & " : EventType = " & aeType;
+	  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
+
    
   end if;  
   //
@@ -218,14 +231,14 @@ totalDynamicControls : set of instance of DynamicControl;
                   link newIntraJobInvariant R23 this;
                   link newIntraJobInvariant R26 theIntraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
-	              logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : ProcessAuditEventData " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType & " with value = " & newIntraJobInvariant.invariantValue;
+	              logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType & " with value = " & newIntraJobInvariant.invariantValue;
 	              Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
 	            else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
 	            end if;                 
               else
                 // Log warning: The audit event data type provided with this audit event is of a disallowed type for this type of audit event
-	            logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " is disallowed for this type of audit event = " & theEventType.AEType;
+	            logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " is disallowed for this type of audit event = " & theEventType.AEType;
 	            Logger::log(Logger::Debug, "AESequenceDC", logMessage);                
                 theJob.failJob("Invalid audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
               end if;
@@ -266,7 +279,7 @@ totalDynamicControls : set of instance of DynamicControl;
                   link theUserExtraJobInvariant R23 this;
                   link theUserExtraJobInvariant R28 theUserExtraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
-	              logMessage := "AESequenceDC::AuditEvent.AddEventForNewJob : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType;
+	              logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " has been added for this type of audit event = " & theEventType.AEType;
 	              Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
 	            else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        

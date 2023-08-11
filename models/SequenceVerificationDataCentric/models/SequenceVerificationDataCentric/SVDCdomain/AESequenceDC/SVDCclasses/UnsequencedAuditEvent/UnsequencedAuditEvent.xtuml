@@ -5,8 +5,92 @@ INSERT INTO O_OBJ
 	'UnsequencedAuditEvent',
 	27,
 	'UAE',
-	'',
+	'A Unsequenced Audit Event is an Audit Event received from the monitored system that is of a type on the so-called unhappy path.
+It typically indicates an error condition and tells the PV that the expected protocol is not being followed.
+Such an audit event cannot be verified as being part of an expected sequence of events and the number of checks that can
+be applied is limited. Unsequenced Audit Events are linked to previous events where possible.',
 	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_TFR
+	VALUES ("f378ab4f-745f-4cd3-bf43-8096f6c77d8d",
+	"d86782a4-2123-494c-9094-819a35c5996a",
+	'AddEventForNewUnhappyJob',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	0,
+	'',
+	3,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	1,
+	2);
+INSERT INTO O_TPARM
+	VALUES ("f4bac123-70cc-488a-a3a5-2b77a3c3f809",
+	"f378ab4f-745f-4cd3-bf43-8096f6c77d8d",
+	'jobId',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO O_TPARM
+	VALUES ("43c0f0da-25f8-4d75-977e-6f2290367b0a",
+	"f378ab4f-745f-4cd3-bf43-8096f6c77d8d",
+	'jobName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"f4bac123-70cc-488a-a3a5-2b77a3c3f809",
+	'');
+INSERT INTO O_TPARM
+	VALUES ("50762087-3fb5-4bba-8876-727c37e508b1",
+	"f378ab4f-745f-4cd3-bf43-8096f6c77d8d",
+	'eventId',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"43c0f0da-25f8-4d75-977e-6f2290367b0a",
+	'');
+INSERT INTO O_TPARM
+	VALUES ("509e9f1b-e78f-4477-b3ce-4281287c9891",
+	"f378ab4f-745f-4cd3-bf43-8096f6c77d8d",
+	'prevAEIds',
+	"15041607-2553-4dd2-9613-b86cf294cf4d",
+	0,
+	'',
+	"50762087-3fb5-4bba-8876-727c37e508b1",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("15041607-2553-4dd2-9613-b86cf294cf4d",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of string',
+	'',
+	'',
+	'../../DomainTypes/DomainTypes.xtuml');
+INSERT INTO O_TPARM
+	VALUES ("d9d88f53-cb63-40af-a375-0d1ccc3158b1",
+	"f378ab4f-745f-4cd3-bf43-8096f6c77d8d",
+	'aeType',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"509e9f1b-e78f-4477-b3ce-4281287c9891",
+	'');
+INSERT INTO O_TPARM
+	VALUES ("f6360efb-5a90-4ceb-8824-3e68a88cea31",
+	"f378ab4f-745f-4cd3-bf43-8096f6c77d8d",
+	'aeData',
+	"73ecc6ad-37f4-40dd-b682-7d2c5f0eeb48",
+	0,
+	'',
+	"d9d88f53-cb63-40af-a375-0d1ccc3158b1",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("73ecc6ad-37f4-40dd-b682-7d2c5f0eeb48",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of auditEventDataStructure',
+	'',
+	'',
+	'../../../Shared/Shared.xtuml');
 INSERT INTO O_REF
 	VALUES ("d86782a4-2123-494c-9094-819a35c5996a",
 	"f50894a2-8c45-468f-896f-f76df8bebddc",
@@ -119,12 +203,63 @@ INSERT INTO O_ATTR
 	VALUES ("53e225a2-7799-4759-9dcd-3bbcff0ed12c",
 	"d86782a4-2123-494c-9094-819a35c5996a",
 	"00000000-0000-0000-0000-000000000000",
-	'unsequencedAuditEventid',
+	'unsequencedAuditEventId',
 	'',
 	'',
-	'unsequencedAuditEventid',
+	'unsequencedAuditEventId',
 	0,
 	"ba5eda7a-def5-0000-0000-000000000004",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("d86782a4-2123-494c-9094-819a35c5996a",
+	"2375aac9-25af-4810-9d67-93e6a0db90c6",
+	0,
+	"69842936-6a58-49d8-a242-610e9ab84946",
+	"cab57fcf-0da9-47a4-8500-8053723b12c7",
+	"4f48635f-9caa-48bb-86da-2e8c2fd2022b",
+	"5757d5be-99b8-4466-9825-53b21df9092a",
+	"1fe2f5e2-4d75-47fd-a24c-9fd566131a98",
+	"5b775e1f-1aac-4baf-8480-7aa2bd627695",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'AuditEvent',
+	'AEId',
+	'R46');
+INSERT INTO R_RGO_PROXY
+	VALUES ("d86782a4-2123-494c-9094-819a35c5996a",
+	"cab57fcf-0da9-47a4-8500-8053723b12c7",
+	"4f48635f-9caa-48bb-86da-2e8c2fd2022b",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("69842936-6a58-49d8-a242-610e9ab84946",
+	"2375aac9-25af-4810-9d67-93e6a0db90c6",
+	0,
+	"cab57fcf-0da9-47a4-8500-8053723b12c7",
+	"5757d5be-99b8-4466-9825-53b21df9092a",
+	'../SVDCclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("1fe2f5e2-4d75-47fd-a24c-9fd566131a98",
+	"d86782a4-2123-494c-9094-819a35c5996a",
+	"69842936-6a58-49d8-a242-610e9ab84946",
+	"2375aac9-25af-4810-9d67-93e6a0db90c6",
+	1,
+	'AEId');
+INSERT INTO O_BATTR_PROXY
+	VALUES ("69842936-6a58-49d8-a242-610e9ab84946",
+	"2375aac9-25af-4810-9d67-93e6a0db90c6",
+	'../AuditEvent/AuditEvent.xtuml');
+INSERT INTO O_ATTR
+	VALUES ("1fe2f5e2-4d75-47fd-a24c-9fd566131a98",
+	"d86782a4-2123-494c-9094-819a35c5996a",
+	"812bf439-69a6-4b72-a426-e9113f6a1f1b",
+	'AEId',
+	'',
+	'',
+	'AEId',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
 	'',
 	'');
 INSERT INTO O_ID
@@ -134,10 +269,15 @@ INSERT INTO O_OIDA
 	VALUES ("53e225a2-7799-4759-9dcd-3bbcff0ed12c",
 	"d86782a4-2123-494c-9094-819a35c5996a",
 	0,
-	'unsequencedAuditEventid');
+	'unsequencedAuditEventId');
 INSERT INTO O_ID
 	VALUES (1,
 	"d86782a4-2123-494c-9094-819a35c5996a");
+INSERT INTO O_OIDA
+	VALUES ("1fe2f5e2-4d75-47fd-a24c-9fd566131a98",
+	"d86782a4-2123-494c-9094-819a35c5996a",
+	1,
+	'AEId');
 INSERT INTO O_ID
 	VALUES (2,
 	"d86782a4-2123-494c-9094-819a35c5996a");

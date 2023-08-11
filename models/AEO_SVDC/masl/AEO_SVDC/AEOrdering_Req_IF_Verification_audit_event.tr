@@ -1,5 +1,5 @@
 public service AEOrdering::Req_IF_Verification~>audit_event ( jobId: in string,
-                                                              nodeName: in string,
+                                                              jobName: in string,
                                                               application: in string,
                                                               auditEventType: in string,
                                                               auditEventId: in string,
@@ -33,9 +33,9 @@ begin
     application,
     auditEventType,
     jobId,
+    jobName,
     prevAuditEventIds,
     auditEventId,
     auditEventData
-    // nodeName ??
   );
 end service;

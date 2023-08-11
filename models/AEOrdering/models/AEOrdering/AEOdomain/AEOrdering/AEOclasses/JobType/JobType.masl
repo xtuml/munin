@@ -88,7 +88,7 @@ begin
 						                               isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
 						                               staleAuditEventDuration => this.staleAuditEventDuration, 
 						                               blockedAuditEventDuration => this.blockedAuditEventDuration, 
-						                               previousEventTypes => previousEventTypes, isBreak => isBreak);
+						                               previousEventTypes => previousEventTypes, isBreak => isBreak, isSequenced => true);
 					link eventType R6 application;
 					link eventType R12 this;
 				else
@@ -169,6 +169,40 @@ begin
 				    end loop;
 				end if;
 	
+			end loop;
+		end if;
+		if jobTypeJSONObject'contains("UnhappyEvents") and jobTypeJSONObject["UnhappyEvents"].kind = JSON::Array then
+			for eventTypeJSONElement in JSON::get_array(jobTypeJSONObject["UnhappyEvents"]) loop
+				eventTypeName := "";
+				sequenceName := "";
+				occurrenceId := 1;
+				applicationName := "";
+				sequenceStart := false;
+				sequenceEnd := false;
+				isBreak := false;
+				hasDynamicControl := false;
+				previousEventTypes := emptyPreviousEventTypes;
+				eventDefJSONObject := JSON::get_object(eventTypeJSONElement);
+				eventTypeName := JSON::get_string(eventDefJSONObject["EventName"]);
+				applicationName := JSON::get_string(eventDefJSONObject["Application"]);
+				
+				// now we have extracted the data create the event
+				application := find_one Application(applicationName = applicationName);
+				if application = null then
+					application := create Application(applicationName => applicationName);
+				end if;
+				
+				eventType := find_one AuditEventType(eventType = eventTypeName and applicationName = applicationName and occurrenceId = occurrenceId);
+				if eventType = null then
+					eventType := create unique AuditEventType(eventType => eventTypeName, occurrenceId => occurrenceId, 
+						                               applicationName => applicationName, sequenceName => sequenceName,
+						                               isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
+						                               staleAuditEventDuration => this.staleAuditEventDuration, 
+						                               blockedAuditEventDuration => this.blockedAuditEventDuration, 
+						                               previousEventTypes => previousEventTypes, isBreak => isBreak, isSequenced => false);
+					link eventType R6 application;
+					link eventType R12 this;
+				end if;				
 			end loop;
 		end if;
 	else

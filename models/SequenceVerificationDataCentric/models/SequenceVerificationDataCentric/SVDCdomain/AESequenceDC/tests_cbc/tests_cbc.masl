@@ -32,24 +32,24 @@ begin
   //
   // Loop count should be an integer. Here is it replaced by the string "FIVE" to provoke an error
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "FIVE");
-  acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","LoopCountJob","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
-  acceptOrderedEvent ("1620920002","Test-0001","LCLC","Job_LoopCount_1","Ev302","Ev303",theAuditEventData);
-  acceptOrderedEvent ("1620920003","Test-0001","LCLD","Job_LoopCount_1","Ev303","Ev304",theAuditEventData);
-  acceptOrderedEvent ("1620920004","Test-0001","LCLB","Job_LoopCount_1","Ev304","Ev305",theAuditEventData);
-  acceptOrderedEvent ("1620920005","Test-0001","LCLC","Job_LoopCount_1","Ev305","Ev306",theAuditEventData);
-  acceptOrderedEvent ("1620920006","Test-0001","LCLD","Job_LoopCount_1","Ev306","Ev307",theAuditEventData);
-  acceptOrderedEvent ("1620920007","Test-0001","LCLB","Job_LoopCount_1","Ev307","Ev308",theAuditEventData);
-  acceptOrderedEvent ("1620920008","Test-0001","LCLC","Job_LoopCount_1","Ev308","Ev309",theAuditEventData);
-  acceptOrderedEvent ("1620920009","Test-0001","LCLD","Job_LoopCount_1","Ev309","Ev310",theAuditEventData);
-  acceptOrderedEvent ("1620920010","Test-0001","LCLB","Job_LoopCount_1","Ev310","Ev311",theAuditEventData);
-  acceptOrderedEvent ("1620920011","Test-0001","LCLC","Job_LoopCount_1","Ev311","Ev312",theAuditEventData);
-  acceptOrderedEvent ("1620920012","Test-0001","LCLD","Job_LoopCount_1","Ev312","Ev313",theAuditEventData);
-  acceptOrderedEvent ("1620920013","Test-0001","LCLB","Job_LoopCount_1","Ev313","Ev314",theAuditEventData);
-  acceptOrderedEvent ("1620920014","Test-0001","LCLC","Job_LoopCount_1","Ev314","Ev315",theAuditEventData);
-  acceptOrderedEvent ("1620920015","Test-0001","LCLD","Job_LoopCount_1","Ev315","Ev316",theAuditEventData);
-  acceptOrderedEvent ("1620920016","Test-0001","LCLE","Job_LoopCount_1","Ev316","Ev317",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev301","Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev302","Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev303","Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev304","Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev305","Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920006","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev306","Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920007","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev307","Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920008","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev308","Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920009","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev309","Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920010","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev310","Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920011","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev311","Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920012","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev312","Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920013","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev313","Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920014","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev314","Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920015","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev315","Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920016","Test-0001","LCLE","Job_LoopCount_1","LoopCountJob","Ev316","Ev317",theAuditEventData);
 
   //
   Test::service_event_queue();
@@ -82,37 +82,37 @@ begin
   // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 10 branches
   // This test does not reveal any erroneous behaviour of the twin but does demonstrate use of the same source and user event
   //
-  acceptOrderedEvent ("1620920000","Test-0001","SSUFA","Branch_Count_Job_SSU",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","SSUFA","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_SameSourceAndUser_1", "10");
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","SSUFB","Branch_Count_Job_SSU",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","SSUFB","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev302",theAuditEventData);
   theAuditEventData :=  emptyAuditEventData;
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SSUFC","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev312",theAuditEventData);
   previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
-  acceptOrderedEvent ("1620920003","Test-0001","SSUFD","Branch_Count_Job_SSU",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SSUFD","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := ("Ev313");
-  acceptOrderedEvent ("1620920004","Test-0001","SSUFE","Branch_Count_Job_SSU",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","SSUFE","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := ("Ev314");
-  acceptOrderedEvent ("1620920005","Test-0001","SSUFF","Branch_Count_Job_SSU",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","SSUFF","Branch_Count_Job_SSU","BranchSameSourceAndUserJob",previousEvents,"Ev315",theAuditEventData);
  //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -166,27 +166,27 @@ begin
   //
   
   theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "Counter_1", "5");
-  acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","","Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","LCLA","Job_LoopCount_1","LoopCountJob","","Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","Ev301","Ev302",theAuditEventData);
-  acceptOrderedEvent ("1620920002","Test-0001","LCLC","Job_LoopCount_1","Ev302","Ev303",theAuditEventData);
-  acceptOrderedEvent ("1620920003","Test-0001","LCLD","Job_LoopCount_1","Ev303","Ev304",theAuditEventData);
-  acceptOrderedEvent ("1620920004","Test-0001","LCLB","Job_LoopCount_1","Ev304","Ev305",theAuditEventData);
-  acceptOrderedEvent ("1620920005","Test-0001","LCLC","Job_LoopCount_1","Ev305","Ev306",theAuditEventData);
-  acceptOrderedEvent ("1620920006","Test-0001","LCLD","Job_LoopCount_1","Ev306","Ev307",theAuditEventData);
-  acceptOrderedEvent ("1620920007","Test-0001","LCLB","Job_LoopCount_1","Ev307","Ev308",theAuditEventData);
-  acceptOrderedEvent ("1620920008","Test-0001","LCLC","Job_LoopCount_1","Ev308","Ev309",theAuditEventData);
-  acceptOrderedEvent ("1620920009","Test-0001","LCLD","Job_LoopCount_1","Ev309","Ev310",theAuditEventData);
-  acceptOrderedEvent ("1620920010","Test-0001","LCLB","Job_LoopCount_1","Ev310","Ev311",theAuditEventData);
-  acceptOrderedEvent ("1620920011","Test-0001","LCLC","Job_LoopCount_1","Ev311","Ev312",theAuditEventData);
-  acceptOrderedEvent ("1620920012","Test-0001","LCLD","Job_LoopCount_1","Ev312","Ev313",theAuditEventData);
-  acceptOrderedEvent ("1620920013","Test-0001","LCLB","Job_LoopCount_1","Ev313","Ev314",theAuditEventData);
-  acceptOrderedEvent ("1620920014","Test-0001","LCLC","Job_LoopCount_1","Ev314","Ev315",theAuditEventData);
-  acceptOrderedEvent ("1620920015","Test-0001","LCLD","Job_LoopCount_1","Ev315","Ev316",theAuditEventData);
-  acceptOrderedEvent ("1620920016","Test-0001","LCLB","Job_LoopCount_1","Ev316","Ev317",theAuditEventData);
-  acceptOrderedEvent ("1620920017","Test-0001","LCLC","Job_LoopCount_1","Ev317","Ev318",theAuditEventData);
-  acceptOrderedEvent ("1620920018","Test-0001","LCLD","Job_LoopCount_1","Ev318","Ev319",theAuditEventData);
-  acceptOrderedEvent ("1620920019","Test-0001","LCLE","Job_LoopCount_1","Ev319","Ev320",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev301","Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev302","Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev303","Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev304","Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev305","Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920006","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev306","Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920007","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev307","Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920008","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev308","Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920009","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev309","Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920010","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev310","Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920011","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev311","Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920012","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev312","Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920013","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev313","Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920014","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev314","Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920015","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev315","Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920016","Test-0001","LCLB","Job_LoopCount_1","LoopCountJob","Ev316","Ev317",theAuditEventData);
+  acceptOrderedEvent ("1620920017","Test-0001","LCLC","Job_LoopCount_1","LoopCountJob","Ev317","Ev318",theAuditEventData);
+  acceptOrderedEvent ("1620920018","Test-0001","LCLD","Job_LoopCount_1","LoopCountJob","Ev318","Ev319",theAuditEventData);
+  acceptOrderedEvent ("1620920019","Test-0001","LCLE","Job_LoopCount_1","LoopCountJob","Ev319","Ev320",theAuditEventData);
 
   //
   Test::service_event_queue();
@@ -221,36 +221,36 @@ begin
   //
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_1", "10");
   theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "Merge_Counter_1", "10");
-  acceptOrderedEvent ("1620920000","Test-0001","BCFA","Branch_Count_Job",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","BCFA","Branch_Count_Job","BranchCountJob",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData :=  emptyAuditEventData;
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","BCFB","Branch_Count_Job",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","BCFB","Branch_Count_Job","BranchCountJob",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev312",theAuditEventData);
   previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
-  acceptOrderedEvent ("1620920003","Test-0001","BCFD","Branch_Count_Job",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := ("Ev313");
-  acceptOrderedEvent ("1620920004","Test-0001","BCFE","Branch_Count_Job",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","BCFE","Branch_Count_Job","BranchCountJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := ("Ev314");
-  acceptOrderedEvent ("1620920005","Test-0001","BCFF","Branch_Count_Job",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","BCFF","Branch_Count_Job","BranchCountJob",previousEvents,"Ev315",theAuditEventData);
  //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -286,35 +286,35 @@ begin
   // However no branch count is provided so the test will fail
   // This test does reveal any erroneous behaviour of the twin
   //
-  acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job","InstForkJob",previousEvents,"Ev301",theAuditEventData);
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job","InstForkJob",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev312",theAuditEventData);
   previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
-  acceptOrderedEvent ("1620920003","Test-0001","IFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","IFD","Instance_FandM_Job","InstForkJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := ("Ev313");
-  acceptOrderedEvent ("1620920004","Test-0001","IFE","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","IFE","Instance_FandM_Job","InstForkJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := ("Ev314");
-  acceptOrderedEvent ("1620920005","Test-0001","IFF","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","IFF","Instance_FandM_Job","InstForkJob",previousEvents,"Ev315",theAuditEventData);
  //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -346,56 +346,56 @@ begin
   // This test does reveal any erroneous behaviour of the twin
   // Forking Sequence
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_3", "10");
-  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev312",theAuditEventData);
   
   // Merging Sequence
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev315",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev316",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev317",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev317",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev318",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev318",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev319",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev319",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev320",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev320",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev321",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev321",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev322",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev322",theAuditEventData);
   previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317" & "Ev318" & "Ev319" & "Ev320" & "Ev321" & "Ev322";
-  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job",previousEvents,"Ev323",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev323",theAuditEventData);
   previousEvents := ("Ev323");
-  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job",previousEvents,"Ev324",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev324",theAuditEventData);
  //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -429,46 +429,46 @@ begin
   // This test does reveal any erroneous behaviour of the twin
   //
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_3", "15");
-  acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM","BranchedJob",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM","BranchedJob",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM","BranchedJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM","BranchedJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM","BranchedJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM","BranchedJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM","BranchedJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM","BranchedJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM","BranchedJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM","BranchedJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM","BranchedJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM","BranchedJob",previousEvents,"Ev312",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM","BranchedJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM","BranchedJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM","BranchedJob",previousEvents,"Ev315",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM","BranchedJob",previousEvents,"Ev316",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev317",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM","BranchedJob",previousEvents,"Ev317",theAuditEventData);
    
   // The merge point
   previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312" & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317";
-  acceptOrderedEvent ("1620920006","Test-0001","FMF","Job_FandM",previousEvents,"Ev318",theAuditEventData);
+  acceptOrderedEvent ("1620920006","Test-0001","FMF","Job_FandM","BranchedJob",previousEvents,"Ev318",theAuditEventData);
   previousEvents := ("Ev318");
-  acceptOrderedEvent ("1620920007","Test-0001","FMG","Job_FandM",previousEvents,"Ev319",theAuditEventData);
+  acceptOrderedEvent ("1620920007","Test-0001","FMG","Job_FandM","BranchedJob",previousEvents,"Ev319",theAuditEventData);
   //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -503,46 +503,46 @@ begin
   //
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "TypeFork_1", "15");
   theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "TypeFork_2", "15");
-  acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","FMA","Job_FandM","BranchedJob",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMB","Job_FandM","BranchedJob",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM","BranchedJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM","BranchedJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM","BranchedJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM","BranchedJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMC","Job_FandM","BranchedJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM","BranchedJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM","BranchedJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM","BranchedJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM","BranchedJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FMD","Job_FandM","BranchedJob",previousEvents,"Ev312",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM","BranchedJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM","BranchedJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM","BranchedJob",previousEvents,"Ev315",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM","BranchedJob",previousEvents,"Ev316",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM",previousEvents,"Ev317",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","FME","Job_FandM","BranchedJob",previousEvents,"Ev317",theAuditEventData);
    
   // The merge point
   previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312" & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317";
-  acceptOrderedEvent ("1620920006","Test-0001","FMF","Job_FandM",previousEvents,"Ev318",theAuditEventData);
+  acceptOrderedEvent ("1620920006","Test-0001","FMF","Job_FandM","BranchedJob",previousEvents,"Ev318",theAuditEventData);
   previousEvents := ("Ev318");
-  acceptOrderedEvent ("1620920007","Test-0001","FMG","Job_FandM",previousEvents,"Ev319",theAuditEventData);
+  acceptOrderedEvent ("1620920007","Test-0001","FMG","Job_FandM","BranchedJob",previousEvents,"Ev319",theAuditEventData);
   //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -579,36 +579,36 @@ begin
   //
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "InstFork_1", "10");
   theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "InstMerge_1", "10");
-  acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job","InstForkJob",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job","InstForkJob",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev312",theAuditEventData);
   previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
-  acceptOrderedEvent ("1620920003","Test-0001","IFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","IFD","Instance_FandM_Job","InstForkJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := ("Ev313");
-  acceptOrderedEvent ("1620920004","Test-0001","IFE","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","IFE","Instance_FandM_Job","InstForkJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := ("Ev314");
-  acceptOrderedEvent ("1620920005","Test-0001","IFF","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","IFF","Instance_FandM_Job","InstForkJob",previousEvents,"Ev315",theAuditEventData);
  //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -646,56 +646,56 @@ begin
 
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "SplitInstFork_1", "10");
   theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "SplitInstMerge_1", "10");
-  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev312",theAuditEventData);
   
   // Merging Sequence
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev315",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev316",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev317",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev317",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev318",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev318",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev319",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev319",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev320",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev320",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev321",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev321",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev322",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev322",theAuditEventData);
   previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317" & "Ev318" & "Ev319" & "Ev320" & "Ev321" & "Ev322";
-  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job",previousEvents,"Ev323",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev323",theAuditEventData);
   previousEvents := ("Ev323");
-  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job",previousEvents,"Ev324",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev324",theAuditEventData);
  //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -733,36 +733,36 @@ begin
   //
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "InstFork_1", "9");
   theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "InstMerge_1", "9");
-  acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","IFA","Instance_FandM_Job","InstForkJob",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","IFB","Instance_FandM_Job","InstForkJob",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","IFC","Instance_FandM_Job","InstForkJob",previousEvents,"Ev312",theAuditEventData);
   previousEvents := empty & "Ev303" & "Ev304" & "Ev305" & "Ev306" & "Ev307" & "Ev308" & "Ev309" & "Ev310" & "Ev311" & "Ev312";
-  acceptOrderedEvent ("1620920003","Test-0001","IFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","IFD","Instance_FandM_Job","InstForkJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := ("Ev313");
-  acceptOrderedEvent ("1620920004","Test-0001","IFE","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","IFE","Instance_FandM_Job","InstForkJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := ("Ev314");
-  acceptOrderedEvent ("1620920005","Test-0001","IFF","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","IFF","Instance_FandM_Job","InstForkJob",previousEvents,"Ev315",theAuditEventData);
  //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -797,56 +797,56 @@ begin
 
   theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "SplitInstFork_1", "10");
   theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "SplitInstMerge_1", "11");
-  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","SIFA","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData := emptyAuditEventData;
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","SIFB","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","SIFC","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev312",theAuditEventData);
   
   // Merging Sequence
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev315",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev316",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev317",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev317",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev318",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev318",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev319",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev319",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev320",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev320",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev321",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev321",theAuditEventData);
   previousEvents := empty;
-  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job",previousEvents,"Ev322",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","SIFD","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev322",theAuditEventData);
   previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317" & "Ev318" & "Ev319" & "Ev320" & "Ev321" & "Ev322";
-  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job",previousEvents,"Ev323",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","SIFE","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev323",theAuditEventData);
   previousEvents := ("Ev323");
-  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job",previousEvents,"Ev324",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","SIFF","Instance_FandM_Job","SplitInstForkJob",previousEvents,"Ev324",theAuditEventData);
  //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -881,42 +881,42 @@ begin
   theAuditEventData := theAuditEventData & (aeDataKindEnum.BRANCHCOUNT, "MultiFork_2", "4");
   theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "MultiMerge_1", "2");
   theAuditEventData := theAuditEventData & (aeDataKindEnum.MERGECOUNT, "MultiMerge_2", "4");
-  acceptOrderedEvent ("1620920000","Test-0001","MFMA","MultiForkJob",previousEvents,"Ev301",theAuditEventData);
+  acceptOrderedEvent ("1620920000","Test-0001","MFMA","MultiForkJob","MultiForkJob",previousEvents,"Ev301",theAuditEventData);
   theAuditEventData :=  emptyAuditEventData;
   previousEvents := ("Ev301");
-  acceptOrderedEvent ("1620920001","Test-0001","MFMB","MultiForkJob",previousEvents,"Ev302",theAuditEventData);
+  acceptOrderedEvent ("1620920001","Test-0001","MFMB","MultiForkJob","MultiForkJob",previousEvents,"Ev302",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","MFMC","MultiForkJob",previousEvents,"Ev303",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","MFMC","MultiForkJob","MultiForkJob",previousEvents,"Ev303",theAuditEventData);
   previousEvents := ("Ev302");
-  acceptOrderedEvent ("1620920002","Test-0001","MFMC","MultiForkJob",previousEvents,"Ev304",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","MFMC","MultiForkJob","MultiForkJob",previousEvents,"Ev304",theAuditEventData);
   previousEvents := ("Ev303");
-  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev305",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob","MultiForkJob",previousEvents,"Ev305",theAuditEventData);
   previousEvents := ("Ev303");
-  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev306",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob","MultiForkJob",previousEvents,"Ev306",theAuditEventData);
   previousEvents := ("Ev303");
-  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev307",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob","MultiForkJob",previousEvents,"Ev307",theAuditEventData);
   previousEvents := ("Ev303");
-  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev308",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob","MultiForkJob",previousEvents,"Ev308",theAuditEventData);
   previousEvents := ("Ev304");
-  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev309",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob","MultiForkJob",previousEvents,"Ev309",theAuditEventData);
   previousEvents := ("Ev304");
-  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev310",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob","MultiForkJob",previousEvents,"Ev310",theAuditEventData);
   previousEvents := ("Ev304");
-  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev311",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob","MultiForkJob",previousEvents,"Ev311",theAuditEventData);
   previousEvents := ("Ev304");
-  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob",previousEvents,"Ev312",theAuditEventData);
+  acceptOrderedEvent ("1620920002","Test-0001","MFMD","MultiForkJob","MultiForkJob",previousEvents,"Ev312",theAuditEventData);
   previousEvents := empty & "Ev305" & "Ev306";
-  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob",previousEvents,"Ev313",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob","MultiForkJob",previousEvents,"Ev313",theAuditEventData);
   previousEvents := empty & "Ev307" & "Ev308";
-  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob",previousEvents,"Ev314",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob","MultiForkJob",previousEvents,"Ev314",theAuditEventData);
   previousEvents := empty & "Ev309" & "Ev310";
-  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob",previousEvents,"Ev315",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob","MultiForkJob",previousEvents,"Ev315",theAuditEventData);
   previousEvents := empty & "Ev311" & "Ev312";
-  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob",previousEvents,"Ev316",theAuditEventData);
+  acceptOrderedEvent ("1620920003","Test-0001","MFME","MultiForkJob","MultiForkJob",previousEvents,"Ev316",theAuditEventData);
   previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316";
-  acceptOrderedEvent ("1620920004","Test-0001","MFMF","MultiForkJob",previousEvents,"Ev317",theAuditEventData);
+  acceptOrderedEvent ("1620920004","Test-0001","MFMF","MultiForkJob","MultiForkJob",previousEvents,"Ev317",theAuditEventData);
   previousEvents := ("Ev317");
-  acceptOrderedEvent ("1620920005","Test-0001","MFMG","MultiForkJob",previousEvents,"Ev318",theAuditEventData);
+  acceptOrderedEvent ("1620920005","Test-0001","MFMG","MultiForkJob","MultiForkJob",previousEvents,"Ev318",theAuditEventData);
  //
   Test::service_event_queue();
   if (Test::get_scheduled_timers ())'length /= 0 then
@@ -967,57 +967,57 @@ begin
   //
   // Bank Transfer Sequence
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
-  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","EBankTransferJob","","Ev1",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","EBankTransferJob","Ev1","Ev2",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","EBankTransferJob","Ev2","Ev3",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev3","Ev4",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","Ev4","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","EBankTransferJob","Ev4","Ev5",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","EBankTransferJob","Ev5","Ev6",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev6","Ev7",theAuditEventData);
   
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
-  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","Ev7","Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev7","Ev8",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","Ev8","Ev9",theAuditEventData);
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","EBankTransferJob","Ev8","Ev9",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","Ev8","Ev9a",theAuditEventData);
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","EBankTransferJob","Ev8","Ev9a",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","Ev9","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev9","Ev10",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","Ev10","Ev11",theAuditEventData);
+  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev10","Ev11",theAuditEventData);
   
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
-  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","Ev11","Ev12",theAuditEventData);
+  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev11","Ev12",theAuditEventData);
   
   // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","","Ev13",theAuditEventData);
+  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","EBankTransferJob","","Ev13",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","Ev13","Ev14",theAuditEventData);
+  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev13","Ev14",theAuditEventData);
   
   // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","","Ev50",theAuditEventData);
+  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","EBankTransferJob","","Ev50",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","Ev50","Ev55",theAuditEventData);
+  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","EBankTransferJob","Ev50","Ev55",theAuditEventData);
   //
   Test::service_event_queue();
   theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
@@ -1131,57 +1131,57 @@ begin
   //
   // Bank Transfer Sequence
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore2");
-  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","EBankTransferJob","","Ev1",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","EBankTransferJob","Ev1","Ev2",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","EBankTransferJob","Ev2","Ev3",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev3","Ev4",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","Ev4","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","EBankTransferJob","Ev4","Ev5",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","EBankTransferJob","Ev5","Ev6",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev6","Ev7",theAuditEventData);
   
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore2");
-  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","Ev7","Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev7","Ev8",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","Ev8","Ev9",theAuditEventData);
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","EBankTransferJob","Ev8","Ev9",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","Ev8","Ev9a",theAuditEventData);
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","EBankTransferJob","Ev8","Ev9a",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","Ev9","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev9","Ev10",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","Ev10","Ev11",theAuditEventData);
+  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev10","Ev11",theAuditEventData);
   
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore3");
-  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","Ev11","Ev12",theAuditEventData);
+  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev11","Ev12",theAuditEventData);
   
   // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","","Ev13",theAuditEventData);
+  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","EBankTransferJob","","Ev13",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","Ev13","Ev14",theAuditEventData);
+  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev13","Ev14",theAuditEventData);
   
   // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","","Ev50",theAuditEventData);
+  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","EBankTransferJob","","Ev50",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","Ev50","Ev55",theAuditEventData);
+  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","EBankTransferJob","Ev50","Ev55",theAuditEventData);
   //
   //
   Test::service_event_queue();
@@ -1247,57 +1247,57 @@ begin
   //
   // Bank Transfer Sequence
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
-  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","EBankTransferJob","","Ev1",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","EBankTransferJob","Ev1","Ev2",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","EBankTransferJob","Ev2","Ev3",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev3","Ev4",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","Ev4","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","EBankTransferJob","Ev4","Ev5",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","EBankTransferJob","Ev5","Ev6",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev6","Ev7",theAuditEventData);
   
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
-  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","Ev7","Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev7","Ev8",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","Ev8","Ev9",theAuditEventData);
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","EBankTransferJob","Ev8","Ev9",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","Ev8","Ev9a",theAuditEventData);
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","EBankTransferJob","Ev8","Ev9a",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","Ev9","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev9","Ev10",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","Ev10","Ev11",theAuditEventData);
+  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev10","Ev11",theAuditEventData);
   
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
-  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","Ev11","Ev12",theAuditEventData);
+  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev11","Ev12",theAuditEventData);
   
   // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","","Ev13",theAuditEventData);
+  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","EBankTransferJob","","Ev13",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","Ev13","Ev14",theAuditEventData);
+  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev13","Ev14",theAuditEventData);
   
   // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","","Ev50",theAuditEventData);
+  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","EBankTransferJob","","Ev50",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","Ev50","Ev55",theAuditEventData);
+  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","EBankTransferJob","Ev50","Ev55",theAuditEventData);
   //
   Test::service_event_queue();
   theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
@@ -1375,57 +1375,57 @@ begin
   //
   // Bank Transfer Sequence
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
-  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920000","export-control-1234","ENearInput","Job_PersistentInvariant_Use","EBankTransferJob","","Ev1",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920001","export-control-1234","ENearPartWrite","Job_PersistentInvariant_Use","EBankTransferJob","Ev1","Ev2",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920002","export-control-1234","ENearJustificationWrite","Job_PersistentInvariant_Use","EBankTransferJob","Ev2","Ev3",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920003","agent-1234","EAgentRequestWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev3","Ev4",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","Ev4","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920004","authoriser-1234","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","EBankTransferJob","Ev4","Ev5",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920005","authoriser-1234","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","EBankTransferJob","Ev5","Ev6",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920006","authoriser-1234","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev6","Ev7",theAuditEventData);
   
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
-  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","Ev7","Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920007","agent-1234","EAgentReceiveWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev7","Ev8",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","Ev8","Ev9",theAuditEventData);
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentPartRead","Job_PersistentInvariant_Use","EBankTransferJob","Ev8","Ev9",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","Ev8","Ev9a",theAuditEventData);
+  acceptOrderedEvent ("1620920008","agent-1234","EAgentProcessedRequest","Job_PersistentInvariant_Use","EBankTransferJob","Ev8","Ev9a",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","Ev9","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920009","agent-1234","EAgentWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev9","Ev10",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","Ev10","Ev11",theAuditEventData);
+  acceptOrderedEvent ("1620920010","gateway-1234","EGatewayReadPayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev10","Ev11",theAuditEventData);
   
   theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Restore1");
-  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","Ev11","Ev12",theAuditEventData);
+  acceptOrderedEvent ("1620920011","gateway-1234","EGatewayWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev11","Ev12",theAuditEventData);
   
   // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","","Ev13",theAuditEventData);
+  acceptOrderedEvent ("1620920012","mid-1234","EMidProcessPayload","Job_PersistentInvariant_Use","EBankTransferJob","","Ev13",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","Ev13","Ev14",theAuditEventData);
+  acceptOrderedEvent ("1620920013","mid-1234","EMidWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev13","Ev14",theAuditEventData);
   
   // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","","Ev50",theAuditEventData);
+  acceptOrderedEvent ("1620920050","import_control-1234","EFarInput","Job_PersistentInvariant_Use","EBankTransferJob","","Ev50",theAuditEventData);
   
   theAuditEventData := emptyAuditEventData;
-  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","Ev50","Ev55",theAuditEventData);
+  acceptOrderedEvent ("1620920055","import_control-1234","EFarOutput","Job_PersistentInvariant_Use","EBankTransferJob","Ev50","Ev55",theAuditEventData);
   //
   Test::service_event_queue();
   theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");

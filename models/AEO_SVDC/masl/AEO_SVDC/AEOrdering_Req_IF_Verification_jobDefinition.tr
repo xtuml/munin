@@ -1,10 +1,27 @@
 public service AEOrdering::Req_IF_Verification~>jobDefinition ( jobName: in string,
                                                                 eventDefinitions: in sequence of EventDefinitionType ) is
 svdcEventDefinitions : sequence of AESequenceDC::eventDefinitionStructure;
+svdcEventDefinition : AESequenceDC::eventDefinitionStructure;
+prevEventTypes: sequence of AESequenceDC::eventStructure;
 
 begin
+
+  for eventDefinition in eventDefinitions loop
+    svdcEventDefinition.sequenceName := eventDefinition.sequenceName;
+    svdcEventDefinition.eventType := eventDefinition.eventType;
+    svdcEventDefinition.occurrenceId := eventDefinition.occurrenceId;
+    svdcEventDefinition.previousEventTypes := sequence of AESequenceDC::eventStructure(eventDefinition.previousEventTypes);
+    svdcEventDefinition.isSequenceStart := eventDefinition.isSequenceStart;
+    svdcEventDefinition.isSequenceEnd := eventDefinition.isSequenceEnd;
+    svdcEventDefinition.isBreak := eventDefinition.isBreak;
+    svdcEventDefinition.isHappy := eventDefinition.isSequenced;
+    //TODO Fix this when critical is available through AEO
+    svdcEventDefinition.isCritical := false;
+
+    svdcEventDefinitions := svdcEventDefinitions & svdcEventDefinition;
+  end loop;
   
   // call the public service
-  AESequenceDC::createJobDefinition(jobName, sequence of AESequenceDC::eventDefinitionStructure(eventDefinitions));
+  AESequenceDC::createJobDefinition(jobName, sequence of AESequenceDC::eventDefinitionStructure(svdcEventDefinitions ));
 
 end service;

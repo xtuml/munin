@@ -7,6 +7,8 @@ public service AEOrdering::Req_IF_Verification~>eventDefinition ( jobName: in st
                                                                   isSequenceEnd: in boolean,
                                                                   isBreak: in boolean ) is
 prevEventTypes: sequence of AESequenceDC::eventStructure;
+isSequenced : boolean;
+isCritical : boolean;
 begin
   // convert the AEOrdering type to an AESequenceDC type
   for previousEventType in previousEventTypes loop
@@ -29,6 +31,8 @@ begin
     prevEventTypes,
     isSequenceStart,
     isSequenceEnd,
-    isBreak
+    isBreak,
+    isSequenced,
+    isCritical
   );
 end service;
