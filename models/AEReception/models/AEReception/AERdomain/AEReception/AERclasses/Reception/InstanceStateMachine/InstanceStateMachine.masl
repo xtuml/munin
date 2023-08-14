@@ -49,7 +49,7 @@ begin
 
             // validate the event
             if this.validate then
-            	validation_result := JSONValidation::validate(element_received, #PROP["auditEventSchema"]#);
+            	validation_result := JSONValidation::validate(element_received, Environment::getenv(Environment::variable_name("AUDIT_EVENT_SCHEMA_PATH")));
 				if JSON::get_boolean(validation_result["valid"]) = true then
 					eventContent := "EventId = " & eventId;
 					Reporting~>reportEvent(Logger::Information, "reception_event_valid", eventContent);
