@@ -20,8 +20,8 @@ begin
   previousEventTypes := ("BCFE",1,"","");
   eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false,true,false);
 
-  dynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
-  dynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
+  createDynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
+  createDynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
   
 //
   previousEventTypes := empty;
@@ -37,7 +37,7 @@ begin
   previousEventTypes := ("SSUFE",1,"","");
   eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFF",1,previousEventTypes,false,true,false,true,false);
 
-  dynamicControlDefinition("BranchSameSourceAndUserJob", "Branch_SameSourceAndUser_1", dynamicControlTypeEnum.BRANCHCOUNT, "SSUFB",1,"SSUFB",1);
+  createDynamicControlDefinition("BranchSameSourceAndUserJob", "Branch_SameSourceAndUser_1", dynamicControlTypeEnum.BRANCHCOUNT, "SSUFB",1,"SSUFB",1);
 //
 end service;
 //

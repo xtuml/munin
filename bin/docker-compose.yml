@@ -1,0 +1,57 @@
+version: "3.9"
+name: munin
+
+volumes:
+  ConanServer:
+  ConanCache:
+
+
+services:
+
+  conan-server:
+    image: levistarrett/conan-server
+    restart: unless-stopped
+    ports:
+      - 9300:9300
+    volumes:
+      - type: volume
+        source: ConanServer
+        target: /conan-data
+
+  populate:
+    image: levistarrett/masl-populate
+    depends_on:
+      conan-server:
+        condition: service_healthy
+
+  bash:
+    image: levistarrett/masl-dev
+    depends_on:
+      conan-server:
+        condition: service_healthy
+    volumes:
+      - type: volume
+        source: ConanCache
+        target: /conan-cache
+
+  build:
+    image: levistarrett/masl-dev
+    depends_on:
+      conan-server:
+        condition: service_healthy
+    volumes:
+      - type: volume
+        source: ConanCache
+        target: /conan-cache
+    command: bash -c "conan build . && conan export-pkg ."
+
+  install-deploy:
+    image: levistarrett/masl-dev
+    depends_on:
+      conan-server:
+        condition: service_healthy
+    volumes:
+      - type: volume
+        source: ConanCache
+        target: /conan-cache
+    command: "conan install . --deployer=full_deploy"

@@ -34,7 +34,7 @@ begin
   eventDefinition ("ComplexInstanceForkJob1","InstanceBranchingWithNoMerge","CS2-Z",1,previousEventTypes,false,true,false,true,false);
   
   // Now, set up the dynamic control definitions for 'ComplexInstanceForkJob1'...
-  dynamicControlDefinition("ComplexInstanceForkJob1", "BCV1", dynamicControlTypeEnum.BRANCHCOUNT, "CS2-U",1,"CS2-V",1);
+  createDynamicControlDefinition("ComplexInstanceForkJob1", "BCV1", dynamicControlTypeEnum.BRANCHCOUNT, "CS2-U",1,"CS2-V",1);
 
   // *********************************************************************************************************************
   // Secondly, set up the event definitions for Job: ComplexInstanceForkAndMergeJob1, Sequence: SingleEventInEachBranch 
@@ -53,8 +53,8 @@ begin
   eventDefinition ("ComplexInstanceForkAndMergeJob1","SingleEventInEachBranch","CS3-Z",1,previousEventTypes,false,true,false,true,false);
   
   // Now, set up the dynamic control definitions for 'ComplexInstanceForkAndMergeJob1'...
-  dynamicControlDefinition("ComplexInstanceForkAndMergeJob1", "BCV2", dynamicControlTypeEnum.BRANCHCOUNT, "CS3-U",1,"CS3-V",1);
-  dynamicControlDefinition("ComplexInstanceForkAndMergeJob1", "MCX2", dynamicControlTypeEnum.MERGECOUNT, "CS3-U",1,"CS3-X",1);
+  createDynamicControlDefinition("ComplexInstanceForkAndMergeJob1", "BCV2", dynamicControlTypeEnum.BRANCHCOUNT, "CS3-U",1,"CS3-V",1);
+  createDynamicControlDefinition("ComplexInstanceForkAndMergeJob1", "MCX2", dynamicControlTypeEnum.MERGECOUNT, "CS3-U",1,"CS3-X",1);
   
   // *********************************************************************************************************************
   // Thirdly, set up the event definitions for Job: ComplexInstanceForkAndMergeJob2, Sequence: MultipleEventsInEachBranch 
@@ -73,8 +73,8 @@ begin
   eventDefinition ("ComplexInstanceForkAndMergeJob2","MultipleEventsInEachBranch","CS4-Z",1,previousEventTypes,false,true,false,true,false);
   
   // Now, set up the dynamic control definitions for 'ComplexInstanceForkAndMergeJob2'...
-  dynamicControlDefinition("ComplexInstanceForkAndMergeJob2", "BCV3", dynamicControlTypeEnum.BRANCHCOUNT, "CS4-U",1,"CS4-V",1);
-  dynamicControlDefinition("ComplexInstanceForkAndMergeJob2", "MCZ3", dynamicControlTypeEnum.MERGECOUNT, "CS4-U",1,"CS4-Z",1);
+  createDynamicControlDefinition("ComplexInstanceForkAndMergeJob2", "BCV3", dynamicControlTypeEnum.BRANCHCOUNT, "CS4-U",1,"CS4-V",1);
+  createDynamicControlDefinition("ComplexInstanceForkAndMergeJob2", "MCZ3", dynamicControlTypeEnum.MERGECOUNT, "CS4-U",1,"CS4-Z",1);
   
   // ****************************************************************************************************************
   // Fourthly, set up the event definitions for Job: ComplexInstanceForkAndMergeJob3, Sequence: NestedInstanceForks
@@ -93,9 +93,9 @@ begin
   eventDefinition ("ComplexInstanceForkAndMergeJob3","NestedInstanceForks","CS5-Z",1,previousEventTypes,false,true,false,true,false);
   
   // Now, set up the dynamic control definitions for 'ComplexInstanceForkJob2'...
-  dynamicControlDefinition("ComplexInstanceForkAndMergeJob3", "BCV4", dynamicControlTypeEnum.BRANCHCOUNT, "CS5-U",1,"CS5-V",1);
-  dynamicControlDefinition("ComplexInstanceForkAndMergeJob3", "BCW4", dynamicControlTypeEnum.BRANCHCOUNT, "CS5-U",1,"CS5-W",1);
-  dynamicControlDefinition("ComplexInstanceForkAndMergeJob3", "MCZ4", dynamicControlTypeEnum.MERGECOUNT, "CS5-U",1,"CS5-Z",1);
+  createDynamicControlDefinition("ComplexInstanceForkAndMergeJob3", "BCV4", dynamicControlTypeEnum.BRANCHCOUNT, "CS5-U",1,"CS5-V",1);
+  createDynamicControlDefinition("ComplexInstanceForkAndMergeJob3", "BCW4", dynamicControlTypeEnum.BRANCHCOUNT, "CS5-U",1,"CS5-W",1);
+  createDynamicControlDefinition("ComplexInstanceForkAndMergeJob3", "MCZ4", dynamicControlTypeEnum.MERGECOUNT, "CS5-U",1,"CS5-Z",1);
   
   // ****************************************************************************************************************************
   // Finally, set up the event definitions for Job: ComplexInstanceForkAndMergeJob4, Sequence: NestedInstanceForksAcrossSequences
@@ -114,9 +114,9 @@ begin
   eventDefinition ("ComplexInstanceForkAndMergeJob4","NestedInstanceForksAcrossSequences","CS6-Z",1,previousEventTypes,false,true,false,true,false);
   
   // Now, set up the dynamic control definitions for 'ComplexInstanceForkJob2'...
-  dynamicControlDefinition("ComplexInstanceForkAndMergeJob4", "BCV5", dynamicControlTypeEnum.BRANCHCOUNT, "CS6-U",1,"CS6-V",1);
-  dynamicControlDefinition("ComplexInstanceForkAndMergeJob4", "BCW5", dynamicControlTypeEnum.BRANCHCOUNT, "CS6-U",1,"CS6-W",1);
-  dynamicControlDefinition("ComplexInstanceForkAndMergeJob4", "MCZ5", dynamicControlTypeEnum.MERGECOUNT, "CS6-U",1,"CS6-Z",1);
+  createDynamicControlDefinition("ComplexInstanceForkAndMergeJob4", "BCV5", dynamicControlTypeEnum.BRANCHCOUNT, "CS6-U",1,"CS6-V",1);
+  createDynamicControlDefinition("ComplexInstanceForkAndMergeJob4", "BCW5", dynamicControlTypeEnum.BRANCHCOUNT, "CS6-U",1,"CS6-W",1);
+  createDynamicControlDefinition("ComplexInstanceForkAndMergeJob4", "MCZ5", dynamicControlTypeEnum.MERGECOUNT, "CS6-U",1,"CS6-Z",1);
   //
 end service;
 //
@@ -213,13 +213,13 @@ begin
   eventDefinition ("ComplexJob2","ComplexSequence2","CS7-R",1,previousEventTypes,false,true,false,true,false);
   //
   // Now, set up the dynamic control definitions for 'ComplexJob2'...
-  dynamicControlDefinition("ComplexJob2", "LCE1", dynamicControlTypeEnum.LOOPCOUNT, "CS7-B",1,"CS7-E",1);
-  dynamicControlDefinition("ComplexJob2", "LCD2", dynamicControlTypeEnum.LOOPCOUNT, "CS7-B",1,"CS7-D",2);
-  dynamicControlDefinition("ComplexJob2", "LCS1", dynamicControlTypeEnum.LOOPCOUNT, "CS7-A",1,"CS7-S",1);
-  dynamicControlDefinition("ComplexJob2", "LCF1", dynamicControlTypeEnum.LOOPCOUNT, "CS7-B",1,"CS7-F",1);
-  dynamicControlDefinition("ComplexJob2", "BCF3", dynamicControlTypeEnum.BRANCHCOUNT, "CS7-F",3,"CS7-F",3);
-  dynamicControlDefinition("ComplexJob2", "BCK1", dynamicControlTypeEnum.BRANCHCOUNT, "CS7-A",1,"CS7-K",1);
-  dynamicControlDefinition("ComplexJob2", "MCM1", dynamicControlTypeEnum.MERGECOUNT, "CS7-A",1,"CS7-M",1);
+  createDynamicControlDefinition("ComplexJob2", "LCE1", dynamicControlTypeEnum.LOOPCOUNT, "CS7-B",1,"CS7-E",1);
+  createDynamicControlDefinition("ComplexJob2", "LCD2", dynamicControlTypeEnum.LOOPCOUNT, "CS7-B",1,"CS7-D",2);
+  createDynamicControlDefinition("ComplexJob2", "LCS1", dynamicControlTypeEnum.LOOPCOUNT, "CS7-A",1,"CS7-S",1);
+  createDynamicControlDefinition("ComplexJob2", "LCF1", dynamicControlTypeEnum.LOOPCOUNT, "CS7-B",1,"CS7-F",1);
+  createDynamicControlDefinition("ComplexJob2", "BCF3", dynamicControlTypeEnum.BRANCHCOUNT, "CS7-F",3,"CS7-F",3);
+  createDynamicControlDefinition("ComplexJob2", "BCK1", dynamicControlTypeEnum.BRANCHCOUNT, "CS7-A",1,"CS7-K",1);
+  createDynamicControlDefinition("ComplexJob2", "MCM1", dynamicControlTypeEnum.MERGECOUNT, "CS7-A",1,"CS7-M",1);
   //
   // And then set up the Invariant definitions for 'ComplexJob2'...
   // Define an intra-job invariant for the 'ComplexJob2' that is used at B,1 and H,1
