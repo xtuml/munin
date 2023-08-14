@@ -107,6 +107,11 @@ begin
 			Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
 		end if;
 		Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
+		// check the processed directory exists and if not create it
+		if not Filesystem::file_exists(Filesystem::filename(this.processedDirectory)) then
+			Filesystem::create_directory(Filesystem::filename(this.processedDirectory));
+		end if;
+		Filesystem::add_permissions(Filesystem::filename(this.processedDirectory),filePermissions);
 		// check the outgoing directory exists and if not create it
 		if not Filesystem::file_exists(Filesystem::filename(this.outgoingDirectory)) then
 			Filesystem::create_directory(Filesystem::filename(this.outgoingDirectory));
