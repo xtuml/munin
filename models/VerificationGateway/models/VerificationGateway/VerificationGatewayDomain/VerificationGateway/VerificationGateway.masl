@@ -3,10 +3,27 @@ public service VerificationGateway::Verification~>verifyInstrumentationEvent ( j
                                                                               eventID : in string,
                                                                               eventType : in string,
                                                                               previousEventID : in string ) is
-reportedEvent: string;
+reportedEvent : string;
+theJobDetails : string;
+theNodeDetails : string;
+theApplicationDetails : string;
+theEventDetails : string;
+thePreviousEventId : string;
+//thePreviousAuditEventIds : sequence of string;
+theAuditEventData : string;
+empty : sequence of string;
 
 begin
-    reportedEvent:= "JobId = " & jobID & " : EventId = " & eventID & " : EventType = " & eventType & " : previousEventId = " & previousEventID;
+    // Construct the reportedEvent string...
+    theJobDetails := "JobId = " & jobID;
+    theNodeDetails := " Node: ";
+    theApplicationDetails := " Application: MUNIN - Protocol Verifier";
+    theEventDetails := " : EventType = " & eventType & " : EventId = " & eventID;
+    //thePreviousAuditEventIds := thePreviousAuditEventIds & thePreviousEventId;
+    theAuditEventData := " Audit Event Data: " & "";
+    
+    reportedEvent := theJobDetails & theNodeDetails & theApplicationDetails & theEventDetails & " : Previous Event Ids: " & previousEventID & theAuditEventData;
+//    reportedEvent:= "JobId = " & jobID & " : EventId = " & eventID & " : EventType = " & eventType & " : previousEventId = " & previousEventID;
     Logger::log(Logger::Information, "VerifierInstrumentation", reportedEvent);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
