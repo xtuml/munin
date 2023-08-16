@@ -74,3 +74,34 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. 'ac66dcaf-1b96-43f9-b68c-9a16b271ce04' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitSimpleJobWithCriticalAndUnhappyEvents () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // A simple job that includes an unhappy event definition
+  // 
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleCriticalSequence","UCEJ-A",1,previousEventTypes,true,false,false,true,false);
+  previousEventTypes := ("UCEJ-A",1,"","");
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleCriticalSequence","UCEJ-B",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCEJ-B",1,"","");
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleCriticalSequence","UCEJ-C",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCEJ-C",1,"","");
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleCriticalSequence","UCEJ-D",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCEJ-D",1,"","");
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleCriticalSequence","UCEJ-E",1,previousEventTypes,false,true,false,true,true);
+  //
+  // and now the unhappy event definition
+  //
+  //
+  previousEventTypes := empty;
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleSequence","UCEJ-Error",1,previousEventTypes,false,false,false,false,false);
+  //
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
