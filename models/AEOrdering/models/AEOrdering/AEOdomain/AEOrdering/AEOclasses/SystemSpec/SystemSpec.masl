@@ -293,7 +293,7 @@ begin
         for auditEventType in (job -> R12.AuditEventType() ordered_by (auditEventTypeId)) loop
             eventDefinitions := eventDefinitions & (auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, 
             	                                 auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd, 
-            	                                 auditEventType.isBreak, auditEventType.isSequenced);
+            	                                 auditEventType.isBreak, auditEventType.isSequenced, auditEventType.critical);
         end loop;
         Req_IF_Verification~>jobDefinition(job.jobTypeName, eventDefinitions);
         // report any dynamic controls
