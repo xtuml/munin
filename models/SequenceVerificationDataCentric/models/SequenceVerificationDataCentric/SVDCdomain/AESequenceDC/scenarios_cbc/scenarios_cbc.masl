@@ -105,3 +105,49 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. 'dce9da0f-d4e0-4728-a818-f1d3e53faefe' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitJobWithCriticalAndUnhappyEvents1 () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // A forking job that includes an unhappy event definition
+  // 
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-A",1,previousEventTypes,true,false,false,true,false);
+  previousEventTypes := ("UCJ-A",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-B",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-B",1,"CriticalJobANDFork","AND");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-C",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-C",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-D",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-D",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-E",1,previousEventTypes,false,false,false,true,true);
+  previousEventTypes := ("UCJ-B",1,"CriticalJobANDFork","AND");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-F",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-F",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-G",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-G",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-H",1,previousEventTypes,false,false,false,true,true);
+  previousEventTypes := ("UCJ-E",1,"","") & ("UCJ-H",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-I",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-I",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-J",1,previousEventTypes,false,true,false,true,false);
+  //
+  //dynamicControlDefinition("UnhappyCriticalJob1", "TypeFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "CSJB",1,"CSJB",1);
+  //dynamicControlDefinition("UnhappyCriticalJob1", "TypeMerge1", dynamicControlTypeEnum.MERGECOUNT, "CSJB",1,"CSJI",1);
+  
+  // and now the unhappy event definitions
+  //
+  //
+  previousEventTypes := empty;
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-Error1",1,previousEventTypes,false,false,false,false,false);
+  previousEventTypes := empty;
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-Error2",1,previousEventTypes,false,false,false,false,false);
+  //
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

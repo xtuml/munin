@@ -61,8 +61,8 @@ begin
 				if eventDefJSONObject'contains("IsBreak") then
 					isBreak := JSON::get_boolean(eventDefJSONObject["IsBreak"]);
 				end if;
-				if eventDefJSONObject'contains("Critical") then
-					critical := JSON::get_boolean(eventDefJSONObject["Critical"]);
+				if eventDefJSONObject'contains("IsCritical") then
+					critical := JSON::get_boolean(eventDefJSONObject["IsCritical"]);
 				end if;
     			if eventDefJSONObject'contains("PreviousEvents") and eventDefJSONObject["PreviousEvents"].kind = JSON::Array then
 					for prevEventTypeJSONElement in JSON::get_array(eventDefJSONObject["PreviousEvents"]) loop
