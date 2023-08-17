@@ -15,8 +15,7 @@ begin
     svdcEventDefinition.isSequenceEnd := eventDefinition.isSequenceEnd;
     svdcEventDefinition.isBreak := eventDefinition.isBreak;
     svdcEventDefinition.isHappy := eventDefinition.isSequenced;
-    //TODO Fix this when critical is available through AEO
-    svdcEventDefinition.isCritical := false;
+    svdcEventDefinition.isCritical := eventDefinition.critical;
 
     svdcEventDefinitions := svdcEventDefinitions & svdcEventDefinition;
   end loop;
