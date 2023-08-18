@@ -610,6 +610,17 @@ begin
     isSuccess := false;
   end if;     
   
+  // Also need to check to see if any unhappy events have no previous events
+  // If that's the case then the above test needs to be overridden if there is a
+  // critical event in the job definition since it is impossible to determine scope
+  
+  if theJobsCriticalEvents /= null then
+    for anUnhappyEvent in theUnhappyEvents loop
+      if (anUnhappyEvent -> R47.has_previous.AuditEvent) = null then
+        isSuccess := false;
+      end if;  
+    end loop;
+  end if;
   
   if isSuccess then
     generate UnhappyJob.unhappyJobBehavedAsExpected () to this;

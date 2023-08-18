@@ -138,7 +138,9 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test902SimpleCriticalEvent 1902 Cle
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test903SimpleCriticalEventHappyEventsOnly 1903 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test904CriticalEventJobOK 1904 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test905CriticalEventJobFail1 1905 CleanUpAllJobs 64]
-RUN SCENARIO Test 1 "run_test" [AESequenceDC Test906CriticalEventJobFail6 1906 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test906CriticalEventJobFail2 1906 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test907CriticalEventJobOK2 1907 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test908CriticalEventJobFail3 1908 CleanUpAllJobs 64]
 
 
 
