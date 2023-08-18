@@ -62,7 +62,7 @@ begin
     link theJob R44 newSeqEvent;
     // and to the sequenced event definition
     link newSeqEvent R2 theEventType;
-    logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Happy event seen in Unhappy Job (" ; //& auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
+    logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Happy event seen in Unhappy Job (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & auditEventType & " with " & prevAuditEventIds'length'image & " previous event ids";
 	Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
     
   end if;
@@ -79,7 +79,7 @@ begin
     // and to the sequenced event definition
     link newUnseqEvent R41 theUnseqEventType;
 
-    logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Unhappy event seen in Unhappy Job (" ; //& auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
+    logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Unhappy event seen in Unhappy Job (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & auditEventType & " with " & prevAuditEventIds'length'image & " previous event ids";
 	Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
     
    // TODO Add possible section to deal with an Unhappy Event being marked as a Job End event
@@ -93,7 +93,7 @@ begin
   if (theEventType /= null) or (theUnseqEventType /= null) then        
     if (prevAuditEventIds /= empty) and (prevAuditEventIds /= emptyPrevId) then
       // Log info: Event has previous event ids
-      logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Follow on event in Unhappy Job (" ; //& auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
+      logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Follow on event in Unhappy Job (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & ", current event type = " & auditEventType & " with " & prevAuditEventIds'length'image & " previous event ids";
 	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
 
       //auditEventDataProcessed := false;
@@ -116,7 +116,7 @@ begin
             link prevEvt R47.has_next.AuditEvent newEvent using newAuditEventLink;
                   
           else
-            theJob.failJob("The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AEId & " and Previous Event Id = " & prevEvt.AEId );              
+            theJob.failJob("The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " , current event type = " & auditEventType & " , Event Id = " & newEvent.AEId & " and Previous Event Id = " & prevEvt.AEId );              
           end if;  
              
           //TODO Confirm whether there is a need to support any audit event data (probably only invariants) for Unhappy Jobs
@@ -182,8 +182,11 @@ logMessage : string;
 theSystemSpec : instance of SystemSpecification;
 theJob : instance of Job;
 eventContent : string;
+unhappyJobFailureReason : string;
 
 begin
+unhappyJobFailureReason := failureReason;
+
   theJob := this -> R45;
   // Cancel the jobDeletionTimer (that may have been set in previous states) in preparation
   // for being set again within this state.
@@ -195,10 +198,10 @@ begin
   theJob.jobCompleted := false;
   
   // Log info: Audit Event Sequence Verification has been informed of Job failure
-  logMessage := "AESequenceDC::Job.JobFailed : Job Failed - jobId = " & this.jobID & " due to: " & failureReason;
+  logMessage := "AESequenceDC::Job.JobFailed : Alarm Condition in - jobId = " & this.jobID & " due to: " & unhappyJobFailureReason;
   Logger::log(Logger::Error, "AESequenceDC", logMessage);
-  eventContent := "FailureReason = " & failureReason & " : JobId = " & this.jobID;
-  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
+  eventContent := "Alarm Condition = " & unhappyJobFailureReason & " : JobId = " & this.jobID;
+  Reporting~>reportEvent(Logger::Error, "svdc_job_alarm", eventContent);
   for evt in theJob-> R44.SequencedAuditEvent loop
 	  eventContent := "EventId = " & evt.AuditEventId;
 	  Reporting~>reportEvent(Logger::Information, "svdc_happy_event_processed", eventContent);
@@ -544,18 +547,93 @@ end state;
 //! ACTIVITY BEGIN. 'a263a5ea-e11e-41b5-b6a6-0ac8c790504d' '2fad9bc5-546e-48fa-ad6f-e3222c2a6ea4' DO NOT EDIT THIS LINE.
 state AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion () is
 theJob : instance of Job;
+theJobDefn : instance of JobDefinition;
+theCriticalEventDefinitions : set of instance of SequencedAuditEventDefinition;
+theCriticalEvents : set of instance of SequencedAuditEvent;
+theJobsEvents : set of instance of SequencedAuditEvent;
+theJobsCriticalEvents : set of instance of SequencedAuditEvent;
+theParentEvent : instance of AuditEvent;
+theParentEvents : set of instance of AuditEvent;
+theGrandparentEvents : set of instance of AuditEvent;
+theAncestorEvents : set of instance of AuditEvent;
+theUnhappyEvents : set of instance of AuditEvent;
+theParentsOfUnhappyEvents : set of instance of AuditEvent;
+logMessage : string;
 isSuccess : boolean;
 failureReason : string;
 begin
   theJob := this -> R45;
+  theJobDefn := theJob -> R8;
 
-  // TODO Check for Critical events
-  // Just for now make it always a success
-  isSuccess := true;
+  // The first step is to find the whole set of ancestors for any critical event within the Job
+  theCriticalEventDefinitions := theJobDefn -> R43.SequencedAuditEventDefinition;
+  theCriticalEvents := theCriticalEventDefinitions -> R2;
+  theJobsEvents := theJob -> R44;
+  theJobsCriticalEvents := theJobsEvents intersection theCriticalEvents;
+
+  logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion for Job with jobId = " & theJob.jobID;
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
+  
+  for eachCriticalEvent in theJobsCriticalEvents loop
+    theParentEvents := eachCriticalEvent -> R46 -> R47.has_previous.AuditEvent;
+    if theParentEvents /= null then
+      theAncestorEvents := theAncestorEvents & theParentEvents;
+      
+      while theParentEvents /= null loop
+        // Walk the graph backwards to find all the ancestors of each critical event
+        declare
+          thisGenerationsEvents : set of instance of AuditEvent;
+        begin  
+          for theParentEvent in theParentEvents loop
+            if (theParentEvent -> R47.has_previous.AuditEvent) /= null then
+              // Find the parents of each parent vent
+              theGrandparentEvents := theParentEvent -> R47.has_previous.AuditEvent;
+              // Add them to the list of ancestors
+              theAncestorEvents := theAncestorEvents & theGrandparentEvents;
+              // Also add them to the list of the current generation
+              thisGenerationsEvents := thisGenerationsEvents & theGrandparentEvents;
+            end if;
+          end loop;  
+          theParentEvents := thisGenerationsEvents;
+        end;
+        
+      end loop;  
+    end if;
+  end loop;
+  
+  // At this point the set "theAncestorEvents" contains all of the ancestors of each critical event for a Job
+  // We now need to find the set of parents for the unhappy events
+  theUnhappyEvents := theJob -> R3 -> R46;
+  theParentsOfUnhappyEvents := theUnhappyEvents -> R47.has_previous.AuditEvent;
+  
+  // Finally we check to see if there are any events at all that parents of an unhappy event and also
+  // ancestors of a critical event. If that's the case then we have a serious error condition
+  // Since it indicates that a critical event has happened within the scope of an unhappy event
+  
+  if (theParentsOfUnhappyEvents intersection theAncestorEvents) = null then
+    isSuccess := true;
+  else
+    isSuccess := false;
+    failureReason := "ALARM: Unhappy event seen within the scope of a Critical event";
+  end if;     
+  
+  // Also need to check to see if any unhappy events have no previous events
+  // If that's the case then the above test needs to be overridden if there is a
+  // critical event in the job definition since it is impossible to determine scope
+  
+  if theJobsCriticalEvents /= null then
+    for anUnhappyEvent in theUnhappyEvents loop
+      if (anUnhappyEvent -> R47.has_previous.AuditEvent) = null then
+        isSuccess := false;
+        failureReason := "ALARM: Unhappy event with no limited scope seen in Job with Critical event";
+      end if;  
+    end loop;
+  end if;
   
   if isSuccess then
     generate UnhappyJob.unhappyJobBehavedAsExpected () to this;
   else
+    // TODO At the moment we are treating this as a job failed condition. We may want to raise this to an alarm condition
     generate Job.jobFailed (failureReason) to theJob;   
   end if;
   // if in due course we want to do invariant checks then generate the

@@ -14,6 +14,9 @@ RUN SCENARIO AESequenceDC 502 "InitComplexEventSequence2Definition"
 RUN SCENARIO AESequenceDC 503 "InitComplexEventSequence3Definition"
 RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
 RUN SCENARIO AESequenceDC 902 "InitSimpleJobWithUnhappyEvents"
+RUN SCENARIO AESequenceDC 903 "InitSimpleJobWithCriticalAndUnhappyEvents"
+RUN SCENARIO AESequenceDC 904 "InitJobWithCriticalAndUnhappyEvents1"
+
 
 # run normal path tests
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test01NormalPath 1001 CleanUpAllJobs 64]
@@ -131,6 +134,14 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test110ComplexSequence_RainyDay10_I
 
 # Unhappy Path Tests
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test901SimpleUnhappyEvent 1901 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test902SimpleCriticalEvent 1902 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test903SimpleCriticalEventHappyEventsOnly 1903 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test904CriticalEventJobOK 1904 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test905CriticalEventJobFail1 1905 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test906CriticalEventJobFail2 1906 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test907CriticalEventJobOK2 1907 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test908CriticalEventJobFail3 1908 CleanUpAllJobs 64]
+
 
 
 # The following Tests will delete some or all of the JobDefinitions so beware!!!!

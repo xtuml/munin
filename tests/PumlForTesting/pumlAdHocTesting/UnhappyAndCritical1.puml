@@ -1,0 +1,26 @@
+@startuml 
+partition "Simple Job" {
+  group "Fund Transfer"
+    :requestFunds;
+    :requestApproved;
+    #gold:fundsTransferred,CRITICAL;
+    detach
+  end group
+
+  package “Unhappy Path Events" {
+    :unhappy-path-event-1;
+    kill
+    :unhappy-path-event-2;
+    kill
+    :unhappy-path-event-3;
+    kill
+    :unhappy-path-event-4;
+    kill
+    :unhappy-path-event-5;
+    kill
+    :unhappy-path-event-6;
+    kill
+  }
+
+}
+@enduml

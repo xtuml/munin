@@ -14,6 +14,7 @@ applicationName : string;
 sequenceStart : boolean;
 sequenceEnd : boolean;
 isBreak : boolean;
+critical : boolean;
 emptyPreviousEventTypes : sequence of PreviousEventType;
 previousEventTypes : sequence of PreviousEventType;
 previousEventName : string;
@@ -44,6 +45,7 @@ begin
 				sequenceEnd := false;
 				isBreak := false;
 				hasDynamicControl := false;
+				critical := false;
 				previousEventTypes := emptyPreviousEventTypes;
 				eventDefJSONObject := JSON::get_object(eventTypeJSONElement);
 				eventTypeName := JSON::get_string(eventDefJSONObject["EventName"]);
@@ -58,6 +60,9 @@ begin
 				end if;
 				if eventDefJSONObject'contains("IsBreak") then
 					isBreak := JSON::get_boolean(eventDefJSONObject["IsBreak"]);
+				end if;
+				if eventDefJSONObject'contains("IsCritical") then
+					critical := JSON::get_boolean(eventDefJSONObject["IsCritical"]);
 				end if;
     			if eventDefJSONObject'contains("PreviousEvents") and eventDefJSONObject["PreviousEvents"].kind = JSON::Array then
 					for prevEventTypeJSONElement in JSON::get_array(eventDefJSONObject["PreviousEvents"]) loop
@@ -88,7 +93,8 @@ begin
 						                               isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
 						                               staleAuditEventDuration => this.staleAuditEventDuration, 
 						                               blockedAuditEventDuration => this.blockedAuditEventDuration, 
-						                               previousEventTypes => previousEventTypes, isBreak => isBreak, isSequenced => true);
+						                               previousEventTypes => previousEventTypes, isBreak => isBreak, 
+						                               critical => critical, isSequenced => true);
 					link eventType R6 application;
 					link eventType R12 this;
 				else
@@ -199,7 +205,8 @@ begin
 						                               isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
 						                               staleAuditEventDuration => this.staleAuditEventDuration, 
 						                               blockedAuditEventDuration => this.blockedAuditEventDuration, 
-						                               previousEventTypes => previousEventTypes, isBreak => isBreak, isSequenced => false);
+						                               previousEventTypes => previousEventTypes, isBreak => isBreak, 
+						                               critical => false, isSequenced => false);
 					link eventType R6 application;
 					link eventType R12 this;
 				end if;				
