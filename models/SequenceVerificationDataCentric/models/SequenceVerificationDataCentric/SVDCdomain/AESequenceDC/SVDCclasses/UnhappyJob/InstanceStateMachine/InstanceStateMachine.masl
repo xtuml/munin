@@ -182,8 +182,11 @@ logMessage : string;
 theSystemSpec : instance of SystemSpecification;
 theJob : instance of Job;
 eventContent : string;
+unhappyJobFailureReason : string;
 
 begin
+unhappyJobFailureReason := failureReason;
+
   theJob := this -> R45;
   // Cancel the jobDeletionTimer (that may have been set in previous states) in preparation
   // for being set again within this state.
@@ -195,10 +198,10 @@ begin
   theJob.jobCompleted := false;
   
   // Log info: Audit Event Sequence Verification has been informed of Job failure
-  logMessage := "AESequenceDC::Job.JobFailed : Job Failed - jobId = " & this.jobID & " due to: " & failureReason;
+  logMessage := "AESequenceDC::Job.JobFailed : Alarm Condition in - jobId = " & this.jobID & " due to: " & unhappyJobFailureReason;
   Logger::log(Logger::Error, "AESequenceDC", logMessage);
-  eventContent := "FailureReason = " & failureReason & " : JobId = " & this.jobID;
-  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
+  eventContent := "Alarm Condition = " & unhappyJobFailureReason & " : JobId = " & this.jobID;
+  Reporting~>reportEvent(Logger::Error, "svdc_job_alarm", eventContent);
   for evt in theJob-> R44.SequencedAuditEvent loop
 	  eventContent := "EventId = " & evt.AuditEventId;
 	  Reporting~>reportEvent(Logger::Information, "svdc_happy_event_processed", eventContent);
@@ -555,7 +558,7 @@ theGrandparentEvents : set of instance of AuditEvent;
 theAncestorEvents : set of instance of AuditEvent;
 theUnhappyEvents : set of instance of AuditEvent;
 theParentsOfUnhappyEvents : set of instance of AuditEvent;
-
+logMessage : string;
 isSuccess : boolean;
 failureReason : string;
 begin
@@ -567,6 +570,9 @@ begin
   theCriticalEvents := theCriticalEventDefinitions -> R2;
   theJobsEvents := theJob -> R44;
   theJobsCriticalEvents := theJobsEvents intersection theCriticalEvents;
+
+  logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion for Job with jobId = " & theJob.jobID;
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
   
   for eachCriticalEvent in theJobsCriticalEvents loop
     theParentEvents := eachCriticalEvent -> R46 -> R47.has_previous.AuditEvent;
@@ -608,6 +614,7 @@ begin
     isSuccess := true;
   else
     isSuccess := false;
+    failureReason := "ALARM: Unhappy event seen within the scope of a Critical event";
   end if;     
   
   // Also need to check to see if any unhappy events have no previous events
@@ -618,6 +625,7 @@ begin
     for anUnhappyEvent in theUnhappyEvents loop
       if (anUnhappyEvent -> R47.has_previous.AuditEvent) = null then
         isSuccess := false;
+        failureReason := "ALARM: Unhappy event with no limited scope seen in Job with Critical event";
       end if;  
     end loop;
   end if;
