@@ -1,4 +1,0 @@
-$TESTSCHEDULE
-RUN SCENARIO AESimulator 1 "initialise"
-
-$ENDTESTSCHEDULE
