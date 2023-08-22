@@ -24,7 +24,7 @@ services:
       conan-server:
         condition: service_healthy
 
-  bash:
+  run:
     image: levistarrett/masl-dev
     depends_on:
       conan-server:
@@ -33,6 +33,8 @@ services:
       - type: volume
         source: ConanCache
         target: /conan-cache
+    environment:
+      - OOA_PORT=0
 
   build:
     image: levistarrett/masl-dev
@@ -45,6 +47,17 @@ services:
         target: /conan-cache
     command: bash -c "conan build . && conan export-pkg ."
 
+  build-test:
+    image: levistarrett/masl-dev
+    depends_on:
+      conan-server:
+        condition: service_healthy
+    volumes:
+      - type: volume
+        source: ConanCache
+        target: /conan-cache
+    command: conan build --options test=True .
+
   install-deploy:
     image: levistarrett/masl-dev
     depends_on:
@@ -54,4 +67,4 @@ services:
       - type: volume
         source: ConanCache
         target: /conan-cache
-    command: "conan install . --deployer=full_deploy"
+    command: conan install . --deployer=full_deploy
