@@ -144,6 +144,9 @@ begin
             end if;
             if configJSONObject'contains("JobStoreLocation") then
                 jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);
+                if not Filesystem::file_exists(Filesystem::filename(jobStoreLocation)) then
+                  Filesystem::create_directory(Filesystem::filename(jobStoreLocation));
+                end if;
             end if;
             if configJSONObject'contains("JobStoreAgeLimit") then
                 jobStoreAgeLimit := duration'parse(JSON::get_string(configJSONObject["JobStoreAgeLimit"]));

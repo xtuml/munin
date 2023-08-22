@@ -45,7 +45,7 @@ services:
       - type: volume
         source: ConanCache
         target: /conan-cache
-    command: bash -c "conan build . && conan export-pkg ."
+    command: bash -c "conan build --update . && conan export-pkg ."
 
   build-test:
     image: levistarrett/masl-dev
@@ -56,7 +56,7 @@ services:
       - type: volume
         source: ConanCache
         target: /conan-cache
-    command: conan build --options test=True .
+    command: conan build --update --options test=True .
 
   install-deploy:
     image: levistarrett/masl-dev

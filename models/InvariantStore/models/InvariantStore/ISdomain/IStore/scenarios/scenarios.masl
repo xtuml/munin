@@ -1,6 +1,7 @@
 //! ACTIVITY BEGIN. 'ca101a6d-c040-467e-9a70-f98567db9b00' DO NOT EDIT THIS LINE.
 private service IStore::init () is
-invStoreName : Filesystem::filename := "./InvariantStore/InvariantStore";
+invStoreLocation : Filesystem::filename := "./InvariantStore";
+invStoreName : Filesystem::filename := "InvariantStore";
 logMessage : string;
 invStore : instance of InvStore;
 
@@ -9,7 +10,10 @@ begin
 	// get the supplied command line option for the config file and verify it is valid
 	invStore := find_one InvStore();
 	if invStore = null then
-		invStore := create unique InvStore(invStoreName => invStoreName, loadRate => @PT2M@, Current_State => Created);
+    if not Filesystem::file_exists(Filesystem::filename(invStoreLocation)) then
+      Filesystem::create_directory(Filesystem::filename(invStoreLocation));
+    end if;
+		invStore := create unique InvStore(invStoreName => Filesystem::filename(invStoreLocation & "/" & invStoreName), loadRate => @PT2M@, Current_State => Created);
 		// check the invariant store exists and if it does not then create it
 		begin
 			if Filesystem::file_exists(invStore.invStoreName) = false then
