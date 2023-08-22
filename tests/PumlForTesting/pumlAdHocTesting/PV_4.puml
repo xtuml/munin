@@ -1,6 +1,6 @@
 @startuml
-partition "Protocol Verifier Job 4" {
-  group "Protocol Verifier Sequence 4"
+partition "Protocol Verifier Job" {
+  group "Protocol Verifier Sequence"
     #green:AEO_PVJobStart;
     note right
       "Sourced from 
@@ -26,7 +26,7 @@ partition "Protocol Verifier Job 4" {
       "Sourced from the start of 
       Job Successful in SVDC"
     endnote
-    #red:SVDC_PVJobDeleted;  
+    #red:AEO_PVJobDeleted;  
     note right
       "Sourced from 
       Job Deleted state in AEO"
@@ -37,6 +37,10 @@ partition "Protocol Verifier Job 4" {
 package "Unsequenced Events" {
   :AEO_PVJobFails;
   kill
+    note right
+    "Sourced from the Failed state of Job
+     of Job in AEO"
+  endnote
   :SVDC_PVJobFails;
   kill
   note right
