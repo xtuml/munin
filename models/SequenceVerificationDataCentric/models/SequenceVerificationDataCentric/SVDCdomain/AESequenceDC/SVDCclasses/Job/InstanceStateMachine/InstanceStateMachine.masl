@@ -822,17 +822,8 @@ end state;
 state AESequenceDC::Job.Deleted () is
 logMessage : string;
 theJobID : string;
-instrumentationEventId : string;
-instrumentationEventType : string;
-
 
 begin
-  // Report that SVDC has deleted the respective Job as part of the 
-  // verification of the Protocol Verifier itself.
-  instrumentationEventId := "Unused";
-  instrumentationEventType := "SVDC_PVJobDeleted";
-  BehaviourVerification~>sendInstrumentationEvent(this.jobID, instrumentationEventId, instrumentationEventType);
-  
   // The Job has reached the end of its useful life and can be deleted.
   theJobID := this.jobID;
   this.deleteJob();
