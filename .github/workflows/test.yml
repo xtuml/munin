@@ -18,326 +18,78 @@ on:
 
 
 jobs:
-  build_aeordering:
+  build_and_test:
     runs-on: ubuntu-latest
-    env:
-      PROJECT_NAME: AEOrdering
-      DOMAIN_NAME: AEOrdering
-      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
-    steps:
-      # Setup
-      - uses: actions/checkout@v3
-      - uses: docker/setup-buildx-action@v2
-      - id: lowercase
-        run: echo '::set-output name=DOMAIN_LOWER::'$(echo "console.log('${{ env.DOMAIN_NAME }}'.toLowerCase())" | node -)
-
-      - name: Check if files have been modified
-        id: check-modified
-        uses: tj-actions/changed-files@v29.0.0
-        with:
-          files: models/${{ env.PROJECT_NAME }}
-
-      - name: Generate MASL
-        run: |
-          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DOMAIN_NAME }}
-          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -d ${{ env.DOMAIN_NAME }} -o masl
-
-      - uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate docker metadata
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}
-
-      - name: Build image (prod)
-        uses: docker/build-push-action@v3
-        with:
-          context: models/${{ env.PROJECT_NAME }}
-          tags: ${{ steps.meta.outputs.tags }}
-          target: install-release
-          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
-          push: true
-
-      - name: Run test
-        run: |
-          cd models/${{ env.PROJECT_NAME }}
-          docker compose -f docker-compose.test.yml build --no-cache
-          docker compose -f docker-compose.test.yml up --force-recreate
-
-      - name: Archive test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ steps.lowercase.outputs.DOMAIN_LOWER }}-results
-          path: models/**/test_results/*.json
-
-  build_aereception:
-    runs-on: ubuntu-latest
-    env:
-      PROJECT_NAME: AEReception
-      DOMAIN_NAME: AEReception
-      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
-    steps:
-      # Setup
-      - uses: actions/checkout@v3
-      - uses: docker/setup-buildx-action@v2
-      - id: lowercase
-        run: echo '::set-output name=DOMAIN_LOWER::'$(echo "console.log('${{ env.DOMAIN_NAME }}'.toLowerCase())" | node -)
-
-      - name: Check if files have been modified
-        id: check-modified
-        uses: tj-actions/changed-files@v29.0.0
-        with:
-          files: models/${{ env.PROJECT_NAME }}
-
-      - name: Generate MASL
-        run: |
-          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DOMAIN_NAME }}
-          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -d ${{ env.DOMAIN_NAME }} -o masl
-
-      - uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate docker metadata
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}
-
-      - name: Build image (prod)
-        uses: docker/build-push-action@v3
-        with:
-          context: models/${{ env.PROJECT_NAME }}
-          tags: ${{ steps.meta.outputs.tags }}
-          target: install-release
-          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
-          push: true
-
-      - name: Run test
-        run: |
-          cd models/${{ env.PROJECT_NAME }}
-          docker compose -f docker-compose.test.yml build --no-cache
-          docker compose -f docker-compose.test.yml up --force-recreate
-
-      - name: Archive test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ steps.lowercase.outputs.DOMAIN_LOWER }}-results
-          path: models/**/test_results/*.json
-
-  build_aesequencedc:
-    runs-on: ubuntu-latest
-    env:
-      PROJECT_NAME: SequenceVerificationDataCentric
-      DOMAIN_NAME: AESequenceDC
-      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
-    steps:
-      - uses: actions/checkout@v3
-      - uses: docker/setup-buildx-action@v2
-      - id: lowercase
-        run: echo '::set-output name=DOMAIN_LOWER::'$(echo "console.log('${{ env.DOMAIN_NAME }}'.toLowerCase())" | node -)
-
-      - name: Check if files have been modified
-        id: check-modified
-        uses: tj-actions/changed-files@v29.0.0
-        with:
-          files: models/${{ env.PROJECT_NAME }}
-
-      - name: Generate MASL
-        run: |
-          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DOMAIN_NAME }}
-          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -d ${{ env.DOMAIN_NAME }} -o masl
-
-      - uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate docker metadata
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}
-
-      - name: Build image (prod)
-        uses: docker/build-push-action@v3
-        with:
-          context: models/${{ env.PROJECT_NAME }}
-          tags: ${{ steps.meta.outputs.tags }}
-          target: install-release
-          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
-          push: true
-
-      - name: Run test
-        run: |
-          cd models/${{ env.PROJECT_NAME }}
-          docker compose -f docker-compose.test.yml build --no-cache
-          docker compose -f docker-compose.test.yml up --force-recreate
-
-      - name: Archive test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ steps.lowercase.outputs.DOMAIN_LOWER }}-results
-          path: models/**/test_results/*.json
-
-  build_istore:
-    runs-on: ubuntu-latest
-    env:
-      PROJECT_NAME: InvariantStore
-      DOMAIN_NAME: IStore
-      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
-    steps:
-      - uses: actions/checkout@v3
-      - uses: docker/setup-buildx-action@v2
-      - id: lowercase
-        run: echo '::set-output name=DOMAIN_LOWER::'$(echo "console.log('${{ env.DOMAIN_NAME }}'.toLowerCase())" | node -)
-
-      - name: Check if files have been modified
-        id: check-modified
-        uses: tj-actions/changed-files@v29.0.0
-        with:
-          files: models/${{ env.PROJECT_NAME }}
-
-      - name: Generate MASL
-        run: |
-          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DOMAIN_NAME }}
-          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -d ${{ env.DOMAIN_NAME }} -o masl
-
-      - uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate docker metadata
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DOMAIN_LOWER }}
-
-      - name: Build image (prod)
-        uses: docker/build-push-action@v3
-        with:
-          context: models/${{ env.PROJECT_NAME }}
-          tags: ${{ steps.meta.outputs.tags }}
-          target: install-release
-          build-args: EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
-          push: true
-
-      - name: Run test
-        run: |
-          cd models/${{ env.PROJECT_NAME }}
-          docker compose -f docker-compose.test.yml build --no-cache
-          docker compose -f docker-compose.test.yml up --force-recreate
-
-      - name: Archive test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ steps.lowercase.outputs.DOMAIN_LOWER }}-results
-          path: models/**/test_results/*.json
-
-  build_aeo_svdc:
-    runs-on: ubuntu-latest
-    env:
-      PROJECT_NAME: AEO_SVDC
-      DEPLOYMENT_NAME: AEO_SVDC
-      DOCKER_BUILDKIT: '1'
-      EXTRA_MASL_ARGS: '-skiptranslator Sqlite'
-    needs:
-      - build_aeordering
-      - build_aesequencedc
-      - build_istore
-    steps:
-      - uses: actions/checkout@v3
-      - uses: docker/setup-buildx-action@v2
-      - id: lowercase
-        run: echo '::set-output name=DEPLOYMENT_LOWER::'$(echo "console.log('${{ env.DEPLOYMENT_NAME }}'.toLowerCase())" | node -)
-
-      - name: Check if files have been modified
-        id: check-modified
-        uses: tj-actions/changed-files@v29.0.0
-        with:
-          files: |
-            models/${{ env.PROJECT_NAME }}
-            models/AEOrdering
-            models/SequenceVerificationDataCentric
-            models/InvariantStore
-
-      - name: Generate MASL
-        run: |
-          mkdir -p models/${{ env.PROJECT_NAME }}/masl/${{ env.DEPLOYMENT_NAME }}
-          docker run -v ${GITHUB_WORKSPACE}/models/${{ env.PROJECT_NAME }}:/root levistarrett/xtuml2masl -xf -i . -p ${{ env.DEPLOYMENT_NAME }} -o masl
-
-      - uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate docker metadata
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/xtuml/${{ steps.lowercase.outputs.DEPLOYMENT_LOWER }}
-
-      - name: Build image (prod)
-        uses: docker/build-push-action@v3
-        with:
-          context: models/${{ env.PROJECT_NAME }}
-          tags: ${{ steps.meta.outputs.tags }}
-          build-args: |
-            EXTRA_MASL_ARGS=${{ env.EXTRA_MASL_ARGS }}
-            VERSION_TAG=${{ steps.meta.outputs.version }}
-          push: true
-
-  generate_report:
-    runs-on: ubuntu-latest
-    needs:
-      - build_aeordering
-      - build_aereception
-      - build_aesequencedc
-      - build_istore
     env:
       AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
-      # Checkout the repository
       - uses: actions/checkout@v3
+      - run: bin/populate.sh
 
-      # Configure python
+      - name: Generate MASL
+        run: |
+          cd models/
+          ./gen_all.sh
+
+      - name: Build (test)
+        run: |
+          cd models/
+          ./build_all.sh test
+
+      - name: Run tests
+        run: |
+          cd models/
+          ./test_all.sh
+
+      - name: Build (prod)
+        run: |
+          cd models/
+          ./build_all.sh
+
+      - uses: docker/setup-buildx-action@v2
+
+      - uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/xtuml/protocol_verifier
+
+      - name: Build/push image
+        uses: docker/build-push-action@v3
+        with:
+          context: models/AEO_SVDC
+          tags: ${{ steps.meta.outputs.tags }}
+          push: true
+
       - uses: actions/setup-python@v3
         with:
           python-version: '3.10'
           cache: 'pip'
       - run: pip install -r test_reporting/requirements.txt
 
-      # Download test results
-      - uses: actions/download-artifact@v3
-        with:
-          path: test_reporting/results
+      - name: Gather results
+        run: |
+          mkdir -p test_reporting/results
+          find models/ -name test_results -exec cp -r {} test_reporting/results/ \;
 
-      # Get a shortened SHA
       - name: Shorten SHA
         id: short_sha
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
-      # Generate the report
       - name: Generate JUnit report
         run: |
           cd test_reporting
           python generate-report.py ${{ github.head_ref || github.ref_name }} ${{ steps.short_sha.outputs.sha_short }}
       - run: mkdir -p test_reporting/summaries && cp test_reporting/target/surefire-reports/* test_reporting/summaries
 
-      # Generate surefire report
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
@@ -347,7 +99,6 @@ jobs:
           cd test_reporting
           mvn site
 
-      # Get the existing summaries for this branch
       - name: Download summaries
         uses: prewk/s3-cp-action@v2
         with:
@@ -357,13 +108,11 @@ jobs:
           dest: 'test_reporting/summaries'
           flags: --recursive
 
-      # Generate the test history
       - name: Generate history
         run: |
           cd test_reporting
           python generate-history.py
 
-      # Aggregate results
       - name: Aggregate results
         run: |
           cd test_reporting
@@ -372,7 +121,6 @@ jobs:
           cp target/site/history.html dist/
           cp -r target/surefire-reports dist/
 
-      # Upload the report
       - name: Archive test results
         uses: actions/upload-artifact@v3
         with:

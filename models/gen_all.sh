@@ -1,6 +1,11 @@
 #!/bin/bash
+XTUML2MASL=xtuml2masl
+which $XTUML2MASL &>/dev/null
+if [[ $? == 1 ]]; then
+	XTUML2MASL="docker run -v /${PWD}:/root levistarrett/xtuml2masl"
+fi
 set -e
-xtuml2masl -xf -i AEOrdering -o AEOrdering/masl -d AEOrdering
-xtuml2masl -xf -i AEReception -o AEReception/masl -d AEReception
-xtuml2masl -xf -i InvariantStore -o InvariantStore/masl -d IStore
-xtuml2masl -xf -i SequenceVerificationDataCentric -o SequenceVerificationDataCentric/masl -d AESequenceDC
+$XTUML2MASL -xf -i AEOrdering -o AEOrdering/masl -d AEOrdering
+$XTUML2MASL -xf -i AEReception -o AEReception/masl -d AEReception
+$XTUML2MASL -xf -i InvariantStore -o InvariantStore/masl -d IStore
+$XTUML2MASL -xf -i SequenceVerificationDataCentric -o SequenceVerificationDataCentric/masl -d AESequenceDC
