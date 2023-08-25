@@ -1,7 +1,5 @@
 //! ACTIVITY BEGIN. '74d12669-f0f1-4050-8f62-08b090fb01ce' DO NOT EDIT THIS LINE.
 public service AEOrdering::AcceptEvent ( jobId : in string,
-                                        nodeName : in string,
-                                        application : in string,
                                         auditEventType : in string,
                                         auditEventId : in string,
                                         auditEventTime : in string,
@@ -11,7 +9,6 @@ logMessage : string;
 job : instance of Job;
 inProgressJob : instance of InProgressJob;
 failedJob : instance of FailedJob;
-node : instance of Node;
 auditEvent : instance of AuditEvent;
 jobFailureReason : string;
 failureReason : string;
@@ -45,7 +42,7 @@ begin
 		elsif job -> R2.ArchivedJob /= null then
 			jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job is already archived";
 		end if;
-		auditEvent := AuditEvent.createAuditEvent(job, nodeName, application, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData, failureReason);
+		auditEvent := AuditEvent.createAuditEvent(job, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData, failureReason);
 		
 		// check if the audit event is blocked
 		if auditEvent = null or job -> R2.ArchivedJob /= null or job -> R2.FailedJob /= null then

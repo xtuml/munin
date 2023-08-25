@@ -26,9 +26,6 @@ begin
      end loop;
   end if;
   
-  // invoke the accept events service
-  AEReception::AcceptEvents(auditEvents); 
-  
   // service the event queues and scheduled timers up to 2s in the future
   Test::service_event_queue();
   
@@ -43,8 +40,6 @@ begin
   Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", orderingAcceptEvent.auditEventId);
   Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length = 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
   Assertions::assertEquals("2021-05-13T10:07:34Z", orderingAcceptEvent.auditEventTime);
-  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  Assertions::assertEquals("NoNode", orderingAcceptEvent.nodeName);
  
   // confirm that the second audit event has the correct parameter values
   orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent2");
@@ -53,8 +48,6 @@ begin
   Assertions::assertEquals("735cc6c2-05e1-437f-a3e8-3b2cc36803a4", orderingAcceptEvent.auditEventId);
   Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length > 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
   Assertions::assertEquals("2021-05-13T10:07:35Z", orderingAcceptEvent.auditEventTime);
-  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  Assertions::assertEquals("NoNode", orderingAcceptEvent.nodeName);
  
   // confirm that the third audit event has the correct parameter values
   orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent3");
@@ -63,8 +56,6 @@ begin
   Assertions::assertEquals("daf4d86c-084b-49cc-acfb-f558eeef6e80", orderingAcceptEvent.auditEventId);
   Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length > 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
   Assertions::assertEquals("2021-05-13T10:07:36Z", orderingAcceptEvent.auditEventTime);
-  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", orderingAcceptEvent.application);
-  Assertions::assertEquals("NoNode", orderingAcceptEvent.nodeName);
 
   Assertions::assertTrue((orderingAcceptEvent.prevAuditEventIds'get_unique intersection "dea5b47b-438b-47b0-8046-585254327fd2")'length = 1, "Missing previous audit event id: " & "dea5b47b-438b-47b0-8046-585254327fd2");
   Assertions::assertTrue((orderingAcceptEvent.prevAuditEventIds'get_unique intersection "735cc6c2-05e1-437f-a3e8-3b2cc36803a4")'length = 1, "Missing previous audit event id: " & "735cc6c2-05e1-437f-a3e8-3b2cc36803a4");

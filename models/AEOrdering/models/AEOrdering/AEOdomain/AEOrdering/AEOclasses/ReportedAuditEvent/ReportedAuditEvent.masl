@@ -52,8 +52,7 @@ begin
 	
 	logMessage := "AEOrdering::ReportedAuditEvent.reportEvent : REPORTING EVENT JobId = " & job.jobId & " : EventId = " & auditEvent.auditEventId & " EventType = " & auditEvent.eventType  & " : PreviousEventId = " & auditEvent.reportedPrevEventIds'image;
 	Logger::log(Logger::Debug, "AEOrdering", logMessage);
-	Req_IF_Verification~>audit_event(job.jobId, auditEvent.reportedNodeName, auditEvent.reportedApplication, auditEvent.reportedEventType, 
-		                             auditEvent.auditEventId, auditEvent.reportedAuditEventTime, auditEvent.reportedPrevEventIds, allReportableAuditEventData);
+	Req_IF_Verification~>audit_event(job.jobId, auditEvent.reportedEventType, auditEvent.auditEventId, auditEvent.reportedAuditEventTime, auditEvent.reportedPrevEventIds, allReportableAuditEventData);
 	// check for any following events that need reporting
 	for followedByEvent in (auditEvent -> R11.isFollowedBy.AuditEvent) loop
 		// if all previous events have been received then we can report this blocked event

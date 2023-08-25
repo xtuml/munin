@@ -15,7 +15,7 @@ jobEventFileLocation : string;
 eventContent : string;
 jobId: string;
 eventId: string := "UnknownID";
-nodeName : string := "NoNode";
+
 
 begin
 
@@ -80,8 +80,6 @@ begin
 				end loop;
 				Ordering~>AcceptEvent(
 					JSON::get_string(this.jsonObject["jobId"]),
-					nodeName,
-					JSON::get_string(this.jsonObject["applicationName"]),
 					JSON::get_string(this.jsonObject["eventType"]),
 					JSON::get_string(this.jsonObject["eventId"]),
 					JSON::get_string(this.jsonObject["timestamp"]),
@@ -111,7 +109,7 @@ begin
 	this.receptionComplete := true;
 	
 	// schedule the deletion
-	schedule this.deletionTimer generate Reception.reception_expired() to this delay receptionSpec.receptionDeletionTime;
+	this.completionTime := timestamp'now;
 	
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
