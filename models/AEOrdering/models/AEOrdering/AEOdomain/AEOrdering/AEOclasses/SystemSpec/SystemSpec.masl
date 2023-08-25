@@ -90,7 +90,7 @@ begin
         // read the contents of the config file 
         configJSONString := Filesystem::read_file(fileName);
         configJSONElement := JSON::parse(configJSONString);
-        configValidationResult := JSONValidation::validate(configJSONElement, #PROP["orderingConfigSchema"]#);
+        configValidationResult := JSONValidation::validate(configJSONElement, Environment::getenv(Environment::variable_name("ORDERING_CONFIG_SCHEMA_PATH")));
         if JSON::get_boolean(configValidationResult["valid"]) then
             // extract the spec data items
             configJSONObject := JSON::get_object(configJSONElement);
@@ -144,6 +144,9 @@ begin
             end if;
             if configJSONObject'contains("JobStoreLocation") then
                 jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);
+                if not Filesystem::file_exists(Filesystem::filename(jobStoreLocation)) then
+                  Filesystem::create_directory(Filesystem::filename(jobStoreLocation));
+                end if;
             end if;
             if configJSONObject'contains("JobStoreAgeLimit") then
                 jobStoreAgeLimit := duration'parse(JSON::get_string(configJSONObject["JobStoreAgeLimit"]));
@@ -251,7 +254,7 @@ begin
             if Strings::ends_with(jobDefinitionFile.jobDefinitionFileName, ".json") then
                 jobTypeJSONString := Filesystem::read_file(Filesystem::filename(jobDefinitionFile.jobDefinitionFileName));
                 jobTypeJSONElement := JSON::parse(jobTypeJSONString);
-                jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, #PROP["jobDefinitionSchema"]#);
+                jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, Environment::getenv(Environment::variable_name("JOB_DEFINITION_SCHEMA_PATH")));
                 if JSON::get_boolean(jobTypeValidationResult["valid"]) then
                     jobTypeJSONObject := JSON::get_object(jobTypeJSONElement);
                     // find or create the job

@@ -1027,8 +1027,8 @@ begin
   previousEventTypes := ("FMF",1,"","");
   eventDefinition ("BranchedJob","BranchedSequence","FMG",1,previousEventTypes,false,true,false,true,false);
   
-  dynamicControlDefinition("BranchedJob", "TypeFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "FMA",1,"FMB",1);
-  dynamicControlDefinition("BranchedJob", "TypeFork_2", dynamicControlTypeEnum.MERGECOUNT, "FMA",1,"FMF",1);
+  createDynamicControlDefinition("BranchedJob", "TypeFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "FMA",1,"FMB",1);
+  createDynamicControlDefinition("BranchedJob", "TypeFork_2", dynamicControlTypeEnum.MERGECOUNT, "FMA",1,"FMF",1);
   
 //
 // An illegal definition since it contains an end sequence in the middle of the event chain
@@ -1062,8 +1062,8 @@ begin
   previousEventTypes := ("IFE",1,"","");
   eventDefinition ("InstForkJob","InstForkSequence","IFF",1,previousEventTypes,false,true,false,true,false);
 
-  dynamicControlDefinition("InstForkJob", "InstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "IFA",1,"IFB",1);
-  dynamicControlDefinition("InstForkJob", "InstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "IFA",1,"IFD",1);
+  createDynamicControlDefinition("InstForkJob", "InstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "IFA",1,"IFB",1);
+  createDynamicControlDefinition("InstForkJob", "InstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "IFA",1,"IFD",1);
   //
   // Job SplitBranchedJob, Sequence ForkSequence
   // 
@@ -1114,8 +1114,8 @@ begin
   previousEventTypes := ("SIFE",1,"","");
   eventDefinition ("SplitInstForkJob","SplitInstMergeSequence","SIFF",1,previousEventTypes,false,true,false,true,false);
 
-  dynamicControlDefinition("SplitInstForkJob", "SplitInstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "SIFA",1,"SIFB",1);
-  dynamicControlDefinition("SplitInstForkJob", "SplitInstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "SIFA",1,"SIFE",1);
+  createDynamicControlDefinition("SplitInstForkJob", "SplitInstFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "SIFA",1,"SIFB",1);
+  createDynamicControlDefinition("SplitInstForkJob", "SplitInstMerge_1", dynamicControlTypeEnum.MERGECOUNT, "SIFA",1,"SIFE",1);
 
   //
   // Job MultiForkJob, Sequence MultiForkSequence
@@ -1135,10 +1135,10 @@ begin
   previousEventTypes := ("MFMF",1,"","");
   eventDefinition ("MultiForkJob","MultiForkSequence","MFMG",1,previousEventTypes,false,true,false,true,false);
   
-  dynamicControlDefinition("MultiForkJob", "MultiFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "MFMA",1,"MFMB",1);
-  dynamicControlDefinition("MultiForkJob", "MultiFork_2", dynamicControlTypeEnum.BRANCHCOUNT, "MFMA",1,"MFMC",1);
-  dynamicControlDefinition("MultiForkJob", "MultiMerge_1", dynamicControlTypeEnum.MERGECOUNT, "MFMA",1,"MFME",1);
-  dynamicControlDefinition("MultiForkJob", "MultiMerge_2", dynamicControlTypeEnum.MERGECOUNT, "MFMA",1,"MFMF",1);
+  createDynamicControlDefinition("MultiForkJob", "MultiFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "MFMA",1,"MFMB",1);
+  createDynamicControlDefinition("MultiForkJob", "MultiFork_2", dynamicControlTypeEnum.BRANCHCOUNT, "MFMA",1,"MFMC",1);
+  createDynamicControlDefinition("MultiForkJob", "MultiMerge_1", dynamicControlTypeEnum.MERGECOUNT, "MFMA",1,"MFME",1);
+  createDynamicControlDefinition("MultiForkJob", "MultiMerge_2", dynamicControlTypeEnum.MERGECOUNT, "MFMA",1,"MFMF",1);
 end service;
 //
 //
@@ -1820,7 +1820,7 @@ begin
   previousEventTypes := ("LD",1,"","") & ("LCError",1,"","");
   eventDefinition ("LoopWithBreakJob","LoopWithBreakSequence","LE",1,previousEventTypes,false,true,false,true,false);
   //
-  dynamicControlDefinition("LoopWithBreakJob", "Counter_L1", dynamicControlTypeEnum.LOOPCOUNT, "LA",1,"LB",1);
+  createDynamicControlDefinition("LoopWithBreakJob", "Counter_L1", dynamicControlTypeEnum.LOOPCOUNT, "LA",1,"LB",1);
   //
 end service;
 //
@@ -1918,12 +1918,12 @@ begin
   eventDefinition ("ComplexJob1","ComplexSequence","CS1-R",1,previousEventTypes,false,true,false,true,false);
   //
   // Now, set up the dynamic control definitions for 'ComplexJob1'...
-  dynamicControlDefinition("ComplexJob1", "LC1", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-E",1);
-  dynamicControlDefinition("ComplexJob1", "LC2", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-D",2);
-  dynamicControlDefinition("ComplexJob1", "LC3", dynamicControlTypeEnum.LOOPCOUNT, "CS1-A",1,"CS1-S",1);
-  //dynamicControlDefinition("ComplexJob1", "LC4", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-F",1);
-  dynamicControlDefinition("ComplexJob1", "BC1", dynamicControlTypeEnum.BRANCHCOUNT, "CS1-F",3,"CS1-F",3);
-  dynamicControlDefinition("ComplexJob1", "BC2", dynamicControlTypeEnum.BRANCHCOUNT, "CS1-A",1,"CS1-K",1);
+  createDynamicControlDefinition("ComplexJob1", "LC1", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-E",1);
+  createDynamicControlDefinition("ComplexJob1", "LC2", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-D",2);
+  createDynamicControlDefinition("ComplexJob1", "LC3", dynamicControlTypeEnum.LOOPCOUNT, "CS1-A",1,"CS1-S",1);
+  //createDynamicControlDefinition("ComplexJob1", "LC4", dynamicControlTypeEnum.LOOPCOUNT, "CS1-B",1,"CS1-F",1);
+  createDynamicControlDefinition("ComplexJob1", "BC1", dynamicControlTypeEnum.BRANCHCOUNT, "CS1-F",3,"CS1-F",3);
+  createDynamicControlDefinition("ComplexJob1", "BC2", dynamicControlTypeEnum.BRANCHCOUNT, "CS1-A",1,"CS1-K",1);
   //
   // And then set up the Invariant definitions for 'ComplexJob1'...
   // Define an intra-job invariant for the 'ComplexJob1' that is used at B,1 and H,1
@@ -1970,7 +1970,7 @@ begin
   previousEventTypes := ("LCLD",1,"","") & ("LCLCError",1,"","");
   eventDefinition ("LoopCountJob","LoopCountSequence","LCLE",1,previousEventTypes,false,true,false,true,false);
 
-  dynamicControlDefinition("LoopCountJob", "Counter_1", dynamicControlTypeEnum.LOOPCOUNT, "LCLA",1,"LCLB",1);
+  createDynamicControlDefinition("LoopCountJob", "Counter_1", dynamicControlTypeEnum.LOOPCOUNT, "LCLA",1,"LCLB",1);
 //
 //
 end service;
@@ -2003,10 +2003,10 @@ begin
 
   logMessage := "AESequenceDC::OLD_InitBranchCountDefinition : OLD_InitBranchCountDefinition scenario - Call for Merge Count follows";
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);                       
-  dynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
+  createDynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
   logMessage := "AESequenceDC::OLD_InitBranchCountDefinition : OLD_InitBranchCountDefinition scenario - Call for Branch Count follows";
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);                       
-  dynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
+  createDynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
   
 //
 //
