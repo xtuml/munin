@@ -90,6 +90,13 @@ begin
 		raise program_error;
 	end if;
 	
+	// check for any reception instance that need to be deleted
+	for reception in find Reception(receptionComplete = true) loop
+		if reception.completionTime + this.receptionDeletionTime < timestamp'now then
+			generate Reception.reception_expired() to reception;
+		end if;
+	end loop;
+	
 exception
 	when others => 	
 	
