@@ -5,32 +5,32 @@ partition "Protocol Verifier Job" {
     note right
       "Sourced from 
       job creation in AEO"
-    end note
+    endnote
     :SVDC_PVSequencingStart;
     note left
       "Sourced from 
       job creation in SVDC"
-    end note
+    endnote
     :SVDC_PVEventProcessingComplete;
      note left
       "Sourced from the start of 
       Assessing Constraints in SVDC"
-    end note
+    endnote
     :SVDC_PVConstraintCheckPassed;
     note left
       "Sourced from the start of 
       Assessing Invariants in SVDC"
-    end note
+    endnote
     #gold:SVDC_PVJobSuccessful,CRITICAL;
     note left
       "Sourced from the start of 
       Job Successful in SVDC"
-    end note
+    endnote
     #red:AEO_PVJobDeleted;  
     note right
       "Sourced from 
       Job Deleted state in AEO"
-    end note
+    endnote
     detach
   end group
   package "Unsequenced Events" {
@@ -39,7 +39,7 @@ partition "Protocol Verifier Job" {
       note right
       "Sourced from the Failed state of Job
        of Job in AEO"
-    end note
+    endnote
     :SVDC_PVJobFails;
     kill
     note right
@@ -48,13 +48,13 @@ partition "Protocol Verifier Job" {
       the failure occurs if that would be 
       useful - currently this is sourced from
       the start of the JobFailed state in SVDC"
-    end note
+    endnote
     :SVDC_PVJobGoneHorriblyWrong;
     kill
     note right
       "Sourced from the start of the JobGoneHorriblyWrong
       state in SVDC"
-    end note
+    endnote
   }
 }
 @enduml
