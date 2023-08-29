@@ -6,20 +6,17 @@ public service VerificationGateway::Verification~>verifyInstrumentationEvent ( j
 reportedEvent : string;
 theJobDetails : string;
 theNodeDetails : string;
-theApplicationDetails : string;
 theEventDetails : string;
 theAuditEventData : string;
 
 begin
     // Construct the reportedEvent string...
     theJobDetails := "JobId = " & jobID;
-    theNodeDetails := " : Node: " & "Not Used"; 
-    theApplicationDetails := " : Application: " & "MUNIN - Protocol Verifier";
     theEventDetails := " : EventType = " & eventType & " : EventId = " & eventID;
-    theAuditEventData := " : Audit Event Data: " & "Not Used";
+    theAuditEventData := " : Audit Event Data = " & "Not Used";
     
     // Report the instrumented event for inclusion in the behavioural verification of the Protocol Verifier.
-    reportedEvent := theJobDetails & theNodeDetails & theApplicationDetails & theEventDetails & " : Previous Event Ids: " & previousEventID & theAuditEventData;
+    reportedEvent := theJobDetails & theEventDetails & " : Previous Event Ids = " & previousEventID & theAuditEventData;
     Logger::log(Logger::Information, "VerifierInstrumentation", reportedEvent);
    
 end service;
