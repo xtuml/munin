@@ -9,13 +9,13 @@ partition "Protocol Verifier Job" {
     #red:AEO_PVJobDeleted;  
     detach
   end group
-}
-package "Unsequenced Events" {
-  :AEO_PVJobFails;
-  kill
-  :SVDC_PVJobFails;
-  kill
-  :SVDC_PVJobGoneHorriblyWrong;
-  kill
+  package "Unsequenced Events" {
+    :AEO_PVJobFails;
+    kill
+    :SVDC_PVJobFails;
+    kill
+    :SVDC_PVJobGoneHorriblyWrong;
+    kill
+  }
 }
 @enduml
