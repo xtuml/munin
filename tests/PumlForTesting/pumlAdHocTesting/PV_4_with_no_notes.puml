@@ -1,0 +1,21 @@
+@startuml
+partition "Protocol Verifier Job" {
+  group "Protocol Verifier Sequence"
+    #green:AEO_PVJobStart;
+    :SVDC_PVSequencingStart;
+    :SVDC_PVEventProcessingComplete;
+    :SVDC_PVConstraintCheckPassed;
+    #gold:SVDC_PVJobSuccessful,CRITICAL;
+    #red:AEO_PVJobDeleted;  
+    detach
+  end group
+}
+package "Unsequenced Events" {
+  :AEO_PVJobFails;
+  kill
+  :SVDC_PVJobFails;
+  kill
+  :SVDC_PVJobGoneHorriblyWrong;
+  kill
+}
+@enduml
