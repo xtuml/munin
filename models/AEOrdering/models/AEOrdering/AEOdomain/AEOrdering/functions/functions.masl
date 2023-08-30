@@ -19,6 +19,7 @@ systemSpec : instance of SystemSpec;
 eventContent : string;
 instrumentationEventId : string;
 instrumentationEventType : string;
+jobName : string;
 
 begin
 
@@ -36,9 +37,10 @@ begin
 		
 		// ...and then report that AEO has started processing a new job as part of the 
         // verification of the Protocol Verifier itself.
+        jobName := "TBD";
         instrumentationEventId := "Unused";
         instrumentationEventType := "AEO_PVJobStart";
-        Req_IF_BehaviourVerification~>sendInstrumentationEvent(job.jobId, instrumentationEventId, instrumentationEventType);
+        Req_IF_BehaviourVerification~>sendInstrumentationEvent(jobName, job.jobId, instrumentationEventId, instrumentationEventType);
 	end if;
 	
 	// create the audit event

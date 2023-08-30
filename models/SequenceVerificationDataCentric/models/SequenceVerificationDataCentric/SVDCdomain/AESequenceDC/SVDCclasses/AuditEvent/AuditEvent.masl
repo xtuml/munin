@@ -64,7 +64,7 @@ begin
         // verification of the Protocol Verifier itself.
         instrumentationEventId := "Unused";
         instrumentationEventType := "SVDC_PVSequencingStart";
-        BehaviourVerification~>sendInstrumentationEvent(jobId, instrumentationEventId, instrumentationEventType);
+        BehaviourVerification~>sendInstrumentationEvent(theJobDef.jobName, jobId, instrumentationEventId, instrumentationEventType);
         
         // Process the audit event data for this new event      
         newEvent.ProcessAuditEventData (aeData);

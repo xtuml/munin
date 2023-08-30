@@ -82,13 +82,15 @@ end state;
 state AEOrdering::Job.Deleted () is
 instrumentationEventId : string;
 instrumentationEventType : string;
+jobName : string;
 
 begin
   // Report that AEO has deleted the respective Job as part of the 
   // verification process of the Protocol Verifier itself.
+  jobName := "TBD";
   instrumentationEventId := "Unused";
   instrumentationEventType := "AEO_PVJobDeleted";
-  Req_IF_BehaviourVerification~>sendInstrumentationEvent(this.jobId, instrumentationEventId, instrumentationEventType);
+  Req_IF_BehaviourVerification~>sendInstrumentationEvent(jobName, this.jobId, instrumentationEventId, instrumentationEventType);
 
   this.jobDeleted();
 

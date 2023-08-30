@@ -55,7 +55,8 @@ project AEO_SVDC is
     end terminator;
     
     terminator Req_IF_BehaviourVerification is
-      public service sendInstrumentationEvent (jobID : in string,
+      public service sendInstrumentationEvent (jobName : in string,
+                                               jobID : in string,
                                                eventID : in string,
                                                eventType : in string);
     end terminator;
@@ -81,7 +82,8 @@ project AEO_SVDC is
     end terminator;
 
     terminator BehaviourVerification is
-      public service sendInstrumentationEvent (jobID : in string,
+      public service sendInstrumentationEvent (jobName : in string,
+                                               jobID : in string,
                                                eventID : in string,
                                                eventType : in string);
     end terminator;

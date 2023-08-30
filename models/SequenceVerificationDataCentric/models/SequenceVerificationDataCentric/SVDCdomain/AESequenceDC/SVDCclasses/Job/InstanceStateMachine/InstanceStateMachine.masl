@@ -501,14 +501,16 @@ logMessage : string;
 failureReason : string;
 instrumentationEventId : string;
 instrumentationEventType : string;
+theJobDef : instance of JobDefinition;
 
 
 begin
   // Report that job sequencing has completed and constraint checking is about to begin as part of the 
   // verification of the Protocol Verifier itself.
+  theJobDef := this -> R8;
   instrumentationEventId := "Unused";
   instrumentationEventType := "SVDC_PVEventProcessingComplete";
-  BehaviourVerification~>sendInstrumentationEvent(this.jobID, instrumentationEventId, instrumentationEventType);
+  BehaviourVerification~>sendInstrumentationEvent(theJobDef.jobName, this.jobID, instrumentationEventId, instrumentationEventType);
         
   
   // Need to check that constraints are honoured	
@@ -794,13 +796,13 @@ instrumentationEventType : string;
 begin
   // Report that SVDC considers that the respective Job has completed successfully as part of the 
   // verification of the Protocol Verifier itself.
+  jobDefinition := this -> R8;
   instrumentationEventId := "Unused";
   instrumentationEventType := "SVDC_PVJobSuccessful";
-  BehaviourVerification~>sendInstrumentationEvent(this.jobID, instrumentationEventId, instrumentationEventType);
+  BehaviourVerification~>sendInstrumentationEvent(jobDefinition.jobName, this.jobID, instrumentationEventId, instrumentationEventType);
   
   // Job is considered to have completed - Record and log this fact.
   this.jobCompleted := true;
-  jobDefinition := this -> R8.JobDefinition;
   // Log info: Audit Event Sequence Verification has determined that the Job is Complete
   logMessage := "AESequenceDC::Job.JobSuccessful : Sequence Verification determines that the Job - jobId = " & this.jobID & " is complete.";
   Logger::log(Logger::Debug, "Monitored System Status", logMessage);
@@ -852,14 +854,16 @@ failureReason : string;
 logMessage : string;
 instrumentationEventId : string;
 instrumentationEventType : string;
+theJobDef : instance of JobDefinition;
 
 
 begin
   // Report that job constraint checking has passed and invariant checking is about to begin as part of the 
   // verification of the Protocol Verifier itself.
+  theJobDef := this -> R8;
   instrumentationEventId := "Unused";
   instrumentationEventType := "SVDC_PVConstraintCheckPassed";
-  BehaviourVerification~>sendInstrumentationEvent(this.jobID, instrumentationEventId, instrumentationEventType);
+  BehaviourVerification~>sendInstrumentationEvent(theJobDef.jobName, this.jobID, instrumentationEventId, instrumentationEventType);
         
   
 // Checking Intra Job Invariants if any
