@@ -5,7 +5,8 @@ if [[ $? == 1 ]]; then
 	XTUML2MASL="docker run -v /${PWD}:/root levistarrett/xtuml2masl"
 fi
 set -e
-$XTUML2MASL -xf -i AEOrdering -o AEOrdering/masl -d AEOrdering
-$XTUML2MASL -xf -i AEReception -o AEReception/masl -d AEReception
-$XTUML2MASL -xf -i InvariantStore -o InvariantStore/masl -d IStore
-$XTUML2MASL -xf -i SequenceVerificationDataCentric -o SequenceVerificationDataCentric/masl -d AESequenceDC
+$XTUML2MASL -i AEOrdering -o AEOrdering/masl -d AEOrdering
+$XTUML2MASL -i AEReception -o AEReception/masl -d AEReception
+$XTUML2MASL -i FileReception -o FileReception/masl -d FReception
+$XTUML2MASL -i InvariantStore -o InvariantStore/masl -d IStore
+$XTUML2MASL -i SequenceVerificationDataCentric -o SequenceVerificationDataCentric/masl -d AESequenceDC

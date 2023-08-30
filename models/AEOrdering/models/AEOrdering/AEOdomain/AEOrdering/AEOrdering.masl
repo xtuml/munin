@@ -24,7 +24,6 @@ end service;
 //! ACTIVITY BEGIN. 'b096e6d3-30f2-4a4c-a458-775fb73552d2' DO NOT EDIT THIS LINE.
 public service AEOrdering::Req_IF_Verification~>audit_event ( jobId : in string,
                                                              jobName : in string,
-                                                             application : in string,
                                                              auditEventType : in string,
                                                              auditEventId : in string,
                                                              auditEventTime : in string,
@@ -105,7 +104,8 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'b3d49062-9b2e-4c74-ad0b-d21254027deb' DO NOT EDIT THIS LINE.
-public service AEOrdering::Req_IF_Verification~>jobDefinition () is
+public service AEOrdering::Req_IF_Verification~>jobDefinition ( jobName : in string,
+                                                               eventDefinitions : in sequence of EventDefinitionType ) is
 begin
   null;
 end service;

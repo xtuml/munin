@@ -5,8 +5,60 @@ INSERT INTO O_OBJ
 	'AuditEventType',
 	5,
 	'AuditEventType',
-	'This captures a type of Audit Event that can be performed by the system being monitored. Each Audit Event Type is associated with the Application and therefore Node that can report it. ',
+	'This captures a type of Audit Event that can be performed by the system being monitored. ',
 	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_TFR
+	VALUES ("5b355e81-b15f-44af-87ca-70f6ec5ca38a",
+	"387c8f68-277a-4047-a914-04ba096d94dd",
+	'validEvent',
+	'',
+	"937e7b24-4016-44da-abc5-a7bf3c67b00c",
+	0,
+	'',
+	1,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	1,
+	1);
+INSERT INTO O_TPARM
+	VALUES ("d9783570-2422-4766-a010-4c0fe564e0c8",
+	"5b355e81-b15f-44af-87ca-70f6ec5ca38a",
+	'failureReason',
+	"ca05455a-8231-467f-be9a-63be44793e6a",
+	1,
+	'',
+	"71001ef6-27b7-46ce-9d03-407653461a8a",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("ca05455a-8231-467f-be9a-63be44793e6a",
+	"00000000-0000-0000-0000-000000000000",
+	'string',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_TPARM
+	VALUES ("71001ef6-27b7-46ce-9d03-407653461a8a",
+	"5b355e81-b15f-44af-87ca-70f6ec5ca38a",
+	'auditEvent',
+	"b497c3d8-7106-4f0a-a9d8-2cc9f133cf83",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("b497c3d8-7106-4f0a-a9d8-2cc9f133cf83",
+	"00000000-0000-0000-0000-000000000000",
+	'instance of AuditEvent',
+	'',
+	'',
+	'../../types/types.xtuml');
+INSERT INTO S_DT_PROXY
+	VALUES ("937e7b24-4016-44da-abc5-a7bf3c67b00c",
+	"00000000-0000-0000-0000-000000000000",
+	'boolean',
+	'',
+	'',
+	'../../../../types/types.xtuml');
 INSERT INTO O_NBATTR
 	VALUES ("0cacac5f-92a5-4669-ac83-8c3d853adc9b",
 	"387c8f68-277a-4047-a914-04ba096d94dd");
@@ -25,57 +77,6 @@ INSERT INTO O_ATTR
 	"ba5eda7a-def5-0000-0000-000000000004",
 	'',
 	'');
-INSERT INTO O_REF
-	VALUES ("387c8f68-277a-4047-a914-04ba096d94dd",
-	"547a0568-6e3a-4949-add3-74dca5256a36",
-	0,
-	"64422644-6291-4d53-8c39-f2cbb2e4e2c4",
-	"fdc60cc0-96a9-4f4e-a74a-785a0c43961e",
-	"a4899860-013a-4f86-ad71-e99193a20735",
-	"ac772966-dd2b-4aff-ac14-ef9505867b80",
-	"2c3c08e5-90f4-459d-b4a6-62dc7afba492",
-	"c2ef46d0-5a11-401a-8203-1e548695e1b3",
-	"00000000-0000-0000-0000-000000000000",
-	0,
-	'',
-	'Application',
-	'applicationName',
-	'R6.''canBeReportedBy''');
-INSERT INTO R_RGO_PROXY
-	VALUES ("387c8f68-277a-4047-a914-04ba096d94dd",
-	"fdc60cc0-96a9-4f4e-a74a-785a0c43961e",
-	"a4899860-013a-4f86-ad71-e99193a20735",
-	'../AEOclasses.xtuml');
-INSERT INTO O_RTIDA_PROXY
-	VALUES ("64422644-6291-4d53-8c39-f2cbb2e4e2c4",
-	"547a0568-6e3a-4949-add3-74dca5256a36",
-	0,
-	"fdc60cc0-96a9-4f4e-a74a-785a0c43961e",
-	"ac772966-dd2b-4aff-ac14-ef9505867b80",
-	'../AEOclasses.xtuml');
-INSERT INTO O_RATTR
-	VALUES ("2c3c08e5-90f4-459d-b4a6-62dc7afba492",
-	"387c8f68-277a-4047-a914-04ba096d94dd",
-	"64422644-6291-4d53-8c39-f2cbb2e4e2c4",
-	"547a0568-6e3a-4949-add3-74dca5256a36",
-	1,
-	'applicationName');
-INSERT INTO O_BATTR_PROXY
-	VALUES ("64422644-6291-4d53-8c39-f2cbb2e4e2c4",
-	"547a0568-6e3a-4949-add3-74dca5256a36",
-	'../Application/Application.xtuml');
-INSERT INTO O_ATTR
-	VALUES ("2c3c08e5-90f4-459d-b4a6-62dc7afba492",
-	"387c8f68-277a-4047-a914-04ba096d94dd",
-	"fc43137c-9735-42aa-bbb4-c5ff6952e86a",
-	'applicationName',
-	'',
-	'',
-	'applicationName',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000007",
-	'',
-	'');
 INSERT INTO O_NBATTR
 	VALUES ("365fd86a-2330-4654-bf19-460e0ec876a2",
 	"387c8f68-277a-4047-a914-04ba096d94dd");
@@ -85,7 +86,7 @@ INSERT INTO O_BATTR
 INSERT INTO O_ATTR
 	VALUES ("365fd86a-2330-4654-bf19-460e0ec876a2",
 	"387c8f68-277a-4047-a914-04ba096d94dd",
-	"2c3c08e5-90f4-459d-b4a6-62dc7afba492",
+	"fc43137c-9735-42aa-bbb4-c5ff6952e86a",
 	'staleAuditEventDuration',
 	'When an event of this type is received if it is older that staleAuditEventDuration then the event shall be considered as failed.',
 	'',
@@ -137,13 +138,6 @@ INSERT INTO O_ATTR
 	"937e7b24-4016-44da-abc5-a7bf3c67b00c",
 	'',
 	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("937e7b24-4016-44da-abc5-a7bf3c67b00c",
-	"00000000-0000-0000-0000-000000000000",
-	'boolean',
-	'',
-	'',
-	'../../../../types/types.xtuml');
 INSERT INTO O_NBATTR
 	VALUES ("6bb61ab1-7df0-44f8-b1c3-3afa2dc5b864",
 	"387c8f68-277a-4047-a914-04ba096d94dd");
@@ -274,13 +268,6 @@ INSERT INTO O_ATTR
 	"ca05455a-8231-467f-be9a-63be44793e6a",
 	'',
 	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("ca05455a-8231-467f-be9a-63be44793e6a",
-	"00000000-0000-0000-0000-000000000000",
-	'string',
-	'',
-	'',
-	'../../../../types/types.xtuml');
 INSERT INTO O_NBATTR
 	VALUES ("b40dab5e-5b20-4356-b9c7-9449525fe0b3",
 	"387c8f68-277a-4047-a914-04ba096d94dd");
@@ -368,11 +355,6 @@ INSERT INTO O_OIDA
 	"387c8f68-277a-4047-a914-04ba096d94dd",
 	0,
 	'eventType');
-INSERT INTO O_OIDA
-	VALUES ("2c3c08e5-90f4-459d-b4a6-62dc7afba492",
-	"387c8f68-277a-4047-a914-04ba096d94dd",
-	0,
-	'applicationName');
 INSERT INTO O_OIDA
 	VALUES ("fc43137c-9735-42aa-bbb4-c5ff6952e86a",
 	"387c8f68-277a-4047-a914-04ba096d94dd",

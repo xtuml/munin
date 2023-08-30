@@ -29,10 +29,16 @@ services:
     depends_on:
       conan-server:
         condition: service_healthy
+    stdin_open: true
+    tty: true
     volumes:
       - type: volume
         source: ConanCache
         target: /conan-cache
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
     environment:
       - OOA_PORT=0
 
