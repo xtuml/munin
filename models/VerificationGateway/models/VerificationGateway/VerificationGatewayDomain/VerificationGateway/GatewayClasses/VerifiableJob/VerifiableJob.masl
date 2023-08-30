@@ -1,5 +1,6 @@
 //! ACTIVITY BEGIN. '1ae29fe4-1651-42e4-9a90-ca9365640fb0' DO NOT EDIT THIS LINE.
-public service VerificationGateway::VerifiableJob.createVerifiableJob ( clientJobId : in string,
+public service VerificationGateway::VerifiableJob.createVerifiableJob ( clientJobName : in string,
+                                                                       clientJobId : in string,
                                                                        clientEventId : in string,
                                                                        clientEventType : in string ) is
 newVerifiableJob : instance of VerifiableJob;
@@ -12,6 +13,7 @@ begin
   jobUUID := string(UUID::generate_formatted());
   
   newVerifiableJob := create VerifiableJob (jobKey => jobUUID,
+  	                                        clientJobName => clientJobName,
   	                                        clientJobId => clientJobId,
   	                                        Current_State => ProcessingEventsForJob);
   	                                               
