@@ -57,6 +57,7 @@ logMessage : string;
 systemSpec : instance of SystemSpec;
 instrumentationEventId : string;
 instrumentationEventType : string;
+jobName : string;
 
 begin
 
@@ -71,9 +72,11 @@ begin
 
     // Report that AEO considers that the respective Job has failed as part of the 
     // verification of the Protocol Verifier itself.
+    // TODO: Fix with real jobName instead of "TBD".
+    jobName := "TBD";
     instrumentationEventId := "Unused";
     instrumentationEventType := "AEO_PVJobFails";
-    Req_IF_BehaviourVerification~>sendInstrumentationEvent(this.jobId, instrumentationEventId, instrumentationEventType);
+    Req_IF_BehaviourVerification~>sendInstrumentationEvent(jobName, this.jobId, instrumentationEventId, instrumentationEventType);
   
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
