@@ -25,7 +25,8 @@ begin
     
     // Having stitched the events appropriately use the newInstrumentationEvent to to verify the behaviour 
     // of the Job within the client application.
-    Verification~>verifyInstrumentationEvent(newInstrumentationEvent.jobKey,
+    Verification~>verifyInstrumentationEvent(this.clientJobName,
+    	                                     newInstrumentationEvent.jobKey,
     	                                     newInstrumentationEvent.eventKey,
     	                                     newInstrumentationEvent.clientEventType,         
                                              newInstrumentationEvent.assignedPreviousEventKey);

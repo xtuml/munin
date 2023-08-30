@@ -648,14 +648,16 @@ theSystemSpec : instance of SystemSpecification;
 eventContent : string;
 instrumentationEventId : string;
 instrumentationEventType : string;
+theJobDef : instance of JobDefinition;
 
 
 begin
   // Report that SVDC considers that the respective Job has failed as part of the 
   // verification of the Protocol Verifier itself.
+  theJobDef := this -> R8;
   instrumentationEventId := "Unused";
   instrumentationEventType := "SVDC_PVJobFails";
-  BehaviourVerification~>sendInstrumentationEvent(this.jobID, instrumentationEventId, instrumentationEventType);
+  BehaviourVerification~>sendInstrumentationEvent(theJobDef.jobName, this.jobID, instrumentationEventId, instrumentationEventType);
   
   // Cancel the jobDeletionTimer (that may have been set in previous states) in preparation
   // for being set again within this state.
@@ -693,14 +695,16 @@ theSystemSpec : instance of SystemSpecification;
 eventContent : string;
 instrumentationEventId : string;
 instrumentationEventType : string;
+theJobDef : instance of JobDefinition;
 
 
 begin
   // Report that SVDC considers that the respective Job has gone horribly wrong as part of the 
   // verification of the Protocol Verifier itself.
+  theJobDef := this -> R8;
   instrumentationEventId := "Unused";
   instrumentationEventType := "SVDC_PVJobGoneHorriblyWrong";
-  BehaviourVerification~>sendInstrumentationEvent(this.jobID, instrumentationEventId, instrumentationEventType);
+  BehaviourVerification~>sendInstrumentationEvent(theJobDef.jobName, this.jobID, instrumentationEventId, instrumentationEventType);
  
   // Cancel the jobDeletionTimer (that may have been set in previous states) in preparation
   // for being set again within this state.

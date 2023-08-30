@@ -30,7 +30,8 @@ begin
   
   
   // Use the firstInstrumentationEvent to verify the behaviour of the Job within the client application. 
-  Verification~>verifyInstrumentationEvent((firstInstrumentationEventForJob.jobKey)'image,
+  Verification~>verifyInstrumentationEvent(newVerifiableJob.clientJobName,
+  	                                       (firstInstrumentationEventForJob.jobKey)'image,
     	                                   (firstInstrumentationEventForJob.eventKey)'image,
     	                                   firstInstrumentationEventForJob.clientEventType,  
     	                                   "");
