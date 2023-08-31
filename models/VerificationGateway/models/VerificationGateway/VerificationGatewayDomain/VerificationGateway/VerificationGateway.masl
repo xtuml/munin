@@ -12,12 +12,12 @@ theAuditEventData : string;
 
 begin
     // Construct the reportedEvent string...
-    theJobDetails := "JobName = " & jobName & " : JobId = " & jobID;
-    theEventDetails := " : EventType = " & eventType & " : EventId = " & eventID;
-    theAuditEventData := " : Audit Event Data = " & "Not Used";
+    theJobDetails := "jobName = " & jobName & " : jobId = " & jobID;
+    theEventDetails := " : eventType = " & eventType & " : eventId = " & eventID;
+    theAuditEventData := " : auditEventData = " & "NotUsed";
     
     // Report the instrumented event for inclusion in the behavioural verification of the Protocol Verifier.
-    reportedEvent := theJobDetails & theEventDetails & " : Previous Event Ids = " & previousEventID & theAuditEventData;
+    reportedEvent := theJobDetails & theEventDetails & " : previousEventIds = " & previousEventID & theAuditEventData;
     Logger::log(Logger::Information, "VerifierInstrumentation", reportedEvent);
    
 end service;
