@@ -1,0 +1,183 @@
+= Protocol Verifier Instrumentation
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note documents thoughts on instrumenting an application for
+observability with the Protocol Verifier.
+
+== 2 Introduction and Background
+
+The Munin team is instrumenting the Protocol Verifier itself to explore
+and test the various use cases of protocol verification.  Since the
+Protocol Verifier (PV) is itself an observable device that implements a
+protocol, the PV is being instrumented for observability and will be used
+as both the observer and the device under observation.
+
+The features around __unhappy path events__ are particularly useful in the
+context of the PV, so testing of this capability is getting special
+attention.
+
+== 3 Requirements
+
+=== 3.1 Explore Alternative Instrumentation
+
+The instrumentation approach we have taken initially is the most simple
+and straight-forward.  This is good.  However, it makes some assumptions.
+Explore alternative instrumentation approaches that would be required if
+the assumptions were eliminated.
+
+=== 3.2 Explore Utility of Extended Features
+
+Explore instrumenting the PV a bit more deeply with features that employ
+event data.  This is primarily for testing and usage understanding.
+
+=== 3.3 Expand and Refine Documentation
+
+Continue to upgrade and maintain usage notes with an eye toward long-term
+support of the Protocol Verifier and its user base.
+
+== 4 Analysis
+
+=== 4.1 Instrumentation Alternatives
+
+==== 4.1.1 Protocol Gateway Domain
+
+This is the approach implemented already (August 2023).  The
+straight-forward approach and expedience are why it was selected first.
+This approach is the most simple and leaves responsibility for ordering in
+the PV Gateway domain.  Minimal instrumentation is required of the
+application domains.  However, this approach makes (valid) assumptions
+about the sequencing of the application domains themselves.  If the AEO
+and SVDC were separated into different tasks/threads/processes/processors,
+the assumptions may seem weak.
+
+==== 4.1.2 Direct Modelling of PVJob and PVEvent
+
+This approach might also be referred to as **Explicit Propagation of
+Observability Events**.
+
+This approach places the obsersvability requirements on the same level as
+the observation requirements of the Protocol Verifier.  This approach will
+model observability together with the ordering and sequencing
+requirements, thus including model elements within the ordering and
+sequencing domains.
+
+A summary of the approach follows:
+
+. Add a class to AEO and SVDC called PVJob with an identifying string
+  attribute formatted as a UUID.
+. Add a relationship between PVJob and Job.
+. Add a class to AEO and SVDC called PVEvent with an identify string
+  attribute formatted as a UUID.
+. Add a relationship between PVEvent and PVJob formalised on the PVJob side.
+. Add an ordering reflexive on PVEvent.
+. Upon Job creation, AEO creates PVJob with a unique string identifier.
+  .. AEO creates an instance of PVEvent with a unique string identifier.
+  .. AEO passes PVJob.ID and PVEvent.ID to the PV Gateway.
+  .. AEO also passes PVJob.ID and PVEvent.ID to SVDC in the job creation message.
+. SVDC creates its own instance of PVJob and PVEvent upon receipt of the
+  job creation message.
+. SVDC creates instances of PVEvent at each observability point (happy or
+  unhappy).
+. SVDC sends PVJob.ID, PVEvent.ID and PVEvent.previousID to PV Gateway for
+  happy and unhappy observability points.
+. Instances of PVJob and PVEvent are discarded whenever the associated Job
+  is discarded.
+
+===== 4.1.2.1 Direct Modelling of PVJob and PVEvent in a Utility Domain
+
+This approach is a variation on the above approach.  Instead of modelling
+PVJob and PVEvent within the Ordering and SVDC subsystems, these classes
+would be modelled in a separate sub-domain which supplies an API which is
+synchronous.  An instance of this local utility would be added to each of
+Ordering and SVDC.
+
+The local utility domain would communicate with the (simplified) PV
+Gateway domain.
+
+Note that explicit propagation of PVJob.ID and PVEvent.ID across the
+interface between Ordering and SVDC is still required.  Thus, storage of
+the PVJobID and PVEventID for a particular job would need to be present at
+the application level.  However, forward propagation of PVEvent IDs within
+the domain would not be necessary in the application, and the creation,
+deletion and linkage of class instances would be handled in the utility.
+Ordering and propagation are maintained within the utility domain for all
+PVEvents local to the domain.
+
+* PVUtil.StartPVJob( pvJobName : in string ) return pvJobId
+* PVUtil.PVEvent( pvJobId : in string, pvEventName : in string ) return pvEventId
+
+==== 4.1.3 Architectural Marking and Propagation
+
+This approach could also be referred to as **Architectural Propagation of
+Observability Events**.
+
+It may be feasible to mark the application model for observability.
+Updated functionality would be necessary in the architecture and/or
+an architectural utility domain.
+
+Overview:
+
+. The MASL MC is updated to automatically generate communication to PV
+  Gateway.
+. The MASL MC is updated to automatically forward PVJob IDs and PVEvent
+  IDs within threads of control via events and messaging, thus providing
+  the mechanism for forward propagation.
+. The job creation state is marked in AEO (and marked specially as the
+  start of the audit event chain).
+. The various key states within SVDC are marked as "observed".
+. The job creation message flowing from AEO to SVDC is marked.
+
+What happens:
+
+. The model compiler produces PV events at marked states.
+. The architecturally manufactured PVJob IDs and PVEvent IDs are passed as
+  (invisible) parameters on precipitated S-M events.
+. Likewise PVJob IDs and PVEvent IDs are passed (invisibly) on marked
+  interdomain messages, where they are propagated on events within the
+  receiving domain.
+
+==== 4.1.4 Protocol Gateway Arbitration
+
+This approach is only a brief thought.
+
+To ensure correct sequencing in the presence of multi-tasking/threading,
+SVDC could be required to request from the Protocol Gateway the most
+recent PVEvent.ID keyed by a Job ID.  This would be an extra step after
+receiving a Job from Ordering and before beginning to process it.
+
+==== 4.1.5 Synchronous PV Gateway (Integrated Utility Domain)
+
+This thought is not even half-baked...
+
+A PV Gateway could be crafted that provided a synchronous bridge.  A
+mechanism to serialise access to the previous event may be necessary.
+Perhaps persistence would be required.
+
+=== 4.2 Explore Utility of Extended Features
+
+TBD
+
+My first thought is to implement an extra-job invariant in the PVPrime job
+definition.  It would add a simplistic run-time check which would
+constrain the jobs slightly.  The primary motivation would be pedagogical.
+
+=== 4.3 Expand and Refine Documentation
+
+TBD
+
+== 5 Work Required
+
+== 6 Acceptance Test
+
+== 7 Document References
+
+. [[dr-1]] https://onefact.atlassian.net/browse/MUN2-117[MUN2-117]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
