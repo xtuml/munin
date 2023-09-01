@@ -46,7 +46,10 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '4a53f2ed-ccfc-4c3a-b664-6c1ee4702459' DO NOT EDIT THIS LINE.
-public service AESequenceDC::BehaviourVerification~>sendInstrumentationEvent () is
+public service AESequenceDC::BehaviourVerification~>sendInstrumentationEvent ( jobName : in string,
+                                                                              jobID : in string,
+                                                                              eventID : in string,
+                                                                              eventType : in string ) is
 begin
   null;
 end service;
