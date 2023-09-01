@@ -9,7 +9,7 @@ INSERT INTO O_OBJ
 Audit Events have to be collated into the correct order before they can be submitted for verification.
 The Audit Events can be released as soon as they are in the correct order irrespective of all Audit Events for a Job being received.
 Any failure in the receipt of an Audit Event shall result in the error being logged and the Veifier being informed of the failure.
-Failures can occur if Audit Events are not received in a timely manner and if unknown Nodes, Applications and event types are reported.',
+Failures can occur if Audit Events are not received in a timely manner and if unknown event types are reported.',
 	"00000000-0000-0000-0000-000000000000");
 INSERT INTO O_TFR
 	VALUES ("132f9323-3874-4c33-a0e6-bef8cf58ded1",
@@ -24,22 +24,6 @@ INSERT INTO O_TFR
 	"00000000-0000-0000-0000-000000000000",
 	1,
 	1);
-INSERT INTO O_TPARM
-	VALUES ("479d9ef6-8650-49a6-811d-c3355683b1a9",
-	"132f9323-3874-4c33-a0e6-bef8cf58ded1",
-	'nodeName',
-	"ca05455a-8231-467f-be9a-63be44793e6a",
-	0,
-	'',
-	"c7f031fa-17c7-4a31-8fe6-bb6f151c6167",
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("ca05455a-8231-467f-be9a-63be44793e6a",
-	"00000000-0000-0000-0000-000000000000",
-	'string',
-	'',
-	'',
-	'../../../../types/types.xtuml');
 INSERT INTO O_TPARM
 	VALUES ("c7f031fa-17c7-4a31-8fe6-bb6f151c6167",
 	"132f9323-3874-4c33-a0e6-bef8cf58ded1",
@@ -57,23 +41,21 @@ INSERT INTO S_DT_PROXY
 	'',
 	'../../types/types.xtuml');
 INSERT INTO O_TPARM
-	VALUES ("58271b58-99df-498a-814c-da125df9cf04",
-	"132f9323-3874-4c33-a0e6-bef8cf58ded1",
-	'applicationName',
-	"ca05455a-8231-467f-be9a-63be44793e6a",
-	0,
-	'',
-	"479d9ef6-8650-49a6-811d-c3355683b1a9",
-	'');
-INSERT INTO O_TPARM
 	VALUES ("d119f0b1-388e-4986-a5ad-d159b6a2dc07",
 	"132f9323-3874-4c33-a0e6-bef8cf58ded1",
 	'auditEventType',
 	"ca05455a-8231-467f-be9a-63be44793e6a",
 	0,
 	'',
-	"58271b58-99df-498a-814c-da125df9cf04",
+	"c7f031fa-17c7-4a31-8fe6-bb6f151c6167",
 	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("ca05455a-8231-467f-be9a-63be44793e6a",
+	"00000000-0000-0000-0000-000000000000",
+	'string',
+	'',
+	'',
+	'../../../../types/types.xtuml');
 INSERT INTO O_TPARM
 	VALUES ("f40d49e3-65ed-4a0d-9315-a10ea9532831",
 	"132f9323-3874-4c33-a0e6-bef8cf58ded1",
@@ -212,39 +194,17 @@ INSERT INTO O_ATTR
 	'',
 	'');
 INSERT INTO O_NBATTR
-	VALUES ("3f345201-1f0b-497f-b183-d8f1e3ff37fd",
+	VALUES ("67f22d6c-82a8-4177-9988-8cfa17aa0646",
 	"956aa587-965c-41c9-bf50-bc941aac3a81");
 INSERT INTO O_BATTR
-	VALUES ("3f345201-1f0b-497f-b183-d8f1e3ff37fd",
+	VALUES ("67f22d6c-82a8-4177-9988-8cfa17aa0646",
 	"956aa587-965c-41c9-bf50-bc941aac3a81");
 INSERT INTO O_ATTR
-	VALUES ("3f345201-1f0b-497f-b183-d8f1e3ff37fd",
+	VALUES ("67f22d6c-82a8-4177-9988-8cfa17aa0646",
 	"956aa587-965c-41c9-bf50-bc941aac3a81",
 	"fa470b72-8c15-4d43-a912-d2a48ffdee02",
-	'reportedApplication',
-	'This is the name of the application that has been reported in the Audit Event. This should match the Application that is captured for thsi type of Audit Event.
-
-If it does not then this will result on a failure.',
-	'',
-	'reportedApplication',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000004",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("67f22d6c-82a8-4177-9988-8cfa17aa0646",
-	"956aa587-965c-41c9-bf50-bc941aac3a81");
-INSERT INTO O_BATTR
-	VALUES ("67f22d6c-82a8-4177-9988-8cfa17aa0646",
-	"956aa587-965c-41c9-bf50-bc941aac3a81");
-INSERT INTO O_ATTR
-	VALUES ("67f22d6c-82a8-4177-9988-8cfa17aa0646",
-	"956aa587-965c-41c9-bf50-bc941aac3a81",
-	"3f345201-1f0b-497f-b183-d8f1e3ff37fd",
 	'reportedEventType',
-	'This represents the event type that has been reported in the Audit Event. This should match one of the Audit Event Types for the reported application.
-
-If it does not match this shall result in a failure.',
+	'This represents the event type that has been reported in the Audit Event. ',
 	'',
 	'reportedEventType',
 	0,
@@ -336,24 +296,6 @@ INSERT INTO O_ATTR
 	'eventCreationTime',
 	0,
 	"ba5eda7a-def5-0000-0000-000000000010",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("45271e72-3306-4585-9428-53d6e19671a4",
-	"956aa587-965c-41c9-bf50-bc941aac3a81");
-INSERT INTO O_BATTR
-	VALUES ("45271e72-3306-4585-9428-53d6e19671a4",
-	"956aa587-965c-41c9-bf50-bc941aac3a81");
-INSERT INTO O_ATTR
-	VALUES ("45271e72-3306-4585-9428-53d6e19671a4",
-	"956aa587-965c-41c9-bf50-bc941aac3a81",
-	"973e71b7-4a9e-46b1-b18b-7ca38ace2620",
-	'reportedNodeName',
-	'',
-	'',
-	'reportedNodeName',
-	0,
-	"ca05455a-8231-467f-be9a-63be44793e6a",
 	'',
 	'');
 INSERT INTO O_REF
@@ -454,7 +396,7 @@ INSERT INTO O_BATTR_PROXY
 INSERT INTO O_ATTR
 	VALUES ("ba753959-a2dc-4abc-9df4-242e31b6ab87",
 	"956aa587-965c-41c9-bf50-bc941aac3a81",
-	"45271e72-3306-4585-9428-53d6e19671a4",
+	"973e71b7-4a9e-46b1-b18b-7ca38ace2620",
 	'jobId',
 	'
 
@@ -483,52 +425,6 @@ INSERT INTO O_ATTR
 	'reportedPrevEventIds',
 	0,
 	"9681b5bd-3a44-4072-93b9-9cbec8f34fc8",
-	'',
-	'');
-INSERT INTO O_REF
-	VALUES ("956aa587-965c-41c9-bf50-bc941aac3a81",
-	"387c8f68-277a-4047-a914-04ba096d94dd",
-	0,
-	"2c3c08e5-90f4-459d-b4a6-62dc7afba492",
-	"ffaf53ac-ba0b-4f9b-932b-a31b60923472",
-	"d72c809b-5155-4d87-8d2d-834c0639f378",
-	"df50049c-80e8-4530-87e5-1cfbd369122d",
-	"19269186-23f0-4b4b-aaab-daf12b073129",
-	"37e4d492-8795-4d27-b5ac-ece018da9b2e",
-	"00000000-0000-0000-0000-000000000000",
-	0,
-	'',
-	'AuditEventType',
-	'applicationName',
-	'R7.''isDefinedAs''');
-INSERT INTO O_RTIDA_PROXY
-	VALUES ("2c3c08e5-90f4-459d-b4a6-62dc7afba492",
-	"387c8f68-277a-4047-a914-04ba096d94dd",
-	0,
-	"ffaf53ac-ba0b-4f9b-932b-a31b60923472",
-	"df50049c-80e8-4530-87e5-1cfbd369122d",
-	'../AEOclasses.xtuml');
-INSERT INTO O_RATTR
-	VALUES ("19269186-23f0-4b4b-aaab-daf12b073129",
-	"956aa587-965c-41c9-bf50-bc941aac3a81",
-	"64422644-6291-4d53-8c39-f2cbb2e4e2c4",
-	"547a0568-6e3a-4949-add3-74dca5256a36",
-	1,
-	'applicationName');
-INSERT INTO O_BATTR_PROXY
-	VALUES ("64422644-6291-4d53-8c39-f2cbb2e4e2c4",
-	"547a0568-6e3a-4949-add3-74dca5256a36",
-	'../Application/Application.xtuml');
-INSERT INTO O_ATTR
-	VALUES ("19269186-23f0-4b4b-aaab-daf12b073129",
-	"956aa587-965c-41c9-bf50-bc941aac3a81",
-	"be335485-6f7d-437b-a7d9-618182715b69",
-	'applicationName',
-	'',
-	'',
-	'applicationName',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000007",
 	'',
 	'');
 INSERT INTO O_REF
@@ -568,7 +464,7 @@ INSERT INTO O_BATTR_PROXY
 INSERT INTO O_ATTR
 	VALUES ("3e504d5b-368e-4768-9e2e-3832744af866",
 	"956aa587-965c-41c9-bf50-bc941aac3a81",
-	"19269186-23f0-4b4b-aaab-daf12b073129",
+	"be335485-6f7d-437b-a7d9-618182715b69",
 	'occurrenceId',
 	'',
 	'',

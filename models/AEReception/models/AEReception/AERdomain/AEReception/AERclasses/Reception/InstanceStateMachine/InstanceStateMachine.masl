@@ -7,123 +7,91 @@ end state;
 //! ACTIVITY BEGIN. 'bb579c50-132b-494e-8018-81a7b4ca3778' '00f732b9-8e05-41dc-a357-6bdce5e53842' DO NOT EDIT THIS LINE.
 state AEReception::Reception.receiving_audit_event () is
 logMessage: string;
-element_received : JSON::JSONElement;
 json_object: JSON::JSONObject;
 validation_result: JSON::JSONObject;
 event_received: boolean := false;
-eventFile : instance of EventFile;
-jobEventFile : instance of JobEventFile;
 receptionSpec : instance of ReceptionSpec;
 jobEventFileLocation : string;
-filePermissions : Filesystem::permissions;
 eventContent : string;
 jobId: string;
 eventId: string := "UnknownID";
 
+
 begin
 
-	filePermissions.group.read := true;
-	filePermissions.other.read := true;
-	filePermissions.group.write := true;
-	filePermissions.other.write := true;
-    // We may get a node name or an event.
-    element_received := this.jsonElements[this.currentIndex];
-    receptionSpec := find_one ReceptionSpec();
-    if element_received.kind = JSON::String then
-        // If we received a node name, then we did not get the event.  Go get it.
-        this.currentNodeName := JSON::get_string(element_received);
+    if this.jsonObject'keys'length = 1 and this.jsonObject'keys'any = "__comment__" then
+        // ignore comment objects
+        logMessage := "AEReception::Reception.receiving_audit_event : JSON comment: " & JSON::get_string(this.jsonObject[this.jsonObject'keys'any]);
+        Logger::log(Logger::Debug, "AEReception", "JSON comment: " & JSON::get_string(this.jsonObject[this.jsonObject'keys'any]));
+    else
+        // report the event received
+        if this.jsonObject'contains("eventId") then
+          	eventId := JSON::get_string(this.jsonObject["eventId"]);
+        end if;
+		eventContent := "EventId = " & eventId;
+		Reporting~>reportEvent(Logger::Information, "reception_event_received", eventContent);
 
-    elsif element_received.kind = JSON::Object then
-        json_object := JSON::get_object(element_received);
-        if json_object'keys'length = 1 and json_object'keys'any = "__comment__" then
-            // ignore comment objects
-            logMessage := "AEReception::Reception.receiving_audit_event : JSON comment: " & JSON::get_string(json_object[json_object'keys'any]);
-	        Logger::log(Logger::Debug, "AEReception", "JSON comment: " & JSON::get_string(json_object[json_object'keys'any]));
-        else
-            // report the event received
-            if json_object'contains("eventId") then
-              	eventId := JSON::get_string(json_object["eventId"]);
-            end if;
-			eventContent := "EventId = " & eventId;
-			Reporting~>reportEvent(Logger::Information, "reception_event_received", eventContent);
-
-            // validate the event
-            if this.validate then
-            	validation_result := JSONValidation::validate(element_received, #PROP["auditEventSchema"]#);
-				if JSON::get_boolean(validation_result["valid"]) = true then
-					eventContent := "EventId = " & eventId;
-					Reporting~>reportEvent(Logger::Information, "reception_event_valid", eventContent);
-				else
-					eventContent := "EventId = " & eventId;
-					Reporting~>reportEvent(Logger::Error, "reception_event_invalid", eventContent);
-					logMessage := "AEReception::Reception.receiving_audit_event : Dropping invalid event with ID: " & eventId & "\n" & JSON::dump(validation_result, true);
-					Logger::log(Logger::Debug, "AEReception", logMessage);
-				end if;
+        // validate the event
+        if this.validate then
+          validation_result := JSONValidation::validate(JSON::to_json(this.jsonObject), Environment::getenv(Environment::variable_name("AUDIT_EVENT_SCHEMA_PATH")));
+			if JSON::get_boolean(validation_result["valid"]) = true then
+				eventContent := "EventId = " & eventId;
+				Reporting~>reportEvent(Logger::Information, "reception_event_valid", eventContent);
+			else
+				eventContent := "EventId = " & eventId;
+				Reporting~>reportEvent(Logger::Error, "reception_event_invalid", eventContent);
+				logMessage := "AEReception::Reception.receiving_audit_event : Dropping invalid event with ID: " & eventId & "\n" & JSON::dump(validation_result, true);
+				Logger::log(Logger::Debug, "AEReception", logMessage);
 			end if;
+		end if;
 
-			// only process valid events (or if validation is disabled)
-			if this.validate = false or JSON::get_boolean(validation_result["valid"]) = true then
-				// extract the job ID from the JSON structure
-				jobId := JSON::get_string(json_object["jobId"]);
-
-				eventFile := this -> R2.EventFile;
-				jobEventFile := find_one (eventFile -> R3.JobEventFile)(jobId = jobId and jobEventFileGenerated = false);                
-				if jobEventFile = null then
-					jobEventFile := create JobEventFile(jobEventFileName => string(UUID::generate_formatted()), jobId => jobId, 
-														fileName => eventFile.fileName, jobEventFileGenerated => false);
-					link jobEventFile R3 eventFile;
-					// check if there is a job directory
-					jobEventFileLocation := receptionSpec.outgoingDirectory & "/" & jobId[jobId'last -1 .. jobId'last];
-					if Filesystem::file_exists(Filesystem::filename(jobEventFileLocation)) = false then
-						begin
-							Filesystem::create_directory(Filesystem::filename(jobEventFileLocation));
-							Filesystem::add_permissions(Filesystem::filename(jobEventFileLocation),filePermissions);
-						exception
-							when others => null;
-						end;
+		// only process valid events (or if validation is disabled)
+		if this.validate = false or JSON::get_boolean(validation_result["valid"]) = true then
+			// extract the job ID from the JSON structure
+			jobId := JSON::get_string(this.jsonObject["jobId"]);
+			
+			// publish the event to ordering
+			declare
+			  prevIds: sequence of string;
+			  evtData: dictionary;
+			begin
+				if this.jsonObject'contains("previousEventIds") then
+					if this.jsonObject["previousEventIds"].kind = JSON::Array then
+						for prev_id_json in JSON::get_array(this.jsonObject["previousEventIds"]) loop
+							prevIds := prevIds & JSON::get_string(prev_id_json);
+						end loop;
+					elsif this.jsonObject["previousEventIds"].kind = JSON::String then
+                        prevIds := prevIds & JSON::get_string(this.jsonObject["previousEventIds"]);
+                    end if;
+				end if;
+				for key in this.jsonObject'keys loop
+					if key /= "jobId" and
+					   key /= "jobName" and
+					   key /= "eventType" and
+					   key /= "eventId" and
+					   key /= "timestamp" and
+					   key /= "previousEventIds" then
+						if this.jsonObject[key].kind = JSON::String then
+							evtData[key] := JSON::get_string(this.jsonObject[key]);
+						else
+							evtData[key] := JSON::dump(this.jsonObject[key]);
+						end if;
 					end if;
-					jobEventFile.jobEventFileLocation := jobEventFileLocation;
-				end if;
-				
-				// send the event along
-				if this.currentNodeName = "" then
-					logMessage := "AEReception::Reception.receiving_audit_event : Audit event with blank node name";
-					Logger::log(Logger::Warning, "AEReception", logMessage);
-				end if;
-				jobEventFile.addEvent(this.currentNodeName, json_object);
-				this.eventsProcessed := this.eventsProcessed + 1;
-				event_received := true;
-        	end if;
-        end if;
+				end loop;
+				Ordering~>AcceptEvent(
+					JSON::get_string(this.jsonObject["jobId"]),
+					JSON::get_string(this.jsonObject["eventType"]),
+					JSON::get_string(this.jsonObject["eventId"]),
+					JSON::get_string(this.jsonObject["timestamp"]),
+					prevIds,
+					evtData
+				);
+			end;
+			
+    	end if;
+    end if;
 
-    else
-	    logMessage := "AEReception::Reception.receiving_audit_event : Invalid JSON type: " & element_received.kind'image;
-	    Logger::log(Logger::Error, "AEReception", logMessage);
-		eventContent := "FailureReason = Invalid JSON type = " & element_received.kind'image;;
-		Reporting~>reportEvent(Logger::Error, "reception_file_process_error", eventContent);
-    end if;
-    
-    // process the next data item or finish
-    this.currentIndex := this.currentIndex + 1;
-    if this.currentIndex <= this.jsonElements'last then
-        if event_received then
-        	// check if have reached the max limit for events in the job event file.
-        	if receptionSpec.maxEventsPerFile > 0 and this.eventsProcessed >= receptionSpec.maxEventsPerFile then
-        		// max events for file reach so generate files
-        		for jobEventFile in this -> R2.EventFile -> R3.JobEventFile(jobEventFileGenerated = false) loop
-        			jobEventFile.writeJobEventFile();
-        		end loop;
-        		this.eventsProcessed := 0;
-        	end if;	
-            // only reschedule the throttle timer if an event was received
-            schedule this.throttleTimer generate Reception.ready_for_event() to this delay this.aeDelay;
-        else
-            generate Reception.ready_for_event() to this;
-        end if;
-    else
-        cancel this.throttleTimer;
-        generate Reception.no_more_events() to this;
-    end if;
+    generate Reception.no_more_events() to this;
 
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -132,68 +100,36 @@ end state;
 state AEReception::Reception.done () is
 logMessage : string;
 receptionSpec : instance of ReceptionSpec;
-eventFile : instance of EventFile;
-fileControl : instance of FileControl;
-filePermissions : Filesystem::permissions;
 
 begin
 	
-	filePermissions.group.read := true;
-	filePermissions.other.read := true;
-	filePermissions.group.write := true;
-	filePermissions.other.write := true;
 
 	receptionSpec := find_one ReceptionSpec();
 	// keep the reception job until the deletion timer fires
 	this.receptionComplete := true;
 	
-	// write the event to the job event file in the outgoing directory for the job
-	for jobEventFile in this -> R2.EventFile -> R3.JobEventFile(jobEventFileGenerated = false) loop
-		jobEventFile.writeJobEventFile();
-	end loop;
-	
-	// move the processed job
-	eventFile := this -> R2.EventFile;
-	if not Filesystem::file_exists(Filesystem::filename(receptionSpec.processedDirectory)) then
-		Filesystem::create_directory(Filesystem::filename(receptionSpec.processedDirectory));
-		Filesystem::add_permissions(Filesystem::filename(receptionSpec.processedDirectory),filePermissions);
-	end if;
-	if Filesystem::file_exists(Filesystem::filename(this.filePath)) then
-		Filesystem::move_file( Filesystem::filename(this.filePath), Filesystem::filename(receptionSpec.processedDirectory & "/" & eventFile.fileName));
-	end if;
-	// request that file control check for capacity
-	fileControl := find_one FileControl();
-	cancel fileControl.fileControlTimer;
-	schedule fileControl.fileControlTimer generate FileControl.checkCapacity() to fileControl delay @PT0S@;
-	
 	// schedule the deletion
-	schedule this.deletionTimer generate Reception.reception_expired() to this delay receptionSpec.receptionDeletionTime;
+	this.completionTime := timestamp'now;
 	
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'bb579c50-132b-494e-8018-81a7b4ca3778' 'b800b83d-014a-4d72-9661-d34476c735a0' DO NOT EDIT THIS LINE.
-state AEReception::Reception.parsing () is
+state AEReception::Reception.parsing ( auditEvent : in string ) is
 logMessage : string;
-json_string: string;
 json_element: JSON::JSONElement;
 eventContent : string;
 
 begin
 
-    // Read the file and parse
-	eventContent := "FileProcessed = " & this.filePath;;
-	Reporting~>reportEvent(Logger::Information, "reception_file_processed", eventContent);
-    json_string := Filesystem::read_file(Filesystem::filename(this.filePath));
-    json_element := JSON::parse(json_string);
-	if json_element.kind = JSON::Array then
-        this.jsonElements := JSON::get_array(json_element);
-        this.currentIndex := this.jsonElements'first;
+    json_element := JSON::parse(auditEvent);
+	if json_element.kind = JSON::Object then
+        this.jsonObject := JSON::get_object(json_element);
         generate Reception.ready_for_event() to this;
     else
-        logMessage := "AEReception::Reception.parsing : Incorrect JSON format for file: " & this.filePath;
+        logMessage := "AEReception::Reception.parsing : Incorrect JSON format : " & auditEvent;
         Logger::log(Logger::Error, "AEReception", logMessage);
-		eventContent := "FailureReason = Incorrect JSON format for file = " & this.filePath;;
+		eventContent := "FailureReason = Incorrect JSON format = " & auditEvent;;
 		Reporting~>reportEvent(Logger::Error, "reception_file_process_error", eventContent);
         generate Reception.parse_failed() to this;
     end if;
@@ -201,17 +137,15 @@ begin
 exception
 
     when JSON::JSONException =>
-	   logMessage := "AEReception::Reception.parsing : Failed to parse JSON for file: " & this.filePath;
+	   logMessage := "AEReception::Reception.parsing : Failed to parse JSON : " & auditEvent;
 	   Logger::log(Logger::Error, "AEReception", logMessage);
-		eventContent := "FailureReason = Failed to parse JSON for file = " & this.filePath;;
+		eventContent := "FailureReason = Failed to parse JSON = " & auditEvent;;
 		Reporting~>reportEvent(Logger::Error, "reception_file_process_error", eventContent);
 	   generate Reception.parse_failed() to this;
 	   
 	when others =>
-	   logMessage := "AEReception::Reception.parsing : Could not read file: " & this.filePath;
+	   logMessage := "AEReception::Reception.parsing : Could not process audit events : " & auditEvent;
 	   Logger::log(Logger::Error, "AEReception", logMessage);
-		eventContent := "FailureReason = Could not read file = " & this.filePath;;
-		Reporting~>reportEvent(Logger::Error, "reception_file_process_error", eventContent);
 	   generate Reception.parse_failed() to this;
 
 end state;
@@ -219,21 +153,9 @@ end state;
 
 //! ACTIVITY BEGIN. 'bb579c50-132b-494e-8018-81a7b4ca3778' 'cc64b9b1-baf2-4721-863b-afbb21126496' DO NOT EDIT THIS LINE.
 state AEReception::Reception.ReceptionDeleted () is
-logMessage : string;
-receptionSpec : instance of ReceptionSpec;
-eventFile : instance of EventFile;
-jobEventFiles : sequence of instance of JobEventFile;
-
 begin
 	
-	// remove the reception and the file
-	eventFile := this -> R2.EventFile;
-	jobEventFiles := eventFile -> R3.JobEventFile;
-	unlink eventFile R3 jobEventFiles;
-	delete jobEventFiles;
-	unlink eventFile R1;
-	unlink this R2;
-	delete eventFile;
+	// remove the reception
 	delete this;
 	
 end state;

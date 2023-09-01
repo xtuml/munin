@@ -1,0 +1,20 @@
+project AER_PROC is
+
+  domain AEReception is
+
+    terminator Ordering is
+
+      public service AcceptEvent (
+        jobId : in string,
+        auditEventType : in string,
+        auditEventId : in string,
+        auditEventTime : in string,
+        prevAuditEventIds : in sequence of string,
+        auditEventData : in dictionary
+      );
+
+    end terminator;
+    
+  end domain;
+
+end project;

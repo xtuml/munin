@@ -1,0 +1,39 @@
+public service AEOrdering::Req_IF_Verification~>audit_event ( jobId: in string,
+                                                              jobName: in string,
+                                                              auditEventType: in string,
+                                                              auditEventId: in string,
+                                                              auditEventTime: in string,
+                                                              prevAuditEventIds: in sequence of string,
+                                                              reportableAuditEventDataItems: in sequence of ReportableAuditEventDataType ) is
+auditEventData: sequence of AESequenceDC::auditEventDataStructure;
+begin
+  for dataItem in reportableAuditEventDataItems loop
+    declare
+      auditEventDataItem: AESequenceDC::auditEventDataStructure;
+    begin
+      if dataItem.dataKind = "INTRAJOBINV" then
+        auditEventDataItem.aedKind := AESequenceDC::INTRAJOBINV;
+      elsif dataItem.dataKind = "EXTRAJOBINV" then
+        auditEventDataItem.aedKind := AESequenceDC::EXTRAJOBINV;
+      elsif dataItem.dataKind = "BRANCHCOUNT" then
+        auditEventDataItem.aedKind := AESequenceDC::BRANCHCOUNT;
+      elsif dataItem.dataKind = "LOOPCOUNT" then
+        auditEventDataItem.aedKind := AESequenceDC::LOOPCOUNT;
+      elsif dataItem.dataKind = "MERGECOUNT" then
+        auditEventDataItem.aedKind := AESequenceDC::MERGECOUNT;
+      end if;
+      auditEventDataItem.aedName := dataItem.dataName;
+      auditEventDataItem.aedValue := dataItem.dataValue;
+      auditEventData := auditEventData & auditEventDataItem;
+    end;
+  end loop;
+  AESequenceDC::acceptOrderedEvent(
+    auditEventTime,
+    auditEventType,
+    jobId,
+    jobName,
+    prevAuditEventIds,
+    auditEventId,
+    auditEventData
+  );
+end service;

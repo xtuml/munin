@@ -19,8 +19,6 @@ end state;
 //! ACTIVITY BEGIN. 'a19e9f01-791c-40e7-bd19-607b8886a3ad' '34af9e5e-e930-4980-933a-2dff76a087a8' DO NOT EDIT THIS LINE.
 state AEOrdering::JobType.JobTypeExpired () is
 jobs : set of instance of Job;
-application : instance of Application;
-node : instance of Node;
 dynamicControl : instance of DynamicControl;
 failureReason : string;
 
@@ -40,18 +38,6 @@ begin
 	
 	// remove the job type and all associated event
 	for auditEventType in this -> R12.AuditEventType loop
-		application := auditEventType -> R6.Application;
-		unlink auditEventType R6 application;
-		node := application -> R5.Node;
-		if (application -> R6.AuditEventType)'length = 0 then
-			if node /= null then
-				unlink node R5 application;
-			end if;
-			delete application;
-		end if;
-		if node /= null and (node -> R5.Application)'length = 0 then
-			delete node;
-		end if;
 		
 		for dataItemType in auditEventType -> R16.DataItemType loop
 			dataItemType.deleteDataItemType();

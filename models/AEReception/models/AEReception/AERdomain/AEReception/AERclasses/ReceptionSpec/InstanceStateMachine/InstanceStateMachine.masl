@@ -9,27 +9,21 @@ end state;
 state AEReception::ReceptionSpec.ConfigurationLoaded () is
 logMessage : string;
 fileStatus : Filesystem::file_status;
-fileControl : instance of FileControl;
 fileName : Filesystem::filename;
 configJSONString : string;
 configJSONElement : JSON::JSONElement;
 configJSONObject : JSON::JSONObject;
 configValidationResult : JSON::JSONObject;
-filePermissions : Filesystem::permissions;
 
 begin
 	
-	filePermissions.group.read := true;
-	filePermissions.other.read := true;
-	filePermissions.group.write := true;
-	filePermissions.other.write := true;
 	// check the config file has not been removed
 	fileName := Filesystem::filename(this.configFilePath & this.configFile);
 	if Filesystem::file_exists(fileName) then
 
 		configJSONString := Filesystem::read_file(fileName);
 		configJSONElement := JSON::parse(configJSONString);
-		configValidationResult := JSONValidation::validate(configJSONElement, #PROP["receptionConfigSchema"]#);
+		configValidationResult := JSONValidation::validate(configJSONElement, Environment::getenv(Environment::variable_name("RECEPTION_CONFIG_SCHEMA_PATH")));
 		
 		if JSON::get_boolean(configValidationResult["valid"]) then
 		    // extract the spec data items
@@ -37,38 +31,14 @@ begin
 			if configJSONObject'contains("SpecUpdateRate") then
 				this.specUpdateRate := duration'parse(JSON::get_string(configJSONObject["SpecUpdateRate"]));
 			end if;
-			if configJSONObject'contains("IncomingDirectory") then
-				this.incomingDirectory := JSON::get_string(configJSONObject["IncomingDirectory"]);
-			end if;
-			if configJSONObject'contains("ProcessingDirectory") then
-				this.processingDirectory := JSON::get_string(configJSONObject["ProcessingDirectory"]);
-			end if;
-			if configJSONObject'contains("ProcessedDirectory") then
-				this.processedDirectory := JSON::get_string(configJSONObject["ProcessedDirectory"]);
-			end if;
-			if configJSONObject'contains("EventThrottleRate") then
-				this.eventThrottleRate := duration'parse(JSON::get_string(configJSONObject["EventThrottleRate"]));
-			end if;
 			if configJSONObject'contains("ReceptionDeletionTime") then
 				this.receptionDeletionTime := duration'parse(JSON::get_string(configJSONObject["ReceptionDeletionTime"]));
-			end if;
-			if configJSONObject'contains("ConcurrentReceptionLimit") then
-				this.concurrentReceptionLimit := integer'parse(JSON::get_string(configJSONObject["ConcurrentReceptionLimit"]));
-			end if;
-			if configJSONObject'contains("OutgoingDirectory") then
-				this.outgoingDirectory := JSON::get_string(configJSONObject["OutgoingDirectory"]);
-			end if;
-			if configJSONObject'contains("MaxEventsPerFile") then
-				this.maxEventsPerFile := integer'parse(JSON::get_string(configJSONObject["MaxEventsPerFile"]));
 			end if;
 			if configJSONObject'contains("SchemaValidate") then
 				this.schemaValidate := boolean'parse(JSON::get_string(configJSONObject["SchemaValidate"]));
 			end if;
 			if configJSONObject'contains("SchemaValidateFrequency") then
 				this.schemaValidateFrequency := integer'parse(JSON::get_string(configJSONObject["SchemaValidateFrequency"]));
-			end if;
-			if configJSONObject'contains("FileControlWaitTime") then
-				this.fileControlWaitTime := duration'parse(JSON::get_string(configJSONObject["FileControlWaitTime"]));
 			end if;
     	else
 			logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded : Config file invalid:\n" & JSON::dump(configValidationResult, true);
@@ -77,7 +47,6 @@ begin
 		end if;
 
 		// set the config file mod time
-		fileName := Filesystem::filename(this.configFilePath & this.configFile);
 		fileStatus := Filesystem::get_file_status(Filesystem::filename(fileName));
 		this.configFileModificationTime := fileStatus.modification_time;
 				
@@ -87,32 +56,6 @@ begin
 		logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
 		Logger::log(Logger::Error, "AEReception", logMessage);
 		raise program_error;
-	end if;
-	
-	// check if file control exists and if not create it
-	fileControl := find_one FileControl();
-	if fileControl = null then
-		fileControl := create unique FileControl(schemaValidationCount => 0, Current_State => Created);
-		filePermissions.group.read := true;
-		filePermissions.other.read := true;
-		filePermissions.group.write := true;
-		filePermissions.other.write := true;
-		// check the incoming directory exists and if not create it
-		if not Filesystem::file_exists(Filesystem::filename(this.incomingDirectory)) then
-			Filesystem::create_directory(Filesystem::filename(this.incomingDirectory));
-		end if;
-		Filesystem::add_permissions(Filesystem::filename(this.incomingDirectory),filePermissions);
-		// check the processing directory exists and if not create it
-		if not Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) then
-			Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
-		end if;
-		Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
-		// check the outgoing directory exists and if not create it
-		if not Filesystem::file_exists(Filesystem::filename(this.outgoingDirectory)) then
-			Filesystem::create_directory(Filesystem::filename(this.outgoingDirectory));
-		end if;
-		Filesystem::add_permissions(Filesystem::filename(this.outgoingDirectory),filePermissions);
-		schedule fileControl.fileControlTimer generate FileControl.checkCapacity() to fileControl delay @PT0S@;
 	end if;
 	
 exception
@@ -146,6 +89,13 @@ begin
 		Logger::log(Logger::Error, "AEReception", logMessage);
 		raise program_error;
 	end if;
+	
+	// check for any reception instance that need to be deleted
+	for reception in find Reception(receptionComplete = true) loop
+		if reception.completionTime + this.receptionDeletionTime < timestamp'now then
+			generate Reception.reception_expired() to reception;
+		end if;
+	end loop;
 	
 exception
 	when others => 	

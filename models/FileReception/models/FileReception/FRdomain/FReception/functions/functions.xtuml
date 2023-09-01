@@ -1,0 +1,68 @@
+-- BP 7.1.6 content: Package syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO EP_PKG
+	VALUES ("b932a41d-6967-448e-a55b-c5e5a0a611e4",
+	"00000000-0000-0000-0000-000000000000",
+	"52ea430d-91a6-4824-93f9-577332214bc0",
+	'functions',
+	'',
+	0);
+INSERT INTO GD_MD
+	VALUES ("e754884c-d2a8-4d19-896a-53462de597e2",
+	112,
+	"b932a41d-6967-448e-a55b-c5e5a0a611e4",
+	108,
+	0,
+	0,
+	1,
+	1,
+	1,
+	12,
+	1,
+	0,
+	0,
+	0,
+	0,
+	0,
+	'',
+	'FileReception::FRdomain::FReception::functions');
+INSERT INTO DIM_DIA
+	VALUES ("e754884c-d2a8-4d19-896a-53462de597e2",
+	'',
+	1.000000,
+	0.000000,
+	0.000000,
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO PE_PE
+	VALUES ("b932a41d-6967-448e-a55b-c5e5a0a611e4",
+	1,
+	"00000000-0000-0000-0000-000000000000",
+	"80c0f974-c290-4f84-8dc1-bde1cf7717f5",
+	7);
+INSERT INTO C_C_PROXY
+	VALUES ("80c0f974-c290-4f84-8dc1-bde1cf7717f5",
+	"00000000-0000-0000-0000-000000000000",
+	"00000000-0000-0000-0000-000000000000",
+	'FReception',
+	'This domain receives audit events from the monitored system. The domain is responsible for decoding 
+the event messages from the form in which they are received to a form that can be used within this 
+verification model.
+
+Any errors in the formatting of the received audit events will be notified through the Logging 
+required interface.
+
+There may be multiple versions of this domain:
+1. To receive and decode audit events in batch file format
+2. To receive and decode events live from the monitored system
+',
+	0,
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'Audit Event Reception',
+	'../FReception.xtuml');
+INSERT INTO S_SYS_PROXY
+	VALUES ("52ea430d-91a6-4824-93f9-577332214bc0",
+	'FileReception',
+	1,
+	'../../../FileReception.xtuml');

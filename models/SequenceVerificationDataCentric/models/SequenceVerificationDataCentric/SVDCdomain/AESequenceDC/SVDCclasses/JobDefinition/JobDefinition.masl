@@ -5,9 +5,9 @@ theSequenceDefn : instance of AESequenceDefinition;
 thePrevSequenceDefn : instance of AESequenceDefinition;
 theNextSequenceDefn : instance of AESequenceDefinition;
 theSequenceDefns : set of instance of AESequenceDefinition;
-theEventDefn : instance of AuditEventDefinition;
-theEventDefns : set of instance of AuditEventDefinition;
-thePrevEventDefn : instance of AuditEventDefinition;
+theEventDefn : instance of SequencedAuditEventDefinition;
+theEventDefns : set of instance of SequencedAuditEventDefinition;
+thePrevEventDefn : instance of SequencedAuditEventDefinition;
 theEventInSeqDef : instance of AEInSequenceDefinition;
 theEventsInSeqDefns : set of instance of AEInSequenceDefinition;
 theEventOccInSeqDef : instance of AEOccurrenceInSequenceDefinition;
@@ -24,6 +24,10 @@ theExtraJobInvariantDefns : set of instance of ExtraJobInvariantDefn;
 theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theDynamicControlDefns : set of instance of DynamicControlDefinition;
 theDynamicControlDefn : instance of DynamicControlDefinition;
+theUnseqDefns : set of instance of UnsequencedAuditEventDefinition;
+theUnseqEventInJobDef : instance of UnsequencedAEDefnInJobDefn;
+theCriticalEventDefns : set of instance of SequencedAuditEventDefinition;
+theCriticalEventInJobDefn : instance of CriticalEventDefnForJobDefn;
 theJobs: set of instance of Job;
 theJob: instance of Job;
 logMessage : string;
@@ -73,11 +77,34 @@ begin
       unlink this R32 theDynamicControlDefn;
       delete theDynamicControlDefn;
     end loop;
+
+    // Delete the Unsequenced event definitions
+    theUnseqDefns := this -> R39.UnsequencedAuditEventDefinition;
+    for theUnseqDefn in theUnseqDefns loop
+      theUnseqEventInJobDef := theUnseqDefn with this -> R39.UnsequencedAEDefnInJobDefn;
+      if theUnseqEventInJobDef /= null then
+        unlink this R39 theUnseqDefn using theUnseqEventInJobDef;
+        delete theUnseqEventInJobDef;
+      end if;  
+    end loop;
+    delete theUnseqDefns;
+
+    // Delete the Critical event definitions
+    theCriticalEventDefns := this -> R43.SequencedAuditEventDefinition;
+    for theCriticalEventDefn in theCriticalEventDefns loop
+      theCriticalEventInJobDefn := theCriticalEventDefn with this -> R43.CriticalEventDefnForJobDefn;
+      if theCriticalEventInJobDefn /= null then
+        unlink this R43 theCriticalEventDefn using theCriticalEventInJobDefn;
+        delete theCriticalEventInJobDefn;
+      end if;  
+    end loop;
+    
+
     // Delete the Sequences and their associated audit event definitions
     
     theSequenceDefns := this -> R7; 
     for theSequenceDefn in theSequenceDefns'elements loop
-      theEventDefns := theSequenceDefn -> R1.AuditEventDefinition;
+      theEventDefns := theSequenceDefn -> R1.SequencedAuditEventDefinition;
       for theEventDefn in theEventDefns loop
         theEventInSeqDef := theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
         theEventOccurrencesInSeqDef := theEventInSeqDef -> R12;
@@ -115,14 +142,6 @@ begin
         delete theEventInSeqDef; 
       end loop;
       delete theEventDefns;
-      thePrevSequenceDefn := theSequenceDefn -> R9.follows;
-      if thePrevSequenceDefn /= null then
-        unlink theSequenceDefn R9.follows thePrevSequenceDefn;
-      end if;
-      theNextSequenceDefn := theSequenceDefn -> R9.precedes;
-      if theNextSequenceDefn /= null then
-        unlink theSequenceDefn R9.precedes theNextSequenceDefn;
-      end if;
      end loop;
      unlink this R7 theSequenceDefns;
     delete theSequenceDefns;

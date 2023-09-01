@@ -1,0 +1,384 @@
+//! ACTIVITY BEGIN. 'e02e3ece-2259-4b87-a003-3bdca65e0783' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test901SimpleUnhappyEvent () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theUnhappyEvents : set of instance of UnsequencedAuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 2 Jobs with 4 sequences and all events are in the standard default order
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  acceptOrderedEvent ("1620920000","SUHJ-A","UJ_Alpha","IncludingUnhappyEventsJob","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","SUHJ-B","UJ_Alpha","IncludingUnhappyEventsJob","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","SUHJ-C","UJ_Alpha","IncludingUnhappyEventsJob","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","SUHJ-Error","UJ_Alpha","IncludingUnhappyEventsJob","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920004","SUHJ-D","UJ_Alpha","IncludingUnhappyEventsJob","Ev4","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920005","SUHJ-E","UJ_Alpha","IncludingUnhappyEventsJob","Ev5","Ev6",theAuditEventData);
+//
+  Test::service_event_queue();
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theJobs -> R44;
+  theUnhappyEvents := theJobs -> R3;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 5, "Wrong number of happy audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theUnhappyEvents'length = 1, "Wrong number of unhappy events created: " & (theUnhappyEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = true, "Sequencing has not failed though it should have: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b2cf6204-6df7-46ce-87aa-e781cd298924' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test902SimpleCriticalEvent () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theUnhappyEvents : set of instance of UnsequencedAuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Jobs with 1 sequence and all events are in the standard default order
+  // This test job has a critical event defined and an unhappy event occurs as an ancestor of that critical event
+  // This test does reveal erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  acceptOrderedEvent ("1620920000","UCEJ-A","UJ_Beta","UnhappyCriticalEventsJob","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCEJ-B","UJ_Beta","UnhappyCriticalEventsJob","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCEJ-C","UJ_Beta","UnhappyCriticalEventsJob","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCEJ-Error","UJ_Beta","UnhappyCriticalEventsJob","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCEJ-D","UJ_Beta","UnhappyCriticalEventsJob","Ev4","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCEJ-E","UJ_Beta","UnhappyCriticalEventsJob","Ev5","Ev6",theAuditEventData);
+//
+  Test::service_event_queue();
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theJobs -> R44;
+  theUnhappyEvents := theJobs -> R3;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 5, "Wrong number of happy audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theUnhappyEvents'length = 1, "Wrong number of unhappy events created: " & (theUnhappyEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job is completed but shouldn't have: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = true, "Sequencing has not failed though it should have: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '6432e901-b734-4384-9f53-6090cfbb4db7' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test903SimpleCriticalEventHappyEventsOnly () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theUnhappyEvents : set of instance of UnsequencedAuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Jobs with 1 sequence and all events are in the standard default order
+  // This test job has a critical event defined and no unhappy events occurs as ancestors of that critical event
+  // This test does not reveal erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  acceptOrderedEvent ("1620920000","UCEJ-A","UJ_Gamma","UnhappyCriticalEventsJob","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCEJ-B","UJ_Gamma","UnhappyCriticalEventsJob","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCEJ-C","UJ_Gamma","UnhappyCriticalEventsJob","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCEJ-D","UJ_Gamma","UnhappyCriticalEventsJob","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCEJ-E","UJ_Gamma","UnhappyCriticalEventsJob","Ev4","Ev5",theAuditEventData);
+//
+  Test::service_event_queue();
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theJobs -> R44;
+  theUnhappyEvents := theJobs -> R3;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 5, "Wrong number of happy audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theUnhappyEvents'length = 0, "Wrong number of unhappy events created: " & (theUnhappyEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job did not completed but should have: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed though it shouldn't have: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a4270288-cbbe-4f54-b3e9-d34eb448a61b' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test904CriticalEventJobOK () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theUnhappyEvents : set of instance of UnsequencedAuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Jobs with 1 sequence and all events are in the standard default order
+  // This test job has a critical event defined and an unhappy event occurs as an ancestor of that critical event
+  // This test does reveal erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  acceptOrderedEvent ("1620920000","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-I","UJ_Delta","UnhappyCriticalJob1","Ev7","Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
+//
+  Test::service_event_queue();
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theJobs -> R44;
+  theUnhappyEvents := theJobs -> R3;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 8, "Wrong number of happy audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theUnhappyEvents'length = 1, "Wrong number of unhappy events created: " & (theUnhappyEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job didn't complete but should have: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = true, "Sequencing has not failed though it should have: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'ffeac6f7-7466-47f5-bf9e-655cd67670d6' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test905CriticalEventJobFail1 () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theUnhappyEvents : set of instance of UnsequencedAuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Jobs with 1 sequence and all events are in the standard default order
+  // This test job has a critical event defined and an unhappy event occurs as an ancestor of that critical event
+  // This test does reveal erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  acceptOrderedEvent ("1620920000","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev4","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-I","UJ_Delta","UnhappyCriticalJob1","Ev7","Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
+//
+  Test::service_event_queue();
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theJobs -> R44;
+  theUnhappyEvents := theJobs -> R3;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 9, "Wrong number of happy audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theUnhappyEvents'length = 1, "Wrong number of unhappy events created: " & (theUnhappyEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed but shouldn't have: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = true, "Sequencing has not failed though it should have: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd3e8db9f-dd4f-438e-a21e-63d12164d2a9' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test906CriticalEventJobFail2 () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theUnhappyEvents : set of instance of UnsequencedAuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // This test covers 1 Jobs with 1 sequence and all events are in the standard default order
+  // This test job has a critical event defined and an unhappy event occurs as an ancestor of that critical event
+  // This test does reveal erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  acceptOrderedEvent ("1620920000","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-I","UJ_Delta","UnhappyCriticalJob1","Ev7","Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
+//
+  Test::service_event_queue();
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theJobs -> R44;
+  theUnhappyEvents := theJobs -> R3;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 9, "Wrong number of happy audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theUnhappyEvents'length = 1, "Wrong number of unhappy events created: " & (theUnhappyEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed but shouldn't have: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = true, "Sequencing has not failed though it should have: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '229bbd63-cab7-4fbc-94f1-c53cf0688c84' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test907CriticalEventJobOK2 () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theUnhappyEvents : set of instance of UnsequencedAuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+previousEvents : sequence of string;
+empty : sequence of string;
+
+begin
+  // This test covers 1 Jobs with 1 sequence and all events are in the standard default order
+  // This test job has a critical event defined and an unhappy event occurs as an ancestor of that critical event
+  // This test does reveal erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  acceptOrderedEvent ("1620920000","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-D","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev4","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
+  previousEvents := empty & "Ev7" & "Ev10";
+  acceptOrderedEvent ("1620920004","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1",previousEvents,"Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
+//
+  Test::service_event_queue();
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theJobs -> R44;
+  theUnhappyEvents := theJobs -> R3;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 9, "Wrong number of happy audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theUnhappyEvents'length = 1, "Wrong number of unhappy events created: " & (theUnhappyEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job didn't complete but should have: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = true, "Sequencing has not failed though it should have: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '6c149fc9-bbfc-4d1b-b760-81a0f37eff0f' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test908CriticalEventJobFail3 () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theUnhappyEvents : set of instance of UnsequencedAuditEvent;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+previousEvents : sequence of string;
+empty : sequence of string;
+
+begin
+  // This test covers 1 Jobs with 1 sequence and all events are in the standard default order
+  // This test job has a critical event defined and an unhappy event occurs as an ancestor of that critical event
+  // This test does reveal erroneous behaviour of the twin
+  //
+  // Bank Transfer Sequence
+  acceptOrderedEvent ("1620920000","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-D","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","","Ev11",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev4","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
+  previousEvents := empty & "Ev7" & "Ev10";
+  acceptOrderedEvent ("1620920004","UCJ-I","UJ_Delta","UnhappyCriticalJob1",previousEvents,"Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
+//
+  Test::service_event_queue();
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theJobs -> R44;
+  theUnhappyEvents := theJobs -> R3;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 10, "Wrong number of happy audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theUnhappyEvents'length = 1, "Wrong number of unhappy events created: " & (theUnhappyEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted = false, "Job completed but shouldn't have: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = true, "Sequencing has not failed though it should have: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

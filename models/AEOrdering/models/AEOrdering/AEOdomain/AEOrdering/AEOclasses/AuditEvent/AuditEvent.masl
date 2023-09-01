@@ -1,7 +1,5 @@
 //! ACTIVITY BEGIN. '132f9323-3874-4c33-a0e6-bef8cf58ded1' DO NOT EDIT THIS LINE.
 public service AEOrdering::AuditEvent.createAuditEvent ( job : in instance of Job,
-                                                        nodeName : in string,
-                                                        applicationName : in string,
                                                         auditEventType : in string,
                                                         auditEventId : in string,
                                                         auditEventTime : in string,
@@ -22,9 +20,9 @@ begin
 	// verify that the audit event does not already exist
 	auditEvent := find_one AuditEvent(auditEventId = auditEventId);
 	if auditEvent = null then
-		auditEvent := create AuditEvent(auditEventId => auditEventId, reportedEventType => auditEventType, reportedApplication => applicationName,
-			                            reportedNodeName => nodeName, reportedAuditEventTime => auditEventTime, reportedPrevEventIds => prevAuditEventIds, 
-			                            eventCreationTime => timestamp'now, eventState => EventStateEnum.BLOCKED, auditEventData => auditEventData);
+		auditEvent := create AuditEvent(auditEventId => auditEventId, reportedEventType => auditEventType,  reportedAuditEventTime => auditEventTime, 
+			                            reportedPrevEventIds => prevAuditEventIds, eventCreationTime => timestamp'now, eventState => EventStateEnum.BLOCKED, 
+			                            auditEventData => auditEventData);
 		link auditEvent R9 job;
 		eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
 		Reporting~>reportEvent(Logger::Information, "aeordering_events_processed", eventContent);
@@ -106,7 +104,7 @@ previousEventsReported : boolean := false;
 begin
 	
 	// verify that this is an allowed event
-	if (job -> R2.InProgressJob /= null) and Application.validEvent(this, failureReason) then
+	if (job -> R2.InProgressJob /= null) and AuditEventType.validEvent(this, failureReason) then
 		
 		// we have a valid audit event so we now need to determine if it can be reported or if it is blocked
 		eventType := this -> R7.AuditEventType;

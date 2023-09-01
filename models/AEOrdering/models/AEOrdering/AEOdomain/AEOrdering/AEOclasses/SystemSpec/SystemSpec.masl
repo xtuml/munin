@@ -73,7 +73,6 @@ jobStore : instance of JobStore;
 jobStoreName : string := "JobIdStore.log";
 today : sequence of integer;
 midnight : timestamp;
-fileControl : instance of FileControl;
 invariantStoreLoadRate : duration;
 
 begin
@@ -90,7 +89,7 @@ begin
         // read the contents of the config file 
         configJSONString := Filesystem::read_file(fileName);
         configJSONElement := JSON::parse(configJSONString);
-        configValidationResult := JSONValidation::validate(configJSONElement, #PROP["orderingConfigSchema"]#);
+        configValidationResult := JSONValidation::validate(configJSONElement, Environment::getenv(Environment::variable_name("ORDERING_CONFIG_SCHEMA_PATH")));
         if JSON::get_boolean(configValidationResult["valid"]) then
             // extract the spec data items
             configJSONObject := JSON::get_object(configJSONElement);
@@ -106,30 +105,6 @@ begin
             if configJSONObject'contains("JobCompletePeriod") then
                 this.jobCompletePeriod := duration'parse(JSON::get_string(configJSONObject["JobCompletePeriod"]));
             end if;
-            if configJSONObject'contains("IncomingDirectory") then
-                this.incomingDirectory := JSON::get_string(configJSONObject["IncomingDirectory"]);
-                // check if the directory exists and if not create it
-				if Filesystem::file_exists(Filesystem::filename(this.incomingDirectory)) = false then
-					Filesystem::create_directory(Filesystem::filename(this.incomingDirectory));
-				end if;
-				Filesystem::add_permissions(Filesystem::filename(this.incomingDirectory),filePermissions);
-            end if;
-            if configJSONObject'contains("ProcessingDirectory") then
-                this.processingDirectory := JSON::get_string(configJSONObject["ProcessingDirectory"]);
-                // check if the directory exists and if not create it
-				if Filesystem::file_exists(Filesystem::filename(this.processingDirectory)) = false then
-					Filesystem::create_directory(Filesystem::filename(this.processingDirectory));
-				end if;
-				Filesystem::add_permissions(Filesystem::filename(this.processingDirectory),filePermissions);
-            end if;
-            if configJSONObject'contains("ProcessedDirectory") then
-                this.processedDirectory := JSON::get_string(configJSONObject["ProcessedDirectory"]);
-                // check if the directory exists and if not create it
-				if Filesystem::file_exists(Filesystem::filename(this.processedDirectory)) = false then
-					Filesystem::create_directory(Filesystem::filename(this.processedDirectory));
-				end if;
-				Filesystem::add_permissions(Filesystem::filename(this.processedDirectory),filePermissions);
-            end if;
             if configJSONObject'contains("JobDefinitionDirectory") then
                 this.jobDefinitionDirectory := JSON::get_string(configJSONObject["JobDefinitionDirectory"]);
             end if;
@@ -144,6 +119,9 @@ begin
             end if;
             if configJSONObject'contains("JobStoreLocation") then
                 jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);
+                if not Filesystem::file_exists(Filesystem::filename(jobStoreLocation)) then
+                  Filesystem::create_directory(Filesystem::filename(jobStoreLocation));
+                end if;
             end if;
             if configJSONObject'contains("JobStoreAgeLimit") then
                 jobStoreAgeLimit := duration'parse(JSON::get_string(configJSONObject["JobStoreAgeLimit"]));
@@ -154,9 +132,6 @@ begin
                 	this.invariantStoreLoadRate := invariantStoreLoadRate;
                 	Req_IF_InvariantStore~>setLoadRate(this.invariantStoreLoadRate);
                 end if;
-            end if;
-            if configJSONObject'contains("FileControlWaitTime") then
-                this.fileControlWaitTime := duration'parse(JSON::get_string(configJSONObject["FileControlWaitTime"]));
             end if;
         else
             logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
@@ -173,8 +148,7 @@ begin
     // if the job store does not exist then create it
     jobStore := find_one JobStore();
     if jobStore = null then
-    	fileControl := find_one FileControl();
-    	jobStoreName := "JobIdStore" & "-" &  fileControl.startJobGroup'image & "-" & fileControl.endJobGroup'image;
+    	jobStoreName := "JobIdStore" & "-" &  this.startJobGroup'image & "-" & this.endJobGroup'image;
     	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, Current_State => Created);
     	JobStore.loadJobStore();
     	today := timestamp'now'split_ymd();
@@ -251,7 +225,7 @@ begin
             if Strings::ends_with(jobDefinitionFile.jobDefinitionFileName, ".json") then
                 jobTypeJSONString := Filesystem::read_file(Filesystem::filename(jobDefinitionFile.jobDefinitionFileName));
                 jobTypeJSONElement := JSON::parse(jobTypeJSONString);
-                jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, #PROP["jobDefinitionSchema"]#);
+                jobTypeValidationResult := JSONValidation::validate(jobTypeJSONElement, Environment::getenv(Environment::variable_name("JOB_DEFINITION_SCHEMA_PATH")));
                 if JSON::get_boolean(jobTypeValidationResult["valid"]) then
                     jobTypeJSONObject := JSON::get_object(jobTypeJSONElement);
                     // find or create the job
@@ -292,7 +266,8 @@ begin
     	eventDefinitions := emptyEventDefinitions;
         for auditEventType in (job -> R12.AuditEventType() ordered_by (auditEventTypeId)) loop
             eventDefinitions := eventDefinitions & (auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, 
-            	                                 auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd, auditEventType.isBreak);
+            	                                 auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd, 
+            	                                 auditEventType.isBreak, auditEventType.isSequenced, auditEventType.critical);
         end loop;
         Req_IF_Verification~>jobDefinition(job.jobTypeName, eventDefinitions);
         // report any dynamic controls

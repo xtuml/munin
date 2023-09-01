@@ -7,7 +7,7 @@ endTime : timestamp;
 existingExtraJobInvariant : instance of PersistedInvariant;
 newExtraJobInvariant : instance of PersistedInvariant;
 sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
-sourceEventDefn : instance of AuditEventDefinition;
+sourceEventDefn : instance of SequencedAuditEventDefinition;
 sourceJobDefn : instance of JobDefinition;
 logMessage : string;
 
@@ -31,7 +31,7 @@ begin
     
     generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
     sourceAEOccurrenceDefn := extraJobInvDefn -> R20;
-    sourceEventDefn := sourceAEOccurrenceDefn -> R12 -> R1.AuditEventDefinition;
+    sourceEventDefn := sourceAEOccurrenceDefn -> R12 -> R1.SequencedAuditEventDefinition;
     sourceJobDefn := sourceAEOccurrenceDefn -> R12 -> R1.AESequenceDefinition -> R7;
     
     Persistence_Req_IF~>PersistInvariant(newExtraJobInvariant.invariantName, 
@@ -53,7 +53,7 @@ end service;
 //! ACTIVITY BEGIN. '2869fcaf-8e75-459e-8a4b-c88648b57c5f' DO NOT EDIT THIS LINE.
 public instance service AESequenceDC::PersistedInvariant.deletePersistedInvariant () is
 theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
-theProvidingAuditEvent : instance of AuditEvent;
+theProvidingAuditEvent : instance of SequencedAuditEvent;
 
 logMessage : string;
 

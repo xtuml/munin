@@ -43,6 +43,69 @@ INSERT INTO O_TFR
 	"3d42cd49-1305-4d1b-9faf-370efe278d18",
 	1,
 	2);
+INSERT INTO O_TFR
+	VALUES ("db347d85-0ef8-469b-a066-39e28a893522",
+	"f50894a2-8c45-468f-896f-f76df8bebddc",
+	'migrateToUnhappyJob',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	1,
+	'',
+	"29df042e-fb35-4443-881f-62ea6991447a",
+	1,
+	3);
+INSERT INTO O_TPARM
+	VALUES ("ef9bd6aa-78ba-4891-aeb0-342a57b3d021",
+	"db347d85-0ef8-469b-a066-39e28a893522",
+	'eventId',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO O_TPARM
+	VALUES ("f13054ed-8fb5-415a-9a12-3ac7fe486dee",
+	"db347d85-0ef8-469b-a066-39e28a893522",
+	'prevAEIds',
+	"15041607-2553-4dd2-9613-b86cf294cf4d",
+	0,
+	'',
+	"ef9bd6aa-78ba-4891-aeb0-342a57b3d021",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("15041607-2553-4dd2-9613-b86cf294cf4d",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of string',
+	'',
+	'',
+	'../../DomainTypes/DomainTypes.xtuml');
+INSERT INTO O_TPARM
+	VALUES ("9ee0dc41-1ae5-46e6-b19c-8570957ac7dc",
+	"db347d85-0ef8-469b-a066-39e28a893522",
+	'aeType',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"f13054ed-8fb5-415a-9a12-3ac7fe486dee",
+	'');
+INSERT INTO O_TPARM
+	VALUES ("033bef04-fee2-4656-b853-3be9756fc7e3",
+	"db347d85-0ef8-469b-a066-39e28a893522",
+	'aeData',
+	"73ecc6ad-37f4-40dd-b682-7d2c5f0eeb48",
+	0,
+	'',
+	"9ee0dc41-1ae5-46e6-b19c-8570957ac7dc",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("73ecc6ad-37f4-40dd-b682-7d2c5f0eeb48",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of auditEventDataStructure',
+	'',
+	'',
+	'../../../Shared/Shared.xtuml');
 INSERT INTO O_NBATTR
 	VALUES ("57838f77-04c2-459e-984c-bf6ae53bfbd8",
 	"f50894a2-8c45-468f-896f-f76df8bebddc");
@@ -59,24 +122,6 @@ INSERT INTO O_ATTR
 	'jobID',
 	0,
 	"ba5eda7a-def5-0000-0000-000000000004",
-	'',
-	'');
-INSERT INTO O_NBATTR
-	VALUES ("c0dd69d1-d93c-4707-8c9c-0e3e0c962cc4",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_BATTR
-	VALUES ("c0dd69d1-d93c-4707-8c9c-0e3e0c962cc4",
-	"f50894a2-8c45-468f-896f-f76df8bebddc");
-INSERT INTO O_ATTR
-	VALUES ("c0dd69d1-d93c-4707-8c9c-0e3e0c962cc4",
-	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"57838f77-04c2-459e-984c-bf6ae53bfbd8",
-	'current_state',
-	'',
-	'',
-	'current_state',
-	0,
-	"ba5eda7a-def5-0000-0000-000000000006",
 	'',
 	'');
 INSERT INTO O_REF
@@ -121,7 +166,7 @@ INSERT INTO O_BATTR_PROXY
 INSERT INTO O_ATTR
 	VALUES ("c70b6270-4c3b-4821-87f8-9699af8bef1f",
 	"f50894a2-8c45-468f-896f-f76df8bebddc",
-	"c0dd69d1-d93c-4707-8c9c-0e3e0c962cc4",
+	"57838f77-04c2-459e-984c-bf6ae53bfbd8",
 	'jobName',
 	'',
 	'',
@@ -243,6 +288,24 @@ INSERT INTO O_ATTR
 	'jobHangingTimer',
 	0,
 	"78c29c89-7a3e-4b79-8163-53652917088c",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("71f39721-9d5e-4712-ae63-2dbddddc0558",
+	"f50894a2-8c45-468f-896f-f76df8bebddc");
+INSERT INTO O_BATTR
+	VALUES ("71f39721-9d5e-4712-ae63-2dbddddc0558",
+	"f50894a2-8c45-468f-896f-f76df8bebddc");
+INSERT INTO O_ATTR
+	VALUES ("71f39721-9d5e-4712-ae63-2dbddddc0558",
+	"f50894a2-8c45-468f-896f-f76df8bebddc",
+	"75dba020-19a7-452d-bf8c-5627b8bb5d40",
+	'current_state',
+	'',
+	'',
+	'current_state',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000006",
 	'',
 	'');
 INSERT INTO O_ID

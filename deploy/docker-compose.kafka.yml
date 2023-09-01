@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  aer_proc:
+    image: "ghcr.io/xtuml/protocol_verifier"
+    volumes:
+      - "./config:/root/config"
+      - "./logs/reception:/var/log/reception"
+      - "./reception-processed:/root/processed"
+    command: "AER_PROC_transient -configPath config/ -configFile pv-config.json  -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup-aer.sch -util MetaData -util Kafka -kafka-broker-list kafka:9093"
+  aeo_svdc_proc:
+    image: "ghcr.io/xtuml/protocol_verifier"
+    volumes:
+      - "./config:/root/config"
+      - "./logs/verifier:/var/log/verifier"
+      - "./InvariantStore:/root/InvariantStore"
+      - "./JobIdStore:/root/JobIdStore"
+    command: "AEO_SVDC_PROC_transient -configPath config/ -configFile pv-config.json  -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup-aeo-svdc.sch -startJobGroup 00 -endJobGroup FF -util MetaData -util Kafka -kafka-broker-list kafka:9093"

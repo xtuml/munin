@@ -1,0 +1,126 @@
+project PV_PROC is
+
+  domain AEReception is
+
+    terminator Ordering is
+
+      public service AcceptEvent (
+        jobId : in string,
+        auditEventType : in string,
+        auditEventId : in string,
+        auditEventTime : in string,
+        prevAuditEventIds : in sequence of string,
+        auditEventData : in dictionary
+      );
+
+    end terminator;
+    
+  end domain;
+
+  domain FReception is
+    
+    terminator Reception is
+    
+      public service AcceptEvents (
+          auditEvents : in string    );
+    
+    end terminator;
+  
+  end domain;
+  
+  domain AEOrdering is
+    terminator Req_IF_Audited is
+      public service reportAuditFailure ( jobId: in string,
+                                          auditReport: in string );       
+      public service reportAuditSuccess ( jobId: in string );       
+      public service reportAuditItem ( jobId: in string,
+                                       auditReport: in string );       
+    end terminator;
+    terminator Req_IF_Verification is
+      public service audit_event ( jobId: in string,
+                                   jobName: in string,        
+                                   auditEventType: in string,
+                                   auditEventId: in string,
+                                   auditEventTime: in string,
+                                   prevAuditEventIds: in sequence of string,
+                                   reportableAuditEventDataItems: in sequence of ReportableAuditEventDataType );       
+      public service failedJob ( jobId: in string,
+                                 failureReason: in string );       
+      public service jobComplete ( jobId: in string );       
+      public service eventDefinition ( jobName: in string,
+                                       sequenceName: in string,
+                                       eventType: in string,
+                                       occurrenceId: in integer,
+                                       previousEventTypes: in sequence of PreviousEventType,
+                                       isSequenceStart: in boolean,
+                                       isSequenceEnd: in boolean,
+                                       isBreak: in boolean );       
+      public service jobTypeDeleted ( jobTypeName: in string );       
+      public service intraJobInvariantDefinition ( auditEventDataName: in string,
+                                                   jobDefinitionName: in string,
+                                                   associatedEvents: in sequence of IntraJobInvDataType );       
+      public service extraJobInvariantDefinition ( auditEventDataName: in string,
+                                                   sourceJobDefnName: in string,
+                                                   sourceEventType: in string,
+                                                   sourceOccurrenceId: in integer,
+                                                   userEvents: in sequence of UserEventDataType );       
+      public service dynamicControlDefinition ( jobTypeName: in string,
+                                                dynamicControlName: in string,
+                                                dynamicControlType: in string,
+                                                sourceEventType: in string,
+                                                sourceOccurrenceId: in integer,
+                                                userEventType: in string,
+                                                userOccurrenceId: in integer );       
+      public service jobDefinition ( jobName: in string,
+                                     eventDefinitions: in sequence of EventDefinitionType );       
+    end terminator;
+    terminator Req_IF_InvariantStore is
+      public service setLoadRate ( loadRate: in duration );       
+    end terminator;
+    
+    terminator Req_IF_BehaviourVerification is
+      public service sendInstrumentationEvent (jobName : in string,
+                                               jobID : in string,
+                                               eventID : in string,
+                                               eventType : in string);
+    end terminator;
+
+    terminator Reporting is
+    end terminator;
+  end domain;
+  
+  domain AESequenceDC is
+    terminator JobAdmin is
+      public service deleteJob ( jobID: in string );       
+    end terminator;
+    terminator Persistence_Req_IF is
+      public service PersistInvariant ( extraJobInvariantName: in string,
+                                        invariantValue: in string,
+                                        validFrom: in timestamp,
+                                        validTo: in timestamp,
+                                        sourceJobDefinitionType: in string,
+                                        sourceAuditEventType: in string,
+                                        sourceAuditEventOccurrenceId: in integer );       
+      public service RestoreNamedInvariant ( extraJobInvariantName: in string,
+                                             invariantValue: in string );       
+    end terminator;
+
+    terminator BehaviourVerification is
+      public service sendInstrumentationEvent (jobName : in string,
+                                               jobID : in string,
+                                               eventID : in string,
+                                               eventType : in string);
+    end terminator;
+
+  end domain;
+  
+  domain IStore is
+    terminator StoreClient is
+      public service addInvariants ( invariantsToReport: in sequence of persistedInvariantStructure );       
+    end terminator;
+  end domain;
+
+  domain VerificationGateway is
+  end domain;
+  
+end project;

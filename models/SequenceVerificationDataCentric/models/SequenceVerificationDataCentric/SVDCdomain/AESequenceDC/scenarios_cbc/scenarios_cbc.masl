@@ -8,37 +8,144 @@ begin
   //
   // Job BranchCountJob, Sequence BranchCountSequence
   // 
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFA",1,previousEventTypes,true,false,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("BCFA",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFB",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("BCFB",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFC",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFC",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("BCFC",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFD",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFD",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("BCFD",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFE",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFE",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("BCFE",1,"","");
-  eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false);
+  eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false,true,false);
 
-  dynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
-  dynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
+  createDynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
+  createDynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
   
 //
   previousEventTypes := empty;
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFA",1,previousEventTypes,true,false,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFA",1,previousEventTypes,true,false,false,true,false);
   previousEventTypes := ("SSUFA",1,"","");
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFB",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFB",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("SSUFB",1,"","");
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFC",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFC",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("SSUFC",1,"","");
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFD",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFD",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("SSUFD",1,"","");
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFE",1,previousEventTypes,false,false,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFE",1,previousEventTypes,false,false,false,true,false);
   previousEventTypes := ("SSUFE",1,"","");
-  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFF",1,previousEventTypes,false,true,false);
+  eventDefinition ("BranchSameSourceAndUserJob","BranchSameSourceAndUserSequence","SSUFF",1,previousEventTypes,false,true,false,true,false);
 
-  dynamicControlDefinition("BranchSameSourceAndUserJob", "Branch_SameSourceAndUser_1", dynamicControlTypeEnum.BRANCHCOUNT, "SSUFB",1,"SSUFB",1);
+  createDynamicControlDefinition("BranchSameSourceAndUserJob", "Branch_SameSourceAndUser_1", dynamicControlTypeEnum.BRANCHCOUNT, "SSUFB",1,"SSUFB",1);
 //
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '7c63c84a-8adc-4c58-aa13-9939c1c7c745' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitSimpleJobWithUnhappyEvents () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // A simple job that includes an unhappy event definition
+  // 
+  eventDefinition ("IncludingUnhappyEventsJob","SimpleSequence","SUHJ-A",1,previousEventTypes,true,false,false,true,false);
+  previousEventTypes := ("SUHJ-A",1,"","");
+  eventDefinition ("IncludingUnhappyEventsJob","SimpleSequence","SUHJ-B",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("SUHJ-B",1,"","");
+  eventDefinition ("IncludingUnhappyEventsJob","SimpleSequence","SUHJ-C",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("SUHJ-C",1,"","");
+  eventDefinition ("IncludingUnhappyEventsJob","SimpleSequence","SUHJ-D",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("SUHJ-D",1,"","");
+  eventDefinition ("IncludingUnhappyEventsJob","SimpleSequence","SUHJ-E",1,previousEventTypes,false,true,false,true,false);
+  //
+  // and now the unhappy event definition
+  //
+  previousEventTypes := empty;
+  eventDefinition ("IncludingUnhappyEventsJob","SimpleSequence","SUHJ-Error",1,previousEventTypes,false,false,false,false,false);
+  //
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'ac66dcaf-1b96-43f9-b68c-9a16b271ce04' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitSimpleJobWithCriticalAndUnhappyEvents () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // A simple job that includes an unhappy event definition
+  // 
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleCriticalSequence","UCEJ-A",1,previousEventTypes,true,false,false,true,false);
+  previousEventTypes := ("UCEJ-A",1,"","");
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleCriticalSequence","UCEJ-B",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCEJ-B",1,"","");
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleCriticalSequence","UCEJ-C",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCEJ-C",1,"","");
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleCriticalSequence","UCEJ-D",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCEJ-D",1,"","");
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleCriticalSequence","UCEJ-E",1,previousEventTypes,false,true,false,true,true);
+  //
+  // and now the unhappy event definition
+  //
+  //
+  previousEventTypes := empty;
+  eventDefinition ("UnhappyCriticalEventsJob","SimpleSequence","UCEJ-Error",1,previousEventTypes,false,false,false,false,false);
+  //
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'dce9da0f-d4e0-4728-a818-f1d3e53faefe' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitJobWithCriticalAndUnhappyEvents1 () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // A forking job that includes an unhappy event definition
+  // 
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-A",1,previousEventTypes,true,false,false,true,false);
+  previousEventTypes := ("UCJ-A",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-B",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-B",1,"CriticalJobANDFork","AND");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-C",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-C",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-D",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-D",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-E",1,previousEventTypes,false,false,false,true,true);
+  previousEventTypes := ("UCJ-B",1,"CriticalJobANDFork","AND");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-F",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-F",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-G",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-G",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-H",1,previousEventTypes,false,false,false,true,true);
+  previousEventTypes := ("UCJ-E",1,"","") & ("UCJ-H",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-I",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("UCJ-I",1,"","");
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-J",1,previousEventTypes,false,true,false,true,false);
+  //
+  //dynamicControlDefinition("UnhappyCriticalJob1", "TypeFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "CSJB",1,"CSJB",1);
+  //dynamicControlDefinition("UnhappyCriticalJob1", "TypeMerge1", dynamicControlTypeEnum.MERGECOUNT, "CSJB",1,"CSJI",1);
+  
+  // and now the unhappy event definitions
+  //
+  //
+  previousEventTypes := empty;
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-Error1",1,previousEventTypes,false,false,false,false,false);
+  previousEventTypes := empty;
+  eventDefinition ("UnhappyCriticalJob1","CriticalSequence1","UCJ-Error2",1,previousEventTypes,false,false,false,false,false);
+  //
 end service;
 //
 //

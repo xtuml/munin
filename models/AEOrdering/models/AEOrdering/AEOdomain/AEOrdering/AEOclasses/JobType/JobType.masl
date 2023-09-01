@@ -10,15 +10,14 @@ dynamicControlJSONObject : JSON::JSONObject;
 eventTypeName : string;
 sequenceName : string;
 occurrenceId : integer;
-applicationName : string;
 sequenceStart : boolean;
 sequenceEnd : boolean;
 isBreak : boolean;
+critical : boolean;
 emptyPreviousEventTypes : sequence of PreviousEventType;
 previousEventTypes : sequence of PreviousEventType;
 previousEventName : string;
 previousEventOccurrenceId : integer;
-application : instance of Application;
 eventType : instance of AuditEventType;
 constraintDefinitionId : string;
 constraintValue : string;
@@ -39,17 +38,16 @@ begin
 				eventTypeName := "";
 				sequenceName := "";
 				occurrenceId := 1;
-				applicationName := "";
 				sequenceStart := false;
 				sequenceEnd := false;
 				isBreak := false;
 				hasDynamicControl := false;
+				critical := false;
 				previousEventTypes := emptyPreviousEventTypes;
 				eventDefJSONObject := JSON::get_object(eventTypeJSONElement);
 				eventTypeName := JSON::get_string(eventDefJSONObject["EventName"]);
 				sequenceName := JSON::get_string(eventDefJSONObject["SequenceName"]);
 				occurrenceId := JSON::get_integer(eventDefJSONObject["OccurrenceId"]);
-				applicationName := JSON::get_string(eventDefJSONObject["Application"]);
 				if eventDefJSONObject'contains("SequenceStart") then
 					sequenceStart := JSON::get_boolean(eventDefJSONObject["SequenceStart"]);
 				end if;
@@ -58,6 +56,9 @@ begin
 				end if;
 				if eventDefJSONObject'contains("IsBreak") then
 					isBreak := JSON::get_boolean(eventDefJSONObject["IsBreak"]);
+				end if;
+				if eventDefJSONObject'contains("IsCritical") then
+					critical := JSON::get_boolean(eventDefJSONObject["IsCritical"]);
 				end if;
     			if eventDefJSONObject'contains("PreviousEvents") and eventDefJSONObject["PreviousEvents"].kind = JSON::Array then
 					for prevEventTypeJSONElement in JSON::get_array(eventDefJSONObject["PreviousEvents"]) loop
@@ -75,21 +76,15 @@ begin
 						previousEventTypes := previousEventTypes & (previousEventName, previousEventOccurrenceId, constraintDefinitionId, constraintValue);
 					end loop;
 				end if;
-				// now we have extracted the data create the event
-				application := find_one Application(applicationName = applicationName);
-				if application = null then
-					application := create Application(applicationName => applicationName);
-				end if;
 				
-				eventType := find_one AuditEventType(eventType = eventTypeName and applicationName = applicationName and occurrenceId = occurrenceId);
+				eventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
 				if eventType = null then
 					eventType := create unique AuditEventType(eventType => eventTypeName, occurrenceId => occurrenceId, 
-						                               applicationName => applicationName, sequenceName => sequenceName,
-						                               isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
+						                               sequenceName => sequenceName, isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
 						                               staleAuditEventDuration => this.staleAuditEventDuration, 
 						                               blockedAuditEventDuration => this.blockedAuditEventDuration, 
-						                               previousEventTypes => previousEventTypes, isBreak => isBreak);
-					link eventType R6 application;
+						                               previousEventTypes => previousEventTypes, isBreak => isBreak,
+						                               critical => critical, isSequenced => true);
 					link eventType R12 this;
 				else
 					eventType.isSequenceEnd := sequenceEnd;
@@ -171,6 +166,33 @@ begin
 	
 			end loop;
 		end if;
+		if jobTypeJSONObject'contains("UnhappyEvents") and jobTypeJSONObject["UnhappyEvents"].kind = JSON::Array then
+			for eventTypeJSONElement in JSON::get_array(jobTypeJSONObject["UnhappyEvents"]) loop
+				eventTypeName := "";
+				sequenceName := "";
+				occurrenceId := 1;
+				sequenceStart := false;
+				sequenceEnd := false;
+				isBreak := false;
+				hasDynamicControl := false;
+				previousEventTypes := emptyPreviousEventTypes;
+				eventDefJSONObject := JSON::get_object(eventTypeJSONElement);
+				eventTypeName := JSON::get_string(eventDefJSONObject["EventName"]);
+				
+				// now we have extracted the data create the event
+				eventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
+				if eventType = null then
+					eventType := create unique AuditEventType(eventType => eventTypeName, occurrenceId => occurrenceId, 
+						                               sequenceName => sequenceName,
+						                               isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
+						                               staleAuditEventDuration => this.staleAuditEventDuration, 
+						                               blockedAuditEventDuration => this.blockedAuditEventDuration, 
+						                               previousEventTypes => previousEventTypes, isBreak => isBreak, 
+						                               critical => false, isSequenced => false);
+					link eventType R12 this;
+				end if;				
+			end loop;
+		end if;
 	else
 		logMessage := "AEOrdering::JobType.loadEventTypes : Failed to process event type for unknown Job Type " & jobTypeName;
 		Logger::log(Logger::Error, "AEOrdering", logMessage);
@@ -186,15 +208,13 @@ logMessage : string;
 eventRuleJSONObject : JSON::JSONObject;
 auditEventType : instance of AuditEventType;
 auditEventTypeName : string;
-applicationName : string;
 
 begin
 	
 	for eventRuleJSONElement in eventRulesJSONArray loop
 		eventRuleJSONObject := JSON::get_object(eventRuleJSONElement);
 		auditEventTypeName := JSON::get_string(eventRuleJSONObject["EventName"]);
-		applicationName := JSON::get_string(eventRuleJSONObject["ApplicationName"]);
-		auditEventType := find_one AuditEventType(eventType = auditEventTypeName and applicationName = applicationName);
+		auditEventType := find_one AuditEventType(eventType = auditEventTypeName);
 		if auditEventType /= null then
 			if eventRuleJSONObject'contains("StaleAuditEventDuration") then
 				auditEventType.staleAuditEventDuration := duration'parse(JSON::get_string(eventRuleJSONObject["StaleAuditEventDuration"]));
