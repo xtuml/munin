@@ -20,6 +20,7 @@ class ConanFile(conan.ConanFile):
         self.requires('freception/[>=0.1]@xtuml/stable')
         self.requires('istore/[>=0.1]@xtuml/stable')
         self.requires('aesequencedc/[>=0.1]@xtuml/stable')
+        self.requires('verificationgateway/[>=0.1]@xtuml/stable')
 
     def build_requirements(self):
         self.tool_requires('masl_codegen/[>=0.1]@xtuml/stable')

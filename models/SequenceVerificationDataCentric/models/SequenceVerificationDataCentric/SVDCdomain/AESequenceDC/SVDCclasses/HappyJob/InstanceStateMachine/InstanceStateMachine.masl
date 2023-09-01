@@ -865,7 +865,6 @@ begin
   // Log info: Audit Event Sequence Verification has determined that the Job is Complete
   logMessage := "AESequenceDC::Job.JobSuccessful : Sequence Verification determines that the Job - jobId = " & this.jobID & " is complete.";
   Logger::log(Logger::Debug, "Monitored System Status", logMessage);
-  jobDefinition := this -> R8;
   eventContent := "JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
   Reporting~>reportEvent(Logger::Information, "svdc_job_success", eventContent);
   for evt in theJob->R10->R11.SequencedAuditEvent loop
