@@ -1,0 +1,16 @@
+//! ACTIVITY BEGIN. 'b86537f1-b474-4416-b985-319d7cd86990' DO NOT EDIT THIS LINE.
+public service FReception::Reporting~>reportEvent ( eventPriority : in Logger::Priority,
+                                                   eventLabel : in string,
+                                                   eventContent : in string ) is
+begin
+	Logger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '82ae77d7-fbec-46f0-a7bb-548b9d515002' DO NOT EDIT THIS LINE.
+public service FReception::Reception~>AcceptEvents ( auditEvents : in string ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

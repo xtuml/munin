@@ -1,0 +1,107 @@
+//! ACTIVITY BEGIN. '99ff2cd9-8936-4cd5-a8ec-56e89d95dd54' 'f3d8f593-7699-4dec-bf95-1159d44da9b6' DO NOT EDIT THIS LINE.
+state FReception::FileControl.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '99ff2cd9-8936-4cd5-a8ec-56e89d95dd54' '5bcca181-4937-4556-a376-1452f3288c35' DO NOT EDIT THIS LINE.
+state FReception::FileControl.WaitingForFile () is
+logMessage : string;
+fileReceptionSpec : instance of FileReceptionSpec;
+fileNames : sequence of Filesystem::filename;
+eventFile : instance of EventFile;
+fileToBeProcessed : Filesystem::filename;
+lock: Filesystem::file_lock;
+fileAssigned : boolean := false;
+filePermissions : Filesystem::permissions;
+
+begin
+
+	// find a file to process
+	fileReceptionSpec := find_one FileReceptionSpec();
+	fileNames := Filesystem::list_directory(Filesystem::filename(fileReceptionSpec.incomingDirectory));
+	for currentFile in fileNames loop
+		begin
+			if Filesystem::lock_file(Filesystem::filename(fileReceptionSpec.incomingDirectory & "/") & currentFile, Filesystem::ExclusiveLock, lock, false) then
+				fileToBeProcessed := Filesystem::filename(fileReceptionSpec.processedDirectory & "/") & currentFile;
+				Filesystem::move_file( Filesystem::filename(fileReceptionSpec.incomingDirectory & "/") & currentFile, Filesystem::filename(fileToBeProcessed));
+				// verify that the move worked
+				if Filesystem::file_exists(Filesystem::filename(fileToBeProcessed)) then
+					eventFile := create EventFile(fileName => string(currentFile), timeProcessed => timestamp'now);
+					link this R1 eventFile;
+					generate FileControl.allocateFile(eventFile) to this;
+					fileAssigned := true;
+					logMessage := "FileReception::FileControl.WaitingForFile : assigning file " & eventFile.fileName;
+					Logger::log(Logger::Debug, "FileReception", logMessage);
+					exit; // for loop
+				end if;
+			end if;
+		exception
+			when others => null;
+		end;
+	end loop;
+	if fileAssigned = false then
+		schedule this.fileControlTimer generate FileControl.checkForFile() to this delay fileReceptionSpec.fileControlWaitTime;
+	end if;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '99ff2cd9-8936-4cd5-a8ec-56e89d95dd54' '9293712c-f5b9-4ebe-a566-a1adce1e933e' DO NOT EDIT THIS LINE.
+state FReception::FileControl.ProcessingFile ( eventFile : in instance of EventFile ) is
+logMessage : string;
+fileToBeProcessed : string;
+auditEvents : string;
+fileReceptionSpec : instance of FileReceptionSpec;
+jsonElement : JSON::JSONElement;
+
+begin
+	
+	// create the reception job and link to the event file it has to process
+	fileReceptionSpec := find_one FileReceptionSpec();
+	fileToBeProcessed := fileReceptionSpec.processedDirectory & "/" & eventFile.fileName;
+    auditEvents := Filesystem::read_file(Filesystem::filename(fileToBeProcessed));
+	jsonElement := JSON::parse(auditEvents);
+	if jsonElement.kind = JSON::Array then
+		for elementReceived in JSON::get_array(jsonElement) loop
+			if elementReceived.kind = JSON::Object then
+				Reception~>AcceptEvents(JSON::dump(elementReceived));
+			end if;
+		end loop;
+	end if;
+	// check for more capacity
+	generate FileControl.checkCapacity() to this;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '99ff2cd9-8936-4cd5-a8ec-56e89d95dd54' 'fbb0749c-c388-4f74-a3ef-b490d4100ac1' DO NOT EDIT THIS LINE.
+state FReception::FileControl.WaitingForCapacity () is
+logMessage : string;
+fileReceptionSpec : instance of FileReceptionSpec;
+currentFiles : sequence of instance of EventFile;
+
+begin
+	
+	cancel this.fileControlTimer;
+	fileReceptionSpec := find_one FileReceptionSpec();
+	currentFiles := this -> R1.EventFile;
+	if currentFiles'length < fileReceptionSpec.concurrentReceptionLimit then
+		generate FileControl.checkForFile() to this;
+	else
+		// schedule to check for capacity. Should not be needed as conclusion of reception processing should force the check.
+		schedule this.fileControlTimer generate FileControl.checkCapacity() to this delay fileReceptionSpec.fileControlWaitTime;
+
+		// age off any old files
+		for eventFile in currentFiles loop
+			unlink this R1 eventFile;
+			delete eventFile;
+		end loop;
+		
+	end if;
+	
+  
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

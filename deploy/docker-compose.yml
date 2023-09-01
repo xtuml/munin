@@ -1,20 +1,17 @@
 version: "3.9"
 services:
-  aereception:
-    image: ghcr.io/xtuml/protocol_verifier
+  pv_proc:
+    image: "ghcr.io/xtuml/protocol_verifier"
     volumes:
       - "./config:/root/config"
       - "./logs/reception:/var/log/reception"
-      - "./reception-incoming:/root/incoming"
-      - "./verifier-incoming:/root/outgoing"
-    command: Reception_proc_transient -configPath config/ -configFile reception-config.json -preinit schedule/reception_startup.sch -util MetaData
-  aeo_svdc:
-    image: ghcr.io/xtuml/protocol_verifier
-    volumes:
-      - "./config:/root/config"
       - "./logs/verifier:/var/log/verifier"
-      - "./verifier-incoming:/root/incoming"
-      - "./verifier-processed:/root/processed"
+      - "./reception-incoming:/root/incoming"
+      - "./reception-processed:/root/processed"
       - "./InvariantStore:/root/InvariantStore"
       - "./JobIdStore:/root/JobIdStore"
-    command: AEO_SVDC_transient -configPath config/ -configFile verifier-config.json -log-config config/log-config-verifier.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -preinit schedule/startup.sch -util MetaData -startJobGroup 00 -endJobGroup FF
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    command: "PV_PROC_transient -configPath config/ -configFile pv-config.json  -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup FF -util Inspector -inspector-port 0"

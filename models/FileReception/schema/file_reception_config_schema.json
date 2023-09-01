@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "file_reception_config_schema.json",
+  "title": "File Reception Config",
+  "description": "Configuration parameters for FReception",
+  "type": "object",
+  "properties": {
+    "SpecUpdateRate": {
+      "description": "This duration determines how often the application checks for updated config files",
+      "type": "string",
+      "format": "duration"
+    },
+    "IncomingDirectory": {
+      "description": "A file path to the directory that will be monitored for files to process",
+      "type": "string"
+    },
+    "ProcessedDirectory": {
+      "description": "A file path to the directory where files will be depositied after they have completed processing",
+      "type": "string"
+    },
+    "ConcurrentReceptionLimit": {
+      "description": "A number that indicates the limit of concurrent reception jobs that can be executing, e.g. 1 = one active reception job",
+      "type": "string",
+      "pattern": "^(0|([1-9][0-9]*))$"
+    },
+    "FileControlWaitTime": {
+      "description": "The frequency that the process shall check for new files or available capacity.",
+      "type": "string",
+      "format": "duration"
+    }
+  }
+}

@@ -13,12 +13,12 @@ begin
   // This test does not reveal any erroneous behaviour of the twin
   //
   // Bank Transfer Sequence
-  acceptOrderedEvent ("1620920000","component-1234","SUHJ-A","UJ_Alpha","IncludingUnhappyEventsJob","","Ev1",theAuditEventData);
-  acceptOrderedEvent ("1620920001","component-1234","SUHJ-B","UJ_Alpha","IncludingUnhappyEventsJob","Ev1","Ev2",theAuditEventData);
-  acceptOrderedEvent ("1620920002","component-1234","SUHJ-C","UJ_Alpha","IncludingUnhappyEventsJob","Ev2","Ev3",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","SUHJ-Error","UJ_Alpha","IncludingUnhappyEventsJob","Ev3","Ev4",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","SUHJ-D","UJ_Alpha","IncludingUnhappyEventsJob","Ev4","Ev5",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","SUHJ-E","UJ_Alpha","IncludingUnhappyEventsJob","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920000","SUHJ-A","UJ_Alpha","IncludingUnhappyEventsJob","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","SUHJ-B","UJ_Alpha","IncludingUnhappyEventsJob","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","SUHJ-C","UJ_Alpha","IncludingUnhappyEventsJob","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","SUHJ-Error","UJ_Alpha","IncludingUnhappyEventsJob","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920004","SUHJ-D","UJ_Alpha","IncludingUnhappyEventsJob","Ev4","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920005","SUHJ-E","UJ_Alpha","IncludingUnhappyEventsJob","Ev5","Ev6",theAuditEventData);
 //
   Test::service_event_queue();
   //
@@ -58,12 +58,12 @@ begin
   // This test does reveal erroneous behaviour of the twin
   //
   // Bank Transfer Sequence
-  acceptOrderedEvent ("1620920000","component-1234","UCEJ-A","UJ_Beta","UnhappyCriticalEventsJob","","Ev1",theAuditEventData);
-  acceptOrderedEvent ("1620920001","component-1234","UCEJ-B","UJ_Beta","UnhappyCriticalEventsJob","Ev1","Ev2",theAuditEventData);
-  acceptOrderedEvent ("1620920002","component-1234","UCEJ-C","UJ_Beta","UnhappyCriticalEventsJob","Ev2","Ev3",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCEJ-Error","UJ_Beta","UnhappyCriticalEventsJob","Ev3","Ev4",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCEJ-D","UJ_Beta","UnhappyCriticalEventsJob","Ev4","Ev5",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCEJ-E","UJ_Beta","UnhappyCriticalEventsJob","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920000","UCEJ-A","UJ_Beta","UnhappyCriticalEventsJob","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCEJ-B","UJ_Beta","UnhappyCriticalEventsJob","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCEJ-C","UJ_Beta","UnhappyCriticalEventsJob","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCEJ-Error","UJ_Beta","UnhappyCriticalEventsJob","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCEJ-D","UJ_Beta","UnhappyCriticalEventsJob","Ev4","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCEJ-E","UJ_Beta","UnhappyCriticalEventsJob","Ev5","Ev6",theAuditEventData);
 //
   Test::service_event_queue();
   //
@@ -103,11 +103,11 @@ begin
   // This test does not reveal erroneous behaviour of the twin
   //
   // Bank Transfer Sequence
-  acceptOrderedEvent ("1620920000","component-1234","UCEJ-A","UJ_Gamma","UnhappyCriticalEventsJob","","Ev1",theAuditEventData);
-  acceptOrderedEvent ("1620920001","component-1234","UCEJ-B","UJ_Gamma","UnhappyCriticalEventsJob","Ev1","Ev2",theAuditEventData);
-  acceptOrderedEvent ("1620920002","component-1234","UCEJ-C","UJ_Gamma","UnhappyCriticalEventsJob","Ev2","Ev3",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCEJ-D","UJ_Gamma","UnhappyCriticalEventsJob","Ev3","Ev4",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCEJ-E","UJ_Gamma","UnhappyCriticalEventsJob","Ev4","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920000","UCEJ-A","UJ_Gamma","UnhappyCriticalEventsJob","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCEJ-B","UJ_Gamma","UnhappyCriticalEventsJob","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCEJ-C","UJ_Gamma","UnhappyCriticalEventsJob","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCEJ-D","UJ_Gamma","UnhappyCriticalEventsJob","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCEJ-E","UJ_Gamma","UnhappyCriticalEventsJob","Ev4","Ev5",theAuditEventData);
 //
   Test::service_event_queue();
   //
@@ -147,15 +147,15 @@ begin
   // This test does reveal erroneous behaviour of the twin
   //
   // Bank Transfer Sequence
-  acceptOrderedEvent ("1620920000","component-1234","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
-  acceptOrderedEvent ("1620920001","component-1234","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
-  acceptOrderedEvent ("1620920002","component-1234","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-I","UJ_Delta","UnhappyCriticalJob1","Ev7","Ev8",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
+  acceptOrderedEvent ("1620920000","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-I","UJ_Delta","UnhappyCriticalJob1","Ev7","Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
 //
   Test::service_event_queue();
   //
@@ -195,16 +195,16 @@ begin
   // This test does reveal erroneous behaviour of the twin
   //
   // Bank Transfer Sequence
-  acceptOrderedEvent ("1620920000","component-1234","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
-  acceptOrderedEvent ("1620920001","component-1234","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
-  acceptOrderedEvent ("1620920002","component-1234","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev4","Ev10",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-I","UJ_Delta","UnhappyCriticalJob1","Ev7","Ev8",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
+  acceptOrderedEvent ("1620920000","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev4","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-I","UJ_Delta","UnhappyCriticalJob1","Ev7","Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
 //
   Test::service_event_queue();
   //
@@ -244,16 +244,16 @@ begin
   // This test does reveal erroneous behaviour of the twin
   //
   // Bank Transfer Sequence
-  acceptOrderedEvent ("1620920000","component-1234","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
-  acceptOrderedEvent ("1620920001","component-1234","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
-  acceptOrderedEvent ("1620920002","component-1234","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev10",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-I","UJ_Delta","UnhappyCriticalJob1","Ev7","Ev8",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
+  acceptOrderedEvent ("1620920000","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-I","UJ_Delta","UnhappyCriticalJob1","Ev7","Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
 //
   Test::service_event_queue();
   //
@@ -295,17 +295,17 @@ begin
   // This test does reveal erroneous behaviour of the twin
   //
   // Bank Transfer Sequence
-  acceptOrderedEvent ("1620920000","component-1234","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
-  acceptOrderedEvent ("1620920001","component-1234","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
-  acceptOrderedEvent ("1620920002","component-1234","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-D","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev4","Ev10",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920000","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-D","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev4","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
   previousEvents := empty & "Ev7" & "Ev10";
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1",previousEvents,"Ev8",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1",previousEvents,"Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
 //
   Test::service_event_queue();
   //
@@ -347,18 +347,18 @@ begin
   // This test does reveal erroneous behaviour of the twin
   //
   // Bank Transfer Sequence
-  acceptOrderedEvent ("1620920000","component-1234","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
-  acceptOrderedEvent ("1620920001","component-1234","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
-  acceptOrderedEvent ("1620920002","component-1234","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
-  acceptOrderedEvent ("1620920002","component-1234","UCJ-D","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","","Ev11",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev4","Ev10",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
-  acceptOrderedEvent ("1620920003","component-1234","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
+  acceptOrderedEvent ("1620920000","UCJ-A","UJ_Delta","UnhappyCriticalJob1","","Ev1",theAuditEventData);
+  acceptOrderedEvent ("1620920001","UCJ-B","UJ_Delta","UnhappyCriticalJob1","Ev1","Ev2",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-C","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev3",theAuditEventData);
+  acceptOrderedEvent ("1620920002","UCJ-D","UJ_Delta","UnhappyCriticalJob1","Ev3","Ev4",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-Error1","UJ_Delta","UnhappyCriticalJob1","","Ev11",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-F","UJ_Delta","UnhappyCriticalJob1","Ev2","Ev5",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-E","UJ_Delta","UnhappyCriticalJob1","Ev4","Ev10",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-G","UJ_Delta","UnhappyCriticalJob1","Ev5","Ev6",theAuditEventData);
+  acceptOrderedEvent ("1620920003","UCJ-H","UJ_Delta","UnhappyCriticalJob1","Ev6","Ev7",theAuditEventData);
   previousEvents := empty & "Ev7" & "Ev10";
-  acceptOrderedEvent ("1620920004","component-1234","UCJ-I","UJ_Delta","UnhappyCriticalJob1",previousEvents,"Ev8",theAuditEventData);
-  acceptOrderedEvent ("1620920005","component-1234","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
+  acceptOrderedEvent ("1620920004","UCJ-I","UJ_Delta","UnhappyCriticalJob1",previousEvents,"Ev8",theAuditEventData);
+  acceptOrderedEvent ("1620920005","UCJ-J","UJ_Delta","UnhappyCriticalJob1","Ev8","Ev9",theAuditEventData);
 //
   Test::service_event_queue();
   //

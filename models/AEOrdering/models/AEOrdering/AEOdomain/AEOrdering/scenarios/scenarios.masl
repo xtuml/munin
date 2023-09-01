@@ -6,23 +6,11 @@ logMessage : string;
 systemSpec : instance of SystemSpec;
 startJobGroup : integer;
 endJobGroup : integer;
-fileControl : instance of FileControl;
 
 begin
 
 	startJobGroup := integer'parse(CommandLine::get_option_value("-startJobGroup"),16);
 	endJobGroup := integer'parse(CommandLine::get_option_value("-endJobGroup"),16);
-	// we need to create a file control for each job group
-	if (find FileControl())'length = 0 then
-		for jobGroup in startJobGroup .. endJobGroup loop
-			fileControl := find_one FileControl(fileControlId = jobGroup);
-			if fileControl = null then
-				fileControl := create FileControl(fileControlId => jobGroup, startJobGroup => startJobGroup, endJobGroup => endJobGroup, Current_State => Created);
-				schedule fileControl.fileTimer generate FileControl.selectFile() to fileControl delay @PT0S@;
-			end if;
-		end loop;
-	end if;
-		
 	// get the supplied command line option for the config file and verify it is valid
 	configFilePath := CommandLine::get_option_value("-configPath");
 	configFile := CommandLine::get_option_value("-configFile", "config.json");
@@ -32,7 +20,8 @@ begin
 			systemSpec := create unique SystemSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, maxOutOfSequenceEvents => 10, 
 				                                   maximumJobTime => @PT10M@, jobCompletePeriod => @PT10M@, fileControlWaitTime => @PT1S@, 
 				                                   defaultJobExpiryDuration => duration'weeks(52), defaultStaleAuditEventDuration => duration'hours(24),
-				                                   defaultBlockedAuditEventDuration => duration'hours(24), Current_State => Created);
+				                                   defaultBlockedAuditEventDuration => duration'hours(24), 
+				                                   startJobGroup => startJobGroup, endJobGroup => endJobGroup, Current_State => Created);
 		end if;
 		systemSpec.loadConfigFile();
 		generate SystemSpec.checkConfigUpdate() to systemSpec;

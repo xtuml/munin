@@ -1,96 +1,65 @@
 //! ACTIVITY BEGIN. 'd507866f-4579-4744-a871-2284db088ea1' DO NOT EDIT THIS LINE.
 private service AEReception::basicTest01 () is
-incomingDirectory: readonly Filesystem::filename := "./incoming/";
-testDirectory: readonly Filesystem::filename := "./testing/";
-testFile: readonly Filesystem::filename := "basicTest01.json";
+auditEvents : string;
+testFile: readonly Filesystem::filename := "./testing/basicTest01.json";
 logMessage : string;
 receptionSpec : instance of ReceptionSpec;
-directoryName : Filesystem::filename;
-filename : Filesystem::filename;
-directoryList : set of Filesystem::filename;
-jsonString: string;
-jsonElement: JSON::JSONElement;
-jsonElements : JSON::JSONArray;
-eventJsonObject : JSON::JSONObject;
-prevAuditEventIds : sequence of string;
+orderingAcceptEvents : sequence of instance of _TEST_Ordering_AcceptEvent;
+orderingAcceptEvent : instance of _TEST_Ordering_AcceptEvent;
+json_element: JSON::JSONElement;
 
 begin
 
   // clear the domain down
   receptionSpec := find_one ReceptionSpec();
-  directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e1");
   AEReception::clearDomain();
-  Filesystem::delete_tree(directoryName);
   
-  // Copy a file into the incoming folder, wait for the file to be processed and
-  // assure the correct terminator message has been called
+  // Open the file and read in the events
+  auditEvents := Filesystem::read_file(testFile);
   
-  // copy the test file into the incoming directory
-  Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
+  json_element := JSON::parse(auditEvents);
+  if json_element.kind = JSON::Array then
+     for elementReceived in JSON::get_array(json_element) loop
+       if elementReceived.kind = JSON::Object then
+         AEReception::AcceptEvents(JSON::dump(elementReceived));  
+       end if;
+     end loop;
+  end if;
   
   // service the event queues and scheduled timers up to 2s in the future
   Test::service_event_queue();
-  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
-  Test::service_event_queue();
-  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
-  Test::service_event_queue();
-  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
-  Test::service_event_queue();
-  Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
   
-  // confirm that the outgoing file is in the correct directory
-  receptionSpec := find_one ReceptionSpec();
-  directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e1");
-  Assertions::assertTrue(Filesystem::file_exists(directoryName), receptionSpec.outgoingDirectory & " not created");
-  directoryList := Filesystem::list_directory(directoryName);
-  Assertions::assertTrue(directoryList'length = 1, receptionSpec.outgoingDirectory & " contains " & directoryList'length'image);
-  filename := directoryName & "/" & Filesystem::list_directory(directoryName)'any;
-  Assertions::assertTrue(Filesystem::file_exists(filename), filename & " not created");
-  
-  // open the outgoing file
-  jsonString := Filesystem::read_file(Filesystem::filename(filename));
-  jsonElement := JSON::parse(jsonString);
-  jsonElements := JSON::get_array(jsonElement);
   // verify that there are 3 events
-  Assertions::assertTrue(jsonElements'length = 3, "Expected 3 events file contains " & jsonElements'length'image);  
+  orderingAcceptEvents := find _TEST_Ordering_AcceptEvent();
+  Assertions::assertTrue(orderingAcceptEvents'length = 3, "Expected 3 events found " & orderingAcceptEvents'length'image);  
   
   // confirm that the first audit event has the correct parameter values
-  eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
-  Assertions::assertEquals("TestEvent1", JSON::get_string(eventJsonObject["eventType"]));
-  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-  Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["eventId"]));
-  Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = false), "basicTest01: Failed as verification reported prevEventIds was invalid");
-  Assertions::assertEquals("2021-05-13T10:07:34Z", JSON::get_string(eventJsonObject["timestamp"]));
-  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
-  Assertions::assertEquals("node1", JSON::get_string(eventJsonObject["node"]));
+  orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent1");
+  Assertions::assertTrue(orderingAcceptEvent /= null, "basicTest01: Failed to find TestEvent1");
+  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", orderingAcceptEvent.jobId);
+  Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", orderingAcceptEvent.auditEventId);
+  Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length = 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
+  Assertions::assertEquals("2021-05-13T10:07:34Z", orderingAcceptEvent.auditEventTime);
  
   // confirm that the second audit event has the correct parameter values
-  eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 1]);
-  Assertions::assertEquals("TestEvent2", JSON::get_string(eventJsonObject["eventType"]));
-  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-  Assertions::assertEquals("735cc6c2-05e1-437f-a3e8-3b2cc36803a4", JSON::get_string(eventJsonObject["eventId"]));
-  Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = true), "basicTest01: Failed as verification reported prevEventIds was invalid");
-  Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["previousEventIds"]));
-  Assertions::assertEquals("2021-05-13T10:07:35Z", JSON::get_string(eventJsonObject["timestamp"]));
-  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
-  Assertions::assertEquals("node1", JSON::get_string(eventJsonObject["node"]));
+  orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent2");
+  Assertions::assertTrue(orderingAcceptEvent /= null, "basicTest01: Failed to find TestEvent2");
+  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", orderingAcceptEvent.jobId);
+  Assertions::assertEquals("735cc6c2-05e1-437f-a3e8-3b2cc36803a4", orderingAcceptEvent.auditEventId);
+  Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length > 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
+  Assertions::assertEquals("2021-05-13T10:07:35Z", orderingAcceptEvent.auditEventTime);
  
   // confirm that the third audit event has the correct parameter values
-  eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 2]);
-  Assertions::assertEquals("TestEvent3", JSON::get_string(eventJsonObject["eventType"]));
-  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-  Assertions::assertEquals("daf4d86c-084b-49cc-acfb-f558eeef6e80", JSON::get_string(eventJsonObject["eventId"]));
-  Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = true), "basicTest01: Failed as verification reported prevEventIds was invalid");
-  if eventJsonObject["previousEventIds"].kind = JSON::Array then
-	  for prev_id in JSON::get_array(eventJsonObject["previousEventIds"]) loop
-	    prevAuditEventIds := prevAuditEventIds & JSON::get_string(prev_id);
-	  end loop;
-  Assertions::assertTrue((prevAuditEventIds'get_unique intersection "dea5b47b-438b-47b0-8046-585254327fd2")'length = 1, "Missing previous audit event id: " & "dea5b47b-438b-47b0-8046-585254327fd2");
-  Assertions::assertTrue((prevAuditEventIds'get_unique intersection "735cc6c2-05e1-437f-a3e8-3b2cc36803a4")'length = 1, "Missing previous audit event id: " & "735cc6c2-05e1-437f-a3e8-3b2cc36803a4");
-  end if;
-  Assertions::assertEquals("2021-05-13T10:07:36Z", JSON::get_string(eventJsonObject["timestamp"]));
-  Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
-  Assertions::assertEquals("node1", JSON::get_string(eventJsonObject["node"]));
+  orderingAcceptEvent := find_one orderingAcceptEvents(auditEventType = "TestEvent3");
+  Assertions::assertTrue(orderingAcceptEvent /= null, "basicTest01: Failed to find TestEvent3");
+  Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", orderingAcceptEvent.jobId);
+  Assertions::assertEquals("daf4d86c-084b-49cc-acfb-f558eeef6e80", orderingAcceptEvent.auditEventId);
+  Assertions::assertTrue(orderingAcceptEvent.prevAuditEventIds'length > 0, "basicTest01: Failed as verification reported prevEventIds was invalid");
+  Assertions::assertEquals("2021-05-13T10:07:36Z", orderingAcceptEvent.auditEventTime);
+
+  Assertions::assertTrue((orderingAcceptEvent.prevAuditEventIds'get_unique intersection "dea5b47b-438b-47b0-8046-585254327fd2")'length = 1, "Missing previous audit event id: " & "dea5b47b-438b-47b0-8046-585254327fd2");
+  Assertions::assertTrue((orderingAcceptEvent.prevAuditEventIds'get_unique intersection "735cc6c2-05e1-437f-a3e8-3b2cc36803a4")'length = 1, "Missing previous audit event id: " & "735cc6c2-05e1-437f-a3e8-3b2cc36803a4");
+
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -107,25 +76,13 @@ begin
 	
 	// the config file should have been loaded so we want to check that the spec class has been created corretcly
 	receptionSpec := find_one ReceptionSpec ();
-	Assertions::assertTrue(receptionSpec.concurrentReceptionLimit = 1, "invalid  concurrentReceptionLimit, expected 1 found " & receptionSpec.concurrentReceptionLimit'image);
 	Assertions::assertTrue(receptionSpec.receptionDeletionTime = @PT10M@, "invalid  receptionDeletionTime, expected 10M found " & receptionSpec.receptionDeletionTime'image);
-	Assertions::assertTrue(receptionSpec.eventThrottleRate = @PT0S@, "invalid  eventThrottleRate, expected 0S found " & receptionSpec.eventThrottleRate'image);
-	Assertions::assertTrue(receptionSpec.processedDirectory = "./processed", "invalid  processedDirectory, expected ./processed found " & receptionSpec.processedDirectory);
-	Assertions::assertTrue(receptionSpec.processingDirectory = "./processing", "invalid  processingDirectory, expected ./processing found " & receptionSpec.processingDirectory);
-	Assertions::assertTrue(receptionSpec.incomingDirectory = "./incoming", "invalid  processingDirectory, expected ./incoming found " & receptionSpec.incomingDirectory);
 	Assertions::assertTrue(receptionSpec.specUpdateRate = @PT2M@, "invalid specUpdateRate, expected 2M found " & receptionSpec.specUpdateRate'image);
-	Assertions::assertTrue(receptionSpec.outgoingDirectory = "./outgoing", "invalid outgoingDirectory, expected ./outgoingDirectory found " & receptionSpec.outgoingDirectory);	
 	// fire the timer to check if the config class has not been as the config file has not changed
 	Test::service_event_queue();
 	Test::fire_scheduled_timers(timestamp'now + duration'minutes(2));
-	Assertions::assertTrue(receptionSpec.concurrentReceptionLimit = 1, "invalid  concurrentReceptionLimit, expected 1 found " & receptionSpec.concurrentReceptionLimit'image);
 	Assertions::assertTrue(receptionSpec.receptionDeletionTime = @PT10M@, "invalid  receptionDeletionTime, expected 10M found " & receptionSpec.receptionDeletionTime'image);
-	Assertions::assertTrue(receptionSpec.eventThrottleRate = @PT0S@, "invalid  eventThrottleRate, expected 0 found " & receptionSpec.eventThrottleRate'image);
-	Assertions::assertTrue(receptionSpec.processedDirectory = "./processed", "invalid  processedDirectory, expected ./processed found " & receptionSpec.processedDirectory);
-	Assertions::assertTrue(receptionSpec.processingDirectory = "./processing", "invalid  processingDirectory, expected ./processing found " & receptionSpec.processingDirectory);
-	Assertions::assertTrue(receptionSpec.incomingDirectory = "./incoming", "invalid  processingDirectory, expected ./incoming found " & receptionSpec.incomingDirectory);
 	Assertions::assertTrue(receptionSpec.specUpdateRate = @PT2M@, "invalid specUpdateRate, expected 2M found " & receptionSpec.specUpdateRate'image);
-	Assertions::assertTrue(receptionSpec.outgoingDirectory = "./outgoing", "invalid outgoingDirectory, expected ./outgoingDirectory found " & receptionSpec.outgoingDirectory);	
 	
 	// put a new config file in place
 	receptionSpec.configFile := configFile;
@@ -136,14 +93,8 @@ begin
 	Test::fire_scheduled_timers(timestamp'now + duration'minutes(2));
 	
 	// verify that the config file has been updated
-	Assertions::assertTrue(receptionSpec.concurrentReceptionLimit = 10, "invalid  concurrentReceptionLimit, expected 10 found " & receptionSpec.concurrentReceptionLimit'image);
 	Assertions::assertTrue(receptionSpec.receptionDeletionTime = @PT20M@, "invalid  receptionDeletionTime, expected 20M found " & receptionSpec.receptionDeletionTime'image);
-	Assertions::assertTrue(receptionSpec.eventThrottleRate = @PT10S@, "invalid  eventThrottleRate, expected 10 found " & receptionSpec.eventThrottleRate'image);
-	Assertions::assertTrue(receptionSpec.processedDirectory = "./processed-test", "invalid  processedDirectory, expected ./processed-test found " & receptionSpec.processedDirectory);
-	Assertions::assertTrue(receptionSpec.processingDirectory = "./processing-test", "invalid  processingDirectory, expected ./processing-test found " & receptionSpec.processingDirectory);
-	Assertions::assertTrue(receptionSpec.incomingDirectory = "./incoming-test", "invalid  processingDirectory, expected ./incoming-test found " & receptionSpec.incomingDirectory);
 	Assertions::assertTrue(receptionSpec.specUpdateRate = @PT10M@, "invalid specUpdateRate, expected 10M found " & receptionSpec.specUpdateRate'image);
-	Assertions::assertTrue(receptionSpec.outgoingDirectory = "./outgoing-test", "invalid outgoingDirectory, expected ./outgoingDirectory found " & receptionSpec.outgoingDirectory);	
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -154,546 +105,9 @@ begin
 
 	// delete all receptions
 	for reception in find Reception() loop
-		unlink reception R2;
 		delete reception;
 	end loop;
 	
-	// delete all the event files
-	for eventFile in find EventFile() loop
-		unlink eventFile R1;
-		unlink eventFile R2;
-		for jobEventFile in find JobEventFile() loop
-			unlink jobEventFile R3;
-			delete jobEventFile;
-		end loop;
-		delete eventFile;
-	end loop;
-
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '2a0c19de-ad2e-44a7-a3e3-d8196449857e' DO NOT EDIT THIS LINE.
-private service AEReception::testFileCapacityManagement () is
-incomingDirectory: readonly Filesystem::filename := "./incoming/";
-testDirectory: readonly Filesystem::filename := "./testing/";
-testFile: readonly Filesystem::filename := "capacityTest01.json";
-testFile2: readonly Filesystem::filename := "capacityTest02.json";
-testFile3: readonly Filesystem::filename := "capacityTest03.json";
-testFile4: readonly Filesystem::filename := "capacityTest04.json";
-eventFiles : sequence of instance of EventFile;
-prevEventFiles : sequence of instance of EventFile;
-eventFile : instance of EventFile;
-receptionJobs : sequence of instance of Reception;
-receptionSpec : instance of ReceptionSpec;
-jobId1 : string := "8a783c30-3161-4cca-9ac1-37f6b50fe6e1";
-auditEventId1 : string := "dea5b47b-438b-47b0-8046-585254327f21";
-jobId2 : string := "8a783c30-3161-4cca-9ac1-37f6b50fe6e2";
-auditEventId2 : string := "dea5b47b-438b-47b0-8046-585254327fd2";
-
-directoryName : Filesystem::filename;
-filename : Filesystem::filename;
-directoryList : set of Filesystem::filename;
-jsonString: string;
-jsonElement: JSON::JSONElement;
-jsonElements : JSON::JSONArray;
-eventJsonObject : JSON::JSONObject;
-prevAuditEventIds : sequence of string;
-
-begin
-
-	// clear the domain down
-	receptionSpec := find_one ReceptionSpec();
-	AEReception::clearDomain();
-	Filesystem::delete_tree(Filesystem::filename(receptionSpec.outgoingDirectory));
-	receptionSpec.concurrentReceptionLimit := 1;
-	  
-	// copy the test file into the incoming directory
-	Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
-	Filesystem::copy_file(testDirectory & testFile2, incomingDirectory & testFile2);
-
-	// service the event queues and scheduled timers up to 2s in the future
-	// this should force file control to detect the incoming files and assign
-	// one of them to be processed
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-
-	// verify that we have one file that has been assigned 
- 	eventFiles := find EventFile (assigned = true);
-	Assertions::assertTrue(eventFiles'length = 1, "wrong number of assigned event files, expected 1 found: " & (eventFiles'length)'image);
-   	for eventFile in eventFiles loop
-		// confirm that the outgoing file is in the correct directory
-		if eventFile.fileName = string(testFile) then
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e1");
-		else
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e2");
-		end if;
-		Assertions::assertTrue(Filesystem::file_exists(directoryName), receptionSpec.outgoingDirectory & " not created");
-		directoryList := Filesystem::list_directory(directoryName);
-		Assertions::assertTrue(directoryList'length = 1, receptionSpec.outgoingDirectory & " contains " & directoryList'length'image);
-		filename := directoryName & "/" & Filesystem::list_directory(directoryName)'any;
-		Assertions::assertTrue(Filesystem::file_exists(filename), filename & " not created");
-		  
-		// open the outgoing file
-		jsonString := Filesystem::read_file(Filesystem::filename(filename));
-		jsonElement := JSON::parse(jsonString);
-		jsonElements := JSON::get_array(jsonElement);
-		// verify that there are 1 events
-		Assertions::assertTrue(jsonElements'length = 1, "Expected 1 events file contains " & jsonElements'length'image);  
-		
-		// confirm that the single audit event has the correct parameter values
-		eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
-		if eventFile.fileName = string(testFile) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327f21", JSON::get_string(eventJsonObject["eventId"]));
-		elsif eventFile.fileName = string(testFile2) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e2", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["eventId"]));
-		else
-			Assertions::assertTrue(false, "Invalid event file assigned");
-		end if;
-	end loop;		
-	// verify that the reception job is complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 1, "wrong number of reception jobs, expected 1 found: " & (receptionJobs'length)'image);
-		
-	// force the next file to be processed
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now);
-	
-	// verify that we have one file that has been assigned 
- 	eventFiles := find EventFile (assigned = true);
-	Assertions::assertTrue(eventFiles'length = 2, "wrong number of assigned event files, expected 1 found: " & (eventFiles'length)'image);
-   	for eventFile in eventFiles loop
-		// confirm that the outgoing file is in the correct directory
-		if eventFile.fileName = string(testFile) then
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e1");
-		else
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e2");
-		end if;
-		Assertions::assertTrue(Filesystem::file_exists(directoryName), receptionSpec.outgoingDirectory & " not created");
-		directoryList := Filesystem::list_directory(directoryName);
-		Assertions::assertTrue(directoryList'length = 1, receptionSpec.outgoingDirectory & " contains " & directoryList'length'image);
-		filename := directoryName & "/" & Filesystem::list_directory(directoryName)'any;
-		Assertions::assertTrue(Filesystem::file_exists(filename), filename & " not created");
-		  
-		// open the outgoing file
-		jsonString := Filesystem::read_file(Filesystem::filename(filename));
-		jsonElement := JSON::parse(jsonString);
-		jsonElements := JSON::get_array(jsonElement);
-		// verify that there are 1 events
-		Assertions::assertTrue(jsonElements'length = 1, "Expected 1 events file contains " & jsonElements'length'image);  
-		
-		// confirm that the single audit event has the correct parameter values
-		eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
-		if eventFile.fileName = string(testFile) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327f21", JSON::get_string(eventJsonObject["eventId"]));
-		elsif eventFile.fileName = string(testFile2) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e2", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["eventId"]));
-		else
-			Assertions::assertTrue(false, "Invalid event file assigned");
-		end if;
-	end loop;		
-
-	// verify that the reception job is complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 2, "wrong number of reception jobs, expected 1 found: " & (receptionJobs'length)'image);
-	
-	// increase the capacity to 2
-	receptionSpec := find_one ReceptionSpec();
-	directoryName := Filesystem::filename(receptionSpec.outgoingDirectory);
-	AEReception::clearDomain();
-	Filesystem::delete_tree(directoryName);
-	receptionSpec.concurrentReceptionLimit := 2;
-
-	// copy the test file into the incoming directory
-	Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
-	Filesystem::copy_file(testDirectory & testFile2, incomingDirectory & testFile2);
-	Filesystem::copy_file(testDirectory & testFile3, incomingDirectory & testFile3);
-	Filesystem::copy_file(testDirectory & testFile4, incomingDirectory & testFile4);
-
-	// service the event queues and scheduled timers up to 2s in the future
-	// this should force file control to detect the incoming files and assign
-	// one of them to be processed
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
-
-	// verify that we have one file that has been assigned 
- 	eventFiles := find EventFile (assigned = true);
-	Assertions::assertTrue(eventFiles'length = 2, "wrong number of assigned event files, expected 2 found: " & (eventFiles'length)'image);
-
-	// confirm that the outgoing file is in the correct directory
-	for eventFile in eventFiles loop
-		if eventFile.fileName = string(testFile) then
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e1");
-		elsif eventFile.fileName = string(testFile2) then
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e2");
-		elsif eventFile.fileName = string(testFile3) then
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e3");
-		else
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e4");
-		end if;
-		Assertions::assertTrue(Filesystem::file_exists(directoryName), receptionSpec.outgoingDirectory & " not created");
-		directoryList := Filesystem::list_directory(directoryName);
-		Assertions::assertTrue(directoryList'length = 1, receptionSpec.outgoingDirectory & " contains " & directoryList'length'image);
-		filename := directoryName & "/" & Filesystem::list_directory(directoryName)'any;
-		Assertions::assertTrue(Filesystem::file_exists(filename), filename & " not created");
-		  
-		// open the outgoing file
-		jsonString := Filesystem::read_file(Filesystem::filename(filename));
-		jsonElement := JSON::parse(jsonString);
-		jsonElements := JSON::get_array(jsonElement);
-		// verify that there are 1 events
-		Assertions::assertTrue(jsonElements'length = 1, "Expected 1 events file contains " & jsonElements'length'image);  
-		
-		// confirm that the single audit event has the correct parameter values
-		eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
-		if eventFile.fileName = string(testFile) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327f21", JSON::get_string(eventJsonObject["eventId"]));
-		elsif eventFile.fileName = string(testFile2) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e2", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["eventId"]));
-		elsif eventFile.fileName = string(testFile3) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e3", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["eventId"]));
-		elsif eventFile.fileName = string(testFile4) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e4", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["eventId"]));
-		else
-			Assertions::assertTrue(false, "Invalid event file assigned");
-		end if;
-		
-	end loop;
-
-	// verify that the reception job is complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 2, "wrong number of reception jobs, expected 2 found: " & (receptionJobs'length)'image);
-		
-	// force the next file to be processed
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
-			
-	// verify that we have one file that has been assigned 
- 	eventFiles := (find EventFile (assigned = true)) not_in prevEventFiles;
-	Assertions::assertTrue(eventFiles'length = 4, "wrong number of assigned event files, expected 4 found: " & (eventFiles'length)'image);
-
-	// confirm that the outgoing file is in the correct directory
-	for eventFile in eventFiles loop
-		if eventFile.fileName = string(testFile) then
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e1");
-		elsif eventFile.fileName = string(testFile2) then
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e2");
-		elsif eventFile.fileName = string(testFile3) then
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e3");
-		else
-			directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e4");
-		end if;
-		Assertions::assertTrue(Filesystem::file_exists(directoryName), receptionSpec.outgoingDirectory & " not created");
-		directoryList := Filesystem::list_directory(directoryName);
-		Assertions::assertTrue(directoryList'length = 1, receptionSpec.outgoingDirectory & " contains " & directoryList'length'image);
-		filename := directoryName & "/" & Filesystem::list_directory(directoryName)'any;
-		Assertions::assertTrue(Filesystem::file_exists(filename), filename & " not created");
-		  
-		// open the outgoing file
-		jsonString := Filesystem::read_file(Filesystem::filename(filename));
-		jsonElement := JSON::parse(jsonString);
-		jsonElements := JSON::get_array(jsonElement);
-		// verify that there are 1 events
-		Assertions::assertTrue(jsonElements'length = 1, "Expected 1 events file contains " & jsonElements'length'image);  
-		
-		// confirm that the single audit event has the correct parameter values
-		eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
-		if eventFile.fileName = string(testFile) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327f21", JSON::get_string(eventJsonObject["eventId"]));
-		elsif eventFile.fileName = string(testFile2) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e2", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["eventId"]));
-		elsif eventFile.fileName = string(testFile3) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e3", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["eventId"]));
-		elsif eventFile.fileName = string(testFile4) then
-			Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e4", JSON::get_string(eventJsonObject["jobId"]));
-			Assertions::assertEquals("dea5b47b-438b-47b0-8046-585254327fd2", JSON::get_string(eventJsonObject["eventId"]));
-		else
-			Assertions::assertTrue(false, "Invalid event file assigned");
-		end if;
-		
-		// delete the file
-		Filesystem::delete_file(Filesystem::filename(filename));
-	end loop;
-
-	// verify that the reception job is complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 4, "wrong number of reception jobs, expected 4 found: " & (receptionJobs'length)'image);
-		
-	// reset the capacity to 1
-	receptionSpec.concurrentReceptionLimit := 1;
-	
-	// test the reception deletion time
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'minutes(10));
-	
-	// verify that all the reception jobs and event files have been cleared down
-   	receptionJobs := find Reception ();
-	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (eventFiles'length)'image);
- 	eventFiles := find EventFile ();
-	Assertions::assertTrue(eventFiles'length = 0, "wrong number of assigned event files, expected 0 found: " & (eventFiles'length)'image);
-	
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '9bc7953d-2ce6-4eb0-aab2-a6edd9e89113' DO NOT EDIT THIS LINE.
-private service AEReception::testEventThrottling () is
-incomingDirectory: readonly Filesystem::filename := "./incoming/";
-testDirectory: readonly Filesystem::filename := "./testing/";
-testFile: readonly Filesystem::filename := "eventThrottleTest01.json";
-eventFiles : sequence of instance of EventFile;
-receptionJobs : sequence of instance of Reception;
-receptionSpec : instance of ReceptionSpec;
-directoryName : Filesystem::filename;
-filename : Filesystem::filename;
-directoryList : set of Filesystem::filename;
-jsonString: string;
-jsonElement: JSON::JSONElement;
-jsonElements : JSON::JSONArray;
-eventJsonObject : JSON::JSONObject;
-prevAuditEventIds : sequence of string;
-
-begin
-
-	// clear the domain down and the outgoing directory
-	receptionSpec := find_one ReceptionSpec();
-	directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e1");
-	AEReception::clearDomain();
-	Filesystem::delete_tree(Filesystem::filename(receptionSpec.outgoingDirectory));
-	
-	// set the throttle rate to be 1 second
-	receptionSpec.eventThrottleRate := @PT1S@;
-	receptionSpec.maxEventsPerFile := 1;
-	  
-	// copy the test file into the incoming directory
-	Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
-
-	// service the event queues
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(2));
-	
-	// confirm that the outgoing file is in the correct directory
-	Assertions::assertTrue(Filesystem::file_exists(directoryName), receptionSpec.outgoingDirectory & " not created");
-	directoryList := Filesystem::list_directory(directoryName);
-	Assertions::assertTrue(directoryList'length = 1, receptionSpec.outgoingDirectory & " contains " & directoryList'length'image);
-	filename := directoryName & "/" & Filesystem::list_directory(directoryName)'any;
-	Assertions::assertTrue(Filesystem::file_exists(filename), filename & " not created");
-	  
-	// open the outgoing file
-	jsonString := Filesystem::read_file(Filesystem::filename(filename));
-	jsonElement := JSON::parse(jsonString);
-	jsonElements := JSON::get_array(jsonElement);
-	// verify that there are 1 events
-	Assertions::assertTrue(jsonElements'length = 1, "Expected 1 events file contains " & jsonElements'length'image);  
-	  
-	// confirm that the first audit event has the correct parameter values
-	eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
-	Assertions::assertEquals("TestEvent", JSON::get_string(eventJsonObject["eventType"]));
-	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-	Assertions::assertEquals("b181fbef-c315-4f39-ae1d-dd5adc778df3", JSON::get_string(eventJsonObject["eventId"]));
-	Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = false), "basicTest01: Failed as verification reported prevEventIds was invalid");
-	Assertions::assertEquals("2021-05-13T10:07:34.000000Z", JSON::get_string(eventJsonObject["timestamp"]));
-	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
-	Assertions::assertEquals("node1", JSON::get_string(eventJsonObject["node"]));
-	// verify that the reception job is not complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (receptionJobs'length)'image);
-	// delete the file
-	Filesystem::delete_file(Filesystem::filename(filename));
-	
-	// service the event queues and scheduled timers up to 1s in the future
-	// this should force reception to process the next event
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-
-	// confirm that the outgoing file is in the correct directory
-	Assertions::assertTrue(Filesystem::file_exists(directoryName), receptionSpec.outgoingDirectory & " not created");
-	directoryList := Filesystem::list_directory(directoryName);
-	Assertions::assertTrue(directoryList'length = 1, receptionSpec.outgoingDirectory & " contains " & directoryList'length'image);
-	filename := directoryName & "/" & Filesystem::list_directory(directoryName)'any;
-	Assertions::assertTrue(Filesystem::file_exists(filename), filename & " not created");
-	  
-	// open the outgoing file
-	jsonString := Filesystem::read_file(Filesystem::filename(filename));
-	jsonElement := JSON::parse(jsonString);
-	jsonElements := JSON::get_array(jsonElement);
-	// verify that there are 1 events
-	Assertions::assertTrue(jsonElements'length = 1, "Expected 1 events file contains " & jsonElements'length'image);  
-	  
-	// confirm that the first audit event has the correct parameter values
-	eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
-	Assertions::assertEquals("TestEvent2", JSON::get_string(eventJsonObject["eventType"]));
-	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-	Assertions::assertEquals("debc5e43-c040-462b-8cf1-11dc88c24abf", JSON::get_string(eventJsonObject["eventId"]));
-	Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = true), "basicTest01: Failed as verification reported prevEventIds was invalid");
-	Assertions::assertEquals("b181fbef-c315-4f39-ae1d-dd5adc778df3", JSON::get_string(eventJsonObject["previousEventIds"]));
-	Assertions::assertEquals("2021-05-13T10:07:35.000000Z", JSON::get_string(eventJsonObject["timestamp"]));
-	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
-	Assertions::assertEquals("node1", JSON::get_string(eventJsonObject["node"]));
-	// verify that the reception job is not complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (receptionJobs'length)'image);
-	// delete the file
-	Filesystem::delete_file(Filesystem::filename(filename));
-
-	// service the event queues and scheduled timers up to 1s in the future
-	// this should force reception to process the next event
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-
-	// confirm that the outgoing file is in the correct directory
-	Assertions::assertTrue(Filesystem::file_exists(directoryName), receptionSpec.outgoingDirectory & " not created");
-	directoryList := Filesystem::list_directory(directoryName);
-	Assertions::assertTrue(directoryList'length = 1, receptionSpec.outgoingDirectory & " contains " & directoryList'length'image);
-	filename := directoryName & "/" & Filesystem::list_directory(directoryName)'any;
-	Assertions::assertTrue(Filesystem::file_exists(filename), filename & " not created");
-	  
-	// open the outgoing file
-	jsonString := Filesystem::read_file(Filesystem::filename(filename));
-	jsonElement := JSON::parse(jsonString);
-	jsonElements := JSON::get_array(jsonElement);
-	// verify that there are 1 events
-	Assertions::assertTrue(jsonElements'length = 1, "Expected 1 events file contains " & jsonElements'length'image);  
-	  
-	// confirm that the first audit event has the correct parameter values
-	eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
-	Assertions::assertEquals("TestEvent3", JSON::get_string(eventJsonObject["eventType"]));
-	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-	Assertions::assertEquals("a8947745-b9ae-418c-98d0-abf2149ddacd", JSON::get_string(eventJsonObject["eventId"]));
-	Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = true), "basicTest01: Failed as verification reported prevEventIds was invalid");
-	Assertions::assertEquals("debc5e43-c040-462b-8cf1-11dc88c24abf", JSON::get_string(eventJsonObject["previousEventIds"]));
-	Assertions::assertEquals("2021-05-13T10:07:36.000000Z", JSON::get_string(eventJsonObject["timestamp"]));
-	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
-	Assertions::assertEquals("node1", JSON::get_string(eventJsonObject["node"]));
-	// verify that the reception job is not complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 1, "wrong number of reception jobs, expected 1 found: " & (receptionJobs'length)'image);
-	// delete the file
-	Filesystem::delete_file(Filesystem::filename(filename));
-
-	// service the event queues and scheduled timers up to 1s in the future
-	// this should force reception to process the next event
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-	
-	// clear the domain down and the outgoing directory
-	receptionSpec := find_one ReceptionSpec();
-	directoryName := Filesystem::filename(receptionSpec.outgoingDirectory & "/e1");
-	AEReception::clearDomain();
-	Filesystem::delete_tree(Filesystem::filename(receptionSpec.outgoingDirectory));
-	
-	// set the throttle rate to be 1 second
-	receptionSpec.eventThrottleRate := @PT1S@;
-	// set the max events per file and re run the file
-	receptionSpec.maxEventsPerFile := 2;
-	  
-	// copy the test file into the incoming directory
-	Filesystem::copy_file(testDirectory & testFile, incomingDirectory & testFile);
-
-	// service the event queues
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-
-	// confirm that the outgoing file is in the correct directory
-	Assertions::assertTrue(Filesystem::file_exists(directoryName), receptionSpec.outgoingDirectory & " not created");
-	directoryList := Filesystem::list_directory(directoryName);
-	Assertions::assertTrue(directoryList'length = 1, receptionSpec.outgoingDirectory & " contains " & directoryList'length'image);
-	filename := directoryName & "/" & Filesystem::list_directory(directoryName)'any;
-	Assertions::assertTrue(Filesystem::file_exists(filename), filename & " not created");
-	  
-	// open the outgoing file
-	jsonString := Filesystem::read_file(Filesystem::filename(filename));
-	jsonElement := JSON::parse(jsonString);
-	jsonElements := JSON::get_array(jsonElement);
-	// verify that there are 1 events
-	Assertions::assertTrue(jsonElements'length = 2, "Expected 2 events file contains " & jsonElements'length'image);  
-	  
-	// confirm that the first audit event has the correct parameter values
-	eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
-	Assertions::assertEquals("TestEvent", JSON::get_string(eventJsonObject["eventType"]));
-	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-	Assertions::assertEquals("b181fbef-c315-4f39-ae1d-dd5adc778df3", JSON::get_string(eventJsonObject["eventId"]));
-	Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = false), "basicTest01: Failed as verification reported prevEventIds was invalid");
-	Assertions::assertEquals("2021-05-13T10:07:34.000000Z", JSON::get_string(eventJsonObject["timestamp"]));
-	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
-	Assertions::assertEquals("node1", JSON::get_string(eventJsonObject["node"]));
-	  
-	// confirm that the secon audit event has the correct parameter values
-	eventJsonObject := JSON::get_object(jsonElements[jsonElements'first + 1]);
-	Assertions::assertEquals("TestEvent2", JSON::get_string(eventJsonObject["eventType"]));
-	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-	Assertions::assertEquals("debc5e43-c040-462b-8cf1-11dc88c24abf", JSON::get_string(eventJsonObject["eventId"]));
-	Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = true), "basicTest01: Failed as verification reported prevEventIds was invalid");
-	Assertions::assertEquals("b181fbef-c315-4f39-ae1d-dd5adc778df3", JSON::get_string(eventJsonObject["previousEventIds"]));
-	Assertions::assertEquals("2021-05-13T10:07:35.000000Z", JSON::get_string(eventJsonObject["timestamp"]));
-	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
-	Assertions::assertEquals("node1", JSON::get_string(eventJsonObject["node"]));
-	// verify that the reception job is not complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (receptionJobs'length)'image);
-	// delete the file
-	Filesystem::delete_file(Filesystem::filename(filename));
-
-	// service the event queues and scheduled timers up to 1s in the future
-	// this should force reception to process the next event
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
-
-	// confirm that the outgoing file is in the correct directory
-	Assertions::assertTrue(Filesystem::file_exists(directoryName), receptionSpec.outgoingDirectory & " not created");
-	directoryList := Filesystem::list_directory(directoryName);
-	Assertions::assertTrue(directoryList'length = 1, receptionSpec.outgoingDirectory & " contains " & directoryList'length'image);
-	filename := directoryName & "/" & Filesystem::list_directory(directoryName)'any;
-	Assertions::assertTrue(Filesystem::file_exists(filename), filename & " not created");
-	  
-	// open the outgoing file
-	jsonString := Filesystem::read_file(Filesystem::filename(filename));
-	jsonElement := JSON::parse(jsonString);
-	jsonElements := JSON::get_array(jsonElement);
-	// verify that there are 1 events
-	Assertions::assertTrue(jsonElements'length = 1, "Expected 1 events file contains " & jsonElements'length'image);  
-	  
-	// confirm that the first audit event has the correct parameter values
-	eventJsonObject := JSON::get_object(jsonElements[jsonElements'first]);
-	Assertions::assertEquals("TestEvent3", JSON::get_string(eventJsonObject["eventType"]));
-	Assertions::assertEquals("8a783c30-3161-4cca-9ac1-37f6b50fe6e1", JSON::get_string(eventJsonObject["jobId"]));
-	Assertions::assertEquals("a8947745-b9ae-418c-98d0-abf2149ddacd", JSON::get_string(eventJsonObject["eventId"]));
-	Assertions::assertTrue((eventJsonObject'contains("previousEventIds") = true), "basicTest01: Failed as verification reported prevEventIds was invalid");
-	Assertions::assertEquals("debc5e43-c040-462b-8cf1-11dc88c24abf", JSON::get_string(eventJsonObject["previousEventIds"]));
-	Assertions::assertEquals("2021-05-13T10:07:36.000000Z", JSON::get_string(eventJsonObject["timestamp"]));
-	Assertions::assertEquals("8f309f67-2949-4071-b8c2-fd599b42cb0d", JSON::get_string(eventJsonObject["applicationName"]));
-	Assertions::assertEquals("node1", JSON::get_string(eventJsonObject["node"]));
-	// verify that the reception job is not complete
-	receptionJobs := find Reception (receptionComplete = true);
-	Assertions::assertTrue(receptionJobs'length = 1, "wrong number of reception jobs, expected 1 found: " & (receptionJobs'length)'image);
-	// delete the file
-	Filesystem::delete_file(Filesystem::filename(filename));
-
-	// test the reception deletion time
-	Test::service_event_queue();
-	Test::fire_scheduled_timers(timestamp'now + duration'minutes(10));
-	
-	// verify that all the reception jobs and event files have been cleared down
-   	receptionJobs := find Reception ();
-	Assertions::assertTrue(receptionJobs'length = 0, "wrong number of reception jobs, expected 0 found: " & (eventFiles'length)'image);
- 	eventFiles := find EventFile ();
-	Assertions::assertTrue(eventFiles'length = 0, "wrong number of assigned event files, expected 0 found: " & (eventFiles'length)'image);	
-
-	// reset the throttle rate to be 1 second
-	receptionSpec.eventThrottleRate := @PT0S@;
-	receptionSpec.maxEventsPerFile := 0;
-  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
