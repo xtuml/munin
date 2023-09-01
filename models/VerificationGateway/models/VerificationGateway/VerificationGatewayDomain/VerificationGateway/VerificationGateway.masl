@@ -1,0 +1,25 @@
+//! ACTIVITY BEGIN. 'b8db0fe9-17bc-42e0-8fd5-19ebf69f4b21' DO NOT EDIT THIS LINE.
+public service VerificationGateway::Verification~>verifyInstrumentationEvent ( jobName : in string,
+                                                                              jobID : in string,
+                                                                              eventID : in string,
+                                                                              eventType : in string,
+                                                                              previousEventID : in string ) is
+reportedEvent : string;
+theJobDetails : string;
+theNodeDetails : string;
+theEventDetails : string;
+theAuditEventData : string;
+
+begin
+    // Construct the reportedEvent string...
+    theJobDetails := "jobName = " & jobName & " : jobId = " & jobID;
+    theEventDetails := " : eventType = " & eventType & " : eventId = " & eventID;
+    theAuditEventData := " : auditEventData = " & "NotUsed";
+    
+    // Report the instrumented event for inclusion in the behavioural verification of the Protocol Verifier.
+    reportedEvent := theJobDetails & theEventDetails & " : previousEventIds = " & previousEventID & theAuditEventData;
+    Logger::log(Logger::Information, "VerifierInstrumentation", reportedEvent);
+   
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

@@ -77,6 +77,14 @@ project PV_PROC is
     terminator Req_IF_InvariantStore is
       public service setLoadRate ( loadRate: in duration );       
     end terminator;
+    
+    terminator Req_IF_BehaviourVerification is
+      public service sendInstrumentationEvent (jobName : in string,
+                                               jobID : in string,
+                                               eventID : in string,
+                                               eventType : in string);
+    end terminator;
+
     terminator Reporting is
     end terminator;
   end domain;
@@ -96,12 +104,23 @@ project PV_PROC is
       public service RestoreNamedInvariant ( extraJobInvariantName: in string,
                                              invariantValue: in string );       
     end terminator;
+
+    terminator BehaviourVerification is
+      public service sendInstrumentationEvent (jobName : in string,
+                                               jobID : in string,
+                                               eventID : in string,
+                                               eventType : in string);
+    end terminator;
+
   end domain;
   
   domain IStore is
     terminator StoreClient is
       public service addInvariants ( invariantsToReport: in sequence of persistedInvariantStructure );       
     end terminator;
+  end domain;
+
+  domain VerificationGateway is
   end domain;
   
 end project;

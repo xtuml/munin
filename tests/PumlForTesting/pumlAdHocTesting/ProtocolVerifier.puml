@@ -1,0 +1,60 @@
+@startuml
+partition "ProtocolVerifier" {
+  group "Protocol Verifier Sequence"
+    #green:AEO_PVJobStart;
+    note right
+      "Sourced from 
+      job creation in AEO"
+    end note
+    :SVDC_PVSequencingStart;
+    note left
+      "Sourced from 
+      job creation in SVDC"
+    end note
+    :SVDC_PVEventProcessingComplete;
+     note left
+      "Sourced from the start of 
+      Assessing Constraints in SVDC"
+    end note
+    :SVDC_PVConstraintCheckPassed;
+    note left
+      "Sourced from the start of 
+      Assessing Invariants in SVDC"
+    end note
+    #gold:SVDC_PVJobSuccessful,CRITICAL;
+    note left
+      "Sourced from the start of 
+      Job Successful in SVDC"
+    end note
+    #red:AEO_PVJobDeleted;  
+    note right
+      "Sourced from 
+      Job Deleted state in AEO"
+    end note
+    detach
+  end group
+  package "Unsequenced Events" {
+    :AEO_PVJobFails;
+    kill
+      note right
+      "Sourced from the Failed state of Job
+       of Job in AEO"
+    end note
+    :SVDC_PVJobFails;
+    kill
+    note right
+      "We could make the unsequenced events
+      more fine grained and define where
+      the failure occurs if that would be 
+      useful - currently this is sourced from
+      the start of the JobFailed state in SVDC"
+    end note
+    :SVDC_PVJobGoneHorriblyWrong;
+    kill
+    note right
+      "Sourced from the start of the JobGoneHorriblyWrong
+      state in SVDC"
+    end note
+  }
+}
+@enduml

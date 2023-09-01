@@ -1,0 +1,222 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	'VerifiableJob',
+	1,
+	'VJ',
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_TFR
+	VALUES ("1ae29fe4-1651-42e4-9a90-ca9365640fb0",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	'createVerifiableJob',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	0,
+	'',
+	3,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	1,
+	1);
+INSERT INTO O_TPARM
+	VALUES ("0dcb51c9-7381-4561-a53f-3dc862121e68",
+	"1ae29fe4-1651-42e4-9a90-ca9365640fb0",
+	'clientJobId',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"25f178e4-5438-4c54-8c68-f4a86b997c77",
+	'');
+INSERT INTO O_TPARM
+	VALUES ("21cdbe09-27b5-4b64-a8a0-f2e8e4a8269d",
+	"1ae29fe4-1651-42e4-9a90-ca9365640fb0",
+	'clientEventId',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"0dcb51c9-7381-4561-a53f-3dc862121e68",
+	'');
+INSERT INTO O_TPARM
+	VALUES ("3c5d8e24-d3df-4f3a-a65b-dd2ce8a55a20",
+	"1ae29fe4-1651-42e4-9a90-ca9365640fb0",
+	'clientEventType',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"21cdbe09-27b5-4b64-a8a0-f2e8e4a8269d",
+	'');
+INSERT INTO O_TPARM
+	VALUES ("25f178e4-5438-4c54-8c68-f4a86b997c77",
+	"1ae29fe4-1651-42e4-9a90-ca9365640fb0",
+	'clientJobName',
+	"ba5eda7a-def5-0000-0000-000000000004",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO O_TFR
+	VALUES ("97da32e3-248e-4c1d-b0c4-918f05c1e2f7",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	'deleteVerifiableJob',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	3,
+	'',
+	"1ae29fe4-1651-42e4-9a90-ca9365640fb0",
+	1,
+	2);
+INSERT INTO O_NBATTR
+	VALUES ("ec018043-f2dd-4278-847d-9b1ead20f103",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO O_BATTR
+	VALUES ("ec018043-f2dd-4278-847d-9b1ead20f103",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO O_ATTR
+	VALUES ("ec018043-f2dd-4278-847d-9b1ead20f103",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	"154e4d1d-361a-47c7-802b-21d8e72752ec",
+	'clientJobId',
+	'The ID of the client Job who behaviour is being verified.',
+	'',
+	'clientJobId',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("553678a2-eb65-44a3-9e2f-1edac8b18c05",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO O_BATTR
+	VALUES ("553678a2-eb65-44a3-9e2f-1edac8b18c05",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO O_ATTR
+	VALUES ("553678a2-eb65-44a3-9e2f-1edac8b18c05",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	"00000000-0000-0000-0000-000000000000",
+	'jobKey',
+	'The unique identifier assigned to the VerifiableJob for use within this domain. The ID of the ''client'' Job is not to be used for this purpose, in order that the client''s identifier is not leaked beyond where necessary.',
+	'',
+	'jobKey',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("4a5279ce-7cde-4129-b505-a36bd6ff8252",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO O_BATTR
+	VALUES ("4a5279ce-7cde-4129-b505-a36bd6ff8252",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO O_ATTR
+	VALUES ("4a5279ce-7cde-4129-b505-a36bd6ff8252",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	"c95c0c92-546b-4cb9-8aea-6586f7a69c3a",
+	'current_state',
+	'',
+	'',
+	'current_state',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000006",
+	'',
+	'');
+INSERT INTO O_REF
+	VALUES ("4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	"6d0a6a67-cf6b-45dd-82fb-15f116eb0901",
+	0,
+	"81dcadf9-02d8-4036-acdd-519eeb8cf9b5",
+	"1ab3c6b2-504f-4f87-a4d7-f955370ac330",
+	"7e3d2fc7-c962-4fd0-b699-9038b1909a98",
+	"a81d61bc-e0c3-4498-81ee-c39afe35ec3a",
+	"c95c0c92-546b-4cb9-8aea-6586f7a69c3a",
+	"fb910ec7-ab53-42c3-a00f-7dbc5a9093b6",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'InstrumentationEvent',
+	'eventKey',
+	'R2.''last_received''');
+INSERT INTO R_RGO_PROXY
+	VALUES ("4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	"1ab3c6b2-504f-4f87-a4d7-f955370ac330",
+	"7e3d2fc7-c962-4fd0-b699-9038b1909a98",
+	'../GatewayClasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("81dcadf9-02d8-4036-acdd-519eeb8cf9b5",
+	"6d0a6a67-cf6b-45dd-82fb-15f116eb0901",
+	0,
+	"1ab3c6b2-504f-4f87-a4d7-f955370ac330",
+	"a81d61bc-e0c3-4498-81ee-c39afe35ec3a",
+	'../GatewayClasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("c95c0c92-546b-4cb9-8aea-6586f7a69c3a",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	"81dcadf9-02d8-4036-acdd-519eeb8cf9b5",
+	"6d0a6a67-cf6b-45dd-82fb-15f116eb0901",
+	0,
+	'eventKey');
+INSERT INTO O_BATTR_PROXY
+	VALUES ("81dcadf9-02d8-4036-acdd-519eeb8cf9b5",
+	"6d0a6a67-cf6b-45dd-82fb-15f116eb0901",
+	'../InstrumentationEvent/InstrumentationEvent.xtuml');
+INSERT INTO O_ATTR
+	VALUES ("c95c0c92-546b-4cb9-8aea-6586f7a69c3a",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	"ec018043-f2dd-4278-847d-9b1ead20f103",
+	'lastReceivedEventKey',
+	'',
+	'',
+	'lastReceivedEventKey',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("154e4d1d-361a-47c7-802b-21d8e72752ec",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO O_BATTR
+	VALUES ("154e4d1d-361a-47c7-802b-21d8e72752ec",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO O_ATTR
+	VALUES ("154e4d1d-361a-47c7-802b-21d8e72752ec",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	"553678a2-eb65-44a3-9e2f-1edac8b18c05",
+	'clientJobName',
+	'',
+	'',
+	'clientJobName',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'',
+	'');
+INSERT INTO O_ID
+	VALUES (0,
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO O_OIDA
+	VALUES ("553678a2-eb65-44a3-9e2f-1edac8b18c05",
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	0,
+	'jobKey');
+INSERT INTO O_ID
+	VALUES (1,
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO O_ID
+	VALUES (2,
+	"4e9fffb7-2842-4e13-9cf6-2474b3468061");
+INSERT INTO PE_PE
+	VALUES ("4e9fffb7-2842-4e13-9cf6-2474b3468061",
+	1,
+	"f24b4276-e7d1-4454-adb1-244f1556b303",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("f24b4276-e7d1-4454-adb1-244f1556b303",
+	"00000000-0000-0000-0000-000000000000",
+	"f4cf9cff-f8c0-431b-90e0-b89b02f86651",
+	'GatewayClasses',
+	'',
+	0,
+	'../GatewayClasses.xtuml');

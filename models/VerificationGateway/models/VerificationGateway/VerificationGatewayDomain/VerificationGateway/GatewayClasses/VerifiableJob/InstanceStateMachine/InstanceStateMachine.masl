@@ -1,0 +1,45 @@
+//! ACTIVITY BEGIN. '71fd4b39-3e2b-4fea-8be2-0598c5877d95' '1a0f8695-c95d-42e8-835c-4f58e991199c' DO NOT EDIT THIS LINE.
+state VerificationGateway::VerifiableJob.ProcessingEventsForJob ( nextEventId : in string,
+                                                                 nextEventType : in string ) is
+newInstrumentationEvent : instance of InstrumentationEvent;
+previousInstrumentationEvent : instance of InstrumentationEvent;
+eventUUID : string;
+
+begin
+  // Create a new instance of InstrumentationEvent (with a generated UUID as its identifier) and
+  // link it up to the Job via R1 and R2
+  eventUUID := string(UUID::generate_formatted());
+  
+  newInstrumentationEvent := create InstrumentationEvent (eventKey => eventUUID,
+  	                                                      clientEventId => nextEventId,
+  	                                                      clientEventType => nextEventType);
+  
+  link this R1 newInstrumentationEvent;
+  previousInstrumentationEvent := this -> R2;
+  if previousInstrumentationEvent /= null then
+    // The previous InstrumentationEvent for the job has been found - so stitch the newInstrumentationEvent to the 
+    // previousInstrumentationEvent by re-linking R2 and link R3 in readiness for the next event.
+    unlink this R2 previousInstrumentationEvent;
+    link this R2 newInstrumentationEvent;
+    link previousInstrumentationEvent R3.is_followed_by newInstrumentationEvent;
+    
+    // Having stitched the events appropriately use the newInstrumentationEvent to to verify the behaviour 
+    // of the Job within the client application.
+    Verification~>verifyInstrumentationEvent(this.clientJobName,
+    	                                     newInstrumentationEvent.jobKey,
+    	                                     newInstrumentationEvent.eventKey,
+    	                                     newInstrumentationEvent.clientEventType,         
+                                             newInstrumentationEvent.assignedPreviousEventKey);
+  else
+    // TODO
+  end if;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '71fd4b39-3e2b-4fea-8be2-0598c5877d95' '13b65c8e-f8d4-4fa4-af37-156b8fa3ee5f' DO NOT EDIT THIS LINE.
+state VerificationGateway::VerifiableJob.Deleting () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

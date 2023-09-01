@@ -1,0 +1,71 @@
+//! ACTIVITY BEGIN. '1ae29fe4-1651-42e4-9a90-ca9365640fb0' DO NOT EDIT THIS LINE.
+public service VerificationGateway::VerifiableJob.createVerifiableJob ( clientJobName : in string,
+                                                                       clientJobId : in string,
+                                                                       clientEventId : in string,
+                                                                       clientEventType : in string ) is
+newVerifiableJob : instance of VerifiableJob;
+firstInstrumentationEventForJob : instance of InstrumentationEvent;
+jobUUID : string;
+eventUUID : string;
+
+begin
+  // Create the new Job assigning it a generated UUID as its identifier.
+  jobUUID := string(UUID::generate_formatted());
+  
+  newVerifiableJob := create VerifiableJob (jobKey => jobUUID,
+  	                                        clientJobName => clientJobName,
+  	                                        clientJobId => clientJobId,
+  	                                        Current_State => ProcessingEventsForJob);
+  	                                               
+  // Create the first event for the new job (assigning it a generated UUID as its identifier) and link
+  // it up appropriately
+  eventUUID := string(UUID::generate_formatted());
+  
+  firstInstrumentationEventForJob := create InstrumentationEvent (eventKey => eventUUID,
+  	                                                              clientEventId => clientEventId, 
+  	                                                              clientEventType => clientEventType);
+  	                                                                     
+  link newVerifiableJob R1 firstInstrumentationEventForJob;
+  link newVerifiableJob R2 firstInstrumentationEventForJob;
+  
+  
+  // Use the firstInstrumentationEvent to verify the behaviour of the Job within the client application. 
+  Verification~>verifyInstrumentationEvent(newVerifiableJob.clientJobName,
+  	                                       (firstInstrumentationEventForJob.jobKey)'image,
+    	                                   (firstInstrumentationEventForJob.eventKey)'image,
+    	                                   firstInstrumentationEventForJob.clientEventType,  
+    	                                   "");
+                                           
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '97da32e3-248e-4c1d-b0c4-918f05c1e2f7' DO NOT EDIT THIS LINE.
+public instance service VerificationGateway::VerifiableJob.deleteVerifiableJob () is
+theLastInstrumentationEvent : instance of InstrumentationEvent;
+theInstrumentationEvents : set of instance of InstrumentationEvent;
+logMessage : string;
+
+begin
+  // Log info: Report that this VerifianleJob is being deleted. 
+  logMessage := "Deleting Job " & this.jobKey'image & " and all its InstrumentationEvents";
+  Logger::log(Logger::Debug, "VerificationGateway", logMessage);
+  
+  theLastInstrumentationEvent := this -> R2;
+  unlink this R2 theLastInstrumentationEvent;
+  theInstrumentationEvents := this -> R1;
+  for theInstrumentationEvent in theInstrumentationEvents loop
+    unlink this R1 theInstrumentationEvent;
+    if (theInstrumentationEvent -> R3.is_followed_by) /= null then
+      unlink (theInstrumentationEvent -> R3.is_followed_by) R3.is_preceded_by theInstrumentationEvent;
+    end if;
+  end loop;
+  
+  // ...and then delete all the InstrumentationEvents for the VerifiableJob 
+  delete theInstrumentationEvents;
+  
+  //...and finally delete this VerifiableJob
+  delete this;
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

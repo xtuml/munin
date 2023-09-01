@@ -1,0 +1,14 @@
+//! ACTIVITY BEGIN. 'dbeecea1-1ab7-464f-8c79-44f9ef6da808' DO NOT EDIT THIS LINE.
+private service VerificationGateway::CleanUpAllJobs () is
+theVerifiableJobs : set of instance of VerifiableJob;
+theVerifiableJob : instance of VerifiableJob;
+
+begin
+//
+    theVerifiableJobs := find VerifiableJob ();
+    for theVerifiableJob in theVerifiableJobs loop
+       theVerifiableJob.deleteVerifiableJob ();     
+    end loop;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
