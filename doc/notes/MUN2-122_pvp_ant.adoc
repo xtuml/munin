@@ -9,7 +9,7 @@ observability with the Protocol Verifier.
 
 == 2 Introduction and Background
 
-The Munin team is instrumenting the Protocol Verifier itself to explore
+The Munin team is instrumenting the Protocol Verifier to explore
 and test the various use cases of protocol verification.  Since the
 Protocol Verifier (PV) is itself an observable device that implements a
 protocol, the PV is being instrumented for observability and will be used
@@ -21,17 +21,18 @@ attention.
 
 == 3 Requirements
 
-=== 3.1 Explore Alternative Instrumentation
+=== 3.1 Explore Utility of Extended Features
 
-The instrumentation approach we have taken initially is the most simple
-and straight-forward.  This is good.  However, it makes some assumptions.
-Explore alternative instrumentation approaches that would be required if
-the assumptions were eliminated.
-
-=== 3.2 Explore Utility of Extended Features
-
-Explore instrumenting the PV a bit more deeply with features that employ
+Explore instrumenting the PV more deeply with features that employ
 event data.  This is primarily for testing and usage understanding.
+
+=== 3.2 Explore Alternative Instrumentation
+
+The instrumentation approach we have taken initially is simple and
+straight-forward.  However, it makes some assumptions.  Explore
+alternative instrumentation approaches that would be required if the
+assumptions were eliminated.  Specifically, explore __identifier forward
+propagation__ (a.k.a. __token passing__).
 
 === 3.3 Expand and Refine Documentation
 
@@ -40,9 +41,31 @@ support of the Protocol Verifier and its user base.
 
 == 4 Analysis
 
-=== 4.1 Instrumentation Alternatives
+=== 4.1 Explore Utility of Extended Features
 
-==== 4.1.1 Protocol Gateway Domain
+The primary motivation for these features is pedagogical, However,
+additional enforcement and constraint may be achieved.
+
+=== 4.1.1 Looping
+
+Consider instrumenting audit event processing.  Use a (unconstrained) loop
+in the job definition to allow multiple audit events.  This will provide
+more depth to our instrumentation and self-testing.
+
+=== 4.1.2 Intra-Job Invariant
+
+Implement an intra-job invariant in the ProtocolVerifier job definition.
+This might be initiated in ordering and checked in sequence verification.
+
+=== 4.1.3 Extra-Job Invariant
+
+Implement an extra-job invariant in the ProtocolVerifer job definition.
+It would add a simplistic run-time check which would constrain the jobs
+slightly.  Maybe do this only for testing/demo purposes and then remove.
+
+=== 4.2 Instrumentation Alternatives
+
+==== 4.2.1 Protocol Gateway Domain
 
 This is the approach implemented already (August 2023).  The
 straight-forward approach and expedience are why it was selected first.
@@ -51,28 +74,30 @@ the PV Gateway domain.  Minimal instrumentation is required of the
 application domains.  However, this approach makes (valid) assumptions
 about the sequencing of the application domains themselves.  If the AEO
 and SVDC were separated into different tasks/threads/processes/processors,
-the assumptions may seem weak.
+the assumptions may not hold.
 
-==== 4.1.2 Direct Modelling of PVJob and PVEvent
+==== 4.2.2 Direct Modelling of PVJob and PVEvent
 
 This approach might also be referred to as **Explicit Propagation of
 Observability Events**.
 
 This approach places the obsersvability requirements on the same level as
-the observation requirements of the Protocol Verifier.  This approach will
-model observability together with the ordering and sequencing
-requirements, thus including model elements within the ordering and
-sequencing domains.
+the observation requirements of the Protocol Verifier.  This approach
+models observability together with the ordering and sequencing
+requirements, thus including observability model elements within the
+ordering and sequencing domains.
 
 A summary of the approach follows:
 
 . Add a class to AEO and SVDC called PVJob with an identifying string
   attribute formatted as a UUID.
 . Add a relationship between PVJob and Job.
-. Add a class to AEO and SVDC called PVEvent with an identify string
+. Add a class to AEO and SVDC called PVEvent with an identifying string
   attribute formatted as a UUID.
 . Add a relationship between PVEvent and PVJob formalised on the PVJob side.
 . Add an ordering reflexive on PVEvent.
+. (Note that no relationship exists between PVEevent and application-level
+  AuditEvent.)
 . Upon Job creation, AEO creates PVJob with a unique string identifier.
   .. AEO creates an instance of PVEvent with a unique string identifier.
   .. AEO passes PVJob.ID and PVEvent.ID to the PV Gateway.
@@ -83,10 +108,12 @@ A summary of the approach follows:
   unhappy).
 . SVDC sends PVJob.ID, PVEvent.ID and PVEvent.previousID to PV Gateway for
   happy and unhappy observability points.
+. SVDC sends PVJob.ID and PVEvent.ID to AEO when signalling the deletion
+  of a job.
 . Instances of PVJob and PVEvent are discarded whenever the associated Job
   is discarded.
 
-===== 4.1.2.1 Direct Modelling of PVJob and PVEvent in a Utility Domain
+===== 4.2.2.1 Direct Modelling of PVJob and PVEvent in a Utility Domain
 
 This approach is a variation on the above approach.  Instead of modelling
 PVJob and PVEvent within the Ordering and SVDC subsystems, these classes
@@ -109,7 +136,11 @@ PVEvents local to the domain.
 * PVUtil.StartPVJob( pvJobName : in string ) return pvJobId
 * PVUtil.PVEvent( pvJobId : in string, pvEventName : in string ) return pvEventId
 
-==== 4.1.3 Architectural Marking and Propagation
+The change to the application model might simply be the addition of two
+attributes on the Job class (pvJobId and pvEventId) which would then be
+propagated with inter-domain messages.
+
+==== 4.2.3 Architectural Marking and Propagation
 
 This approach could also be referred to as **Architectural Propagation of
 Observability Events**.
@@ -123,23 +154,24 @@ Overview:
 . The MASL MC is updated to automatically generate communication to PV
   Gateway.
 . The MASL MC is updated to automatically forward PVJob IDs and PVEvent
-  IDs within threads of control via events and messaging, thus providing
-  the mechanism for forward propagation.
+  IDs within threads of control via events, invocations and messaging,
+  thus providing the mechanism for forward propagation.
 . The job creation state is marked in AEO (and marked specially as the
   start of the audit event chain).
-. The various key states within SVDC are marked as "observed".
+. The various key states within AEO and SVDC are marked as "observed".
 . The job creation message flowing from AEO to SVDC is marked.
+. The job deletion message flowing from SVDC to AEO is marked.
 
 What happens:
 
 . The model compiler produces PV events at marked states.
 . The architecturally manufactured PVJob IDs and PVEvent IDs are passed as
-  (invisible) parameters on precipitated S-M events.
+  (invisible) parameters on precipitated S-M events and subroutine invocations.
 . Likewise PVJob IDs and PVEvent IDs are passed (invisibly) on marked
-  interdomain messages, where they are propagated on events within the
-  receiving domain.
+  interdomain messages, where they are propagated on events and
+  invocations within the receiving domain.
 
-==== 4.1.4 Protocol Gateway Arbitration
+==== 4.2.4 Protocol Gateway Arbitration
 
 This approach is only a brief thought.
 
@@ -148,7 +180,7 @@ SVDC could be required to request from the Protocol Gateway the most
 recent PVEvent.ID keyed by a Job ID.  This would be an extra step after
 receiving a Job from Ordering and before beginning to process it.
 
-==== 4.1.5 Synchronous PV Gateway (Integrated Utility Domain)
+==== 4.2.5 Synchronous PV Gateway (Integrated Utility Domain)
 
 This thought is not even half-baked...
 
@@ -156,17 +188,12 @@ A PV Gateway could be crafted that provided a synchronous bridge.  A
 mechanism to serialise access to the previous event may be necessary.
 Perhaps persistence would be required.
 
-=== 4.2 Explore Utility of Extended Features
-
-TBD
-
-My first thought is to implement an extra-job invariant in the PVPrime job
-definition.  It would add a simplistic run-time check which would
-constrain the jobs slightly.  The primary motivation would be pedagogical.
-
 === 4.3 Expand and Refine Documentation
 
 TBD
+
+All that we do and learn must be captured for sharing with the Protocol
+Verifier user community.
 
 == 5 Work Required
 
@@ -175,6 +202,7 @@ TBD
 == 7 Document References
 
 . [[dr-1]] https://onefact.atlassian.net/browse/MUN2-117[MUN2-117]
+. [[dr-2]] https://onefact.atlassian.net/browse/MUN2-122[MUN2-122]
 
 ---
 
