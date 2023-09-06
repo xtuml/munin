@@ -9,7 +9,7 @@ newJob :  instance of Job;
 newHappyJob : instance of HappyJob;
 newEvent : instance of AuditEvent;
 newSeqEvent : instance of SequencedAuditEvent;
-oldEvent : instance of SequencedAuditEvent;
+oldEvent : instance of AuditEvent;
 newEventType : instance of SequencedAuditEventDefinition;
 possibleEventTypes : set of instance of SequencedAuditEventDefinition;
 prevEvent : instance of SequencedAuditEvent;
@@ -33,7 +33,7 @@ instrumentationEventId : string;
 instrumentationEventType : string;
 
 begin
-  oldEvent := find_one SequencedAuditEvent (AuditEventId = eventId);
+  oldEvent := find_one AuditEvent (AEId = eventId);
   // Check to see if we've seen this event instance before
   if (oldEvent = null) then
     //We have a new job and this event must be a valid initial event for a Job

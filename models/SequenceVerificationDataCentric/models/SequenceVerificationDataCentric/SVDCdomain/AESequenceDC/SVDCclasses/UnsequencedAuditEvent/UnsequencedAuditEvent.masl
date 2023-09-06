@@ -6,7 +6,7 @@ public service AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob ( jo
                                                                              aeType : in string,
                                                                              aeData : in sequence of auditEventDataStructure ) is
 newJob : instance of Job;
-oldEvent : instance of UnsequencedAuditEvent;
+oldEvent : instance of AuditEvent;
 newUnhappyJob : instance of UnhappyJob;
 newUnhappyEvent : instance of UnsequencedAuditEvent;
 newEvent : instance of AuditEvent;
@@ -17,12 +17,15 @@ eventContent : string;
 
 begin
 
-  oldEvent := find_one UnsequencedAuditEvent (unsequencedAuditEventId = eventId);
+  oldEvent := find_one AuditEvent (AEId = eventId);
   // Check to see if we've seen this event instance before
   if (oldEvent = null) then
     //We have received an unhappy path event as the first event in the Job. So we need to create a new job 
     // with its corresponding UnhappyJob subtype and this event is an unsequenced event for a Job
     // Note: SequencingFailed is marked true for an UnhappyJob
+
+    logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob : First event for Job is an unhappy event - job Name = " & jobName & ", Initial audit event: " & eventId & " of type " & aeType;
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
     
     newJob := create Job (jobID => jobId, sequencingFailed => true, jobCompleted => false );
     newUnhappyJob := create UnhappyJob (jobID => jobId, Current_State => Created );

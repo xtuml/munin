@@ -558,6 +558,14 @@ theGrandparentEvents : set of instance of AuditEvent;
 theAncestorEvents : set of instance of AuditEvent;
 theUnhappyEvents : set of instance of AuditEvent;
 theParentsOfUnhappyEvents : set of instance of AuditEvent;
+theTriggeringAncestorEvents : set of instance of AuditEvent;
+theChildEvents : set of instance of AuditEvent;
+theGrandchildrenEvents : set of instance of AuditEvent;
+theDecendantEvents : set of instance of AuditEvent;
+inScopeCriticalEvents : set of instance of AuditEvent;
+theJobsCriticalAuditEvents : set of instance of AuditEvent;
+inScopeCriticalEventDefinition : instance of SequencedAuditEventDefinition;
+
 logMessage : string;
 isSuccess : boolean;
 failureReason : string;
@@ -615,6 +623,40 @@ begin
   else
     isSuccess := false;
     failureReason := "ALARM: Unhappy event seen within the scope of a Critical event";
+    
+    //Find and report the critical events that are in scope of the unhappy events
+    theTriggeringAncestorEvents := (theParentsOfUnhappyEvents intersection theAncestorEvents);
+    theChildEvents := theTriggeringAncestorEvents -> R47.has_next.AuditEvent;
+      while theChildEvents /= null loop
+        // Walk the graph forwards to find all the descendants of the common ancestor event
+        declare
+          thisGenerationsEvents : set of instance of AuditEvent;
+        begin  
+          for theChildEvent in theDecendantEvents loop
+            if (theChildEvent -> R47.has_next.AuditEvent) /= null then
+              // Find the grandchildren of each child event
+              theGrandchildrenEvents := theChildEvent -> R47.has_next.AuditEvent;
+              // Add them to the list of descendants
+              theDecendantEvents := theDecendantEvents & theGrandchildrenEvents;
+              // Also add them to the list of the current generation
+              thisGenerationsEvents := thisGenerationsEvents & theGrandchildrenEvents;
+            end if;
+          end loop;  
+          theChildEvents := thisGenerationsEvents;
+        end;
+        
+      end loop;  
+    
+    theJobsCriticalAuditEvents := theJobsCriticalEvents -> R46;  
+    inScopeCriticalEvents := (theJobsCriticalAuditEvents intersection theDecendantEvents);    
+    
+    logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion - The following critical events are in the scope of the unhappy event for Job with jobId = " & theJob.jobID & " and job type " & theJob.jobName;
+    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+    for inScopeCriticalEvent in inScopeCriticalEvents loop
+      inScopeCriticalEventDefinition := inScopeCriticalEvent -> R46.SequencedAuditEvent -> R2;
+      logMessage := "  In scope Critical Event  = " & inScopeCriticalEvent.AEId & " of type " & inScopeCriticalEventDefinition.AEType;
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);      
+    end loop;   
   end if;     
   
   // Also need to check to see if any unhappy events have no previous events
