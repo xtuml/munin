@@ -374,11 +374,11 @@ begin
       
       
       if intraJobInvariantCheckPassed then
-        logMessage := "AESequenceDC::Job.AssessingIntraJobInvariants : Intra-Job Invariant check passed for - jobId = " & this.jobID;
+        logMessage := "AESequenceDC::UnhappyJob.AssessingIntraJobInvariants : Intra-Job Invariant check passed for Unhappy Job - jobId = " & this.jobID;
         Logger::log(Logger::Debug, "AESequenceDC", logMessage);
         generate Job.intraJobInvariantCheckSuccessful() to theJob;
       else
-        failureReason := "Check of Intra-Job Invariants Failed";
+        failureReason := "Check of Intra-Job Invariants in Unhappy Job Failed";
         generate Job.jobFailed(failureReason) to theJob;
       end if;  
   
@@ -396,7 +396,7 @@ begin
   theJob := this -> R45;
 
   //TODO Remove debug message
-  logMessage := "AESequenceDC::Job.AwaitingPersistenceService : Entered state Awaiting Persistence Service for - jobId = " & this.jobID;
+  logMessage := "AESequenceDC::UnhappyJob.AwaitingPersistenceService : Entered state Awaiting Persistence Service for Unhappy job - jobId = " & this.jobID;
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   
   theSystemSpec := find_one SystemSpecification ();
@@ -466,11 +466,11 @@ begin
 
 
       if extraJobInvariantCheckPassed then
-        logMessage := "AESequenceDC::Job.AssessingLocalExtraJobInvariants : Extra-Job Invariant check passed for - jobId = " & this.jobID;
+        logMessage := "AESequenceDC::UnhappyJob.AssessingLocalExtraJobInvariants : Extra-Job Invariant check passed for Unhappy Job - jobId = " & this.jobID;
         Logger::log(Logger::Debug, "AESequenceDC", logMessage);
         generate Job.extraJobInvariantCheckSuccessful() to theJob;
       else
-        logMessage := "AESequenceDC::Job.AssessingLocalExtraJobInvariants : Local Extra-Job Invariants insufficient so checking stored value for - jobId = " & this.jobID;
+        logMessage := "AESequenceDC::UnhappyJob.AssessingLocalExtraJobInvariants : Local Extra-Job Invariants insufficient so checking stored value for Unhappy Job - jobId = " & this.jobID;
         Logger::log(Logger::Debug, "AESequenceDC", logMessage);
       end if;  
   
@@ -533,11 +533,11 @@ begin
 
 
       if extraJobInvariantCheckPassed then
-        logMessage := "AESequenceDC::Job.ReassessingExtraJobInvariants : Extra-Job Invariant check passed for - jobId = " & this.jobID;
+        logMessage := "AESequenceDC::UnhappyJob.ReassessingExtraJobInvariants : Extra-Job Invariant check passed for Unhappy Job - jobId = " & this.jobID;
         Logger::log(Logger::Debug, "AESequenceDC", logMessage);
         generate Job.extraJobInvariantCheckSuccessful() to theJob;
       else
-        failureReason := "Extra-Job Invariant check failed including checking stored invariants";
+        failureReason := "Extra-Job Invariant check failed including checking stored invariants for Unhappy Job";
         generate Job.jobFailed (failureReason) to theJob;
       end if;  
   
