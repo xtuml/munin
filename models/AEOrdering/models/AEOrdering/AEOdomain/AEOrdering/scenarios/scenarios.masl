@@ -9,8 +9,8 @@ endJobGroup : integer;
 
 begin
 
-	startJobGroup := integer'parse(CommandLine::get_option_value("-startJobGroup"),16);
-	endJobGroup := integer'parse(CommandLine::get_option_value("-endJobGroup"),16);
+	startJobGroup := integer'parse(CommandLine::get_option_value("-startJobGroup", "00"),16);
+	endJobGroup := integer'parse(CommandLine::get_option_value("-endJobGroup", "FF"),16);
 	// get the supplied command line option for the config file and verify it is valid
 	configFilePath := CommandLine::get_option_value("-configPath");
 	configFile := CommandLine::get_option_value("-configFile", "config.json");
@@ -44,7 +44,7 @@ end service;
 //! ACTIVITY BEGIN. 'ffcee2b3-5671-490c-8731-d0a4a122cdab' DO NOT EDIT THIS LINE.
 private service AEOrdering::registerCommandLineArgs () is
 begin
-	
+
 	// The domain needs to be started with the command line argument -config that specifies where to find the configuration file;
   begin
 	  CommandLine::register_value("-configPath", "The path to the configuration file for the service", CommandLine::Required, "configPath", CommandLine::Required, CommandLine::Single);
@@ -57,16 +57,16 @@ begin
     when program_error => null;  // Ignore error if option has been defined in another domain.
   end;
   begin
-	  CommandLine::register_value("-startJobGroup", "The starting group id for jobs to be processed by this instance", CommandLine::Required, "startJobGroup", CommandLine::Required, CommandLine::Single);
+	  CommandLine::register_value("-startJobGroup", "The starting group id for jobs to be processed by this instance", CommandLine::Optional, "startJobGroup", CommandLine::Required, CommandLine::Single);
   exception
     when program_error => null;  // Ignore error if option has been defined in another domain.
   end;
   begin
-	  CommandLine::register_value("-endJobGroup", "The ending group id for jobs to be processed by this instance", CommandLine::Required, "endJobGroup", CommandLine::Required, CommandLine::Single);
+	  CommandLine::register_value("-endJobGroup", "The ending group id for jobs to be processed by this instance", CommandLine::Optional, "endJobGroup", CommandLine::Required, CommandLine::Single);
   exception
     when program_error => null;  // Ignore error if option has been defined in another domain.
   end;
-	
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
