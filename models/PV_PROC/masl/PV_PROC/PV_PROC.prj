@@ -73,6 +73,12 @@ project PV_PROC is
                                                 userOccurrenceId: in integer );       
       public service jobDefinition ( jobName: in string,
                                      eventDefinitions: in sequence of EventDefinitionType );       
+      public service reportVerificationTimerControls ( maxIntraSequenceEventTimeoutPeriod: in duration,
+                                                       waitPeriodForAllJobsCompletedCheck: in duration,
+                                                       waitPeriodForJobDeletion: in duration,
+                                                       waitPeriodForInvariantDeletion: in duration,
+                                                       timeoutPeriodForRetreivingStoredInvariants: in duration,
+                                                       timeoutPeriodForHangingJob: in duration );     
     end terminator;
     terminator Req_IF_InvariantStore is
       public service setLoadRate ( loadRate: in duration );       

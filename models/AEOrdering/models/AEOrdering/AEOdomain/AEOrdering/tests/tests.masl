@@ -27,11 +27,12 @@ reportedJobDefinitions : sequence of instance of _TEST_Req_IF_Verification_jobDe
 intraEventDataDef : instance of _TEST_Req_IF_Verification_intraJobInvariantDefinition;
 extraEventDataDef : instance of _TEST_Req_IF_Verification_extraJobInvariantDefinition;
 dynamicControlDefinition : instance of _TEST_Req_IF_Verification_dynamicControlDefinition;
+verificationTimerControls : sequence of instance of _TEST_Req_IF_Verification_reportVerificationTimerControls;
+verificationTimerControl : instance of _TEST_Req_IF_Verification_reportVerificationTimerControls;
 
 begin
 	
 	// When the domain has started it should report the details of the event definitions to verifications
-
 	reportedJobDefinitions := find _TEST_Req_IF_Verification_jobDefinition();
 	Assertions::assertTrue((reportedJobDefinitions'length = 2), "Test Config File: Failed to find the correct number of reported event definitions, expected 2 found " & (reportedJobDefinitions'length)'image);
 	
@@ -126,6 +127,17 @@ begin
     Assertions::assertTrue((dynamicControlDefinition /= null), "Test Config Test Data: Failed to find dynamic control definition definition jobTypeName = AEOrdering-Test and dynamicControlName = cccLOOPCOUNT and dynamicControlType = LOOPCOUNT and sourceEventType = bbb and sourceOccurrenceId = 1 and userEventType = ccc and userOccurrenceId = 1");
 	
 
+	verificationTimerControls := find _TEST_Req_IF_Verification_reportVerificationTimerControls();
+	Assertions::assertTrue((verificationTimerControls'length = 2), "Test Config File: Failed to find the correct number of reported cerification timer controls, expected 2 found " & (verificationTimerControls'length)'image);
+	verificationTimerControl := find_one verificationTimerControls();
+    Assertions::assertTrue((verificationTimerControl.maxIntraSequenceEventTimeoutPeriod = duration'seconds(1)), "Test Config Test Data: Invalid maxIntraSequenceEventTimeoutPeriod");
+    Assertions::assertTrue((verificationTimerControl.waitPeriodForAllJobsCompletedCheck = duration'days(1)), "Test Config Test Data: Invalid waitPeriodForAllJobsCompletedCheck");
+    Assertions::assertTrue((verificationTimerControl.waitPeriodForJobDeletion = duration'minutes(30)), "Test Config Test Data: Invalid waitPeriodForJobDeletion");
+    Assertions::assertTrue((verificationTimerControl.waitPeriodForInvariantDeletion = duration'days(1)), "Test Config Test Data: Invalid waitPeriodForInvariantDeletion");
+    Assertions::assertTrue((verificationTimerControl.timeoutPeriodForRetreivingStoredInvariants = duration'seconds(10)), "Test Config Test Data: Invalid timeoutPeriodForRetreivingStoredInvariants");
+    Assertions::assertTrue((verificationTimerControl.timeoutPeriodForHangingJob = duration'seconds(15)), "Test Config Test Data: Invalid timeoutPeriodForHangingJob");
+	delete verificationTimerControls;
+	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -1295,12 +1307,16 @@ private service AEOrdering::testConfigFile () is
 reportedEventJobDefinitions : sequence of instance of _TEST_Req_IF_Verification_jobDefinition;
 systemSpec : instance of SystemSpec;
 configFile : string := "config.json";
+verificationTimerControls : sequence of instance of _TEST_Req_IF_Verification_reportVerificationTimerControls;
+verificationTimerControl : instance of _TEST_Req_IF_Verification_reportVerificationTimerControls;
 
 begin
 	
 	AEOrdering::clearDomain(true, true);
 	reportedEventJobDefinitions := find _TEST_Req_IF_Verification_jobDefinition();
 	delete reportedEventJobDefinitions;
+	verificationTimerControls := find _TEST_Req_IF_Verification_reportVerificationTimerControls();
+	delete verificationTimerControls;
 	systemSpec := find_one SystemSpec();
 	systemSpec.configFile := configFile;
 	Filesystem::touch_file(Filesystem::filename(systemSpec.configFilePath & configFile));
@@ -1368,6 +1384,18 @@ begin
 			Assertions::assertTrue(false, "Test Config File: Unknown job reported, jobName = " & jobDefinition.jobName);  
 		end if;
 	end loop;
+
+	verificationTimerControls := find _TEST_Req_IF_Verification_reportVerificationTimerControls();
+	Assertions::assertTrue((verificationTimerControls'length = 1), "Test Config File: Failed to find the correct number of reported cerification timer controls, expected 1 found " & (verificationTimerControls'length)'image);
+	verificationTimerControl := find_one verificationTimerControls();
+    Assertions::assertTrue((verificationTimerControl.maxIntraSequenceEventTimeoutPeriod = @PT1S@), "Test Config Test Data: Invalid maxIntraSequenceEventTimeoutPeriod, value = " & verificationTimerControl.maxIntraSequenceEventTimeoutPeriod'image);
+    Assertions::assertTrue((verificationTimerControl.waitPeriodForAllJobsCompletedCheck = duration'days(1)), "Test Config Test Data: Invalid waitPeriodForAllJobsCompletedCheck");
+    Assertions::assertTrue((verificationTimerControl.waitPeriodForJobDeletion = duration'minutes(30)), "Test Config Test Data: Invalid waitPeriodForJobDeletion");
+    Assertions::assertTrue((verificationTimerControl.waitPeriodForInvariantDeletion = duration'days(1)), "Test Config Test Data: Invalid waitPeriodForInvariantDeletion");
+    Assertions::assertTrue((verificationTimerControl.timeoutPeriodForRetreivingStoredInvariants = duration'seconds(10)), "Test Config Test Data: Invalid timeoutPeriodForRetreivingStoredInvariants");
+    Assertions::assertTrue((verificationTimerControl.timeoutPeriodForHangingJob = duration'seconds(15)), "Test Config Test Data: Invalid timeoutPeriodForHangingJob");
+	delete verificationTimerControls;
+	
 		
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
