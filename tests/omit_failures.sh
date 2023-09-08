@@ -25,7 +25,7 @@ docker compose up -d &>/dev/null
 echo "Done."
 
 echo "Generating runtime events."
-#$P2J --play -o reception-incoming $puml_file --play --omit A
+$P2J --play -o reception-incoming $puml_file --play --omit A
 $P2J --play -o reception-incoming $puml_file --play --omit B
 $P2J --play -o reception-incoming $puml_file --play --omit C
 $P2J --play -o reception-incoming $puml_file --play --omit D
