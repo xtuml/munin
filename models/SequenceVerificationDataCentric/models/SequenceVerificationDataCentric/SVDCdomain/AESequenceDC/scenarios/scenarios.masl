@@ -994,14 +994,6 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
-//! ACTIVITY BEGIN. 'cb99e9a8-3c77-4d96-be2f-b226eb5c235f' DO NOT EDIT THIS LINE.
-private service AESequenceDC::InitSystemSpec () is
-begin
-  createSVDCsystemSpec(@PT1S@,@P1D@,@PT30M@,@P1D@,@PT10S@,@PT15S@);
-  //
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
 //! ACTIVITY BEGIN. '9fe65133-a1f2-4b98-a12d-1823267bd100' DO NOT EDIT THIS LINE.
 private service AESequenceDC::InitForkAndMergeTopologyEventDefinition () is
 // Initialisation goes here.
@@ -2013,5 +2005,12 @@ begin
 end service;
 //
 //
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '4faa3426-8603-40d7-a0e2-9b6a514a6108' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitSystemSpec () is
+begin
+  AESequenceDC::createSVDCsystemSpec(@PT1S@, @P1D@, @PT30M@, @P1D@, @PT10S@, @PT15S@);
+end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

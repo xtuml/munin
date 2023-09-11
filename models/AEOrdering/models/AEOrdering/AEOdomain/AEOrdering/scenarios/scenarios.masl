@@ -24,7 +24,7 @@ begin
 				                                   startJobGroup => startJobGroup, endJobGroup => endJobGroup, Current_State => Created);
 		end if;
 		systemSpec.loadConfigFile();
-		generate SystemSpec.checkConfigUpdate() to systemSpec;
+    	generate SystemSpec.checkConfigUpdate() to systemSpec;
 	else
 		logMessage := "AEOrdering::init : failed to locate config file. Specified file = " & configFilePath & configFile;
 		Logger::log(Logger::Error, "AEOrdering", logMessage);

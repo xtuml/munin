@@ -1,0 +1,10 @@
+public service AEOrdering::Req_IF_Verification~>reportVerificationTimerControls ( maxIntraSequenceEventTimeoutPeriod: in duration,
+                                                                                  waitPeriodForAllJobsCompletedCheck: in duration,
+                                                                                  waitPeriodForJobDeletion: in duration,
+                                                                                  waitPeriodForInvariantDeletion: in duration,
+                                                                                  timeoutPeriodForRetreivingStoredInvariants: in duration,
+                                                                                  timeoutPeriodForHangingJob: in duration ) is
+begin
+  AESequenceDC::createSVDCsystemSpec(maxIntraSequenceEventTimeoutPeriod, waitPeriodForAllJobsCompletedCheck, waitPeriodForJobDeletion,
+  	                                 waitPeriodForInvariantDeletion, timeoutPeriodForRetreivingStoredInvariants,timeoutPeriodForHangingJob);
+end service;

@@ -11,11 +11,11 @@ git clean -dxf .
 echo "Done."
 
 # get list of puml files
-puml_files=$(ls -1 ../tests/PumlForTesting/PumlRegression/*.puml | sort)
+puml_file="../tests/PumlForTesting/PumlRegression/ACritical1.puml"
 
 # generate job definitions
 echo "Generating job definitions..."
-echo ${puml_files} | xargs $P2J --job -o config/job_definitions
+$P2J --job -o config/job_definitions $puml_file
 echo "Done."
 
 # launch the protocol verifier
@@ -24,16 +24,18 @@ docker compose down
 docker compose up -d &>/dev/null
 echo "Done."
 
-# play all jobs
-for fn in ${puml_files}; do
-	echo "Generating runtime event data for '${fn}'..."
-	$P2J --play -o reception-incoming ${fn}
-	echo "Done."
-	sleep 1
-done
+echo "Generating runtime events."
+set -x
+$P2J --play -o reception-incoming $puml_file --play --sibling CSJC
+$P2J --play -o reception-incoming $puml_file --play --replace CSJA
+$P2J --play -o reception-incoming $puml_file --play --replace CSJC
+$P2J --play -o reception-incoming $puml_file --play --replace CSJD
+$P2J --play -o reception-incoming $puml_file --play --orphan CSJI
+set +x
+echo "Done."
 
 # wait a reasonable amount of time
-delay=5
+delay=15
 echo "Waiting ${delay} seconds for protocol verifier to complete..."
 sleep $delay
 echo "Done."
@@ -45,11 +47,17 @@ NORMAL=$(tput sgr0)
 exit_code=0
 echo "Checking results..."
 echo "--------------------------------------------------"
+# Check for job_failed and be sure no success or alarm.
 for fn in config/job_definitions/*.json; do
-	job_name=$(jq -r '.JobDefinitionName' "${fn}")
-	grep "svdc_job_success : JobId = [a-f0-9-]* : JobName = ${job_name}" logs/verifier/Verifier.log &>/dev/null
+	grep "svdc_job_alarm" logs/verifier/Verifier.log &>/dev/null
 	if [[ $? == 0 ]]; then
-		printf "%-40s %s\n" "${job_name}" "[${GREEN}SUCCESS${NORMAL}]"
+		grep "svdc_job_success" logs/verifier/Verifier.log &>/dev/null
+		if [[ $? != 0 ]]; then
+			printf "%-40s %s\n" "${job_name}" "[${GREEN}SUCCESS${NORMAL}]"
+		else
+			printf "%-40s %s\n" "${job_name}" "[${RED}FAILURE${NORMAL}]"
+			exit_code=1
+		fi
 	else
 		printf "%-40s %s\n" "${job_name}" "[${RED}FAILURE${NORMAL}]"
 		exit_code=1

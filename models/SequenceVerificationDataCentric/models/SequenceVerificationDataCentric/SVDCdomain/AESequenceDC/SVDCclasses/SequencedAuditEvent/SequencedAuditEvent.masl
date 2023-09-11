@@ -46,6 +46,7 @@ begin
     link newSeqEvent R44 newJob;
     newEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
     theJobDef := find_one JobDefinition (jobName = jobName);
+    link newJob R8 theJobDef;
     possibleEventTypes := theJobDef -> R7 -> R1.SequencedAuditEventDefinition;
     
     if (newEventType /= null) and (newEventType intersection possibleEventTypes /= null) and ((prevAEIds = empty) or (prevAEIds = emptyString)) then
@@ -70,7 +71,6 @@ begin
         link newSequence R11 newSeqEvent;
         link newSequence R14 theAeSequenceDef;
    
-        link newJob R8 theJobDef;
         // The first event for this new Job is a valid event type for starting the sequence
         // Log info: new Job and event sequence started
         logMessage := "AESequenceDC::SequencedAuditEvent.AddEventForNewJob : New Job started - jobId = " & newJob.jobID & ", Initial audit event: " & eventId & " of type " & newEventType.AEType;

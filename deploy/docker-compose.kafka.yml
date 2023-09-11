@@ -1,17 +1,34 @@
 version: "3.9"
 services:
   aer_proc:
-    image: "ghcr.io/xtuml/protocol_verifier"
+    image: levistarrett/masl-dev
     volumes:
+      - type: volume
+        source: ConanCache
+        target: /conan-cache
+      - "../models/PV_PROC/build:/work/build"
+      - "../models/PV_PROC/schedule:/root/schedule"
       - "./config:/root/config"
       - "./logs/reception:/var/log/reception"
       - "./reception-processed:/root/processed"
-    command: "AER_PROC_transient -configPath config/ -configFile pv-config.json  -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup-aer.sch -util MetaData -util Kafka -kafka-broker-list kafka:9093"
+    working_dir: /root
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AER_PROC_transient -configPath config/ -configFile pv-config.json  -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup-aer.sch -util MetaData -util Kafka -kafka-broker-list kafka:9093"
   aeo_svdc_proc:
-    image: "ghcr.io/xtuml/protocol_verifier"
+    image: levistarrett/masl-dev
     volumes:
+      - type: volume
+        source: ConanCache
+        target: /conan-cache
+      - "../models/PV_PROC/build:/work/build"
+      - "../models/PV_PROC/schedule:/root/schedule"
       - "./config:/root/config"
       - "./logs/verifier:/var/log/verifier"
       - "./InvariantStore:/root/InvariantStore"
       - "./JobIdStore:/root/JobIdStore"
-    command: "AEO_SVDC_PROC_transient -configPath config/ -configFile pv-config.json  -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup-aeo-svdc.sch -startJobGroup 00 -endJobGroup FF -util MetaData -util Kafka -kafka-broker-list kafka:9093"
+    working_dir: /root
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configPath config/ -configFile pv-config.json  -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup-aeo-svdc.sch -startJobGroup 00 -endJobGroup FF -util MetaData -util Kafka -kafka-broker-list kafka:9093"
+
+volumes:
+  ConanCache:
+    name: munin_ConanCache
+    external: true

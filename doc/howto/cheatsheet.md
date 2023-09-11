@@ -118,7 +118,7 @@ execute the command:
 Once the build is complete, run the tests by executing the command:
 
 ```
-./test.sh
+../../bin/test.sh
 ```
 
 A success or failure message is printed at the end of the test run.
