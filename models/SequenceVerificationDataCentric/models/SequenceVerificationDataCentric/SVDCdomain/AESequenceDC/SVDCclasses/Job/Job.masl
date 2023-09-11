@@ -220,7 +220,7 @@ logMessage : string;
 
 
 begin
-  logMessage := "AESequenceDC::Job.migrateToUnhappyJob : Migration from Happy Job to Unhappy Job for - jobId = " & this.jobID;
+  logMessage := "AESequenceDC::Job.migrateToUnhappyJob : Migration from Happy Job to Unhappy Job for - jobId = " & this.jobID & " with Job Name = " & this.jobName;
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 
   // Unlink HappyJob from Job
@@ -241,7 +241,7 @@ begin
   
   // Generate firstUnhappyEvent event to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
 
-  logMessage := "AESequenceDC::Job.migrateToUnhappyJob : Unhappy Job created for - jobId = " & this.jobID;
+  logMessage := "AESequenceDC::Job.migrateToUnhappyJob : Unhappy Job created for - jobId = " & this.jobID & " with Job Name = " & this.jobName ;
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 
   generate Job.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to this;

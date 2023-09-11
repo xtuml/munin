@@ -35,7 +35,7 @@ begin
       // Log info: The accepted event is for a new Job that has a non-active JobDefinition 
       logMessage := "AESequenceDC::acceptorderedEvent : The event - AuditEventId = " & id & "cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
       Logger::log(Logger::Debug, "AESequenceDC", logMessage);        
-      eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = The event cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
+      eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = The event cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
       Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
     else    
         
@@ -67,7 +67,7 @@ begin
           // Log info: Report that the specified audit event type (ae_type) does not exist.
           logMessage := "AESequenceDC::acceptorderedEvent : Accepted event is of an unknown type - AEType = " & ae_type;
           Logger::log(Logger::Error, "AESequenceDC", logMessage); 
-          eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
+          eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
           Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
         end if;
       end if;
@@ -76,7 +76,7 @@ begin
     // Log info: Report that the specified job definition as indicated by jobName does not exist.
     logMessage := "AESequenceDC::acceptorderedEvent : The specified Job Type is unknown = " & jobName;
     Logger::log(Logger::Error, "AESequenceDC", logMessage); 
-    eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Job type";
+    eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Job type";
     Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
     
   end if;
