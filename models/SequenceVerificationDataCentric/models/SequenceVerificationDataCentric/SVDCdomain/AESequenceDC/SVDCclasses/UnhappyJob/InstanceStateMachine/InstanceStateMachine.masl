@@ -284,7 +284,7 @@ begin
   theJob.jobCompleted := true;
   jobDefinition := theJob -> R8.JobDefinition;
   // Log info: Audit Event Sequence Verification has determined that the Job is Complete
-  logMessage := "AESequenceDC::UnhappyJob.JobSuccessful : Sequence Verification determines that the Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " is complete.";
+  logMessage := "AESequenceDC::UnhappyJob.JobSuccessful : Sequence Verification determines that the Unhappy Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " has ended without an alarm condition being raised.";
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   eventContent := "JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
   Reporting~>reportEvent(Logger::Information, "svdc_job_success", eventContent);
@@ -309,17 +309,19 @@ state AESequenceDC::UnhappyJob.Deleted () is
 theJob : instance of Job;
 logMessage : string;
 theJobID : string;
+jobName : string;
 
 begin
   theJob := this -> R45;
   // The Job has reached the end of its useful life and can be deleted.
   theJobID := this.jobID;
+  jobName := theJob.jobName;
   theJob.deleteJob();
   
   // Synchronise the deletion of any counterpart Job instances in other domains.
   JobAdmin~>deleteJob(theJobID);
 
-  logMessage := "AESequenceDC::Job.Deleted : Job with jobID: " & " with Job Name = " & theJob.jobName & theJobID & " has been deleted";
+  logMessage := "AESequenceDC::Job.Deleted : Job with jobID: " & theJobID & " with Job Name = " & jobName & " has been deleted";
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   //
 end state;
@@ -627,12 +629,14 @@ begin
     //Find and report the critical events that are in scope of the unhappy events
     theTriggeringAncestorEvents := (theParentsOfUnhappyEvents intersection theAncestorEvents);
     theChildEvents := theTriggeringAncestorEvents -> R47.has_next.AuditEvent;
+    if theChildEvents /= null then
+      theDecendantEvents := theDecendantEvents & theChildEvents;
       while theChildEvents /= null loop
         // Walk the graph forwards to find all the descendants of the common ancestor event
         declare
           thisGenerationsEvents : set of instance of AuditEvent;
         begin  
-          for theChildEvent in theDecendantEvents loop
+          for theChildEvent in theChildEvents loop
             if (theChildEvent -> R47.has_next.AuditEvent) /= null then
               // Find the grandchildren of each child event
               theGrandchildrenEvents := theChildEvent -> R47.has_next.AuditEvent;
@@ -646,6 +650,10 @@ begin
         end;
         
       end loop;  
+    else
+      logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion - No child events found for unhappy event in Job with jobId = " & theJob.jobID & " and job type " & theJob.jobName;
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+    end if;
     
     theJobsCriticalAuditEvents := theJobsCriticalEvents -> R46;  
     inScopeCriticalEvents := (theJobsCriticalAuditEvents intersection theDecendantEvents);    
