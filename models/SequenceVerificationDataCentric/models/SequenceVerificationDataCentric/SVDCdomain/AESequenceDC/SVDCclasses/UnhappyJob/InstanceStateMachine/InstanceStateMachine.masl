@@ -112,7 +112,6 @@ begin
             // This is necessary for the critical event check
             newAuditEventLink := create AuditEventLink (previousAEId => prevEvt.AEId,
                   	                                    nextAEId => newEvent.AEId);
-//            link newEvent R47.has_previous.AuditEvent prevEvt using newAuditEventLink;
             link prevEvt R47.has_next.AuditEvent newEvent using newAuditEventLink;
                   
           else
