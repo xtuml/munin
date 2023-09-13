@@ -43,7 +43,7 @@ suggested that the proposals outlined here are reviewed thoroughly and thenthe c
 
 TBD - add invariant source on first happy event from SVDC and invariant usage on 
 
-=== 3.2 Extend Invariant Store to provide additiona services for Intra Job Invariants
+=== 3.2 Extend Invariant Store to provide additional services for Intra Job Invariants
 
 The following illustrates the propsed extensions to the InvarinatStore domain to provide support
 for use of Intra-Job Invariants in the instrumented PV.
@@ -51,9 +51,11 @@ for use of Intra-Job Invariants in the instrumented PV.
 .Proposed extensions to Invariant Store
 image::ProposedExtensionsToInvariantStore.png[Proposed extensions to Invariant Store]
 
+
 TBD - Add mechanism for generating and using invariant values for use in PV instrumentation events.
-- generate intra-job invariant (generates a new invariant value)
-- getNamedIntraJobInvariant (gets the invariant value)
+
+  - generateNewIntraJobInvariant (creates an instance of IntraJobInvariant (for a specified job) and generates a new invariant value)
+  - getNamedIntraJobInvariant (gets the invariant value for a named invariant of a specified job)
 
 === 3.3 Extend terminator services in AEO and SVDC and possibly also AER
 
