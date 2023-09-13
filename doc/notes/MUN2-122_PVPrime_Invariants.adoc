@@ -34,6 +34,8 @@ TBD - additional domain, extension of Invaraiant Store, built into VerificationG
 === 2.3 Delivery Point
 
 TBD - include in September delivery or define requirement and implement in next phase.
+Given the complexity of the changes to support unhappy events in SVDC AND the nearness of the September code-freeze it is
+suggested that the proposals outlined here are reviewed thoroughly and thenthe changes incorporated in the next delivery period.
 
 == 3 Proposal
 
@@ -43,8 +45,14 @@ TBD - add invariant source on first happy event from SVDC and invariant usage on
 
 === 3.2 Extend Invariant Store to provide additiona services for Intra Job Invariants
 
+The following illustrates the propsed extensions to the InvarinatStore domain to provide support
+for use of Intra-Job Invariants in the instrumented PV.
+
+.Proposed extensions to Invariant Store
+image::ProposedExtensionsToInvariantStore.png[Proposed extensions to Invariant Store]
+
 TBD - Add mechanism for generating and using invariant values for use in PV instrumentation events.
-- generate intra-job invariant (sets the invariant value)
+- generate intra-job invariant (generates a new invariant value)
 - getNamedIntraJobInvariant (gets the invariant value)
 
 === 3.3 Extend terminator services in AEO and SVDC and possibly also AER
