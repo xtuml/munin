@@ -1,0 +1,34 @@
+@startuml
+partition "ACriticalIJInvariantJob1" {
+    group "A Critical Job With Intra Job Invariant Sequence 1"
+        #green:CIJA;
+        :CIJB,IINV,name=CIJInvA;
+        fork
+            :CIJC;
+            :CIJD;
+            #gold:CIJE,CRITICAL;
+        fork again
+            :CIJF;
+            :CIJG;
+            #gold:CIJH,CRITICAL;
+        end fork
+        :CIJI,IINV,USER,name=CIJInvA;
+        #red:CIJJ;
+        detach
+    end group
+    package "Unhappy Events" {
+      :CIJB_Err;
+      kill
+      :CIJD_Err;
+      kill
+      :CIJE_Err;
+      kill
+      :CIJF_Err;
+      kill
+      :CIJG_Err;
+      kill
+      :CIJI_Err;
+      kill    
+    }
+}
+@enduml
