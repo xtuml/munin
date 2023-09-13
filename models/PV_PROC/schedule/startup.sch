@@ -1,6 +1,0 @@
-$TESTSCHEDULE
-RUN SCENARIO AEReception 1 "init"
-RUN SCENARIO FReception 1 "init"
-RUN SCENARIO IStore 1 "init"
-RUN SCENARIO AEOrdering 1 "init"
-$ENDTESTSCHEDULE

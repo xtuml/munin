@@ -1,4 +1,3 @@
-$TESTSCHEDULE
 # initialize domain
 RUN SCENARIO AESequenceDC 1 "InitEventDefinition"
 RUN SCENARIO AESequenceDC 2 "InitCyclicTopologyEventDefinition"
@@ -161,5 +160,3 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test09CorrectDeletionOfDefinitions 
 
 # done
 TERMINATE
-
-$ENDTESTSCHEDULE

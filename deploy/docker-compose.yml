@@ -22,7 +22,7 @@ services:
     environment:
       - OOA_PORT=0
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/PV_PROC_transient -configPath config/ -configFile pv-config.json  -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup FF -util Inspector"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/PV_PROC_transient -configFile pv-config.json -log-config config/log-config-pv-proc.xml -util Inspector"
 
 volumes:
   ConanCache:
