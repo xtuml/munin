@@ -2,13 +2,14 @@
 public service AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn ( jobName : in string,
                                                                                 invariantName : in string,
                                                                                 invariantEventDefns : in sequence of eventStructure ) is
-newInvariant : instance of IntraJobInvariantDefn;
+theInvariant : instance of IntraJobInvariantDefn;
 theJobDefn : instance of JobDefinition;
 theEventDefn : instance of SequencedAuditEventDefinition;
 theSequenceDefn: instance of AESequenceDefinition;
 theSequenceDefns: set of instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
+theCurrentAEOccDefns : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
 theAuditEventDefinitions : set of instance of SequencedAuditEventDefinition;
 logMessage: string;
@@ -18,8 +19,17 @@ begin
   theJobDefn := find_one JobDefinition (jobName = jobName);
   theAuditEventDefinitions := theJobDefn -> R7 -> R1.SequencedAuditEventDefinition;
   if theJobDefn /= null then
-    newInvariant := create IntraJobInvariantDefn (jobName => theJobDefn.jobName, intraJobInvName => invariantName);
-    link newInvariant R22 theJobDefn;
+    theInvariant := find_one IntraJobInvariantDefn (jobName = theJobDefn.jobName and intraJobInvName = invariantName);
+    if theInvariant = null then
+      theInvariant := create IntraJobInvariantDefn (jobName => theJobDefn.jobName, intraJobInvName => invariantName);
+      link theInvariant R22 theJobDefn;
+    else
+      // We've seen this invariant before so this is an update to the definition which requires us to unlink the currently linked event definitions
+      theCurrentAEOccDefns := theInvariant -> R19;
+      for theCurrentAEOccDefn in theCurrentAEOccDefns loop
+        unlink theCurrentAEOccDefn R19 theInvariant;
+      end loop;
+    end if;  
     
     for eachInvariantEventDefn in invariantEventDefns'elements loop
       theEventDefn := find_one theAuditEventDefinitions (AEType = eachInvariantEventDefn.eventTypeName);
@@ -28,15 +38,29 @@ begin
       
         theSequenceDefn := find_one theSequenceDefns (jobName = jobName);
         
-        theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
-        theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
-        theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = eachInvariantEventDefn.occurrenceId);
-        link newInvariant R19 theEventOccInSeqDefn;
+        if theSequenceDefn /= null then
+          theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
+          theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
+          theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = eachInvariantEventDefn.occurrenceId);
+          if theEventOccInSeqDefn /= null then
+            link theInvariant R19 theEventOccInSeqDefn;
+          else
+            logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 3) = " & theJobDefn.jobName;
+            Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	        eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
+	        Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);          
+          end if;  
+       else
+          logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 2) = " & theJobDefn.jobName;
+          Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	      eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
+	      Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);            
+       end if;  
       end if;
     end loop;
   else
     // Digital Twin Error dues to failed configurations
-    logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition = " & theJobDefn.jobName;
+    logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 1) = " & theJobDefn.jobName;
     Logger::log(Logger::Error, "AESequenceDC", logMessage);
 	eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
 	Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
