@@ -15,7 +15,7 @@ end structure;
 pragma test_only ( true ); pragma scenario ( 2 ); 
     private service init (
     );
-pragma scenario ( 1 ); 
+pragma scenario ( 1 ); pragma process_listener ( "started" ); 
     public service persistInvariant (
         invariantName : in string,        invariantValue : in string,        validFrom : in timestamp,        validTo : in timestamp,        sourceJobDefinitionType : in string,        sourceAuditEventType : in string,        sourceAuditEventOccurrenceId : in integer    );
     public service setLoadRate (

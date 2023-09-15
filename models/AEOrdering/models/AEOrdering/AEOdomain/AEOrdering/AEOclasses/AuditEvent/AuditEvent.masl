@@ -1,5 +1,6 @@
 //! ACTIVITY BEGIN. '132f9323-3874-4c33-a0e6-bef8cf58ded1' DO NOT EDIT THIS LINE.
 public service AEOrdering::AuditEvent.createAuditEvent ( job : in instance of Job,
+                                                        reportedJobName : in string,
                                                         auditEventType : in string,
                                                         auditEventId : in string,
                                                         auditEventTime : in string,
@@ -22,7 +23,7 @@ begin
 	if auditEvent = null then
 		auditEvent := create AuditEvent(auditEventId => auditEventId, reportedEventType => auditEventType,  reportedAuditEventTime => auditEventTime, 
 			                            reportedPrevEventIds => prevAuditEventIds, eventCreationTime => timestamp'now, eventState => EventStateEnum.BLOCKED, 
-			                            auditEventData => auditEventData);
+			                            auditEventData => auditEventData, reportedJobName => reportedJobName);
 		link auditEvent R9 job;
 		eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
 		Reporting~>reportEvent(Logger::Information, "aeordering_events_processed", eventContent);
@@ -100,11 +101,13 @@ eventType : instance of AuditEventType;
 lastReportedAuditEvent : instance of AuditEvent;
 previousReportedEvents : sequence of instance of ReportedAuditEvent;
 previousEventsReported : boolean := false;
+eventValid : boolean;
 
 begin
 	
 	// verify that this is an allowed event
-	if (job -> R2.InProgressJob /= null) and AuditEventType.validEvent(this, failureReason) then
+	eventValid := AuditEventType.validEvent(this, failureReason);
+	if (job -> R2.InProgressJob /= null) and eventValid then
 		
 		// we have a valid audit event so we now need to determine if it can be reported or if it is blocked
 		eventType := this -> R7.AuditEventType;
@@ -142,6 +145,7 @@ begin
 		end if;
 		
 	else
+		Logger::log(Logger::Error, "AEOrdering", "setEventState - " & failureReason);
 		this.eventState := EventStateEnum.FAILED;
 	end if;
 

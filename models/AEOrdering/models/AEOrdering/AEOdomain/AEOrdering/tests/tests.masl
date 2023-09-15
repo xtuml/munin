@@ -496,10 +496,10 @@ begin
 	AEOrdering::clearDomain(true, false);
 	
 	// Test 1 report an event invalid node
-	logMessage := "AEOrdering::testInvalidJobDefinition - Test invalid node";
+	logMessage := "AEOrdering::testInvalidJobDefinition - Test invalid job definiton";
 	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	auditEventTime := timestamp'now;
-	AEOrdering::AcceptEvent(jobId1, "NoEvent", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId1, "jobId1", "NoEvent", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	
 	// service the event queue
 	Test::service_event_queue();
@@ -508,7 +508,7 @@ begin
 	AEOrdering::checkInvalidJobDefinition(jobId1, "1");
 	
 	// Test 2 report an event with invalid app
-	AEOrdering::AcceptEvent(jobId2, "NoEvent", "2", auditEventTime'image, emptyPrevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId2, "jobId2", "NoEvent", "2", auditEventTime'image, emptyPrevEventIds, auditEventData);
 	
 	// service the event queue
 	Test::service_event_queue();
@@ -517,7 +517,7 @@ begin
 	AEOrdering::checkInvalidJobDefinition(jobId2, "2");
 		
 	// report an event with invalid event type
-	AEOrdering::AcceptEvent(jobId3, "NoEvent", "3", auditEventTime'image, emptyPrevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId3, "jobId3",  "NoEvent", "3", auditEventTime'image, emptyPrevEventIds, auditEventData);
 	
 	// service the event queue
 	Test::service_event_queue();
@@ -553,15 +553,15 @@ begin
 
 	auditEventTime := timestamp'now;
 
-	AEOrdering::AcceptEvent(jobId1, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 
 	prevEventIds := emptyPrevEventIds & "1"; 
-	AEOrdering::AcceptEvent(jobId1, "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 
 	prevEventIds := emptyPrevEventIds & "2"; 
-	AEOrdering::AcceptEvent(jobId1, "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// fire the job complete and then the delete job
@@ -599,7 +599,7 @@ begin
 	
 	// create a failed job
 	auditEventTime := timestamp'now - @PT24H@;
-	AEOrdering::AcceptEvent(jobId2, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId2, "AEOrdering-Test", "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	job := find_one Job(jobId = jobId2);
 	if job /= null then
 		// the job should be failed so generate the delete job event
@@ -616,7 +616,7 @@ begin
 	delete verificationFailedJobs;
 	auditEventTime := timestamp'now;
 	prevEventIds := emptyPrevEventIds & "1"; 
-	AEOrdering::AcceptEvent(jobId3, "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId3, "AEOrdering-Test", "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);	
 	job := find_one Job(jobId = jobId3);
 	if job /= null then
 		// the job should be failed so generate the delete job event
@@ -663,6 +663,7 @@ auditEventData : AuditEventDataType;
 jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
 jobId2 : string := "95a3b3a7-fada-41d5-b7e2-902079e81002";
 jobId3 : string := "95a3b3a7-fada-41d5-b7e2-902079e81003";
+jobId4 : string := "95a3b3a7-fada-41d5-b7e2-902079e81004";
 
 begin
 	
@@ -674,7 +675,7 @@ begin
 	auditEventTime := timestamp'now;
 	
 	// start a new job
-	AEOrdering::AcceptEvent(jobId1, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -688,7 +689,7 @@ begin
 	
 	// block an event then time it out so the job fails
 	prevEventIds := emptyPrevEventIds & "2"; 
-	AEOrdering::AcceptEvent(jobId1, "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 
     // verify the blocked event has not been reported
@@ -713,7 +714,7 @@ begin
 	
 	auditEventTime := timestamp'now - @PT24H@;
 	// report an event for a job with a stale time so the job fails
-	AEOrdering::AcceptEvent(jobId2, "aaa", "21", auditEventTime'image, emptyPrevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId2, "AEOrdering-Test", "aaa", "21", auditEventTime'image, emptyPrevEventIds, auditEventData);
 	
 	// verify that no job or event has been reported to verification
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -724,7 +725,7 @@ begin
 	// test that a job is reported as failed if an event arrives after it has completed
 	auditEventTime := timestamp'now;
 
-	AEOrdering::AcceptEvent(jobId3, "aaa", "31", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId3, "AEOrdering-Test", "aaa", "31", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -743,7 +744,7 @@ begin
 		delete verificationJobComplete;
 		// send in  new event now that the job is complete
 		prevEventIds := emptyPrevEventIds & "1"; 
-		AEOrdering::AcceptEvent(jobId3, "bbb", "32", auditEventTime'image, prevEventIds, auditEventData);
+		AEOrdering::AcceptEvent(jobId3, "AEOrdering-Test", "bbb", "32", auditEventTime'image, prevEventIds, auditEventData);
 		Test::service_event_queue();
 		failedJob := find_one FailedJob(jobId = jobId3);
 		Assertions::assertTrue((completedJob /= null), "Test Job Failure: Job id did not transition to failed for job 3");
@@ -753,6 +754,25 @@ begin
 	else
 		Test::fail("", 3, "Test Job Complete: Failed to find Job");
 	end if;
+
+	// test if an event in the same job has a different job name it fails
+	// report an event for a job 
+	AEOrdering::AcceptEvent(jobId4, "AEOrdering-Test", "aaa", "41", auditEventTime'image, emptyPrevEventIds, auditEventData);
+	
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 1), "Test Job Failure: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+	delete verificationAuditEvents;
+
+	// report an event for a job with an invalid job name
+	AEOrdering::AcceptEvent(jobId4, "invalidJobName", "bbb", "42", auditEventTime'image, emptyPrevEventIds, auditEventData);
+	
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "1");
+	// verify that no job or event has been reported to verification
+    verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
+    Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Job Failure: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
+    AEOrdering::checkJobFailures(jobId4, "42");
+	delete verificationAuditEvents;
+	
 	
 	
 end service;
@@ -795,27 +815,27 @@ begin
 	
 	auditEventTime := timestamp'now;
 	
-	AEOrdering::AcceptEvent(jobId1, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 	
 	prevEventIds := emptyPrevEventIds & "1"; 
-	AEOrdering::AcceptEvent(jobId1, "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	prevEventIds := emptyPrevEventIds & "2"; 
-	AEOrdering::AcceptEvent(jobId1, "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 
 	prevEventIds := emptyPrevEventIds & "3"; 
-	AEOrdering::AcceptEvent(jobId1, "ddd", "4", auditEventTime'image, prevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "ddd", "4", auditEventTime'image, prevEventIds, auditEventData);	
 	Test::service_event_queue();
 
 	prevEventIds := emptyPrevEventIds & "4"; 
-	AEOrdering::AcceptEvent(jobId1, "eee", "5", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "eee", "5", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 
 	prevEventIds := emptyPrevEventIds & "5"; 
-	AEOrdering::AcceptEvent(jobId1, "fff", "6", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "fff", "6", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify the test
@@ -855,7 +875,7 @@ begin
 	// job 1	
 	// report event 2
 	prevEventIds := emptyPrevEventIds & "1"; 
-	AEOrdering::AcceptEvent(jobId1, "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -863,7 +883,7 @@ begin
     Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
 
 	// report event 1
-	AEOrdering::AcceptEvent(jobId1, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -882,7 +902,7 @@ begin
 
 	// report event 4
 	prevEventIds := emptyPrevEventIds & "3"; 
-	AEOrdering::AcceptEvent(jobId1, "ddd", "4", auditEventTime'image, prevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "ddd", "4", auditEventTime'image, prevEventIds, auditEventData);	
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -891,7 +911,7 @@ begin
 	
 	// report event 5
 	prevEventIds := emptyPrevEventIds & "4"; 
-	AEOrdering::AcceptEvent(jobId1, "eee", "5", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "eee", "5", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -900,7 +920,7 @@ begin
 	
 	// report event 3
 	prevEventIds := emptyPrevEventIds & "2"; 
-	AEOrdering::AcceptEvent(jobId1, "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -923,7 +943,7 @@ begin
 	
 	// report event 6	
 	prevEventIds := emptyPrevEventIds & "5"; 
-	AEOrdering::AcceptEvent(jobId1, "fff", "6", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "fff", "6", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -939,7 +959,7 @@ begin
 	
 	// job 2
 	// report event 11
-	AEOrdering::AcceptEvent(jobId2, "aaa", "11", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId2, "AEOrdering-Test", "aaa", "11", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -954,7 +974,7 @@ begin
 	
 	// report event 13
 	prevEventIds := emptyPrevEventIds & "12"; 
-	AEOrdering::AcceptEvent(jobId2, "ccc", "13", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId2, "AEOrdering-Test", "ccc", "13", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -963,7 +983,7 @@ begin
 	
 	// report event 14
 	prevEventIds := emptyPrevEventIds & "13"; 
-	AEOrdering::AcceptEvent(jobId2, "ddd", "14", auditEventTime'image, prevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId2, "AEOrdering-Test", "ddd", "14", auditEventTime'image, prevEventIds, auditEventData);	
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -972,7 +992,7 @@ begin
 	
 	// report event 15
 	prevEventIds := emptyPrevEventIds & "14"; 
-	AEOrdering::AcceptEvent(jobId2, "eee", "15", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId2, "AEOrdering-Test", "eee", "15", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -981,7 +1001,7 @@ begin
 	
 	// report event 16
 	prevEventIds := emptyPrevEventIds & "15"; 
-	AEOrdering::AcceptEvent(jobId2, "fff", "16", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId2, "AEOrdering-Test", "fff", "16", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -990,7 +1010,7 @@ begin
 	
 	// report event 12
 	prevEventIds := emptyPrevEventIds & "11"; 
-	AEOrdering::AcceptEvent(jobId2, "bbb", "12", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId2, "AEOrdering-Test", "bbb", "12", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -1022,7 +1042,7 @@ begin
 	// job 3
 	// report event 22
 	prevEventIds := emptyPrevEventIds & "21"; 
-	AEOrdering::AcceptEvent(jobId3, "bbb", "22", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId3, "AEOrdering-Test", "bbb", "22", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -1031,7 +1051,7 @@ begin
 	
 	// report event 24
 	prevEventIds := emptyPrevEventIds & "23"; 
-	AEOrdering::AcceptEvent(jobId3, "ddd", "24", auditEventTime'image, prevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId3, "AEOrdering-Test", "ddd", "24", auditEventTime'image, prevEventIds, auditEventData);	
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -1039,7 +1059,7 @@ begin
     Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
 	
 	// report event 21
-	AEOrdering::AcceptEvent(jobId3, "aaa", "21", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId3, "AEOrdering-Test", "aaa", "21", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -1058,7 +1078,7 @@ begin
 	
 	// report event 25
 	prevEventIds := emptyPrevEventIds & "24"; 
-	AEOrdering::AcceptEvent(jobId3, "eee", "25", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId3, "AEOrdering-Test", "eee", "25", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -1067,7 +1087,7 @@ begin
 	
 	// report event 23
 	prevEventIds := emptyPrevEventIds & "22"; 
-	AEOrdering::AcceptEvent(jobId3, "ccc", "23", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId3, "AEOrdering-Test", "ccc", "23", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify that the job and audit event was reported to verification
@@ -1090,7 +1110,7 @@ begin
 	
 	// report event 26
 	prevEventIds := emptyPrevEventIds & "25"; 
-	AEOrdering::AcceptEvent(jobId3, "fff", "26", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId3, "AEOrdering-Test", "fff", "26", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -1106,7 +1126,7 @@ begin
 
 	// job 4
 	// all prev ids are received before forwarding followed by events
-	AEOrdering::AcceptEvent(jobId4, "aaa", "27", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId4, "AEOrdering-Test", "aaa", "27", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -1118,7 +1138,7 @@ begin
 	delete verificationAuditEvents;
 	
 	prevEventIds := emptyPrevEventIds & "27"; 
-	AEOrdering::AcceptEvent(jobId4, "bbb", "28", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId4, "AEOrdering-Test", "bbb", "28", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -1131,28 +1151,28 @@ begin
 	delete verificationAuditEvents;
 	
 	prevEventIds := emptyPrevEventIds & "31" & "32" & "33"; 
-	AEOrdering::AcceptEvent(jobId4, "eee", "34", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId4, "AEOrdering-Test", "eee", "34", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
     Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
 	
 	prevEventIds := emptyPrevEventIds & "29"; 
-	AEOrdering::AcceptEvent(jobId4, "ddd", "31", auditEventTime'image, prevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId4, "AEOrdering-Test", "ddd", "31", auditEventTime'image, prevEventIds, auditEventData);	
 	Test::service_event_queue();
 
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
     Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
 	
 	prevEventIds := emptyPrevEventIds & "29"; 
-	AEOrdering::AcceptEvent(jobId4, "ddd", "32", auditEventTime'image, prevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId4, "AEOrdering-Test", "ddd", "32", auditEventTime'image, prevEventIds, auditEventData);	
 	Test::service_event_queue();
 	
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
     Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
 	
 	prevEventIds := emptyPrevEventIds & "28"; 
-	AEOrdering::AcceptEvent(jobId4, "ccc", "29", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId4, "AEOrdering-Test", "ccc", "29", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -1173,14 +1193,14 @@ begin
 	delete verificationAuditEvents;
 	
 	prevEventIds := emptyPrevEventIds & "30"; 
-	AEOrdering::AcceptEvent(jobId4, "ddd", "33", auditEventTime'image, prevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId4, "AEOrdering-Test", "ddd", "33", auditEventTime'image, prevEventIds, auditEventData);	
 	Test::service_event_queue();
 
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
     Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Out of Order Job: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
 	
 	prevEventIds := emptyPrevEventIds & "28"; 
-	AEOrdering::AcceptEvent(jobId4, "ccc", "30", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId4, "AEOrdering-Test", "ccc", "30", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -1202,7 +1222,7 @@ begin
 	delete verificationAuditEvents;
 	
 	prevEventIds := emptyPrevEventIds & "34"; 
-	AEOrdering::AcceptEvent(jobId4, "fff", "35", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId4, "AEOrdering-Test", "fff", "35", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -1242,26 +1262,26 @@ begin
 	auditEventTime := timestamp'now;
 
 	prevEventIds := emptyPrevEventIds & "5"; 
-	AEOrdering::AcceptEvent(jobId1, "fff", "6", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "fff", "6", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	prevEventIds := emptyPrevEventIds & "4"; 
-	AEOrdering::AcceptEvent(jobId1, "eee", "5", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "eee", "5", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	prevEventIds := emptyPrevEventIds & "3"; 
-	AEOrdering::AcceptEvent(jobId1, "ddd", "4", auditEventTime'image, prevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "ddd", "4", auditEventTime'image, prevEventIds, auditEventData);	
 	Test::service_event_queue();
 		
 	prevEventIds := emptyPrevEventIds & "2"; 
-	AEOrdering::AcceptEvent(jobId1, "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	prevEventIds := emptyPrevEventIds & "1"; 
-	AEOrdering::AcceptEvent(jobId1, "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
-	AEOrdering::AcceptEvent(jobId1, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 	
 	
@@ -1412,6 +1432,7 @@ prevEventIds : sequence of string;
 emptyPrevEventIds : sequence of string;
 auditEventData : AuditEventDataType;
 jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
+jobName : string := "AEOrdering-Test";
 
 begin
 	
@@ -1421,25 +1442,25 @@ begin
 	
 	auditEventTime := timestamp'now;
 	
-	AEOrdering::AcceptEvent(jobId1, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId1, jobName, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 	
 	prevEventIds := emptyPrevEventIds & "1"; 
-	AEOrdering::AcceptEvent(jobId1, "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, jobName, "bbb", "2", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 
 	prevEventIds := emptyPrevEventIds & "2"; 
-	AEOrdering::AcceptEvent(jobId1, "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, jobName, "ccc", "3", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 
 	prevEventIds := emptyPrevEventIds & "2"; 	
-	AEOrdering::AcceptEvent(jobId1, "ccc", "4", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, jobName, "ccc", "4", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 
 	// Add a merge event before the final event to be merged and verify it does not get reported
 	prevEventIds := emptyPrevEventIds & "3" & "4" & "5"; 
-	AEOrdering::AcceptEvent(jobId1, "ddd", "6", auditEventTime'image, prevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId1, jobName, "ddd", "6", auditEventTime'image, prevEventIds, auditEventData);	
 	Test::service_event_queue();
 
 	// verify the test
@@ -1465,15 +1486,15 @@ begin
 	delete verificationAuditEvents;
 	
 	prevEventIds := emptyPrevEventIds & "2"; 
-	AEOrdering::AcceptEvent(jobId1, "ccc", "5", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, jobName, "ccc", "5", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	prevEventIds := emptyPrevEventIds & "6"; 
-	AEOrdering::AcceptEvent(jobId1, "eee", "7", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, jobName, "eee", "7", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 
 	prevEventIds := emptyPrevEventIds & "7"; 
-	AEOrdering::AcceptEvent(jobId1, "fff", "8", auditEventTime'image, prevEventIds, auditEventData);
+	AEOrdering::AcceptEvent(jobId1, jobName, "fff", "8", auditEventTime'image, prevEventIds, auditEventData);
 	Test::service_event_queue();
 	
 	// verify the test
@@ -1542,37 +1563,38 @@ begin
 	
 	logMessage := "AEOrdering::testOrderedJobWithData";
 	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	delete find _TEST_Req_IF_Verification_failedJob();
 	AEOrdering::clearDomain(true, false);
 	
 	auditEventTime := timestamp'now;
 	testAuditEventData.dataItems["Data1"] := "Test1";
 	testAuditEventData.dataItems["Data2"] := "Test2";
-	AEOrdering::AcceptEvent(jobId1, "aaa", "1", auditEventTime'image, emptyPrevEventIds, testAuditEventData);	
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "aaa", "1", auditEventTime'image, emptyPrevEventIds, testAuditEventData);	
 	Test::service_event_queue();
 	
 	prevEventIds := emptyPrevEventIds & "1"; 
 	testAuditEventData := emptyAuditEventData;
 	testAuditEventData.dataItems["cccLOOPCOUNT"] := "3";
 	testAuditEventData.dataItems["dddBRANCHCOUNT"] := "2";
-	AEOrdering::AcceptEvent(jobId1, "bbb", "2", auditEventTime'image, prevEventIds, testAuditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "bbb", "2", auditEventTime'image, prevEventIds, testAuditEventData);
 	Test::service_event_queue();
 	
 	prevEventIds := emptyPrevEventIds & "2"; 
-	AEOrdering::AcceptEvent(jobId1, "ccc", "3", auditEventTime'image, prevEventIds, testAuditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "ccc", "3", auditEventTime'image, prevEventIds, testAuditEventData);
 	Test::service_event_queue();
 
 	prevEventIds := emptyPrevEventIds & "3";
 	testAuditEventData := emptyAuditEventData;
 	testAuditEventData.dataItems["Data4"] := "Test4";
-	AEOrdering::AcceptEvent(jobId1, "ddd", "4", auditEventTime'image, prevEventIds, testAuditEventData);	
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "ddd", "4", auditEventTime'image, prevEventIds, testAuditEventData);	
 	Test::service_event_queue();
 
 	prevEventIds := emptyPrevEventIds & "4"; 
-	AEOrdering::AcceptEvent(jobId1, "eee", "5", auditEventTime'image, prevEventIds, testAuditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "eee", "5", auditEventTime'image, prevEventIds, testAuditEventData);
 	Test::service_event_queue();
 
 	prevEventIds := emptyPrevEventIds & "5"; 
-	AEOrdering::AcceptEvent(jobId1, "fff", "6", auditEventTime'image, prevEventIds, testAuditEventData);
+	AEOrdering::AcceptEvent(jobId1, "AEOrdering-Test", "fff", "6", auditEventTime'image, prevEventIds, testAuditEventData);
 	Test::service_event_queue();
 	
 	// verify the test
@@ -1622,8 +1644,9 @@ begin
 	
 	// test invalid dynamic control data	
 	auditEventTime := timestamp'now;
+	testAuditEventData := emptyAuditEventData;
 	testAuditEventData.dataItems["cccLOOPCOUNT"] := "0";
-	AEOrdering::AcceptEvent(jobId2, "aaa", "2-1", auditEventTime'image, emptyPrevEventIds, testAuditEventData);	
+	AEOrdering::AcceptEvent(jobId2, "AEOrdering-Test", "bbb", "2-1", auditEventTime'image, emptyPrevEventIds, testAuditEventData);	
 	Test::service_event_queue();
 
 	// verify that the job was reported as failed to verification
@@ -1715,7 +1738,7 @@ begin
 	AEOrdering::clearDomain(true, false);
 	auditEventTime := timestamp'now;
 
-	AEOrdering::AcceptEvent(jobId, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId, "AEOrdering-Test", "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 
 	// verify that the job was accepted and the event reported
@@ -1730,7 +1753,7 @@ begin
 	systemSpec.startJobGroup := integer'parse("d6",16);
 	auditEventTime := timestamp'now;
 
-	AEOrdering::AcceptEvent(jobId, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId, "AEOrdering-Test", "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 
 	// verify that the job was not accepted and no events were reported
@@ -1745,7 +1768,7 @@ begin
 	systemSpec.endJobGroup := integer'parse("d4",16);
 	auditEventTime := timestamp'now;
 
-	AEOrdering::AcceptEvent(jobId, "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
+	AEOrdering::AcceptEvent(jobId, "AEOrdering-Test", "aaa", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	Test::service_event_queue();
 
 	// verify that the job was not accepted and no events were reported
