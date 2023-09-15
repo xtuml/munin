@@ -79,7 +79,7 @@ begin
 				
 				eventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
 				if eventType = null then
-					eventType := create unique AuditEventType(eventType => eventTypeName, occurrenceId => occurrenceId, 
+					eventType := create unique AuditEventType(eventType => eventTypeName, occurrenceId => occurrenceId, jobTypeName => this.jobTypeName,
 						                               sequenceName => sequenceName, isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
 						                               staleAuditEventDuration => this.staleAuditEventDuration, 
 						                               blockedAuditEventDuration => this.blockedAuditEventDuration, 
@@ -183,7 +183,7 @@ begin
 				eventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
 				if eventType = null then
 					eventType := create unique AuditEventType(eventType => eventTypeName, occurrenceId => occurrenceId, 
-						                               sequenceName => sequenceName,
+						                               jobTypeName => this.jobTypeName, sequenceName => sequenceName,
 						                               isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
 						                               staleAuditEventDuration => this.staleAuditEventDuration, 
 						                               blockedAuditEventDuration => this.blockedAuditEventDuration, 

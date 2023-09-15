@@ -1,5 +1,6 @@
 //! ACTIVITY BEGIN. '74d12669-f0f1-4050-8f62-08b090fb01ce' DO NOT EDIT THIS LINE.
 public service AEOrdering::AcceptEvent ( jobId : in string,
+                                        jobName : in string,
                                         auditEventType : in string,
                                         auditEventId : in string,
                                         auditEventTime : in string,
@@ -30,17 +31,26 @@ begin
 	
 		job := find_one Job(jobId = jobId);
 		if job = null then
-			job := create Job(jobId => jobId, outOfSequenceEventCount => 0, jobStartTime => timestamp'now, totalOutOfSequence => 0, maxOutOfSequence => 0, Current_State => Created);
-			inProgressJob := create InProgressJob(jobId => job.jobId);
-			link inProgressJob R2 job;
-			generate Job.jobStarted() to job;
-			eventContent := "JobId = " & job.jobId;
-			Reporting~>reportEvent(Logger::Information, "aeordering_job_processed", eventContent);
-			// ...and then report that AEO has started processing a new job as part of the 
-        		// verification of the Protocol Verifier itself.
-        		instrumentationEventId := "Unused";
-        		instrumentationEventType := "AEO_PVJobStart";
-        		Req_IF_BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", job.jobId, instrumentationEventId, instrumentationEventType);
+			job := create Job(jobId => jobId, outOfSequenceEventCount => 0, jobStartTime => timestamp'now, totalOutOfSequence => 0, maxOutOfSequence => 0, reportedJobName => jobName, Current_State => Created);
+			if find_one JobType(jobTypeName = jobName) /= null then
+				inProgressJob := create InProgressJob(jobId => job.jobId);
+				link inProgressJob R2 job;
+				generate Job.jobStarted() to job;
+				eventContent := "JobId = " & job.jobId;
+				Reporting~>reportEvent(Logger::Information, "aeordering_job_processed", eventContent);
+				// ...and then report that AEO has started processing a new job as part of the 
+	        		// verification of the Protocol Verifier itself.
+	        		instrumentationEventId := "Unused";
+	        		instrumentationEventType := "AEO_PVJobStart";
+	        		Req_IF_BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", job.jobId, instrumentationEventId, instrumentationEventType);
+			else
+				// we have created the job but the reported job name does not match a known JobType
+				// so we need to fail the job
+				failedJob := create FailedJob(jobId => job.jobId, failureReason => "Invalid job name supplied", jobFailureTime => timestamp'now);
+				failureReason := "JobId = " & job.jobId & "FailureReason = Invalid job name supplied, jobName = " & jobName;
+				link failedJob R2 job;
+				generate Job.jobFailed() to job;
+			end if;
 		end if;
 		
 		// create the audit event
@@ -49,7 +59,7 @@ begin
 		elsif job -> R2.ArchivedJob /= null then
 			jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job is already archived";
 		end if;
-		auditEvent := AuditEvent.createAuditEvent(job, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData, failureReason);
+		auditEvent := AuditEvent.createAuditEvent(job, jobName, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData, failureReason);
 		
 		// check if the audit event is blocked
 		if auditEvent = null or job -> R2.ArchivedJob /= null or job -> R2.FailedJob /= null then
