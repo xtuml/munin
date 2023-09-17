@@ -77,7 +77,7 @@ begin
 					end loop;
 				end if;
 				
-				eventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
+				eventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId and jobTypeName = this.jobTypeName);
 				if eventType = null then
 					eventType := create unique AuditEventType(eventType => eventTypeName, occurrenceId => occurrenceId, jobTypeName => this.jobTypeName,
 						                               sequenceName => sequenceName, isSequenceStart => sequenceStart, isSequenceEnd => sequenceEnd, 
@@ -180,7 +180,7 @@ begin
 				eventTypeName := JSON::get_string(eventDefJSONObject["EventName"]);
 				
 				// now we have extracted the data create the event
-				eventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId);
+				eventType := find_one AuditEventType(eventType = eventTypeName and occurrenceId = occurrenceId and jobTypeName = this.jobTypeName);
 				if eventType = null then
 					eventType := create unique AuditEventType(eventType => eventTypeName, occurrenceId => occurrenceId, 
 						                               jobTypeName => this.jobTypeName, sequenceName => sequenceName,
@@ -214,7 +214,7 @@ begin
 	for eventRuleJSONElement in eventRulesJSONArray loop
 		eventRuleJSONObject := JSON::get_object(eventRuleJSONElement);
 		auditEventTypeName := JSON::get_string(eventRuleJSONObject["EventName"]);
-		auditEventType := find_one AuditEventType(eventType = auditEventTypeName);
+		auditEventType := find_one AuditEventType(eventType = auditEventTypeName and jobTypeName = this.jobTypeName);
 		if auditEventType /= null then
 			if eventRuleJSONObject'contains("StaleAuditEventDuration") then
 				auditEventType.staleAuditEventDuration := duration'parse(JSON::get_string(eventRuleJSONObject["StaleAuditEventDuration"]));
