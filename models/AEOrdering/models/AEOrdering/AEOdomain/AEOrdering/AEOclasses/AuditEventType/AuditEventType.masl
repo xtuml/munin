@@ -10,8 +10,8 @@ dataValue : integer;
 
 begin
 
-	eventType := find_one AuditEventType(eventType = auditEvent.reportedEventType);
 	job := auditEvent -> R9.Job;
+	eventType := find_one AuditEventType(eventType = auditEvent.reportedEventType and jobTypeName = job.reportedJobName);
 	// failed to identify the event
 	if eventType = null then
 		validEvent := false;
@@ -31,7 +31,7 @@ begin
 		
 		// check if the event has dynamic controls that the value is valid. Only integer values are allowed and they have to be greater than 0
 		theAuditEventData := auditEvent.auditEventData;
-		for dynamicControl in (find AuditEventType(eventType = auditEvent.reportedEventType)) -> R19.DynamicControl loop
+		for dynamicControl in (find AuditEventType(eventType = auditEvent.reportedEventType and jobTypeName = job.reportedJobName)) -> R19.DynamicControl loop
 			if theAuditEventData.dataItems'contains(dynamicControl.dynamicControlName) = true then
 				dataValue := integer'parse(theAuditEventData.dataItems[dynamicControl.dynamicControlName]);
 				if dataValue < 1 then

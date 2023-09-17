@@ -76,8 +76,31 @@ begin
 				Assertions::assertTrue(false, "Test Config File: Failed to find the correct number of reported event definitions for AEOrdering-Test, expected 8 found " & (jobDefinition.eventDefinitions'length)'image);  
 			end if;
 		elsif jobDefinition.jobName = "Other-Test-Job" then
-			if jobDefinition.eventDefinitions'length = 3 then
-				null;
+			if jobDefinition.eventDefinitions'length = 5 then
+				for reportEventDefinition in jobDefinition.eventDefinitions loop
+					if reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "aaa" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
+						null;
+					elsif reportEventDefinition.sequenceName = "SEQUENCE1" and reportEventDefinition.eventType = "bbb" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
+					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = bbb");
+						for previousEventType in reportEventDefinition.previousEventTypes loop
+							Assertions::assertTrue((previousEventType.previousEventTypeName = "aaa" and previousEventType.occurrenceId = 1), "");
+						end loop;
+					elsif reportEventDefinition.sequenceName = "SEQUENCE2" and reportEventDefinition.eventType = "Other-aaa" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
+						null;
+					elsif reportEventDefinition.sequenceName = "SEQUENCE2" and reportEventDefinition.eventType = "Other-bbb" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
+					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = Other-aaa");
+						for previousEventType in reportEventDefinition.previousEventTypes loop
+							Assertions::assertTrue((previousEventType.previousEventTypeName = "Other-aaa" and previousEventType.occurrenceId = 1), "");
+						end loop;
+					elsif reportEventDefinition.sequenceName = "SEQUENCE2" and reportEventDefinition.eventType = "Other-ddd" and reportEventDefinition.occurrenceId = 1 and reportEventDefinition.isSequenced = true then
+					    Assertions::assertTrue((reportEventDefinition.previousEventTypes'length = 1), "Unexepected previous event types eventType = Other-bbb");
+						for previousEventType in reportEventDefinition.previousEventTypes loop
+							Assertions::assertTrue((previousEventType.previousEventTypeName = "Other-bbb" and previousEventType.occurrenceId = 1), "");
+						end loop;
+					else
+						Assertions::assertTrue(false, "Unknown reported event definitions for AEOrdering-Test eventType = " & reportEventDefinition.eventType);  
+					end if;
+				end loop;
 			else
 				Assertions::assertTrue(false, "Test Config File: Failed to find the correct number of reported event definitions for Other-Test-Job, expected 3 found " & (jobDefinition.eventDefinitions'length)'image);  
 			end if;
