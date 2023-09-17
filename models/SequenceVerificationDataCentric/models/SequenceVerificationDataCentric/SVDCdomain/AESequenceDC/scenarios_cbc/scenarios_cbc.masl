@@ -151,3 +151,79 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '4b94f810-9a82-41d0-a59d-20bbf33eb308' DO NOT EDIT THIS LINE.
+private service AESequenceDC::InitJobWithRepeatedEventNames () is
+// Initialisation goes here.
+previousEventTypes : sequence of eventStructure;
+empty : sequence of eventStructure;
+
+begin
+  //
+  // A forking job that includes an unhappy event definition
+  // 
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-A",1,previousEventTypes,true,false,false,true,false);
+  previousEventTypes := ("RENJ-A",1,"","");
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-B",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-B",1,"CriticalJobANDFork","AND");
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-C",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-C",1,"","");
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-D",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-D",1,"","");
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-E",1,previousEventTypes,false,false,false,true,true);
+  previousEventTypes := ("RENJ-B",1,"CriticalJobANDFork","AND");
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-F",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-F",1,"","");
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-G",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-G",1,"","");
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-H",1,previousEventTypes,false,false,false,true,true);
+  previousEventTypes := ("RENJ-E",1,"","") & ("RENJ-H",1,"","");
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-I",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-I",1,"","");
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-J",1,previousEventTypes,false,true,false,true,false);
+  //
+  //dynamicControlDefinition("RepeatedEventNameJob1", "TypeFork_1", dynamicControlTypeEnum.BRANCHCOUNT, "CSJB",1,"CSJB",1);
+  //dynamicControlDefinition("RepeatedEventNameJob1", "TypeMerge1", dynamicControlTypeEnum.MERGECOUNT, "CSJB",1,"CSJI",1);
+  
+  // and now the unhappy event definitions
+  //
+  //
+  previousEventTypes := empty;
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-Error1",1,previousEventTypes,false,false,false,false,false);
+  previousEventTypes := empty;
+  eventDefinition ("RepeatedEventNameJob1","RENSequence1","RENJ-Error2",1,previousEventTypes,false,false,false,false,false);
+  //
+ //
+  // Here's a second job definition that uses the same event names and RENSequence names
+  // 
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-A",1,previousEventTypes,true,false,false,true,false);
+  previousEventTypes := ("RENJ-A",1,"","");
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-B",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-B",1,"CriticalJobANDFork","AND");
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-C",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-C",1,"","");
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-D",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-D",1,"","");
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-E",1,previousEventTypes,false,false,false,true,true);
+  previousEventTypes := ("RENJ-B",1,"CriticalJobANDFork","AND");
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-F",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-F",1,"","");
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-G",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-G",1,"","");
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-H",1,previousEventTypes,false,false,false,true,true);
+  previousEventTypes := ("RENJ-E",1,"","") & ("RENJ-H",1,"","");
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-I",1,previousEventTypes,false,false,false,true,false);
+  previousEventTypes := ("RENJ-I",1,"","");
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-J",1,previousEventTypes,false,true,false,true,false);
+  // 
+  // and now the unhappy event definitions
+  //
+  //
+  previousEventTypes := empty;
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-Error1",1,previousEventTypes,false,false,false,false,false);
+  previousEventTypes := empty;
+  eventDefinition ("RepeatedEventNameJob2","RENSequence2","RENJ-Error2",1,previousEventTypes,false,false,false,false,false);
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

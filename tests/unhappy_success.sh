@@ -11,11 +11,13 @@ git clean -dxf .
 echo "Done."
 
 # get list of puml files
-puml_file="../tests/PumlForTesting/PumlRegression/ACritical1.puml"
+puml_file_1="../tests/PumlForTesting/PumlRegression/ACritical1.puml"
+puml_file_3="../tests/PumlForTesting/PumlRegression/ACritical3.puml"
 
 # generate job definitions
 echo "Generating job definitions..."
-$P2J --job -o config/job_definitions $puml_file
+$P2J --job -o config/job_definitions $puml_file_1
+$P2J --job -o config/job_definitions $puml_file_3
 echo "Done."
 
 # launch the protocol verifier
@@ -26,8 +28,14 @@ echo "Done."
 
 echo "Generating runtime events."
 set -x
-$P2J --play -o reception-incoming $puml_file --play --replace CSJI
-$P2J --play -o reception-incoming $puml_file --play --replace CSJJ
+$P2J --play -o reception-incoming $puml_file_1 --play --replace CSJI
+$P2J --play -o reception-incoming $puml_file_1 --play --replace CSJJ
+$P2J --play -o reception-incoming $puml_file_3 --play --replace CSJI
+$P2J --play -o reception-incoming $puml_file_3 --play --replace CSJ3J
+$P2J --play -o reception-incoming $puml_file_3 --play --sibling CSJ3D
+$P2J --play -o reception-incoming $puml_file_3 --play --insert CSJ3D
+$P2J --play -o reception-incoming $puml_file_3 --play --replace CSJ3D
+
 set +x
 echo "Done."
 

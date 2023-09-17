@@ -884,17 +884,19 @@ state AESequenceDC::HappyJob.Deleted () is
 theJob : instance of Job;
 logMessage : string;
 theJobID : string;
+jobName : string;
 
 begin
   theJob := this -> R45;
   // The Job has reached the end of its useful life and can be deleted.
   theJobID := this.jobID;
+  jobName := theJob.jobName;
   theJob.deleteJob();
   
   // Synchronise the deletion of any counterpart Job instances in other domains.
   JobAdmin~>deleteJob(theJobID);
 
-  logMessage := "AESequenceDC::HappyJob.Deleted : Job with jobID: " & theJobID & " with Job Name = " & theJob.jobName & " has been deleted";
+  logMessage := "AESequenceDC::HappyJob.Deleted : Job with jobID: " & theJobID & " with Job Name = " & jobName & " has been deleted";
   Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   //
 end state;

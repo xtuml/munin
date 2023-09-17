@@ -15,6 +15,7 @@ RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
 RUN SCENARIO AESequenceDC 902 "InitSimpleJobWithUnhappyEvents"
 RUN SCENARIO AESequenceDC 903 "InitSimpleJobWithCriticalAndUnhappyEvents"
 RUN SCENARIO AESequenceDC 904 "InitJobWithCriticalAndUnhappyEvents1"
+RUN SCENARIO AESequenceDC 905 "InitJobWithRepeatedEventNames"
 
 
 # run normal path tests
@@ -142,7 +143,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test907CriticalEventJobOK2 1907 Cle
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test908CriticalEventJobFail3 1908 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test909CriticalEventJobFail4 1909 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test910CriticalEventJobOK3 1910 CleanUpAllJobs 64]
-
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test911ReusedEventNameJob1 1911 CleanUpAllJobs 64]
 
 
 # The following Tests will delete some or all of the JobDefinitions so beware!!!!
