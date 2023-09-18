@@ -1,8 +1,8 @@
 <log>
     <logger>
         <name>AEReception</name>
+        <level>trace</level>
         <filter>
-            <minlevel>trace</minlevel>
             <format>
                 <pattern><timestamp decimal="none"/> <priority/>: <message/></pattern>   <!-- defines a pattern inline -->
                 <stderr/>
@@ -22,8 +22,8 @@
     </logger>
     <logger>
         <name>FileReception</name>
+        <level>trace</level>
         <filter>
-            <minlevel>trace</minlevel>
             <format>
                 <pattern><timestamp decimal="none"/> <priority/>: <message/></pattern>   <!-- defines a pattern inline -->
                 <stderr/>
@@ -43,6 +43,7 @@
     </logger>
     <logger>
         <name>Reception</name>
+        <level>trace</level>
         <format>
             <pattern><timestamp/> <message/></pattern>
             <file>
@@ -60,6 +61,7 @@
     </logger>
     <logger>
         <name>AEOrdering</name>
+        <level>trace</level>
         <format>
             <pattern><timestamp decimal="none"/> <priority/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
             <stderr/>
@@ -78,6 +80,7 @@
     </logger>
     <logger>
         <name>AESequenceDC</name>
+        <level>trace</level>
         <format>
             <pattern><timestamp decimal="none"/> <priority/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
             <stderr/>
@@ -96,6 +99,7 @@
     </logger>
     <logger>
         <name>IStore</name>
+        <level>trace</level>
         <format>
             <pattern><timestamp decimal="none"/> <priority/> : <message/></pattern> <!-- The pattern of the data to be written to the log file -->
             <stderr/>
@@ -114,6 +118,7 @@
     </logger>
     <logger>
         <name>Verifier</name>
+        <level>trace</level>
         <format>
           <pattern><timestamp/> <param name="instance_index" default="0"/> <message/></pattern>
             <file>

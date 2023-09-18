@@ -1,0 +1,34 @@
+@startuml
+partition "ACriticalJob2" {
+    group "A Critical Job Sequence 2"
+        #green:CSJA;
+        :CSJB;
+        fork
+            :CSJC;
+            :CSJD;
+            :CSJE;
+        fork again
+            :CSJF;
+            :CSJG;
+            #gold:CSJH,CRITICAL;
+        end fork
+        :CSJI;
+        #red:CSJJ;
+        detach
+    end group
+    package "Unhappy Events" {
+      :CSJB_Err;
+      kill
+      :CSJD_Err;
+      kill
+      :CSJE_Err;
+      kill
+      :CSJF_Err;
+      kill
+      :CSJG_Err;
+      kill
+      :CSJI_Err;
+      kill    
+    }
+}
+@enduml

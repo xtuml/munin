@@ -6,7 +6,7 @@ public service AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob ( jo
                                                                              aeType : in string,
                                                                              aeData : in sequence of auditEventDataStructure ) is
 newJob : instance of Job;
-oldEvent : instance of UnsequencedAuditEvent;
+oldEvent : instance of AuditEvent;
 newUnhappyJob : instance of UnhappyJob;
 newUnhappyEvent : instance of UnsequencedAuditEvent;
 newEvent : instance of AuditEvent;
@@ -17,24 +17,19 @@ eventContent : string;
 
 begin
 
-  oldEvent := find_one UnsequencedAuditEvent (unsequencedAuditEventId = eventId);
+  oldEvent := find_one AuditEvent (AEId = eventId);
   // Check to see if we've seen this event instance before
   if (oldEvent = null) then
     //We have received an unhappy path event as the first event in the Job. So we need to create a new job 
     // with its corresponding UnhappyJob subtype and this event is an unsequenced event for a Job
     // Note: SequencingFailed is marked true for an UnhappyJob
+
+    logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob : First event for Job is an unhappy event - job id = " & jobId & " with Job Name = " & jobName & ", Initial audit event: " & eventId & " of type " & aeType;
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
     
     newJob := create Job (jobID => jobId, sequencingFailed => true, jobCompleted => false );
     newUnhappyJob := create UnhappyJob (jobID => jobId, Current_State => Created );
     link newUnhappyJob R45 newJob;
-    newEvent := create AuditEvent (AEId => eventId);
-    newUnhappyEvent := create UnsequencedAuditEvent (unsequencedAuditEventId => eventId, AEId => newEvent.AEId);
-    link newUnhappyEvent R3 newJob;
-    link newUnhappyEvent R46 newEvent;
-    
-    newEventType := find_only UnsequencedAuditEventDefinition (UnsequencedAEType = aeType);
-    if newEventType /= null then
-      link newUnhappyEvent R41 newEventType;
 
       theJobDefinition := find_one JobDefinition (jobName = jobName);
       if theJobDefinition /= null then
@@ -43,28 +38,20 @@ begin
         // Generate firstUnhappyEvent event polymorphically to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
         generate Job.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to newJob;
 
-	    eventContent := "JobId = " & newJob.jobID & " : EventId = " & eventId & " : EventType = " & newEventType.UnsequencedAEType;
+	    eventContent := "JobId = " & newJob.jobID & " with Job Name = " & newJob.jobName & " : EventId = " & eventId & " : EventType = " & aeType;
 	    Reporting~>reportEvent(Logger::Information, "svdc_new_unhappy_job_started", eventContent);
 
       else
-        newJob.failJob("An unrecognised job definition has been received - Job Id = " & newJob.jobID & " Event Type = " & newEventType.UnsequencedAEType);      
-        logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob : No Job Definition found for - job Name = " & jobName & ", Initial audit event: " & eventId & " of type " & newEventType.UnsequencedAEType;
+        newJob.failJob("An unrecognised job definition has been received - Job Id = " & newJob.jobID & " with Job Name = " & newJob.jobName & " Event Type = " & aeType);      
+        logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob : No Job Definition found for - job Name = " & jobName & ", Initial audit event: " & eventId & " of type " & aeType;
 	    Logger::log(Logger::Error, "AESequenceDC", logMessage);
       end if;  
     
-
-    else
-    
-      newJob.failJob("An unrecognised event type has been received - Job Id = " & newJob.jobID & " Event Type = " & newEventType.UnsequencedAEType);      
-      logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob : No Unhappy Audit Event Type found with name = " & aeType & " for - job Name = " & jobName & ", Initial audit event: " & eventId;
-	  Logger::log(Logger::Error, "AESequenceDC", logMessage);
- 
-    end if;
   else
       // Log error: The audit event id received has been seen before
-	  logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewJob : The audit event has been seen before for jobId = " & jobId & ", Initial audit event = " & aeType;
+	  logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewJob : The audit event has been seen before for jobId = " & jobId & " with Job Name = " & jobName & ", Initial audit event = " & aeType;
 	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-      eventContent := "JobId = " & jobId & " : FailureReason = The audit event has been seen before"  & " : EventId = " & eventId & " : EventType = " & aeType;
+      eventContent := "JobId = " & jobId & " with Job Name = " & jobName & " : FailureReason = The audit event has been seen before"  & " : EventId = " & eventId & " : EventType = " & aeType;
 	  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
 
    

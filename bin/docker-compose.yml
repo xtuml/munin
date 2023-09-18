@@ -9,7 +9,7 @@ volumes:
 services:
 
   conan-server:
-    image: levistarrett/conan-server
+    image: levistarrett/conan-server:${MASL_VERSION:-latest}
     restart: unless-stopped
     ports:
       - 9300:9300
@@ -19,13 +19,13 @@ services:
         target: /conan-data
 
   populate:
-    image: levistarrett/masl-populate
+    image: levistarrett/masl-populate:${MASL_POPULATE:-latest}
     depends_on:
       conan-server:
         condition: service_healthy
 
   bash:
-    image: levistarrett/masl-dev
+    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
     stdin_open: true
     tty: true
     volumes:
@@ -56,7 +56,7 @@ services:
     command: bash -c "source /work/build/Release/generators/conanrun.sh && source /work/test.env && ${TEST_CMD:-exit}"
 
   build:
-    image: levistarrett/masl-dev
+    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
     depends_on:
       conan-server:
         condition: service_healthy

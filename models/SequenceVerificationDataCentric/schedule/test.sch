@@ -1,4 +1,3 @@
-$TESTSCHEDULE
 # initialize domain
 RUN SCENARIO AESequenceDC 1 "InitEventDefinition"
 RUN SCENARIO AESequenceDC 2 "InitCyclicTopologyEventDefinition"
@@ -147,6 +146,8 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test905CriticalEventJobFail1 1905 C
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test906CriticalEventJobFail2 1906 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test907CriticalEventJobOK2 1907 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test908CriticalEventJobFail3 1908 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test909CriticalEventJobFail4 1909 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test910CriticalEventJobOK3 1910 CleanUpAllJobs 64]
 
 
 
@@ -165,5 +166,3 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test09CorrectDeletionOfDefinitions 
 
 # done
 TERMINATE
-
-$ENDTESTSCHEDULE
