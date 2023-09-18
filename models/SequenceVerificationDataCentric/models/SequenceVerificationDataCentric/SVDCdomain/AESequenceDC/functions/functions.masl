@@ -381,7 +381,11 @@ begin
         Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   
     else
-      // TODO We have seen this definition before so for now we'll ignore a repetition
+        theUnseqEventDefnInJobDefn := create UnsequencedAEDefnInJobDefn (UnsequencedAEDefnId => theUnseqEventDefn.UnsequencedAEDefnId,
+                                                                         jobName => theJobDefn.jobName); 
+        link theUnseqEventDefn R39 theJobDefn using theUnseqEventDefnInJobDefn ;
+        logMessage := "AESequenceDC::eventDefinition : Existing Unhappy Event Definition found and added to this Job Definition = " & theJobDefn.jobName & ", Unhappy Event type = " & theUnseqEventDefn.UnsequencedAEType;
+        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
     end if;
     
     // The following checks that an unhappy event is not marked as a critical event as that combination is not allowed

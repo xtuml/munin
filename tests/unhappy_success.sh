@@ -12,11 +12,13 @@ echo "Done."
 
 # get list of puml files
 puml_file_1="../tests/PumlForTesting/PumlRegression/ACritical1.puml"
+puml_file_2="../tests/PumlForTesting/PumlRegression/ACritical2.puml"
 puml_file_3="../tests/PumlForTesting/PumlRegression/ACritical3.puml"
 
 # generate job definitions
 echo "Generating job definitions..."
 $P2J --job -o config/job_definitions $puml_file_1
+$P2J --job -o config/job_definitions $puml_file_2
 $P2J --job -o config/job_definitions $puml_file_3
 echo "Done."
 
@@ -30,6 +32,9 @@ echo "Generating runtime events."
 set -x
 $P2J --play -o reception-incoming $puml_file_1 --play --replace CSJI
 $P2J --play -o reception-incoming $puml_file_1 --play --replace CSJJ
+$P2J --play -o reception-incoming $puml_file_2 --play --replace CSJD
+$P2J --play -o reception-incoming $puml_file_2 --play --sibling CSJD
+$P2J --play -o reception-incoming $puml_file_2 --play --insert CSJE
 $P2J --play -o reception-incoming $puml_file_3 --play --replace CSJI
 $P2J --play -o reception-incoming $puml_file_3 --play --replace CSJ3J
 $P2J --play -o reception-incoming $puml_file_3 --play --sibling CSJ3D

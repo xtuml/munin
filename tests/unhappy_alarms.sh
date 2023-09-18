@@ -12,11 +12,13 @@ echo "Done."
 
 # get list of puml files
 puml_file_1="../tests/PumlForTesting/PumlRegression/ACritical1.puml"
+puml_file_2="../tests/PumlForTesting/PumlRegression/ACritical2.puml"
 puml_file_3="../tests/PumlForTesting/PumlRegression/ACritical3.puml"
 
 # generate job definitions
 echo "Generating job definitions..."
 $P2J --job -o config/job_definitions $puml_file_1
+$P2J --job -o config/job_definitions $puml_file_2
 $P2J --job -o config/job_definitions $puml_file_3
 echo "Done."
 
@@ -35,6 +37,11 @@ $P2J --play -o reception-incoming $puml_file_1 --play --replace CSJD
 $P2J --play -o reception-incoming $puml_file_1 --play --orphan CSJI
 $P2J --play -o reception-incoming $puml_file_1 --play --sibling CSJA
 $P2J --play -o reception-incoming $puml_file_1 --play --insert CSJE
+$P2J --play -o reception-incoming $puml_file_2 --play --sibling CSJC
+$P2J --play -o reception-incoming $puml_file_2 --play --replace CSJA
+$P2J --play -o reception-incoming $puml_file_2 --play --replace CSJC
+$P2J --play -o reception-incoming $puml_file_2 --play --orphan CSJI
+$P2J --play -o reception-incoming $puml_file_2 --play --sibling CSJA
 $P2J --play -o reception-incoming $puml_file_3 --play --replace CSJ3A
 $P2J --play -o reception-incoming $puml_file_3 --play --sibling CSJ3C
 $P2J --play -o reception-incoming $puml_file_3 --play --replace CSJ3C
