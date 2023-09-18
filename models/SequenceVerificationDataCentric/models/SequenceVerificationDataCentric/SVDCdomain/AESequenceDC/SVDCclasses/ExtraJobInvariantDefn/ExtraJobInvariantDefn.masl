@@ -3,7 +3,7 @@ public service AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariant
                                                                                       invariantName : in string,
                                                                                       invariantEventDefn : in eventStructure,
                                                                                       lifetime : in duration ) is
-newInvariant : instance of ExtraJobInvariantDefn;
+theInvariant : instance of ExtraJobInvariantDefn;
 theJobDefn : instance of JobDefinition;
 theJobsEvents : set of instance of SequencedAuditEventDefinition;
 theEventDefn : instance of SequencedAuditEventDefinition;
@@ -22,17 +22,44 @@ begin
   
     theEventDefn := find_one theJobsEvents (AEType = invariantEventDefn.eventTypeName);
     if theEventDefn /= null then
-      newInvariant := create ExtraJobInvariantDefn (extraJobInvName => invariantName, lifetime => lifetime);
+      theInvariant := find_one ExtraJobInvariantDefn (extraJobInvName = invariantName);
+      if theInvariant = null then
+        theInvariant := create ExtraJobInvariantDefn (extraJobInvName => invariantName, lifetime => lifetime);
+      else
+        // the invariant definition is being updated which may include the events that carry the invariant
+        // Update the lifetime and clear the links to existing events so they can be set up again
+        theInvariant.lifetime := lifetime;
+        if (theInvariant -> R20) /= null then
+          unlink (theInvariant -> R20) R20 theInvariant;
+        end if;  
+        if (theInvariant -> R21) /= null then
+          unlink (theInvariant -> R21) R21 theInvariant;
+        end if;  
+      end if;  
       theSequenceDefns := theEventDefn -> R1.AESequenceDefinition;
       
       theSequenceDefn := find_one theSequenceDefns (jobName = jobDefnName);
+      if theSequenceDefn /= null then
             
-      theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
-      theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
-      theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = invariantEventDefn.occurrenceId);
-      link newInvariant R20 theEventOccInSeqDefn;
+        theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
+        theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
+        theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = invariantEventDefn.occurrenceId);
+        if theEventOccInSeqDefn /= null then
+          link theInvariant R20 theEventOccInSeqDefn;
+        else
+          logMessage := "AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn : Invalid Event Definition provided (type 3) : " & invariantEventDefn.eventTypeName & "for Extra Job Invariant Name = " & invariantName;
+	      Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	      eventContent := "FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
+	      Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);        
+        end if;  
+      else
+          logMessage := "AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn : Invalid Event Definition provided (type 2) : " & invariantEventDefn.eventTypeName & "for Extra Job Invariant Name = " & invariantName;
+	      Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	      eventContent := "FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
+	      Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);              
+      end if;
     else
-      logMessage := "AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn : Invalid Event Definition provided : " & invariantEventDefn.eventTypeName & "for Extra Job Invariant Name = " & invariantName;
+      logMessage := "AESequenceDC::ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn : Invalid Event Definition provided (type 1) : " & invariantEventDefn.eventTypeName & "for Extra Job Invariant Name = " & invariantName;
 	  Logger::log(Logger::Error, "AESequenceDC", logMessage);
 	  eventContent := "FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
 	  Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);

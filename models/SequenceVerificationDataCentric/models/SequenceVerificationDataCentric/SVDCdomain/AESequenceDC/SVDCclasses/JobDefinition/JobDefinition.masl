@@ -85,9 +85,11 @@ begin
       if theUnseqEventInJobDef /= null then
         unlink this R39 theUnseqDefn using theUnseqEventInJobDef;
         delete theUnseqEventInJobDef;
-      end if;  
+      end if;
+      if (theUnseqDefn -> R39.JobDefinition) = null then
+        delete theUnseqDefn;
+      end if;
     end loop;
-    delete theUnseqDefns;
 
     // Delete the Critical event definitions
     theCriticalEventDefns := this -> R43.SequencedAuditEventDefinition;
@@ -140,10 +142,13 @@ begin
         end loop;       
         unlink theEventDefn R1 theSequenceDefn using theEventInSeqDef;
         delete theEventInSeqDef; 
+        if (theEventDefn -> R1.AESequenceDefinition) = null then
+          delete theEventDefn;
+        end if;
       end loop;
-      delete theEventDefns;
-     end loop;
-     unlink this R7 theSequenceDefns;
+    end loop;
+    
+    unlink this R7 theSequenceDefns;
     delete theSequenceDefns;
     theConstraintDefinitions := this -> R17;
     if (this -> R17) /= null then

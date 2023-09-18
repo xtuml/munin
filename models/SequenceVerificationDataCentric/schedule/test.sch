@@ -15,6 +15,7 @@ RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
 RUN SCENARIO AESequenceDC 902 "InitSimpleJobWithUnhappyEvents"
 RUN SCENARIO AESequenceDC 903 "InitSimpleJobWithCriticalAndUnhappyEvents"
 RUN SCENARIO AESequenceDC 904 "InitJobWithCriticalAndUnhappyEvents1"
+RUN SCENARIO AESequenceDC 905 "InitJobWithRepeatedEventNames"
 
 
 # run normal path tests
@@ -118,6 +119,12 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test255IllegalSplitInstanceForkWith
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test256TimeoutDueToNoRestoredExtraJobInvariant 1256 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test257InvalidRestoredExtraJobInvariant 1257 CleanUpAllJobs 64]
 
+# Tests for dynamic update of invariant and dynamic control definitions
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test66IntraJobInvariantWithUpdatedDefinition 1301 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test67ExtraJobInvariantWithUpdatedDefinition 1302 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test68BranchCountWithUpdatedDynamicControlDefn 1303 CleanUpAllJobs 64]
+
+
 # Errors in complex sequences
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test100ComplexSequence_RainyDay1_XORconstraintViolation 1100 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test101ComplexSequence_RainyDay2_InstanceForkViolation 1101 CleanUpAllJobs 64]
@@ -142,7 +149,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test907CriticalEventJobOK2 1907 Cle
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test908CriticalEventJobFail3 1908 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test909CriticalEventJobFail4 1909 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test910CriticalEventJobOK3 1910 CleanUpAllJobs 64]
-
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test911ReusedEventNameJob1 1911 CleanUpAllJobs 64]
 
 
 # The following Tests will delete some or all of the JobDefinitions so beware!!!!

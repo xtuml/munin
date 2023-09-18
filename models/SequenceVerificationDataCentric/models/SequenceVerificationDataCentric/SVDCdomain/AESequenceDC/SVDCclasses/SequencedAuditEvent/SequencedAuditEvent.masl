@@ -146,6 +146,7 @@ public instance service AESequenceDC::SequencedAuditEvent.TestPreviousEventIsVal
 theAuditEventDefinition : instance of SequencedAuditEventDefinition;
 prevAuditEventDefinition : instance of SequencedAuditEventDefinition;
 thisEventInSequence : instance of AEInSequenceDefinition;
+thisEventOccInSequence : instance of AEOccurrenceInSequenceDefinition;
 prevEventOccInSequence : instance of AEOccurrenceInSequenceDefinition;
 intersectionEventOccsInSequence : set of instance of AEOccurrenceInSequenceDefinition;
 intersectionEventOccInSequence : instance of AEOccurrenceInSequenceDefinition;
@@ -153,31 +154,31 @@ thisAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
 theseAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
 possibleAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
 theSequenceDef : instance of AESequenceDefinition;
+theSequenceDefs : set of instance of AESequenceDefinition;
 aeSequenceDefs : set of instance of AESequenceDefinition;
+theJobsSeqDefns : set of instance of AESequenceDefinition;
 theJob : instance of Job;
+theJobDefn : instance of JobDefinition;
 isValidEventPair : boolean := false;
 
 begin
   theJob := this -> R11 -> R10;
+  theJobDefn := theJob -> R8;
+  theJobsSeqDefns := theJobDefn -> R7;
  
   theAuditEventDefinition := this -> R2;
+  thisEventOccInSequence := this -> R13;
   prevEventOccInSequence := prevEventInstance -> R13;
   
   if prevEventOccInSequence.isSequenceEnd = false then
-    aeSequenceDefs := theAuditEventDefinition -> R1.AESequenceDefinition;
-    
-    // TODO Replace the following line with something that is aware of JobType
-    theSequenceDef := find_one aeSequenceDefs ();
-    
-    thisEventInSequence := theAuditEventDefinition with theSequenceDef -> R1.AEInSequenceDefinition;
-    theseAeOccurrencesInSequenceDef := thisEventInSequence -> R12;
-    possibleAeOccurrencesInSequenceDef := prevEventOccInSequence -> R6.precedes.AEOccurrenceInSequenceDefinition;
-    intersectionEventOccsInSequence := possibleAeOccurrencesInSequenceDef intersection theseAeOccurrencesInSequenceDef;
+      theseAeOccurrencesInSequenceDef := theseAeOccurrencesInSequenceDef & thisEventOccInSequence;
+      possibleAeOccurrencesInSequenceDef := prevEventOccInSequence -> R6.precedes.AEOccurrenceInSequenceDefinition;
+      intersectionEventOccsInSequence := possibleAeOccurrencesInSequenceDef intersection theseAeOccurrencesInSequenceDef;
  
-    if intersectionEventOccsInSequence /= null then
-      // this is a valid event sequence
-      isValidEventPair := true;
-    end if;
+      if intersectionEventOccsInSequence /= null then
+        // this is a valid event sequence
+        isValidEventPair := true;
+      end if;
   end if;
  // 
  // 
