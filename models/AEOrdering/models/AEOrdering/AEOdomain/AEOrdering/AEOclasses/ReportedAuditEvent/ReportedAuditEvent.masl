@@ -30,7 +30,7 @@ begin
 	
 	// build the audit data details to be reported for invariants
 	theAuditEventData := auditEvent.auditEventData;
-	auditEventTypes := find AuditEventType(eventType = auditEvent.reportedEventType);
+	auditEventTypes := find AuditEventType(eventType = auditEvent.reportedEventType and jobTypeName = job.reportedJobName);
 	for auditEventData in auditEventTypes -> R16.DataItemType loop
 		if theAuditEventData.dataItems'contains(auditEventData.dataItemName) = true then
 			reportableAuditEventData.dataName := auditEventData.dataItemName;
