@@ -119,6 +119,12 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test255IllegalSplitInstanceForkWith
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test256TimeoutDueToNoRestoredExtraJobInvariant 1256 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test257InvalidRestoredExtraJobInvariant 1257 CleanUpAllJobs 64]
 
+# Tests for dynamic update of invariant and dynamic control definitions
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test66IntraJobInvariantWithUpdatedDefinition 1301 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test67ExtraJobInvariantWithUpdatedDefinition 1302 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test68BranchCountWithUpdatedDynamicControlDefn 1303 CleanUpAllJobs 64]
+
+
 # Errors in complex sequences
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test100ComplexSequence_RainyDay1_XORconstraintViolation 1100 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test101ComplexSequence_RainyDay2_InstanceForkViolation 1101 CleanUpAllJobs 64]
