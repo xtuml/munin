@@ -1,0 +1,125 @@
+= Regression Testing of Failure Cases
+
+Munin Project Analysis Note
+
+== 1 Abstract
+
+This note documents thoughts on extending the range of regression tests to support deliberate error injection into the Protocol Verifier (PV). The focus is on extensions to the plus2json capability to enable this.
+
+== 2 Introduction and Background
+
+The Munin project is progressively growing its range of regression testing for the end-to-end Prototcol Verifier testing. At present there are a rnage of tests of successful scenarios captured in munin/tests/regression.sh. In addition, there are some specific regression tests for Unhappy Jobs. Some of these are for successful scenarios (munin/tests/unhappy_successes.sh) and some for alarm conditions (munin/tests/unhappy_alarms.sh).
+
+These scripts all use plus2json to both define the configuation of the job definitions for the test cases and to inject the runtime events.The PV logs are then inspected by the scripts to determine the success or otherwise of the tests.
+
+At present there are no regression tests for the deliberate injection of error events to test the PV's ability to spot and warn of error conditions. These features are tested in unit tests but adding them to end-to-end regression tests would be beneficial.
+
+This document sets out the requirements for these additional tests. Realisation of these requirememt will require extensions to plus2json and the addition of new scripts that utilise the new plus2json functionality.
+
+== 3 Requirements
+
+=== 3.1 Define the types of Error Injection required
+
+The unit tests are a good source for identifying the range of error injection scenarios required. These will include things like injecting an unknown event type, injecting valid event types in an invalid order, missing expected event types, etc.
+
+=== 3.2 Define the required extensions to plus2json
+
+plus2json was initially developed to define the configuration data required by the PV. It was soon realised that it would be suitable to inject runtime events into a running PV too. The first examples of this were valid scenarios derived directly from the specification. Error injection requires extensions to plus2json so that error conditions not compliant with the specification can be generated. This has already been successfully achieved for the testing of unhappy jobs. Further extensions to support an additional range of error injection are introduced here.
+
+=== 3.3 Develop scripts to exploit the additional plss2json capability
+
+Once plus2json has the required extended functionality, then new regression test scripts will be required that use that functionality to enrich the range of regression tests that the PV is subject to.
+
+== 4 Analysis of the Classes of Error to be Injected
+
+The classes of error include the following:
+
+. Unexpected event types
+. Unexpected job naes
+. Unexpected order of events
+. Non-compliance with sequence start and end definitions
+. Illegal previous events
+. Reuse of unique identifiers
+. Non-compliance of AND and XOR constraints
+. Non-complaince of dynamic controls (loop, branch and merge counts)
+. Non-compliance of invariants (intra and extra job)
+
+There are also errors associated with timeouts though it is recognised these may be harder to create with plus2json.
+
+=== 4.1 List of Error Conditions to Test
+
+The following shows the types of error that the PV is designed to detect and therefore need to be tested. These tests apply to Happy Jobs only. These are numbered EI-1 etc for Error Injection.
+
+. EI-1: A valid event type in an unexpected location in a sequence of events.
+. EI-2: An unknown event type anywhere in a sequence of events.
+. EI-3: A valid event type carrying an unknown previous event id.
+. EI-4: A valid and expected sequence start event in the middle of a job but with a previous event id.
+. EI-5: A valid and expected sequence end event seen as a previous event in the middle of a job.
+. EI-6: An event with an event id that has been seen previously in the Job.
+. EI-7: An incomplete series of events that causes the Job to timeout.
+. EI-8: An additional event is received after normal job completion
+. EI-9: Events with an unknown job name
+. EI-10: ?A condition that causes AEOrdering to report FailedJob during job processing?
+. EI-11: ?A condition that causes AEOrdering to report FailedJob after job completion?
+. EI-12: ?A condition that causes AEOrdering to report JobComplete prematurely?
+. EI-13: A type fork and merge job with an unexpected previous event type at the merge point.
+. EI-14: A type fork and merge job with a missing previous event type at the merge point.
+. EI-15: An instance fork and merge with a missing previous event at the merge point.
+. EI-16: An instance fork and merge with a missing previous event and a repeated previous event at the merge point (correct number of previous events but invalid).
+. EI-17: A job with an AND fork where one or more branches is missing.
+. EI-18: A job with an XOR fork where more than one branch is present.
+. EI-19: A job with an intra job invariant where the invariant names match but the values do not.
+. EI-20: A job with an intra job invariant where the names and values are valid but an invariant is attached to an unexpected event.
+. EI-21: A job with an intra job invariant where the names and values are valid but an expected invariant is missing.
+. EI-22: A job with a source extra job invariant attached to an unexpected event.
+. EI-23: A job with a user extra job invariant where the invariant names match the source extra job invariant but the values do not.
+. EI-24: A job with a user extra job invariant where the invariant names and values match the source extra job invariant but the user exra job invariant is attached to an unexpected event.
+. EI-25: A job with an expected but missing user extra job invariant.
+. EI-26: A job with a user extra job invariant where the invariant has gone stale.
+. EI-27: A job with a user extra job invariant where the invariant is recovered from the invariant store but has the recovered invariant has the correct name but incorrect value.
+. EI-28: An instance fork and merge Job with a branch count defined but missing at runtime.
+. EI-29: An instance fork and merge Job with a branch and merge count defined but merge count missing at runtime.
+. EI-30: An instance and type fork and merge Job with a branch and merge count defined but branch count missing at runtime.
+. EI-31: An instance and type fork and merge Job with a branch and merge count defined but merge count missing at runtime.
+. EI-31: An instance fork and merge Job with a branch count defined but branch count too low at runtime.
+. EI-32: An instance fork and merge Job with a branch count defined but branch count too high at runtime.
+. EI-33: An instance fork and merge Job with a branch count defined and branch count valid at runtime but merge count too low at runtime.
+. EI-34: An instance fork and merge Job with a branch count defined and branch count valid at runtime but merge count too high at runtime.
+. EI-35: A Job with a loop count defined where the runtime loop count is less than the number of loops observed.
+. EI-36: A Job with a loop count defined where the runtime loop count is greater than the number of loops observed.
+. EI-37: A Job with a loop count defined where the runtime loop count is missing.
+. EI-38: A Job with a loop count defined where the runtime loop count is non-integer.
+
+== 5 Enhancements to plus2json --play
+
+The following additional controls would enable plus2json --play to support many, if not all, of the above tests:
+
+. Inject manually specified event types into a sequence
+. Omit named event types from a sequence
+. Force an event type into a particular place in a sequence
+. Override the properties of a runtime event including event ids, previous event ids and job name so that values can be omitted, reused or changed 
+. Truncate an event sequence or a tine of an event sequence
+. Override an AND or XOR constraint to omit or inject tines as required
+. Change dynamic control values to increase, decrease, change or omit loop, branch and merge counts
+. Change or omit invariant names and values on specific events
+. Move invariants to different events
+
+To achieve some of the control need to inject events it may be necessary to be able to control the event ids generated.
+
+== 6 Enhancements to regression test scripts
+
+A new regression script will be required to run jobs that deliberately fail. Given that the current script regression.sh is, the the style of unhappy_successes.sh and unhappy_alarms.sh, effectively happy_successes.sh then this new script is effectively happy_failures.sh.
+
+== 7 Further topics for consideration
+
+. How do we create the conditions under test to check all of the timer behaviours?
+. How do we force invariants to be recovered from the invariant store?
+
+== 8 Document References
+
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
