@@ -1,7 +1,5 @@
 #!/bin/bash
-
-# authenticate with Github
-docker login ghcr.io
+set -e
 
 # prepare the deploy folder
 echo "Preparing deploy location..."
@@ -17,40 +15,27 @@ echo "Generating job definitions..."
 echo ${puml_files} | xargs python ../bin/plus2json.pyz --job -o config/job_definitions
 echo "Done."
 
-# generate test event data
-echo "Generating event data..."
-echo ${puml_files} | xargs python ../bin/plus2json.pyz --play -o reception-incoming --num-events 10000 --batch-size 50 --shuffle
-echo "Done."
-
 # launch the application
 echo "Launching the application..."
-cd ../metrics && docker compose up -d &> /dev/null
-sleep 10
-cd ../deploy && docker compose -f docker-compose.benchmark.yml up -d &> /dev/null
+export CONFIG_FILE=benchmarking-config.json
+docker compose -f docker-compose.kafka.yml up -d --wait &>/dev/null
 echo "Done."
 
-# wait until the logs stop changing
-echo "Waiting for the test to finish..."
-mod_time="0"
-new_mod_time="1"
-while [[ "${mod_time}" != "${new_mod_time}" ]]; do
-  sleep 5;
-  mod_time=${new_mod_time}
-  new_mod_time="$(stat -c %Y logs/verifier/Verifier.log)"
-  # new_mod_time="$(stat -f %m logs/verifier/Verifier.log)"  # Uncomment for use on macOS
-done
-sleep 10;
+# generate test event data
+echo "Generating event data..."
+# little delay to assure everything is initialized
+sleep 2
+echo ${puml_files} | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic default.AEReception_service0 --shuffle --num-events 100000
 echo "Done."
 
 # run the benchmark script
-echo "Processing report..."
-python ../metrics/benchmark.py
+echo "Waiting for application to finish..."
+python ../metrics/benchmark.py --msgbroker localhost:9092 --topic default.BenchmarkingProbe_service0
 echo "Done."
 
 # tear down docker
 echo "Tearing down the application..."
-docker compose -f docker-compose.benchmark.yml down
-cd ../metrics && docker compose down
+docker compose -f docker-compose.kafka.yml down
 echo "Done."
 
 exit_code=0
