@@ -15,6 +15,12 @@ project AER_PROC is
       );
 
     end terminator;
+
+    terminator Reporting is
+      public service reportEvent ( eventPriority: in Logger::Priority,
+                                  eventLabel: in string,
+                                  eventContent: in string );     
+    end terminator;
     
   end domain;
 
