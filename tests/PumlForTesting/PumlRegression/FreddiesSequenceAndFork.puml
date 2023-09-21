@@ -1,0 +1,16 @@
+@startuml
+partition "simple_AND_job" {
+    group "simple_AND_job"
+        #green:SAJA;
+        :SAJB;
+        fork
+            :SAJC;
+        fork again
+            :SAJD;
+        fork again
+            :SAJE;
+        end fork
+        #red:SAJF;
+    end group
+}
+@enduml

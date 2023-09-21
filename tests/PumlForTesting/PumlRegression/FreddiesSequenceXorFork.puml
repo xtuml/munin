@@ -1,0 +1,17 @@
+@startuml
+partition "simple_XOR_job" {
+    group "simple_XOR_job"
+        #green:SXJA;
+        :SXJB;
+        switch ("XOR")
+            case ("1")
+                :SXJC;
+            case ("2")
+                :SXJD;
+            case ("3")
+                :SXJE;
+        endswitch
+        #red:SXJF;
+    end group
+}
+@enduml

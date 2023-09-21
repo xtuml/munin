@@ -6,9 +6,12 @@ public service AESequenceDC::DynamicControlDefinition.createDynamicControlDefini
                                                                                       sourceOccurrenceId : in integer ) is
 theJobDefn : instance of JobDefinition;
 theDynamicControlDefinition : instance of DynamicControlDefinition;
+theJobsAuditEventDefns : set of instance of SequencedAuditEventDefinition;
 sourceAuditEventDefn : instance of SequencedAuditEventDefinition;
 sourceSequenceDefn : instance of AESequenceDefinition;
 sourceSequenceDefns : set of instance of AESequenceDefinition;
+theJobsSequenceDefns : set of instance of AESequenceDefinition;
+theJobsSourceSequenceDefns : set of instance of AESequenceDefinition;
 sourceAEInSequenceDefn : instance of AEInSequenceDefinition;
 sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 sourceAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
@@ -33,12 +36,13 @@ begin
     end if;  
     
     // Find the source AEOccurrenceInSequenceDefinition
-    sourceAuditEventDefn := find_one SequencedAuditEventDefinition (AEType = sourceEventType);
+    theJobsSequenceDefns := theJobDefn -> R7;
+    theJobsAuditEventDefns := theJobsSequenceDefns -> R1.SequencedAuditEventDefinition;
+    sourceAuditEventDefn := find_one theJobsAuditEventDefns (AEType = sourceEventType);
     if sourceAuditEventDefn /= null then
       sourceSequenceDefns := sourceAuditEventDefn -> R1.AESequenceDefinition;
-      
-      // TODO: The following line will need to change when JobType is available as an input parameter
-      sourceSequenceDefn := find_one sourceSequenceDefns ();
+      theJobsSourceSequenceDefns := theJobsSequenceDefns intersection sourceSequenceDefns;
+      sourceSequenceDefn := find_one theJobsSourceSequenceDefns ();
       
       if sourceSequenceDefn /= null then
         sourceAEInSequenceDefn := sourceAuditEventDefn with sourceSequenceDefn -> R1.AEInSequenceDefinition;

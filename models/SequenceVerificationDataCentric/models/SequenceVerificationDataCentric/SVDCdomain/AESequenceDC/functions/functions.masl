@@ -266,7 +266,7 @@ begin
     end if;
   
     for previousEventType in previousEventTypes'elements loop
-        thePrevEventDefn := find_one SequencedAuditEventDefinition (AEType = previousEventType.eventTypeName);
+        thePrevEventDefn := find_one thisJobsEventDefns (AEType = previousEventType.eventTypeName);
         if thePrevEventDefn /= null then
           thePrevEventInSeqDefn :=  thePrevEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
           existingEventOccurrencesInSeqDefn := thePrevEventInSeqDefn -> R12;
@@ -311,7 +311,7 @@ begin
           else
             // We have a reference to a forward event which is possible in the case of cyclic sequences so create a placeholder event
             // In this case the event definition has been seen before but not this referenced occurrence number
-            logMessage := "AESequenceDC::eventDefinition :  There is a forward reference to an event so create a Placeholder for event: " & thePrevEventDefn.AEType & "in Job Name = " & jobName;
+            logMessage := "AESequenceDC::eventDefinition :  There is a forward reference to an event so create a Placeholder for the new event occurrence: " & thePrevEventDefn.AEType & " in Job Name = " & jobName;
 	        Logger::log(Logger::Debug, "AESequenceDC", logMessage);            
           
             thePlaceholderEventDefn := thePrevEventDefn; 
@@ -336,10 +336,28 @@ begin
           end if;
         else
           // We have a reference to a forward event which is possible in the case of cyclic sequences so create a placeholder event
-          thePlaceholderEventDefn := create unique SequencedAuditEventDefinition (AEType => previousEventType.eventTypeName); 
-          thePlaceholderEventInSeqDef := create AEInSequenceDefinition (AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, AESequenceId => theSequenceDefn.AESequenceId);
-          link thePlaceholderEventDefn R1 theSequenceDefn using thePlaceholderEventInSeqDef;
-          thePlaceholderEventOccInSeqDef := create AEOccurrenceInSequenceDefinition (
+          // In this case the event definition has not been seen at all
+          logMessage := "AESequenceDC::eventDefinition :  There is a forward reference to an event so create a Placeholder for event type: " & previousEventType.eventTypeName & " in Job Name = " & jobName;
+	      Logger::log(Logger::Debug, "AESequenceDC", logMessage);            
+          thePlaceholderEventDefn := find_one SequencedAuditEventDefinition (AEType = previousEventType.eventTypeName);
+          if thePlaceholderEventDefn = null then
+            thePlaceholderEventDefn := create unique SequencedAuditEventDefinition (AEType => previousEventType.eventTypeName); 
+            thePlaceholderEventInSeqDef := create AEInSequenceDefinition (AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, AESequenceId => theSequenceDefn.AESequenceId);
+            link thePlaceholderEventDefn R1 theSequenceDefn using thePlaceholderEventInSeqDef;
+          else
+            thePlaceholderEventInSeqDef := find_one AEInSequenceDefinition (AEDefinitionId = thePlaceholderEventDefn.AEDefinitionId and AESequenceId = theSequenceDefn.AESequenceId);
+            if thePlaceholderEventInSeqDef = null then
+              thePlaceholderEventInSeqDef := create AEInSequenceDefinition (AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, AESequenceId => theSequenceDefn.AESequenceId);
+              link thePlaceholderEventDefn R1 theSequenceDefn using thePlaceholderEventInSeqDef;
+            end if;
+          end if;  
+          //link thePlaceholderEventDefn R1 theSequenceDefn using thePlaceholderEventInSeqDef;
+          thePlaceholderEventOccInSeqDef := find_one AEOccurrenceInSequenceDefinition (
+    	                                                            AEDefinitionId = thePlaceholderEventDefn.AEDefinitionId and 
+    	                                                            AESequenceId = theSequenceDefn.AESequenceId and 
+    	                                                            occurrenceNumberInSequence = previousEventType.occurrenceId);
+    	  if thePlaceholderEventOccInSeqDef = null then                                                            
+            thePlaceholderEventOccInSeqDef := create AEOccurrenceInSequenceDefinition (
     	                                                            AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, 
     	                                                            AESequenceId => theSequenceDefn.AESequenceId, 
     	                                                            occurrenceNumberInSequence => previousEventType.occurrenceId, 
@@ -347,7 +365,8 @@ begin
     	                                                            isSequenceEnd => isSequenceEnd,
     	                                                            isPlaceholder => true
                                                                     );
-          link thePlaceholderEventOccInSeqDef R12 thePlaceholderEventInSeqDef;
+            link thePlaceholderEventOccInSeqDef R12 thePlaceholderEventInSeqDef;
+          end if;
           newEventInSeqPairDef := create AEInSequencePairDefn (
         	                                                 AESequenceId => theSequenceDefn.AESequenceId, 
         	                                                 followingAEDefinitionId => theEventOccInSeqDef.AEDefinitionId, 

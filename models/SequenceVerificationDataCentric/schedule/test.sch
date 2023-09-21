@@ -11,6 +11,7 @@ RUN SCENARIO AESequenceDC 9 "InitLoopBreakEventDefinition"
 RUN SCENARIO AESequenceDC 501 "InitComplexEventSequence1Definition"
 RUN SCENARIO AESequenceDC 502 "InitComplexEventSequence2Definition"
 RUN SCENARIO AESequenceDC 503 "InitComplexEventSequence3Definition"
+RUN SCENARIO AESequenceDC 504 "InitComplexSequenceWithRepeatedNamesDefinition"
 RUN SCENARIO AESequenceDC 10 "InitLoopCountDefinition"
 RUN SCENARIO AESequenceDC 902 "InitSimpleJobWithUnhappyEvents"
 RUN SCENARIO AESequenceDC 903 "InitSimpleJobWithCriticalAndUnhappyEvents"
@@ -69,6 +70,7 @@ RUN SCENARIO Test 1 "run_test" [AESequenceDC Test203NormalTypeAndInstanceForkWit
 #RUN SCENARIO Test 1 "run_test" [AESequenceDC Test204NormalMultiInstanceForkWithBranchAndMergeCount 1204 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test205NormalUserExtraJobInvariantWithRestoredSourceEJI 1205 CleanUpAllJobs 64]
 RUN SCENARIO Test 1 "run_test" [AESequenceDC Test206NormalUserExtraJobInvariantWithRestoredSourceEJI 1206 CleanUpAllJobs 64]
+RUN SCENARIO Test 1 "run_test" [AESequenceDC Test207ComplexSequenceRepeatedEventNamesSunnyDay1 1207 CleanUpAllJobs 64]
 
 
 # Suspend & Reactivate JobDefinition test cases
