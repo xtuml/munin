@@ -6,6 +6,7 @@ theInvariant : instance of IntraJobInvariantDefn;
 theJobDefn : instance of JobDefinition;
 theEventDefn : instance of SequencedAuditEventDefinition;
 theSequenceDefn: instance of AESequenceDefinition;
+theJobsSequenceDefns: set of instance of AESequenceDefinition;
 theSequenceDefns: set of instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
@@ -17,6 +18,7 @@ eventContent : string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobName);
+  theJobsSequenceDefns := theJobDefn -> R7;
   theAuditEventDefinitions := theJobDefn -> R7 -> R1.SequencedAuditEventDefinition;
   if theJobDefn /= null then
     theInvariant := find_one IntraJobInvariantDefn (jobName = theJobDefn.jobName and intraJobInvName = invariantName);
@@ -34,16 +36,18 @@ begin
     for eachInvariantEventDefn in invariantEventDefns'elements loop
       theEventDefn := find_one theAuditEventDefinitions (AEType = eachInvariantEventDefn.eventTypeName);
       if theEventDefn /= null then
-        theSequenceDefns := theEventDefn -> R1.AESequenceDefinition;
-      
-        theSequenceDefn := find_one theSequenceDefns (jobName = jobName);
+        theSequenceDefns := (theEventDefn -> R1.AESequenceDefinition) intersection theJobsSequenceDefns;
+        // There can be only one
+        theSequenceDefn := find_one theSequenceDefns ();
         
         if theSequenceDefn /= null then
           theEventInSeqDefn :=  theEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
           theEventOccurrencesInSeqDefn := theEventInSeqDefn -> R12;
           theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = eachInvariantEventDefn.occurrenceId);
           if theEventOccInSeqDefn /= null then
-            link theInvariant R19 theEventOccInSeqDefn;
+            if (theEventOccInSeqDefn -> R19) = null then
+              link theInvariant R19 theEventOccInSeqDefn;
+            end if;  
           else
             logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 3) = " & theJobDefn.jobName;
             Logger::log(Logger::Error, "AESequenceDC", logMessage);
