@@ -1,5 +1,6 @@
 AEOdomain::AEOrdering::scenarios::void init,scenario,Function,1
-AEOdomain::AEOrdering::scenarios::void registerCommandLineArgs,startup,Function,true
+AEOdomain::AEOrdering::scenarios::void init,process_listener,Function,"started"
+AEOdomain::AEOrdering::scenarios::void registerCommandLineArgs,process_listener,Function,"initialised"
 AEOdomain::AEOrdering::tests::void checkJobComplete,test_only,Function,true
 AEOdomain::AEOrdering::tests::void testConfigTestData,scenario,Function,2
 AEOdomain::AEOrdering::tests::void testConfigTestData,test_only,Function,true
@@ -33,6 +34,6 @@ AEOdomain::AEOrdering::tests::void testOrderedJobWithData,scenario,Function,12
 AEOdomain::AEOrdering::tests::void testOrderedJobWithData,test_only,Function,true
 AEOdomain::AEOrdering::tests::void testFileIngest,scenario,Function,13
 AEOdomain::AEOrdering::tests::void testFileIngest,test_only,Function,true
-AEOdomain::AEOrdering::functions::void AcceptEvent(string string string string sequence of string AuditEventDataType),kafka_topic,Function,true
 AEOdomain::AEOrdering::tests::void testLaneValidation,test_only,Function,true
 AEOdomain::AEOrdering::tests::void testLaneValidation,scenario,Function,14
+AEOdomain::AEOrdering::functions::void AcceptEvent(string string string string string sequence of string AuditEventDataType),kafka_topic,Function,true

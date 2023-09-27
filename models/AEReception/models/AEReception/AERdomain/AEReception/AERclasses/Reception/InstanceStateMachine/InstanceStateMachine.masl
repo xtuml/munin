@@ -78,8 +78,11 @@ begin
 						end if;
 					end if;
 				end loop;
+				eventContent := "EventId = " & JSON::get_string(this.jsonObject["eventId"]);
+				Reporting~>reportEvent(Logger::Information, "reception_event_written", eventContent);
 				Ordering~>AcceptEvent(
 					JSON::get_string(this.jsonObject["jobId"]),
+					JSON::get_string(this.jsonObject["jobName"]),
 					JSON::get_string(this.jsonObject["eventType"]),
 					JSON::get_string(this.jsonObject["eventId"]),
 					JSON::get_string(this.jsonObject["timestamp"]),

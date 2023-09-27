@@ -1,0 +1,71 @@
+@startuml
+
+partition "Kitchen Sink Job 1" {
+ :EINV,SRC,jobdefn="Extra Job Invariant Source Job",
+ name=AUTH_TOKEN_A|
+ detach
+group "Kitchen Sink Sequence"
+
+  #green:KSJA,LCNT,user=KSJS,name=LC3,BCNT,user=KSJK,name=BC2,MCNT,user=KSJW,name=MC2;
+  :KSJB,LCNT,user=KSJF(0),name=LC1,LCNT,user=KSJD(1),name=LC2,IINV,name=KSJInvA;
+  :KSJC;
+    :KSJD;
+    fork
+      :KSJE;
+      repeat
+        :KSJF;
+        :KSJG,EINV,USER,name=AUTH_TOKEN_A;
+        :KSJH;
+      repeat while
+      :KSJI;
+      repeat
+        :KSJD;
+        :KSJE;
+        if (XOR) then ("error")
+          :KSJT;
+          break
+        else ("normal")
+          :KSJF;
+        endif
+      repeat while
+      :KSJU;
+    fork again
+      :KSJK;
+      :KSJL,EINV,USER,name=AUTH_TOKEN_A;
+      :KSJM;
+      if (XOR) then ("normal")
+        :KSJV;  
+      else ("error")
+        #red:KSJN;
+        detach
+      endif
+      :KSJW;    
+    fork again
+      :KSJP;
+      #red:KSJQ;
+      detach
+    fork again
+      :KSJC;
+      repeat
+        :KSJD;
+        :KSJE;
+      repeat while
+      :KSJF,BCNT,name=BC1;
+      :KSJD,EINV,USER,name=AUTH_TOKEN_A;
+      #red:KSJG;
+      detach
+    fork again
+      :KSJJ;
+      repeat
+        :KSJS;
+      repeat while
+      :KSJD;
+      #red:KSJE;
+      detach
+    end fork
+    :KSJH,IINV,USER,name=KSJInvA;
+    #red:KSJZ;
+    detach
+end group
+}
+@enduml

@@ -6,6 +6,7 @@ project PV_PROC is
 
       public service AcceptEvent (
         jobId : in string,
+        jobName : in string,
         auditEventType : in string,
         auditEventId : in string,
         auditEventTime : in string,
@@ -127,6 +128,10 @@ project PV_PROC is
   end domain;
 
   domain VerificationGateway is
+  end domain;
+
+  // This domain is included so the empty implementation is used
+  domain BenchmarkingProbe is
   end domain;
   
 end project;

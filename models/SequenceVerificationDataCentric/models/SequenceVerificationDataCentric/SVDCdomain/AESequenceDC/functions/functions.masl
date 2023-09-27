@@ -8,6 +8,8 @@ public service AESequenceDC::acceptOrderedEvent ( ae_time : in string,
                                                  auditEventData : in sequence of auditEventDataStructure ) is
 existingJob : instance of Job;
 existingJobs : set of instance of Job;
+possibleSeqAuditEventDefinitions : set of instance of SequencedAuditEventDefinition;
+possibleUnseqAuditEventDefinitions : set of instance of UnsequencedAuditEventDefinition;
 theSeqAuditEventDefinition : instance of SequencedAuditEventDefinition;
 theUnseqAuditEventDefinition : instance of UnsequencedAuditEventDefinition;
 eventsSequenceDefs : set of instance of AESequenceDefinition;
@@ -35,7 +37,7 @@ begin
       // Log info: The accepted event is for a new Job that has a non-active JobDefinition 
       logMessage := "AESequenceDC::acceptorderedEvent : The event - AuditEventId = " & id & "cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
       Logger::log(Logger::Debug, "AESequenceDC", logMessage);        
-      eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = The event cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
+      eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = The event cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
       Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
     else    
         
@@ -43,6 +45,8 @@ begin
         
          
       existingJobs := knownJobDefinition -> R8;
+      possibleSeqAuditEventDefinitions := knownJobDefinition -> R7 -> R1.SequencedAuditEventDefinition;
+      possibleUnseqAuditEventDefinitions := knownJobDefinition -> R39.UnsequencedAuditEventDefinition;
       // Check to see if the received event is part of a Job that is already being processed
       existingJob := find_only existingJobs (jobID = jobId);
       if existingJob /= null then
@@ -52,8 +56,8 @@ begin
         // The received event must be for a new job, but before the event can be accepted we need to verify that 
         // the JobDefinition for this new job is neither Suspended nor Deprecated (if it is, the event cannot be accepted)
         // We also need to check whether the event received is a known happy event type, an unhappy event type or an unknown event type
-        theSeqAuditEventDefinition := find_only SequencedAuditEventDefinition (AEType = ae_type);
-        theUnseqAuditEventDefinition := find_only UnsequencedAuditEventDefinition (UnsequencedAEType = ae_type);
+        theSeqAuditEventDefinition := find_only possibleSeqAuditEventDefinitions (AEType = ae_type);
+        theUnseqAuditEventDefinition := find_only possibleUnseqAuditEventDefinitions (UnsequencedAEType = ae_type);
         if theSeqAuditEventDefinition /= null then
         
           //We have a new job and this event should be tested as a valid initial event for a Job
@@ -64,10 +68,10 @@ begin
           UnsequencedAuditEvent.AddEventForNewUnhappyJob (jobId, jobName, id, prevAEIds, ae_type, auditEventData);
       
         else
-          // Log info: Report that the specified audit event type (ae_type) does not exist.
-          logMessage := "AESequenceDC::acceptorderedEvent : Accepted event is of an unknown type - AEType = " & ae_type;
+          // Log info: Report that the specified audit event type (ae_type) does not exist for this job definition.
+          logMessage := "AESequenceDC::acceptorderedEvent : Accepted event is of an unknown type for this job definition - AEType = " & ae_type & " for Job Name = " & jobName;
           Logger::log(Logger::Error, "AESequenceDC", logMessage); 
-          eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
+          eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
           Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
         end if;
       end if;
@@ -76,7 +80,7 @@ begin
     // Log info: Report that the specified job definition as indicated by jobName does not exist.
     logMessage := "AESequenceDC::acceptorderedEvent : The specified Job Type is unknown = " & jobName;
     Logger::log(Logger::Error, "AESequenceDC", logMessage); 
-    eventContent := "JobId = " & jobId  & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Job type";
+    eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Job type";
     Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
     
   end if;
@@ -126,6 +130,8 @@ public service AESequenceDC::eventDefinition ( jobName : in string,
 theJobDefn : instance of JobDefinition;
 theSequenceDefn : instance of AESequenceDefinition;
 theEventDefn : instance of SequencedAuditEventDefinition;
+thisJobsEventDefns : set of instance of SequencedAuditEventDefinition;
+theExistingEventDefn : instance of SequencedAuditEventDefinition;
 theEventDefnsInSequence : set of instance of SequencedAuditEventDefinition;
 matchingEventDefn : instance of SequencedAuditEventDefinition;
 thePrevEventDefn : instance of SequencedAuditEventDefinition;
@@ -148,10 +154,14 @@ eventContent : string;
 
 //
 begin
+  logMessage := "AESequenceDC::eventDefinition : New Event Definition, Job Definition = " & jobName & "Sequence Name = " & sequenceName & " event type = " & eventType & " Start = " & isSequenceStart'image & " End = " & isSequenceEnd'image & " Break = " & isBreak'image & " Happy = " & isHappy'image & " Critical = " & isCritical'image ;
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   theJobDefn := find_one JobDefinition (jobName = jobName);
   if theJobDefn = null then
     // Event Definition for new Job so create the Job Definition
     theJobDefn := create unique JobDefinition (jobName => jobName, isDeprecated => false, isSuspended => false, Current_State => Active);
+    logMessage := "AESequenceDC::eventDefinition : New Job Definition added, Job Definition = " & theJobDefn.jobName;
+    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   end if; 
 
   if isHappy then
@@ -162,9 +172,13 @@ begin
       // Event Definition for new Sequence so create the Sequence Definition
       theSequenceDefn := create unique AESequenceDefinition (sequenceDefinitionName => sequenceName);
       link theSequenceDefn R7 theJobDefn;
+      logMessage := "AESequenceDC::eventDefinition : New Sequence Definition added, Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName;
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
     end if;
    
     theEventDefn := find_one SequencedAuditEventDefinition (AEType = eventType);
+    thisJobsEventDefns := theJobDefn -> R7 -> R1.SequencedAuditEventDefinition;
+    theExistingEventDefn := find_one thisJobsEventDefns (AEType = eventType);
     if theEventDefn = null then
       // The event definition hasn't been seen before so is a valid addition
       theEventDefn := create unique SequencedAuditEventDefinition (AEType => eventType); 
@@ -187,10 +201,12 @@ begin
     	                                                            isSequenceEnd => isSequenceEnd,
                                                                     isBreak => isBreak);
       link theEventOccInSeqDef R12 theEventInSeqDef;
-    else
-      // The event definition has been seen before which could indicate the repetition of an event type in a sequence
+      logMessage := "AESequenceDC::eventDefinition : New Happy Event Definition added, Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType;
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+    elsif theExistingEventDefn /= null then
+      // The event definition has been seen before which could indicate the repetition of an event type within a sequence or the repetition of an event type in a different job definition
       theEventDefnsInSequence := theSequenceDefn -> R1.SequencedAuditEventDefinition;
-       matchingEventDefn := find_one theEventDefnsInSequence (AEType = eventType);
+      matchingEventDefn := find_one theEventDefnsInSequence (AEType = eventType);
       if matchingEventDefn /= null then
         // We have already seen this event type which could be because of a placeholder event definition or because of a repeated occurrence of an event definition
         // A placeholder event definition occurs where a cyclic topology is defined. The backwards connection means that the previous event the the current event has not been seen yet.
@@ -207,6 +223,8 @@ begin
       	                                                              isSequenceEnd => isSequenceEnd
                                                                       );
           link theEventInSeqDef R12 theEventOccInSeqDef;
+          logMessage := "AESequenceDC::eventDefinition : Additional Event Occurrence Definition added, Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType;
+          Logger::log(Logger::Debug, "AESequenceDC", logMessage);
         else
           // It is a placeholder so now we've seen it for real we can clear the isPlaceholder flag and set the other flags according to input data
           thePlaceholderEventOccInSeqDef.isPlaceholder := false;
@@ -222,10 +240,33 @@ begin
 	    eventContent := "FailureReason = The event type provided in the initialisation data has been seen elsewhere" & " : JobName = " & theJobDefn.jobName  & " : SequenceDefinition = " & theSequenceDefn.sequenceDefinitionName & " : EventType = " & theEventDefn.AEType;
         Reporting~>reportEvent(Logger::Error, "svdc_invalid_event_definition", eventContent);
       end if;
+    else
+      // We have an event definition previously seen in a different job definition which is fine
+      // Capture whether this is a critical event in the happy path      
+      if isCritical then
+        newCriticalEventDefnInJobDefn := create CriticalEventDefnForJobDefn (AEDefinitionId => theEventDefn.AEDefinitionId,
+        	                                                                 jobName => jobName);
+        link theEventDefn R43 theJobDefn using newCriticalEventDefnInJobDefn;
+        
+      end if;  
+      
+      theEventInSeqDef := create AEInSequenceDefinition (AEDefinitionId => theEventDefn.AEDefinitionId, AESequenceId => theSequenceDefn.AESequenceId);
+      link theEventDefn R1 theSequenceDefn using theEventInSeqDef;
+      theEventOccInSeqDef := create AEOccurrenceInSequenceDefinition (
+    	                                                            AEDefinitionId => theEventDefn.AEDefinitionId, 
+    	                                                            AESequenceId => theSequenceDefn.AESequenceId, 
+    	                                                            occurrenceNumberInSequence => occurrenceId, 
+    	                                                            isSequenceStart => isSequenceStart, 
+    	                                                            isSequenceEnd => isSequenceEnd,
+                                                                    isBreak => isBreak);
+      link theEventOccInSeqDef R12 theEventInSeqDef;
+      logMessage := "AESequenceDC::eventDefinition : Event Definition seen in another Job added to Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType;
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+      
     end if;
   
     for previousEventType in previousEventTypes'elements loop
-        thePrevEventDefn := find_one SequencedAuditEventDefinition (AEType = previousEventType.eventTypeName);
+        thePrevEventDefn := find_one thisJobsEventDefns (AEType = previousEventType.eventTypeName);
         if thePrevEventDefn /= null then
           thePrevEventInSeqDefn :=  thePrevEventDefn with theSequenceDefn -> R1.AEInSequenceDefinition;
           existingEventOccurrencesInSeqDefn := thePrevEventInSeqDefn -> R12;
@@ -270,7 +311,7 @@ begin
           else
             // We have a reference to a forward event which is possible in the case of cyclic sequences so create a placeholder event
             // In this case the event definition has been seen before but not this referenced occurrence number
-            logMessage := "AESequenceDC::eventDefinition :  There is a forward reference to an event so create a Placeholder for event: " & thePrevEventDefn.AEType & "in Job Name = " & jobName;
+            logMessage := "AESequenceDC::eventDefinition :  There is a forward reference to an event so create a Placeholder for the new event occurrence: " & thePrevEventDefn.AEType & " in Job Name = " & jobName;
 	        Logger::log(Logger::Debug, "AESequenceDC", logMessage);            
           
             thePlaceholderEventDefn := thePrevEventDefn; 
@@ -295,10 +336,28 @@ begin
           end if;
         else
           // We have a reference to a forward event which is possible in the case of cyclic sequences so create a placeholder event
-          thePlaceholderEventDefn := create unique SequencedAuditEventDefinition (AEType => previousEventType.eventTypeName); 
-          thePlaceholderEventInSeqDef := create AEInSequenceDefinition (AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, AESequenceId => theSequenceDefn.AESequenceId);
-          link thePlaceholderEventDefn R1 theSequenceDefn using thePlaceholderEventInSeqDef;
-          thePlaceholderEventOccInSeqDef := create AEOccurrenceInSequenceDefinition (
+          // In this case the event definition has not been seen at all
+          logMessage := "AESequenceDC::eventDefinition :  There is a forward reference to an event so create a Placeholder for event type: " & previousEventType.eventTypeName & " in Job Name = " & jobName;
+	      Logger::log(Logger::Debug, "AESequenceDC", logMessage);            
+          thePlaceholderEventDefn := find_one SequencedAuditEventDefinition (AEType = previousEventType.eventTypeName);
+          if thePlaceholderEventDefn = null then
+            thePlaceholderEventDefn := create unique SequencedAuditEventDefinition (AEType => previousEventType.eventTypeName); 
+            thePlaceholderEventInSeqDef := create AEInSequenceDefinition (AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, AESequenceId => theSequenceDefn.AESequenceId);
+            link thePlaceholderEventDefn R1 theSequenceDefn using thePlaceholderEventInSeqDef;
+          else
+            thePlaceholderEventInSeqDef := find_one AEInSequenceDefinition (AEDefinitionId = thePlaceholderEventDefn.AEDefinitionId and AESequenceId = theSequenceDefn.AESequenceId);
+            if thePlaceholderEventInSeqDef = null then
+              thePlaceholderEventInSeqDef := create AEInSequenceDefinition (AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, AESequenceId => theSequenceDefn.AESequenceId);
+              link thePlaceholderEventDefn R1 theSequenceDefn using thePlaceholderEventInSeqDef;
+            end if;
+          end if;  
+          //link thePlaceholderEventDefn R1 theSequenceDefn using thePlaceholderEventInSeqDef;
+          thePlaceholderEventOccInSeqDef := find_one AEOccurrenceInSequenceDefinition (
+    	                                                            AEDefinitionId = thePlaceholderEventDefn.AEDefinitionId and 
+    	                                                            AESequenceId = theSequenceDefn.AESequenceId and 
+    	                                                            occurrenceNumberInSequence = previousEventType.occurrenceId);
+    	  if thePlaceholderEventOccInSeqDef = null then                                                            
+            thePlaceholderEventOccInSeqDef := create AEOccurrenceInSequenceDefinition (
     	                                                            AEDefinitionId => thePlaceholderEventDefn.AEDefinitionId, 
     	                                                            AESequenceId => theSequenceDefn.AESequenceId, 
     	                                                            occurrenceNumberInSequence => previousEventType.occurrenceId, 
@@ -306,7 +365,8 @@ begin
     	                                                            isSequenceEnd => isSequenceEnd,
     	                                                            isPlaceholder => true
                                                                     );
-          link thePlaceholderEventOccInSeqDef R12 thePlaceholderEventInSeqDef;
+            link thePlaceholderEventOccInSeqDef R12 thePlaceholderEventInSeqDef;
+          end if;
           newEventInSeqPairDef := create AEInSequencePairDefn (
         	                                                 AESequenceId => theSequenceDefn.AESequenceId, 
         	                                                 followingAEDefinitionId => theEventOccInSeqDef.AEDefinitionId, 
@@ -336,12 +396,18 @@ begin
         theUnseqEventDefnInJobDefn := create UnsequencedAEDefnInJobDefn (UnsequencedAEDefnId => theUnseqEventDefn.UnsequencedAEDefnId,
                                                                          jobName => theJobDefn.jobName); 
         link theUnseqEventDefn R39 theJobDefn using theUnseqEventDefnInJobDefn ;
+        logMessage := "AESequenceDC::eventDefinition : New Unhappy Event Definition added, Job Definition = " & theJobDefn.jobName & ", Unhappy Event type = " & theUnseqEventDefn.UnsequencedAEType;
+        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   
     else
-      // TODO We have seen this definition before so for now we'll ignore a repetition
+        theUnseqEventDefnInJobDefn := create UnsequencedAEDefnInJobDefn (UnsequencedAEDefnId => theUnseqEventDefn.UnsequencedAEDefnId,
+                                                                         jobName => theJobDefn.jobName); 
+        link theUnseqEventDefn R39 theJobDefn using theUnseqEventDefnInJobDefn ;
+        logMessage := "AESequenceDC::eventDefinition : Existing Unhappy Event Definition found and added to this Job Definition = " & theJobDefn.jobName & ", Unhappy Event type = " & theUnseqEventDefn.UnsequencedAEType;
+        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
     end if;
     
-    // The following checks that an unappy event is not marked as a critical event as that combination is not allowed
+    // The following checks that an unhappy event is not marked as a critical event as that combination is not allowed
     if isCritical then
       logMessage := "AESequenceDC::eventDefinition : The event type provided in the initialisation data is marked as Critical and an Unhappy Event - this combination is not allowed, Job Definition = " & theJobDefn.jobName & ", Event type = " & theEventDefn.AEType;
       Logger::log(Logger::Error, "AESequenceDC", logMessage);
@@ -406,12 +472,22 @@ public service AESequenceDC::createSVDCsystemSpec ( maxIntraSequenceEventTimeout
                                                    timeoutPeriodForHangingJob : in duration ) is
 theSVDCSystemSpec : instance of SystemSpecification;
 begin
-  theSVDCSystemSpec := create unique SystemSpecification (intraSequenceEventTimeoutPeriod => maxIntraSequenceEventTimeoutPeriod,
+  theSVDCSystemSpec := find_one SystemSpecification ();
+  if theSVDCSystemSpec = null then
+    theSVDCSystemSpec := create unique SystemSpecification (intraSequenceEventTimeoutPeriod => maxIntraSequenceEventTimeoutPeriod,
   	                                                      checkJobDefReadyForDeletionPeriod => waitPeriodForAllJobsCompletedCheck,
   	                                                      jobDeletionWaitPeriod => waitPeriodForJobDeletion,
   	                                                      sourceExtraJobInvariantDeletionPeriod => waitPeriodForInvariantDeletion,
   	                                                      persistentInvariantRestoreTimeoutPeriod => timeoutPeriodForRetreivingStoredInvariants,              
   	                                                      jobHangingTimeoutPeriod => timeoutPeriodForHangingJob);
+  else
+    theSVDCSystemSpec.intraSequenceEventTimeoutPeriod := maxIntraSequenceEventTimeoutPeriod;
+    theSVDCSystemSpec.checkJobDefReadyForDeletionPeriod := waitPeriodForAllJobsCompletedCheck;
+  	theSVDCSystemSpec.jobDeletionWaitPeriod := waitPeriodForJobDeletion;
+  	theSVDCSystemSpec.sourceExtraJobInvariantDeletionPeriod := waitPeriodForInvariantDeletion;
+  	theSVDCSystemSpec.persistentInvariantRestoreTimeoutPeriod := timeoutPeriodForRetreivingStoredInvariants;              
+  	theSVDCSystemSpec.jobHangingTimeoutPeriod := timeoutPeriodForHangingJob;
+  end if;	                                                      
   //
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -590,11 +666,15 @@ theJobDefn : instance of JobDefinition;
 logMessage : string;
 begin
   theJobDefn := find_one JobDefinition (jobName = jobName);
+  logMessage := "AESequenceDC::createJobDefinition : New Job Definition, Job Definition = " & jobName ;
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   if theJobDefn = null then
     // Event Definition for new Job so create the Job Definition
     theJobDefn := create unique JobDefinition (jobName => jobName, isDeprecated => false, isSuspended => false, Current_State => Active);
     for eventDefinition in eventDefinitions loop
-    	AESequenceDC::eventDefinition(jobName, eventDefinition.sequenceName, eventDefinition.eventType, eventDefinition.occurrenceId, 
+      logMessage := "AESequenceDC::createJobDefinition : New Event Definition, Sequence Name = " & eventDefinition.sequenceName & " event type = " & eventDefinition.eventType & " Start = " & eventDefinition.isSequenceStart'image & " End = " & eventDefinition.isSequenceEnd'image & " Break = " & eventDefinition.isBreak'image & " Happy = " & eventDefinition.isHappy'image & " Critical = " & eventDefinition.isCritical'image ;
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+      AESequenceDC::eventDefinition(jobName, eventDefinition.sequenceName, eventDefinition.eventType, eventDefinition.occurrenceId, 
     		                          eventDefinition.previousEventTypes, eventDefinition.isSequenceStart, eventDefinition.isSequenceEnd, 
     		                          eventDefinition.isBreak, eventDefinition.isHappy, eventDefinition.isCritical);
     end loop;

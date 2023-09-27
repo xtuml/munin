@@ -6,6 +6,7 @@ project AER_PROC is
 
       public service AcceptEvent (
         jobId : in string,
+        jobName : in string,
         auditEventType : in string,
         auditEventId : in string,
         auditEventTime : in string,
@@ -13,6 +14,12 @@ project AER_PROC is
         auditEventData : in dictionary
       );
 
+    end terminator;
+
+    terminator Reporting is
+      public service reportEvent ( eventPriority: in Logger::Priority,
+                                  eventLabel: in string,
+                                  eventContent: in string );     
     end terminator;
     
   end domain;

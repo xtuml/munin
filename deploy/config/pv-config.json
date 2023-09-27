@@ -2,6 +2,7 @@
   "SpecUpdateRate": "PT2M",
   "IncomingDirectory": "./incoming",
   "ProcessedDirectory": "./processed",
+  "ProcessingDirectory": "./processing",
   "EventThrottleRate": "PT0S",
   "ReceptionDeletionTime": "PT10M",
   "MaxEventsPerReceptionJob": "0",
@@ -12,11 +13,10 @@
   "MaxOutOfSequenceEvents": "100",
   "MaximumJobTime": "PT10M",
   "JobCompletePeriod": "PT24H",
-  "ProcessingDirectory": "processing",
   "JobDefinitionDirectory": "config/job_definitions",
-  "DefaultJobExpiryDuration" : "P99W",
-  "DefaultStaleAuditEventDuration" : "PT24H",
-  "DefaultBlockedAuditEventDuration" : "PT24H",
+  "DefaultJobExpiryDuration": "P99W",
+  "DefaultStaleAuditEventDuration": "PT24H",
+  "DefaultBlockedAuditEventDuration": "PT24H",
   "JobStoreLocation": "./JobIdStore",
   "JobStoreAgeLimit": "P7D",
   "InvariantStoreLoadRate": "PT2M",
@@ -24,22 +24,6 @@
   "WaitPeriodForAllJobsCompletedCheck": "P1D",
   "WaitPeriodForJobDeletion": "PT30M",
   "WaitPeriodForInvariantDeletion": "P1D",
-  "TimeoutPeriodForRetreivingStoredInvariants": "PT10S",              
-  "TimeoutPeriodForHangingJob": "PT15S",
-  "Jobs": [
-      {
-          "JobDefinitionName": "Simple Sequence Job",
-          "JobDeprecated": "false",
-          "JobTypeExpiryDate": "2023-12-11T18:08:00Z",
-          "StaleAuditEventDuration": "P99W",
-          "BlockedAuditEventDuration": "PT5M"
-      },
-      {
-          "JobDefinitionName": "Complex No Event Data Job",
-          "JobDeprecated": "false",
-          "JobTypeExpiryDate": "2023-12-11T18:08:00Z",
-          "StaleAuditEventDuration": "P99W",
-          "BlockedAuditEventDuration": "PT5M"
-      }
-  ]
+  "TimeoutPeriodForRetreivingStoredInvariants": "PT10S",
+  "TimeoutPeriodForHangingJob": "PT15S"
 }
