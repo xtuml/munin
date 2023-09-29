@@ -226,5 +226,32 @@ metrics:
     timestamp: '{{.timestamp}}'
     pv_index: '{{.pv_index}}'
     event_id: '{{.event_id}}'
+- type: counter
+  name: svdc_job_alarm
+  help: An alarm reported by the SVDC domain.
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_job_alarm : EventId = %{UUID:event_id}'
+  path: /var/log/verifier/Verifier.log
+  labels:
+    timestamp: '{{.timestamp}}'
+    pv_index: '{{.pv_index}}'
+    event_id: '{{.event_id}}'
+- type: counter
+  name: svdc_happy_event_processed
+  help: A sequenced event reported by SVDC.
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_happy_event_processed : EventId = %{UUID:event_id}'
+  path: /var/log/verifier/Verifier.log
+  labels:
+    timestamp: '{{.timestamp}}'
+    pv_index: '{{.pv_index}}'
+    event_id: '{{.event_id}}'
+- type: counter
+  name: svdc_unhappy_event_processed
+  help: An unsequenced event reported by SVDC.
+  match: '%{TIMESTAMP_ISO8601:timestamp} %{NUMBER:pv_index} svdc_unhappy_event_processed : EventId = %{UUID:event_id}'
+  path: /var/log/verifier/Verifier.log
+  labels:
+    timestamp: '{{.timestamp}}'
+    pv_index: '{{.pv_index}}'
+    event_id: '{{.event_id}}'
 server:
   port: 9144

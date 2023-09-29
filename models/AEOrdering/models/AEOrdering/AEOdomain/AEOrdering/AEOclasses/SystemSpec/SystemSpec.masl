@@ -111,7 +111,7 @@ begin
                 this.defaultJobExpiryDuration := duration'parse(JSON::get_string(configJSONObject["DefaultJobExpiryDuration"]));
             end if;
             if configJSONObject'contains("DefaultStaleAuditEventDuration") then
-                this.defaultJobExpiryDuration := duration'parse(JSON::get_string(configJSONObject["DefaultStaleAuditEventDuration"]));
+                this.defaultStaleAuditEventDuration := duration'parse(JSON::get_string(configJSONObject["DefaultStaleAuditEventDuration"]));
             end if;
             if configJSONObject'contains("DefaultBlockedAuditEventDuration") then
                 this.defaultBlockedAuditEventDuration := duration'parse(JSON::get_string(configJSONObject["DefaultBlockedAuditEventDuration"]));
