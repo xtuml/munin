@@ -1,0 +1,153 @@
+= Munin Configuration Data
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note identifies the configuration data that can be speficied for the 
+Protocl Verifier in the MUNIN project.
+
+== 2 Introduction and Background
+
+There are several domains that make up the Protocol Verifier and they are all configured
+by the JSON definition file pv-config.json.
+
+== 3 Configuration
+
+All configuration data that can impact how the Protocol Verifier operates are captured 
+in the configuration file.
+
+The following table identifies each of the configuration items, its description and the allowed types.
+
+[cols="1,6,1,1"]
+|===
+| Name | Brief Description | Type | Default Setting
+
+| SpecUpdateRate
+| A time period that specifies how often the processes in the Protocol verifier will examine the 
+configuration files (pv-config.json and job definition files)​ to check if it has been updated. 
+If it has been updated it shall be reloaded.
+| Duration
+| 2 minutes
+| IncomingDirectory
+| If the Protocol Verfier has been deployed to use the File Reception domain and events are being 
+delivered via files this is the directory where the File Reception process expects to find the 
+JSON files containing the events​.
+| String
+| ./incoming
+| ProcessedDirectory
+| If the Protocol Verfier has been deployed to use the File Reception domain and events are being 
+delivered via files this is the directory where the File Reception domain moves the JSON event files 
+to after all the contained events have been processed.
+| String
+| ./processed
+| ReceptionDeletionTime
+| If the Protocol Verfier has been deployed to use the File Reception domain and events are being 
+delivered via files when a file has been through reception the details of the reception processing 
+shall be stored until this time expires​.
+| Duration
+| 10 minutes
+| ConcurrentReceptionLimit
+| A number that indicates the limit of concurrent reception jobs that can be executing, e.g. 1 = one 
+active reception job
+| Integer
+| 1
+| SchemaValidate
+| A flag that indicates if json schema validation of incoming events hould be perfomred
+| Boolean
+| true
+| SchemaValidateFrequency
+| The frequency that validation of the events shall be performed. Every time the AcceptEvents interface 
+of the Reception domaiin is invoked the schema validation count is incremented and when it reaches the 
+SchemaValidateFrequency the events are validated. Currently this is defaulted to 1 ensuring all events are
+validated when the AcceptEvents interface is invoked
+| Integer
+| 1
+| FileControlWaitTime
+| If the Protocol Verfier has been deployed to use the File Reception domain and events are being delivered 
+via files this is the amount of time it shall wait between checking for files being available to process or 
+if the ConcurrentReceptionLimit the amount of time it shall wait to check for capacity before checking for a 
+file to process.
+| Duration
+| 1 second
+| MaxOutOfSequenceEvents
+| The maximum consecutive number of out-of-sequence events that can be received for a job before an error is 
+declared.
+| Integer
+| 100
+| MaximumJobTime
+| The maximum time it should take for a job to be finished. When this time has been reached after the job was 
+started it shall be archived (if there are no blocked events or failed if there are blocked events).​
+| Duration
+| 10 minutes
+| JobCompletePeriod
+| When a Job has completed it shall be either archived or failed and once the job complete period has expired 
+it shall be deleted from the domain with all associated events.​
+| Duration
+| 24 hours
+| JobDefinitionDirectory
+| The directory where the Verifier process expects to find the Job Definitions.​
+| String
+| config/job_definitions
+| DefaultJobExpiryDuration
+| Job definitions can supply an expiry time and this is the time that jobs of that job type shall no longer be 
+valid. If a expiry time is not supplied with the job definition the default job expiry is used for that job type.
+| Duration
+| 99 weeks
+| DefaultStaleAuditEventDuration
+| Job definitions can supply a stale event duration and this duration is used to determine if the event recieved 
+is older than allowed for the event type by checking the provided event timestamp together with the stale event 
+duration against the current time. If it exceeds the current time then the event is consider failed and the job 
+shall fail. If the job definition deos not supply a stale audit event duration then the default shall be used.
+| Duration
+| 24 hours
+| DefaultBlockedAuditEventDuration
+| Job definitions can supply a blocked event duration and this duration is used to determine if a blocked event 
+has been blocked for too long. When an event is blocked for longer than the blocked event duration the job is 
+failed. If the job definition deos not supply a blocked audit event duration then the default shall be used.
+| Duration
+| 24 hours
+| JobStoreLocation
+| The directory where the Verifier process expects to find the Job ID Store.
+| String
+| ./JobIdStore
+| JobStoreAgeLimit
+| This defines how long the job ids will be retained in the Job Id Store.
+| Duration
+| 7 days
+| InvariantStoreLoadRate
+| This defines how frequently the invariant store is checked for changes. The detection of changes will prompt 
+the upload of the new invariants to each running instance of the Verifier process.​
+| Duration
+| 2 minutes
+| MaxIntraSequenceEventTimeoutPeriod
+| The period of time that the Protocol Verifier waits for a subsequent sequence (if any) before it considers the 
+Job to have completed.​
+| Duration
+| 1 second
+| WaitPeriodForAllJobsCompletedCheck
+| The period of time the Protocol Verifier waits after a  Job Definition has been deprecated before that Job 
+Definition is deleted.​
+| Duration
+| 1 day
+| WaitPeriodForJobDeletion
+| The period of time after a Job has completed (whether succeeded or failed) that the Protocol Verifier waits 
+before that Job, and all its associated audit events, are deleted.​
+| Duraion
+| 30 minutes
+| WaitPeriodForInvariantDeletion
+| The period of time after an Extra Job Invariant has gone ‘out of force’ before it is deleted.​
+| Duration
+| 1 day
+| TimeoutPeriodForRetreivingStoredInvariants
+| The period of time after requesting the restoration of an Extra Job Invariant from the Invariant Store that the 
+Protocol Verifier waits before giving up and assuming that the respective Invariant is not available.​
+| Duration
+| 10 seconds
+| TimeoutPeriodForHangingJob
+| The period of time that the job will wait until it considers it has timed out because it hasn't seen a complete 
+expected sequence of events within the period or because of a blocked event timeout for a job.
+| Duration
+| 15 seconds
+
+|===
