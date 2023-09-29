@@ -1,9 +1,18 @@
-version: "3.9"
+version: '3.9'
+volumes:
+  ConanCache:
+    name: munin_ConanCache
+    external: true
+
 services:
+
   aer_proc:
     image: levistarrett/masl-dev
     deploy:
       replicas: 8
+    depends_on:
+      kafka:
+        condition: service_healthy
     volumes:
       - type: volume
         source: ConanCache
@@ -13,10 +22,16 @@ services:
       - "./config:/root/config"
       - "./logs/reception:/var/log/reception"
       - "./reception-processed:/root/processed"
+    ulimits:
+      sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AER_PROC_transient -configFile pv-config.json -log-config config/log-config-pv-proc.xml -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id reception_group_1 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AER_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id reception_group_1 -util MetaData"
+
   aeo_svdc_proc_1:
     image: levistarrett/masl-dev
+    depends_on:
+      kafka:
+        condition: service_healthy
     volumes:
       - type: volume
         source: ConanCache
@@ -27,10 +42,16 @@ services:
       - "./logs/verifier:/var/log/verifier"
       - "./InvariantStore:/root/InvariantStore"
       - "./JobIdStore:/root/JobIdStore"
+    ulimits:
+      sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile pv-config.json -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -startJobGroup 00 -endJobGroup 3F -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -startJobGroup 00 -endJobGroup 3F -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+
   aeo_svdc_proc_2:
     image: levistarrett/masl-dev
+    depends_on:
+      kafka:
+        condition: service_healthy
     volumes:
       - type: volume
         source: ConanCache
@@ -41,10 +62,16 @@ services:
       - "./logs/verifier:/var/log/verifier"
       - "./InvariantStore:/root/InvariantStore"
       - "./JobIdStore:/root/JobIdStore"
+    ulimits:
+      sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile pv-config.json -log-config config/log-config-pv-proc.xml -log-param instance_index=2 -startJobGroup 40 -endJobGroup 7F -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=2 -startJobGroup 40 -endJobGroup 7F -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+
   aeo_svdc_proc_3:
     image: levistarrett/masl-dev
+    depends_on:
+      kafka:
+        condition: service_healthy
     volumes:
       - type: volume
         source: ConanCache
@@ -55,10 +82,16 @@ services:
       - "./logs/verifier:/var/log/verifier"
       - "./InvariantStore:/root/InvariantStore"
       - "./JobIdStore:/root/JobIdStore"
+    ulimits:
+      sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile pv-config.json -log-config config/log-config-pv-proc.xml -log-param instance_index=3 -startJobGroup 80 -endJobGroup BF -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=3 -startJobGroup 80 -endJobGroup BF -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+
   aeo_svdc_proc_4:
     image: levistarrett/masl-dev
+    depends_on:
+      kafka:
+        condition: service_healthy
     volumes:
       - type: volume
         source: ConanCache
@@ -69,10 +102,31 @@ services:
       - "./logs/verifier:/var/log/verifier"
       - "./InvariantStore:/root/InvariantStore"
       - "./JobIdStore:/root/JobIdStore"
+    ulimits:
+      sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile pv-config.json -log-config config/log-config-pv-proc.xml -log-param instance_index=4 -startJobGroup C0 -endJobGroup FF -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=4 -startJobGroup C0 -endJobGroup FF -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
-volumes:
-  ConanCache:
-    name: munin_ConanCache
-    external: true
+  zookeeper:
+    image: wurstmeister/zookeeper:3.4.6
+    ports:
+     - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+     - "9092:9092"
+    expose:
+     - "9093"
+    healthcheck:
+      test: /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9093 --topic default.AEOrdering_service0,default.AEReception_service0 --describe
+      interval: 10s
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "default.AEReception_service0:32:1,default.AEOrdering_service0:1:1"
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
