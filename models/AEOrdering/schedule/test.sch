@@ -1,3 +1,6 @@
+# initialise domain
+RUN SCENARIO AEOrdering 1 "init"
+
 # run tests
 RUN SCENARIO Test 1 "run_test" [AEOrdering testConfigTestData 2]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testInvalidJobDefinition 4]
