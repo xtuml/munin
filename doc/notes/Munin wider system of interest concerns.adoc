@@ -89,8 +89,34 @@ Compromises seen and handled by the PV should be compared with those seen and
 handled by other systems. A compromise seen in one system that would be 
 expected but not seen in another would be cause for concern.
 
-=== 3.3 Next topic
+=== 3.3 Analysis of Job Definitions
 
+==== 3.2.1 Introduction
+
+The function of the PV is determined by the job definitions it receives. We know
+that some job definitions will be more effectvely verified than others. For 
+example, takes 2 job definitions each with 20 audit events in them. One of the
+job definitions is composed of 20 sequences each with 1 event. The other job
+definition is a single sequence of 20 events. No sequence verification is
+possible with the first job definition whilst the second job definition can 
+have its sequencing fully verfied.
+
+==== 3.2.2 Concern
+
+The effectiveness of the PV could be significantly reduced if it is configured 
+in ineffective ways. 
+
+==== 3.2.3 Mitigation
+
+The PV could provide an analysis of its own configuration. For example, it
+could report the average event to sequence ratio for each job (or for a set 
+of jobs). A ratio of greater than 8 might me described as very strong, a ratio 
+of 5 to 8 as strong, a ratio of 2 to 5 as weak and a ratio of less than 2 as 
+very weak.
+
+Other analyses of job complexity, the use of dynamic controls and the use of
+invariants could also provide qualitative and quantitative assessments of 
+the set of job definitions.
 
 == 4 Future work
 
