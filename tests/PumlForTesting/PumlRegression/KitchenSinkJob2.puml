@@ -6,10 +6,10 @@ partition "Kitchen Sink Job 2" {
  detach
 group "Kitchen Sink Sequence 2"
 
-  #green:KSJA,LCNT,user=KSJ2S,name=LC3,BCNT,user=KSJ2K,name=BC2,MCNT,user=KSJ2W,name=MC2;
-  :KSJB,LCNT,user=KSJ2F(0),name=LC1,LCNT,user=KSJ2D(1),name=LC2,IINV,name=KSJInvB;
-  :KSJ2C;
-    :KSJ2D;
+  #green:KSJA,LCNT,user=KSJS,name=LC3,BCNT,user=KSJK,name=BC2,MCNT,user=KSJW,name=MC2;
+  :KSJB,LCNT,user=KSJF(0),name=LC1,LCNT,user=KSJD(1),name=LC2,IINV,name=KSJInvB;
+  :KSJC;
+    :KSJD;
     fork
       :KSJE;
       repeat
@@ -17,54 +17,54 @@ group "Kitchen Sink Sequence 2"
         :KSJG,EINV,USER,name=AUTH_TOKEN_A;
         :KSJH;
       repeat while
-      :KSJ2I;
+      :KSJI;
       repeat
-        :KSJ2D;
-        :KSJ2E;
+        :KSJD;
+        :KSJE;
         if (XOR) then ("error")
-          :KSJ2T;
+          :KSJT;
           break
         else ("normal")
-          :KSJ2F;
+          :KSJF;
         endif
       repeat while
-      :KSJ2U;
+      :KSJU;
     fork again
-      :KSJ2K;
-      :KSJ2L,EINV,USER,name=AUTH_TOKEN_A;
-      :KSJ2M;
+      :KSJK;
+      :KSJL,EINV,USER,name=AUTH_TOKEN_A;
+      :KSJM;
       if (XOR) then ("normal")
-        :KSJ2V;  
+        :KSJV;  
       else ("error")
-        #red:KSJ2N;
+        #red:KSJN;
         detach
       endif
-      :KSJ2W;    
+      :KSJW;    
     fork again
-      :KSJ2P;
-      #red:KSJ2Q;
+      :KSJP;
+      #red:KSJQ;
       detach
     fork again
-      :KSJ2C;
+      :KSJC;
       repeat
-        :KSJ2D;
-        :KSJ2E;
+        :KSJD;
+        :KSJE;
       repeat while
-      :KSJ2F,BCNT,name=BC1;
-      :KSJ2D,EINV,USER,name=AUTH_TOKEN_A;
-      #red:KSJ2G;
+      :KSJF,BCNT,name=BC1;
+      :KSJD,EINV,USER,name=AUTH_TOKEN_A;
+      #red:KSJG;
       detach
     fork again
-      :KSJ2J;
+      :KSJJ;
       repeat
-        :KSJ2S;
+        :KSJS;
       repeat while
-      :KSJ2D;
-      #red:KSJ2E;
+      :KSJD;
+      #red:KSJE;
       detach
     end fork
-    :KSJ2H,IINV,USER,name=KSJInvB;
-    #red:KSJ2Z;
+    :KSJH,IINV,USER,name=KSJInvB;
+    #red:KSJZ;
     detach
 end group
 }

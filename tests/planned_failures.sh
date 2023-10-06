@@ -11,11 +11,11 @@ git clean -dxf .
 echo "Done."
 
 # get list of puml files
-puml_file="../tests/PumlForTesting/PumlRegression/ComplexNoEventDataJob.puml"
+puml_files=$(ls -1 ../tests/PumlForTesting/PumlRegression/*.puml | sort)
 
 # generate job definitions
 echo "Generating job definitions..."
-$P2J --job -o config/job_definitions $puml_file
+echo ${puml_files} | xargs $P2J --job -o config/job_definitions
 echo "Done."
 
 # launch the protocol verifier
@@ -25,24 +25,14 @@ docker compose up -d &>/dev/null
 echo "Done."
 
 echo "Generating runtime events."
-$P2J --play -o reception-incoming $puml_file --play --omit A
-$P2J --play -o reception-incoming $puml_file --play --omit B
-$P2J --play -o reception-incoming $puml_file --play --omit C
-$P2J --play -o reception-incoming $puml_file --play --omit D
-$P2J --play -o reception-incoming $puml_file --play --omit E
-$P2J --play -o reception-incoming $puml_file --play --omit F
-$P2J --play -o reception-incoming $puml_file --play --omit G
-$P2J --play -o reception-incoming $puml_file --play --omit H
-$P2J --play -o reception-incoming $puml_file --play --omit I
-$P2J --play -o reception-incoming $puml_file --play --omit J
-$P2J --play -o reception-incoming $puml_file --play --omit K
-$P2J --play -o reception-incoming $puml_file --play --omit L
-$P2J --play -o reception-incoming $puml_file --play --omit M
-$P2J --play -o reception-incoming $puml_file --play --omit N
-$P2J --play -o reception-incoming $puml_file --play --omit O
-$P2J --play -o reception-incoming $puml_file --play --omit P
-$P2J --play -o reception-incoming $puml_file --play --omit Q
-$P2J --play -o reception-incoming $puml_file --play --omit R
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJA
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJB
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJC
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJD
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJE 
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJA --injectAb4B SSJA SSJC
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJB --injectAb4B SSJB SSJD
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJC --injectAb4B SSJC SSJE
 echo "Done."
 
 # wait a reasonable amount of time
@@ -51,7 +41,7 @@ echo "Waiting ${delay} seconds for protocol verifier to complete..."
 sleep $delay
 echo "Done."
 
-# make sure there is a success log for every job definition
+# make sure there is a failure log for every job definition
 RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 NORMAL=$(tput sgr0)
