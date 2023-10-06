@@ -33,7 +33,12 @@ begin
 
         // validate the event
         if this.validate then
-          validation_result := JSONValidation::validate(JSON::to_json(this.jsonObject), Environment::getenv(Environment::variable_name("AUDIT_EVENT_SCHEMA_PATH")));
+          receptionSpec := find_one ReceptionSpec();
+          if receptionSpec /= null then
+            validation_result := JSONValidation::validate(JSON::to_json(this.jsonObject), receptionSpec.auditEventSchema);
+          else
+            raise program_error("No schema loaded");
+          end if;
 			if JSON::get_boolean(validation_result["valid"]) = true then
 				eventContent := "EventId = " & eventId;
 				Reporting~>reportEvent(Logger::Information, "reception_event_valid", eventContent);
@@ -78,8 +83,11 @@ begin
 						end if;
 					end if;
 				end loop;
+				eventContent := "EventId = " & JSON::get_string(this.jsonObject["eventId"]);
+				Reporting~>reportEvent(Logger::Information, "reception_event_written", eventContent);
 				Ordering~>AcceptEvent(
 					JSON::get_string(this.jsonObject["jobId"]),
+					JSON::get_string(this.jsonObject["jobName"]),
 					JSON::get_string(this.jsonObject["eventType"]),
 					JSON::get_string(this.jsonObject["eventId"]),
 					JSON::get_string(this.jsonObject["timestamp"]),

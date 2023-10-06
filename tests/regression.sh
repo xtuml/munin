@@ -33,8 +33,9 @@ for fn in ${puml_files}; do
 done
 
 # wait a reasonable amount of time
-echo "Waiting for protocol verifier to complete..."
-sleep 5
+delay=5
+echo "Waiting ${delay} seconds for protocol verifier to complete..."
+sleep $delay
 echo "Done."
 
 # make sure there is a success log for every job definition

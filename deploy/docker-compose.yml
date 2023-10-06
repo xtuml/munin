@@ -1,8 +1,12 @@
 version: "3.9"
 services:
   pv_proc:
-    image: "ghcr.io/xtuml/protocol_verifier"
+    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
     volumes:
+      - type: volume
+        source: ConanCache
+        target: /conan-cache
+      - "../models/PV_PROC/build:/work/build"
       - "./config:/root/config"
       - "./logs/reception:/var/log/reception"
       - "./logs/verifier:/var/log/verifier"
@@ -14,4 +18,14 @@ services:
       - "20000:20000"
       - "30000:30000"
       - "40000:40000"
-    command: "PV_PROC_transient -configPath config/ -configFile pv-config.json  -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -log-level AEOrdering=trace -log-level AESequenceDC=trace -log-level IStore=trace -log-level Verifier=trace -log-level AEReception=trace -log-level FileReception=trace -log-level Reception=trace -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup FF -util Inspector -inspector-port 0"
+    environment:
+      - OOA_PORT=0
+    ulimits:
+      sigpending: -1
+    working_dir: /root
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/PV_PROC_transient -configFile pv-config.json -log-config config/log-config-pv-proc.xml -util Inspector"
+
+volumes:
+  ConanCache:
+    name: munin_ConanCache
+    external: true

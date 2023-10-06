@@ -2,8 +2,25 @@
   "JobDefinitionName": "Other-Test-Job",
   "Events": [
     {
-      "EventName": "Other-aaa",
+      "EventName": "aaa",
       "SequenceName": "SEQUENCE1",
+      "OccurrenceId": 1,
+      "Application": "app1",
+      "SequenceStart": true,
+      "EventData": [
+        {
+          "EventDataName": "Data1",
+          "EventDataType": "EXTRAJOBINV"
+        },
+        {
+          "EventDataName": "Data2",
+          "EventDataType": "INTRAJOBINV"
+        }
+      ]
+    },
+    {
+      "EventName": "Other-aaa",
+      "SequenceName": "SEQUENCE2",
       "OccurrenceId": 1,
       "Application": "app1",
       "SequenceStart": true
@@ -15,14 +32,14 @@
           "PreviousOccurrenceId": 1
         }
       ],
-      "SequenceName": "SEQUENCE1",
+      "SequenceName": "SEQUENCE2",
       "EventName": "Other-bbb",
       "OccurrenceId": 1,
       "Application": "app1"
     },
     {
       "EventName": "Other-ddd",
-      "SequenceName": "SEQUENCE1",
+      "SequenceName": "SEQUENCE2",
       "PreviousEvents": [
         {
           "PreviousEventName": "Other-bbb",
@@ -31,6 +48,24 @@
       ],
       "OccurrenceId": 1,
       "Application": "app3"
+    },
+    {
+      "EventName": "bbb",
+      "SequenceName": "SEQUENCE1",
+      "PreviousEvents": [
+        {
+          "PreviousEventName": "aaa",
+          "PreviousOccurrenceId": 1
+        }
+      ],
+      "OccurrenceId": 1,
+      "Application": "app3",
+      "EventData": [
+        {
+          "EventDataName": "Data4",
+          "EventDataType": "EXTRAJOBINV"
+        }
+      ]
     }
   ]
 }

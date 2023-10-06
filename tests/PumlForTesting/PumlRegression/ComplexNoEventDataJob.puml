@@ -3,33 +3,33 @@
 partition "Complex No Event Data Job" {
 
 group "Single Complex Sequence"
-  #green:SCJAa;
-  :SCJAb;
-  :SCJBa;
-  :SCJBb;
-  :SCJBc;
-  :SCJC;
+  #green:A;
+  :B;
+  :C;
+  :D;
+  :E;
+  :F;
   if (XOR) then ("normal")
-    :SJCDa;
+    :G;
     fork
-    :SJCDb;
-      :SCJG;
-      :SJCFa;
+      :H;
+      :I;
+      :J;
     fork again
-      :SCJP;
-      #red:SCJQ;
+      :K;
+      #red:L;
       detach
     fork again
-      :SCJC;
-      :SCJF;
-      :SCJD;
-      :SCJG;
+      :M;
+      :N;
+      :O;
+      :P;
     end fork
-    :SCJH;
-    #red:SCJJ;
+    :Q;
+    #red:R;
     detach
   else ("error")
-    #red:SCJR;
+    #red:S;
     detach
   endif
 end group

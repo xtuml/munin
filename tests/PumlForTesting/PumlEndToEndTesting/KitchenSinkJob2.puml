@@ -6,71 +6,66 @@ partition "Kitchen Sink Job 2" {
  detach
 group "Kitchen Sink Sequence 2"
 
-  #green:KSJ2A,LCNT,user=KSJ2AB,name=LC3,BCNT,user=KSJ2M,name=BC2,MCNT,user=KSJ2P,name=MC2;
-  :KSJ2B,LCNT,user=KSJ2E,name=LC1,LCNT,user=KSJ2H,name=LC2,IINV,name=KSJ2InvA;
-  :KSJ2C;
-  if (XOR) then ("normal")
-    :KSJ2AH;
+  #green:KSJA,LCNT,user=KSJS,name=LC3,BCNT,user=KSJK,name=BC2,MCNT,user=KSJW,name=MC2;
+  :KSJB,LCNT,user=KSJE(0),name=LC1,LCNT,user=KSJD(1),name=LC2,IINV,name=KSJInvA;
+  :KSJC;
+    :KSJD;
     fork
-      :KSJ2AJ;
+      :KSJE;
       repeat
-        :KSJ2D;
-        :KSJ2E,EINV,USER,name=AUTH_TOKEN_A;
-        :KSJ2F;
+        :KSJF;
+        :KSJG,EINV,USER,name=AUTH_TOKEN_A;
+        :KSJH;
       repeat while
-      :KSJ2G,IINV,USER,name=KSJ2InvA;
+      :KSJI;
       repeat
-        :KSJ2H;
-        :KSJ2I;
+        :KSJD;
+        :KSJE;
         if (XOR) then ("error")
-          :KSJ2J;
+          :KSJT;
           break
         else ("normal")
-          :KSJ2K;
+          :KSJF;
         endif
       repeat while
-      :KSJ2L;
+      :KSJU;
     fork again
-      :KSJ2M;
-      :KSJ2N,EINV,USER,name=AUTH_TOKEN_A;
-      :KSJ2P;
-      if (XOR) then ("error")
-        #red:KSJ2Q;
+      :KSJK;
+      :KSJL,EINV,USER,name=AUTH_TOKEN_A;
+      :KSJM;
+      if (XOR) then ("normal")
+        :KSJV;  
+      else ("error")
+        #red:KSJN;
         detach
-      else ("normal")
-      :KSJ2R;  
       endif
-      :KSJ2S;    
+      :KSJW;    
     fork again
-      :KSJ2T,IINV,USER,name=KSJ2InvA;
-      #red:KSJ2U;
+      :KSJP;
+      #red:KSJQ;
       detach
     fork again
-      :KSJ2V;
+      :KSJC;
       repeat
-        :KSJ2W;
-        :KSJ2X;
+        :KSJD;
+        :KSJE;
       repeat while
-      :KSJ2Y,BCNT,name=BC1;
-      :KSJ2Z,EINV,USER,name=AUTH_TOKEN_A;
-      #red:KSJ2AA;
+      :KSJF,BCNT,name=BC1;
+      :KSJD,EINV,USER,name=AUTH_TOKEN_A;
+      #red:KSJG;
       detach
     fork again
-      :KSJ2AK;
+      :KSJJ;
       repeat
-        :KSJ2AB;
+        :KSJS;
       repeat while
-      :KSJ2AC;
-      #red:KSJ2AD,IINV,USER,name=KSJ2InvA;
+      :KSJD;
+      #red:KSJE;
       detach
     end fork
-    :KSJ2AE,IINV,USER,name=KSJ2InvA;
-    #red:KSJ2AF;
+    :KSJH,IINV,USER,name=KSJInvA;
+    #red:KSJZ;
     detach
-  else ("error")
-    #red:KSJ2AG;
-    detach
-  endif
 end group
 }
 @enduml

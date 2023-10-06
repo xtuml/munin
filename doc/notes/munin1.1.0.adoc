@@ -1,0 +1,55 @@
+= Munin 1.1.0 Release Notes
+
+**Inter-domain/Inter-process Communication and Scaling**
+
+Inter-domain/Inter-process communication is implemented using a message
+broker in a publish/subscribe pattern.  This is implemented in the
+underlying software architecture (MASL-Cpass:[++]) using Kafka.  Kafka may
+or may not be the final message broker, so to as great an extent as
+feasible work has been done to insulate the application from this
+architectural artefact.
+
+Munin retains support for file-based input/output for unit testing purposes.
+However, the production configuration now communicates through the broker
+from end-to-end.  `plus2json --play` can feed runtime audit event streams
+into the Protocol Verifier through the message broker.
+
+**Benchmarking Progress**
+
+The Protocol Verifier has been (re)benchmarked.  Scaling with the message
+broker has had a positive effect on performance.  Throughput has doubled
+over the previous stage release.  `plus2json --play` support now has a
+`--rate` option which allows test scripts to play (simulated) audit event
+streams at rates specified in events per second.
+
+**Unhappy Event Support**
+
+Protocol Verifier now supports job definitions that include Unhappy 
+Events and Critical Events.  This is a large change set impacting every
+aspect of the application.  Sequence Verification now subtypes Job into
+Happy Job and Unhappy Job to support the distinctly different behaviour
+required for unhappy event enforcement.  Happy Events continue to be
+supported.  `plus2json` now supports production of Unhappy job
+definitions and runtime production of (simulated) audit event data streams
+with unhappy events inserted/replaced/orphaned/etc.
+
+**Protocol Verifier Instrumentation**
+
+In the absence of an instrumented application with which to test unhappy
+event scenarios, the Protocol Verifier (itself) has been instrumented to
+produce runtime audit events including unhappy events.  The Protocol
+Verifier has a simple straight-line sequence as the normal happy path
+(successful jobs) but a significant number of (legal) error paths.  Thus
+the Protocol Verifier is being tested by monitoring the Protocol Verifier.
+
+Additional motivation to instrument the Protocol Verifier was to explore
+and understand instrumentation techniques and hurdles.  This experience
+has been captured in a set of training material slides.
+
+links:
+
+* https://github.com/xtuml/munin[Munin GitHub repository]
+* https://github.com/xtuml/munin/releases/tag/v1.1.0[Munin Phase 2 Stage 2 release tag]
+* https://github.com/xtuml/plus2json[plus2json GitHub repository]
+* https://github.com/xtuml/plus2json/releases/tag/v1.1.0[plus2json Munin Phase 2 Stage 2 release tag]
+

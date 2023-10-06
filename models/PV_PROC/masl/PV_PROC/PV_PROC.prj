@@ -6,6 +6,7 @@ project PV_PROC is
 
       public service AcceptEvent (
         jobId : in string,
+        jobName : in string,
         auditEventType : in string,
         auditEventId : in string,
         auditEventTime : in string,
@@ -73,6 +74,12 @@ project PV_PROC is
                                                 userOccurrenceId: in integer );       
       public service jobDefinition ( jobName: in string,
                                      eventDefinitions: in sequence of EventDefinitionType );       
+      public service reportVerificationTimerControls ( maxIntraSequenceEventTimeoutPeriod: in duration,
+                                                       waitPeriodForAllJobsCompletedCheck: in duration,
+                                                       waitPeriodForJobDeletion: in duration,
+                                                       waitPeriodForInvariantDeletion: in duration,
+                                                       timeoutPeriodForRetreivingStoredInvariants: in duration,
+                                                       timeoutPeriodForHangingJob: in duration );     
     end terminator;
     terminator Req_IF_InvariantStore is
       public service setLoadRate ( loadRate: in duration );       
@@ -121,6 +128,10 @@ project PV_PROC is
   end domain;
 
   domain VerificationGateway is
+  end domain;
+
+  // This domain is included so the empty implementation is used
+  domain BenchmarkingProbe is
   end domain;
   
 end project;

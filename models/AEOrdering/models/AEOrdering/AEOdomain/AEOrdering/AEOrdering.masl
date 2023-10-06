@@ -111,6 +111,13 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '7de8f146-366c-421c-bd7c-58de8be8da3b' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_Verification~>reportVerificationTimerControls () is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
 //! ACTIVITY BEGIN. '3f80ab1a-1a0b-45e9-ae35-0682099b81c4' DO NOT EDIT THIS LINE.
 public service AEOrdering::Req_IF_InvariantStore~>setLoadRate ( loadRate : in duration ) is
 begin
@@ -128,7 +135,8 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'be8a0735-26d0-46db-8594-13f83d8e3b59' DO NOT EDIT THIS LINE.
-public service AEOrdering::Req_IF_BehaviourVerification~>sendInstrumentationEvent ( jobID : in string,
+public service AEOrdering::Req_IF_BehaviourVerification~>sendInstrumentationEvent ( jobName : in string,
+                                                                                   jobID : in string,
                                                                                    eventID : in string,
                                                                                    eventType : in string ) is
 begin

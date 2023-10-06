@@ -1,0 +1,34 @@
+@startuml
+partition "ACriticalEJInvariantJob1" {
+    group "A Critical Job With Extra Job Invariant Sequence 1"
+        #green:CEJA;
+        :CEJB;
+        fork
+            :CEJC;
+            :CEJD;
+            #gold:CEJE,CRITICAL;
+        fork again
+            :CEJF;
+            :CEJG;
+            #gold:CEJH,CRITICAL;
+        end fork
+        :CEJI,EINV,USER,name=AUTH_TOKEN_A;
+        #red:CEJJ;
+        detach
+    end group
+    package "Unhappy Events" {
+      :CEJB_Err;
+      kill
+      :CEJD_Err;
+      kill
+      :CEJE_Err;
+      kill
+      :CEJF_Err;
+      kill
+      :CEJG_Err;
+      kill
+      :CEJI_Err;
+      kill    
+    }
+}
+@enduml

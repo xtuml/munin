@@ -68,20 +68,19 @@ configJSONObject : JSON::JSONObject;
 configValidationResult : JSON::JSONObject;
 jobStoreLocation : string := "./";
 jobStoreAgeLimit : duration := @P7D@;
-filePermissions : Filesystem::permissions;
 jobStore : instance of JobStore;
 jobStoreName : string := "JobIdStore.log";
 today : sequence of integer;
 midnight : timestamp;
 invariantStoreLoadRate : duration;
+maxIntraSequenceEventTimeoutPeriod : duration := @PT1S@;
+waitPeriodForAllJobsCompletedCheck : duration := @P1D@;
+waitPeriodForJobDeletion : duration := @PT30M@;
+waitPeriodForInvariantDeletion : duration := @P1D@;
+timeoutPeriodForRetreivingStoredInvariants : duration := @PT10S@;              
+timeoutPeriodForHangingJob : duration := @PT15S@;
 
 begin
-	filePermissions.group.read := true;
-	filePermissions.other.read := true;
-	filePermissions.group.write := true;
-	filePermissions.other.write := true;
-	filePermissions.group.execute := true;
-	filePermissions.other.execute := false;
     
     // check the config file has not been removed
     fileName := Filesystem::filename(this.configFilePath & this.configFile);
@@ -112,7 +111,7 @@ begin
                 this.defaultJobExpiryDuration := duration'parse(JSON::get_string(configJSONObject["DefaultJobExpiryDuration"]));
             end if;
             if configJSONObject'contains("DefaultStaleAuditEventDuration") then
-                this.defaultJobExpiryDuration := duration'parse(JSON::get_string(configJSONObject["DefaultStaleAuditEventDuration"]));
+                this.defaultStaleAuditEventDuration := duration'parse(JSON::get_string(configJSONObject["DefaultStaleAuditEventDuration"]));
             end if;
             if configJSONObject'contains("DefaultBlockedAuditEventDuration") then
                 this.defaultBlockedAuditEventDuration := duration'parse(JSON::get_string(configJSONObject["DefaultBlockedAuditEventDuration"]));
@@ -133,6 +132,29 @@ begin
                 	Req_IF_InvariantStore~>setLoadRate(this.invariantStoreLoadRate);
                 end if;
             end if;
+            if configJSONObject'contains("MaxIntraSequenceEventTimeoutPeriod") then
+				maxIntraSequenceEventTimeoutPeriod := duration'parse(JSON::get_string(configJSONObject["MaxIntraSequenceEventTimeoutPeriod"]));
+			end if;
+            if configJSONObject'contains("WaitPeriodForAllJobsCompletedCheck") then
+				waitPeriodForAllJobsCompletedCheck := duration'parse(JSON::get_string(configJSONObject["WaitPeriodForAllJobsCompletedCheck"]));
+			end if;
+            if configJSONObject'contains("WaitPeriodForJobDeletion") then
+				waitPeriodForJobDeletion := duration'parse(JSON::get_string(configJSONObject["WaitPeriodForJobDeletion"]));
+			end if;
+            if configJSONObject'contains("WaitPeriodForInvariantDeletion") then
+				waitPeriodForInvariantDeletion := duration'parse(JSON::get_string(configJSONObject["WaitPeriodForInvariantDeletion"]));
+			end if;
+            if configJSONObject'contains("TimeoutPeriodForRetreivingStoredInvariants") then
+				timeoutPeriodForRetreivingStoredInvariants    := duration'parse(JSON::get_string(configJSONObject["TimeoutPeriodForRetreivingStoredInvariants"]));           
+			end if;
+            if configJSONObject'contains("TimeoutPeriodForHangingJob") then
+				timeoutPeriodForHangingJob := duration'parse(JSON::get_string(configJSONObject["TimeoutPeriodForHangingJob"]));
+			end if;
+			
+			// report the verification timer controls 
+			Req_IF_Verification~>reportVerificationTimerControls(maxIntraSequenceEventTimeoutPeriod, waitPeriodForAllJobsCompletedCheck,
+				                                                 waitPeriodForJobDeletion, waitPeriodForInvariantDeletion,
+				                                                 timeoutPeriodForRetreivingStoredInvariants, timeoutPeriodForHangingJob);
         else
             logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
             Logger::log(Logger::Debug, "AEOrdering", logMessage);

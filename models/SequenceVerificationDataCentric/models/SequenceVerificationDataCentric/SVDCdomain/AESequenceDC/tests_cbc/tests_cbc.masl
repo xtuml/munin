@@ -1481,3 +1481,601 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '0e9d8322-95b7-4054-a81e-ab89eab5a766' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test66IntraJobInvariantWithUpdatedDefinition () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+theIntraJobInvariants : set of instance of TransientInvariant;
+invariantEventTypes : sequence of intraJobInvDataStructure;
+
+begin
+
+  // Start by updating the invariant definition - it moves the invariant to be expected on different events
+  invariantEventTypes := ("SFMB",1,"") & ("SFMG",1,"");
+  intraJobInvariantDefinition("SplitBranchedJob","InvA",invariantEventTypes);
+
+  // This test is based upon Test14 which covers 1 Job with 2 sequences based on a fork and merge path definition - the first
+  // sequence contains a fork to 3 branches and the second sequence contains a merge back to a single branch
+  // This test adds invariant audit event data which is used to verify the two sequences have been used correctly
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  previousEvents := empty;
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920000","SFMA","Job_Split_FandM","SplitBranchedJob",previousEvents,"Ev301",theAuditEventData);
+  previousEvents := ("Ev301");
+  theAuditEventData := (aeDataKindEnum.INTRAJOBINV, "InvA", "B12345");
+  acceptOrderedEvent ("1620920001","SFMB","Job_Split_FandM","SplitBranchedJob",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","SFMC","Job_Split_FandM","SplitBranchedJob",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","SFMD","Job_Split_FandM","SplitBranchedJob",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev302");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","SFME","Job_Split_FandM","SplitBranchedJob",previousEvents,"Ev305",theAuditEventData);
+  previousEvents := empty;
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920005","SFMC1","Job_Split_FandM","SplitBranchedJob",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := empty;
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920005","SFMD1","Job_Split_FandM","SplitBranchedJob",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := empty;
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920005","SFME1","Job_Split_FandM","SplitBranchedJob",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := empty & "Ev306" & "Ev307" & "Ev308";
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920006","SFMF","Job_Split_FandM","SplitBranchedJob",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev309");
+  theAuditEventData := (aeDataKindEnum.INTRAJOBINV, "InvA", "B12345");
+  acceptOrderedEvent ("1620920007","SFMG","Job_Split_FandM","SplitBranchedJob",previousEvents,"Ev310",theAuditEventData);
+  //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  theIntraJobInvariants := theAuditEvents -> R23;
+  
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 2, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 10, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theIntraJobInvariants'length = 2, "Wrong number of invariants created: " & (theIntraJobInvariants'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '9ef5aa18-7677-4c8e-a170-4de4671cfe38' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test67ExtraJobInvariantWithUpdatedDefinition () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+theIntraJobInvariants : set of instance of TransientInvariant;
+invariantEventTypes : sequence of intraJobInvDataStructure;
+userEvents : sequence of userEventDataStructure;
+userEvent : userEventDataStructure;
+theSourceInvariants : set of instance of PersistedInvariant;
+thePersistedInvariants : set of instance of PersistedInvariant;
+
+begin
+
+  // Start by updating the invariant definition - it moves the invariant to be expected on different events
+  userEvents := ("EBankTransferJob","ENearPartWrite",1,"") & ("EBankTransferJob","EAuthoriserSendWidgets",1,"") & ("EBankTransferJob","EGatewayWritePayload",1,"");
+  extraJobInvariantDefinition("PersistentInvariantTypeB", "Auth_PersistentInvariantJob", "EAuthSendResponse",1,userEvents);
+
+  // This test covers 1 Auth Job with 2 persistentinvariant values being defined
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  previousEvents := empty;
+//  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeA", "Ent987654321");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920000","EAuthoriserSendOrderRequest","Job_PersistentInvariant","Auth_PersistentInvariantJob",previousEvents,"Ev1201",theAuditEventData);
+  previousEvents := ("Ev1201");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920001","EAuthReceiveRequest","Job_PersistentInvariant","Auth_PersistentInvariantJob",previousEvents,"Ev1202",theAuditEventData);
+  previousEvents := ("Ev1202");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920002","EAuthSendMidRequest","Job_PersistentInvariant","Auth_PersistentInvariantJob",previousEvents,"Ev1203",theAuditEventData);
+  previousEvents := ("Ev1203");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920003","EAuthReceiveMidResponse","Job_PersistentInvariant","Auth_PersistentInvariantJob",previousEvents,"Ev1204",theAuditEventData);
+  previousEvents := ("Ev1204");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920004","EAuthSendMidRequest","Job_PersistentInvariant","Auth_PersistentInvariantJob",previousEvents,"Ev1205",theAuditEventData);
+  previousEvents := ("Ev1205");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920005","EAuthReceiveMidResponse","Job_PersistentInvariant","Auth_PersistentInvariantJob",previousEvents,"Ev1206",theAuditEventData);
+  previousEvents := ("Ev1206");
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Ent987654321");
+  acceptOrderedEvent ("1620920006","EAuthSendResponse","Job_PersistentInvariant","Auth_PersistentInvariantJob",previousEvents,"Ev1207",theAuditEventData);
+  previousEvents := ("Ev1207");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920007","EAuthoriserReceiveOrder","Job_PersistentInvariant","Auth_PersistentInvariantJob",previousEvents,"Ev1208",theAuditEventData);
+  //
+  Test::service_event_queue();
+  theJob := find_only Job(jobID = "Job_PersistentInvariant");
+  Test::fire_timer(theJob.jobEventTimer);
+  
+  
+  // It then deletes the Job that created the PersistentInvariant values but retains the persistentinvariant values as PersistedInvariants
+  
+  deleteJob ("Job_PersistentInvariant");
+  theSourceInvariants := find PersistedInvariant(inForce = true);
+  Assertions::assertTrue(theSourceInvariants'length = 1, "Wrong number of source invariants in force: " & (theSourceInvariants'length)'image);
+
+  
+    // Bank Transfer Sequence
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920000","ENearInput","Job_PersistentInvariant_Use","EBankTransferJob","","Ev1",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Ent987654321");
+  acceptOrderedEvent ("1620920001","ENearPartWrite","Job_PersistentInvariant_Use","EBankTransferJob","Ev1","Ev2",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920002","ENearJustificationWrite","Job_PersistentInvariant_Use","EBankTransferJob","Ev2","Ev3",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920003","EAgentRequestWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev3","Ev4",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920004","EAuthoriserReadWidgetRequest","Job_PersistentInvariant_Use","EBankTransferJob","Ev4","Ev5",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920005","EAuthoriserParsedJustification","Job_PersistentInvariant_Use","EBankTransferJob","Ev5","Ev6",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Ent987654321");
+  acceptOrderedEvent ("1620920006","EAuthoriserSendWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev6","Ev7",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920007","EAgentReceiveWidgets","Job_PersistentInvariant_Use","EBankTransferJob","Ev7","Ev8",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920008","EAgentPartRead","Job_PersistentInvariant_Use","EBankTransferJob","Ev8","Ev9",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920008","EAgentProcessedRequest","Job_PersistentInvariant_Use","EBankTransferJob","Ev8","Ev9a",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920009","EAgentWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev9","Ev10",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920010","EGatewayReadPayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev10","Ev11",theAuditEventData);
+  
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "PersistentInvariantTypeB", "Ent987654321");
+  acceptOrderedEvent ("1620920011","EGatewayWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev11","Ev12",theAuditEventData);
+  
+  // Mid Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920012","EMidProcessPayload","Job_PersistentInvariant_Use","EBankTransferJob","","Ev13",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920013","EMidWritePayload","Job_PersistentInvariant_Use","EBankTransferJob","Ev13","Ev14",theAuditEventData);
+  
+  // Far Side Sequence - note first event of a sequence has no previous event id (penultimate parameter)
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920050","EFarInput","Job_PersistentInvariant_Use","EBankTransferJob","","Ev50",theAuditEventData);
+  
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1620920055","EFarOutput","Job_PersistentInvariant_Use","EBankTransferJob","Ev50","Ev55",theAuditEventData);
+  
+  Test::service_event_queue();
+  
+  theJob := find_only Job(jobID = "Job_PersistentInvariant_Use");
+  Test::fire_timer(theJob.jobEventTimer);
+
+  Test::service_event_queue();
+  
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 3, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 17, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;
+  
+  // ... and finally clear down all the existing instances of PersistedInvariant in readiness for other tests.
+  thePersistedInvariants := find PersistedInvariant();
+  for thePersistedInvariant in thePersistedInvariants loop
+    thePersistedInvariant.deletePersistedInvariant();   
+  end loop; 
+  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '39fc51e1-aa6e-4b17-9226-79bd08f88e72' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test68BranchCountWithUpdatedDynamicControlDefn () is
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+previousEvents : sequence of string;
+empty : sequence of string;
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+
+begin
+  // First update the dynamic control definitions to move the event on which the event data is expected and to move the merge point
+  createDynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFB",1,"BCFB",1);
+  createDynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFB",1,"BCFE",1);
+
+  // This test covers 1 Job with 1 sequences based on a fork and merge path definition - there are 10 branches
+  // This test does not reveal any erroneous behaviour of the twin
+  //
+  theAuditEventData :=  emptyAuditEventData;
+  acceptOrderedEvent ("1620920000","BCFA","Branch_Count_Job","BranchCountJob",previousEvents,"Ev301",theAuditEventData);
+  previousEvents := ("Ev301");
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "Branch_Counter_1", "10") & (aeDataKindEnum.MERGECOUNT, "Merge_Counter_1", "10");
+  acceptOrderedEvent ("1620920001","BCFB","Branch_Count_Job","BranchCountJob",previousEvents,"Ev302",theAuditEventData);
+  previousEvents := ("Ev302");
+  theAuditEventData :=  emptyAuditEventData;
+  acceptOrderedEvent ("1620920002","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev303",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev304",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev305",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev306",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev307",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev308",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev309",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev310",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev311",theAuditEventData);
+  previousEvents := ("Ev302");
+  acceptOrderedEvent ("1620920002","BCFC","Branch_Count_Job","BranchCountJob",previousEvents,"Ev312",theAuditEventData);
+  previousEvents := ("Ev303");
+  acceptOrderedEvent ("1620920003","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev313",theAuditEventData);
+  previousEvents := ("Ev304");
+  acceptOrderedEvent ("1620920003","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev314",theAuditEventData);
+  previousEvents := ("Ev305");
+  acceptOrderedEvent ("1620920003","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev315",theAuditEventData);
+  previousEvents := ("Ev306");
+  acceptOrderedEvent ("1620920003","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev316",theAuditEventData);
+  previousEvents := ("Ev307");
+  acceptOrderedEvent ("1620920003","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev317",theAuditEventData);
+  previousEvents := ("Ev308");
+  acceptOrderedEvent ("1620920003","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev318",theAuditEventData);
+  previousEvents := ("Ev309");
+  acceptOrderedEvent ("1620920003","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev319",theAuditEventData);
+  previousEvents := ("Ev310");
+  acceptOrderedEvent ("1620920003","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev320",theAuditEventData);
+  previousEvents := ("Ev311");
+  acceptOrderedEvent ("1620920003","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev321",theAuditEventData);
+  previousEvents := ("Ev312");
+  acceptOrderedEvent ("1620920003","BCFD","Branch_Count_Job","BranchCountJob",previousEvents,"Ev322",theAuditEventData);
+  previousEvents := empty & "Ev313" & "Ev314" & "Ev315" & "Ev316" & "Ev317" & "Ev318" & "Ev319" & "Ev320" & "Ev321" & "Ev322";
+  acceptOrderedEvent ("1620920004","BCFE","Branch_Count_Job","BranchCountJob",previousEvents,"Ev323",theAuditEventData);
+  previousEvents := ("Ev323");
+  acceptOrderedEvent ("1620920005","BCFF","Branch_Count_Job","BranchCountJob",previousEvents,"Ev324",theAuditEventData);
+ //
+  Test::service_event_queue();
+  if (Test::get_scheduled_timers ())'length /= 0 then
+    Test::fire_scheduled_timers();
+  end if; 
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  //
+  Assertions::assertTrue(theJobs'length = 1, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 1, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 24, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;  
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'f3a849e7-9b47-4071-a022-0edebd0f9511' DO NOT EDIT THIS LINE.
+private service AESequenceDC::Test207ComplexSequenceRepeatedEventNamesSunnyDay1 () is
+theAuditEventData : sequence of auditEventDataStructure;
+emptyAuditEventData : sequence of auditEventDataStructure;
+previousEvents : sequence of string;
+empty : sequence of string;
+theJob : instance of Job;
+theJobs : set of instance of Job;
+theSequences : set of instance of Sequence;
+theAuditEvents : set of instance of SequencedAuditEvent;
+theDynamicControls : set of instance of DynamicControl;
+theDynamicControlDefinitions : set of instance of DynamicControlDefinition;
+theLOOPCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
+theBRANCHCOUNTcontrolDefinitions : set of instance of DynamicControlDefinition;
+theIntraJobInvariantDefinitions : set of instance of IntraJobInvariantDefn;
+theTransientInvariantsForIntraJobInvariants : set of instance of TransientInvariant;
+theUsagesOfTransientInvariant : set of instance of TransientInvariant;
+theSourcesOfExtraJobInvariant : set of instance of PersistedInvariant;   // As delivered by an AuditEvent in this test
+theUsageOfTransientInvariant : instance of TransientInvariant;           // As delivered by an AuditEvent in this test
+theExtraJobInvariantDefnForTransientInvariantUsage : instance of ExtraJobInvariantDefn;
+theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn : integer;
+thePersistedInvariants : set of instance of PersistedInvariant;
+thePersistedInvariant : instance of PersistedInvariant;
+logMessage : string;
+
+begin
+  // *******************************************************************************
+  // This test delivers events for two jobs:
+  //    (1) 'GenToken1' of type 'GenerateAuthorisationTokenJob'
+  //    (2) 'ComplexSunnyDayRepeatedEventNames1' of type 'ComplexJobRepeat1'
+  // The first of these two jobs is the source of an Extra Job Invariant that is used several times within the second job.
+  //
+  // This test is designed to check that an invalid break-out of a loop can be detected and reported and result in a failed Job
+  //
+  // The only difference between this test and Test72ComplexSequence_SunnyDay1 is that the second of two loops in section 2 of the
+  // sequence breaks out of the loop after Event66 on the 2nd occurrence of event 'E,2'.
+  // *******************************************************************************
+  //
+  // Firstly, deliver a set of events for the 'GenerateAuthorisationTokenJob'
+  previousEvents := empty;
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246655","TOK-A","GenToken2","GenerateAuthorisationTokenJob2",previousEvents,"Event97",theAuditEventData);
+  previousEvents := ("Event97");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246656","TOK-B","GenToken2","GenerateAuthorisationTokenJob2",previousEvents,"Event98",theAuditEventData);
+  previousEvents := ("Event98");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246657","TOK-C","GenToken2","GenerateAuthorisationTokenJob2",previousEvents,"Event99",theAuditEventData);
+  //
+  // Event occurrence TOK-D,1 is the source of an Extra Job Invariant.
+  previousEvents := ("Event99");
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_C", "ProtectedFact_A2");
+  acceptOrderedEvent ("1670246658","TOK-D","GenToken2","GenerateAuthorisationTokenJob2",previousEvents,"Event100",theAuditEventData);
+  // End of event definitions for the 'GenToken1' instance of the 'GenerateAuthorisationTokenJob'.
+  //
+  // Process all the events on the event queue - note that the job 'GenToken1' should be in the 'CheckingSequenceCompletion' state after this.
+  Test::service_event_queue();
+  //
+  // Fire the jobEventTimer to move the GenToken1 job (which thinks it's complete) through to the state for checking constraints & invariants
+  theJob := find_only Job(jobID = "GenToken2");
+  Test::fire_timer(theJob.jobEventTimer);
+  //
+  // Service the event queue again to process any events placed on queue resulting from  
+  // the jobEventTimer for Job 'GenToken1' being fired.
+  Test::service_event_queue();
+  //
+  //
+  // Now deliver a set of events for the 'ComplexJobRepeat1' - this job consists of a single but highly complex sequence which,
+  // for practical purposes, has been divided into 7 separate sections. The sequence overall consists of combinations of 
+  // various topologies, constraints and invariants.
+  //
+  // Starting with the initial 3 events of section 1 of the complex sequence...
+  previousEvents := empty;
+  // Event occurrence 'CS1-A,1' in the sequence is the source of loop constraint 'LC3' (which constrains the loop involving event occurrence 'CS1-S,1' to 2), and
+  // is also the source of branch constraint 'BC2' (which constrains the number of instance branches at 'CS1-K,2' to 3).
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC3", "2") & (aeDataKindEnum.BRANCHCOUNT, "BC2", "3");
+  acceptOrderedEvent ("1670246786","CS1-A","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event25",theAuditEventData);
+  previousEvents := ("Event25");
+  // Event occurrence 'CS1-B,1' in the sequence is the source of two loop constraints 'LC1' (which constrains the loop involving event occurrence 'CS1-E,1' to 3) and
+  // 'LC2' (which constrains the loop involving event occurrence 'CS1-D,2' to 2).
+  theAuditEventData := (aeDataKindEnum.LOOPCOUNT, "LC1", "3") & (aeDataKindEnum.LOOPCOUNT, "LC2", "2") & (aeDataKindEnum.INTRAJOBINV, "InvariantRA", "AAAAA");
+  acceptOrderedEvent ("1670246787","CS1-B","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event59",theAuditEventData);
+  previousEvents := ("Event59");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246788","CS1-C","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event13",theAuditEventData);
+  //
+  // ...then the events for the second section of the sequence (up until Event55 which is just before the Type Merge at Event15)...
+  previousEvents := ("Event13");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246789","CS1-D","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event60",theAuditEventData);
+  previousEvents := ("Event60");
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_C", "ProtectedFact_A2");
+  acceptOrderedEvent ("1670246790","CS1-E","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event11",theAuditEventData);
+  previousEvents := ("Event11");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246791","CS1-F","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event17",theAuditEventData);
+  previousEvents := ("Event17");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246792","CS1-D","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event29",theAuditEventData);
+  previousEvents := ("Event29");
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_C", "ProtectedFact_A2");
+  acceptOrderedEvent ("1670246793","CS1-E","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event33",theAuditEventData);
+  previousEvents := ("Event33");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246794","CS1-F","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event41",theAuditEventData);
+  previousEvents := ("Event41");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246795","CS1-D","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event63",theAuditEventData);
+  previousEvents := ("Event63");
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_C", "ProtectedFact_A2");
+  acceptOrderedEvent ("1670246796","CS1-E","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event19",theAuditEventData);
+  previousEvents := ("Event19");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246797","CS1-F","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event23",theAuditEventData);
+  previousEvents := ("Event23");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246798","CS1-G","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event16",theAuditEventData);
+  previousEvents := ("Event16");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246799","CS1-D","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event27",theAuditEventData);
+  previousEvents := ("Event27");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246800","CS1-E","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event70",theAuditEventData);
+  previousEvents := ("Event70");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246801","CS1-F","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event18",theAuditEventData);
+  previousEvents := ("Event18");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246802","CS1-D","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event36",theAuditEventData);
+  previousEvents := ("Event36");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246803","CS1-E","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event66",theAuditEventData);
+  previousEvents := ("Event66");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246804","CS1-T","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event77",theAuditEventData);
+  //
+  // ...and now the events for the third section of the sequence (which includes an instance fork and merge)...
+  previousEvents := ("Event13");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246805","CS1-K","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event61",theAuditEventData);
+  // An instance fork starts here - with 3 instances of CS1-L
+  previousEvents := ("Event61");
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_C", "ProtectedFact_A2");
+  acceptOrderedEvent ("1670246806","CS1-L","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event62",theAuditEventData);
+  previousEvents := ("Event61");
+  //theAuditEventData := emptyAuditEventData;
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_C", "ProtectedFact_A2");
+  acceptOrderedEvent ("1670246807","CS1-L","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event56",theAuditEventData);
+  previousEvents := ("Event61");
+  //theAuditEventData := emptyAuditEventData;
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_C", "ProtectedFact_A2");
+  acceptOrderedEvent ("1670246808","CS1-L","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event57",theAuditEventData);
+  //
+  // ...and the INSTANCE fork merges here at the CS1-M event
+  previousEvents := empty & "Event62" & "Event56" & "Event57";
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246809","CS1-M","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event14",theAuditEventData);
+  //
+  // At this point the third section in the sequence merges with the second section in the sequence at Event15, so deliver the remaining 
+  // events up to the end point in the second section of the sequence.
+  //
+  previousEvents := empty & "Event77" & "Event14";
+  theAuditEventData := (aeDataKindEnum.INTRAJOBINV, "InvariantRA", "AAAAA");
+  acceptOrderedEvent ("1670246810","CS1-H","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event15",theAuditEventData);
+  previousEvents := ("Event15");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246811","CS1-J","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event44",theAuditEventData);
+  //
+  // ...and now the events for section 4 of the sequence...
+  previousEvents := ("Event13");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246812","CS1-P","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event20",theAuditEventData);
+  previousEvents := ("Event20");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246813","CS1-Q","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event10",theAuditEventData);
+  //
+  // ...and now the events for section 5 of the sequence...
+  previousEvents := ("Event13");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246816","CS1-C","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event64",theAuditEventData);
+  previousEvents := ("Event64");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246817","CS1-D","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event30",theAuditEventData);
+  previousEvents := ("Event30");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246818","CS1-E","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event32",theAuditEventData);
+  previousEvents := ("Event32");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246819","CS1-D","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event45",theAuditEventData);
+  previousEvents := ("Event45");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246890","CS1-E","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event21",theAuditEventData);
+  //
+  // Event occurrence 'CS1-F,3' in the sequence is the source of branch constraint 'BC1' (which constrains the number of instance branches at 'CS1-F,3' to 2)
+  previousEvents := ("Event21");
+  theAuditEventData := (aeDataKindEnum.BRANCHCOUNT, "BC1", "2");
+  acceptOrderedEvent ("1670246891","CS1-F","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event24",theAuditEventData);
+  //
+  // Event occurrence 'CS1-D,4' in the sequence is a user of the Extra Job Invariant 'AUTH_TOKEN_C'.
+  previousEvents := ("Event24"); 
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_C", "ProtectedFact_A2");
+  acceptOrderedEvent ("1670246892","CS1-D","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event39",theAuditEventData);
+  //
+  previousEvents := ("Event39");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246893","CS1-G","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event34",theAuditEventData);
+  previousEvents := ("Event24");
+  theAuditEventData := (aeDataKindEnum.EXTRAJOBINV, "AUTH_TOKEN_C", "ProtectedFact_A2");
+  acceptOrderedEvent ("1670246892","CS1-D","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event46",theAuditEventData);
+  previousEvents := ("Event46");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246893","CS1-G","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event47",theAuditEventData);
+  //
+  // ...and finally the events for section 6 of the sequence...
+  previousEvents := ("Event13");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246894","CS1-S","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event42",theAuditEventData);
+  previousEvents := ("Event42");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246895","CS1-S","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event31",theAuditEventData);
+  previousEvents := ("Event31");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246896","CS1-D","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event22",theAuditEventData);
+  previousEvents := ("Event22");
+  theAuditEventData := emptyAuditEventData;
+  acceptOrderedEvent ("1670246897","CS1-E","ComplexSunnyDayRepeatedEventNames1","ComplexJobRepeat1",previousEvents,"Event28",theAuditEventData);
+  //
+  // Process all the events on the event queue - note that the job 'ComplexSunnyDayRepeatedEventNames1' should be in the 'CheckingSequenceCompletion' state after this.
+  Test::service_event_queue();
+  //
+  // Fire the jobEventTimer to move the 'ComplexSunnyDayRepeatedEventNames1' job (which thinks it's complete) through to the state for checking constraints & invariants
+  theJob := find_only Job(jobID = "ComplexSunnyDayRepeatedEventNames1");
+  Test::fire_timer(theJob.jobEventTimer);
+  //
+  // Service the event queue again to process any events placed on queue resulting from  
+  // the jobEventTimer for Job 'ComplexSunnyDayRepeatedEventNames1' being fired.
+  Test::service_event_queue();
+  //
+  // ...and now check that the state of the model is as expected.
+  theJobs := find Job ();
+  theSequences := theJobs -> R10;
+  theAuditEvents := theSequences -> R11;
+  theDynamicControls := theJobs -> R35;
+  theDynamicControlDefinitions := theJobs -> R35 -> R29;
+  theLOOPCOUNTcontrolDefinitions := find theDynamicControlDefinitions (dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT);
+  theBRANCHCOUNTcontrolDefinitions := find theDynamicControlDefinitions (dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT);
+  theIntraJobInvariantDefinitions := theJobs -> R8 -> R22;
+  theTransientInvariantsForIntraJobInvariants := theIntraJobInvariantDefinitions -> R26;
+  theSourcesOfExtraJobInvariant := theAuditEvents -> R27;
+  theUsagesOfTransientInvariant := theAuditEvents -> R23;
+  theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn := 0;
+  for theUsageOfTransientEvent in theUsagesOfTransientInvariant loop
+    theExtraJobInvariantDefnForTransientInvariantUsage := theUsageOfTransientEvent -> R28;
+    if theExtraJobInvariantDefnForTransientInvariantUsage /= null then
+      theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn := theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn + 1;
+    end if;
+  end loop;
+  //
+  Assertions::assertTrue(theJobs'length = 2, "Wrong number of jobs created: " & (theJobs'length)'image);
+  Assertions::assertTrue(theSequences'length = 2, "Wrong number of sequences created: " & (theSequences'length)'image);
+  Assertions::assertTrue(theAuditEvents'length = 46, "Wrong number of audit events created: " & (theAuditEvents'length)'image);
+  Assertions::assertTrue(theDynamicControls'length = 7, "Wrong number of dynamic controls created: " & (theDynamicControls'length)'image);
+  Assertions::assertTrue(theLOOPCOUNTcontrolDefinitions'length = 3, "Wrong number of LOOPCOUNT control definitions created: " & (theLOOPCOUNTcontrolDefinitions'length)'image);
+  Assertions::assertTrue(theBRANCHCOUNTcontrolDefinitions'length = 2, "Wrong number of BRANCHCOUNT control definitions created: " & (theBRANCHCOUNTcontrolDefinitions'length)'image);
+  Assertions::assertTrue(theIntraJobInvariantDefinitions'length = 1, "Wrong number of Intra-Job Invariant definitions created: " & (theIntraJobInvariantDefinitions'length)'image);
+  Assertions::assertTrue(theTransientInvariantsForIntraJobInvariants'length = 2, "Wrong number of Transient Invariants created for IntraJob Invariants: " & (theTransientInvariantsForIntraJobInvariants'length)'image);
+  Assertions::assertTrue(theSourcesOfExtraJobInvariant'length = 1, "Wrong number of audit events acting as source of a PersistedInvariant : " & (theSourcesOfExtraJobInvariant'length)'image);
+  Assertions::assertTrue(theUsagesOfTransientInvariant'length = 10, "Wrong number of audit events making usage of a TransientInvariant : " & (theUsagesOfTransientInvariant'length)'image);
+  Assertions::assertTrue(theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn = 8, "Wrong number of audit events using an Extra-Job Invariant : " & (theNumberOfTransientInvariantsActingAsUsagesOfAnExtraJobInvariantDefn)'image);
+  //
+  for theJob in theJobs loop
+    Assertions::assertTrue(theJob.jobCompleted, "Job is incomplete: " & theJob.jobID);
+    Assertions::assertTrue(theJob.sequencingFailed = false, "Sequencing has failed: " & theJob.jobID);
+  end loop;
+  //
+  // ... and finally clear down all the existing instances of PersistedInvariant in readiness for other tests.
+  thePersistedInvariants := find PersistedInvariant();
+  for thePersistedInvariant in thePersistedInvariants loop
+    thePersistedInvariant.deletePersistedInvariant();   
+  end loop; 
+  //
+end service;
+//
+//
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
