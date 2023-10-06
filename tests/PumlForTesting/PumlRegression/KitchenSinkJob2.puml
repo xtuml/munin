@@ -33,11 +33,11 @@ group "Kitchen Sink Sequence 2"
       :KSJK;
       :KSJL,EINV,USER,name=AUTH_TOKEN_A;
       :KSJM;
-      if (XOR) then ("normal")
-        :KSJV;  
-      else ("error")
+      if (XOR) then ("error")
         #red:KSJN;
         detach
+      else ("normal")
+        :KSJV;  
       endif
       :KSJW;    
     fork again
