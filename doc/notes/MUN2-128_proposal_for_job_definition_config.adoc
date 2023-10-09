@@ -1,35 +1,35 @@
-= Proposal for Configuration of Job Definition Specific Controls 
+= Proposal for Configuration of Job Definition Specific Controls
 
 xtUML Project Analysis Note
 
 == 1 Abstract
 
-Currently in PV it is possible to configure specific controls that are to be 
-applied to a job definition in the verifier-config.json file. It would be 
-advantageous if this configuration data could be capture in the definition 
+Currently in PV it is possible to configure specific controls that are to be
+applied to a job definition in the pv-config.json file. It would be
+advantageous if this configuration data could be capture in the definition
 of the Job using PLUS. This note summarises the investigation and proposes a solution.
 
 == 2 Introduction and Background
 
 The proof of concept for PV provided a config file that captured the configuration data
-for the Protocol Verifier and the definitons of the Jobs that were to be procesed. 
+for the Protocol Verifier and the definitions of the Jobs that were to be processed.
 Investigation was performed on using Plant UML to define the Job Definitions which resulted
 in the PLUS language and plus2json tooling to generate Job Definitions into individual json files.
-Currently it is not possible to define in PLUS if a job is deprecated or if there are different 
-timing constraints for stale and blocked events against a job or individual events and these 
-definitions are still captured in the verifier-config.json introducing a disconnect between 
-the job definition and some of the control behaviour that needs to be captureed for the job.
+Currently it is not possible to define in PLUS if a job is deprecated or if there are different
+timing constraints for stale and blocked events against a job or individual events and these
+definitions are still captured in the pv-config.json introducing a disconnect between
+the job definition and some of the control behaviour that needs to be captured for the job.
 
 == 3 Requirements
 
-The verifier-config.json specification file allows the system administrator to set default durations
+The pv-config.json specification file allows the system administrator to set default durations
 
 * DefaultStaleAuditEventDuration
 * DefaultBlockedAuditEventDuration
 
 that will be applied to all jobs.
 
-In addition the verifier-config currently allows the System Administrator to define in specific durations
+In addition the pv-config currently allows the System Administrator to define in specific durations
 for individual jobs and specific events in the job using the following:
 [source,json]
 ----
@@ -57,12 +57,12 @@ for individual jobs and specific events in the job using the following:
     }
   ]
 ----
-The definition of these values for jobs and specific events should not be the responsiblity of
-the System Adminstrator but should be specified by the Job Designer.
+The definition of these values for jobs and specific events should not be the responsibility of
+the System Administrator but should be specified by the Job Designer.
 
-. The PLUS Job Defintion shall provide the Job Designer with a mechansim to define job specific
+. The PLUS Job Definition shall provide the Job Designer with a mechanism to define job specific
 specification data in a Plant UML Activity Diagram.
-. The PLUS Job Defintion shall provide the Job Designer with a mechansim to define job event specific
+. The PLUS Job Definition shall provide the Job Designer with a mechanism to define job event specific
 specification data.
 . The plus2json tool shall generate the appropriate json for the Job Definition to define job and
 event specification data.
@@ -70,7 +70,7 @@ event specification data.
 
 == 4 Analysis
 
-The options for capturing this data in a Plant UML activity diagrams are limited with either the 
+The options for capturing this data in a Plant UML activity diagrams are limited with either the
 *Action* or the *Note* being the most appropriate syntax blocks to capture this information.
 
 The *Note* can be placed either on the left or the right of an element and can be either floating
@@ -82,9 +82,9 @@ shown in the example below:
 .Example of Job Definition Specification in Note on right
 image::SomeJobDefNoteRight.png[Example of Job Definition Specification in Note on right]
 
-Therefore to captue the specification for a job the recommendation is that an *Action* is used just
-after the job definition as indicated by the *partition* keyword. To deferentiate the action from other
-actions it is recommended that the action is rendered as a box as shwon in the example below:
+Therefore to capture the specification for a job the recommendation is that an *Action* is used just
+after the job definition as indicated by the *partition* keyword. To differentiate the action from other
+actions it is recommended that the action is rendered as a box as shown in the example below:
 
 [source,puml]
 ----
@@ -103,7 +103,7 @@ image::SomeJobDefSpec.png[Example of Job Definition Specification Block]
 
 The specification data is captured inside two keywords *@SPECDEFN* and *@ENDSPECDEFN* that we shall use to define the
 contents as specification data. If they do not exist then the plus2json processor should not
-treat it as a job specification block. The content inside should be specified as if it where json.
+treat it as a job specification block. The content inside should be specified as if it were json.
 For the Job Definition specification the Job Designer
 shall have to use the detach keyword after the *action* to prevent a transition being added.
 
@@ -120,14 +120,14 @@ group "Instance Fork Sequence"
   #green:IFSA;
   :IFSC;
   note right
-  :@SPECDEFN   
+  :@SPECDEFN
     "StaleAuditEventDuration": "P99W",
     "BlockedAuditEventDuration": "PT5M"
    @ENDSPECDEFN
   end note
   :IFSD;
   note left
-  :@SPECDEFN   
+  :@SPECDEFN
     "StaleAuditEventDuration": "P99W",
     "BlockedAuditEventDuration": "PT5M"
    @ENDSPECDEFN
@@ -150,7 +150,7 @@ Here is a full example using the Instance Fork Job:
 ----
 @startuml
 partition "Instance Fork Job" {
-:@SPECDEFN   
+:@SPECDEFN
     "JobDeprecated": "false",
     "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
     "StaleAuditEventDuration": "P99W",
@@ -166,14 +166,14 @@ group "Instance Fork Sequence"
   end note
   :IFSC;
   note right
-  :@SPECDEFN   
+  :@SPECDEFN
     "StaleAuditEventDuration": "P99W",
     "BlockedAuditEventDuration": "PT5M"
    @ENDSPECDEFN
   end note
   :IFSD;
   note right
-  :@SPECDEFN   
+  :@SPECDEFN
     "StaleAuditEventDuration": "P99W",
     "BlockedAuditEventDuration": "PT5M"
    @ENDSPECDEFN
@@ -188,20 +188,20 @@ end group
 @enduml
 ----
 
-.Example of Job Definition 
+.Example of Job Definition
 image::SomeJobDef.png[Example of Job Definition ]
 
 Consideration could be given to making the individual specification parameters keywords to be processed. This is discounted
-as allwing json like definition provides more flexibility.
+as allowing json like definition provides more flexibility.
 
-The output that the plus2json processor should produce is to add the Job Definition Specification 
+The output that the plus2json processor should produce is to add the Job Definition Specification
 
 	"JobDeprecated": "false",
 	"JobTypeExpiryDate": "2022-04-11T18:08:00Z",
 	"StaleAuditEventDuration": "P99W",
 	"BlockedAuditEventDuration": "PT5M",
 
-if provided to the job section of the Job Definition json file and to add the Event Definition Specification 
+if provided to the job section of the Job Definition json file and to add the Event Definition Specification
 
       "StaleAuditEventDuration": "P99W",
       "BlockedAuditEventDuration": "PT5M"
@@ -234,16 +234,16 @@ if provided to the appropriate event section on the Job Definition json file as 
 
 === 5.1 PLUS
 
-Update the plus definition to cover the addition of an *action* box and *note* 
-containing the speacial keywords *@SPECDEFN* and *@ENDSPECDEFN* to allow the Job Designer to
+Update the plus definition to cover the addition of an *action* box and *note*
+containing the special keywords *@SPECDEFN* and *@ENDSPECDEFN* to allow the Job Designer to
 specify the job and event specific configuration.
 
 === 5.2 plus2json
 
-Update plus2json to process the new defintion nad produce a job definition json file 
+Update plus2json to process the new definition and produce a job definition json file
 containing the specification data.
 
 === 5.2 AEOrdering
 
-Update AEOrdering to remove the job and event specific configuration data from the verifier-config.json 
+Update AEOrdering to remove the job and event specific configuration data from the pv-config.json
 and to read in the job and event specific configuration data from the job definition file.
