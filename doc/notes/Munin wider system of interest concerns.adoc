@@ -1,0 +1,130 @@
+= Munin Protocol Verifier - Wider System of Interst Concerns
+
+Munin Project Analysis Note
+
+== 1 Abstract
+
+This note covers a mix of topics that have been identified by the Munin team.
+The topics cover the wider context of operating the Protocol Verifier (PV) and 
+provide a list of things to be considered and reviewed when deploying or 
+operating the PV
+
+== 2 Introduction and Background
+
+The note covers a range of topics but the one thing they have in common is
+that there is a potential impact on the effectivesness of the PV once it
+is operational.
+
+Some might elicit new requirements, others might affect the way the PV is
+operated and monitored and yet others may have no impact.
+
+There is no intended order to the topics. They should be complete in 
+themselves.
+
+== 3 Topics of Concern
+
+=== 3.1 Happy vs Unhappy Jobs
+
+==== 3.1.1 Introduction
+
+The PV is designed to perform a series of checks on the sequences of audit 
+events that it receives. The audit events are organised into Jobs which
+represent a coherent sequence of audit events that follow a predictable
+protocol. When all is going well the events arrive in a predicted order
+and that order can be verified. 
+
+However, it has been noticed that some events can occur at times that make 
+capturing the predicted sequence very complicated. These are typically error
+events but it should be noted that some types of error events can be
+relaibaly sequenced. These events are referred to as Unhappy Events 
+(or Unsequenced Events) because there is little benefit in tring to sequence 
+them.
+
+When the PV receives an Unhappy Event it changes mode from processing a 
+Happy Job to processing an Unhappy Job. The first Unhappy Events seen in any
+Job causes this transition. Event the first event of a Job can be an Unhappy
+one and if that is the case the Job is treated as Unhappy from the outset.
+
+Unhappy Events are knwon in advance and so are expected events. However,
+by definition, they cannot be sequenced and so sequencing for the Job
+stops when it becomes an Unhappy Job. A number of other checks are not perfomed
+for Unhappy Jobs too. It is unlikely that loop counts, branch counts and merge 
+counts will be reliable after an Unhappy Event. Similarly, enforcing AND or
+XOR constraints cannot be relied on. Some Invariant checks can still be 
+performed though no warning associated with a missing invariant can be used.
+ 
+==== 3.1.2 Concern
+
+As a result there is a concern that the verification of an Unhappy Job is
+significantly less thorough than for a Happy Job. If most Jobs turn out to be 
+Unhappy that would undermine the effectiveness of the PV.
+
+Also, is the injection of an expected Unhappy Event a possible attack vector
+since it downgrades the effectiveness of the PV.
+
+==== 3.1.3 Mitigation
+
+During operation it may be good practice to observe the relative proportions of
+Happy and Unhappy Jobs for each Job Definition. If there is a high or an
+increasing proportion of Unhappy Jobs for a given Job Definition then that 
+would be cause for concern and worth investigating.
+
+=== 3.2 Compromise of Extra Job Invariant
+
+==== 3.2.1 Introduction
+
+A separate analysis note [Reference] covers the potential requirement for
+handling the compromise of an Extra Job Invariant. This section looks at the 
+implications.
+
+==== 3.2.2 Concern
+
+The compromise of an Extra Job Invariant flags a concern about the wider system
+of interest. The behaviour within the PV should correlate with behaviour in 
+other systems.
+
+==== 3.2.3 Mitigation
+
+Compromises seen and handled by the PV should be compared with those seen and
+handled by other systems. A compromise seen in one system that would be 
+expected but not seen in another would be cause for concern.
+
+=== 3.3 Analysis of Job Definitions
+
+==== 3.2.1 Introduction
+
+The function of the PV is determined by the job definitions it receives. We know
+that some job definitions will be more effectvely verified than others. For 
+example, takes 2 job definitions each with 20 audit events in them. One of the
+job definitions is composed of 20 sequences each with 1 event. The other job
+definition is a single sequence of 20 events. No sequence verification is
+possible with the first job definition whilst the second job definition can 
+have its sequencing fully verfied.
+
+==== 3.2.2 Concern
+
+The effectiveness of the PV could be significantly reduced if it is configured 
+in ineffective ways. 
+
+==== 3.2.3 Mitigation
+
+The PV could provide an analysis of its own configuration. For example, it
+could report the average event to sequence ratio for each job (or for a set 
+of jobs). A ratio of greater than 8 might me described as very strong, a ratio 
+of 5 to 8 as strong, a ratio of 2 to 5 as weak and a ratio of less than 2 as 
+very weak.
+
+Other analyses of job complexity, the use of dynamic controls and the use of
+invariants could also provide qualitative and quantitative assessments of 
+the set of job definitions.
+
+== 4 Future work
+
+== 5 Document References
+
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
