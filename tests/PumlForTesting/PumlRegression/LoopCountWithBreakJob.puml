@@ -1,0 +1,22 @@
+@startuml
+partition "Loop Count With Break Job" {
+group "Loop Count With Break Sequence"
+  #green:LCBJA;
+  :LCBJB,LCNT,user=LCBJE,name=LC1;
+  :LCBJC;
+  repeat
+    :LCBJD;
+    :LCBJE;
+    if (XOR) then ("error")
+      :LCBJF;
+      break
+    else ("normal")
+      :LCBJG;
+    endif
+  repeat while
+  :LCBJH;
+  #red:LCBJJ;
+  detach
+end group
+}
+@enduml

@@ -224,11 +224,12 @@ begin
                           else
                             theJob.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId ); 
                           end if;
-                          // TODO: Should there be an else clause here that deals with an expected DynamicControlValue not being > 0?                  
+                          logMessage := "AESequenceDC::HappyJob.JobInProgress : The Dynamic Control value must be a positive integer and it is not " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID & " with Job Name = " & theJob.jobName & " has value = " & theUserDynamicControl.expectedDynamicControlValue'image;
+	                      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
                         end if;  
                         
 	                  else
-                      logMessage := "AESequenceDC::HappyJob.JobInProgress : This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID & " with Job Name = " & theJob.jobName;
+                        logMessage := "AESequenceDC::HappyJob.JobInProgress : This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID & " with Job Name = " & theJob.jobName;
 	                    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	                  end if;  
 	                  
@@ -491,9 +492,7 @@ begin
         end if; 
       end if;    
  
-      // TODO Remove later: Process Audit event data was here
-      
-        
+       
       // Check to see if the received event marks an end point in the current sequence and if so check whether or
       // not it completes the sequence (note that sequences can have multiple end points due to branching)
       if (theAeOccInSequenceDef /= null) and (theAeOccInSequenceDef.isSequenceEnd) = true then
@@ -642,16 +641,20 @@ begin
           // This is the source branch count which isn't checked
         end if;    
       elsif theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.MERGECOUNT then
-        if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
-          validatedConstraint := false;    
-          // TODO Remove debug log message      
-          logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Merge Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Merge Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Merge Count = " & theDynamicControl.currentDynamicControlValue'image;
-          Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
+        if theDynamicControl -> R36 /= null then
+        // We have a user dynamic control so check its values
+          if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
+            validatedConstraint := false;    
+            // TODO Remove debug log message      
+            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Merge Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Merge Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Merge Count = " & theDynamicControl.currentDynamicControlValue'image;
+            Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
+          else
+            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Merge Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Merge Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Merge Count = " & theDynamicControl.currentDynamicControlValue'image;
+            Logger::log(Logger::Debug, "AESequenceDC", logMessage);              
+          end if;
         else
-          logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Merge Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Merge Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Merge Count = " & theDynamicControl.currentDynamicControlValue'image;
-          Logger::log(Logger::Debug, "AESequenceDC", logMessage);              
+          // An event with the merge count has not been encountered so no need to check
         end if;
-      
       end if;
     end loop;
   end;

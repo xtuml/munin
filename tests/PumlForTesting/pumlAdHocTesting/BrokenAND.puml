@@ -1,0 +1,34 @@
+@startuml
+partition "Broken AND Job" {
+  group "Broken AND Sequence"
+    #green:A;
+    note right
+      "Would the following work?
+      It's poorly specified since
+      there is no need for 2 
+      occurrences of F"
+    endnote
+fork 
+        :B;
+        :C;
+        :F;
+        note right
+          "This is the first F occurrence"
+        endnote
+        
+      fork again
+        :D;
+        :E;
+        :F;
+        note right
+          "This is the second F occurrence"
+        endnote
+      end fork
+    #red:G;
+    note right
+      "The end fork should be after C and E"
+    endnote
+    
+  end group  
+}
+@enduml
