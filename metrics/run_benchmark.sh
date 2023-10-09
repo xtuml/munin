@@ -21,6 +21,13 @@ export CONFIG_FILE=benchmarking-config.json
 docker compose -f docker-compose.kafka.yml up -d --wait &>/dev/null
 echo "Done."
 
+# generate source job
+echo "Generating source..."
+# little delay to assure everything is initialized
+sleep 2
+echo "../tests/PumlForTesting/PumlRegression/AAExtraJobInvariantSourceJob.puml" | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic default.AEReception_service0
+echo "Done."
+
 # generate test event data
 echo "Generating event data..."
 # little delay to assure everything is initialized

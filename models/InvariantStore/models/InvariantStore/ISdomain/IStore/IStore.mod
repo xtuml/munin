@@ -10,18 +10,21 @@ domain IStore is
     sourceAuditEventType :string;
     sourceAuditEventOccurrenceId :integer;
 end structure;
-    private service testInvariantStore (
-    );
-pragma test_only ( true ); pragma scenario ( 2 ); 
     private service init (
     );
 pragma scenario ( 1 ); pragma process_listener ( "started" ); 
+    private service testInvariantStore (
+    );
+pragma test_only ( true ); pragma scenario ( 2 ); 
     public service persistInvariant (
         invariantName : in string,        invariantValue : in string,        validFrom : in timestamp,        validTo : in timestamp,        sourceJobDefinitionType : in string,        sourceAuditEventType : in string,        sourceAuditEventOccurrenceId : in integer    );
+pragma kafka_topic ( true ); 
     public service setLoadRate (
         loadRate : in duration    );
+pragma kafka_topic ( true ); 
     public service restoreNamedInvariant (
         invariantName : in string,        invariantValue : in string    );
+pragma kafka_topic ( true ); 
   terminator StoreClient is
     public service addInvariants (
         invariantsToReport : in sequence of persistedInvariantStructure    );
