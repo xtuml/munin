@@ -5,9 +5,7 @@ volumes:
   ConanServer:
   ConanCache:
 
-
 services:
-
   conan-server:
     image: levistarrett/conan-server:${MASL_VERSION:-latest}
     restart: unless-stopped
@@ -19,7 +17,7 @@ services:
         target: /conan-data
 
   populate:
-    image: levistarrett/masl-populate:${MASL_POPULATE:-latest}
+    image: levistarrett/masl-populate:${MASL_VERSION:-latest}
     depends_on:
       conan-server:
         condition: service_healthy
@@ -40,7 +38,7 @@ services:
       - OOA_PORT=0
 
   test:
-    image: levistarrett/masl-dev
+    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
     stdin_open: true
     tty: true
     volumes:
@@ -53,7 +51,7 @@ services:
       - "40000:40000"
     environment:
       - OOA_PORT=0
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && source /work/test.env && ${TEST_CMD:-exit}"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && source /work/test.env && ${TEST_CMD:-exit}"
 
   build:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}

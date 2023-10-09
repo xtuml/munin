@@ -45,6 +45,9 @@ begin
 			Logger::log(Logger::Debug, "AEReception", logMessage);
 			raise JSON::JSONException("Config file invalid");
 		end if;
+		
+		// load the JSON schema
+		this.auditEventSchema := JSONValidation::load_schema(Environment::getenv(Environment::variable_name("AUDIT_EVENT_SCHEMA_PATH")));
 
 		// set the config file mod time
 		fileStatus := Filesystem::get_file_status(Filesystem::filename(fileName));
