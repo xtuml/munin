@@ -27,7 +27,7 @@ echo "Done."
 # play all jobs
 for fn in ${puml_files}; do
 	echo "Generating runtime event data for '${fn}'..."
-	$P2J --play --all -o reception-incoming ${fn}
+	$P2J --play -o reception-incoming ${fn}
 	echo "Done."
 	sleep 1
 done
