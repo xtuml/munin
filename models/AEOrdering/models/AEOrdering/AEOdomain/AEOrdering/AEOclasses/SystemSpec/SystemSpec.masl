@@ -286,6 +286,7 @@ begin
     // report the latest set of events to the sequence domain
     for job in find updatedJobTypes() loop
     	eventDefinitions := emptyEventDefinitions;
+    	associatedEvents := emptyAssociatedEvents;
         for auditEventType in (job -> R12.AuditEventType() ordered_by (auditEventTypeId)) loop
             eventDefinitions := eventDefinitions & (auditEventType.sequenceName, auditEventType.eventType, auditEventType.occurrenceId, 
             	                                 auditEventType.previousEventTypes, auditEventType.isSequenceStart, auditEventType.isSequenceEnd, 

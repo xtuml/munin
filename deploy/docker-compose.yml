@@ -7,7 +7,6 @@ services:
         source: ConanCache
         target: /conan-cache
       - "../models/PV_PROC/build:/work/build"
-      - "../models/PV_PROC/schedule:/root/schedule"
       - "./config:/root/config"
       - "./logs/reception:/var/log/reception"
       - "./logs/verifier:/var/log/verifier"
@@ -24,7 +23,7 @@ services:
     ulimits:
       sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/PV_PROC_transient -configFile pv-config.json -log-config config/log-config-pv-proc.xml -util Inspector"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/PV_PROC_transient -configFile pv-config.json -log-config config/log-config-pv-proc.xml -util Inspector"
 
 volumes:
   ConanCache:

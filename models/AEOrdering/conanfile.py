@@ -6,7 +6,7 @@ from conan.tools.files import copy
 
 class ConanFile(conan.ConanFile):
     name = 'aeordering'
-    version = '1.1.0'
+    version = '1.1.1'
     user = 'xtuml'
     channel = 'stable'
     python_requires = 'masl_conan/[>=4.1.1]@xtuml/stable'

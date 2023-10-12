@@ -24,7 +24,7 @@ services:
     ulimits:
       sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AER_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id reception_group_1 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AER_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id reception_group_1 -util MetaData"
 
   istore_proc:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
@@ -43,7 +43,7 @@ services:
     ulimits:
       sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/ISTORE_PROC_transient -log-config config/log-config-pv-proc.xml -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/ISTORE_PROC_transient -log-config config/log-config-pv-proc.xml -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   aeo_svdc_proc_1:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
@@ -63,7 +63,7 @@ services:
     ulimits:
       sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -startJobGroup 00 -endJobGroup 3F -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=1 -startJobGroup 00 -endJobGroup 3F -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   aeo_svdc_proc_2:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
@@ -83,7 +83,7 @@ services:
     ulimits:
       sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=2 -startJobGroup 40 -endJobGroup 7F -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=2 -startJobGroup 40 -endJobGroup 7F -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   aeo_svdc_proc_3:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
@@ -103,7 +103,7 @@ services:
     ulimits:
       sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=3 -startJobGroup 80 -endJobGroup BF -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=3 -startJobGroup 80 -endJobGroup BF -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   aeo_svdc_proc_4:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
@@ -123,7 +123,7 @@ services:
     ulimits:
       sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=4 -startJobGroup C0 -endJobGroup FF -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -log-config config/log-config-pv-proc.xml -log-param instance_index=4 -startJobGroup C0 -endJobGroup FF -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   zookeeper:
     image: wurstmeister/zookeeper:3.4.6

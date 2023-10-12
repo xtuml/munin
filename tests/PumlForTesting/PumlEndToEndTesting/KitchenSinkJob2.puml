@@ -1,15 +1,15 @@
 @startuml
 
 partition "Kitchen Sink Job 2" {
- :EINV,SRC,jobdefn="Extra Job Invariant Source Job",
+ :EINV,SRC,jobdefn="AA Extra Job Invariant Source Job",
  name=AUTH_TOKEN_A|
  detach
 group "Kitchen Sink Sequence 2"
 
-  #green:KSJA,LCNT,user=KSJS,name=LC3,BCNT,user=KSJK,name=BC2,MCNT,user=KSJW,name=MC2;
-  :KSJB,LCNT,user=KSJE(0),name=LC1,LCNT,user=KSJD(1),name=LC2,IINV,name=KSJInvA;
-  :KSJC;
-    :KSJD;
+  #green:KSJA,LCNT,user=KSJ2S,name=LC3,BCNT,user=KSJ2K,name=BC2,MCNT,user=KSJ2W,name=MC2;
+  :KSJB,LCNT,user=KSJ2F(0),name=LC1,LCNT,user=KSJ2D(1),name=LC2,IINV,name=KSJInvB;
+  :KSJ2C;
+    :KSJ2D;
     fork
       :KSJE;
       repeat
@@ -17,54 +17,54 @@ group "Kitchen Sink Sequence 2"
         :KSJG,EINV,USER,name=AUTH_TOKEN_A;
         :KSJH;
       repeat while
-      :KSJI;
+      :KSJ2I;
       repeat
-        :KSJD;
-        :KSJE;
+        :KSJ2D;
+        :KSJ2E;
         if (XOR) then ("error")
-          :KSJT;
+          :KSJ2T;
           break
         else ("normal")
-          :KSJF;
+          :KSJ2F;
         endif
       repeat while
-      :KSJU;
+      :KSJ2U;
     fork again
-      :KSJK;
-      :KSJL,EINV,USER,name=AUTH_TOKEN_A;
-      :KSJM;
+      :KSJ2K;
+      :KSJ2L,EINV,USER,name=AUTH_TOKEN_A;
+      :KSJ2M;
       if (XOR) then ("normal")
-        :KSJV;  
+        :KSJ2V;  
       else ("error")
-        #red:KSJN;
+        #red:KSJ2N;
         detach
       endif
-      :KSJW;    
+      :KSJ2W;    
     fork again
-      :KSJP;
-      #red:KSJQ;
+      :KSJ2P;
+      #red:KSJ2Q;
       detach
     fork again
-      :KSJC;
+      :KSJ2C;
       repeat
-        :KSJD;
-        :KSJE;
+        :KSJ2D;
+        :KSJ2E;
       repeat while
-      :KSJF,BCNT,name=BC1;
-      :KSJD,EINV,USER,name=AUTH_TOKEN_A;
-      #red:KSJG;
+      :KSJ2F,BCNT,name=BC1;
+      :KSJ2D,EINV,USER,name=AUTH_TOKEN_A;
+      #red:KSJ2G;
       detach
     fork again
-      :KSJJ;
+      :KSJ2J;
       repeat
-        :KSJS;
+        :KSJ2S;
       repeat while
-      :KSJD;
-      #red:KSJE;
+      :KSJ2D;
+      #red:KSJ2E;
       detach
     end fork
-    :KSJH,IINV,USER,name=KSJInvA;
-    #red:KSJZ;
+    :KSJ2H,IINV,USER,name=KSJInvB;
+    #red:KSJ2Z;
     detach
 end group
 }

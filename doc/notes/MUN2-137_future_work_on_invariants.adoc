@@ -1,0 +1,105 @@
+= Enhancements to Invariants in Munin Phase 2 Release 3
+
+Munin Project Analysis Note
+
+== 1 Abstract
+
+Support for Extra Job and Intra Job Invariants has been embedded in the 
+Protocol Verifier (PV) for several releases. However, there are some
+additional features that may be required. This document covers those.
+
+== 2 Introduction and Background
+
+The PV includes support for 2 syles of invariant. One the intra job invariant
+is used solely within the context of a single job. The other, the extra job 
+invariant, is created by a source job and then persisted independently of
+all jobs and used by any number of user jobs. The extra job invariant has
+a known lifetime and can no longer be used when it becomes stale.
+
+These features are currently supported but some additional testing is required 
+to ensure the resilience of invariants and some extra behaviour is 
+potentially required. Extra job invariants are expected to live for hours or 
+days. During their lifetime external factors may cause them to become invalid
+or compromised. We need to add behaviour to respond to a compromised extra job 
+invariant.
+
+== 3 Requirements
+
+=== 3.1 Dynamic update of Job Definitions
+
+The PV does not currently support the dynamic update of job definitions. The 
+services that supports the addition of job and event definitions currently
+check to see if the definition is already present and if so, output a message 
+saying dynamic update of job definitions is not currently supported. This
+needs to be addressed along with the corresponding update of invariants and
+dynamic controls.
+
+=== 3.2 Enhanced Testing of Intra Job Invariants
+
+Intra job invariants are scoped to a single job. In principle, it is valid for
+2 intra job invariants of the same name to co-exist in different jobs. There is
+currently no test for this scenario and one should be added.
+
+The dynamic update of an intra job invariant would allow for the set of events
+with which the invariant is associated to be changed. We need to review whether
+this would allow a attack vector and, if not, we need to add tests to 
+support it. 
+
+=== 3.3 Compromise of Extra Job Invariants
+
+A service needs to be added to the PV which allows the compromise of an extra 
+job invariant to be notified. This would stop the extra job invariant being 
+current or "in force". The required behaviour associated with any jobs 
+currently using the invariant needs to be determined. In addition, the
+mechanism for replacing the compromised invariant needs to be determined.
+
+In addition, there are standard mechanisms for conveying compromised invariants
+and these will probably need to be supported. Certificate Revocation Lists 
+(CRLs) are a standard approach to revoking certificates before the end of their
+lifetime. Something similar may be required for the PV. If so, then a service 
+would be needed on the PV which regulalrly scans CRLs and then invokes the
+compromise service if one of its own invariants was spotted.
+
+The compromise of intra job invariants is not considered an issue since they
+are short-lived and confined to a single job.
+
+=== 3.4 Dynamic Update of Extra Job Invariants
+
+The updating of an extra job invariant definition is allowed in principle.
+However, there is a concern that this might introduce an attack vector. For
+example, if the source job of an extra job invariant is changed in an update, 
+it feels as though it would be important to warn of such a change since it
+would be unusual and, if unintended, could have serious consequences. 
+
+The updating of the extra job invariants in user jobs also needs to be
+checked, supported and tested. The implications for these updates seem less 
+serious and are probably routine.
+
+The requirements for dynamic update of extra job invariants need to be 
+clarified with the Authority.
+
+=== 3.5 Enhanced Testing of Extra Job Invariants
+
+Extra job invariants have an independent lifecycle. They are not tied to the
+lifecycle of any job. There is some initial testing of extra job invariants
+but this needs to be reviewed and the testing potentailly enhanced.
+
+In addition, testing associated with the above requirements on dynamic 
+update and compromise would also be needed.
+
+== 4 Future work
+
+Additional testing can be developed during Phase 2 Release 3 work.
+
+Discussions with the Authority are required to determine the requirements
+for compromise of extra job invariants and the potential use of CRLs or
+something similar.
+
+== 5 Document References
+
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
