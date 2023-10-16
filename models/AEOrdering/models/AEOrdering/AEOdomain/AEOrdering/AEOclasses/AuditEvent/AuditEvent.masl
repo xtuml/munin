@@ -61,7 +61,7 @@ begin
 					failedAuditEvent := create FailedAuditEvent(auditEventId => auditEventId, failureTime => timestamp'now, failureReason => failureReason);
 					link failedAuditEvent R4 auditEvent;
 					logMessage := "AEOrdering::AuditEvent.createAuditEvent : " & failureReason;
-					Logger::log(Logger::Error, "AEOrdering", logMessage);
+					AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
 					eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType & " : FailureReason = " & failureReason;
 					Reporting~>reportEvent(Logger::Error, "aeordering_events_failed", eventContent);
 				end;
@@ -72,13 +72,13 @@ begin
 		previousJob := auditEvent -> R9.Job;
 		if previousJob = job then
 			logMessage := "AEOrdering::AuditEvent.createAuditEvent : Audit Event has previously been reported for the same job, jobId = " & job.jobId & ", auditEventId = " & auditEventId;
-			Logger::log(Logger::Error, "AEOrdering", logMessage);
+			AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
 			failureReason := "Audit Event has previously been reported for the same job";
 			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType & " : FailureReason = " & failureReason;
 			Reporting~>reportEvent(Logger::Error, "aeordering_events_failed", eventContent);
 		else
 			logMessage := "AEOrdering::AuditEvent.createAuditEvent : Audit Event has previously been reported for a different job, jobId = " & job.jobId & ", auditEventId = " & auditEventId & ", previous jobId = " & previousJob.jobId;
-			Logger::log(Logger::Error, "AEOrdering", logMessage);
+			AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
 			failureReason := "Audit Event has previously been reported for a different job. PreviousJobId = " & previousJob.jobId;
 			eventContent := "JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType & " : FailureReason = " & failureReason;
 			Reporting~>reportEvent(Logger::Error, "aeordering_events_failed", eventContent);
@@ -145,7 +145,7 @@ begin
 		end if;
 		
 	else
-		Logger::log(Logger::Error, "AEOrdering", "setEventState - " & failureReason);
+		AsyncLogger::log(Logger::Error, "AEOrdering", "setEventState - " & failureReason);
 		this.eventState := EventStateEnum.FAILED;
 	end if;
 

@@ -25,7 +25,7 @@ begin
     // Note: SequencingFailed is marked true for an UnhappyJob
 
     logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob : First event for Job is an unhappy event - job id = " & jobId & " with Job Name = " & jobName & ", Initial audit event: " & eventId & " of type " & aeType;
-	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+	AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
     
     newJob := create Job (jobID => jobId, sequencingFailed => true, jobCompleted => false );
     newUnhappyJob := create UnhappyJob (jobID => jobId, Current_State => Created );
@@ -44,13 +44,13 @@ begin
       else
         newJob.failJob("An unrecognised job definition has been received - Job Id = " & newJob.jobID & " with Job Name = " & newJob.jobName & " Event Type = " & aeType);      
         logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob : No Job Definition found for - job Name = " & jobName & ", Initial audit event: " & eventId & " of type " & aeType;
-	    Logger::log(Logger::Error, "AESequenceDC", logMessage);
+	    AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);
       end if;  
     
   else
       // Log error: The audit event id received has been seen before
 	  logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewJob : The audit event has been seen before for jobId = " & jobId & " with Job Name = " & jobName & ", Initial audit event = " & aeType;
-	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+	  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
       eventContent := "JobId = " & jobId & " with Job Name = " & jobName & " : FailureReason = The audit event has been seen before"  & " : EventId = " & eventId & " : EventType = " & aeType;
 	  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
 

@@ -22,7 +22,7 @@ begin
     if this.jsonObject'keys'length = 1 and this.jsonObject'keys'any = "__comment__" then
         // ignore comment objects
         logMessage := "AEReception::Reception.receiving_audit_event : JSON comment: " & JSON::get_string(this.jsonObject[this.jsonObject'keys'any]);
-        Logger::log(Logger::Debug, "AEReception", "JSON comment: " & JSON::get_string(this.jsonObject[this.jsonObject'keys'any]));
+        AsyncLogger::log(Logger::Debug, "AEReception", "JSON comment: " & JSON::get_string(this.jsonObject[this.jsonObject'keys'any]));
     else
         // report the event received
         if this.jsonObject'contains("eventId") then
@@ -46,7 +46,7 @@ begin
 				eventContent := "EventId = " & eventId;
 				Reporting~>reportEvent(Logger::Error, "reception_event_invalid", eventContent);
 				logMessage := "AEReception::Reception.receiving_audit_event : Dropping invalid event with ID: " & eventId & "\n" & JSON::dump(validation_result, true);
-				Logger::log(Logger::Debug, "AEReception", logMessage);
+				AsyncLogger::log(Logger::Debug, "AEReception", logMessage);
 			end if;
 		end if;
 
@@ -136,7 +136,7 @@ begin
         generate Reception.ready_for_event() to this;
     else
         logMessage := "AEReception::Reception.parsing : Incorrect JSON format : " & auditEvent;
-        Logger::log(Logger::Error, "AEReception", logMessage);
+        AsyncLogger::log(Logger::Error, "AEReception", logMessage);
 		eventContent := "FailureReason = Incorrect JSON format = " & auditEvent;;
 		Reporting~>reportEvent(Logger::Error, "reception_file_process_error", eventContent);
         generate Reception.parse_failed() to this;
@@ -146,14 +146,14 @@ exception
 
     when JSON::JSONException =>
 	   logMessage := "AEReception::Reception.parsing : Failed to parse JSON : " & auditEvent;
-	   Logger::log(Logger::Error, "AEReception", logMessage);
+	   AsyncLogger::log(Logger::Error, "AEReception", logMessage);
 		eventContent := "FailureReason = Failed to parse JSON = " & auditEvent;;
 		Reporting~>reportEvent(Logger::Error, "reception_file_process_error", eventContent);
 	   generate Reception.parse_failed() to this;
 	   
 	when others =>
 	   logMessage := "AEReception::Reception.parsing : Could not process audit events : " & auditEvent;
-	   Logger::log(Logger::Error, "AEReception", logMessage);
+	   AsyncLogger::log(Logger::Error, "AEReception", logMessage);
 	   generate Reception.parse_failed() to this;
 
 end state;

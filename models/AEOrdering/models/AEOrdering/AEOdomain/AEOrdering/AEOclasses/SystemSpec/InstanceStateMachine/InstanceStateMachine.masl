@@ -29,7 +29,7 @@ exception
 	when others => 	
 	
 		logMessage := "AEOrdering::SystemSpec.ConfigChecked : failed to load configuration file";
-		Logger::log(Logger::Error, "AEOrdering", logMessage);
+		AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 		
 end state;
