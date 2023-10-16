@@ -2,7 +2,7 @@ import conan
 
 
 class ConanFile(conan.ConanFile):
-    name = 'verificationgateway'
+    name = 'asynclogger'
     version = '1.1.1'
     user = 'xtuml'
     channel = 'stable'
@@ -15,7 +15,6 @@ class ConanFile(conan.ConanFile):
     def requirements(self):
         self.requires('masl_core/[>=4.1.1]@xtuml/stable')
         self.requires('masl_utils/[>=4.1.1]@xtuml/stable')
-        self.requires('asynclogger/[>=1.1.1]@xtuml/stable')
 
     def build_requirements(self):
         self.tool_requires('masl_codegen/[>=4.1.1]@xtuml/stable')

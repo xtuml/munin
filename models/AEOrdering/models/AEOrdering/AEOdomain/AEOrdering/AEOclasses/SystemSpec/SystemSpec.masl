@@ -11,7 +11,7 @@ begin
         mostRecentModificationTime := fileStatus.modification_time;
     else
         logMessage := "AEOrdering::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
         raise program_error;
     end if;
     if Filesystem::file_exists(Filesystem::filename(this.jobDefinitionDirectory)) then
@@ -48,7 +48,7 @@ begin
     	end if;
     else
         logMessage := "AEOrdering::locateUpdatedConfig : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
     end if;
     if configUpdates = true then
     	return true; 
@@ -157,14 +157,14 @@ begin
 				                                                 timeoutPeriodForRetreivingStoredInvariants, timeoutPeriodForHangingJob);
         else
             logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
-            Logger::log(Logger::Debug, "AEOrdering", logMessage);
+            AsyncLogger::log(Logger::Debug, "AEOrdering", logMessage);
             raise JSON::JSONException("Config file invalid");
         end if;
         // set the config file mod time
         this.configFileModificationTime := this.lastModificationTime();        
     else
         logMessage := "AEOrdering::ConfigUpdated : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
     end if;
     
     // if the job store does not exist then create it
@@ -211,7 +211,7 @@ begin
         end loop;
     else
         logMessage := "AEOrdering::locateUpdatedConfig : failed to locate job definition directory. Specified directory = " & this.jobDefinitionDirectory;
-        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
     end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -271,7 +271,7 @@ begin
                     updatedJobTypes := updatedJobTypes & jobType;
                 else
                     logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid: " & jobDefinitionFile.jobDefinitionFileName & "\n" & JSON::dump(jobTypeValidationResult, true);
-                    Logger::log(Logger::Debug, logMessage);
+                    AsyncLogger::log(Logger::Debug, logMessage);
                     raise JSON::JSONException("Job definition file invalid");
                 end if;
             end if;

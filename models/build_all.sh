@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+bash -c "cd AsyncLogger && ../../bin/build.sh $@"
 bash -c "cd AEOrdering && ../../bin/build.sh $@"
 bash -c "cd AEReception && ../../bin/build.sh $@"
 bash -c "cd FileReception && ../../bin/build.sh $@"

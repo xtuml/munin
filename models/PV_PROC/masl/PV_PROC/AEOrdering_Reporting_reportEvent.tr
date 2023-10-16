@@ -3,6 +3,6 @@ public service AEOrdering::Reporting~>reportEvent (
   eventLabel: in string,
   eventContent: in string ) is
 begin
-	Logger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
+	AsyncLogger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
   BenchmarkingProbe::mark(eventLabel, eventContent, timestamp'now);
 end service;

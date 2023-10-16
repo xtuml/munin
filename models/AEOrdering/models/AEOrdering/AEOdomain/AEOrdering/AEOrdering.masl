@@ -130,7 +130,7 @@ public service AEOrdering::Reporting~>reportEvent ( eventPriority : in Logger::P
                                                    eventLabel : in string,
                                                    eventContent : in string ) is
 begin
-	Logger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
+	AsyncLogger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
