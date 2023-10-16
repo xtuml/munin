@@ -1,0 +1,21 @@
+
+@startuml 
+partition "Financial Transaction Job 1" {
+  group "Financial Transaction Sequence 1"
+      #green:FTJ_Payment_Instruction,IINV,name=FTJInv;
+      :FTJ_Settlement_Request;
+      if (XOR) then "normal"
+        fork
+          :FTJ_Debit_Payer;
+        fork again
+          :FTJ_Debit_Payee;
+        end fork
+        :FTJC;
+        :FTJD,IINV,USER,name=FTJInv;
+        #red:FTJE;
+      else "error"
+        :FTJ_Invalid_Transaction;
+      end if  
+  end group
+}
+@enduml
