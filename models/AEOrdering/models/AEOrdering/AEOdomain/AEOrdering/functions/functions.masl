@@ -23,7 +23,7 @@ instrumentationEventType : string;
 begin
 
 	logMessage := "AEOrdering::AcceptEvent : jobId = " & jobId & ", auditEventType = " & auditEventType & ", auditEventId = " & auditEventId;
-	Logger::log(Logger::Debug, "AEOrdering", logMessage);
+	AsyncLogger::log(Logger::Debug, "AEOrdering", logMessage);
 	systemSpec := find_one SystemSpec();
 	rawJobId := UUID::extract_raw(UUID::formatted_uuid(jobId));
 	lane := integer(rawJobId[rawJobId'last]);

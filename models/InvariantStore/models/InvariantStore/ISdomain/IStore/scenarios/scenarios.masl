@@ -29,7 +29,7 @@ exception
 	when others =>
 	
 		logMessage := "IStore::init : failed during start up";
-		Logger::log(Logger::Error, "IStore", logMessage);
+		AsyncLogger::log(Logger::Error, "IStore", logMessage);
 		raise program_error;
 	
 end service;

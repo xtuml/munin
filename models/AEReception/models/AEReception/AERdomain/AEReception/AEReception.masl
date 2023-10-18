@@ -3,7 +3,7 @@ public service AEReception::Reporting~>reportEvent ( eventPriority : in Logger::
                                                     eventLabel : in string,
                                                     eventContent : in string ) is
 begin
-	Logger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
+	AsyncLogger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

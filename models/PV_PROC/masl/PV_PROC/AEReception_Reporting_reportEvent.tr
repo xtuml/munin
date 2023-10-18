@@ -3,6 +3,6 @@ public service AEReception::Reporting~>reportEvent (
   eventLabel: in string,
   eventContent: in string ) is
 begin
-	Logger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
+	AsyncLogger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
   BenchmarkingProbe::mark(eventLabel, eventContent, timestamp'now);
 end service;

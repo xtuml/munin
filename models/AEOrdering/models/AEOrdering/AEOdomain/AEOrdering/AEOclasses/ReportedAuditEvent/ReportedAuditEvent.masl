@@ -50,7 +50,7 @@ begin
 		end if;
 	end loop;
 	logMessage := "AEOrdering::ReportedAuditEvent.reportEvent : REPORTING EVENT JobId = " & job.jobId & " : EventId = " & auditEvent.auditEventId & " EventType = " & auditEvent.eventType  & " : PreviousEventId = " & auditEvent.reportedPrevEventIds'image;
-	Logger::log(Logger::Debug, "AEOrdering", logMessage);
+	AsyncLogger::log(Logger::Debug, "AEOrdering", logMessage);
 	Req_IF_Verification~>audit_event(job.jobId, auditEvent.reportedJobName, auditEvent.reportedEventType, auditEvent.auditEventId, auditEvent.reportedAuditEventTime, auditEvent.reportedPrevEventIds, allReportableAuditEventData);
 	// check for any following events that need reporting
 	for followedByEvent in (auditEvent -> R11.isFollowedBy.AuditEvent) loop
@@ -66,18 +66,18 @@ begin
 				delete blockedAuditEvent;
 				followedByEvent.eventState := EventStateEnum.REPORTED;
 				logMessage := "AEOrdering::ReportedAuditEvent.reportEvent : REPORTING BLOCKED EVENT JobId = " & job.jobId & " : EventId = " & followedByEvent.auditEventId & " EventType = " & followedByEvent.eventType  & " : PreviousEventId = " & this.auditEventId;
-				Logger::log(Logger::Debug, "AEOrdering", logMessage);
+				AsyncLogger::log(Logger::Debug, "AEOrdering", logMessage);
 				reportedAuditEvent.reportEvent();
 			else
 				logMessage := "AEOrdering::ReportedAuditEvent.reportEvent : followed by event was not blocked, jobId " & job.jobId & ", eventId " & this.auditEventId & " expected blocked EventId = " & followedByEvent.auditEventId;
-				Logger::log(Logger::Error, "AEOrdering", logMessage);
+				AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
 				eventContent := "JobId = " & job.jobId & " : EventId = " & auditEvent.auditEventId & " EventType = " & auditEvent.eventType  & " : FailureReason = followed by event was not blocked";
 				Reporting~>reportEvent(Logger::Error, "verifier_failure", eventContent);
 				raise program_error;
 			end if;
 		else
 			logMessage := "AEOrdering::ReportedAuditEvent.reportEvent : EVENT BLOCKED NOT ALL PREVIOUS EVENTS RECEIVED JobId = " & job.jobId & " : EventId = " & followedByEvent.auditEventId  & " EventType = " & followedByEvent.eventType  & " Not all previous events reported do not report this event";
-			Logger::log(Logger::Debug, "AEOrdering", logMessage);
+			AsyncLogger::log(Logger::Debug, "AEOrdering", logMessage);
 		end if;
 	end loop;
 	
@@ -95,7 +95,7 @@ begin
 	// check that all the previous events for this followed by event have been received
 	reportedPreceedingEvents := followingEvent -> R13.PreviousAuditEvent;
 	logMessage := "AEOrdering::ReportedAuditEvent.verifyPreviousEventsAvailable : EventId = " & followingEvent.auditEventId  & " EventType = " & followingEvent.eventType;
-	Logger::log(Logger::Debug, "AEOrdering", logMessage);
+	AsyncLogger::log(Logger::Debug, "AEOrdering", logMessage);
 	for reportedPreceedingEvent in reportedPreceedingEvents loop
 		previousEvent := find_one AuditEvent(auditEventId = reportedPreceedingEvent.previousAuditEventId and eventState = EventStateEnum.REPORTED);
 		if previousEvent = null then
@@ -103,7 +103,7 @@ begin
 			exit;
 		else
 			logMessage := "AEOrdering::ReportedAuditEvent.verifyPreviousEventsAvailable : reportedPreceedingEvent.previousAuditEventId " & reportedPreceedingEvent.previousAuditEventId & " previousEventId = " & previousEvent.auditEventId  & " EventType = " & previousEvent.eventType & " EventState = " & previousEvent.eventState'image;
-			Logger::log(Logger::Debug, "AEOrdering", logMessage);
+			AsyncLogger::log(Logger::Debug, "AEOrdering", logMessage);
 		end if;
 	end loop;
 	
