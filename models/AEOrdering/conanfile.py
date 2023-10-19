@@ -12,8 +12,8 @@ class ConanFile(conan.ConanFile):
     python_requires = 'masl_conan/[>=4.1.1]@xtuml/stable'
     python_requires_extend = 'masl_conan.MaslConanHelper'
 
-#    def masl_extras(self):
-#        return ['-skiptranslator', 'Sqlite']
+    def masl_extras(self):
+        return ['-skiptranslator', 'Sqlite']
 
     def requirements(self):
         self.requires('masl_core/[>=4.1.1]@xtuml/stable')
