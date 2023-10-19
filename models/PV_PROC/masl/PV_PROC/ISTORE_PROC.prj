@@ -1,0 +1,10 @@
+project ISTORE_PROC is
+
+  
+  domain IStore is
+    terminator StoreClient is
+      public service addInvariants ( invariantsToReport: in sequence of persistedInvariantStructure );       
+    end terminator;
+  end domain;
+  
+end project;

@@ -42,9 +42,12 @@ begin
 			end if;
     	else
 			logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded : Config file invalid:\n" & JSON::dump(configValidationResult, true);
-			Logger::log(Logger::Debug, "AEReception", logMessage);
+			AsyncLogger::log(Logger::Debug, "AEReception", logMessage);
 			raise JSON::JSONException("Config file invalid");
 		end if;
+		
+		// load the JSON schema
+		this.auditEventSchema := JSONValidation::load_schema(Environment::getenv(Environment::variable_name("AUDIT_EVENT_SCHEMA_PATH")));
 
 		// set the config file mod time
 		fileStatus := Filesystem::get_file_status(Filesystem::filename(fileName));
@@ -54,7 +57,7 @@ begin
 		schedule this.configTimer generate ReceptionSpec.checkConfigUpdate() to this delay this.specUpdateRate;
 	else
 		logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-		Logger::log(Logger::Error, "AEReception", logMessage);
+		AsyncLogger::log(Logger::Error, "AEReception", logMessage);
 		raise program_error;
 	end if;
 	
@@ -64,7 +67,7 @@ exception
 	when others => 	
 	
 		logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded : failed to load configuration file";
-		Logger::log(Logger::Error, "AEReception", logMessage);
+		AsyncLogger::log(Logger::Error, "AEReception", logMessage);
 		raise program_error;
 		
 end state;
@@ -86,7 +89,7 @@ begin
 		end if;
 		else
 		logMessage := "AEReception::ReceptionSpec.ConfigChecked : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-		Logger::log(Logger::Error, "AEReception", logMessage);
+		AsyncLogger::log(Logger::Error, "AEReception", logMessage);
 		raise program_error;
 	end if;
 	
@@ -101,7 +104,7 @@ exception
 	when others => 	
 	
 		logMessage := "AEReception::ReceptionSpec.ConfigChecked : failed to load configuration file";
-		Logger::log(Logger::Error, "AEReception", logMessage);
+		AsyncLogger::log(Logger::Error, "AEReception", logMessage);
 		raise program_error;		
 	
 end state;

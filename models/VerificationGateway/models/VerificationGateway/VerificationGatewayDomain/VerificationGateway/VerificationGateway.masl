@@ -18,7 +18,7 @@ begin
     
     // Report the instrumented event for inclusion in the behavioural verification of the Protocol Verifier.
     reportedEvent := theJobDetails & theEventDetails & " : previousEventIds = " & previousEventID & theAuditEventData;
-    Logger::log(Logger::Information, "VerifierInstrumentation", reportedEvent);
+    AsyncLogger::log(Logger::Information, "VerifierInstrumentation", reportedEvent);
    
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

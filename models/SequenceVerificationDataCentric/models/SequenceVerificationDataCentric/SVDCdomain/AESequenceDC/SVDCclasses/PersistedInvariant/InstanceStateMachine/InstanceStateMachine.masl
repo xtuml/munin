@@ -13,7 +13,7 @@ logMessage : string;
 begin
   // Report the current state of PersistedInvariant
   logMessage := "AESequenceDC::PersistedInvariant.InForce : PersistedInvariant: " & this.invariantId'image & " is InForce";
-  Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+  AsyncLogger::log(Logger::Information, "AESequenceDC", logMessage); 
   
   this.inForce := true;
   schedule this.invariantTimer generate PersistedInvariant.invariantExpires() to this at this.validUntil;
@@ -29,7 +29,7 @@ logMessage : string;
 begin
   // Report the current state of PersistedInvariant
   logMessage := "AESequenceDC::PersistedInvariant.Deprecated : PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") has been Deprecated";
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
+  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage); 
   
   theSystemSpec := find_only SystemSpecification();
   this.inForce := false;
@@ -45,7 +45,7 @@ logMessage : string;
 begin
   // Report the current state of PersistedInvariant
   logMessage := "AESequenceDC::PersistedInvariant.Deleted : PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") is about to be deleted";
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
+  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage); 
   
   // Unlink the specification class
   if (this -> R24) /= null then

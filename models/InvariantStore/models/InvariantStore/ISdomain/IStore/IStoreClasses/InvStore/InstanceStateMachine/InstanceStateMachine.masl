@@ -86,7 +86,7 @@ begin
 exception
 	when others => 
 		logMessage := "IStore::InvStore.StoreLoaded : failed to load invariant store";
-		Logger::log(Logger::Information, "IStore", logMessage);
+		AsyncLogger::log(Logger::Information, "IStore", logMessage);
 		raise program_error;
 		
 end state;
@@ -110,7 +110,7 @@ begin
 		end if;
 	else
 		logMessage := "InvStore.StoreChecked : failed to locate invariant store. Specified file = " & string(this.invStoreName);
-		Logger::log(Logger::Error, "IStore", logMessage);
+		AsyncLogger::log(Logger::Error, "IStore", logMessage);
 		raise program_error;
 	end if;
 	
@@ -118,7 +118,7 @@ exception
 	when others => 	
 	
 		logMessage := "AEOrdering::InvStore.StoreChecked : failed to load invariant store";
-		Logger::log(Logger::Error, "IStore", logMessage);
+		AsyncLogger::log(Logger::Error, "IStore", logMessage);
 		raise program_error;
 	
 end state;
