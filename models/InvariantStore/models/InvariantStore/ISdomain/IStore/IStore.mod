@@ -10,12 +10,15 @@ domain IStore is
     sourceAuditEventType :string;
     sourceAuditEventOccurrenceId :integer;
 end structure;
-    private service init (
-    );
-pragma scenario ( 1 ); pragma process_listener ( "started" ); 
     private service testInvariantStore (
     );
 pragma test_only ( true ); pragma scenario ( 2 ); 
+    private service init (
+    );
+pragma scenario ( 1 ); pragma process_listener ( "postschedules" ); 
+    private service registerCommandLineArgs (
+    );
+pragma process_listener ( "initialised" ); 
     public service persistInvariant (
         invariantName : in string,        invariantValue : in string,        validFrom : in timestamp,        validTo : in timestamp,        sourceJobDefinitionType : in string,        sourceAuditEventType : in string,        sourceAuditEventOccurrenceId : in integer    );
 pragma kafka_topic ( true ); 
@@ -37,6 +40,7 @@ pragma kafka_topic ( true );
     storeTimer :   timer;
     loadRate :   duration;
     storeModificationTime :   timestamp;
+    storeToFile :   boolean;
      state Created();
      state StoreLoaded();
      state StoreChecked();

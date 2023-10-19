@@ -22,8 +22,8 @@ class ConanFile(conan.ConanFile):
     def build_requirements(self):
         self.tool_requires('masl_codegen/[>=4.1.1]@xtuml/stable')
 
-    def masl_extras(self):
-        return ['-skiptranslator', 'Sqlite']
+#    def masl_extras(self):
+#        return ['-skiptranslator', 'Sqlite']
 
     def package(self):
         super().package()
