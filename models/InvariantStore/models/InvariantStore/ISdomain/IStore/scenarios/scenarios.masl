@@ -4,26 +4,30 @@ invStoreLocation : Filesystem::filename := "./InvariantStore";
 invStoreName : Filesystem::filename := "InvariantStore";
 logMessage : string;
 invStore : instance of InvStore;
+storeToFile : boolean := false;
 
 begin
 
 	// get the supplied command line option for the config file and verify it is valid
 	invStore := find_one InvStore();
+	storeToFile := CommandLine::option_present("-fileStore");
 	if invStore = null then
-    if not Filesystem::file_exists(Filesystem::filename(invStoreLocation)) then
-      Filesystem::create_directory(Filesystem::filename(invStoreLocation));
-    end if;
-		invStore := create unique InvStore(invStoreName => Filesystem::filename(invStoreLocation & "/" & invStoreName), loadRate => @PT2M@, Current_State => Created);
+	    if storeToFile and not Filesystem::file_exists(Filesystem::filename(invStoreLocation)) then
+	      Filesystem::create_directory(Filesystem::filename(invStoreLocation));
+	    end if;
+		invStore := create unique InvStore(invStoreName => Filesystem::filename(invStoreLocation & "/" & invStoreName), loadRate => @PT2M@, storeToFile => storeToFile, Current_State => Created);
 		// check the invariant store exists and if it does not then create it
 		begin
-			if Filesystem::file_exists(invStore.invStoreName) = false then
+			if storeToFile and Filesystem::file_exists(invStore.invStoreName) = false then
 				Filesystem::touch_file(invStore.invStoreName);
 			end if;
 		exception 
 			when others => null;
 		end;
 	end if;
-	generate InvStore.loadStore() to invStore;
+	if invStore.storeToFile then
+		generate InvStore.loadStore() to invStore;
+	end if;
 	
 exception
 	when others =>
@@ -32,6 +36,16 @@ exception
 		AsyncLogger::log(Logger::Error, "IStore", logMessage);
 		raise program_error;
 	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '76eb7275-4d22-45c6-a2fe-834bd23b1a63' DO NOT EDIT THIS LINE.
+private service IStore::registerCommandLineArgs () is
+begin
+
+	// The command line argument for storing invariants are being stored to file
+	CommandLine::register_value("-fileStore", "Indicates that the invariants are being stored to file", CommandLine::Optional, "fileStore", CommandLine::Optional, CommandLine::Single);
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

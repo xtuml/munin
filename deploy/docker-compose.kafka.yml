@@ -41,7 +41,7 @@ services:
     ulimits:
       sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/ISTORE_PROC_transient -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   aeo_svdc_proc_1:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}

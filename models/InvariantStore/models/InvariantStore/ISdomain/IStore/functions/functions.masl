@@ -17,7 +17,9 @@ begin
 			                          sourceJobDefinitionType => sourceJobDefinitionType, sourceAuditEventType => sourceAuditEventType, 
 			                          sourceAuditEventOccurrenceId => sourceAuditEventOccurrenceId'image, reportedToLocalClient => true, stored => false);
 		invStore := find_one InvStore();
-		generate InvStore.loadStore() to invStore;
+		if invStore.storeToFile = true then
+			generate InvStore.loadStore() to invStore;
+		end if;
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -33,7 +35,9 @@ begin
 	end if;
 	invStore.loadRate := loadRate;
 	cancel invStore.storeTimer;
-	generate InvStore.checkStore() to invStore;
+	if invStore.storeToFile = true then
+		generate InvStore.checkStore() to invStore;
+	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -47,6 +51,8 @@ invariantToReport : persistedInvariantStructure;
 invariantsToReport : sequence of persistedInvariantStructure;
 
 begin
+	
+	invStore := find_one InvStore();
 	invariant := find_one Invariant(invariantName = invariantName and invariantValue = invariantValue);
 	if invariant /= null then
 		invariantToReport.invariantName := invariant.invariantName;
@@ -59,9 +65,10 @@ begin
 		invariantsToReport := invariantsToReport & invariantToReport;
 		invariant.reportedToLocalClient := true;
 		StoreClient~>addInvariants(invariantsToReport);
-	else
-		invStore := find_one InvStore();
+	elsif invStore.storeToFile = true then
 		generate InvStore.loadStore() to invStore;
+	else
+		StoreClient~>addInvariants(invariantsToReport);
 	end if;
 	
 end service;
