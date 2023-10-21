@@ -263,6 +263,18 @@ begin
                             modificationTime => jobDefinitionFile.lastModificationTime,
                             Current_State => Created
                         );
+						if jobTypeJSONObject'contains("JobDeprecated") then
+							jobType.deprecated := boolean'parse(JSON::get_string(jobTypeJSONObject["JobDeprecated"]));
+						end if;
+						if jobTypeJSONObject'contains("JobTypeExpiryDate") then
+							jobType.jobTypeExpiryTime := timestamp'parse(JSON::get_string(jobTypeJSONObject["JobTypeExpiryDate"]));
+						end if;
+						if jobTypeJSONObject'contains("StaleAuditEventDuration") then
+							jobType.staleAuditEventDuration := duration'parse(JSON::get_string(jobTypeJSONObject["StaleAuditEventDuration"]));
+						end if;
+						if jobTypeJSONObject'contains("BlockedAuditEventDuration") then
+							jobType.blockedAuditEventDuration := duration'parse(JSON::get_string(jobTypeJSONObject["BlockedAuditEventDuration"]));
+						end if;
                         generate JobType.activateJobType() to jobType;
                     end if;
                     // extract the spec data items
