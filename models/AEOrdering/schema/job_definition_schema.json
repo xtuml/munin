@@ -9,6 +9,25 @@
       "description": "The name of the job.",
       "type": "string"
     },
+    "JobDeprecated": {
+      "description": "Indicates if the job is no longer supported.",
+      "type": "string"
+    },
+    "JobTypeExpiryDate": {
+      "description": "A timestamp value specifying the latest date at which the job type is valid.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "StaleAuditEventDuration": {
+      "description": "A duration value specifying the maximum age of an event at the time it is received for it to be considered valid.",
+      "type": "string",
+      "format": "duration"
+    },
+    "BlockedAuditEventDuration": {
+      "description": "A duration value specifying the maximum time an event can be blocked before the job is considered to be failed.",
+      "type": "string",
+      "format": "duration"
+    },
     "Events": {
       "type": "array",
       "items": {
@@ -63,6 +82,16 @@
         "IsCritical": {
           "description": "A flag denoting that the event is critical in the scope of unhappy events",
           "type": "boolean"
+        },
+        "StaleAuditEventDuration": {
+          "description": "A duration value specifying the maximum age of an event at the time it is received for it to be considered valid.",
+          "type": "string",
+          "format": "duration"
+        },
+        "BlockedAuditEventDuration": {
+          "description": "A duration value specifying the maximum time an event can be blocked before the job is considered to be failed.",
+          "type": "string",
+          "format": "duration"
         },
         "DynamicControl" : {
           "description": "Definition of event data values which constrain the flow of events",
