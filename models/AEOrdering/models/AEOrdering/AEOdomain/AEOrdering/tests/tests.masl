@@ -1352,6 +1352,8 @@ systemSpec : instance of SystemSpec;
 configFile : string := "config.json";
 verificationTimerControls : sequence of instance of _TEST_Req_IF_Verification_reportVerificationTimerControls;
 verificationTimerControl : instance of _TEST_Req_IF_Verification_reportVerificationTimerControls;
+jobType : instance of JobType;
+auditEventType : instance of AuditEventType;
 
 begin
 	
@@ -1439,7 +1441,29 @@ begin
     Assertions::assertTrue((verificationTimerControl.timeoutPeriodForHangingJob = duration'seconds(15)), "Test Config Test Data: Invalid timeoutPeriodForHangingJob");
 	delete verificationTimerControls;
 	
-		
+	// check the job definition for the correct stale and blocked audit event times
+	jobType := find_one JobType(jobTypeName = "Job1");
+	Assertions::assertTrue(jobType /= null, "Failed to find Job Type Job 1");
+	Assertions::assertTrue(jobType.staleAuditEventDuration = @P2W@, "Job Type Job 1 has an invalid staleAuditEventDuration");
+	Assertions::assertTrue(jobType.blockedAuditEventDuration = @PT15M@, "Job Type Job 1 has an invalid blockedAuditEventDuration");
+	jobType := find_one JobType(jobTypeName = "Job2");
+	Assertions::assertTrue(jobType /= null, "Failed to find Job Type Job 2");
+	Assertions::assertTrue(jobType.staleAuditEventDuration = @P3W@, "Job Type Job 2 has an invalid staleAuditEventDuration");
+	Assertions::assertTrue(jobType.blockedAuditEventDuration = @PT25M@, "Job Type Job 2 has an invalid blockedAuditEventDuration");
+	
+	// check the specific event types for the correct stale and blocked audit event times
+	auditEventType := find_one AuditEventType(jobTypeName = "Job1" and eventType = "TestEvent5" and occurrenceId = 1);
+	Assertions::assertTrue(auditEventType /= null, "Failed to find Event Type TestEvent5 for job type Job 1");
+	Assertions::assertTrue(auditEventType.staleAuditEventDuration = @PT2H@, "Event Type TestEvent5 for Job 1 has an invalid staleAuditEventDuration");
+	Assertions::assertTrue(auditEventType.blockedAuditEventDuration = @PT2H@, "Event Type TestEvent5 for Job 1 has an invalid blockedAuditEventDuration");
+	auditEventType := find_one AuditEventType(jobTypeName = "Job2" and eventType = "TestEvent20" and occurrenceId = 1);
+	Assertions::assertTrue(auditEventType /= null, "Failed to find Event Type TestEvent20 for job type Job 2");
+	Assertions::assertTrue(auditEventType.staleAuditEventDuration = @PT1H@, "Event Type TestEvent20 for Job 2 has an invalid staleAuditEventDuration");
+	Assertions::assertTrue(auditEventType.blockedAuditEventDuration = @PT1H@, "Event Type TestEvent20 for Job 2 has an invalid blockedAuditEventDuration");
+	auditEventType := find_one AuditEventType(jobTypeName = "Job2" and eventType = "TestEvent25" and occurrenceId = 1);
+	Assertions::assertTrue(auditEventType /= null, "Failed to find Event Type TestEvent25 for job type Job 2");
+	Assertions::assertTrue(auditEventType.staleAuditEventDuration = @PT2H@, "Event Type TestEvent25 for Job 2 has an invalid staleAuditEventDuration");
+	Assertions::assertTrue(auditEventType.blockedAuditEventDuration = @PT2H@, "Event Type TestEvent25 for Job 2 has an invalid blockedAuditEventDuration");
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

@@ -1,5 +1,9 @@
 {
   "JobDefinitionName": "Job2",
+  "JobDeprecated": "false",
+  "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
+  "StaleAuditEventDuration": "P3W",
+  "BlockedAuditEventDuration": "PT25M",
   "Events": [
     {
       "EventName": "TestEvent18",
@@ -23,6 +27,8 @@
     {
       "EventName": "TestEvent20",
       "SequenceName": "Sequence4",
+      "StaleAuditEventDuration": "PT1H",
+      "BlockedAuditEventDuration": "PT1H",
       "PreviousEvents": [
         {
           "PreviousEventName": "TestEvent19",
@@ -91,7 +97,9 @@
       "EventName": "TestEvent25",
       "OccurrenceId": 1,
       "Application": "App6",
-      "SequenceEnd": true
-    }
+      "SequenceEnd": true,
+      "StaleAuditEventDuration": "PT2H",
+      "BlockedAuditEventDuration": "PT2H"
+}
   ]
 }
