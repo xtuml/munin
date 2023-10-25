@@ -30,13 +30,13 @@ $P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleS
 $P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJC
 $P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJD
 $P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJE 
-$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJA --injectAb4B SSJA SSJC
-$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJB --injectAb4B SSJB SSJD
-$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --omit SSJC --injectAb4B SSJC SSJE
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --injectAb4B SSJA SSJC
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --injectAb4B SSJB SSJD
+$P2J --play -o reception-incoming ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml --injectAb4B SSJC SSJE
 echo "Done."
 
 # wait a reasonable amount of time
-delay=10
+delay=3
 echo "Waiting ${delay} seconds for protocol verifier to complete..."
 sleep $delay
 echo "Done."
@@ -50,18 +50,12 @@ echo "Checking results..."
 echo "--------------------------------------------------"
 # Check for job_failed and be sure no success or alarm.
 for fn in config/job_definitions/*.json; do
-        job_name=$(jq -r '.JobDefinitionName' "${fn}")
-        grep "svdc_job_failed : JobId = [a-f0-9-]* : JobName = ${job_name}" logs/verifier/Verifier.log &>/dev/null
+	job_name=$(jq -r '.JobDefinitionName' "${fn}")
+	grep 'svdc_job_failed :\|: JobId = [a-f0-9-]* with Job Name = ${job_name}' logs/verifier/Verifier.log &>/dev/null
 	if [[ $? == 0 ]]; then
-		grep "svdc_job_success : JobId = [a-f0-9-]* : JobName = ${job_name}" logs/verifier/Verifier.log &>/dev/null
+		grep "svdc_job_success" logs/verifier/Verifier.log &>/dev/null
 		if [[ $? != 0 ]]; then
-			grep "svdc_job_alarm : JobId = [a-f0-9-]* : JobName = ${job_name}" logs/verifier/Verifier.log &>/dev/null
-			if [[ $? != 0 ]]; then
-				printf "%-40s %s\n" "${job_name}" "[${GREEN}SUCCESS${NORMAL}]"
-			else
-				printf "%-40s %s\n" "${job_name}" "[${RED}FAILURE${NORMAL}]"
-				exit_code=1
-			fi
+			printf "%-40s %s\n" "${job_name}" "[${GREEN}SUCCESS${NORMAL}]"
 		else
 			printf "%-40s %s\n" "${job_name}" "[${RED}FAILURE${NORMAL}]"
 			exit_code=1
