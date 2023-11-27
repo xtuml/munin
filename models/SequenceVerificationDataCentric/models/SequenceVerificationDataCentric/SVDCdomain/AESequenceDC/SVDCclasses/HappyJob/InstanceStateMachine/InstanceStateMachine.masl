@@ -653,7 +653,7 @@ begin
         if theDynamicControl -> R36 /= null then
         // We have a user dynamic control so check its values
           if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
-            validatedConstraint := false;    
+            validatedDynamicControl := false;    
             // TODO Remove debug log message      
             logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Merge Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Merge Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Merge Count = " & theDynamicControl.currentDynamicControlValue'image;
             AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);    
