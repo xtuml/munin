@@ -91,6 +91,12 @@ begin
 					eventType.isSequenceStart := sequenceStart;
 					eventType.previousEventTypes := previousEventTypes;
 				end if;				
+				if eventDefJSONObject'contains("StaleAuditEventDuration") then
+					eventType.staleAuditEventDuration := duration'parse(JSON::get_string(eventDefJSONObject["StaleAuditEventDuration"]));
+				end if;
+				if eventDefJSONObject'contains("BlockedAuditEventDuration") then
+					eventType.blockedAuditEventDuration := duration'parse(JSON::get_string(eventDefJSONObject["BlockedAuditEventDuration"]));
+				end if;
 				
 				// check for any dynamic controls
 				if eventDefJSONObject'contains("DynamicControl") then
