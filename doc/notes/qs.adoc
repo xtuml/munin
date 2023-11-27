@@ -5,14 +5,48 @@
 * Where do job definitions come from?
 * How many events per job will there be (on average)?
 * What percentage of jobs will define unhappy events?
+* What percentage of runtime jobs containing unhappy events is acceptable?
 * What percentage of jobs will use intra-job invariants?
 * What percentage of jobs will use extra-job invariants?
 * What is the expected expiration/longevity of extra-job invariants?
-* How will the PV be notified of compromised invariants?
+* How many extra-job invariants are expected to be in force concurrently?
+* Can a given extra-job invariant have more than one value valid at a time?
+* How will the PV be notified of compromised extra-job invariants?
+* How is an extra-job invariant's lifetime specified? Is it a property of the 
+definition or might this need to be a runtime parameter? It's currently fixed
+at 1 day.
+* Invariant checking currently happens on job completion. Is there any benefit
+to performing some checks earlier where possible?
+* What is the likely maximum number of intra-job invariants used in a single job?
+* What is the likely maximum number of extra-job invariants used in a single job?
+* Can we rule out a runtime job which has multiple instances of the start event?
+(We think that should be multiple runtime jobs each with a single start event)
 * What are the requirements on back-end reporting (alarms, failures, successes)?
 * What technology will the back-end reporting use?  (kafka, stroom, etc)
 * Can we deprecate support for Inclusive OR forks?
+* If we can't deprecate support for Inclusive OR forks what proportion of jobs 
+will utilise Inclusive OR? (We may be able to mitigate for the performance hit 
+that Inclusive OR causes if the proportion is not too high)
+* Is it OK to mandate a branch count constraint on every instance fork? 
+(An unconstrained instance fork is a potential vulnerability so we would prefer 
+to exclude it)
+* Should we mandate a loop count constraint on every loop? 
+(This is not currently required but verification would be stronger if it were)
+* What level of nested features do job definition topologies need to support?
+* Is there any prospect of being able to order sequences within a job?
+* A Job Definition containing 20 sequences each with one event is possible but
+of little value. Would a measure of job definition "quality" be useful?
+* The first event for a runtime Job could be an expected unhappy event. Should 
+this be tolerated or should this be classed as a failed Job?
+
 
 == assumptions
 
 * Job definitions do not change.  They can be defined and deprecated but not modified.
+* Once a runtime Job receives an unhappy event the sequencing of further events
+becomes impractical so the verification of that Job is too a lower standard. As 
+part of the monitoring of the effectiveness of the PV in operation it is 
+assumed that the proportion of unhappy jobs to happy jobs will be monitored 
+to ensure the PV is working effectively.
+* The failure of any checks of a job containing an unhappy event raises an alarm
+condition. 
