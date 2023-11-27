@@ -75,16 +75,8 @@ end state;
 
 //! ACTIVITY BEGIN. 'ee1fb944-54a4-406f-b70a-53153f627d75' '4d6cdb20-682a-45cb-9520-e2ae3c11293a' DO NOT EDIT THIS LINE.
 state AEOrdering::Job.Deleted () is
-instrumentationEventId : string;
-instrumentationEventType : string;
-
 begin
-  // Report that AEO has deleted the respective Job as part of the 
-  // verification process of the Protocol Verifier itself.
-  instrumentationEventId := "Unused";
-  instrumentationEventType := "AEO_PVJobDeleted";
-  Req_IF_BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", this.jobId, instrumentationEventId, instrumentationEventType);
-
+  // Simply, delete this instance of Job.
   this.jobDeleted();
 
 end state;

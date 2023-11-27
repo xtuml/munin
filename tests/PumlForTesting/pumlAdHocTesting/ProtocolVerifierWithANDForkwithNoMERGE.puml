@@ -6,32 +6,38 @@ partition "ProtocolVerifier" {
       "Sourced from 
       job creation in AEO"
     end note
-    :SVDC_PVSequencingStart;
-    note left
-      "Sourced from 
-      job creation in SVDC"
-    end note
-    :SVDC_PVEventProcessingComplete;
-     note left
-      "Sourced from the start of 
-      Assessing Constraints in SVDC"
-    end note
-    :SVDC_PVConstraintCheckPassed;
-    note left
-      "Sourced from the start of 
-      Assessing Invariants in SVDC"
-    end note
-    #gold:SVDC_PVJobSuccessful,CRITICAL;
-    note left
-      "Sourced from the start of 
-      Job Successful in SVDC"
-    end note
-    #red:AEO_PVJobDeletionInitiated;  
-    note right
-      "Sourced from start of
-      deleteJob function in AEO"
-    end note
-    detach
+    fork
+      :AEO_PVSomethingElse;
+      detach
+    fork again
+      :SVDC_PVSequencingStart;
+      note left
+        "Sourced from 
+        job creation in SVDC"
+      end note
+      :SVDC_PVEventProcessingComplete;
+       note left
+        "Sourced from the start of 
+        Assessing Constraints in SVDC"
+      end note
+      :SVDC_PVConstraintCheckPassed;
+      note left
+        "Sourced from the start of 
+        Assessing Invariants in SVDC"
+      end note
+      #gold:SVDC_PVJobSuccessful,CRITICAL;
+      note left
+        "Sourced from the start of 
+        Job Successful in SVDC"
+      end note
+       end fork
+      #red:AEO_PVJobDeletionInitiated;  
+      note right
+        "Sourced from start of
+        deleteJob function in AEO"
+      end note
+      detach
+   
   end group
   package "Unsequenced Events" {
     :AEO_PVJobFails;
