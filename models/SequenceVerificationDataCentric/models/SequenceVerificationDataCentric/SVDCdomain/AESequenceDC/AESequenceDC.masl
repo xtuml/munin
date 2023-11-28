@@ -18,7 +18,7 @@ logMessage : string;
 begin
 
   logMessage := "AESequenceDC::Persistence_Req_IF~>PersistInvariant : PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
-  AsyncLogger::log(Logger::Information, "AESequenceDC", logMessage);
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -31,7 +31,7 @@ logMessage : string;
 begin
 
   logMessage := "AESequenceDC::Persistence_Req_IF~>PersistInvariant : PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
-  AsyncLogger::log(Logger::Information, "AESequenceDC", logMessage);
+  Logger::log(Logger::Information, "AESequenceDC", logMessage);
   
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -41,7 +41,7 @@ public service AESequenceDC::Reporting~>reportEvent ( eventPriority : in Logger:
                                                      eventLabel : in string,
                                                      eventContent : in string ) is
 begin
-	AsyncLogger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
+	Logger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

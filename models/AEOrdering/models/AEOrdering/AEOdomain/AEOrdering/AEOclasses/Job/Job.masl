@@ -33,7 +33,7 @@ begin
 	
 	// now log the failure
 	logMessage := "AEOrdering::Job.failJob : " & failureReason;
-	AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+	Logger::log(Logger::Error, "AEOrdering", logMessage);
 	Reporting~>reportEvent(Logger::Information, "aeordering_job_failed", failureReason);
 	
 end service;

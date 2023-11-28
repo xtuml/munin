@@ -14,7 +14,7 @@ begin
         delete this;
     else
         logMessage := "AEOrdering::JobType.SourceDataItemForwardReference : Failed to process EXTRAJOBINV event data item type for unknown Source Job Type = " & this.sourceJobTypeName & ", Event Data Name = " & this.sourceDataItemName;
-        AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
         raise program_error;
     end if;
 end service;

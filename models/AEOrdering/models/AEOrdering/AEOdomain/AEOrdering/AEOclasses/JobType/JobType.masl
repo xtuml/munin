@@ -147,7 +147,7 @@ begin
 				                        link sourceDataItemType R18.constrains dataItemType;
 				                    else
                                         logMessage := "AEOrdering::JobType.loadEventTypes : Failed to process INTRAJOBINV event data item type for unknown Source Event Type " & JSON::get_string(eventDataJSONObject["SourceEventType"]) & ", Occurrence Id " & JSON::get_integer(eventDataJSONObject["SourceEventOccurrenceId"])'image;
-                                        AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+                                        Logger::log(Logger::Error, "AEOrdering", logMessage);
                                         raise program_error;
 				                    end if;
 				                else
@@ -201,7 +201,7 @@ begin
 		end if;
 	else
 		logMessage := "AEOrdering::JobType.loadEventTypes : Failed to process event type for unknown Job Type " & jobTypeName;
-		AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+		Logger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 	end if;
 	
