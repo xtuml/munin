@@ -157,7 +157,7 @@ services:
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LOG_RETENTION_MS: 900000                  # default retention of 15 minutes
+      KAFKA_LOG_RETENTION_MS: 300000                  # default retention of 5 minutes
       KAFKA_LOG_SEGMENT_BYTES: 1048576                # roll the log at 1MB
       # KAFKA_LOG_ROLL_MS: 60000                      # roll the log every minute
       KAFKA_LOG_SEGMENT_DELETE_DELAY_MS: 1            # delete immediately after log roll
