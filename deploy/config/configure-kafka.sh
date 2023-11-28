@@ -9,4 +9,4 @@
 /opt/kafka/bin/kafka-configs.sh --alter --bootstrap-server kafka:9093 --topic default.IStore_service0 --add-config retention.ms=30000
 /opt/kafka/bin/kafka-configs.sh --alter --bootstrap-server kafka:9093 --topic default.IStore_service1 --add-config retention.ms=30000
 /opt/kafka/bin/kafka-configs.sh --alter --bootstrap-server kafka:9093 --topic default.IStore_service2 --add-config retention.ms=30000
-/opt/kafka/bin/kafka-configs.sh --alter --bootstrap-server kafka:9093 --topic default.BenchmarkingProbe_service0 --add-config retention.ms=60000000
+/opt/kafka/bin/kafka-configs.sh --alter --bootstrap-server kafka:9093 --topic default.BenchmarkingProbe_service0 --add-config retention.ms=6000000
