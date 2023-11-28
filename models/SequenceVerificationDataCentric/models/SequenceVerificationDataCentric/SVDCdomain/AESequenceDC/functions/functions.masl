@@ -36,7 +36,7 @@ begin
     if (knownJobDefinition.isSuspended = true) or (knownJobDefinition.isDeprecated = true)then
       // Log info: The accepted event is for a new Job that has a non-active JobDefinition 
       logMessage := "AESequenceDC::acceptorderedEvent : The event - AuditEventId = " & id & "cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
-      AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);        
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);        
       eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = The event cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
       Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
     else    
@@ -70,7 +70,7 @@ begin
         else
           // Log info: Report that the specified audit event type (ae_type) does not exist for this job definition.
           logMessage := "AESequenceDC::acceptorderedEvent : Accepted event is of an unknown type for this job definition - AEType = " & ae_type & " for Job Name = " & jobName;
-          AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage); 
+          Logger::log(Logger::Error, "AESequenceDC", logMessage); 
           eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
           Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
         end if;
@@ -79,7 +79,7 @@ begin
   else
     // Log info: Report that the specified job definition as indicated by jobName does not exist.
     logMessage := "AESequenceDC::acceptorderedEvent : The specified Job Type is unknown = " & jobName;
-    AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage); 
+    Logger::log(Logger::Error, "AESequenceDC", logMessage); 
     eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Job type";
     Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
     
@@ -155,13 +155,13 @@ eventContent : string;
 //
 begin
   logMessage := "AESequenceDC::eventDefinition : New Event Definition, Job Definition = " & jobName & "Sequence Name = " & sequenceName & " event type = " & eventType & " Start = " & isSequenceStart'image & " End = " & isSequenceEnd'image & " Break = " & isBreak'image & " Happy = " & isHappy'image & " Critical = " & isCritical'image ;
-  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   theJobDefn := find_one JobDefinition (jobName = jobName);
   if theJobDefn = null then
     // Event Definition for new Job so create the Job Definition
     theJobDefn := create unique JobDefinition (jobName => jobName, isDeprecated => false, isSuspended => false, Current_State => Active);
     logMessage := "AESequenceDC::eventDefinition : New Job Definition added, Job Definition = " & theJobDefn.jobName;
-    AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   end if; 
 
   if isHappy then
@@ -173,7 +173,7 @@ begin
       theSequenceDefn := create unique AESequenceDefinition (sequenceDefinitionName => sequenceName);
       link theSequenceDefn R7 theJobDefn;
       logMessage := "AESequenceDC::eventDefinition : New Sequence Definition added, Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName;
-      AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
     end if;
    
     theEventDefn := find_one SequencedAuditEventDefinition (AEType = eventType);
@@ -202,7 +202,7 @@ begin
                                                                     isBreak => isBreak);
       link theEventOccInSeqDef R12 theEventInSeqDef;
       logMessage := "AESequenceDC::eventDefinition : New Happy Event Definition added, Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType;
-      AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
     elsif theExistingEventDefn /= null then
       // The event definition has been seen before which could indicate the repetition of an event type within a sequence or the repetition of an event type in a different job definition
       theEventDefnsInSequence := theSequenceDefn -> R1.SequencedAuditEventDefinition;
@@ -224,7 +224,7 @@ begin
                                                                       );
           link theEventInSeqDef R12 theEventOccInSeqDef;
           logMessage := "AESequenceDC::eventDefinition : Additional Event Occurrence Definition added, Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType;
-          AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+          Logger::log(Logger::Debug, "AESequenceDC", logMessage);
         else
           // It is a placeholder so now we've seen it for real we can clear the isPlaceholder flag and set the other flags according to input data
           thePlaceholderEventOccInSeqDef.isPlaceholder := false;
@@ -236,7 +236,7 @@ begin
       else  
         // For now assume this is not allowed. TODO Check to see if the same event type can legitimately occur in different Job Types and Sequences
         logMessage := "AESequenceDC::eventDefinition : The event type provided in the initialisation data has been seen elsewhere , Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType;
-        AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);
+        Logger::log(Logger::Error, "AESequenceDC", logMessage);
 	    eventContent := "FailureReason = The event type provided in the initialisation data has been seen elsewhere" & " : JobName = " & theJobDefn.jobName  & " : SequenceDefinition = " & theSequenceDefn.sequenceDefinitionName & " : EventType = " & theEventDefn.AEType;
         Reporting~>reportEvent(Logger::Error, "svdc_invalid_event_definition", eventContent);
       end if;
@@ -261,7 +261,7 @@ begin
                                                                     isBreak => isBreak);
       link theEventOccInSeqDef R12 theEventInSeqDef;
       logMessage := "AESequenceDC::eventDefinition : Event Definition seen in another Job added to Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType;
-      AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
       
     end if;
   
@@ -292,7 +292,7 @@ begin
                 theConstraintDefn := create ConstraintDefinition (constraintDefnId => previousEventType.constraintDefId, jobName => theJobDefn.jobName, constraintType => XOR );
               else
                 logMessage := "AESequenceDC::eventDefinition : Invalid Constraint Value provided : " & previousEventType.constraintValue & "in Job Name = " & jobName;
-	            AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);
+	            Logger::log(Logger::Error, "AESequenceDC", logMessage);
 	            eventContent := "FailureReason = Invalid Constraint Value provided" & " : JobName = " & jobName  & " : ConstraintValue = " & previousEventType.constraintValue;
 	            Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
               end if;
@@ -304,7 +304,7 @@ begin
               // No constraint specified which is valid
             else
               logMessage := "AESequenceDC::eventDefinition : Invalid Constraint Definition provided : " & previousEventType.constraintDefId & "in Job Name = " & jobName;
-	          AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);            
+	          Logger::log(Logger::Error, "AESequenceDC", logMessage);            
 	          eventContent := "FailureReason = Invalid Constraint Definition provided" & " : JobName = " & jobName  & " : ConstraintDefId = " & previousEventType.constraintDefId;
 	          Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
             end if;
@@ -312,7 +312,7 @@ begin
             // We have a reference to a forward event which is possible in the case of cyclic sequences so create a placeholder event
             // In this case the event definition has been seen before but not this referenced occurrence number
             logMessage := "AESequenceDC::eventDefinition :  There is a forward reference to an event so create a Placeholder for the new event occurrence: " & thePrevEventDefn.AEType & " in Job Name = " & jobName;
-	        AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);            
+	        Logger::log(Logger::Debug, "AESequenceDC", logMessage);            
           
             thePlaceholderEventDefn := thePrevEventDefn; 
             thePlaceholderEventInSeqDef := thePlaceholderEventDefn with theSequenceDefn -> R1;
@@ -338,7 +338,7 @@ begin
           // We have a reference to a forward event which is possible in the case of cyclic sequences so create a placeholder event
           // In this case the event definition has not been seen at all
           logMessage := "AESequenceDC::eventDefinition :  There is a forward reference to an event so create a Placeholder for event type: " & previousEventType.eventTypeName & " in Job Name = " & jobName;
-	      AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);            
+	      Logger::log(Logger::Debug, "AESequenceDC", logMessage);            
           thePlaceholderEventDefn := find_one SequencedAuditEventDefinition (AEType = previousEventType.eventTypeName);
           if thePlaceholderEventDefn = null then
             thePlaceholderEventDefn := create unique SequencedAuditEventDefinition (AEType => previousEventType.eventTypeName); 
@@ -379,11 +379,11 @@ begin
         
           // The previous event definition provided is unknown
           //logMessage := "AESequenceDC::eventDefinition : Previous event types provided in the initialisation data are unknown, Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType& ", Previous event type = " & previousEventType.eventTypeName;
-	      //AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);                  
+	      //Logger::log(Logger::Error, "AESequenceDC", logMessage);                  
         end if;
 
 //      logMessage := "AESequenceDC::eventDefinition : Multiple previous event types provided in the initialisation data. Not currently supported, Job Definition = " & theJobDefn.jobName & ", Sequence Definition = " & theSequenceDefn.sequenceDefinitionName & ", Event type = " & theEventDefn.AEType;
-//	  AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);            
+//	  Logger::log(Logger::Error, "AESequenceDC", logMessage);            
         
 //    end if;
     end loop;
@@ -397,20 +397,20 @@ begin
                                                                          jobName => theJobDefn.jobName); 
         link theUnseqEventDefn R39 theJobDefn using theUnseqEventDefnInJobDefn ;
         logMessage := "AESequenceDC::eventDefinition : New Unhappy Event Definition added, Job Definition = " & theJobDefn.jobName & ", Unhappy Event type = " & theUnseqEventDefn.UnsequencedAEType;
-        AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   
     else
         theUnseqEventDefnInJobDefn := create UnsequencedAEDefnInJobDefn (UnsequencedAEDefnId => theUnseqEventDefn.UnsequencedAEDefnId,
                                                                          jobName => theJobDefn.jobName); 
         link theUnseqEventDefn R39 theJobDefn using theUnseqEventDefnInJobDefn ;
         logMessage := "AESequenceDC::eventDefinition : Existing Unhappy Event Definition found and added to this Job Definition = " & theJobDefn.jobName & ", Unhappy Event type = " & theUnseqEventDefn.UnsequencedAEType;
-        AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
     end if;
     
     // The following checks that an unhappy event is not marked as a critical event as that combination is not allowed
     if isCritical then
       logMessage := "AESequenceDC::eventDefinition : The event type provided in the initialisation data is marked as Critical and an Unhappy Event - this combination is not allowed, Job Definition = " & theJobDefn.jobName & ", Event type = " & theEventDefn.AEType;
-      AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);
+      Logger::log(Logger::Error, "AESequenceDC", logMessage);
 	  eventContent := "FailureReason = The event type provided in the initialisation data is marked as Critical and an Unhappy Event - this combination is not allowed " & " : JobName = " & theJobDefn.jobName  & " : EventType = " & theEventDefn.AEType;
       Reporting~>reportEvent(Logger::Error, "svdc_invalid_event_definition", eventContent);
     end if;
@@ -433,7 +433,7 @@ begin
   else
 
     logMessage := "AESequenceDC::deleteJob : jobId provided is unknown " & jobId;
-	AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
       
   end if;
   //
@@ -457,7 +457,7 @@ begin
   else
   
     logMessage := "AESequenceDC::deprecatedJobDefinition : Job Definition specified for deprecation is unknown - jobName " & jobName;
-	AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   
   end if;  
 end service;
@@ -508,7 +508,7 @@ begin
   else
   
     logMessage := "AESequenceDC::suspendJobDefinition : The JobDefinition specified for suspension is unknown - jobName " & jobName;
-	AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   
   end if;
 end service;
@@ -527,7 +527,7 @@ begin
     // Check whether the respective JobDefinition is in the 'Suspended' state.
     if theJobDefn.isSuspended /= true then
       logMessage := "AESequenceDC::reactivateJobDefinition : Reactivation attempt of JobDefinition - jobName " & jobName & "failed because it was not in the SUSPENDED state";
-	  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	else
 	   // Reactivate the suspended JobDefinition
        generate JobDefinition.reactivate() to theJobDefn;
@@ -535,7 +535,7 @@ begin
   else
     // 
     logMessage := "AESequenceDC::reactivateJobDefinition : The JobDefinition specified for reactivation is unknown - jobName " & jobName;
-	AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   
   end if;
 end service;
@@ -554,7 +554,7 @@ logMessage : string;
 begin
   // TODO - remove the following log message (added for testing purposes).
   logMessage := "AESequenceDC::extraJobInvariantDefinition : Extra Job Invariant Definition added for "& auditEventDataName;
-  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 
   sourceInvariantEventType := (sourceEventType,sourceOccurrenceId,"","");
   ExtraJobInvariantDefn.createSourceExtraJobInvariantDefn(sourceJobDefnName,auditEventDataName, sourceInvariantEventType, @P1D@);
@@ -639,7 +639,7 @@ begin
     else
                       
       logMessage := "AESequenceDC::restoreInvariants : No Extra-Job Invariant Definition of the appropriate name was found so restoring the following Invariant cannot proceed " & restoredInvariant.invariantName;
-      AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   	                                                                           
     end if;  
                  
@@ -652,7 +652,7 @@ begin
     
     // TODO Remove debug message
     logMessage := "AESequenceDC::restoreInvariants : Additional Source Invariants found so re-evaluate the extra job invariants for Job " & eachJob.jobID;
-    AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
     
     generate Job.StoredInvariantsReceived () to eachJob;
   end loop;
@@ -667,20 +667,20 @@ logMessage : string;
 begin
   theJobDefn := find_one JobDefinition (jobName = jobName);
   logMessage := "AESequenceDC::createJobDefinition : New Job Definition, Job Definition = " & jobName ;
-  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
   if theJobDefn = null then
     // Event Definition for new Job so create the Job Definition
     theJobDefn := create unique JobDefinition (jobName => jobName, isDeprecated => false, isSuspended => false, Current_State => Active);
     for eventDefinition in eventDefinitions loop
       logMessage := "AESequenceDC::createJobDefinition : New Event Definition, Sequence Name = " & eventDefinition.sequenceName & " event type = " & eventDefinition.eventType & " Start = " & eventDefinition.isSequenceStart'image & " End = " & eventDefinition.isSequenceEnd'image & " Break = " & eventDefinition.isBreak'image & " Happy = " & eventDefinition.isHappy'image & " Critical = " & eventDefinition.isCritical'image ;
-      AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
       AESequenceDC::eventDefinition(jobName, eventDefinition.sequenceName, eventDefinition.eventType, eventDefinition.occurrenceId, 
     		                          eventDefinition.previousEventTypes, eventDefinition.isSequenceStart, eventDefinition.isSequenceEnd, 
     		                          eventDefinition.isBreak, eventDefinition.isHappy, eventDefinition.isCritical);
     end loop;
   else
     logMessage := "AESequenceDC::createJobDefinition :  Updates for existing jobs not supported: Job Name = " & jobName;
-    AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);            
+    Logger::log(Logger::Debug, "AESequenceDC", logMessage);            
   end if;
      
 end service;
