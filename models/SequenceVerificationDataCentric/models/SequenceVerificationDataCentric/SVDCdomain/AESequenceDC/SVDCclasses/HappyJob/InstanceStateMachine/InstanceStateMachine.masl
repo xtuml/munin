@@ -51,6 +51,7 @@ theCurrentDynamicControlDefn : instance of DynamicControlDefinition;
 theUserDynamicControl : instance of DynamicControl;
 thisJobsDynamicControl : instance of DynamicControl;
 thisJobsDynamicControls : set of instance of DynamicControl;
+allJobsUserDynamicControls : set of instance of DynamicControl;
 theDynamicControls : set of instance of DynamicControl;
 theSourceDynamicControl : instance of DynamicControl;
 theCurrentDynamicControls : set of instance of DynamicControl;
@@ -253,11 +254,16 @@ begin
 
                     // Add logic for creating user Branch Count on Fork event
                     theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
+
                     if theUserDynamicControlDefn /= null and theUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then                      
 
                       // We know this event is a fork point so find the corresponding source event to get the number of branches expected
 
-                      theDynamicControls := theUserDynamicControlDefn -> R29;
+                      // MUN2-143 change
+                      allJobsUserDynamicControls := theUserDynamicControlDefn -> R29;
+                      thisJobsDynamicControls := theJob -> R35;
+                      theDynamicControls := thisJobsDynamicControls intersection allJobsUserDynamicControls;
+                      // end MUN2-143 change
                       theSourceDynamicControl := find_one theDynamicControls (isUser = false);
                       if theSourceDynamicControl /= null then
  
@@ -290,6 +296,9 @@ begin
                     thePrevUserDynamicControl := prevEvent -> R36;
                     if thePrevUserDynamicControl /= null and thePrevUserDynamicControl.isUser then
                       thePrevUserDynamicControl.currentDynamicControlValue := thePrevUserDynamicControl.currentDynamicControlValue + 1;
+                      
+                      logMessage := "AESequenceDC::HappyJob.JobInProgress : Incrementing the Branch Count for job: " & this.jobID & " with Job Name = " & theJob.jobName & " to value = " & thePrevUserDynamicControl.currentDynamicControlValue'image;
+	                  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
                       
                     end if;
 
@@ -631,11 +640,11 @@ begin
         // We have a user dynamic control so check its values
           if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.currentDynamicControlValue /= theDynamicControl.expectedDynamicControlValue) then
             validatedDynamicControl := false;          
-            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Branch Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theBranchedEvents'length'image;
-            Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
+            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Branch Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
+            AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);    
           else
-            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Branch Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theBranchedEvents'length'image;
-            Logger::log(Logger::Debug, "AESequenceDC", logMessage);              
+            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Branch Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
+            AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);              
           end if;
         else
           // This is the source branch count which isn't checked
@@ -644,7 +653,7 @@ begin
         if theDynamicControl -> R36 /= null then
         // We have a user dynamic control so check its values
           if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
-            validatedConstraint := false;    
+            validatedDynamicControl := false;    
             // TODO Remove debug log message      
             logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Merge Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Merge Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Merge Count = " & theDynamicControl.currentDynamicControlValue'image;
             Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
@@ -789,7 +798,7 @@ completeSequences : set of instance of Sequence;
 sequencesForJob : set of instance of Sequence;
 theSystemSpec : instance of SystemSpecification;
 logMessage : string;
- 
+// Note thePotentiallyCompletedSequence is provided as a polymorphic input parameter though it is not visible in the state action in BP (it is in MASL)
 begin
   theJob := this -> R45;
   // Log info: Audit Event Sequence Verification is checking for completion of a Sequence or Job
