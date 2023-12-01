@@ -1,0 +1,167 @@
+= Munin Protocol Verifier - Testing for Planned Errors
+
+Munin Project Analysis Note
+
+== 1 Abstract
+
+The Protocol Verifier (PV) is designed to verify the correct behaviour of the
+system it monitors - the Monitored System (MS). This involves testing that the 
+PV identifies the correct behaviour of the MS but also that it identifies 
+predicted and defined failure modes of the MS. This note looks at the test
+conditions required for the testing of failure modes.
+
+
+== 2 Introduction and Background
+
+The Protocol Verifier (PV) tracks audit events emitted by the Monitored System 
+(MS) amd verifies that the MS behaves as expected. This does not mean that the 
+MS has to behave correctly all of the time. The MS is expected to fail from 
+time to time and the PV checks that any such failures behave in a predicted 
+manner. Such a predicted failure is still a successful job from the PV's 
+perspective. The PV's determination of a successful job is that the job
+behaves as expected not that the MS was successful in doing what it aimed to.
+
+In addition, the PV must catch and report a range of unexpected behaviours in
+the MS. These are reported as errors. 
+
+There is a set of regression tests that check for the expected behaviour of the 
+MS. In addition, we need a set of regression tests that demonstrate that the PV 
+detects unexpected behaviour of the MS. This note lists some of the error 
+injections that the regression tests for failure modes need to cover.
+ 
+== 3 Error Injection Modes
+
+=== 3.1 Event Ordering and Completeness
+
+. Missing Events - expected events are missing from the sequence
+. Swapped Events - the full set of events is present but in an invalid order
+as defined by the previous event ids (not time order)
+. Spurious Events - additional unexpected events are added to the sequence
+. Missing Start Event - the omission of job and sequence start events
+. Missing End Events - the job does not complete as expected
+. Invalid Start Event 1 - a start event provided with a previous event id
+. Invalid Event - an event not defined as a start event has no previous event id
+. Invalid End Event - an end event used as a previous event id in another event
+. Multiple instances of start event - the job start event has multiple instances
+(Note this condition is not currently tested but is thought to be an error 
+condition)
+
+=== 3.2 Logic Errors
+
+. Missing Events in AND Fork - an incomplete set of tines following an AND fork
+. Spurious Events in XOR Fork - multiple options on an XOR fork are taken
+. Unsupported Constraint Type - A constraint other than AND and XOR is specified
+
+=== 3.3 Dynamic Control Errors
+
+. Incomplete Fork - a fork event has insufficient tines following it based 
+on the Branch Count
+. Superfluous Fork - a fork event has too many tines following it based 
+on the Branch Count
+. Incomplete Merge - a merge event has insufficient previous events ids based 
+on the Merge Count
+. Superfluous Merge - a merge event has too many previous events ids based 
+on the Merge Count
+. Incomplete Loop - a loop has insufficient repetitions based on the Loop Count
+. Superfluous Loop - a loop has too many repetitions based on the Loop Count
+. Missing Loop - a loop has no repetitions
+. Invalid Dynamic Control Name - the dynamic control name does not match that
+of the definition
+. Invalid Source Dynamic Control - the dynamic control value is provided on
+an unexpected event
+. Invalid User Dynamic Control (Branch) - the branch point in the event stream
+does not match the definition of the user branch point
+. Invalid User Dynamic Control (Loop) - the loop in the event stream
+does not include the defined user loop event
+. Missing Branch Count - the event expected to carry the branch count has no data
+. Missing Merge Count - the event expected to carry the merge count has no data
+. Missing Loop Count - the event expected to carry the loop count has no data
+. Non-integer Branch Count - the value provided for the branch count is non-integer
+. Non-integer Merge Count - the value provided for the merge count is non-integer
+. Non-integer Loop Count - the value provided for the loop count is non-integer
+. Failed break - ??
+
+=== 3.4 Extra Job Invariant Errors
+
+. Invalid Source Invariant Location - the source invariant is provided on the
+wrong event
+. Invalid Source Invariant Name - the source invariant name in the data does 
+not match the definition
+. Invalid User Invariant Location - the user invariant is provided on the
+wrong event
+. Invalid User Invariant Name - the user invariant name in the data does 
+not match the definition
+. Invalid User Invariant Value - the user invariant value does not match the
+source invariant
+. Expired User Invariant Value - the user invariant value matches an expired
+source invariant
+
+=== 3.5 Intra Job Invariant Errors
+
+. Invalid Source Invariant Location - the source invariant is provided on the
+wrong event
+. Invalid Source Invariant Name - the source invariant name in the data does 
+not match the definition
+. Invalid User Invariant Location - the user invariant is provided on the
+wrong event
+. Invalid User Invariant Name - the user invariant name in the data does 
+not match the definition
+. Invalid User Invariant Value - the user invariant value does not match the
+source invariant
+
+=== 3.6 Invalid Identfier Errors
+
+. Reused Job Id - a job id is used in more than one job
+. Reused Event Id - an event id is used in more than one event in a job
+. Invalid Previous Event Id - a previous event id that does not refer to a 
+previous event
+. Repeated Previous Event Id - a merge point with a previous event id
+occurring more than once in the list of previous events
+
+== 4 Implications for plus2json
+
+The plus2json --play feature produces valid runtime event stream based upon 
+a PLUS job definition. This feature is already extensively used in regression
+testing. Some addtional features have been added to plus2json to support
+unhappy events and unhappy jobs. These are jobs with, typically, error
+events that are predicted. plus2json can inject or replace unhappy events
+into the event stream. This has broadened the set of regression tests.
+
+To test the PV's ability to detect and report unexpected behaviour we need
+to be able to inject deliberately erroneous events and event data into the
+event stream. This could be done be generating a valid event stream using
+plus2json and then editing it to add the errors. The resulting edited json
+would be retained and used as the basis of regression tests. This approach
+may be necessary for some of the error conditions described above.
+
+plus2json could also be further developed to support some of the required
+error injection features. The ability to omit and event and to insert event A
+before event B have already been added.
+
+The following are some of the other candidate features that should be 
+considered for plus2json based upon the above requirements:
+
+. Ability to add a previous event id
+. Ability to omit a previous event id
+. Explicit control of the number of instances of a named event that are
+created
+. Explicit control of the number of tines on an instance fork along with
+independent control of the branch count value (potentially non-integer)
+. Explicit control of the number of previous ids on an instance merge with
+independent control of the merge count value (potentially non-integer)
+. Explicit control of the number of loops exercised at runtime with
+independent control of the loop count value (potentially non-integer)
+. Explicit control of the event an invariant is attached to
+. Explicit control of the name of an invariant
+. Explicit control of the value of an invariant
+
+Some of the above overlap and several requirements could be met by a single feature in plus2json.
+
+== 5 Document References
+
+. [[dr-1]] https://github.com/xtuml/plus2json/tree/main/doc/notes
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
