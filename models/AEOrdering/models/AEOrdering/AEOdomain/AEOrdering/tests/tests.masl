@@ -654,15 +654,26 @@ begin
 		Test::fail("", 1, "Test Job Complete: Failed to find Failed Job");
 	end if;
 	
-	// test purge job store
+	// check that the job store file exists and contains 
 	jobStore := find_one JobStore();
+	Assertions::assertTrue((Filesystem::file_exists(Filesystem::filename(jobStore.jobStoreLocation & "/" & jobStore.jobStoreName))), "Test Job Complete: Job store file does not exist");
+	// test purge job store
+	schedule jobStore.jobStoreTimer generate JobStore.purgeJobStore() to jobStore delay @PT1S@;
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
+	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId1);
+    Assertions::assertTrue((storedJobIdentifier /= null), "Test Job Complete: Failed to find StoredJobIdentifier");
+	// check the archived file exists
+	Assertions::assertTrue((Filesystem::list_directory(Filesystem::filename(jobStore.jobStoreLocation))'length > 0), "Test Job Complete: Job store file not archived");
+	
+	// check the archived file has been removed
 	jobStore.jobStoreAgeLimit := @PT0S@;
 	schedule jobStore.jobStoreTimer generate JobStore.purgeJobStore() to jobStore delay @PT1S@;
 	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
 	Test::fire_scheduled_timers(timestamp'now + duration'seconds(1));
 	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId1);
     Assertions::assertTrue((storedJobIdentifier = null), "Test Job Complete: Failed to find StoredJobIdentifier");
-	
+	Assertions::assertTrue((Filesystem::list_directory(Filesystem::filename(jobStore.jobStoreLocation))'length = 0), "Test Job Complete: Job store file archive not removed");
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
