@@ -296,10 +296,10 @@ begin
                     thePrevUserDynamicControl := prevEvent -> R36;
                     if thePrevUserDynamicControl /= null and thePrevUserDynamicControl.isUser then
                       thePrevUserDynamicControl.currentDynamicControlValue := thePrevUserDynamicControl.currentDynamicControlValue + 1;
-                      
+
                       logMessage := "AESequenceDC::HappyJob.JobInProgress : Incrementing the Branch Count for job: " & this.jobID & " with Job Name = " & theJob.jobName & " to value = " & thePrevUserDynamicControl.currentDynamicControlValue'image;
-	                  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
-                      
+                      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+
                     end if;
 
 
@@ -641,10 +641,10 @@ begin
           if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.currentDynamicControlValue /= theDynamicControl.expectedDynamicControlValue) then
             validatedDynamicControl := false;          
             logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Branch Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
-            AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);    
+            Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
           else
             logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Branch Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
-            AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);              
+            Logger::log(Logger::Debug, "AESequenceDC", logMessage);              
           end if;
         else
           // This is the source branch count which isn't checked
@@ -860,7 +860,7 @@ begin
         if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.currentDynamicControlValue /= theDynamicControl.expectedDynamicControlValue) then
             branchCountIncomplete := true;          
             logMessage := "AESequenceDC::HappyJob.AssessingSequenceCompletion : Branch Count suggests job is incomplete for " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
-            AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);    
+            Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
         end if;
       else
           // This is the source branch count which doesn't need to be checked

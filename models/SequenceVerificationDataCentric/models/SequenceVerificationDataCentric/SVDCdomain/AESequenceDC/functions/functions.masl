@@ -73,17 +73,17 @@ begin
           else
             // Log info: Report that the specified audit event type (ae_type) does not exist for this job definition.
             logMessage := "AESequenceDC::acceptorderedEvent : Accepted event is of an unknown type for this job definition - AEType = " & ae_type & " for Job Name = " & jobName;
-            AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage); 
+            Logger::log(Logger::Error, "AESequenceDC", logMessage); 
             eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
             Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);
           end if;
         else
           // The jobId corresponds to that of a deleted job so this is an error condition
           logMessage := "AESequenceDC::acceptorderedEvent : The event has a job id for a job that has been deleted = " & ae_type & " for Job Name = " & jobName;
-          AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage); 
+          Logger::log(Logger::Error, "AESequenceDC", logMessage); 
           eventContent := "JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Event has been sent to a previously deleted Job";
           Reporting~>reportEvent(Logger::Error, "svdc_invalid_event", eventContent);          
-        end if;    
+        end if;
       end if;
     end if;  
   else
