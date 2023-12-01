@@ -799,6 +799,9 @@ theANDConstraintDefinitions : set of instance of ConstraintDefinition;
 anySeqAuditEventPairs : set of instance of SequencedAuditEventPair;
 theEventPairDefinitions : set of instance of AEInSequencePairDefn;
 incompleteANDFork : boolean;
+theDynamicControls : set of instance of DynamicControl;
+theDynamicControlDefn : instance of DynamicControlDefinition;
+branchCountIncomplete : boolean;
 aeSequenceDefs : set of instance of AESequenceDefinition;
 completeSequences : set of instance of Sequence;
 sequencesForJob : set of instance of Sequence;
@@ -846,13 +849,31 @@ begin
   
   end loop;
   
+  // Test to see if any instance branches could still be in progress
+  theDynamicControls := theJob -> R35;
+  for theDynamicControl in theDynamicControls loop
+    theDynamicControlDefn := theDynamicControl -> R29;
+    if theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then
+    
+      if theDynamicControl -> R36 /= null then
+        // We have a user dynamic control so check its values
+        if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.currentDynamicControlValue /= theDynamicControl.expectedDynamicControlValue) then
+            branchCountIncomplete := true;          
+            logMessage := "AESequenceDC::HappyJob.AssessingSequenceCompletion : Branch Count suggests job is incomplete for " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
+            AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);    
+        end if;
+      else
+          // This is the source branch count which doesn't need to be checked
+      end if;    
+    end if;
+  end loop;
   
   // Then check to see if the job is complete
   aeSequenceDefs := theJob -> R8 -> R7;
   sequencesForJob := theJob -> R10;
   completeSequences := find sequencesForJob (isComplete = true);
   theSystemSpec := find_one SystemSpecification();
-  if (aeSequenceDefs'length = completeSequences'length) and (incompleteANDFork = false) then
+  if (aeSequenceDefs'length = completeSequences'length) and (incompleteANDFork = false) and (branchCountIncomplete = false) then
     // All sequences for the Job appear to be complete - but just in case there's a late delivery of the first
     // event in a previously unseen optional branch of one of those sequences then give a short period for it to 
     // arrive before moving the Job into the JobCompleted state.
