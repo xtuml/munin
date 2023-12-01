@@ -171,6 +171,8 @@ begin
     jobStore := find_one JobStore();
     if jobStore = null then
     	jobStoreName := "JobIdStore" & "-" &  this.startJobGroup'image & "-" & this.endJobGroup'image;
+    	jobStoreLocation := jobStoreLocation & "/" & this.startJobGroup'image & "-" & this.endJobGroup'image;
+    	Filesystem::create_directory(Filesystem::filename(jobStoreLocation));
     	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, Current_State => Created);
     	JobStore.loadJobStore();
     	today := timestamp'now'split_ymd();
