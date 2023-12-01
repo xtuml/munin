@@ -1,6 +1,19 @@
 #!/bin/bash
 set -e
 
+EVENTS_PER_SECOND=1000
+TOTAL_EVENTS=100000
+if [[ $# -eq 2 ]] ; then
+  EVENTS_PER_SECOND=$1
+  TOTAL_EVENTS=$2
+fi
+
+# Allow over-riding the kafka topic (for Linux builds)
+RECEPTION_TOPIC="default.AEReception_service0"
+if [[ $# -eq 3 ]] ; then
+  RECEPTION_TOPIC=$3
+fi
+
 # prepare the deploy folder
 echo "Preparing deploy location..."
 cd ../deploy
@@ -26,14 +39,14 @@ echo "Done."
 echo "Generating source..."
 # little delay to assure everything is initialized
 sleep 2
-echo "../tests/PumlForTesting/PumlRegression/AAExtraJobInvariantSourceJob.puml" | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic default.AEReception_service0
+echo "../tests/PumlForTesting/PumlRegression/AAExtraJobInvariantSourceJob.puml" | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC
 echo "Done."
 
 # generate test event data
 echo "Generating event data..."
 # little delay to assure everything is initialized
 sleep 2
-echo ${puml_files} | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic default.AEReception_service0 --shuffle --rate 1000 --num-events 100000
+echo ${puml_files} | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $TOTAL_EVENTS
 echo "Done."
 
 echo "When PV is done, hit ENTER to continue."
