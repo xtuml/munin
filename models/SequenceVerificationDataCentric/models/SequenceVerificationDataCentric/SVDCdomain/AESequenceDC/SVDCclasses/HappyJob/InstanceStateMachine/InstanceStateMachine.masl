@@ -793,6 +793,12 @@ end state;
 //! ACTIVITY BEGIN. '79ee457c-fada-4ebb-8735-1e0b3b4a1284' '7fc9a805-6528-448d-a328-03229cfaef6a' DO NOT EDIT THIS LINE.
 state AESequenceDC::HappyJob.AssessingSequenceCompletion () is
 theJob : instance of Job;
+theJobDefinition : instance of JobDefinition;
+theConstraintDefinitions : set of instance of ConstraintDefinition;
+theANDConstraintDefinitions : set of instance of ConstraintDefinition;
+anySeqAuditEventPairs : set of instance of SequencedAuditEventPair;
+theEventPairDefinitions : set of instance of AEInSequencePairDefn;
+incompleteANDFork : boolean;
 aeSequenceDefs : set of instance of AESequenceDefinition;
 completeSequences : set of instance of Sequence;
 sequencesForJob : set of instance of Sequence;
@@ -813,12 +819,40 @@ begin
     thePotentiallyCompletedSequence.isComplete := false;
   end if;  
    
+  // Test to see if any AND branches have not yet been taken
+  theJobDefinition := theJob -> R8;
+  theConstraintDefinitions := theJobDefinition -> R17;
+  theANDConstraintDefinitions := find theConstraintDefinitions (constraintType = AND);
+  incompleteANDFork := false;
+  for eachANDConstraintDefinition in theANDConstraintDefinitions loop
+    // test to see if this AND constraint has been touched at all in the sequence (it may have been missed if it
+    // occurs after an XOR fork)
+    anySeqAuditEventPairs := eachANDConstraintDefinition -> R16 -> R15;
+    if anySeqAuditEventPairs'length /= 0 then
+      // This means at least one branch of the AND has been transited so now check they all have
+      theEventPairDefinitions := eachANDConstraintDefinition -> R16;
+      for eachEventPairDefn in theEventPairDefinitions loop
+        if eachEventPairDefn -> R15 = null then
+          // This means that an AND fork that has been visited at least once does not have an audit event pair on every branch
+          // and so is incomplete. This occurring on any AND fork in the job renders it incomplete
+          incompleteANDFork := true;
+        else
+          // There is an event pair for that definition so thats good  
+        end if;
+      end loop;
+    else
+      // The AND fork has not been touched at all so it is not an issue
+    end if;
+  
+  end loop;
+  
+  
   // Then check to see if the job is complete
   aeSequenceDefs := theJob -> R8 -> R7;
   sequencesForJob := theJob -> R10;
   completeSequences := find sequencesForJob (isComplete = true);
   theSystemSpec := find_one SystemSpecification();
-  if aeSequenceDefs'length = completeSequences'length then
+  if (aeSequenceDefs'length = completeSequences'length) and (incompleteANDFork = false) then
     // All sequences for the Job appear to be complete - but just in case there's a late delivery of the first
     // event in a previously unseen optional branch of one of those sequences then give a short period for it to 
     // arrive before moving the Job into the JobCompleted state.
