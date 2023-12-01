@@ -23,7 +23,7 @@ instrumentationEventType : string;
 begin
 
 	logMessage := "AEOrdering::AcceptEvent : jobId = " & jobId & ", auditEventType = " & auditEventType & ", auditEventId = " & auditEventId;
-	AsyncLogger::log(Logger::Debug, "AEOrdering", logMessage);
+	Logger::log(Logger::Debug, "AEOrdering", logMessage);
 	systemSpec := find_one SystemSpec();
 	rawJobId := UUID::extract_raw(UUID::formatted_uuid(jobId));
 	lane := integer(rawJobId[rawJobId'last]);
@@ -87,20 +87,33 @@ end service;
 
 //! ACTIVITY BEGIN. 'd313277c-1d1c-4def-8303-bc6aa6b950dd' DO NOT EDIT THIS LINE.
 public service AEOrdering::deleteJob ( jobId : in string ) is
+instrumentationEventId : string;
+instrumentationEventType : string;
 logMessage : string;
-job : instance of Job;
+theJob : instance of Job;
 
 begin
-	job := find_one Job(jobId = jobId);
-	if job /= null then
-		// check if we have any blocked events and if so fail the job otherwise delete the job
-		if (job -> R9.AuditEvent -> R4.BlockedAuditEvent)'length > 0 then
-			job.failJob("JobId = " & job.jobId & " : FailureReason = Job ended with blocked events");
-		else
-			job.jobDeleted();
-			Req_IF_Verification~>jobComplete(jobId);
-		end if;
-	end if;
+  theJob := find_one Job(jobId = jobId);
+  if theJob /= null then
+    // Firstly, report that AEO has initiated the deletion of the Job (as part of 
+    // the behaviour verification process of the Protocol Verifier itself). Note
+    // that if the Job includes any blocked events at this point then the job
+    // will be failed before eventually timing out any being deleted, otherwise
+    // it can be immediately deleted.
+    instrumentationEventId := "Unused";
+    instrumentationEventType := "AEO_PVJobDeletionInitiated";
+    Req_IF_BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", jobId, instrumentationEventId, instrumentationEventType);
+
+    // Then, check if the job has any blocked events and if so fail the job otherwise delete the job
+	if (theJob -> R9.AuditEvent -> R4.BlockedAuditEvent)'length > 0 then
+	  theJob.failJob("JobId = " & jobId & " : FailureReason = Job ended with blocked events");
+    else  
+	  theJob.jobDeleted();
+	  Req_IF_Verification~>jobComplete(jobId);
+    end if;
+  else
+    // TODO - Raise log message that reports that the specified job does not exist  
+  end if;
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

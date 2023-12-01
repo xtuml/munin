@@ -30,6 +30,12 @@ begin
     	                                     newInstrumentationEvent.eventKey,
     	                                     newInstrumentationEvent.clientEventType,         
                                              newInstrumentationEvent.assignedPreviousEventKey);
+
+    // HACK - TODO - CDS - Detect the last event and delete the instance data.
+    if nextEventType = "AEO_PVJobDeletionInitiated" then
+      this.deleteVerifiableJob();
+    end if;
+
   else
     // TODO
   end if;

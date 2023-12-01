@@ -51,7 +51,7 @@ begin
 			end if;
     	else
 			logMessage := "AEReception::ReceptionSpec.ConfigurationLoaded : Config file invalid:\n" & JSON::dump(configValidationResult, true);
-			AsyncLogger::log(Logger::Debug, "AEReception", logMessage);
+			Logger::log(Logger::Debug, "AEReception", logMessage);
 			raise JSON::JSONException("Config file invalid");
 		end if;
 
@@ -64,7 +64,7 @@ begin
 		schedule this.configTimer generate FileReceptionSpec.checkConfigUpdate() to this delay this.specUpdateRate;
 	else
 		logMessage := "FileReception::FileReceptionSpec.ConfigurationLoaded : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-		AsyncLogger::log(Logger::Error, "FileReception", logMessage);
+		Logger::log(Logger::Error, "FileReception", logMessage);
 		raise program_error;
 	end if;
 	
@@ -95,7 +95,7 @@ exception
 	when others => 	
 	
 		logMessage := "FileReception::FileReceptionSpec.ConfigurationLoaded : failed to load configuration file";
-		AsyncLogger::log(Logger::Error, "FileReception", logMessage);
+		Logger::log(Logger::Error, "FileReception", logMessage);
 		raise program_error;
 		
 end state;
@@ -117,7 +117,7 @@ begin
 		end if;
 		else
 		logMessage := "FileReception::FileReceptionSpec.ConfigChecked : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-		AsyncLogger::log(Logger::Error, "FileReception", logMessage);
+		Logger::log(Logger::Error, "FileReception", logMessage);
 		raise program_error;
 	end if;
 	
@@ -125,7 +125,7 @@ exception
 	when others => 	
 	
 		logMessage := "FileReception::FileReceptionSpec.ConfigChecked : failed to load configuration file";
-		AsyncLogger::log(Logger::Error, "FileReception", logMessage);
+		Logger::log(Logger::Error, "FileReception", logMessage);
 		raise program_error;		
 	
 end state;

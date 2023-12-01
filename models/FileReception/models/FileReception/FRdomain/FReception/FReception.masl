@@ -3,7 +3,7 @@ public service FReception::Reporting~>reportEvent ( eventPriority : in Logger::P
                                                    eventLabel : in string,
                                                    eventContent : in string ) is
 begin
-	AsyncLogger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
+	Logger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

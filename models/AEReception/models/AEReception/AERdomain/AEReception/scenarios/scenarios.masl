@@ -20,7 +20,7 @@ begin
 		generate ReceptionSpec.loadConfig() to receptionSpec;
 	else
 		logMessage := "AEReception::init : failed to locate config file. Specified file = " & configFilePath & configFile;
-		AsyncLogger::log(Logger::Information, "AEReception", logMessage);
+		Logger::log(Logger::Information, "AEReception", logMessage);
 		raise program_error;
 	end if;
 
@@ -28,7 +28,7 @@ exception
 	when others =>
 	
 		logMessage := "AEReception::init : failed during start up";
-		AsyncLogger::log(Logger::Error, "AEReception", logMessage);
+		Logger::log(Logger::Error, "AEReception", logMessage);
 		raise program_error;
 	
 end service;

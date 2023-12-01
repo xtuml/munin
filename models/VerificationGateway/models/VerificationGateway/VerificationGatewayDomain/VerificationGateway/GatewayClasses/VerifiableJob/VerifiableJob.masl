@@ -48,7 +48,7 @@ logMessage : string;
 begin
   // Log info: Report that this VerifianleJob is being deleted. 
   logMessage := "Deleting Job " & this.jobKey'image & " and all its InstrumentationEvents";
-  AsyncLogger::log(Logger::Debug, "VerificationGateway", logMessage);
+  Logger::log(Logger::Debug, "VerificationGateway", logMessage);
   
   theLastInstrumentationEvent := this -> R2;
   unlink this R2 theLastInstrumentationEvent;

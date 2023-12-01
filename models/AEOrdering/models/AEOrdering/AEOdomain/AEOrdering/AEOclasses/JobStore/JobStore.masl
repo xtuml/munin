@@ -18,13 +18,13 @@ begin
         	if storedJobIdentifier = null then
     			storedJobIdentifier := create StoredJobIdentifier(jobId => tokens[tokens'first + 1], jobTime => timestamp'parse(tokens[tokens'first]));
     		else
-			    AsyncLogger::log(Logger::Information, "AEOrdering", "Duplicate job id recovered from job store JobId = " & tokens[tokens'first + 1]);
+			    Logger::log(Logger::Information, "AEOrdering", "Duplicate job id recovered from job store JobId = " & tokens[tokens'first + 1]);
     		end if;
         end loop;
 	end if;
 exception
 	when others =>
-	    AsyncLogger::log(Logger::Information, "AEOrdering", "Failed to load Job Store filename = " & fileName);
+	    Logger::log(Logger::Information, "AEOrdering", "Failed to load Job Store filename = " & fileName);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -43,7 +43,7 @@ begin
 		jobStoreDevice << storedJobIdentifier.jobTime'image << " " << storedJobIdentifier.jobId << "\n";
 		Filesystem::close(jobStoreDevice);
 	else
-	    AsyncLogger::log(Logger::Information, "AEOrdering", "Duplicate job id reported to job store JobId = " & jobId);
+	    Logger::log(Logger::Information, "AEOrdering", "Duplicate job id reported to job store JobId = " & jobId);
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

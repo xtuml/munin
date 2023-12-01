@@ -8,7 +8,7 @@ services:
   aer_proc:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
     deploy:
-      replicas: 8
+      replicas: 1
     depends_on:
       kafka:
         condition: service_healthy
@@ -157,6 +157,20 @@ services:
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "default.AEReception_service0:32:1,default.AEOrdering_service0:1:1,default.AESequenceDC_service12:1:1,default.IStore_service0:1:1,default.IStore_service1:1:1,default.IStore_service2:1:1,default.AsyncLogger_service0:1:1,default.AsyncLogger_service1:1:1,default.AsyncLogger_service2:1:1,default.AsyncLogger_service3:1:1,default.AsyncLogger_service4:1:1,default.AsyncLogger_service5:1:1,default.AsyncLogger_service6:1:1,default.AsyncLogger_service7:1:1,default.AsyncLogger_service8:1:1,default.AsyncLogger_service9:1:1,default.AsyncLogger_service10:1:1,default.AsyncLogger_service11:1:1,default.AsyncLogger_service12:1:1,default.AsyncLogger_service13:1:1,default.AsyncLogger_service14:1:1,default.AsyncLogger_service15:1:1,default.AsyncLogger_service16:1:1,default.AsyncLogger_service17:1:1,default.AsyncLogger_service18:1:1,default.AsyncLogger_service19:1:1,default.AsyncLogger_service20:1:1"
+      KAFKA_LOG_RETENTION_MS: 300000                  # default retention of 5 minutes
+      KAFKA_LOG_SEGMENT_BYTES: 1048576                # roll the log at 1MB
+      # KAFKA_LOG_ROLL_MS: 60000                      # roll the log every minute
+      KAFKA_LOG_SEGMENT_DELETE_DELAY_MS: 1            # delete immediately after log roll
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 10000    # check the retention condition every 10 seconds
+      KAFKA_CREATE_TOPICS: "default.AEReception_service0:1:1,default.AEOrdering_service0:1:1,default.AESequenceDC_service12:1:1,default.IStore_service0:1:1,default.IStore_service1:1:1,default.IStore_service2:1:1,default.AsyncLogger_service0:1:1,default.AsyncLogger_service1:1:1,default.AsyncLogger_service2:1:1,default.AsyncLogger_service3:1:1,default.AsyncLogger_service4:1:1,default.AsyncLogger_service5:1:1,default.AsyncLogger_service6:1:1,default.AsyncLogger_service7:1:1,default.AsyncLogger_service8:1:1,default.AsyncLogger_service9:1:1,default.AsyncLogger_service10:1:1,default.AsyncLogger_service11:1:1,default.AsyncLogger_service12:1:1,default.AsyncLogger_service13:1:1,default.AsyncLogger_service14:1:1,default.AsyncLogger_service15:1:1,default.AsyncLogger_service16:1:1,default.AsyncLogger_service17:1:1,default.AsyncLogger_service18:1:1,default.AsyncLogger_service19:1:1,default.AsyncLogger_service20:1:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  kafka_config:
+    image: wurstmeister/kafka
+    depends_on:
+      kafka:
+        condition: service_healthy
+    volumes:
+      - "./config:/root/config"
+    command: /root/config/configure-kafka.sh

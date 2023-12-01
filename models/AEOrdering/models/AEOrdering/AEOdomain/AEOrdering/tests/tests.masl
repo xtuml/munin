@@ -7,9 +7,9 @@ auditEvents : sequence of instance of AuditEvent;
 begin
 	
 	logMessage := "AEOrdering::checkJobComplete";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	logMessage := "AEOrdering::checkJobComplete - Test job complete";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	
 	// verify that there are no jobs
 	jobs := find Job();
@@ -260,7 +260,7 @@ reportAuditFailure :  instance of _TEST_Req_IF_Audited_reportAuditFailure;
 begin
         
     logMessage := "AEOrdering::checkInvalidJobDefinition";
-    AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+    Logger::log(Logger::Information, "AEOrdering", logMessage);
     
 	reportAuditFailure := find_one _TEST_Req_IF_Audited_reportAuditFailure(jobId = jobId);
 	Assertions::assertTrue((reportAuditFailure /= null), "Failed to find report audit failure jobId = " & jobId & ", eventId = " & eventId);
@@ -286,7 +286,7 @@ failedAuditEvent : instance of FailedAuditEvent;
 begin
         
 	logMessage := "AEOrdering::checkJobFailures";
-    AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+    Logger::log(Logger::Information, "AEOrdering", logMessage);
     
     failedJob := find_one FailedJob(jobId = jobId);
 	Assertions::assertTrue((failedJob /= null), "Failed to find Failed Job = " & jobId);
@@ -310,7 +310,7 @@ jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
 begin
         
 	logMessage := "AEOrdering::checkOrderedJob";
-    AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+    Logger::log(Logger::Information, "AEOrdering", logMessage);
     
     // verify that all the jobs have been reported to verification
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
@@ -378,7 +378,7 @@ jobId4 : string := "95a3b3a7-fada-41d5-b7e2-902079e81004";
 begin
         
 	logMessage := "AEOrdering::checkOutOrderedJob";
-    AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+    Logger::log(Logger::Information, "AEOrdering", logMessage);
     
     inProgressJob := find_one InProgressJob(jobId = jobId1);
 	Assertions::assertTrue((inProgressJob /= null), "Test Out of Order Job: Failed to find Failed Job 1");
@@ -472,7 +472,7 @@ jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
 begin
         
 	logMessage := "AEOrdering::checkReverseOrderedJob";
-    AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+    Logger::log(Logger::Information, "AEOrdering", logMessage);
     
     inProgressJob := find_one InProgressJob(jobId = jobId1);
     Assertions::assertTrue((inProgressJob /= null), "Test Reverse Order Job: Failed to find Failed Job");
@@ -515,12 +515,12 @@ jobId3 : string := "95a3b3a7-fada-41d5-b7e2-902079e81003";
 begin
 	
 	logMessage := "AEOrdering::testInvalidJobDefinition";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	AEOrdering::clearDomain(true, false);
 	
 	// Test 1 report an event invalid node
 	logMessage := "AEOrdering::testInvalidJobDefinition - Test invalid job definiton";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	auditEventTime := timestamp'now;
 	AEOrdering::AcceptEvent(jobId1, "jobId1", "NoEvent", "1", auditEventTime'image, emptyPrevEventIds, auditEventData);	
 	
@@ -571,7 +571,7 @@ jobId3 : string := "95a3b3a7-fada-41d5-b7e2-902079e81003";
 begin
 	
 	logMessage := "AEOrdering::testJobComplete";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	AEOrdering::clearDomain(true, false);
 
 	auditEventTime := timestamp'now;
@@ -691,7 +691,7 @@ jobId4 : string := "95a3b3a7-fada-41d5-b7e2-902079e81004";
 begin
 	
 	logMessage := "AEOrdering::testJobFailure";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	AEOrdering::clearDomain(true, false);
 	delete (find _TEST_Req_IF_Verification_audit_event());
 	delete (find _TEST_Req_IF_Verification_failedJob());
@@ -833,7 +833,7 @@ jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
 begin
 	
 	logMessage := "AEOrdering::testOrderedJob";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	AEOrdering::clearDomain(true, false);
 	
 	auditEventTime := timestamp'now;
@@ -889,7 +889,7 @@ jobId4 : string := "95a3b3a7-fada-41d5-b7e2-902079e81004";
 begin
 	
 	logMessage := "AEOrdering::testOrderedJob";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	AEOrdering::clearDomain(true, false);
 	delete (find _TEST_Req_IF_Verification_audit_event());
 	
@@ -1277,7 +1277,7 @@ jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
 begin
 	
 	logMessage := "AEOrdering::testReverseOrderedJob";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
 	delete verificationAuditEvents;
 	AEOrdering::clearDomain(true, false);
@@ -1484,7 +1484,7 @@ jobName : string := "AEOrdering-Test";
 begin
 	
 	logMessage := "AEOrdering::fork and merge";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	AEOrdering::clearDomain(true, false);
 	
 	auditEventTime := timestamp'now;
@@ -1609,7 +1609,7 @@ jobId2 : string := "95a3b3a7-fada-41d5-b7e2-902079e81002";
 begin
 	
 	logMessage := "AEOrdering::testOrderedJobWithData";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	delete find _TEST_Req_IF_Verification_failedJob();
 	AEOrdering::clearDomain(true, false);
 	
@@ -1650,7 +1650,7 @@ begin
 	// verify the audit event data
 	verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(auditEventId = "1");
     Assertions::assertTrue((verificationAuditEvent /= null), "Test Ordered Job: Failed to find` verification audit event id = 1");
-	AsyncLogger::log(Logger::Information, "AEOrdering", "verification audit event length: " & verificationAuditEvent.reportableAuditEventDataItems'length'image);
+	Logger::log(Logger::Information, "AEOrdering", "verification audit event length: " & verificationAuditEvent.reportableAuditEventDataItems'length'image);
     Assertions::assertTrue((verificationAuditEvent.reportableAuditEventDataItems'length = 2), "Test Ordered Job With Data: Failed as verification audit event data Items /= 2");
     for dataItem in verificationAuditEvent.reportableAuditEventDataItems loop
 	    if dataItem.dataName = "Data1" then
@@ -1779,7 +1779,7 @@ systemSpec : instance of SystemSpec;
 begin
 	
 	logMessage := "AEOrdering::testLaneValidation";
-	AsyncLogger::log(Logger::Information, "AEOrdering", logMessage);
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
 	delete verificationAuditEvents;
 	AEOrdering::clearDomain(true, false);

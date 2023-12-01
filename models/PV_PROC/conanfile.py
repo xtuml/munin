@@ -6,7 +6,7 @@ class ConanFile(conan.ConanFile):
     version = '1.1.1'
     user = 'xtuml'
     channel = 'stable'
-    python_requires = 'masl_conan/[>=4.1.1]@xtuml/stable'
+    python_requires = 'masl_conan/[>=4.2.2]@xtuml/stable'
     python_requires_extend = 'masl_conan.MaslConanHelper'
     persistent_procs = ['ISTORE_PROC.prj']
 
@@ -29,8 +29,8 @@ class ConanFile(conan.ConanFile):
         super().build()
 
     def requirements(self):
-        self.requires('masl_core/[>=4.1.1]@xtuml/stable')
-        self.requires('masl_utils/[>=4.1.1]@xtuml/stable')
+        self.requires('masl_core/[>=4.2.2]@xtuml/stable')
+        self.requires('masl_utils/[>=4.2.2]@xtuml/stable')
         self.requires('asynclogger/[>=1.1.1]@xtuml/stable')
         self.requires('aeordering/[>=1.1.1]@xtuml/stable')
         self.requires('aereception/[>=1.1.1]@xtuml/stable')
@@ -40,4 +40,4 @@ class ConanFile(conan.ConanFile):
         self.requires('verificationgateway/[>=1.1.1]@xtuml/stable')
 
     def build_requirements(self):
-        self.tool_requires('masl_codegen/[>=4.1.1]@xtuml/stable')
+        self.tool_requires('masl_codegen/[>=4.2.2]@xtuml/stable')
