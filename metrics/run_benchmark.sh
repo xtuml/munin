@@ -1,16 +1,18 @@
 #!/bin/bash
 set -e
 
+BATCH_OF_EVENTS=10000
 EVENTS_PER_SECOND=1000
 TOTAL_EVENTS=100000
-if [[ $# -eq 2 ]] ; then
+if [[ $# -ge 2 ]] ; then
   EVENTS_PER_SECOND=$1
   TOTAL_EVENTS=$2
 fi
+ITERATIONS=$(($TOTAL_EVENTS / $BATCH_OF_EVENTS))
 
 # Allow over-riding the kafka topic (for Linux builds)
 RECEPTION_TOPIC="default.AEReception_service0"
-if [[ $# -eq 3 ]] ; then
+if [[ $# -ge 3 ]] ; then
   RECEPTION_TOPIC=$3
 fi
 
@@ -46,11 +48,13 @@ echo "Done."
 echo "Generating event data..."
 # little delay to assure everything is initialized
 sleep 2
-echo ${puml_files} | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $TOTAL_EVENTS
+# plus2json leaks memory when running continously.
+# Loop it up to free memory after small batches of events.
+for ((i = 0; i < $ITERATIONS; i++)); do
+  echo ${puml_files} | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
+done
+sleep 5
 echo "Done."
-
-echo "When PV is done, hit ENTER to continue."
-read my_var
 
 # run the benchmark script
 echo "Running benchmark calculations..."
