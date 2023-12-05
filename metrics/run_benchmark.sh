@@ -33,8 +33,11 @@ echo "Done."
 echo "Generating event data..."
 # little delay to assure everything is initialized
 sleep 2
-echo ${puml_files} | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic default.AEReception_service0 --shuffle --num-events 100000
+echo ${puml_files} | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic default.AEReception_service0 --shuffle --rate 1000 --num-events 100000
 echo "Done."
+
+echo "When PV is done, hit ENTER to continue."
+read my_var
 
 # run the benchmark script
 echo "Running benchmark calculations..."
