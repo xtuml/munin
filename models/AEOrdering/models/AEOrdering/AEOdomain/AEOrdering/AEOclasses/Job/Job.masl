@@ -117,8 +117,7 @@ begin
 		end if;
 	end if;
 	// add the job to the job store as there should be no more events
-        // CDS - HACK - re-design to scale
-	//JobStore.addJobToStore(this.jobId);
+	JobStore.addJobToStore(this.jobId);
 	delete this;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

@@ -30,20 +30,16 @@ end service;
 
 //! ACTIVITY BEGIN. '47b304fc-89f6-4116-a87e-604aecbf8b4b' DO NOT EDIT THIS LINE.
 public service AEOrdering::JobStore.addJobToStore ( jobId : in string ) is
-jobStore : instance of JobStore;
 storedJobIdentifier : instance of StoredJobIdentifier;
-jobStoreDevice : Filesystem::file;
+eventContent : string;
 
 begin
 	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId);
 	if storedJobIdentifier = null then
-		storedJobIdentifier := create StoredJobIdentifier(jobId => jobId, jobTime => timestamp'now);
-		jobStore := find_one JobStore();
-        Filesystem::open_append(Filesystem::filename(jobStore.jobStoreLocation & "/" & jobStore.jobStoreName), jobStoreDevice);
-		jobStoreDevice << storedJobIdentifier.jobTime'image << " " << storedJobIdentifier.jobId << "\n";
-		Filesystem::close(jobStoreDevice);
+		storedJobIdentifier := create StoredJobIdentifier(jobId => jobId, jobTime => timestamp'now, stored => false);
 	else
-	    Logger::log(Logger::Information, "AEOrdering", "Duplicate job id reported to job store JobId = " & jobId);
+	    eventContent := "Duplicate job id reported to job store JobId = " & jobId;
+	    Reporting~>reportEvent(Logger::Error, "aeordering_duplicate_job_id", eventContent);
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
