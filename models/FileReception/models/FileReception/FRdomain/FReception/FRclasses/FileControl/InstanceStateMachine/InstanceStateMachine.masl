@@ -33,7 +33,7 @@ begin
 					generate FileControl.allocateFile(eventFile) to this;
 					fileAssigned := true;
 					logMessage := "FileReception::FileControl.WaitingForFile : assigning file " & eventFile.fileName;
-					AsyncLogger::log(Logger::Debug, "FileReception", logMessage);
+					Logger::log(Logger::Debug, "FileReception", logMessage);
 					exit; // for loop
 				end if;
 			end if;

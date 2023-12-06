@@ -43,7 +43,7 @@ begin
           theSequenceDefn := find_one theSequenceDefns ();
         else
           logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 4) = " & theJobDefn.jobName;
-          AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);
+          Logger::log(Logger::Error, "AESequenceDC", logMessage);
 	      eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
 	      Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);                
         end if;  
@@ -59,13 +59,13 @@ begin
             end if;  
           else
             logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 3) = " & theJobDefn.jobName;
-            AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);
+            Logger::log(Logger::Error, "AESequenceDC", logMessage);
 	        eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
 	        Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);          
           end if;  
         else
           logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 2) = " & theJobDefn.jobName;
-          AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);
+          Logger::log(Logger::Error, "AESequenceDC", logMessage);
 	      eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
 	      Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);            
         end if;  
@@ -74,7 +74,7 @@ begin
   else
     // Digital Twin Error dues to failed configurations
     logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 1) = " & theJobDefn.jobName;
-    AsyncLogger::log(Logger::Error, "AESequenceDC", logMessage);
+    Logger::log(Logger::Error, "AESequenceDC", logMessage);
 	eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
 	Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
   end if;

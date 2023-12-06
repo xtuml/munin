@@ -5,7 +5,7 @@ begin
 	
 	// This is just a progress message - the failure is reported in the state machine
 	logMessage := "AESequenceDC::Job.failJob : failed job ";
-	AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	
 		
 	generate Job.jobFailed(failureReason) to this;
@@ -221,7 +221,7 @@ logMessage : string;
 
 begin
   logMessage := "AESequenceDC::Job.migrateToUnhappyJob : Migration from Happy Job to Unhappy Job for - jobId = " & this.jobID & " with Job Name = " & this.jobName;
-  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 
   // Unlink HappyJob from Job
   theHappyJob := this -> R45.HappyJob;
@@ -242,7 +242,7 @@ begin
   // Generate firstUnhappyEvent event to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
 
   logMessage := "AESequenceDC::Job.migrateToUnhappyJob : Unhappy Job created for - jobId = " & this.jobID & " with Job Name = " & this.jobName ;
-  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 
   generate Job.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to this;
 end service;

@@ -1994,10 +1994,10 @@ begin
   eventDefinition ("BranchCountJob","BranchCountSequence","BCFF",1,previousEventTypes,false,true,false,true,false);
 
   logMessage := "AESequenceDC::OLD_InitBranchCountDefinition : OLD_InitBranchCountDefinition scenario - Call for Merge Count follows";
-  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);                       
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);                       
   createDynamicControlDefinition("BranchCountJob", "Merge_Counter_1", dynamicControlTypeEnum.MERGECOUNT, "BCFA",1,"BCFD",1);
   logMessage := "AESequenceDC::OLD_InitBranchCountDefinition : OLD_InitBranchCountDefinition scenario - Call for Branch Count follows";
-  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);                       
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);                       
   createDynamicControlDefinition("BranchCountJob", "Branch_Counter_1", dynamicControlTypeEnum.BRANCHCOUNT, "BCFA",1,"BCFB",1);
   
 //

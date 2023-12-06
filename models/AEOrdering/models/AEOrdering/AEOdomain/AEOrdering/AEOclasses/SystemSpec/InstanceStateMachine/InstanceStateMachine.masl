@@ -23,13 +23,15 @@ begin
     	this.loadJobDefinitions(updatedJobDefinitions);
     end if;
     
+    // check the job store and purge if required
+    generate JobStore.purgeJobStore() to (find_one JobStore());
     schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
 	
 exception
 	when others => 	
 	
 		logMessage := "AEOrdering::SystemSpec.ConfigChecked : failed to load configuration file";
-		AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+		Logger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 		
 end state;

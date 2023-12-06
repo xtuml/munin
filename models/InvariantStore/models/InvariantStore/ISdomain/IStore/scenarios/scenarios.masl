@@ -33,7 +33,7 @@ exception
 	when others =>
 	
 		logMessage := "IStore::init : failed during start up";
-		AsyncLogger::log(Logger::Error, "IStore", logMessage);
+		Logger::log(Logger::Error, "IStore", logMessage);
 		raise program_error;
 	
 end service;

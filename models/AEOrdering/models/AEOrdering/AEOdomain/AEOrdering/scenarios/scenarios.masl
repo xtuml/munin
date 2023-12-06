@@ -27,7 +27,7 @@ begin
     	generate SystemSpec.checkConfigUpdate() to systemSpec;
 	else
 		logMessage := "AEOrdering::init : failed to locate config file. Specified file = " & configFilePath & configFile;
-		AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+		Logger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 	end if;
 
@@ -35,7 +35,7 @@ exception
 	when others =>
 	
 		logMessage := "AEOrdering::init : failed during start up";
-		AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+		Logger::log(Logger::Error, "AEOrdering", logMessage);
 		raise program_error;
 	
 end service;

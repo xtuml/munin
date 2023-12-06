@@ -74,7 +74,7 @@ begin
         // The first event for this new Job is a valid event type for starting the sequence
         // Log info: new Job and event sequence started
         logMessage := "AESequenceDC::SequencedAuditEvent.AddEventForNewJob : New Job started - jobId = " & newJob.jobID & " with Job Name = " & newJob.jobName & ", Initial audit event: " & eventId & " of type " & newEventType.AEType;
-	    AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+	    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 		eventContent := "JobId = " & newJob.jobID & " : EventId = " & eventId & " : EventType = " & newEventType.AEType;
 		Reporting~>reportEvent(Logger::Information, "svdc_new_job_started", eventContent);
         
@@ -106,7 +106,7 @@ begin
   else
       // Log error: The audit event id received has been seen before
 	  logMessage := "AESequenceDC::SequencedAuditEvent.AddEventForNewJob : The audit event has been seen before for jobId = " & jobId & " with Job Name = " & jobName & ", Initial audit event = " & aeType;
-	  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
       eventContent := "JobId = " & jobId & " with Job Name = " & jobName & " : FailureReason = The audit event has been seen before"  & " : EventId = " & eventId & " : EventType = " & aeType;
 	  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
 
@@ -241,14 +241,14 @@ totalDynamicControls : set of instance of DynamicControl;
                   link newIntraJobInvariant R26 theIntraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
 	              logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " with Job Name = " & theJob.jobName & " has been added for this type of audit event = " & theEventType.AEType & " with value = " & newIntraJobInvariant.invariantValue;
-	              AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage); 
+	              Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
 	            else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
 	            end if;                 
               else
                 // Log warning: The audit event data type provided with this audit event is of a disallowed type for this type of audit event
 	            logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " with Job Name = " & theJob.jobName & " is disallowed for this type of audit event = " & theEventType.AEType;
-	            AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);                
+	            Logger::log(Logger::Debug, "AESequenceDC", logMessage);                
                 theJob.failJob("Invalid audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
               end if;
             else
@@ -289,7 +289,7 @@ totalDynamicControls : set of instance of DynamicControl;
                   link theUserExtraJobInvariant R28 theUserExtraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
 	              logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " with Job Name = " & theJob.jobName & " has been added for this type of audit event = " & theEventType.AEType;
-	              AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage); 
+	              Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
 	            else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
 	            end if; 
@@ -440,7 +440,7 @@ logMessage : string;
 begin
   // TODO: Remove the following log message - just for debug
   logMessage := "Checking received event data against definition";
-  AsyncLogger::log(Logger::Debug, "AESequenceDC", logMessage);
+  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
 	
   // Initialise return parameters
   checkHasPassed := true;
