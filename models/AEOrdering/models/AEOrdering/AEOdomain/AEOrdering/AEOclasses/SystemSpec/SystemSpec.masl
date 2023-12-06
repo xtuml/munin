@@ -70,8 +70,6 @@ jobStoreLocation : string := "./";
 jobStoreAgeLimit : duration := @P7D@;
 jobStore : instance of JobStore;
 jobStoreName : string := "JobIdStore.log";
-today : sequence of integer;
-midnight : timestamp;
 invariantStoreLoadRate : duration;
 maxIntraSequenceEventTimeoutPeriod : duration := @PT1S@;
 waitPeriodForAllJobsCompletedCheck : duration := @P1D@;
@@ -173,11 +171,8 @@ begin
     	jobStoreName := "JobIdStore" & "-" &  this.startJobGroup'image & "-" & this.endJobGroup'image;
     	jobStoreLocation := jobStoreLocation & "/" & this.startJobGroup'image & "-" & this.endJobGroup'image;
     	Filesystem::create_directory(Filesystem::filename(jobStoreLocation));
-    	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, Current_State => Created);
+    	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, fileStoreCreationTime => timestamp'now, Current_State => Created);
     	JobStore.loadJobStore();
-    	today := timestamp'now'split_ymd();
-    	midnight := timestamp'combine_ymd(today[1], today[2], today[3] + 1);
-    	schedule jobStore.jobStoreTimer generate JobStore.purgeJobStore() to jobStore at midnight; 
     end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
