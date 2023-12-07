@@ -26,10 +26,10 @@ partition "ProtocolVerifier" {
       "Sourced from the start of 
       Job Successful in SVDC"
     end note
-    #red:AEO_PVJobDeleted;  
+    #red:AEO_PVJobDeletionInitiated;  
     note right
-      "Sourced from 
-      Job Deleted state in AEO"
+      "Sourced from start of
+      deleteJob function in AEO"
     end note
     detach
   end group
@@ -38,7 +38,7 @@ partition "ProtocolVerifier" {
     kill
       note right
       "Sourced from the Failed state of Job
-       of Job in AEO"
+       in AEO"
     end note
     :SVDC_PVJobFails;
     kill

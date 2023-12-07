@@ -1,0 +1,28 @@
+
+@startuml 
+partition "Financial Transaction Job 1" {
+  group "Financial Transaction Sequence 1"
+      #green:FTJ_Payment_Instruction,IINV,name=FTJInv;
+      :FTJ_Settlement_Request;
+      fork
+        :FTJ_Debit_Payer;
+      fork again
+        :FTJ_Credit_Payee;
+      end fork
+      :FTJ_Settlement_Reponse;
+      fork
+        :FTJ_Form_Sender_Notification;
+        #gold:FTJ_Dispatch_Sender_Notification,CRITICAL;
+      fork again
+        :FTJ_Form_Settled_Payment_Instruction;
+        #gold:FTJ_Dispatch_Settled_Payment_Instruction,CRITICAL,IINV,USER,name=FTJInv;
+      end fork
+      #red:FTJ_Transaction_Complete;
+      detach 
+  end group
+  package "Unhappy Events" {
+    :FTJ_Invalid_Transaction;
+    kill
+    }
+}
+@enduml

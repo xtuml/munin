@@ -11,7 +11,7 @@ begin
         mostRecentModificationTime := fileStatus.modification_time;
     else
         logMessage := "AEOrdering::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
         raise program_error;
     end if;
     if Filesystem::file_exists(Filesystem::filename(this.jobDefinitionDirectory)) then
@@ -48,7 +48,7 @@ begin
     	end if;
     else
         logMessage := "AEOrdering::locateUpdatedConfig : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
     end if;
     if configUpdates = true then
     	return true; 
@@ -70,8 +70,6 @@ jobStoreLocation : string := "./";
 jobStoreAgeLimit : duration := @P7D@;
 jobStore : instance of JobStore;
 jobStoreName : string := "JobIdStore.log";
-today : sequence of integer;
-midnight : timestamp;
 invariantStoreLoadRate : duration;
 maxIntraSequenceEventTimeoutPeriod : duration := @PT1S@;
 waitPeriodForAllJobsCompletedCheck : duration := @P1D@;
@@ -157,25 +155,24 @@ begin
 				                                                 timeoutPeriodForRetreivingStoredInvariants, timeoutPeriodForHangingJob);
         else
             logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
-            AsyncLogger::log(Logger::Debug, "AEOrdering", logMessage);
+            Logger::log(Logger::Debug, "AEOrdering", logMessage);
             raise JSON::JSONException("Config file invalid");
         end if;
         // set the config file mod time
         this.configFileModificationTime := this.lastModificationTime();        
     else
         logMessage := "AEOrdering::ConfigUpdated : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
     end if;
     
     // if the job store does not exist then create it
     jobStore := find_one JobStore();
     if jobStore = null then
     	jobStoreName := "JobIdStore" & "-" &  this.startJobGroup'image & "-" & this.endJobGroup'image;
-    	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, Current_State => Created);
+    	jobStoreLocation := jobStoreLocation & "/" & this.startJobGroup'image & "-" & this.endJobGroup'image;
+    	Filesystem::create_directory(Filesystem::filename(jobStoreLocation));
+    	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, fileStoreCreationTime => timestamp'now, Current_State => Created);
     	JobStore.loadJobStore();
-    	today := timestamp'now'split_ymd();
-    	midnight := timestamp'combine_ymd(today[1], today[2], today[3] + 1);
-    	schedule jobStore.jobStoreTimer generate JobStore.purgeJobStore() to jobStore at midnight; 
     end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -211,7 +208,7 @@ begin
         end loop;
     else
         logMessage := "AEOrdering::locateUpdatedConfig : failed to locate job definition directory. Specified directory = " & this.jobDefinitionDirectory;
-        AsyncLogger::log(Logger::Error, "AEOrdering", logMessage);
+        Logger::log(Logger::Error, "AEOrdering", logMessage);
     end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -283,7 +280,7 @@ begin
                     updatedJobTypes := updatedJobTypes & jobType;
                 else
                     logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid: " & jobDefinitionFile.jobDefinitionFileName & "\n" & JSON::dump(jobTypeValidationResult, true);
-                    AsyncLogger::log(Logger::Debug, logMessage);
+                    Logger::log(Logger::Debug, logMessage);
                     raise JSON::JSONException("Job definition file invalid");
                 end if;
             end if;
