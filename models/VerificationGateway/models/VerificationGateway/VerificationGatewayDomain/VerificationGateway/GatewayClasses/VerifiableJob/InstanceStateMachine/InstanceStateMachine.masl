@@ -23,7 +23,7 @@ begin
     link this R2 newInstrumentationEvent;
     link previousInstrumentationEvent R3.is_followed_by newInstrumentationEvent;
     
-    // Having stitched the events appropriately use the newInstrumentationEvent to to verify the behaviour 
+    // Having stitched the events appropriately use the newInstrumentationEvent to verify the behaviour 
     // of the Job within the client application.
     Verification~>verifyInstrumentationEvent(this.clientJobName,
     	                                     newInstrumentationEvent.jobKey,
@@ -32,9 +32,9 @@ begin
                                              newInstrumentationEvent.assignedPreviousEventKey);
 
     // HACK - TODO - CDS - Detect the last event and delete the instance data.
-    if nextEventType = "AEO_PVJobDeletionInitiated" then
-      this.deleteVerifiableJob();
-    end if;
+    //if nextEventType = "AEO_PVJobDeletionInitiated" then
+    //  this.deleteVerifiableJob();
+    //end if;
 
   else
     // TODO
