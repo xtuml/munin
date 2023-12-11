@@ -19,7 +19,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '04a120e4-d309-4974-abd5-f90d3ecc4bdb' DO NOT EDIT THIS LINE.
-private service VerificationGateway::deleteVerifiableJob ( jobId : in string ) is
+public service VerificationGateway::deleteVerifiableJob ( jobId : in string ) is
 theVerifiableJob : instance of VerifiableJob;
 begin
   theVerifiableJob := find_one VerifiableJob(clientJobId = jobId);
