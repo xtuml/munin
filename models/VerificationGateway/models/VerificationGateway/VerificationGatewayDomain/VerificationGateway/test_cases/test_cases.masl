@@ -220,3 +220,89 @@ end service;
 //
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. '7ad41492-5ce9-4cd3-896d-7c357154958c' DO NOT EDIT THIS LINE.
+private service VerificationGateway::Test004_MultipleHappyJobs_EventsInterleaved_WithJobDeletion () is
+theVerifiableJobs : set of instance of VerifiableJob;
+theInstrumentationEvents : set of instance of InstrumentationEvent;
+
+begin
+  //
+  //Job001, Job002 & Job003 interleaved but incorrect sequence for each job
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job001","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job002","Unused","AEO_PVJobStart");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job003","Unused","AEO_PVJobStart");
+  //
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  //
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job001","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job001","Unused","SVDC_PVEventProcessingComplete");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job002","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job002","Unused","SVDC_PVEventProcessingComplete");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job003","Unused","SVDC_PVSequencingStart");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job003","Unused","SVDC_PVEventProcessingComplete");
+  //
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  //
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job003","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job003","Unused","SVDC_PVJobSuccessful");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job002","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job002","Unused","SVDC_PVJobSuccessful");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job001","Unused","SVDC_PVConstraintCheckPassed");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job001","Unused","SVDC_PVJobSuccessful");
+  //
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  //
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job002","Unused","AEO_PVJobDeleted");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job003","Unused","AEO_PVJobDeleted");
+  acceptInstrumentationEventForJob("PVGateway_Test004","Job001","Unused","AEO_PVJobDeleted");
+  //
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  
+  // Next, finally check that the state of the VerifiableJobs & InstrumentationEvents are as expected.
+  theVerifiableJobs := find VerifiableJob ();
+  Assertions::assertTrue(theVerifiableJobs'length = 3, "Wrong number of VerifiableJobs created: " & (theVerifiableJobs'length)'image);
+  for theVerifiableJob in theVerifiableJobs loop
+    theInstrumentationEvents := theVerifiableJob -> R1;
+    Assertions::assertTrue(theInstrumentationEvents'length = 6, "Wrong number of InstrumentationEvents created for VerifiableJob : " & theVerifiableJob.jobKey'image & " - the incorrect number of events = " & (theInstrumentationEvents'length)'image); 
+  end loop;
+  
+  // Now delete VerifiableJob 'Job001' and re-check the state of the VerifiableJobs and InstrumentationEvents.
+  deleteVerifiableJob ("Job001");
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  theVerifiableJobs := find VerifiableJob ();
+  Assertions::assertTrue(theVerifiableJobs'length = 2, "Wrong number of VerifiableJobs left after deletion of 'Job001' : " & (theVerifiableJobs'length)'image);
+  theInstrumentationEvents := find InstrumentationEvent ();
+  Assertions::assertTrue(theInstrumentationEvents'length = 12, "Wrong number of InstrumentationEvents left after deletion of 'Job001' - the incorrect number of events = " & (theInstrumentationEvents'length)'image); 
+
+  // Now delete VerifiableJob 'Job002' and re-check the state of the VerifiableJobs and InstrumentationEvents.
+  deleteVerifiableJob ("Job002");
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  theVerifiableJobs := find VerifiableJob ();
+  Assertions::assertTrue(theVerifiableJobs'length = 1, "Wrong number of VerifiableJobs left after deletion of 'Job002' : " & (theVerifiableJobs'length)'image);
+  theInstrumentationEvents := find InstrumentationEvent ();
+  Assertions::assertTrue(theInstrumentationEvents'length = 6, "Wrong number of InstrumentationEvents left after deletion of 'Job002' - the incorrect number of events = " & (theInstrumentationEvents'length)'image); 
+
+// And finally delete VerifiableJob 'Job003' and re-check the state of the VerifiableJobs and InstrumentationEvents.
+  deleteVerifiableJob ("Job003");
+  
+  // Process all the events on the event queue.
+  Test::service_event_queue();
+  theVerifiableJobs := find VerifiableJob ();
+  Assertions::assertTrue(theVerifiableJobs'length = 0, "Wrong number of VerifiableJobs left after deletion of 'Job002' : " & (theVerifiableJobs'length)'image);
+  theInstrumentationEvents := find InstrumentationEvent ();
+  Assertions::assertTrue(theInstrumentationEvents'length = 0, "Wrong number of InstrumentationEvents left after deletion of 'Job002' - the incorrect number of events = " & (theInstrumentationEvents'length)'image); 
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

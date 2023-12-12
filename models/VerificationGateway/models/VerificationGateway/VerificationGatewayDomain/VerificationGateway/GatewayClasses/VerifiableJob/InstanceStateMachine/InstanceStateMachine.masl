@@ -23,19 +23,13 @@ begin
     link this R2 newInstrumentationEvent;
     link previousInstrumentationEvent R3.is_followed_by newInstrumentationEvent;
     
-    // Having stitched the events appropriately use the newInstrumentationEvent to to verify the behaviour 
+    // Having stitched the events appropriately use the newInstrumentationEvent to verify the behaviour 
     // of the Job within the client application.
     Verification~>verifyInstrumentationEvent(this.clientJobName,
     	                                     newInstrumentationEvent.jobKey,
     	                                     newInstrumentationEvent.eventKey,
     	                                     newInstrumentationEvent.clientEventType,         
                                              newInstrumentationEvent.assignedPreviousEventKey);
-
-    // HACK - TODO - CDS - Detect the last event and delete the instance data.
-    if nextEventType = "AEO_PVJobDeletionInitiated" then
-      this.deleteVerifiableJob();
-    end if;
-
   else
     // TODO
   end if;
@@ -45,7 +39,8 @@ end state;
 //! ACTIVITY BEGIN. '71fd4b39-3e2b-4fea-8be2-0598c5877d95' '13b65c8e-f8d4-4fa4-af37-156b8fa3ee5f' DO NOT EDIT THIS LINE.
 state VerificationGateway::VerifiableJob.Deleting () is
 begin
-  null;
+  // Deletion of the VerifiableJob instance is achieved using an instance-based function.
+  deleteVerifiableJob();
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
