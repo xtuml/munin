@@ -1,0 +1,17 @@
+public service JobManagement::acceptEvent ( auditEvent: in string ) is
+json_element: JSON::JSONElement;
+json_object: JSON::JSONObject;
+jobId : string;
+eventId : string;
+
+begin
+    // parse the event and extract the job id
+    json_element := JSON::parse(auditEvent);
+	if json_element.kind = JSON::Object then
+//        jsonObject := JSON::get_object(json_element);
+//        jobId := JSON::get_string(this.jsonObject["jobId"]);
+//        eventId := JSON::get_string(this.jsonObject["eventId"]),
+//        
+    end if;
+    
+end service;

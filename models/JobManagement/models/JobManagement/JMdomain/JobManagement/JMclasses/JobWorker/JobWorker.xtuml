@@ -7,6 +7,61 @@ INSERT INTO O_OBJ
 	'JobWorker',
 	'',
 	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_TFR
+	VALUES ("88ce096b-9281-49e4-ab6a-4d5d5d6546dd",
+	"a669992c-cd5f-4699-adae-74d40be636cc",
+	'createWorker',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	0,
+	'',
+	3,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	1,
+	1);
+INSERT INTO O_TPARM
+	VALUES ("c25d7c08-f6f0-463d-8d99-aa2fce7fc797",
+	"88ce096b-9281-49e4-ab6a-4d5d5d6546dd",
+	'workerId',
+	"f45ea6a5-88da-45f6-b35a-0c0bbfef9200",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("f45ea6a5-88da-45f6-b35a-0c0bbfef9200",
+	"00000000-0000-0000-0000-000000000000",
+	'UUID::formatted_uuid',
+	'',
+	'',
+	'../../types/types.xtuml');
+INSERT INTO O_TFR
+	VALUES ("a1ef673a-e921-4e65-b841-375a09821315",
+	"a669992c-cd5f-4699-adae-74d40be636cc",
+	'employWorker',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	3,
+	'',
+	"88ce096b-9281-49e4-ab6a-4d5d5d6546dd",
+	1,
+	2);
+INSERT INTO O_TFR
+	VALUES ("be5f8717-8c2d-4fe7-8f57-abd9ca26443e",
+	"a669992c-cd5f-4699-adae-74d40be636cc",
+	'retireWorker',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	3,
+	'',
+	"a1ef673a-e921-4e65-b841-375a09821315",
+	1,
+	3);
 INSERT INTO O_NBATTR
 	VALUES ("4df7b766-97c6-4f9f-96ac-e7b03e4efe35",
 	"a669992c-cd5f-4699-adae-74d40be636cc");
@@ -23,60 +78,6 @@ INSERT INTO O_ATTR
 	'workerId',
 	0,
 	"f45ea6a5-88da-45f6-b35a-0c0bbfef9200",
-	'',
-	'');
-INSERT INTO S_DT_PROXY
-	VALUES ("f45ea6a5-88da-45f6-b35a-0c0bbfef9200",
-	"00000000-0000-0000-0000-000000000000",
-	'UUID::formatted_uuid',
-	'',
-	'',
-	'../../types/types.xtuml');
-INSERT INTO O_REF
-	VALUES ("a669992c-cd5f-4699-adae-74d40be636cc",
-	"a669992c-cd5f-4699-adae-74d40be636cc",
-	0,
-	"4df7b766-97c6-4f9f-96ac-e7b03e4efe35",
-	"2e6f9303-dffe-47e9-89c8-b6e65a16e526",
-	"cd9e7d72-8be0-4284-9127-6737b489c136",
-	"4d5e0365-8763-40a6-bc1f-b9e3a6df2f4d",
-	"27fddd6e-dd0f-450b-981d-5271ec04c01a",
-	"b3c564aa-445d-46ff-993e-d0e9521f6c6b",
-	"00000000-0000-0000-0000-000000000000",
-	0,
-	'',
-	'JobWorker',
-	'workerId',
-	'R3.''employedBefore''');
-INSERT INTO R_RGO_PROXY
-	VALUES ("a669992c-cd5f-4699-adae-74d40be636cc",
-	"2e6f9303-dffe-47e9-89c8-b6e65a16e526",
-	"cd9e7d72-8be0-4284-9127-6737b489c136",
-	'../JMclasses.xtuml');
-INSERT INTO O_RTIDA_PROXY
-	VALUES ("4df7b766-97c6-4f9f-96ac-e7b03e4efe35",
-	"a669992c-cd5f-4699-adae-74d40be636cc",
-	0,
-	"2e6f9303-dffe-47e9-89c8-b6e65a16e526",
-	"4d5e0365-8763-40a6-bc1f-b9e3a6df2f4d",
-	'../JMclasses.xtuml');
-INSERT INTO O_RATTR
-	VALUES ("27fddd6e-dd0f-450b-981d-5271ec04c01a",
-	"a669992c-cd5f-4699-adae-74d40be636cc",
-	"4df7b766-97c6-4f9f-96ac-e7b03e4efe35",
-	"a669992c-cd5f-4699-adae-74d40be636cc",
-	1,
-	'workerId');
-INSERT INTO O_ATTR
-	VALUES ("27fddd6e-dd0f-450b-981d-5271ec04c01a",
-	"a669992c-cd5f-4699-adae-74d40be636cc",
-	"4df7b766-97c6-4f9f-96ac-e7b03e4efe35",
-	'previousworkerId',
-	'',
-	'previous',
-	'workerId',
-	1,
-	"ba5eda7a-def5-0000-0000-000000000007",
 	'',
 	'');
 INSERT INTO O_REF
@@ -185,6 +186,53 @@ INSERT INTO S_DT_PROXY
 	'',
 	'',
 	'../../../../types/types.xtuml');
+INSERT INTO O_REF
+	VALUES ("a669992c-cd5f-4699-adae-74d40be636cc",
+	"a669992c-cd5f-4699-adae-74d40be636cc",
+	0,
+	"4df7b766-97c6-4f9f-96ac-e7b03e4efe35",
+	"2e6f9303-dffe-47e9-89c8-b6e65a16e526",
+	"cd9e7d72-8be0-4284-9127-6737b489c136",
+	"4d5e0365-8763-40a6-bc1f-b9e3a6df2f4d",
+	"27fddd6e-dd0f-450b-981d-5271ec04c01a",
+	"b3c564aa-445d-46ff-993e-d0e9521f6c6b",
+	"00000000-0000-0000-0000-000000000000",
+	0,
+	'',
+	'JobWorker',
+	'workerId',
+	'R3.''employedBefore''');
+INSERT INTO R_RGO_PROXY
+	VALUES ("a669992c-cd5f-4699-adae-74d40be636cc",
+	"2e6f9303-dffe-47e9-89c8-b6e65a16e526",
+	"cd9e7d72-8be0-4284-9127-6737b489c136",
+	'../JMclasses.xtuml');
+INSERT INTO O_RTIDA_PROXY
+	VALUES ("4df7b766-97c6-4f9f-96ac-e7b03e4efe35",
+	"a669992c-cd5f-4699-adae-74d40be636cc",
+	0,
+	"2e6f9303-dffe-47e9-89c8-b6e65a16e526",
+	"4d5e0365-8763-40a6-bc1f-b9e3a6df2f4d",
+	'../JMclasses.xtuml');
+INSERT INTO O_RATTR
+	VALUES ("27fddd6e-dd0f-450b-981d-5271ec04c01a",
+	"a669992c-cd5f-4699-adae-74d40be636cc",
+	"4df7b766-97c6-4f9f-96ac-e7b03e4efe35",
+	"a669992c-cd5f-4699-adae-74d40be636cc",
+	1,
+	'workerId');
+INSERT INTO O_ATTR
+	VALUES ("27fddd6e-dd0f-450b-981d-5271ec04c01a",
+	"a669992c-cd5f-4699-adae-74d40be636cc",
+	"4df7b766-97c6-4f9f-96ac-e7b03e4efe35",
+	'previousworkerId',
+	'',
+	'previous',
+	'workerId',
+	1,
+	"ba5eda7a-def5-0000-0000-000000000007",
+	'',
+	'');
 INSERT INTO O_ID
 	VALUES (0,
 	"a669992c-cd5f-4699-adae-74d40be636cc");

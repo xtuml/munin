@@ -1,0 +1,83 @@
+//! ACTIVITY BEGIN. '80ea8de3-d3c3-4fc9-88f3-f20f0a06f949' DO NOT EDIT THIS LINE.
+private service JobManagement::testConfigFile () is
+jobManagementSpec : instance of JobManagementSpec;
+jobStore : instance of JobStore;
+configFile : string := "testconfig.json";
+
+begin
+	
+	jobManagementSpec := find_one JobManagementSpec();
+	Assertions::assertTrue((jobManagementSpec /= null), "Test Config File: Failed to find Job Management Spec");  
+	Assertions::assertTrue((jobManagementSpec.maxJobsPerWorker = 2), "Test Config File: Failed to set maxJobsPerWorker, expected 2 found " & (jobManagementSpec.maxJobsPerWorker)'image);  
+	Assertions::assertTrue((jobManagementSpec.maxUnassignedJobs = 3), "Test Config File: Failed to set maxUnassignedJobs, expected 3 found " & (jobManagementSpec.maxUnassignedJobs)'image);  
+	Assertions::assertTrue((jobManagementSpec.retiredWorkerDeletionTime = @PT1M@), "Test Config File: Failed to set retiredWorkerDeletionTime, expected 1M found " & (jobManagementSpec.retiredWorkerDeletionTime)'image);  
+    jobStore := find_one JobStore();
+	Assertions::assertTrue((jobStore /= null), "Test Config File: Failed to find Job Store");  
+	Assertions::assertTrue((jobStore.jobStoreAgeLimit =  @PT1H@), "Test Config File: Failed to find Job Store");  
+	jobManagementSpec.configFile := configFile;
+	Filesystem::touch_file(Filesystem::filename(jobManagementSpec.configFilePath & configFile));
+    
+	// fire the timer to check the config file
+	generate JobManagementSpec.checkConfigUpdate() to jobManagementSpec;
+	Test::service_event_queue();
+	
+	Assertions::assertTrue((jobManagementSpec /= null), "Test Config File: Failed to find Job Management Spec");  
+	Assertions::assertTrue((jobManagementSpec.maxJobsPerWorker = 3), "Test Config File: Failed to set maxJobsPerWorker, expected 2 found " & (jobManagementSpec.maxJobsPerWorker)'image);  
+	Assertions::assertTrue((jobManagementSpec.maxUnassignedJobs = 4), "Test Config File: Failed to set maxUnassignedJobs, expected 3 found " & (jobManagementSpec.maxUnassignedJobs)'image);  
+	Assertions::assertTrue((jobManagementSpec.retiredWorkerDeletionTime = @PT2M@), "Test Config File: Failed to set retiredWorkerDeletionTime, expected 1M found " & (jobManagementSpec.retiredWorkerDeletionTime)'image);  
+	Assertions::assertTrue((jobStore /= null), "Test Config File: Failed to find Job Store");  
+	Assertions::assertTrue((jobStore.jobStoreAgeLimit =  @PT2H@), "Test Config File: Failed to find Job Store");  
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '2788b9d8-b589-4fad-9301-8691fb4a05dd' DO NOT EDIT THIS LINE.
+private service JobManagement::testRegisterWorker () is
+workerId : UUID::formatted_uuid;
+worker : instance of JobWorker;
+workerRegistered : instance of _TEST_Worker_workerRegistered;
+employedWorker : instance of EmployedWorker;
+retiredWorker : instance of RetiredWorker;
+
+begin
+	
+	// register a worker
+	workerId := UUID::generate_formatted();
+	JobManagement::registerWorker(workerId);
+	Test::service_event_queue();
+	
+	// check that the worker has been informed it is registered
+	workerRegistered := find_one _TEST_Worker_workerRegistered(workerId = workerId);
+	Assertions::assertTrue((workerRegistered /= null), "Test Register Worker: Failed to find Registered Worker");
+	delete workerRegistered;
+	
+	// check we have an employed worker
+	worker := find_one JobWorker(workerId = workerId);
+	Assertions::assertTrue((worker /= null), "Test Register Worker: Failed to find Worker");
+	employedWorker := find_one EmployedWorker(workerId = workerId);
+	Assertions::assertTrue((employedWorker /= null), "Test Register Worker: Failed to find Employed Worker");
+	
+	// make the worker retired
+	retiredWorker := create RetiredWorker(workerId => workerId);
+	unlink employedWorker R2.JobWorker worker;
+	delete employedWorker;
+	link retiredWorker R2.JobWorker worker;
+	
+	// register the retired worker
+	JobManagement::registerWorker(workerId);
+	Test::service_event_queue();
+	
+	// check that the worker has been informed it is registered
+	workerRegistered := find_one _TEST_Worker_workerRegistered(workerId = workerId);
+	Assertions::assertTrue((workerRegistered /= null), "Test Register Worker: Failed to find Registered Worker");
+	delete workerRegistered;
+	
+	// check we have an employed worker
+	worker := find_one JobWorker(workerId = workerId);
+	Assertions::assertTrue((worker /= null), "Test Register Worker: Failed to find Worker");
+	employedWorker := find_one EmployedWorker(workerId = workerId);
+	Assertions::assertTrue((employedWorker /= null), "Test Register Worker: Failed to find Employed Worker");
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

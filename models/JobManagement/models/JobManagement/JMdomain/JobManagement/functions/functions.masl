@@ -1,19 +1,36 @@
 //! ACTIVITY BEGIN. '1a20be36-52a8-4bb8-b192-0c81141e29ae' DO NOT EDIT THIS LINE.
-private service JobManagement::registerWorker () is
+private service JobManagement::registerWorker ( workerId : in UUID::formatted_uuid ) is
+jobWorker : instance of JobWorker;
+employedWorker : instance of EmployedWorker;
+retiredWorker : instance of RetiredWorker;
+
 begin
-  null;
+	
+	// check if this is a new worker
+	jobWorker := find_one JobWorker(workerId = workerId);
+	if jobWorker = null then
+		JobWorker.createWorker(workerId);
+	else
+		// not a new worker so is the worker retired
+		retiredWorker := jobWorker -> R2.RetiredWorker;
+		if retiredWorker /= null then
+			// worker retired so put back into employment
+			jobWorker.employWorker();
+		end if;
+	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '0fb0455c-728d-4b65-8673-2eedf8a4ec9b' DO NOT EDIT THIS LINE.
-private service JobManagement::workerHeartbeat () is
+private service JobManagement::workerHeartbeat ( workerId : in UUID::formatted_uuid,
+                                                jobList : in sequence of string ) is
 begin
   null;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '2c4a7088-e8df-4d3e-bf4c-8ea74c88aa8b' DO NOT EDIT THIS LINE.
-private service JobManagement::acceptEvent ( auditEvent : in string ) is
+public service JobManagement::acceptEvent ( auditEvent : in string ) is
 json_element: JSON::JSONElement;
 json_object: JSON::JSONObject;
 jobId : string;
@@ -23,10 +40,10 @@ begin
     // parse the event and extract the job id
     json_element := JSON::parse(auditEvent);
 	if json_element.kind = JSON::Object then
-        jsonObject := JSON::get_object(json_element);
-        jobId := JSON::get_string(this.jsonObject["jobId"]);
-        eventId := JSON::get_string(this.jsonObject["eventId"]),
-        
+//        jsonObject := JSON::get_object(json_element);
+//        jobId := JSON::get_string(this.jsonObject["jobId"]);
+//        eventId := JSON::get_string(this.jsonObject["eventId"]),
+//        
     end if;
     
 end service;
@@ -40,7 +57,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'ff723fb4-c20f-4ab8-bc39-e807df00e8fc' DO NOT EDIT THIS LINE.
-private service JobManagement::deregisterWorker () is
+private service JobManagement::deregisterWorker ( workerId : in UUID::formatted_uuid ) is
 begin
   null;
 end service;

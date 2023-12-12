@@ -1,0 +1,30 @@
+private service JobManagement::testConfigFile () is
+jobManagementSpec : instance of JobManagementSpec;
+jobStore : instance of JobStore;
+configFile : string := "testconfig.json";
+
+begin
+	
+	jobManagementSpec := find_one JobManagementSpec();
+	Assertions::assertTrue((jobManagementSpec /= null), "Test Config File: Failed to find Job Management Spec");  
+	Assertions::assertTrue((jobManagementSpec.maxJobsPerWorker = 2), "Test Config File: Failed to set maxJobsPerWorker, expected 2 found " & (jobManagementSpec.maxJobsPerWorker)'image);  
+	Assertions::assertTrue((jobManagementSpec.maxUnassignedJobs = 3), "Test Config File: Failed to set maxUnassignedJobs, expected 3 found " & (jobManagementSpec.maxUnassignedJobs)'image);  
+	Assertions::assertTrue((jobManagementSpec.retiredWorkerDeletionTime = @PT1M@), "Test Config File: Failed to set retiredWorkerDeletionTime, expected 1M found " & (jobManagementSpec.retiredWorkerDeletionTime)'image);  
+    jobStore := find_one JobStore();
+	Assertions::assertTrue((jobStore /= null), "Test Config File: Failed to find Job Store");  
+	Assertions::assertTrue((jobStore.jobStoreAgeLimit =  @PT1H@), "Test Config File: Failed to find Job Store");  
+	jobManagementSpec.configFile := configFile;
+	Filesystem::touch_file(Filesystem::filename(jobManagementSpec.configFilePath & configFile));
+    
+	// fire the timer to check the config file
+	generate JobManagementSpec.checkConfigUpdate() to jobManagementSpec;
+	Test::service_event_queue();
+	
+	Assertions::assertTrue((jobManagementSpec /= null), "Test Config File: Failed to find Job Management Spec");  
+	Assertions::assertTrue((jobManagementSpec.maxJobsPerWorker = 3), "Test Config File: Failed to set maxJobsPerWorker, expected 2 found " & (jobManagementSpec.maxJobsPerWorker)'image);  
+	Assertions::assertTrue((jobManagementSpec.maxUnassignedJobs = 4), "Test Config File: Failed to set maxUnassignedJobs, expected 3 found " & (jobManagementSpec.maxUnassignedJobs)'image);  
+	Assertions::assertTrue((jobManagementSpec.retiredWorkerDeletionTime = @PT2M@), "Test Config File: Failed to set retiredWorkerDeletionTime, expected 1M found " & (jobManagementSpec.retiredWorkerDeletionTime)'image);  
+	Assertions::assertTrue((jobStore /= null), "Test Config File: Failed to find Job Store");  
+	Assertions::assertTrue((jobStore.jobStoreAgeLimit =  @PT2H@), "Test Config File: Failed to find Job Store");  
+	
+end service;

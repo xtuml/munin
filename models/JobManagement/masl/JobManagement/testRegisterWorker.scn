@@ -1,0 +1,47 @@
+private service JobManagement::testRegisterWorker () is
+workerId : UUID::formatted_uuid;
+worker : instance of JobWorker;
+workerRegistered : instance of _TEST_Worker_workerRegistered;
+employedWorker : instance of EmployedWorker;
+retiredWorker : instance of RetiredWorker;
+
+begin
+	
+	// register a worker
+	workerId := UUID::generate_formatted();
+	JobManagement::registerWorker(workerId);
+	Test::service_event_queue();
+	
+	// check that the worker has been informed it is registered
+	workerRegistered := find_one _TEST_Worker_workerRegistered(workerId = workerId);
+	Assertions::assertTrue((workerRegistered /= null), "Test Register Worker: Failed to find Registered Worker");
+	delete workerRegistered;
+	
+	// check we have an employed worker
+	worker := find_one JobWorker(workerId = workerId);
+	Assertions::assertTrue((worker /= null), "Test Register Worker: Failed to find Worker");
+	employedWorker := find_one EmployedWorker(workerId = workerId);
+	Assertions::assertTrue((employedWorker /= null), "Test Register Worker: Failed to find Employed Worker");
+	
+	// make the worker retired
+	retiredWorker := create RetiredWorker(workerId => workerId);
+	unlink employedWorker R2.JobWorker worker;
+	delete employedWorker;
+	link retiredWorker R2.JobWorker worker;
+	
+	// register the retired worker
+	JobManagement::registerWorker(workerId);
+	Test::service_event_queue();
+	
+	// check that the worker has been informed it is registered
+	workerRegistered := find_one _TEST_Worker_workerRegistered(workerId = workerId);
+	Assertions::assertTrue((workerRegistered /= null), "Test Register Worker: Failed to find Registered Worker");
+	delete workerRegistered;
+	
+	// check we have an employed worker
+	worker := find_one JobWorker(workerId = workerId);
+	Assertions::assertTrue((worker /= null), "Test Register Worker: Failed to find Worker");
+	employedWorker := find_one EmployedWorker(workerId = workerId);
+	Assertions::assertTrue((employedWorker /= null), "Test Register Worker: Failed to find Employed Worker");
+	
+end service;

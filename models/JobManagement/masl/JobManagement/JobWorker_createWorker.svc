@@ -1,0 +1,12 @@
+public service JobManagement::JobWorker.createWorker ( workerId: in UUID::formatted_uuid ) is
+worker : instance of JobWorker;
+jobManager : instance of JobManager;
+
+begin
+	
+	jobManager := find_one JobManager();
+	worker := create JobWorker(workerId => workerId, employmentDate => timestamp'now);
+	link worker R1 jobManager;
+	worker.employWorker();
+	
+end service;

@@ -1,0 +1,61 @@
+public instance service JobManagement::JobManagementSpec.loadConfigFile () is
+logMessage : string;
+fileName : Filesystem::filename;
+configJSONString : string;
+configJSONElement : JSON::JSONElement;
+configJSONObject : JSON::JSONObject;
+configValidationResult : JSON::JSONObject;
+maxJobsPerWorker : integer;
+maxUnassignedJobs : duration := @P7D@;
+retiredWorkerDeletionTime : duration := @P1D@;
+jobStore : instance of JobStore;
+jobStoreName : string := "JobIdStore.log";
+jobStoreAgeLimit : duration := @PT1H@;
+
+begin
+    
+    // check the config file has not been removed
+    fileName := Filesystem::filename(this.configFilePath & this.configFile);
+    if Filesystem::file_exists(fileName) then
+        // read the contents of the config file 
+        configJSONString := Filesystem::read_file(fileName);
+        configJSONElement := JSON::parse(configJSONString);
+        configValidationResult := JSONValidation::validate(configJSONElement, Environment::getenv(Environment::variable_name("JM_CONFIG_SCHEMA_PATH")));
+        if JSON::get_boolean(configValidationResult["valid"]) then
+            // extract the spec data items
+            configJSONObject := JSON::get_object(configJSONElement);
+            if configJSONObject'contains("SpecUpdateRate") then
+                this.specUpdateRate := duration'parse(JSON::get_string(configJSONObject["SpecUpdateRate"]));
+            end if;
+            if configJSONObject'contains("MaxJobsPerWorker") then
+                this.maxJobsPerWorker := integer'parse(JSON::get_string(configJSONObject["MaxJobsPerWorker"]));
+            end if;
+            if configJSONObject'contains("MaxUnassignedJobs") then
+                this.maxUnassignedJobs := integer'parse(JSON::get_string(configJSONObject["MaxUnassignedJobs"]));
+            end if;
+            if configJSONObject'contains("RetiredWorkerDeletionTime") then
+                this.retiredWorkerDeletionTime := duration'parse(JSON::get_string(configJSONObject["RetiredWorkerDeletionTime"]));
+            end if;
+            if configJSONObject'contains("JobStoreAgeLimit") then
+                jobStoreAgeLimit := duration'parse(JSON::get_string(configJSONObject["JobStoreAgeLimit"]));
+            end if;
+        else
+            logMessage := "JobManagement::JobManagementSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
+            Logger::log(Logger::Debug, "JobManagement", logMessage);
+            raise JSON::JSONException("Config file invalid");
+        end if;
+        // set the config file mod time
+        this.configFileModificationTime := this.lastModificationTime();        
+    else
+        logMessage := "JobManagement::ConfigUpdated : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
+        Logger::log(Logger::Error, "JobManagement", logMessage);
+    end if;
+    
+    // if the job store does not exist then create it
+    jobStore := find_one JobStore();
+    if jobStore = null then
+    	jobStore := create unique JobStore(jobStoreAgeLimit => jobStoreAgeLimit, Current_State => Created);
+    else
+    	jobStore.jobStoreAgeLimit := jobStoreAgeLimit;
+    end if;
+end service;
