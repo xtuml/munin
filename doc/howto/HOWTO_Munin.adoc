@@ -104,10 +104,10 @@ workspace:
   ** AEOrdering (AEO)
   ** SequenceVerificationDataCentric (SVDC)
   ** InvariantStore (IStore)
+  ** Verification Gateway (VG)
 * Deployments
-  ** AEO_SVDC (AEO + SVDC + IStore)
-* Test Domain
-  ** AESimulator (AESim)
+  ** AEO_SVDC (AEO + SVDC + IStore + VG)
+  ** AER (a single domain deployment)
 * Utilities
   ** utils
   ** plus2json
@@ -154,7 +154,10 @@ can be found link:https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.
 "plus2json" refers to the application which processes PLUS files (textual
 `.puml` activity diagrams) and produces JSON job definition and runtime
 configuration files consumable by the Protocol Verifier (and the Audit
-Event Simulator).
+Event Simulator). plus2json can also be used to generate runtime test 
+data based on the job definitions. It is capable of generating valid
+runtime event streams and also of injecting errors into runtime event
+streams.
 
 plus2json source code, documentation and examples/tests can be found in a
 git repository link:https://github.com/xtuml/plus2json[here].
@@ -308,6 +311,16 @@ multiple concurrent instances of Protocol Verifier processes.
 For a visual overview of the domains and the key interactions between them click
 link:images/MUNIN_Domains_and_Key_Interactions.pdf[here].
 
+===== Verification Gateway (VG)
+
+The role of the Verification Gateway is to generate audit events that represent the
+protocol of job verification being preformed by the Protocol Verifier. These
+audit events can then be injected into another (or the same) instance of the PV
+and used to verify that the PV itself is behaving as expected. This means that the
+PV is both observing and observable. This provides assurance that the PV is behaving
+correctly and also serves to demonstrate the both the generation and consumption
+of audit events. The PV can be said to be "eating its own dog food".
+
 === Deployment Overview
 
 The Protocol Verifier is partitioned into a set of deployments that can be instantiated and
@@ -315,7 +328,7 @@ deployed in parallel to provide for performance scaling. The deployments are mad
 of one or more of the Protocol Verifer domains. They are:
 
 * Reception (AER) - mulitiple instances
-* Ordering, Sequence Verification, iStore (AEO_SVDC) - multiple instances
+* Ordering, Sequence Verification, iStore, Verification Gateway (AEO_SVDC) - multiple instances
 
 For a description of how this architecture achieves scaling see
 link:https://github.com/xtuml/munin/blob/main/doc/notes/MUN-151_scaling_ant.adoc[here].
