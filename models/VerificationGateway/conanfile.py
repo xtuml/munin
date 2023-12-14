@@ -3,7 +3,7 @@ import conan
 
 class ConanFile(conan.ConanFile):
     name = 'verificationgateway'
-    version = '1.1.1'
+    version = '1.2.0'
     user = 'xtuml'
     channel = 'stable'
     python_requires = 'masl_conan/[>=4.2.2]@xtuml/stable'
