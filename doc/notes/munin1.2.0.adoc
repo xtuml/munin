@@ -1,0 +1,146 @@
+= Munin 1.2.0 Release Notes
+
+== 1 Summary
+
+During Phase 2 Stage 3 of development the Munin Protocol Verifier
+continued to mature.  It can now be considered functionally at a Technical
+Readiness Level (TRL, <<dr-1>>) of 5.  It passes a broad range of
+functional tests and now runs under stress continuously for hours and
+days.  It scales (statically) up and down.  The bulk of the required
+functionality is in place; deployment, integration and maintenance issues
+are moving to the forefront.
+
+== 2 Highlights
+
+=== 2.1 Open Source Software
+
+Munin <<dr-2>> (and plus2json <<dr-3>>) are now Open Source Software (OSS)
+licensed under Apache 2.0 and Creative Commons CC0.  The repositories are
+hosted on github within the xtuml organisation.  Open sourcing the software
+ensures that the intellectual property will be forever widely available and
+unencumbered.
+
+=== 2.2 Conference Presentation
+
+A technical experience report around the Protocol Verifier was presented
+at a modelling conference in November.  The presentation highlighted the
+modelling, methodology and underlying technologies.  The approach to
+scaling was explained.  Using the Protocol Verifier to verify itself was
+illustrated.  A demonstration of the running Protocol Verifier was given.
+
+As a byproduct of this conference presentation a new pedagogical example
+application has been produced.  A protocol and job definition were crafted
+around the ISO 20022 international standard for financial transactions.
+This job definition is now part of the regression and benchmarking test
+suites.
+
+Find a recording of the conference presentation at <<dr-5>>.
+
+=== 2.3 Verification Gateway (PV Prime)
+
+The mechanism for using the Protocol Verifier to verify itself was refined
+in this development cycle.  Two configurations for monitoring were
+demonstrated and tested.  In one configuration a second instance of the
+Protocol Verifier (called PV Prime) is used to monitor the primary
+instance of the PV.  In another configuration the instrumented PV feeds its
+output back into its own input.  Both configurations work and have their
+relative merit.
+
+== 3 Test
+
+Testing ramped up during the P2S3 release cycle.  The development team
+together with an independent test team focused functional and performance
+testing on the Protocol Verifier.  Several bugs were uncovered and
+addressed, and performance improvements were made.  Reliability and
+endurance have increased.
+
+=== 3.1 Two Test Harnesses
+
+The development and test teams use separate test harnesses.  The
+development test harness is built around `plus2json --play` <<dr-3>>.  The
+test harness used by the independent test team is planned for release as
+OSS in the next development cycle.  These test harnesses offer a diversity
+of strengths which result in wider test coverage.
+
+=== 3.2 Functional Testing
+
+More and varied job definitions were added to the test suite.  These job
+definitions are used to configure the Protocol Verifier, and then
+`plus2json --play` interprets the job definitions to produce the
+(simulated) input runtime audit event streams.
+
+=== 3.3 Error Injection
+
+`plus2json --play` was enhanced to support various methods of manipulating the
+runtime audit event stream in ways that simulate protocol violations in the
+device being monitored.  The audit event stream is perturbed but in a manner
+that continues to satisfy the schema validation process.  This capacitates
+testing of various forms of protocol violation.  The following manipulations
+are supported:
+
+* insert - Insert an unhappy event.
+* replace - Replace a valid event with an unhappy event.
+* omit - Omit an event from the stream yet keep the event stream linkage.
+* injectAb4B - Inject a specified event (A) before a specified event (B).
+* orphan - Orphan an event by erasing its previous ID linkage.
+
+More forms of manipulation are planned for the next stage of development.
+
+=== 3.4 Performance Testing
+
+Equally important to functional testing is performance/stress testing.
+The Protocol Verifier must be able to process production-level loads of
+runtime audit event data streams.  The test team focused on this aspect;
+the development team attempted to keep up.
+
+The development team expanded the benchmark test suite to include all of
+the job definitions used in regression testing.  Thus we are testing all
+supported topologies at stress throughput levels.
+
+Two key problems were identified during stress testing.  These had to do
+with resource usage growing beyond the memory and speed capacity of the
+Protocol Verifier.  Both of these issues were addressed.
+
+Example throughput and endurance levels included:
+
+* 64,000,000 events at >1000 events/second
+* 1,000,000 events at >2000 events/second
+
+== 4 Bug Fixes and Improvements
+
+Several bugs were identified and fixed in the release cycle.
+
+=== 4.1 Schema Validation
+
+A key performance bottleneck was addressed in the area of JSON schema
+validation.  This was resolved through improvements made in the MASL model
+compiler (Cpass:[++] code generator).  Schema validation is now enabled
+for every JSON element received by the Protocol Verifier with minimal
+performance impact.
+
+=== 4.2 AsyncLogger
+
+AsyncLogger is a singleton domain which is added to serialise logging to a
+file.  AsyncLogger contains Logger but receives input logging messages
+through the message broker.  This effectively serialises multiple logging
+clients into a single log file.  This addressed issue #143 below.
+
+=== 4.3 Issues Fixed
+
+* https://github.com/xtuml/munin/issues/143[#143] - Reception Events not all appearing in logs
+* https://github.com/xtuml/munin/issues/144[#144] - Reception events not consumed in order of receipt (file based in take)
+* https://github.com/xtuml/munin/issues/145[#145] - Logger does not rotate and zip well when running in multiple processes.
+* https://github.com/xtuml/munin/issues/146[#146] - Multiple containers failing in longer runs
+* https://github.com/xtuml/munin/issues/152[#152] - AND constraint checks not consistent for same sequence and job definition
+* https://github.com/xtuml/munin/issues/156[#156] - AEOSVDC increasing CPU
+* https://github.com/xtuml/munin/issues/157[#157] - AEOSVDC memory usage and container failures
+* https://github.com/xtuml/munin/issues/158[#158] - JobIDStore IO issue at the stroke of midnight
+
+== 5 Document References
+
+. [[dr-1]] https://en.wikipedia.org/wiki/Technology_readiness_level[Technical Readiness Level]
+. [[dr-2]] https://github.com/xtuml/munin[Munin GitHub repository]
+. [[dr-3]] https://github.com/xtuml/plus2json[plus2json GitHub repository]
+. [[dr-4]] https://github.com/xtuml/munin/releases/tag/v1.2.0[Munin Phase 2 Stage 3 release tag]
+. [[dr-5]] https://www.youtube.com/watch?v=UjR9AR8M2Ew[Munin Protocol Verifier at Shlaer-Mellor Day 2023]
+
