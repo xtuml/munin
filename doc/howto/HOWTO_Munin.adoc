@@ -325,11 +325,20 @@ of audit events. The PV can be said to be "eating its own dog food".
 
 The Protocol Verifier is partitioned into a set of deployments that can be instantiated and
 deployed in parallel to provide for performance scaling. The deployments are made up
-of one or more of the Protocol Verifer domains. They are:
+of one or more of the Protocol Verifer domains and some supporting infrastructure. 
+Deployments can use file-based messaging between domains but the preferred option is
+based upon a messaging infrastructure. The following shows the components for a
+deployment using Kafka for messaging:
 
-* Reception (AER) - mulitiple instances
-* Ordering, Sequence Verification, iStore, Verification Gateway (AEO_SVDC) - multiple instances
+* Reception (AER) - typically a single instance
+* IStore - single instance
+* Ordering, Sequence Verification, Job Store, Verification Gateway (AEO_SVDC) - multiple instances
+* async_logger - single instance
+* zookeeper - single instance
+* kafka - single instance
 
+
+TODO IS this still relevant?
 For a description of how this architecture achieves scaling see
 link:https://github.com/xtuml/munin/blob/main/doc/notes/MUN-151_scaling_ant.adoc[here].
 
@@ -345,6 +354,12 @@ Verifier to monitor and check a new protocol. Once configured and supplied
 with a set of job definitions, the Protocol Verifier can be run without
 reconfiguration for as long as the input set of job definitions need to be
 monitored.
+
+plus2json is also capable of providing test audit event streams. The 
+regression testing of the PV uses plus2json to generate valid and 
+invalid event streams.
+
+See LINK HERE for details of plus2json commands
 
 == Configuring the Protocol Verifier
 
@@ -410,7 +425,7 @@ Assume a PlantUML file containing a single job definition called `Tutorial_1.pum
 has been created. The typical sequence of plus2json commands is as follows:
 
 Optionally backup the existing configuration file by moving the contents of 
-link:https://github.com/xtuml/munin/deploy/plus2json-deployed[this directory] 
+link:https://github.com/xtuml/munin/deploy/config[this directory] 
 to a backup location of your choice.
 
 The following commands convert the PLUS files into json files and load them into the appropriate
@@ -420,24 +435,17 @@ configuration directories:
 - this checks the syntax of the puml file
 . `python plus2json.pyz Tutorial_1.puml --job -p` 
 - this produces a human readable representation of the job definition including previous events and audit event data
-. `python plus2json.pyz Tutorial_1.puml --job | python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1.json` 
+. `python plus2json.pyz Tutorial_1.puml --job | python -m json.tool > munin/deploy/config/job_definitions/tutorial_1.json` 
 - this generates the job definition file and loads it into the appropriate directory. The job definition file 
 must be the same name as the job definition name 
-. `python plus2json.pyz Tutorial_1.puml --audit_event_data |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/tutorial_1_aedata.json` 
-- this generates the audit event data associated with the job definition and loads it into the appropriate directory. 
-Currently, the file must be manually edited to create a file per audit event data item. Each file must have the same name
-as the audit event data item. For example, if the tutorial_1_aedata.json file contains an Invariant X and an Invariant Y
-then a file X.json and a file Y.jon need to be created containing the respective invariants.
-. `python plus2json.pyz Tutorial_1.puml --aeo_config |  python -m json.tool > munin/deploy/plus2json-deployed/generated-config/config.json` 
-- this loads the master config.json file which sets a number of behavioural parameters and references each of the jobs
 
 Note: Advanced feature - the behavioural parameters in the config.json file can be adjusted with appropriate caution
 
-.Click to see more details on the `deploy/plus2json-deployed/generated-config/config.json` config file format
+.Click to see more details on the `deploy/config/pv-config.json` config file format
 [%collapsible]
 ====
 
-These configuration files contain some items that may be adjusted to manage the
+This configuration file contains some items that may be adjusted to manage the
 digital twin. The following is a list of the configuration items that can be
 adjusted and there description are as follows:
 
@@ -447,22 +455,22 @@ reloads the configuration files.
 *IncomingDirectory* - The directory where the application expects to find JSON
 files containing events.
 
-*ProcessingDirectory* - The directory where the application moves JSON files
-while the events are being processed.
-
 *ProcessedDirectory* - The directory where the application moves JSON files
 after all the contained events are processed.
 
-*EventThrottleRate* - The rate that events should be processed from one
-reception file specified as a duration. Once an event has been processed a timer
-shall be set to the throttle rate and the timer shall have to expire before
-another event is selected for processing.
-
 *ReceptionDeletionTime* - When a file has been through reception the details of
-the reception processing shall be stored until this time expires.
+the reception processing shall be stored until this time expires. Only applicable
+to legacy file-based incoming data.
 
 *ConcurrentReceptionLimit* - A number that indicates the limit of concurrent
 reception jobs that can be executing, e.g. 1 = one active reception job
+
+*SchemaValidate* - A boolean which if set true ensures that json schema validation
+of received files or messages is performed.
+
+*SchemaValidateFrequency* - TODO CHECK How often schema validation is run in seconds
+
+*FileControlWaitTime* - TODO
 
 *MaxOutOfSequenceEvents* - This is the consecutive maximum out of sequence
 events that can be received for a job before an error is declared.
@@ -475,6 +483,20 @@ archived if there are no blocked events or failed if there are blocked events.
 failed and once the job complete period has expired it shall be deleted from the
 domain with all associated events.
 
+*JobDefinitionDirectory* - The file location relative to the deploy directory where
+the job definition json files are stored.
+
+*DefaultJobExpiryDuration* - TODO CHECK - This defines the default period of validiaty 
+for a job definition
+
+*DefaultStaleAuditEventDuration* - This is the period of time for which a received 
+event is deemed to be valid after its stated auditEventTime. If the event is received 
+outside of this valid period then the audit event is considered to have failed.
+
+*DefaultBlockedAuditEventDuration* - This is the period of time for which a job will wait
+for an expected event (as indicated by its previous event id on earlier event) to arrive.
+If the expected event fails to arrive within this period then the job will be failed.
+
 *JobStoreLocation* - This contains the relative path to the directory where the 
 Job Store Id file will be created and maintained.
 
@@ -485,266 +507,70 @@ store.
 checked for changes. The detection of changes will prompt the upload of the new 
 invariants to each running instance of the AEO_SVDC process.
 
-For each *Job Definition* the following are defined:
+*MaxIntraSequenceEventTimeoutPeriod* - Under some circumstances it is not possible
+to be sure that a job has finished. The conditions for job completion may be
+present but further events might still be possible. This timer determines how
+long the job should wait for any late arrival events before declaring itself
+complete.
 
-*JobDefinitionName* - this is provided automatically by the plus2json application
-(This is also known as JobTypeName)
+*WaitPeriodForAllJobsCompletedCheck* - TODO
 
-*JobDeprecated* - this is a boolean which indicates whether the job definition is in 
-current use. `false` means the job definition is in current use.
+*WaitPeriodForInvariantDeletion* - TODO
 
-*JobTypeExpiryDate* - this is a timestamp that sets a date and time for when the job 
-definition is no longer valid.
+*TimeoutPeriodForRetreivingStoredInvariants* - TODO
 
-*StaleAuditEventDuration* - this is the period of time for which a received event is
-deemed to be valid after its stated auditEventTime. If the event is received 
-outside of this valid period then the audit event is considered to have failed.
-
-*BlockedAuditEventDuration* - this is the period of time for which a job will wait
-for an expected event (as indicated by its previous event id on earlier event) to arrive.
-If the expected event fails to arrive within this period then the job will be failed.
+*TimeoutPeriodForHangingJob* - This determines how long the PV will wait for 
+events in the circumstances where the PV knows the job is incomplete and
+further events are expected. If this timer times out then the job is
+deemed to have failed.
 
 Example:
 
 ----
 {
-    "SpecUpdateRate": "PT2M",
-    "MaxOutOfSequenceEvents": 10,
-    "MaximumJobTime": "PT10M",
-    "JobCompletePeriod": "PT24H",
-    "IncomingDirectory": "incoming",
-    "ProcessingDirectory": "processing",
-    "ProcessedDirectory": "processed",
-    "EventThrottleRate": "PT0S",
-    "ReceptionDeletionTime": "PT10M",
-    "ConcurrentReceptionLimit": 1,
-    "JobStoreLocation": "./JobIdStore",
-    "JobStoreAgeLimit": "P7D",
-    "InvariantStoreLoadRate": "PT2M",
-    "Jobs": [
-        {
-            "JobDefinitionName": "Job with Simple Sequence",
-            "JobDeprecated": false,
-            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
-            "StaleAuditEventDuration": "P99W",
-            "BlockedAuditEventDuration": "PT5M"
-        },
-        {
-            "JobDefinitionName": "AND Fork",
-            "JobDeprecated": false,
-            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
-            "StaleAuditEventDuration": "P99W",
-            "BlockedAuditEventDuration": "PT5M"
-        },
-        {
-            "JobDefinitionName": "XOR Fork",
-            "JobDeprecated": false,
-            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
-            "StaleAuditEventDuration": "P99W",
-            "BlockedAuditEventDuration": "PT5M"
-        },
-        {
-            "JobDefinitionName": "AND Fork and Merge",
-            "JobDeprecated": false,
-            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
-            "StaleAuditEventDuration": "P99W",
-            "BlockedAuditEventDuration": "PT5M"
-        },
-        {
-            "JobDefinitionName": "Job with Intra-Job Invariant",
-            "JobDeprecated": false,
-            "JobTypeExpiryDate": "2022-04-11T18:08:00Z",
-            "StaleAuditEventDuration": "P99W",
-            "BlockedAuditEventDuration": "PT5M"
-        }
-    ]
+  "SpecUpdateRate": "PT2M",
+  "IncomingDirectory": "./incoming",
+  "ProcessedDirectory": "./processed",
+  "ReceptionDeletionTime": "PT0S",
+  "ConcurrentReceptionLimit": "1",
+  "SchemaValidate": "true",
+  "SchemaValidateFrequency": "1",
+  "FileControlWaitTime": "PT1S",
+  "MaxOutOfSequenceEvents": "1000",
+  "MaximumJobTime": "PT10M",
+  "JobCompletePeriod": "PT24H",
+  "JobDefinitionDirectory": "config/job_definitions",
+  "DefaultJobExpiryDuration": "P99W",
+  "DefaultStaleAuditEventDuration": "PT10M",
+  "DefaultBlockedAuditEventDuration": "PT55S",
+  "JobStoreLocation": "./JobIdStore",
+  "JobStoreAgeLimit": "PT1H",
+  "InvariantStoreLoadRate": "PT2M",
+  "MaxIntraSequenceEventTimeoutPeriod": "PT5S",
+  "WaitPeriodForAllJobsCompletedCheck": "P1D",
+  "WaitPeriodForJobDeletion": "PT0S",
+  "WaitPeriodForInvariantDeletion": "P1D",
+  "TimeoutPeriodForRetreivingStoredInvariants": "PT10S",
+  "TimeoutPeriodForHangingJob": "PT30S"
 }
 ----
 
-====
-Additionally if the simulator is to be used also execute these:
+The selection of timer values can have a significant impact on the performance 
+of the PV. For example, the MaxIntraSequenceEventTimeoutPeriod defines how long
+jobs will wait for any additional events. If this timer was set to 10 minutes
+and the PV is running at 500 events/sec then 300000 events will be retained
+in the PV after the potential completion of their associated jobs. This will
+utilise memory and decrease performance. 
 
-. `python plus2json.pyz Tutorial_1.puml --play --aesim_config | python -m json.tool > munin/deploy/aesim-config/plus2json/Tutorial_1.json` 
-- this creates a job definition file for Tutorial_1 for consumption by the AE Simulator. The file name of this file must match
-the job type name.
-. `python plus2json.pyz Tutorial_1.puml --play --aesim_test | python -m json.tool > munin/deploy/aesim-config/plus2json/plus2json-test-specification.json` 
-- this creates an example dispatch file for Tutorial_1 for consumption by the AE Simulator
-
-==== Configuring the simulator
-
-The Audit Event Simulator will use the configuration files that are placed in the deploy/aesim-config/ directory.
-There can be multiple configurations files in this folder.
-
-It is possible to configure the simulator to generate jobs that are to be
-delivered to the digital twin. The configuration file it loads is defined in the
-command specified in the `ae-simulator.yml` and passed on the
-`-test-config` argument as shown here:
-
-  command: "-test-config config/plus2json/plus2json-test-specification.json -postinit schedule/startup.sch -util Inspector -inspector-port 10 -util MetaData"
-
-It ispossible to edit the yml file to point atthe configuration file that the simulator should load.
-
-.Click to see more details on the config file format
-[%collapsible]
+The values shown in the example reflect values that have worked effectively
+in performance tests.
 ====
 
-The JSON test specification configuration file allows the user to define the test to be executed.
-Below is a sample of a test from the configuration file:
+=== Configuring the Deployment for Kafka-based messaging
 
-  {
-  "OneFilePerJob" : "false",
-  "MaxEventsPerFile" : 170,
-  "FileTimoutPeriod" : "PT10S",
-  "JobSpecificationLocation" : "config/plus2json",
-  "TestFileLocation" : "test-files/generated",
-  "TestFileDestination" : "test-files/incoming",
-  "Tests" : [{
-      "TestId" : 1,
-      "TestName" : "Ordered_Test1",
-      "TotalTests" : 100,
-      "TestFrequency" : "PT0.15S",
-      "TestJobSpec" : [{
-            "TestJobSpecName" : "Job with Simple Sequence",
-            "EventDispatchOrder" : "1,2,3,4,5"
-        },
-        {
-            "TestJobSpecName" : "AND Fork",
-            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9"
-          },
-          {
-            "TestJobSpecName" : "XOR Fork",
-            "EventDispatchOrder" : "1,2,3,4,5,6,7,8"
-          },
-          {
-            "TestJobSpecName" : "AND Fork and Merge",
-            "EventDispatchOrder" : "1,2,3,4,5,6,7,8,9"
-          },
-          {
-            "TestJobSpecName" : "Job with Intra-Job Invariant",
-            "EventDispatchOrder" : "1,2,3,4,5"
-          }]
-      }]
-}
+This configuration is specified in deploy/docker-compose.kafka.yml
 
-
-
-The following provides an explanation to each of the JSON elements in the configuration
-file:
-
-*OneFilePerJob* - If set true then all events for a job are put into one event file for an execution of a job. Once all events have been added the event file is made available. If set to false events from any in progress Job will be put in the event file and the simulator will use the MaxEventsPerFile and FileTimeoutPeriod to determine when the event file should be made available.
-
-*MaxEventsPerFile* - When the OneFilePerJob is set to false this is the maximum number of events that shall be added to an event file.
-
-*FileTimoutPeriod* - When the OneFilePerJob is set to false this is the maximum amount of time that shall pass before the event flies made available.
-
-*JobSpecificationLocation* - The details of the events that are to be generated for a job are captured in a Job Specification. This value identifies the location of these files.
-
-*TestFileLocation*- This is the directory where the files should be created.
-
-*TestFileDestination* - This directory the files should be moved to once
-created.
-
-*Tests* - This is an array of tests that are to be executed by the simulator. The following provides and explanation of the JSON elements in a test.
-
-*TestId* - This provides a unique id for the test specification.
-
-*TestName* - The name that has been assigned to the test.
-
-*TotalTests* - This defines the total number of times this test is to be
-executed.
-
-*TestFrequency* - A duration that specifies the frequency that the test should
-be run e.g. PT1S is every second.
-
-*TestJobSpec* - This is an array of the test job specifications that should be executed for this test. The following provides an explanation of the JSON elements in a test job specification.
-
-*TestJobSpecName* - This the name of the JSON file for the test job specification e.g., EndToEndHappyPathJob.json that should be found in *JobSpecificationLocation*. A test job specification indicates the events that are to be produced when the job is executed for the test. Note that this is may not be a valid set of events for a given job that is to be validated by the Protocol Processor but is simulating a set of events in a scenario that needs to be tested
-
-*EventDispatchOrder* - Each event specified in the job specification has a unique identifier. This element allows the tester to specify the order that the events are to be dispatched for this test.
-
-The JSON job specification configuration file allows the user to define the events that are in a job run that is to be executed by the simulator.
-Below is a sample of a test from the configuration file:
-
-
-  {
-    "JobSpecName": "scenario1",
-    "JobName": "Job with Simple Sequence",
-    "EventDefinition": [
-        {
-            "EventId": "1",
-            "PreviousEventId": "None",
-            "EventName": "A1",
-            "SequenceStart": "true",
-            "NodeName": "default_node_name",
-            "ApplicationName": "default_application_name"
-        },
-        {
-            "EventId": "2",
-            "PreviousEventId": "1",
-            "EventName": "B1",
-            "SequenceStart": "false",
-            "NodeName": "default_node_name",
-            "ApplicationName": "default_application_name"
-        },
-        {
-            "EventId": "3",
-            "PreviousEventId": "2",
-            "EventName": "C1",
-            "SequenceStart": "false",
-            "NodeName": "default_node_name",
-            "ApplicationName": "default_application_name"
-        },
-        {
-            "EventId": "4",
-            "PreviousEventId": "3",
-            "EventName": "D1",
-            "SequenceStart": "false",
-            "NodeName": "default_node_name",
-            "ApplicationName": "default_application_name"
-        },
-        {
-            "EventId": "5",
-            "PreviousEventId": "4",
-            "EventName": "E1",
-            "SequenceStart": "false",
-            "NodeName": "default_node_name",
-            "ApplicationName": "default_application_name"
-        }
-    ]
-}
-
-
-The following provides an explanation to each of the JSON elements in the test job specification configuration file. It identifies som of the data that shall by the simulator for each event e.g., EventName, PreviousEventId, etc:
-
-*JobSpecName* - The name of the test job specification that shall be executed in the test.
-
-*EventDefinition* - An array of events that will be generated for this job. The following provides an explanation of the JSON elements in an event.
-
-*EventId* - A unique identifier for this event specification in the test job specification.
-
-*EventName* - The name of the event that is to be generated and presented to the protocol processor.
-
-*NodeName* - The name of the node that is responsible for generating the event.
-
-*ApplicationName* the name of the application that generated the event.
-
-*DispatchDelay* - The amount of time that the simulator should wait before dispatching the event on a test run for this job specification.
-
-*SequenceStart* - Indicates if this is the first event in a sequence of events. If so there will not be a previous event definition id.
-
-*PreviousEventId* - This is the previous event definition id e.g. in this event definition with an id of 2 the previous event definition is 1.
-
-*EventData* - An array of event data that should be generated by the simulator for the event. The following provides an explanation of the JSON elements in an event data.
-
-*DataName* - The name of the event data e.g., PersistentInvariant.
-
-*DataValue* - The value of the data that is to be supplied for the event data e.g. "PersistentInvariant" : "someDataValue".
-
-====
-
-=== Configuring the Deployment
-
-This configuration determines the number of instances of each of the deployments to instantiate at start up.
+determines the number of instances of each of the deployments to instantiate at start up.
 Note: This version of the Protocol Verifier supports static scaling.
 
 Two different methods have been used for scaling the containers for the protocol verifier. 
