@@ -1,0 +1,98 @@
+= HOWTO release munin (and plus2json)
+
+xtUML Project Implementation Note
+
+== 1 Abstract
+
+This note is a "living" HOWTO on the steps to release the Munin Protocol
+Verifier and associated artefacts.
+
+== 2 Introduction and Background
+
+The initial development of the Munin Protocol Verifier followed a
+schedule of roughly one release per calendar quarter.  After the first few
+release cycles, the team began tagging the releases officially.  This
+enabled more consistency in the testing cycles and the ability to
+reproduce results from previous releases.  Simple tags were (are) used for
+intermediate deliveries.
+
+== 3 Requirements
+
+=== 3.1 Enumerate Release Process
+
+A step-by-step process for releasing the Munin Protocol Verifier shall be
+enumerated.
+
+== 4 Work Required
+
+. Document (from memory) the steps to release Munin.
+. Re-visit and refine this at the next and following release cycles.
+
+== 5 Implementation Comments
+
+N/A
+
+== 6 Unit Test
+
+. At the next release cycle, use this process and update it.
+
+== 7 User Documentation
+
+=== 7.1 Step-by-Step Release Process
+
+==== 7.1.1 Release plus2json First
+
+. Branch the plus2json repository.
+. Bump the 'version' values in `bundle.py` and `setup.py`.
+. Bundle plus2json.
+  .. Export BPHOME as a path leading to your installation of BridgePoint.
+     ... `export BPHOME=~/xtuml/2023-11-30txt/BridgePoint.app/Contents/Eclipse`
+  .. Export WORKSPACE as a path leading to a workspace containing the
+     xtUML model of PLUS.
+     ...  `export WORKSPACE=~/ws/plus1`
+  .. Run the bundle script.
+     ... `python bundle.py`
+     ... Ensure it ran cleanly with no errors and produced a new `plus2json.pyz`.
+  .. Copy `plus2json.pyz` to your `munin/bin` folder.
+. Commit and push.
+. Prepare a pull request.
+. Review and service the pull request.
+. Create new release using GitHub.
+  .. 'Releases' (within right-hand panes).
+  .. 'Draft a new release'
+  .. 'Choose a tag'
+  .. Create a new tag.
+  .. 'Publish release'
+
+==== 7.1.2 Release munin Second
+
+. Branch the plus2json repository.
+. Bump the 'version' values in the `conanfile.py` of each model project.
+  As of December 2023 these included the following:
+  .. AEOrdering
+  .. AEReception
+  .. AsyncLogger
+  .. FileReception
+  .. InvariantStore
+  .. PV_PROC
+  .. SequenceVerificationDataCentric
+  .. VerificationGateway
+. Commit and push (including the updated binary `plus2json.pyz`).
+. Prepare a pull request.
+. Review and service the pull request.
+. Create new release using GitHub.
+  .. 'Releases' (along right-hand panes).
+  .. 'Draft a new release'
+  .. 'Choose a tag'
+  .. Create a new tag.
+  .. 'Publish release'
+
+== 8 Document References
+
+. [[dr-1]] https://onefact.atlassian.net/browse/MUN2-152[152 - HOWTO release Munin]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
