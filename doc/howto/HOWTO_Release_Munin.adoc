@@ -40,6 +40,10 @@ N/A
 
 === 7.1 Step-by-Step Release Process
 
+Ensure that release notes have been written and are in the main branch of
+the munin repository.  Both releases will refer to the release notes
+document.
+
 ==== 7.1.1 Release plus2json First
 
 . Branch the plus2json repository.
@@ -61,12 +65,14 @@ N/A
   .. 'Releases' (within right-hand panes).
   .. 'Draft a new release'
   .. 'Choose a tag'
-  .. Create a new tag.
+  .. Create a new tag following the existing naming pattern.
+  .. Paste a link to the release notes document or type a short summary of
+     the release in the body of the release.
   .. 'Publish release'
 
 ==== 7.1.2 Release munin Second
 
-. Branch the plus2json repository.
+. Branch the munin repository.
 . Bump the 'version' values in the `conanfile.py` of each model project.
   As of December 2023 these included the following:
   .. AEOrdering
@@ -84,7 +90,9 @@ N/A
   .. 'Releases' (along right-hand panes).
   .. 'Draft a new release'
   .. 'Choose a tag'
-  .. Create a new tag.
+  .. Create a new tag following the existing naming pattern.
+  .. Paste a link to the release notes document or type a short summary of
+     the release in the body of the release.
   .. 'Publish release'
 
 == 8 Document References
