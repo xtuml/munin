@@ -12,7 +12,7 @@ Verifier (PV) under stressful loads.
 A regression script exists which does a small amount of coverage testing
 of the Protocol Verifier.  Stress testing also uses a script to set up and
 run the PV.  The stress testing utilises features of `plus2json --play`
-which repeated run jobs playing out runtime audit event streams.
+which repeatedly run jobs playing out audit event instance streams.
 
 == 3 Requirements
 
@@ -39,26 +39,40 @@ successfully stess test the Munin PV, then unit test passes.
 
 === 7.1 Steps
 
+. Log in to your Linux instance.
+  * `ssh -i ~/.ssh/pvtest-keypair.pem ubuntu@ec2-35-153-105-133.compute-1.amazonaws.com`
 . Navigate to munin/metrics.
-. Run `run_benchmark.sh` for 20000 events.
-  .. `run_benchmark.sh 1000 20000`
+. Delete the logs and cruft from previous runs.
+  * `sudo rm -rf ../deploy/logs ../deploy/InvariantStore/ ../deploy/JobIdStore/ ../deploy/reception-incoming/ ../deploy/reception-processed/`
+. Run `run_benchmark.sh` at 1000 events per second for 50000 events.
+  * `run_benchmark.sh 1000 50000`
+. Open a separate shell or log in to your Linux instance in a separate shell.
+  * `ssh -i ~/.ssh/pvtest-keypair.pem ubuntu@ec2-35-153-105-133.compute-1.amazonaws.com`
 . Observe the log files.
+  .. Navigate to munin/deploy.
   .. Check for failed jobs.
-  .. `grep -c job_fail logs/verifier/*`
+     * `grep -c job_fail logs/verifier/*`
+  .. Count successful jobs.
+     * `grep -c job_succ logs/verifier/*`
+  .. Count persisted JobIDs.  (Multiply by number of instances of PV.)
+     * `wc JobIdStore/0-63/*`
 
 === 7.2 References
 
 ==== 7.2.1 plus2json
 
 * Run `plus2json -h` to get help text which briefly documents all
-* features.  Pay special attention to 'rate' and 'num-events'.
+  features.  Pay special attention to 'rate' and 'num-events'.
 
 ==== 7.2.2 Interesting Commands
 
-* `docker system prune`
-* `docker volume prune`
+* Delete unused docker images.
+  ** `docker system prune`
+* Delete unused docker volumes (e.g. Kafka logs).
+  ** `docker volume prune`
 * See CPU and memory usage.
   ** `docker stats --no-stream`
+  ** `top`
 
 == 8 Document References
 
