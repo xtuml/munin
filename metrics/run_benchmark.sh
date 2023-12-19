@@ -3,7 +3,7 @@ set -e
 
 # Usage:
 # run_benchmark.sh [rate (events/second)] [total number of events] [reception topic]
-# Executution defaults to:  run_benchmark.sh 1000 100000 default.AEReception_service0
+# Executution defaults to:  run_benchmark.sh 1000 100000 default.AEReception_service2
 
 # Define batches of events for p2j to play.
 BATCH_OF_EVENTS=10000
@@ -15,8 +15,8 @@ if [[ $# -ge 2 ]] ; then
 fi
 ITERATIONS=$(($TOTAL_EVENTS / $BATCH_OF_EVENTS))
 
-# Allow over-riding the kafka topic (for Linux builds)
-RECEPTION_TOPIC="default.AEReception_service0"
+# Allow over-riding the kafka topic (for MacOS builds)
+RECEPTION_TOPIC="default.AEReception_service2"
 if [[ $# -ge 3 ]] ; then
   RECEPTION_TOPIC=$3
 fi
