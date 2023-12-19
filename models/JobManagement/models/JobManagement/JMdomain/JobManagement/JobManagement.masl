@@ -8,7 +8,28 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '2265df2c-a66b-42e1-8fb2-8659b9924fd3' DO NOT EDIT THIS LINE.
-public service JobManagement::Worker~>workerRegistered () is
+public service JobManagement::Worker~>workerRegistered ( workerId : in UUID::formatted_uuid ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c339d680-99d1-4f67-8019-95da77ffa2b3' DO NOT EDIT THIS LINE.
+public service JobManagement::Worker~>workerUnregistered ( workerId : in UUID::formatted_uuid ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8824eaa8-d531-43f6-9174-8dec78f9da4c' DO NOT EDIT THIS LINE.
+public service JobManagement::Worker~>reportEvent ( auditEvent : in string ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'aab5262c-fb70-4646-bb9c-c18dd1abf095' DO NOT EDIT THIS LINE.
+public service JobManagement::Worker~>jobCompletionConfirmed () is
 begin
   null;
 end service;

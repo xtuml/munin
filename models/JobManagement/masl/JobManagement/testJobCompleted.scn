@@ -1,0 +1,117 @@
+private service JobManagement::testJobCompleted () is
+workerId : UUID::formatted_uuid;
+jmSpec : instance of JobManagementSpec;
+reportedAuditEventString1 : string;
+reportedAuditEventString2 : string;
+reportedAuditEventString3 : string;
+reportedAuditEventString4 : string;
+reportedAuditEventString5 : string;
+reportedAuditEventString6 : string;
+jobId1 : string;
+jobId2 : string;
+jobId3 : string;
+jobId4 : string;
+jobId5 : string;
+jobId6 : string;
+unassignedJob : instance of UnassignedJob;
+auditEvent : instance of AuditEvent;
+jobManager : instance of JobManager;
+worker1 : instance of JobWorker;
+worker2 : instance of JobWorker;
+workerJobCompletionConfirmed : instance of _TEST_Worker_jobCompletionConfirmed;
+
+begin
+	
+	// clear domian
+	JobManagement::clearDomain();
+	
+	// set the max jobs per worker at two
+	jmSpec := find_one JobManagementSpec();
+	jmSpec.maxJobsPerWorker := 1;
+	
+	// create three workers
+	workerId := UUID::generate_formatted();
+	JobManagement::registerWorker(workerId);
+	Test::service_event_queue();
+	workerId := UUID::generate_formatted();
+	JobManagement::registerWorker(workerId);
+	Test::service_event_queue();
+
+	Assertions::assertTrue(((find JobWorker())'length = 2), "Test Job Completed: Failed to find all workers");
+	jobManager := find_one JobManager();
+	worker1 := jobManager -> R22.JobWorker; 
+	worker2 := worker1 -> R3.employedBefore.JobWorker;
+	
+	// send in an event for the first job and verify it is assigned correctly
+	jobId1 := string(UUID::generate_formatted());
+	JobManagement::sendAuditEvent(jobId1, reportedAuditEventString1);
+	JobManagement::checkJobEventAssignment("JobId1", jobId1, reportedAuditEventString1, worker1.workerId);
+	
+	// send in a event for the second job and verify it is assigned correctly
+	jobId2 := string(UUID::generate_formatted());
+	JobManagement::sendAuditEvent(jobId2, reportedAuditEventString2);
+	JobManagement::checkJobEventAssignment("JobId2", jobId2, reportedAuditEventString2, worker2.workerId);
+	
+	// create job 3 and verify it is unassigned
+	jobId3 := string(UUID::generate_formatted());
+	JobManagement::sendAuditEvent(jobId3, reportedAuditEventString3);
+	unassignedJob := find_one UnassignedJob(jobId = jobId3);
+	Assertions::assertTrue((unassignedJob /= null), "Test Job Completed: Failed to find unassigned job for job 3");	
+	auditEvent := find_one AuditEvent(auditEvent = reportedAuditEventString3);
+	Assertions::assertTrue((auditEvent = (find_one (unassignedJob -> R5.Job -> R7.AuditEvent)(auditEvent = reportedAuditEventString3))), "Test Job Completed: Failed to find audit event for job 3");
+
+	// create job 4 and verify it is unassigned
+	jobId4 := string(UUID::generate_formatted());
+	JobManagement::sendAuditEvent(jobId4, reportedAuditEventString4);
+	unassignedJob := find_one UnassignedJob(jobId = jobId4);
+	Assertions::assertTrue((unassignedJob /= null), "Test Job Completed: Failed to find unassigned job for job 4");	
+	auditEvent := find_one AuditEvent(auditEvent = reportedAuditEventString4);
+	Assertions::assertTrue((auditEvent = (find_one (unassignedJob -> R5.Job -> R7.AuditEvent)(auditEvent = reportedAuditEventString4))), "Test Job Completed: Failed to find audit event for job 4");
+	
+	// complete job 1 and confirm worker 1 gets assigned job 3
+	JobManagement::jobCompleted(worker1.workerId, jobId1);
+	Test::service_event_queue();
+	workerJobCompletionConfirmed := find_one _TEST_Worker_jobCompletionConfirmed(workerId = worker1.workerId and jobId = jobId1);
+	Assertions::assertTrue((workerJobCompletionConfirmed /= null), "Test Job Completed: Failed to find completed job for job 1");	
+	JobManagement::checkJobEventAssignment("JobId3", jobId3, reportedAuditEventString3, worker1.workerId);
+	
+	// complete job 2 and confirm worker 2 gets assigned job 4
+	JobManagement::jobCompleted(worker2.workerId, jobId2);
+	Test::service_event_queue();
+	workerJobCompletionConfirmed := find_one _TEST_Worker_jobCompletionConfirmed(workerId = worker2.workerId and jobId = jobId2);
+	Assertions::assertTrue((workerJobCompletionConfirmed /= null), "Test Job Completed: Failed to find completed job for job 2");	
+	JobManagement::checkJobEventAssignment("JobId4", jobId4, reportedAuditEventString4, worker2.workerId);
+		
+	// create job 5 and verify it is unassigned
+	jobId5 := string(UUID::generate_formatted());
+	JobManagement::sendAuditEvent(jobId5, reportedAuditEventString5);
+	unassignedJob := find_one UnassignedJob(jobId = jobId5);
+	Assertions::assertTrue((unassignedJob /= null), "Test Job Completed: Failed to find unassigned job for job 5");	
+	auditEvent := find_one AuditEvent(auditEvent = reportedAuditEventString5);
+	Assertions::assertTrue((auditEvent = (find_one (unassignedJob -> R5.Job -> R7.AuditEvent)(auditEvent = reportedAuditEventString5))), "Test Job Completed: Failed to find audit event for job 5");
+
+	// create job 6 and verify it is unassigned
+	jobId6 := string(UUID::generate_formatted());
+	JobManagement::sendAuditEvent(jobId6, reportedAuditEventString6);
+	unassignedJob := find_one UnassignedJob(jobId = jobId6);
+	Assertions::assertTrue((unassignedJob /= null), "Test Job Completed: Failed to find unassigned job for job 6");	
+	auditEvent := find_one AuditEvent(auditEvent = reportedAuditEventString6);
+	Assertions::assertTrue((auditEvent = (find_one (unassignedJob -> R5.Job -> R7.AuditEvent)(auditEvent = reportedAuditEventString6))), "Test Job Completed: Failed to find audit event for job 6");
+	
+	// complete job 4 and confirm worker 2 gets assigned job 5
+	JobManagement::jobCompleted(worker2.workerId, jobId4);
+	Test::service_event_queue();
+	workerJobCompletionConfirmed := find_one _TEST_Worker_jobCompletionConfirmed(workerId = worker2.workerId and jobId = jobId4);
+	Assertions::assertTrue((workerJobCompletionConfirmed /= null), "Test Job Completed: Failed to find completed job for job 4");	
+	JobManagement::checkJobEventAssignment("JobId5", jobId5, reportedAuditEventString5, worker2.workerId);
+		
+	// complete job 3 and confirm worker 1 gets assigned job 6
+	JobManagement::jobCompleted(worker1.workerId, jobId3);
+	Test::service_event_queue();
+	workerJobCompletionConfirmed := find_one _TEST_Worker_jobCompletionConfirmed(workerId = worker1.workerId and jobId = jobId3);
+	Assertions::assertTrue((workerJobCompletionConfirmed /= null), "Test Job Completed: Failed to find completed job for job 6");	
+	JobManagement::checkJobEventAssignment("JobId6", jobId6, reportedAuditEventString6, worker1.workerId);
+	
+	
+	
+end service;

@@ -1,4 +1,43 @@
 public instance service JobManagement::JobWorker.retireWorker () is
+employedWorker : instance of EmployedWorker;
+retiredWorker : instance of RetiredWorker;
+unassignedJob : instance of UnassignedJob;
+jobManager : instance of JobManager;
+job : instance of Job;
+assignedWorker : instance of EmployedWorker;
+unassignedJobIds : sequence of string;
+
 begin
-  null;
+	jobManager := find_one JobManager();
+	employedWorker := this -> R2.EmployedWorker;
+	if employedWorker /= null then
+		// move any assigned jobs to unassigned and add back into queue
+		for assignedJob in (employedWorker -> R6.AssignedJob) loop
+			unlink employedWorker R6 assignedJob;
+			job := assignedJob -> R5.Job; 
+			unlink assignedJob R5 job;
+			delete assignedJob;
+			unassignedJob := create UnassignedJob(jobId => job.jobId);
+			link unassignedJob R5.Job job;
+			unassignedJobIds := jobManager.unassignedJobIds;
+			unassignedJobIds := unassignedJobIds & job.jobId;
+        	jobManager.unassignedJobIds := unassignedJobIds;        	
+		end loop;
+		// report the worker as unregistered
+		Worker~>workerUnregistered(workerId);
+		unlink employedWorker R2.JobWorker this;
+		delete employedWorker;
+	end if;
+	// create the employed worker
+	retiredWorker := create RetiredWorker(workerId => this.workerId);
+	link retiredWorker R2 this;
+    
+    // if we have unassigned jobs attempt to assign
+    if jobManager.unassignedJobIds'length > 0 then
+    	assignedWorker := jobManager.selectWorkerForJob();
+    	// if worker selected assign job
+    	if assignedWorker /= null then
+    		jobManager.assignJob(assignedWorker);
+    	end if;
+	end if;
 end service;

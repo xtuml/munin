@@ -1,6 +1,6 @@
 domain JobManagement is
   
-  public service acceptEvent ( auditEvent: in string );   
+  public service acceptEvent ( auditEvent: in string ); pragma kafka_topic( true );   
   
   
   terminator Reporting is
@@ -11,6 +11,11 @@ domain JobManagement is
   
   terminator Worker is
     public service workerRegistered ( workerId: in UUID::formatted_uuid );     
+    public service workerUnregistered ( workerId: in UUID::formatted_uuid );     
+    public service reportEvent ( workerId: in UUID::formatted_uuid,
+                                 auditEvent: in string );     
+    public service jobCompletionConfirmed ( workerId: in UUID::formatted_uuid,
+                                            jobId: in string );     
   end terminator;
   
   

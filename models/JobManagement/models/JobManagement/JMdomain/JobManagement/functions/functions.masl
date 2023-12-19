@@ -22,44 +22,137 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '0fb0455c-728d-4b65-8673-2eedf8a4ec9b' DO NOT EDIT THIS LINE.
-private service JobManagement::workerHeartbeat ( workerId : in UUID::formatted_uuid,
-                                                jobList : in sequence of string ) is
+private service JobManagement::workerHeartbeat ( workerId : in UUID::formatted_uuid ) is
+employedWorker : instance of EmployedWorker;
+
 begin
-  null;
+	// locate the worker
+	employedWorker := find_one EmployedWorker(workerId = workerId);
+	if employedWorker /= null then
+		generate EmployedWorker.workerPresent() to employedWorker;
+	else
+		Worker~>workerUnregistered(workerId);
+	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '2c4a7088-e8df-4d3e-bf4c-8ea74c88aa8b' DO NOT EDIT THIS LINE.
 public service JobManagement::acceptEvent ( auditEvent : in string ) is
-json_element: JSON::JSONElement;
-json_object: JSON::JSONObject;
+jsonElement: JSON::JSONElement;
+jsonObject: JSON::JSONObject;
 jobId : string;
-eventId : string;
+jobManager : instance of JobManager;
+job : instance of Job;
+unassignedJobIds : sequence of string;
+unassignedJob : instance of UnassignedJob;
+acceptedAuditEvent : instance of AuditEvent;
+assignedWorker : instance of EmployedWorker;
+jmSpec : instance of JobManagementSpec;
+eventContent : string;
 
 begin
     // parse the event and extract the job id
-    json_element := JSON::parse(auditEvent);
-	if json_element.kind = JSON::Object then
-//        jsonObject := JSON::get_object(json_element);
-//        jobId := JSON::get_string(this.jsonObject["jobId"]);
-//        eventId := JSON::get_string(this.jsonObject["eventId"]),
-//        
+    jsonElement := JSON::parse(auditEvent);
+	if jsonElement.kind = JSON::Object then
+        jsonObject := JSON::get_object(jsonElement);
+        if jsonObject'contains("jobId") then
+	        jobId := JSON::get_string(jsonObject["jobId"]);
+	        jobManager := find_one JobManager();
+	        job := find_one Job(jobId = jobId);
+	        if job = null then
+	        	job := create Job(jobId => jobId);
+	        	unassignedJob := create UnassignedJob(jobId => jobId);
+	        	link unassignedJob R5.Job job;
+	        	unassignedJobIds := jobManager.unassignedJobIds;
+	        	unassignedJobIds := unassignedJobIds & jobId;
+	        	jobManager.unassignedJobIds := unassignedJobIds;
+	        end if;
+	        // add the event to the job
+	        acceptedAuditEvent := create unique AuditEvent(auditEvent => auditEvent);
+	        link acceptedAuditEvent R7 job;
+        	// check if this is an assigned job
+        	assignedWorker := job -> R5.AssignedJob -> R6.EmployedWorker;
+        	if assignedWorker = null then
+        		// select worker for job
+	        	assignedWorker := jobManager.selectWorkerForJob();
+	        	// if worker selected assign job
+	        	if assignedWorker /= null then
+	        		jobManager.assignJob(assignedWorker);
+	        	end if;
+        	else
+	        	// report the event
+	        	acceptedAuditEvent.reportAuditEvent(assignedWorker);
+	        end if;
+	        
+	        // check if we have exceeded the max unassigned jobs and if so report an error
+	        unassignedJobIds := jobManager.unassignedJobIds;
+	        jmSpec := find_one JobManagementSpec();
+	        if unassignedJobIds'length > jmSpec.maxUnassignedJobs then
+		        eventContent := "Maximum number of of unassigned jobs exceeded. Job Count = " & (unassignedJobIds'length)'image;
+		        Reporting~>reportEvent(Logger::Error, "aeordering_duplicate_job_id", eventContent);
+		    end if;
+    	end if;    
     end if;
     
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'd64e9daf-e005-46ed-8216-8cc7bf43d3b1' DO NOT EDIT THIS LINE.
-private service JobManagement::jobCompleted () is
+private service JobManagement::jobCompleted ( workerId : in UUID::formatted_uuid,
+                                             jobId : in string ) is
+employedWorker : instance of EmployedWorker;
+assignedJob : instance of AssignedJob;
+job : instance of Job;
+auditEvents : sequence of instance of AuditEvent;
+jobManager : instance of JobManager;
+unassignedJobIds : sequence of string;
+
 begin
-  null;
+	
+	// locate the worker and check they are not retired
+	employedWorker := find_one EmployedWorker(workerId = workerId);
+	if employedWorker /= null then
+		// find the job and check it was assigned to this worker
+		assignedJob := find_one (employedWorker -> R6.AssignedJob)(jobId = jobId);
+		if assignedJob /= null then
+			// add the job to the job store
+			JobStore.addJobToStore(jobId);
+			
+			// remove the job and the events
+			job := assignedJob -> R5.Job;
+			auditEvents := job -> R7.AuditEvent;
+			unlink auditEvents R7;
+			delete auditEvents;
+			unlink assignedJob R5 job;
+			unlink assignedJob R6;
+			delete assignedJob;
+			delete job;
+			
+			// report that the job completion is confirmed
+			Worker ~>jobCompletionConfirmed(workerId, jobId);
+			// check if there are not unassigned jobs and if there are and this employed worker has capacity then assign the job
+			jobManager := find_one JobManager();
+			unassignedJobIds := jobManager.unassignedJobIds;
+			if unassignedJobIds'length > 0 then
+				jobManager.assignJob(employedWorker);
+			end if;
+		end if;
+	end if;
+		
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'ff723fb4-c20f-4ab8-bc39-e807df00e8fc' DO NOT EDIT THIS LINE.
 private service JobManagement::deregisterWorker ( workerId : in UUID::formatted_uuid ) is
+employedWorker : instance of EmployedWorker;
+
 begin
-  null;
+	
+	// check if this is a new worker
+	employedWorker := find_one EmployedWorker(workerId = workerId);
+	if employedWorker /= null then
+		generate EmployedWorker.workerDeregistered() to employedWorker;
+	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

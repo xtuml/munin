@@ -1,4 +1,7 @@
 state JobManagement::EmployedWorker.Deregistered () is
 begin
-  null;
+	
+	// retire the worker
+	(this -> R2.JobWorker).retireWorker();
+	
 end state;

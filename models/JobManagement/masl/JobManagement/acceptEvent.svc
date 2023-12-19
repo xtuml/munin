@@ -1,17 +1,58 @@
 public service JobManagement::acceptEvent ( auditEvent: in string ) is
-json_element: JSON::JSONElement;
-json_object: JSON::JSONObject;
+jsonElement: JSON::JSONElement;
+jsonObject: JSON::JSONObject;
 jobId : string;
-eventId : string;
+jobManager : instance of JobManager;
+job : instance of Job;
+unassignedJobIds : sequence of string;
+unassignedJob : instance of UnassignedJob;
+acceptedAuditEvent : instance of AuditEvent;
+assignedWorker : instance of EmployedWorker;
+jmSpec : instance of JobManagementSpec;
+eventContent : string;
 
 begin
     // parse the event and extract the job id
-    json_element := JSON::parse(auditEvent);
-	if json_element.kind = JSON::Object then
-//        jsonObject := JSON::get_object(json_element);
-//        jobId := JSON::get_string(this.jsonObject["jobId"]);
-//        eventId := JSON::get_string(this.jsonObject["eventId"]),
-//        
+    jsonElement := JSON::parse(auditEvent);
+	if jsonElement.kind = JSON::Object then
+        jsonObject := JSON::get_object(jsonElement);
+        if jsonObject'contains("jobId") then
+	        jobId := JSON::get_string(jsonObject["jobId"]);
+	        jobManager := find_one JobManager();
+	        job := find_one Job(jobId = jobId);
+	        if job = null then
+	        	job := create Job(jobId => jobId);
+	        	unassignedJob := create UnassignedJob(jobId => jobId);
+	        	link unassignedJob R5.Job job;
+	        	unassignedJobIds := jobManager.unassignedJobIds;
+	        	unassignedJobIds := unassignedJobIds & jobId;
+	        	jobManager.unassignedJobIds := unassignedJobIds;
+	        end if;
+	        // add the event to the job
+	        acceptedAuditEvent := create unique AuditEvent(auditEvent => auditEvent);
+	        link acceptedAuditEvent R7 job;
+        	// check if this is an assigned job
+        	assignedWorker := job -> R5.AssignedJob -> R6.EmployedWorker;
+        	if assignedWorker = null then
+        		// select worker for job
+	        	assignedWorker := jobManager.selectWorkerForJob();
+	        	// if worker selected assign job
+	        	if assignedWorker /= null then
+	        		jobManager.assignJob(assignedWorker);
+	        	end if;
+        	else
+	        	// report the event
+	        	acceptedAuditEvent.reportAuditEvent(assignedWorker);
+	        end if;
+	        
+	        // check if we have exceeded the max unassigned jobs and if so report an error
+	        unassignedJobIds := jobManager.unassignedJobIds;
+	        jmSpec := find_one JobManagementSpec();
+	        if unassignedJobIds'length > jmSpec.maxUnassignedJobs then
+		        eventContent := "Maximum number of of unassigned jobs exceeded. Job Count = " & (unassignedJobIds'length)'image;
+		        Reporting~>reportEvent(Logger::Error, "aeordering_duplicate_job_id", eventContent);
+		    end if;
+    	end if;    
     end if;
     
 end service;

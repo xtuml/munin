@@ -1,5 +1,12 @@
-private service JobManagement::workerHeartbeat ( workerId: in UUID::formatted_uuid,
-                                                 jobList: in sequence of string ) is
+private service JobManagement::workerHeartbeat ( workerId: in UUID::formatted_uuid ) is
+employedWorker : instance of EmployedWorker;
+
 begin
-  null;
+	// locate the worker
+	employedWorker := find_one EmployedWorker(workerId = workerId);
+	if employedWorker /= null then
+		generate EmployedWorker.workerPresent() to employedWorker;
+	else
+		Worker~>workerUnregistered(workerId);
+	end if;
 end service;

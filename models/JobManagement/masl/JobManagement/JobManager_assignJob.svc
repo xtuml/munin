@@ -1,4 +1,42 @@
-public instance service JobManagement::JobManager.assignJob () is
+public instance service JobManagement::JobManager.assignJob ( employedWorker: in instance of EmployedWorker ) is
+unassignedJobIds : sequence of string;
+emptyUnassignedJobIds : sequence of string;
+unassignedJob : instance of UnassignedJob;
+job : instance of Job;
+assignedJob : instance of AssignedJob;
+logMessage : string;
+
 begin
-  null;
+	
+	unassignedJobIds := this.unassignedJobIds;
+	if unassignedJobIds'length > 0 then
+		unassignedJob := find_one UnassignedJob(jobId = unassignedJobIds[unassignedJobIds'first]);
+		if unassignedJob /= null then
+			job := unassignedJob -> R5.Job;
+			assignedJob := create AssignedJob(jobId => unassignedJob.jobId);
+			unlink unassignedJob R5 job;
+			link assignedJob R5 job;
+			delete unassignedJob;
+			if unassignedJobIds'length > 1 then
+				unassignedJobIds := unassignedJobIds[unassignedJobIds'first + 1 .. unassignedJobIds'last];
+			else
+				unassignedJobIds := emptyUnassignedJobIds;
+			end if;
+			this.unassignedJobIds := unassignedJobIds;
+			link assignedJob R6 employedWorker;
+			// we now have the job assigned to the worker
+			for auditEvent in job -> R7.AuditEvent loop
+				auditEvent.reportAuditEvent(employedWorker);
+			end loop;
+			
+		else
+			// log an error as there is an unassigned job held by job manager but there is no instance of unassigned job
+			logMessage := "Found unassigned job id without an unassigned job, jobId = " & unassignedJobIds[unassignedJobIds'first];
+			Logger::log(Logger::Error, "JobManagement", logMessage);
+			// remove the unassigned job id
+			unassignedJobIds := unassignedJobIds[unassignedJobIds'first + 1 .. unassignedJobIds'last];
+			this.unassignedJobIds := unassignedJobIds;
+		end if;
+	end if;
+	
 end service;

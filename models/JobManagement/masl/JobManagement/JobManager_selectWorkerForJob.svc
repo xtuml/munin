@@ -1,0 +1,51 @@
+public instance service JobManagement::JobManager.selectWorkerForJob () return instance of EmployedWorker is
+nextWorker : instance of JobWorker;
+noWorkersAvailable : boolean := false;
+firstSelectedWorker : instance of JobWorker;
+employedWorker : instance of EmployedWorker;
+jmSpec : instance of JobManagementSpec;
+
+begin
+  
+	// find the next available worker
+	nextWorker := this -> R4.JobWorker;
+	if nextWorker = null then
+		nextWorker := this -> R22.JobWorker;
+		if nextWorker = null then
+			noWorkersAvailable := true;
+		end if;
+	end if;
+	firstSelectedWorker := nextWorker;
+	jmSpec := find_one JobManagementSpec();
+	while noWorkersAvailable = false loop
+		// check worker capacity
+		employedWorker := nextWorker -> R2.EmployedWorker;
+		if employedWorker /= null and (employedWorker -> R6.AssignedJob)'length < jmSpec.maxJobsPerWorker then
+				
+			// set up the next worker to be assigned
+			unlink this R4;
+			nextWorker := employedWorker -> R2.JobWorker -> R3.employedBefore.JobWorker;
+			if nextWorker = null then
+				// no next worker so set the the first worker
+				nextWorker := this -> R22.JobWorker;
+			end if;
+			link this R4 nextWorker;
+			
+			exit;
+		else
+			// worker has no capacity
+			employedWorker := null;
+			nextWorker := nextWorker -> R3.employedBefore.JobWorker;
+			if nextWorker = null then
+				// set the next worker to the first employee
+				nextWorker := this -> R22.JobWorker;
+			end if;
+			// if next worker is the first selected worker then no workers available
+			if nextWorker = firstSelectedWorker then
+				noWorkersAvailable := true;				
+			end if;
+		end if;
+	end loop;
+	return employedWorker;
+
+end service;

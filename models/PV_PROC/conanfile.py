@@ -8,7 +8,7 @@ class ConanFile(conan.ConanFile):
     channel = 'stable'
     python_requires = 'masl_conan/[>=4.2.2]@xtuml/stable'
     python_requires_extend = 'masl_conan.MaslConanHelper'
-    persistent_procs = ['ISTORE_PROC.prj']
+    persistent_procs = ['ISTORE_PROC.prj', 'JobManagement.prj']
 
     def masl_extras(self):
         return ['-skiptranslator', 'Sqlite']
@@ -38,6 +38,7 @@ class ConanFile(conan.ConanFile):
         self.requires('istore/[>=1.1.1]@xtuml/stable')
         self.requires('aesequencedc/[>=1.1.1]@xtuml/stable')
         self.requires('verificationgateway/[>=1.1.1]@xtuml/stable')
+        self.requires('jobmanagement/[>=0.1.0]@xtuml/stable')
 
     def build_requirements(self):
         self.tool_requires('masl_codegen/[>=4.2.2]@xtuml/stable')

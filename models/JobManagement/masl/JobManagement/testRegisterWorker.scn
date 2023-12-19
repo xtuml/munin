@@ -1,11 +1,16 @@
 private service JobManagement::testRegisterWorker () is
 workerId : UUID::formatted_uuid;
 worker : instance of JobWorker;
+originalWorker : instance of JobWorker;
 workerRegistered : instance of _TEST_Worker_workerRegistered;
 employedWorker : instance of EmployedWorker;
 retiredWorker : instance of RetiredWorker;
+jobManager : instance of JobManager;
 
 begin
+	
+	// clear domian
+	JobManagement::clearDomain();
 	
 	// register a worker
 	workerId := UUID::generate_formatted();
@@ -18,10 +23,17 @@ begin
 	delete workerRegistered;
 	
 	// check we have an employed worker
+	jobManager := find_one JobManager();
 	worker := find_one JobWorker(workerId = workerId);
 	Assertions::assertTrue((worker /= null), "Test Register Worker: Failed to find Worker");
 	employedWorker := find_one EmployedWorker(workerId = workerId);
 	Assertions::assertTrue((employedWorker /= null), "Test Register Worker: Failed to find Employed Worker");
+	// verify that the worker has been designated as the first employee
+	Assertions::assertTrue(((jobManager -> R22.JobWorker) = worker), "Test Register Worker: Failed to find first worker");
+	// verify that the worker has been assigned as the next worker to be assigned
+	Assertions::assertTrue(((jobManager -> R4.JobWorker) = worker), "Test Register Worker: Failed to find worker as next worker");
+	// verify that the worker has been assigned as the last worker employed
+	Assertions::assertTrue(((jobManager -> R21.JobWorker) = worker), "Test Register Worker: Failed to find worker as last employed");
 	
 	// make the worker retired
 	retiredWorker := create RetiredWorker(workerId => workerId);
@@ -43,5 +55,49 @@ begin
 	Assertions::assertTrue((worker /= null), "Test Register Worker: Failed to find Worker");
 	employedWorker := find_one EmployedWorker(workerId = workerId);
 	Assertions::assertTrue((employedWorker /= null), "Test Register Worker: Failed to find Employed Worker");
+		 
+	// register another worker
+	originalWorker := worker;
+	workerId := UUID::generate_formatted();
+	JobManagement::registerWorker(workerId);
+	Test::service_event_queue();
+	
+	// check that the worker has been informed it is registered
+	workerRegistered := find_one _TEST_Worker_workerRegistered(workerId = workerId);
+	Assertions::assertTrue((workerRegistered /= null), "Test Register Worker: Failed to find Registered Worker");
+	delete workerRegistered;
+	
+	// check we have an employed worker
+	worker := find_one JobWorker(workerId = workerId);
+	Assertions::assertTrue((worker /= null), "Test Register Worker: Failed to find Worker");
+	employedWorker := find_one EmployedWorker(workerId = workerId);
+	Assertions::assertTrue((employedWorker /= null), "Test Register Worker: Failed to find Employed Worker");
+	// verify that the worker has been assigned as the last worker employed
+	Assertions::assertTrue(((jobManager -> R21.JobWorker) = worker), "Test Register Worker: Failed to find second worker as last employed");
+	// verify that the worker is employedAfter the original worker
+	Assertions::assertTrue(((worker -> R3.employedAfter.JobWorker) = originalWorker), "Test Register Worker: Failed to find original worker in employed after test");
+	Assertions::assertTrue(((originalWorker -> R3.employedBefore.JobWorker) = worker), "Test Register Worker: Failed to find worker in employed before test");
+	
+	// register another worker
+	originalWorker := worker;
+	workerId := UUID::generate_formatted();
+	JobManagement::registerWorker(workerId);
+	Test::service_event_queue();
+	
+	// check that the worker has been informed it is registered
+	workerRegistered := find_one _TEST_Worker_workerRegistered(workerId = workerId);
+	Assertions::assertTrue((workerRegistered /= null), "Test Register Worker: Failed to find Registered Worker");
+	delete workerRegistered;
+	
+	// check we have an employed worker
+	worker := find_one JobWorker(workerId = workerId);
+	Assertions::assertTrue((worker /= null), "Test Register Worker: Failed to find Worker");
+	employedWorker := find_one EmployedWorker(workerId = workerId);
+	Assertions::assertTrue((employedWorker /= null), "Test Register Worker: Failed to find Employed Worker");
+	// verify that the worker has been assigned as the last worker employed
+	Assertions::assertTrue(((jobManager -> R21.JobWorker) = worker), "Test Register Worker: Failed to find third worker as last employed");
+	// verify that the worker is employedAfter the original worker
+	Assertions::assertTrue(((worker -> R3.employedAfter.JobWorker) = originalWorker), "Test Register Worker: Failed to find second worker in employed after test");
+	Assertions::assertTrue(((originalWorker -> R3.employedBefore.JobWorker) = worker), "Test Register Worker: Failed to find third worker in employed before test");
 	
 end service;

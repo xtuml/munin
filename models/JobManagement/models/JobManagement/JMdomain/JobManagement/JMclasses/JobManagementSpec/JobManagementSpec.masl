@@ -6,9 +6,6 @@ configJSONString : string;
 configJSONElement : JSON::JSONElement;
 configJSONObject : JSON::JSONObject;
 configValidationResult : JSON::JSONObject;
-maxJobsPerWorker : integer;
-maxUnassignedJobs : duration := @P7D@;
-retiredWorkerDeletionTime : duration := @P1D@;
 jobStore : instance of JobStore;
 jobStoreName : string := "JobIdStore.log";
 jobStoreAgeLimit : duration := @PT1H@;
@@ -36,6 +33,12 @@ begin
             end if;
             if configJSONObject'contains("RetiredWorkerDeletionTime") then
                 this.retiredWorkerDeletionTime := duration'parse(JSON::get_string(configJSONObject["RetiredWorkerDeletionTime"]));
+            end if;
+            if configJSONObject'contains("WorkerHeartbeatRate") then
+                this.workerHeartbeatRate := duration'parse(JSON::get_string(configJSONObject["WorkerHeartbeatRate"]));
+            end if;
+            if configJSONObject'contains("WorkerHeartbeatFailureThreshold") then
+                this.workerHeartbeatFailureThreshold := integer'parse(JSON::get_string(configJSONObject["WorkerHeartbeatFailureThreshold"]));
             end if;
             if configJSONObject'contains("JobStoreAgeLimit") then
                 jobStoreAgeLimit := duration'parse(JSON::get_string(configJSONObject["JobStoreAgeLimit"]));
