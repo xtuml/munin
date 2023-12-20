@@ -102,15 +102,19 @@ workspace:
 * Protocol Verifier Domains
   ** AEReception (AER)
   ** AEOrdering (AEO)
+  ** FileReception (FR) - only required if input event streams are file based
   ** SequenceVerificationDataCentric (SVDC)
   ** InvariantStore (IStore)
   ** Verification Gateway (VG)
 * Deployments
-  ** AEO_SVDC (AEO + SVDC + IStore + VG)
+  ** AEO_SVDC (AEO + SVDC + VG)
+  ** IStore (a single domain deployment) (TODO Does this include Job Id Store too?)
   ** AER (a single domain deployment)
 * Utilities
   ** utils
   ** plus2json
+  ** kafka
+  ** zookeeper
 
 === Terminology
 
@@ -137,10 +141,16 @@ general term "project".
 
 "Protocol Verifier" refers to the overall application as well as the BridgePoint
 project where all of the domains are integrated together using a set of deployments.
-In our context the Protocol Verifier is the collections of the two deployments:
+The Protocol Verifier is built to use kafka as an inter-process messaging service.
+However, if kafka is not present then the Protocol Verifier will revert to file-based
+transfers. This includes getting event streams into the PV. The kafka configuration
+is described below.
+
+In our context the Protocol Verifier is the collections of the following deployments:
 
 * AER
-* AEO_SVDC (includes iStore)
+* IStore
+* AEO_SVDC (includes Verification Gateway)
 
 ==== PLUS
 
@@ -264,12 +274,22 @@ mainline.
 ===== Reception (AER)
 
 The role of the Audit Event Reception domain is to convert audit events received
-from the monitored system, in whatever form they arrive, into audit event
+from the monitored system, in json format, into audit event
 objects that can be used by the other domains in the model. Any changes to the
-format of received audit events will be addressed by the Audit Event Reception
+json format of received audit events will be addressed by the Audit Event Reception
 domain. The format of delivery to the other domains will remain consistent. This
 isolates the impact of changes in received audit event format to a single
 domain. Unexpected input formats are rejected and errors are notified.
+
+===== File Reception (FR)
+
+The Reception Domain (AER) takes json format event streams as its input.
+Some configurations of the PV will take json event streams as direct input
+say from a messaging fabric. Other configuartions of the PV can receive
+events streams in a file-based format. Each file contains a number of
+json fomratted events. This domain deals with the file-based reception
+of audit event files. It is not required in configurations where the
+json events are provided directly over a messaging fabric.
 
 ===== Ordering (AEO)
 
@@ -332,7 +352,7 @@ deployment using Kafka for messaging:
 
 * Reception (AER) - typically a single instance
 * IStore - single instance
-* Ordering, Sequence Verification, Job Store, Verification Gateway (AEO_SVDC) - multiple instances
+* Ordering, Sequence Verification, Job Store (TODO ?), Verification Gateway (AEO_SVDC) - multiple instances
 * async_logger - single instance
 * zookeeper - single instance
 * kafka - single instance
@@ -363,10 +383,11 @@ See LINK HERE for details of plus2json commands
 
 == Configuring the Protocol Verifier
 
-This splits into two main parts:
+This splits into the following main parts:
 
 * Specifying Job and Event Data Definitions
 * Configuring Runtime Parameters
+* Configuring the messaging fabric
 
 For a visual overview of the configuration of the Protocol Verifier (and the associated Audit Event Simulator) 
 click link:images/MUNIN_Configuration_Setup.pdf[here].
@@ -571,109 +592,11 @@ in performance tests.
 This configuration is specified in deploy/docker-compose.kafka.yml
 
 determines the number of instances of each of the deployments to instantiate at start up.
-Note: This version of the Protocol Verifier supports static scaling.
+Note: This version of the Protocol Verifier supports static scaling. It also launches
+the logging service and the kafka and associated zookeeper processes.
 
-Two different methods have been used for scaling the containers for the protocol verifier. 
-The first used be AER makes use of the
+TODO How much detail to inlcude on docker-compose.kafka.yml
 
-    `--scale aereception=2` 
-
-command line option provided by docker. This instructs the docker engine how many instances of the service named `aereception` 
-to create. This method is being used by AER as we do not to configure each running instance with specific configuration data.
-AER is responsible for arranging events by JobId and each instane of aereception shall process the incoming event files and 
-place events for each job identified in a file in the `verifier-incoming` directory. The files placed in `verifier-incoming` 
-are arranged into directories fomr 00 to ff and AER places the file for the job into the directory that matches the last two 
-digits in the job id.
-
-    `jobId = cadf665f-fc78-4d84-9673-0ab2eb2c8b4d` 
-
-would be placed in
-
-    `verifier-incoming/4d` 
-
-In order to ensure that an individual job is only every processed by one instance of AEO_SVDC this is provided with configuration 
-data in its docker compose file that indicate which job ids it is to process and we refer to this as its `Job Group`. An example can
-seen in the following compose file:
-[source,yml]
-----
-version: "3.9"
-services:
-  aeo_svdc-1:
-    image: "ghcr.io/xtuml/aeo_svdc"
-    build:
-      context: .
-      args:
-        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
-    ports:
-      - "20000:20000"
-      - "30000:30000"
-      - "40000:40000"
-    volumes:
-      - "./plus2json-deployed/generated-config:/root/config"
-      - "./InvariantStore:/root/InvariantStore"
-      - "./verifier-incoming:/root/incoming"
-      - "./JobIdStore:/root/JobIdStore"
-      - "./verifier-processed:/root/processed"
-    command: "-configPath config/  -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup FF"
-----
-
-In the above example we have defined one service `aeo_svdc-1` that has a `startJobgroup` of `00` and
-an `endJobGroup` of `FF`. This means that it will process all audit event files it finds in the directories
-in its `verifier-incoming` directory from `00` to `FF` e.g., an eventfile for the job
-
-    `jobId = cadf665f-fc78-4d84-9673-0ab2eb2c8b4d` 
-
-placed in
-
-    `verifier-incoming/4d` 
-
-would be processed by the instance `aeo_svdc-1`
-
-As we have to inform the AEO_SVDC instance of its `Job Group` in order to scale this processing we have to extend the docker compose file. The following is an example of AE_SVDC being scaled to two instance.
-
-[source,yml]
-----
-version: "3.9"
-services:
-  aeo_svdc-1:
-    image: "ghcr.io/xtuml/aeo_svdc"
-    build:
-      context: .
-      args:
-        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
-    ports:
-      - "20000:20000"
-      - "30000:30000"
-      - "40000:40000"
-    volumes:
-      - "./plus2json-deployed/generated-config:/root/config"
-      - "./InvariantStore:/root/InvariantStore"
-      - "./verifier-incoming:/root/incoming"
-      - "./JobIdStore:/root/JobIdStore"
-      - "./verifier-processed:/root/processed"
-    command: "-configPath config/  -preinit schedule/startup.sch -startJobGroup 00 -endJobGroup 7F"
-  aeo_svdc-2:
-    image: "ghcr.io/xtuml/aeo_svdc"
-    build:
-      context: .
-      args:
-        EXTRA_MASL_ARGS: "-skiptranslator Sqlite"
-    ports:
-      - "20001:20001"
-      - "30001:30001"
-      - "40001:40001"
-    volumes:
-      - "./plus2json-deployed/generated-config:/root/config"
-      - "./InvariantStore:/root/InvariantStore"
-      - "./verifier-incoming:/root/incoming"
-      - "./JobIdStore:/root/JobIdStore"
-      - "./verifier-processed:/root/processed"
-    command: "-configPath config/  -preinit schedule/startup.sch -startJobGroup 80 -endJobGroup FF"
-----
-
-In this example `aeo_svdc-1` has been assigned `00` to `7F` and 'aeo_svdc-2' has been assigned `80` to `FF`.
-
-NOTE: Care should be taken when assigning `Job Group` as there is no verification that the instanes have not been assigned overlapping groups.
 
 == Building and Running the Protocol Verifier
 
@@ -785,9 +708,9 @@ code generation is complete. It sets up link paths, include directories and
 other global properties for the build. The behaviour of the build is different
 depending on whether or not the build is launched in `Debug` (test) mode.
 
-==== `docker-compose.yml` and `docker-compose.test.yml`
+==== `docker-compose.yml`, `docker-compose.test.yml` and `docker-compose.kafka.yml`
 
-The two `docker-compose*.yml` files are used to configure the build and
+The `docker-compose*.yml` files are used to configure the build and
 execution using Docker. The build target and parameters are configured, internet
 ports and shared volumes are set up between host and container, and the command
 line arguments are defined for the process. Any `docker compose ...` commands
@@ -814,7 +737,41 @@ available by clicking link:images/MUNIN_Top_Level_Deployment_Directory_Structure
 a more detailed example for the AEO_SVDC deployment is illustrated by clicking 
 link:images/AEO_SVDC_Directory_Structure.pdf[here]
 
+=== Populate the Conan Server
+
+Before building, it is required to populate a local cache with the MASL
+artifacts. This step is only required once before building.
+
+From the root of the repository, execute the following command:
+
+```
+./bin/populate.sh
+```
+
+This may take some time as it downloads ~500MB of data.
+
 === Export MASL
+
+There is a script to help with this that works on MacOS. However, it
+doesn't work on Windows so use the manual approach decribed below.
+
+==== Generate MASL using script
+
+To generate MASL, import the project(s) you desire to build into a BridgePoint
+workspace and export MASL by clicking the hammer icon or selecting "Build
+Project" from the context menu.
+
+You can generate MASL for all projects by navigating to the `models/` directory
+and executing the following command:
+
+```
+./gen_all.sh
+```
+
+If `<BP install>/tools/mc/bin` is in your `PATH`, the `xtuml2masl` script will
+be executed. If not, a docker container will be used to generate the MASL.
+
+==== Generate MASL manually
 
 . Open up BridgePoint. Assure that you have all of the source projects
 imported into your workspace.
@@ -835,67 +792,134 @@ keyboard shortcut.
 NOTE: The `utils` project simply contains common MASL interfaces and need not be
 built. In fact, it will not even show up in the xtUML Modelling perspective.
 
-=== Build each domain
+=== Build and Test scripts
 
-This should be repeated for each of the domains and the simulator domain.
-For the sake of demonstration, the following instructions will
-reference the `AEReception` domain. Additionally, the instructions will assume
-that the code has been cloned in a standard location (`~/git/munin` on Linux/Mac
-and `C:\git\munin` on Windows).
+A number of shell scripts have been written to build and execute the PV for 
+use in various circumstances. Some of them are illustrated here:
 
-. Open a shell and navigate to the `AEReception` project directory:
+*  build_all.sh
+*  regression.sh
+*  run_benchmark.sh
 
-  cd ~/git/munin/models/AEReception   # linux/mac
-  cd C:\git\munin\models\AEReception  # windows
+==== build_all.sh
 
-. Build the project with Docker by running the following command:
+To build all projects, including the deployment, navigate to the `models/`
+directory and execute:
 
-  docker compose build --no-cache
+```
+./build_all.sh
+```
 
-+
-NOTE: The `--no-cache` flag tells Docker to rebuild the image even if it has
-been built before and exists in cache. This is not strictly necessary, but it
-provides confidence that the latest code is being used for the build.
+All build artifacts including C++ source code can be found in the `build/`
+directory in each project.
 
-+
-NOTE: The first invocation of `docker compose build ...` will cause Docker to
-download the base MASL image from Docker Hub. This image is > 600 MB and
-therefore will take some time to download. Subsequent builds will not require
-this download.
+==== regression.sh
 
-A graphical rendition of the domain build process is depicted
-link:images/Building_a_Domain.pdf[here].
+This is the principal regression test script. There are several other variants
+of it which test error conditions bit they all follow the same principle. It can
+be found in: 
 
-. Repeat this step for the other domains:
-  .. AEOrdering
-  .. AESimulator
-  .. SequenceVerificationDataCentric
-  .. InvariantStore
+  ~/git/munin/tests   # linux/mac
+  C:\git\munin\tests  # windows
 
-=== Build each Deployment
+The script assumes that all of the domains have been exported from BridgePoint.
+It initially cleans up the deploy directory. It then generates the set of job
+definition files required for the regression test using plus2json --job to 
+convert puml files into json files that can be consumed by the PV.
 
-IMPORTANT: Before this step, all of the application domains must be built
-as demonstrated in the previous step.
+It then launches the PV application and uses the same regression job definition
+files to generate test event streams using plus2json --play.
 
-The following deployments need to be built
+Finally, it checks the log files to ensure that all jobs have passed.
 
-* AEO_SVDC containing Ordering, Sequence Verification and the InvariantStore domains
+Variants of regression.sh follow the same basic steps but typically vary
+the --play options to inject errors. The test of the log files ensures that 
+the test jobs fail as expected.
 
-TODO Check the following describes the deployment build process
+==== run_benchmark.sh
 
-. In your shell, navigate to the AEO_SVDC directory:
+This is the principal performance benchmarking script. It can
+be found in: 
 
-  cd ~/git/munin/models/AEO_SVDC   # linux/mac
-  cd C:\git\munin\models\AEO_SVDC  # windows
+  ~/git/munin/metrics   # linux/mac
+  C:\git\munin\metrics  # windows
 
-. Build the project with Docker by running the following command:
+The script assumes that all of the domains have been exported from BridgePoint.
+It initially cleans up the deploy directory. It then generates the set of job
+definition files required for performance benchmarking using plus2json --job to 
+convert puml files into json files that can be consumed by the PV.
 
-  docker compose build --no-cache
+It then launches the PV application and uses the same set of job definition
+files to generate test event streams using plus2json --play. Options on 
+--play allow thousands of jobs to be injected into the PV in a single test.
+The rate of event generation and whether the events are shuffled or not can 
+be speicifed by options.
+
+Finally, it analyses the log files, characterises the performance and 
+summarises the passes and failures.
+
+=== Building individual domains
+
+To build a single project, navigate to the project directory and execute the
+command:
+
+```
+../../bin/build.sh
+```
+
+If the project had been built previously, this command will perform an
+incremental build and should not have to recompile all the sources. It is
+recommended that a full build be performed first and then incremental builds
+during development. Note that the build command does not cause MASL to be
+re-exported. That must be done manually as a separate step.
+
+NOTE: The deployment must be rebuilt if any domain is changed in order for
+changes in the domain to manifest in the application. It is recommended to
+always run `./build_all.sh` after making changes in a domain but before running
+the integrated application.
+
+=== Cleaning
+
+Sometimes artifacts that are no longer required are left in the build and
+need to be cleaned out. If there are build issues then a clean is recommended.
+Artifacts generated by the build can be removed by navigating to the project
+directory and executing the command:
+
+```
+../../bin/clean.sh
+```
+
+All projects can be cleaned by navigating to the `models/` directory and executing
+the command:
+
+```
+./clean_all.sh
+```
+
+=== Launching The Application
+
+Once the entire system has successfully built, the application can be launched
+by navigating to the `deploy/` directory. To execute a file-based version of the 
+PV execute the following command:
+
+```
+docker compose up
+```
+
+To execute a kafka-based version of the PV on Windows or Linux execute the 
+following command:
+
+docker compose -f docker-compose.kafka.yml up
+
+For MacOS execute the following:
+
+docker compose -f docker-compose.kafka.yml.macos up
+
+
+
   
-A graphical rendition of the deployment build process is depicted
+TODO CHECK A graphical rendition of the deployment build process is depicted
 link:images/Building_a_Deployment.pdf[here].
-
-=== Running the protocol verifier
 
 ==== The `munin/deploy` Folder
 
@@ -907,35 +931,25 @@ of the deploy folder. Click to see more details on the deploy folder
 This section describes the purpose of the folders and files within the 
 `munin/deploy` folder.
 
+TODO Fix the following section
 
   ▾ deploy/
-    ▸ aesim-config/
-      ▸ plus2json/
-    ▸ reception-config/
-    ▾ plus2json-deployed/
-      ▸ generated-config/
-    ▸ aer-incoming/
-    ▸ verifier-incoming/
-    ▸ verifier-processed/
+    ▾ config/
+      ▸ job_definitions/
     ▸ InvariantStore/
     ▸ JobIdStore/
-    ▸ puml/
-      ae-simulator.yml
-      reception.yml
-      verifier.yml
-      README.adoc
+    ▸ logs/
+    ▸ reception-processed/
+      docker-compose.yml
+      docker-compose.kafka.yml
+      docker-compose.kafka.yml.macos
+      p2JInvariantStore
+      .env
+      .gitignore
 
-`aesim-config/plus2json/`
+`config/job_definitions/`
 
-This contains files that capture the test specification and job specifications that are too be used by the Audit Event Simulator. Typically these will have been generated using plus2json. 
-
-`reception-config/`
-
-This contains the configuration file for the Audit Event Reception (AER). 
-
-`plus2json/generated-config/`
-
-This contains files that capture the test specification and job specifications that are too be used by the AEO_SVDC. Typically these will have been generated using plus2json. 
+This contains files that capture the job specifications that are too be used by the PV. Typically these will have been generated using plus2json. 
 
 `aer-incoming/`
 
@@ -963,80 +977,25 @@ This is the docker compse file that is used by the Audit Event Reception.
 
 `verifier.yml`
 
-This is the docker compse file that is used by AEO_SVDC. 
+This is the docker compose file that is used by AEO_SVDC. 
 
 `README.adoc`
 
-An explanition of the directory. 
+An explanation of the directory. 
 
-====
+==== 
 
-==== Executing the Processes
+==== Stopping the Application
 
-TODO Check the following:
-This section looks ok to me but in future we should use the -d option 
-and have the containers running in the background. When we do this we need to makesure that the
-log files are not getting sent to the console bit to a log file that is accessible outside the
-container and is managed using rotate. Pretty sure the logging domain will do this for us. Greg.
-
-IMPORTANT: Before this step, all of the domains and deployments 
-described above must be built as demonstrated in the previous steps.
-
-The Protocol Verifier is run as two separate processes. The first contains
-the single domain AEReception. Having been built it can be run using the 
-command below. The second is the AEO_SVDC deployment which contains the 
-three domains AEOrdering, SequenceVerification and InvariantStore. Again,
-having been built it can be run using the command below.
-
-In addition, a third process can be launched containing the AESimulator
-domain. This is required if a simulated source of audit events is required.
-This is covered <<Running the protocol verifier with the audit event simulator,here>>.
-
-. Open a shell in the `munin/deploy` directory, run the following command
-to launch the AEO_SVDC process:
-
-  docker compose -f verifier.yml up
-
-. Open another shell in the `munin/deploy` directory, run the following command
-to launch the AEReception process:
-
-  docker compose -f reception.yml up
-
-+
-You should see some logs begin to appear, in particular a periodic log from the
-`AEReception` domain that it is waiting on input files.
-
-When running without the simulator it is possible to use previously processed files.
-However if doing this it is important that the files in the JobIdStore are removed prior
-to running the software. Failure to do so will result in the following error:
-
-  `Duplicate Job Id identified`
-
-. Open a file explorer and navigate to the `deploy/verifier-processed/`
-directory within the repository. This can be done through your OS GUI or quickly
-through a simple command:
-
-  open -a Finder ~/git/munin/deploy/verifier-processed/  # mac
-  xdg-open ~/git/munin/deploy/verifier-processed/        # linux
-  explorer C:\git\munin\deploy\verifier-processed\       # windows
-
-. Open another file explorer window and navigate to the
-`deploy/aer-incoming/` directory within the repository:
-
-  open -a Finder ~/git/munin/deploy/aer-incoming/  # mac
-  xdg-open ~/git/munin/deploy/aer-incoming/        # linux
-  explorer C:\git\munin\deploy\aer-incoming\       # windows
-
-. link:images/04_drag_and_drop.gif[Drag and drop] e.g, `871f08bc-324e-4a8c-8d5d-bd052d3ba0ed` from the
-`verifier-processed/` directory to the `aer-incoming/` directory. You will see a flurry of
-output from the application and the file will reappear in the `verifier-processed/`
-directory. Inspect the logs and you will see that the audit events have been
-received, ordered, and verified by the application.
 
 . Kill the process by pressing `Ctrl-C`. Clean up the process by running the
 following command:
 
   docker compose down
+
+or
+
+  docker compose -f docker-compose.kafka.yml down
 
 ==== Troubleshooting Docker
 
