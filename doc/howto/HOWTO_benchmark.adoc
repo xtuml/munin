@@ -40,7 +40,12 @@ successfully stess test the Munin PV, then unit test passes.
 === 7.1 Steps
 
 . Log in to your Linux instance.
-  * `ssh -i ~/.ssh/pvtest-keypair.pem ubuntu@ec2-35-153-105-133.compute-1.amazonaws.com`
+  .. `ssh -i ~/.ssh/pvlinuxtest.pem ubuntu@ec2-35-153-105-133.compute-1.amazonaws.com`
+  .. Start a detachable terminal session to protect against network outages.
+     * `tmux`
+     * Detach with ctrl-b followed by d.
+     * Reattach.
+       ** `tmux attach`
 . Navigate to munin/metrics.
 . Delete the logs and cruft from previous runs.
   * `sudo rm -rf ../deploy/logs ../deploy/InvariantStore/ ../deploy/JobIdStore/ ../deploy/reception-incoming/ ../deploy/reception-processed/`
@@ -73,6 +78,8 @@ successfully stess test the Munin PV, then unit test passes.
 * See CPU and memory usage.
   ** `docker stats --no-stream`
   ** `top`
+* See disk usage.
+  ** `df -vh`
 
 == 8 Document References
 
