@@ -460,7 +460,10 @@ configuration directories:
 - this generates the job definition file and loads it into the appropriate directory. The job definition file 
 must be the same name as the job definition name 
 
-Note: Advanced feature - the behavioural parameters in the config.json file can be adjusted with appropriate caution
+=== Configuring Runtime Parameters
+
+Note: This is regarded as an advanced feature - the behavioural parameters 
+in the config.json file can be adjusted with appropriate caution.
 
 .Click to see more details on the `deploy/config/pv-config.json` config file format
 [%collapsible]
@@ -587,15 +590,22 @@ The values shown in the example reflect values that have worked effectively
 in performance tests.
 ====
 
-=== Configuring the Deployment for Kafka-based messaging
+=== Configuring the messaging fabric 
 
-This configuration is specified in deploy/docker-compose.kafka.yml
+There are a variety of possible applications that could provide the messaging
+fabric. The chosen one for this release is Kafka. However, it is important to 
+note that none of the PV domains have any explicit dependency on Kafka. Chnaging
+to a different messaging fabric would have some impact would in would not be
+major.
 
-determines the number of instances of each of the deployments to instantiate at start up.
-Note: This version of the Protocol Verifier supports static scaling. It also launches
-the logging service and the kafka and associated zookeeper processes.
+The configuration of Kafka is specified in deploy/docker-compose.kafka.yml
 
-TODO How much detail to inlcude on docker-compose.kafka.yml
+This determines the number of instances of each of the deployments to 
+instantiate at start up. Note: This version of the Protocol Verifier 
+supports static scaling. This yml script also launches the logging service 
+and the kafka and associated zookeeper processes.
+
+TODO How much detail to include on docker-compose.kafka.yml
 
 
 == Building and Running the Protocol Verifier
@@ -624,6 +634,7 @@ build logs, test results). Not every one of these files will be covered in the
 section below, but it is good to be aware of them.
 
   ▾ AEReception/
+    ▸ build/
     ▸ config/
     ▾ gen/
       ▸ code_generation/
@@ -636,13 +647,18 @@ section below, but it is good to be aware of them.
     ▸ schema/
     ▸ test_results/
     ▸ testing/
-      CMakeLists.txt
-      docker-compose.test.yml
-      docker-compose.yml
-      Dockerfile
+      .dependencies
+      .project
+      conanfile.py
+      test.env
 
 For a visual overview of the directory structure for the AEReception domain 
-click link:images/AEReception_Directory_Structure.pdf[here].
+click link:images/AEReception_Directory_Structure.pdf[here]. TODO Update the diagram
+
+==== `build`
+
+The `build` directory contains atrefacts produced in the code generation process.
+TODO Any more required here
 
 ==== `config`
 
@@ -654,13 +670,11 @@ population. Not all projects have config folders.
 ==== `gen/`
 
 The `gen` directory contains files used during the process of code generation
-and build. The `AEJSON_OOA/` subdirectory contains a handwritten C++ utility
-domain used by the main `AEReception` domain to parse the JSON input files.
-`features.mark` and `application.mark` contain model compiler "marks". These
-metadata are associated with particular application model elements and act as directives
-to the compiler. For example, domain services used exclusively for testing are
-marked as `test_only`, and the architecture will exclude them from generation
-during a production build.
+and build. `features.mark` and `application.mark` contain model compiler 
+"marks". These metadata are associated with particular application model 
+elements and act as directives to the compiler. For example, domain services 
+used exclusively for testing are marked as `test_only`, and the architecture
+will exclude them from generation during a production build.
 
 ==== `masl/`
 
@@ -701,46 +715,29 @@ edited and this directory may not exist before a run.
 
 The `testing` directory contains test files used in the unit tests.
 
-==== `CMakeLists.txt`
+==== `.dependencies`
 
-The `CMakeLists.txt` file is the top-level build file for the C++ build after
-code generation is complete. It sets up link paths, include directories and
-other global properties for the build. The behaviour of the build is different
-depending on whether or not the build is launched in `Debug` (test) mode.
+TODO
 
-==== `docker-compose.yml`, `docker-compose.test.yml` and `docker-compose.kafka.yml`
+==== `.project`
 
-The `docker-compose*.yml` files are used to configure the build and
-execution using Docker. The build target and parameters are configured, internet
-ports and shared volumes are set up between host and container, and the command
-line arguments are defined for the process. Any `docker compose ...` commands
-will reference `docker-compose.yml` by default, however the config file can be
-altered by passing the name of the new file with `-f`. You will notice in the
-rest of this document that any time the test build is being run, the command
-will start with `docker compose -f docker-compose.test.yml ...`.
+TODO This files contains some Bridgepoint configuration paramaters for the domain.
 
-==== `Dockerfile`
+==== `conanfile.py`
 
-The `Dockerfile` file defines the actual build. The file uses Docker's
-multi-stage build capability which allows the file to define two separate builds
--- one for testing and one for release. The testing version of the image
-executes the code generator in test mode which will cause it to generate code
-for the `test_only` services as well as additional scaffolding for testing
-interfaces.
+TODO
 
-TIP: I encourage you to take a moment before moving on to open each of these
-files in a text editor (you can double click them from the "Project Explorer"
-within BridgePoint) and briefly explore their contents.
+==== `test.env`
 
-For completeness a visual overview of the top-level of the deployment directory structure is
-available by clicking link:images/MUNIN_Top_Level_Deployment_Directory_Structure.pdf[here], and
-a more detailed example for the AEO_SVDC deployment is illustrated by clicking 
-link:images/AEO_SVDC_Directory_Structure.pdf[here]
+TODO
 
 === Populate the Conan Server
 
-Before building, it is required to populate a local cache with the MASL
-artifacts. This step is only required once before building.
+The build process uses Conan and the Conan server local cache needs to be
+populated with the required artefacts before the build can commence. 
+This step is only required once before building.
+
+TODO When does it need to be re-done. When you change branch?
 
 From the root of the repository, execute the following command:
 
@@ -945,43 +942,62 @@ TODO Fix the following section
       docker-compose.kafka.yml.macos
       p2JInvariantStore
       .env
-      .gitignore
 
 `config/job_definitions/`
 
-This contains files that capture the job specifications that are too be used by the PV. Typically these will have been generated using plus2json. 
+This contains files that capture the job specifications that are too be used by the PV. 
+Typically these will have been generated using plus2json. 
 
-`aer-incoming/`
+`reception-processed/`
 
-This is the directory that AER shall check for incoming Audit Event files. The Audit Event Simulator shall place Audit Event files that it generates in this directory. 
+This is the directory where AER shall place Audit Event files that it has 
+processed in this directory. This is unused if a configuration with a 
+messaging fabric is used. 
 
-`verifier-incoming/`
+`InvariantStore`
 
-This is the directory that AEO_SVDC shall check for incoming Audit Event files. AER shall place Audit Event files that it has processed in this directory. 
+Extra Job Invariants have to be persisted beyond the lifetime of the executing
+processes. This is directory contains the repository for persisted invariant 
+values.
 
-`verifier-processed/`
+`JobIdStore`
 
-This is the directory that AEO_SVDC shall place Audit Event files that it has processed in this directory. 
+It is necessary to maintain job ids beyond the lifetime of the jobs to look for
+illegal reuse of job ids. This directory contains the simple file based store 
+of job ids. This feature is soon to be replaced with a Job Management domain.
 
-`puml/`
+`logs`
 
-This is the directory contains example PLUS files. 
+This directory contains log files generated by the reception and verifier parts
+of the PV. 
 
-`ae-simulator.yml`
+`docker-compose.yml`
 
-This is the docker compse file that is used by the Audit Event Simulator. 
+This is the docker compose file that is used to build the version of the PV
+that achieves inter-process messaging using files. 
 
-`reception.yml`
+`docker-compose.kafka.yml`
 
-This is the docker compse file that is used by the Audit Event Reception. 
+This is the docker compose file that is used to build the version of the PV
+that achieves inter-process messaging using kafka. This default version of 
+the docker compose file supports Linux and Windows builds.
 
-`verifier.yml`
+`docker-compose.kafka.yml.macos`
 
-This is the docker compose file that is used by AEO_SVDC. 
+This is the docker compose file that is used to build the version of the PV
+that achieves inter-process messaging using kafka. This special version of 
+the docker compose file supports MacOS builds.
 
-`README.adoc`
+`P2JInvariantStore`
 
-An explanation of the directory. 
+Just a the PV needs to retain extra job invariants over extended periods of 
+time so does plus2json. A plus2json job which uses an extra job invariant
+hours or days after it was created needs to be able to locate and reuse the 
+appropriate value. This file is the store of invariants the plus2json uses. 
+
+`.env`
+
+This file defines the version of MASL to be used. 
 
 ==== 
 
@@ -1003,7 +1019,7 @@ Docker is a great tool for standardising builds and deployments, however it
 presents some pitfalls when being used as a local build/development tool.
 
 Docker Compose requires the "down" command to be issued even after all the
-processes launched by the "up" command have terminated. This is because though
+processes launched by the "up" command have terminated. This is because, though
 the process inside each container has exited, the container itself still exists
 and can be restarted. As long as the container exists (whether running or
 stopped), it will hold onto resources such as shared volumes and internet ports.
@@ -1036,6 +1052,9 @@ ones created from the latest image).
 
 ==== Running the latest published version of the protocol verifier
 
+TODO Check This section is out of date. Is this still relevant and needs to be
+updated or can it be removed?
+
 As mentioned above, the application is built and published automatically each
 time new code is merged into the main repository branch. It is possible to use
 docker to run the latest version of the application without any build at all.
@@ -1067,52 +1086,23 @@ have been received, ordered, and verified by the application.
 
 . Kill the process by pressing `Ctrl-C`.
 
-=== Running the protocol verifier with the audit event simulator
-
-In the last section, we built and ran the protocol verifier interactively with
-test files. The audit event simulator can also be used to generate test audit
-event files to be consumed by the AE Reception and AEO_SVDC processes. This 
-section will also walk through using the process inspector to attach to the 
-running processes and browse the instance population.
-
-. Open an additional shell in the `munin/deploy` directory, run the following command
-to launch the process with the simulator:
-
-  docker compose -f ae-simulator.yml up
-
-+
-You will see a lot of output at once. If you look closely, you can see several
-logs showing the simulator emitting audit events, followed by the AE Reception
-and AEO_SVDC handling those audit events.
-
-Clean up the process by running the following command:
-
-  docker compose -f ae-simulator.yml down
-
 === Building a domain with test
 
-Each domain contains a set of unit tests. We will use the `AEReception` domain
-to demonstrate building a domain in test mode.
+To build a project with tests enabled, navigate to the project directory and
+execute the command:
 
-. Open a shell and navigate to the `AEReception` project directory:
+```
+../../bin/build.sh test
+```
 
-  cd ~/git/munin/models/AEReception   # linux/mac
-  cd C:\git\munin\models\AEReception  # windows
+Once the build is complete, run the tests by executing the command:
 
-. Build the project in test mode with Docker by running the following command:
+```
+../../bin/test.sh
+```
 
-  docker compose -f docker-compose.test.yml build --no-cache
+A success or failure message is printed at the end of the test run.
 
-. Run the test schedule with Docker using the following command:
+=== Building with inspector
 
-  docker compose -f docker-compose.test.yml up
-
-A graphical rendition of the domain build process for test mode is depicted
-link:images/Building_a_Domain_in_Test_Mode.pdf[here].
-+
-You will see a lot of output including some logs from the test runner. All of
-the tests will be marked as "SUCCEEDED".
-
-. Clean up the docker run with the following command:
-
-  docker compose -f docker-compose.test.yml down
+TODO Do we want to say anything about this event if just for our own benefit?
