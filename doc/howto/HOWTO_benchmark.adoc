@@ -39,20 +39,26 @@ successfully stess test the Munin PV, then unit test passes.
 
 === 7.1 Steps
 
-. Log in to your Linux instance.
+. Navigate to munin/bin on your local machine.
+. Start a remote Linux instance with munin repos pre-populated.
+  (Substitute your own name for "dave".)
+  .. `munin-ec2.sh start dave`
+. Log in to your remote Linux instance.
+  .. `munin-ec2.sh login`
   .. `ssh -i ~/.ssh/pvlinuxtest.pem ubuntu@ec2-35-153-105-133.compute-1.amazonaws.com`
-  .. Start a detachable terminal session to protect against network outages.
-     * `tmux`
-     * Detach with ctrl-b followed by d.
-     * Reattach.
-       ** `tmux attach`
+. Start a detachable terminal session to protect against network outages.
+   * `tmux`
+   * Detach with ctrl-b followed by d.
+   * Reattach.
+     ** `tmux attach`
 . Navigate to munin/metrics.
 . Delete the logs and cruft from previous runs.
-  * `sudo rm -rf ../deploy/logs ../deploy/InvariantStore/ ../deploy/JobIdStore/ ../deploy/reception-incoming/ ../deploy/reception-processed/`
+  * `../bin/clean_for_benchmark.sh`
+    ** (same as) `sudo rm -rf ../deploy/logs ../deploy/InvariantStore/ ../deploy/JobIdStore/ ../deploy/reception-incoming/ ../deploy/reception-processed/ ../deploy/p2jInvariantStore`
 . Run `run_benchmark.sh` at 1000 events per second for 50000 events.
   * `run_benchmark.sh 1000 50000`
 . Open a separate shell or log in to your Linux instance in a separate shell.
-  * `ssh -i ~/.ssh/pvtest-keypair.pem ubuntu@ec2-35-153-105-133.compute-1.amazonaws.com`
+  * `munin-ec2.sh login`
 . Observe the log files.
   .. Navigate to munin/deploy.
   .. Check for failed jobs.
@@ -61,6 +67,10 @@ successfully stess test the Munin PV, then unit test passes.
      * `grep -c job_succ logs/verifier/*`
   .. Count persisted JobIDs.  (Multiply by number of instances of PV.)
      * `wc JobIdStore/0-63/*`
+. Log out of your remote Linux instance.
+  .. `exit`
+. Terminate your remote Linux instance.  (IMPORTANT:  machines left running cost money.)
+  .. `munin-ec2.sh terminate`
 
 === 7.2 References
 
