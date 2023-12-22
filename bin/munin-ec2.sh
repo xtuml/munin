@@ -39,13 +39,13 @@ function usage() {
     echo "    ./munin-ec2.sh start dave"
     echo
     echo "    # Stop an existing instance"
-    echo "    ./aws-server.sh stop"
+    echo "    ./munin-ec2.sh stop"
     echo
     echo "    # Terminate an existing instance"
-    echo "    ./aws-server.sh terminate"
+    echo "    ./munin-ec2.sh terminate"
     echo
     echo "    # Log in to the remote linux instance"
-    echo "    ./aws-server.sh login"
+    echo "    ./munin-ec2.sh login"
     echo
     exit 1
 }
