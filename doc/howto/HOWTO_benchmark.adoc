@@ -1,0 +1,102 @@
+= HOWTO Stress Test
+
+xtUML Project Implementation Note
+
+== 1 Abstract
+
+This note is a "living" HOWTO guiding engineers to run the Protocol
+Verifier (PV) under stressful loads.
+
+== 2 Introduction and Background
+
+A regression script exists which does a small amount of coverage testing
+of the Protocol Verifier.  Stress testing also uses a script to set up and
+run the PV.  The stress testing utilises features of `plus2json --play`
+which repeatedly run jobs playing out audit event instance streams.
+
+== 3 Requirements
+
+=== 3.1 Guide Engineers in Protocol Verifier Testing
+
+Information shall be provided that guides users and testers of the
+Protocol Verifier to run in production configurations.
+
+== 4 Work Required
+
+. Document how to run the benchmarking script and general PV features.
+. Document configuration variables.
+
+== 5 Implementation Comments
+
+N/A
+
+== 6 Unit Test
+
+When a random, intelligent engineer can follow these instructions and
+successfully stess test the Munin PV, then unit test passes.
+
+== 7 User Documentation
+
+=== 7.1 Steps
+
+. Navigate to munin/bin on your local machine.
+. Start a remote Linux instance with munin repos pre-populated.
+  (Substitute your own name for "dave".)
+  .. `munin-ec2.sh start dave`
+. Log in to your remote Linux instance.
+  .. `munin-ec2.sh login`
+  .. `ssh -i ~/.ssh/pvlinuxtest.pem ubuntu@ec2-35-153-105-133.compute-1.amazonaws.com`
+. Start a detachable terminal session to protect against network outages.
+   * `tmux`
+   * Detach with ctrl-b followed by d.
+   * Reattach.
+     ** `tmux attach`
+. Navigate to munin/metrics.
+. Delete the logs and cruft from previous runs.
+  * `../bin/clean_for_benchmark.sh`
+    ** (same as) `sudo rm -rf ../deploy/logs ../deploy/InvariantStore/ ../deploy/JobIdStore/ ../deploy/reception-incoming/ ../deploy/reception-processed/ ../deploy/p2jInvariantStore`
+. Run `run_benchmark.sh` at 1000 events per second for 50000 events.
+  * `run_benchmark.sh 1000 50000`
+. Open a separate shell or log in to your Linux instance in a separate shell.
+  * `munin-ec2.sh login`
+. Observe the log files.
+  .. Navigate to munin/deploy.
+  .. Check for failed jobs.
+     * `grep -c job_fail logs/verifier/*`
+  .. Count successful jobs.
+     * `grep -c job_succ logs/verifier/*`
+  .. Count persisted JobIDs.  (Multiply by number of instances of PV.)
+     * `wc JobIdStore/0-63/*`
+. Log out of your remote Linux instance.
+  .. `exit`
+. Terminate your remote Linux instance.  (IMPORTANT:  machines left running cost money.)
+  .. `munin-ec2.sh terminate`
+
+=== 7.2 References
+
+==== 7.2.1 plus2json
+
+* Run `plus2json -h` to get help text which briefly documents all
+  features.  Pay special attention to 'rate' and 'num-events'.
+
+==== 7.2.2 Interesting Commands
+
+* Delete unused docker images.
+  ** `docker system prune`
+* Delete unused docker volumes (e.g. Kafka logs).
+  ** `docker volume prune`
+* See CPU and memory usage.
+  ** `docker stats --no-stream`
+  ** `top`
+* See disk usage.
+  ** `df -vh`
+
+== 8 Document References
+
+. [[dr-1]] https://onefact.atlassian.net/browse/MUN2-153[153 - build and test artefacts]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
