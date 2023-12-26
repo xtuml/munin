@@ -1,0 +1,20 @@
+<log>
+    <logger>
+        <name>JobIdStore</name>
+        <level>trace</level>
+        <format>
+          <pattern><timestamp/> <param name="instance_index" default="0"/> <message/></pattern>
+            <file>
+                <path>/var/log/JobIdStore/JobIdStore.log</path> <!-- Name of the log file -->
+                <archive>
+                    <rotate>
+                        <size units="MiB">50</size> <!-- When to rotate  -->
+                    </rotate>
+                    <extension>timestamp</extension> <!-- What extension to use on archived log files -->
+                    <compress>false</compress> <!-- If archived files should be compressed -->
+                    <purge units="count">10</purge> <!-- How many archive to keep -->
+                </archive>
+            </file>
+        </format>
+    </logger>
+</log>

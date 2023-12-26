@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jm_config_schema.json",
+  "title": "Job Management Config",
+  "description": "Configuration parameters for Job Management",
+  "type": "object",
+  "properties": {
+    "SpecUpdateRate": {
+      "description": "This duration determines how often the application checks for updated config files",
+      "type": "string",
+      "format": "duration"
+    },
+    "MaxJobsPerWorker": {
+      "description": "This is the maximum number of in progress jobs any one worker can be assigned.",
+      "type": "string",
+      "pattern": "^(0|([1-9][0-9]*))$"
+    },
+    "MaxUnassignedJobs": {
+      "description": "This is the maximum nimber of unassigned jobs. If reached an error shall be reported.",
+      "type": "string",
+      "pattern": "^(0|([1-9][0-9]*))$"
+    },
+    "RetiredWorkerDeletionTime": {
+      "description": "This is the time that a retired worker shall be retained. Once reached the worker shall be deleted.",
+      "type": "string",
+      "format": "duration"
+    },
+    "JobStoreAgeLimit": {
+      "description": "The number of days to hold the completed job ids.",
+      "type": "string"
+    }
+  }
+}

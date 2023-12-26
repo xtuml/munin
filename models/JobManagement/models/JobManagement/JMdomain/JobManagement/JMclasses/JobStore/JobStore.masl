@@ -1,0 +1,16 @@
+//! ACTIVITY BEGIN. 'b049f533-d814-4309-b6da-d4f28cabaedc' DO NOT EDIT THIS LINE.
+public service JobManagement::JobStore.addJobToStore ( jobId : in string ) is
+storedJobIdentifier : instance of StoredJobIdentifier;
+eventContent : string;
+
+begin
+	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId);
+	if storedJobIdentifier = null then
+		storedJobIdentifier := create StoredJobIdentifier(jobId => jobId, jobTime => timestamp'now);
+	else
+	    eventContent := "Duplicate job id reported to job store JobId = " & jobId;
+	    Reporting~>reportEvent(Logger::Error, "aeordering_duplicate_job_id", eventContent);
+	end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

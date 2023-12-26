@@ -1,0 +1,25 @@
+JMdomain::JobManagement::scenarios::void registerCommandLineArgs,process_listener,Function,"initialised"
+JMdomain::JobManagement::scenarios::void init,scenario,Function,1
+JMdomain::JobManagement::scenarios::void init,process_listener,Function,"postschedules"
+JMdomain::JobManagement::tests::void testConfigFile,scenario,Function,101
+JMdomain::JobManagement::tests::void testConfigFile,test_only,Function,true
+JMdomain::JobManagement::tests::void testRegisterWorker,test_only,Function,true
+JMdomain::JobManagement::tests::void testRegisterWorker,scenario,Function,102
+JMdomain::JobManagement::tests::void testWorkerHeartbeat,scenario,Function,103
+JMdomain::JobManagement::tests::void testWorkerHeartbeat,test_only,Function,true
+JMdomain::JobManagement::tests::void testAssignWork,scenario,Function,104
+JMdomain::JobManagement::tests::void testAssignWork,test_only,Function,true
+JMdomain::JobManagement::tests::void clearDomain,test_only,Function,true
+JMdomain::JobManagement::tests::void sendAuditEvent(string string),test_only,Function,true
+JMdomain::JobManagement::tests::void checkJobEventAssignment(string string string UUID::formatted_uuid),test_only,Function,true
+JMdomain::JobManagement::tests::void testJobCompleted,test_only,Function,true
+JMdomain::JobManagement::tests::void testJobCompleted,scenario,Function,105
+JMdomain::JobManagement::tests::void testDeregisterWorker,scenario,Function,106
+JMdomain::JobManagement::tests::void testDeregisterWorker,test_only,Function,true
+JMdomain::JobManagement::tests::void testAssignJobQueue,scenario,Function,107
+JMdomain::JobManagement::tests::void testAssignJobQueue,test_only,Function,true
+JMdomain::JobManagement::functions::void registerWorker(UUID::formatted_uuid),kafka_topic,Function,true
+JMdomain::JobManagement::functions::void workerHeartbeat(UUID::formatted_uuid),kafka_topic,Function,true
+JMdomain::JobManagement::functions::void acceptEvent(string),kafka_topic,Function,true
+JMdomain::JobManagement::functions::void jobCompleted(UUID::formatted_uuid string),kafka_topic,Function,true
+JMdomain::JobManagement::functions::void deregisterWorker(UUID::formatted_uuid),kafka_topic,Function,true
