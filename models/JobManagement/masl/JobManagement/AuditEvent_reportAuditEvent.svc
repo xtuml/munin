@@ -1,6 +1,0 @@
-public instance service JobManagement::AuditEvent.reportAuditEvent ( assignedWorker: in instance of EmployedWorker ) is
-begin
-	
-	Worker~>reportEvent(assignedWorker.workerId, this.auditEvent);
-	
-end service;
