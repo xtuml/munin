@@ -1,0 +1,9 @@
+//! ACTIVITY BEGIN. '9cbac07b-6dc4-4fa8-b9d8-55d50c527727' DO NOT EDIT THIS LINE.
+public instance service JobManagement::AuditEvent.reportAuditEvent ( assignedWorker : in instance of EmployedWorker ) is
+begin
+	
+	Worker~>reportEvent(assignedWorker.workerId, this.auditEvent);
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

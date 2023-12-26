@@ -1,0 +1,129 @@
+-- BP 7.1.6 content: ModelClass syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO O_OBJ
+	VALUES ("0a63cc4f-2b85-46cd-ad31-da81fae0dce2",
+	'JobManager',
+	1,
+	'JobManager',
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO O_TFR
+	VALUES ("a22df37d-df18-49e8-be8b-a7faa005cb6b",
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2",
+	'assignJob',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'',
+	3,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	1,
+	1);
+INSERT INTO O_TPARM
+	VALUES ("cca85737-4c21-4f39-b68e-6f6244211158",
+	"a22df37d-df18-49e8-be8b-a7faa005cb6b",
+	'employedWorker',
+	"67b7c70d-a707-4d46-9bd5-bbf054c1d443",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("67b7c70d-a707-4d46-9bd5-bbf054c1d443",
+	"00000000-0000-0000-0000-000000000000",
+	'instance of EmployedWorker',
+	'',
+	'',
+	'../../types/types.xtuml');
+INSERT INTO O_TFR
+	VALUES ("8fcb0661-1936-4345-a37f-bad1f4f588f7",
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2",
+	'selectWorkerForJob',
+	'',
+	"67b7c70d-a707-4d46-9bd5-bbf054c1d443",
+	1,
+	'',
+	3,
+	'',
+	"a22df37d-df18-49e8-be8b-a7faa005cb6b",
+	1,
+	2);
+INSERT INTO O_NBATTR
+	VALUES ("181c5691-8007-4e6d-ab14-65e3f1fc6789",
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2");
+INSERT INTO O_BATTR
+	VALUES ("181c5691-8007-4e6d-ab14-65e3f1fc6789",
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2");
+INSERT INTO O_ATTR
+	VALUES ("181c5691-8007-4e6d-ab14-65e3f1fc6789",
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2",
+	"00000000-0000-0000-0000-000000000000",
+	'jobManager',
+	'',
+	'',
+	'jobManager',
+	0,
+	"695bd43a-ebe2-4646-a7ad-d7cf52cde90e",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("695bd43a-ebe2-4646-a7ad-d7cf52cde90e",
+	"00000000-0000-0000-0000-000000000000",
+	'MASLunique',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_NBATTR
+	VALUES ("b161d91b-5e51-484c-9a5f-d40b79531487",
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2");
+INSERT INTO O_BATTR
+	VALUES ("b161d91b-5e51-484c-9a5f-d40b79531487",
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2");
+INSERT INTO O_ATTR
+	VALUES ("b161d91b-5e51-484c-9a5f-d40b79531487",
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2",
+	"181c5691-8007-4e6d-ab14-65e3f1fc6789",
+	'unassignedJobIds',
+	'',
+	'',
+	'unassignedJobIds',
+	0,
+	"94ec6a88-9b66-4c46-bbe6-1db15d7661c1",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("94ec6a88-9b66-4c46-bbe6-1db15d7661c1",
+	"00000000-0000-0000-0000-000000000000",
+	'sequence of string',
+	'',
+	'',
+	'../../../../types/types.xtuml');
+INSERT INTO O_ID
+	VALUES (0,
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2");
+INSERT INTO O_OIDA
+	VALUES ("181c5691-8007-4e6d-ab14-65e3f1fc6789",
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2",
+	0,
+	'jobManager');
+INSERT INTO O_ID
+	VALUES (1,
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2");
+INSERT INTO O_ID
+	VALUES (2,
+	"0a63cc4f-2b85-46cd-ad31-da81fae0dce2");
+INSERT INTO PE_PE
+	VALUES ("0a63cc4f-2b85-46cd-ad31-da81fae0dce2",
+	1,
+	"370739a9-00a6-4027-9495-0a169d23d700",
+	"00000000-0000-0000-0000-000000000000",
+	4);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("370739a9-00a6-4027-9495-0a169d23d700",
+	"00000000-0000-0000-0000-000000000000",
+	"3c543db5-ae82-4b0c-bac1-17aad787c18a",
+	'JMclasses',
+	'',
+	0,
+	'../JMclasses.xtuml');

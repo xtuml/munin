@@ -1,0 +1,99 @@
+//! ACTIVITY BEGIN. 'a22df37d-df18-49e8-be8b-a7faa005cb6b' DO NOT EDIT THIS LINE.
+public instance service JobManagement::JobManager.assignJob ( employedWorker : in instance of EmployedWorker ) is
+unassignedJobIds : sequence of string;
+emptyUnassignedJobIds : sequence of string;
+unassignedJob : instance of UnassignedJob;
+job : instance of Job;
+assignedJob : instance of AssignedJob;
+logMessage : string;
+
+begin
+	
+	unassignedJobIds := this.unassignedJobIds;
+	if unassignedJobIds'length > 0 then
+		unassignedJob := find_one UnassignedJob(jobId = unassignedJobIds[unassignedJobIds'first]);
+		if unassignedJob /= null then
+			job := unassignedJob -> R5.Job;
+			assignedJob := create AssignedJob(jobId => unassignedJob.jobId);
+			unlink unassignedJob R5 job;
+			link assignedJob R5 job;
+			delete unassignedJob;
+			if unassignedJobIds'length > 1 then
+				unassignedJobIds := unassignedJobIds[unassignedJobIds'first + 1 .. unassignedJobIds'last];
+			else
+				unassignedJobIds := emptyUnassignedJobIds;
+			end if;
+			this.unassignedJobIds := unassignedJobIds;
+			link assignedJob R6 employedWorker;
+			// we now have the job assigned to the worker
+			for auditEvent in job -> R7.AuditEvent loop
+				auditEvent.reportAuditEvent(employedWorker);
+			end loop;
+			
+		else
+			// log an error as there is an unassigned job held by job manager but there is no instance of unassigned job
+			logMessage := "Found unassigned job id without an unassigned job, jobId = " & unassignedJobIds[unassignedJobIds'first];
+			Logger::log(Logger::Error, "JobManagement", logMessage);
+			// remove the unassigned job id
+			unassignedJobIds := unassignedJobIds[unassignedJobIds'first + 1 .. unassignedJobIds'last];
+			this.unassignedJobIds := unassignedJobIds;
+		end if;
+	end if;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8fcb0661-1936-4345-a37f-bad1f4f588f7' DO NOT EDIT THIS LINE.
+public instance service JobManagement::JobManager.selectWorkerForJob () return instance of EmployedWorker is
+nextWorker : instance of JobWorker;
+noWorkersAvailable : boolean := false;
+firstSelectedWorker : instance of JobWorker;
+employedWorker : instance of EmployedWorker;
+jmSpec : instance of JobManagementSpec;
+
+begin
+  
+	// find the next available worker
+	nextWorker := this -> R4.JobWorker;
+	if nextWorker = null then
+		nextWorker := this -> R22.JobWorker;
+		if nextWorker = null then
+			noWorkersAvailable := true;
+		end if;
+	end if;
+	firstSelectedWorker := nextWorker;
+	jmSpec := find_one JobManagementSpec();
+	while noWorkersAvailable = false loop
+		// check worker capacity
+		employedWorker := nextWorker -> R2.EmployedWorker;
+		if employedWorker /= null and (employedWorker -> R6.AssignedJob)'length < jmSpec.maxJobsPerWorker then
+				
+			// set up the next worker to be assigned
+			unlink this R4;
+			nextWorker := employedWorker -> R2.JobWorker -> R3.employedBefore.JobWorker;
+			if nextWorker = null then
+				// no next worker so set the the first worker
+				nextWorker := this -> R22.JobWorker;
+			end if;
+			link this R4 nextWorker;
+			
+			exit;
+		else
+			// worker has no capacity
+			employedWorker := null;
+			nextWorker := nextWorker -> R3.employedBefore.JobWorker;
+			if nextWorker = null then
+				// set the next worker to the first employee
+				nextWorker := this -> R22.JobWorker;
+			end if;
+			// if next worker is the first selected worker then no workers available
+			if nextWorker = firstSelectedWorker then
+				noWorkersAvailable := true;				
+			end if;
+		end if;
+	end loop;
+	return employedWorker;
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

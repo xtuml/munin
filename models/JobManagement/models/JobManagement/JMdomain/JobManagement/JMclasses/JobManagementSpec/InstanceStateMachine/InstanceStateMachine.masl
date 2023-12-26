@@ -1,0 +1,34 @@
+//! ACTIVITY BEGIN. 'bc228894-cfb7-474d-8c76-39c4a407dfe9' 'a9fc6e20-79bf-4e63-b764-b176bc6131e1' DO NOT EDIT THIS LINE.
+state JobManagement::JobManagementSpec.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'bc228894-cfb7-474d-8c76-39c4a407dfe9' 'fa12ba83-ec76-4262-ba3a-82c2fe335363' DO NOT EDIT THIS LINE.
+state JobManagement::JobManagementSpec.ConfigChecked () is
+logMessage : string;
+fileStatus : Filesystem::file_status;
+fileName : Filesystem::filename;
+configUpdates : boolean;
+
+begin
+
+    if this.checkUpdatedConfig() = true then
+    	this.loadConfigFile();
+    end if;
+
+    // check the job store and purge if required
+    generate JobStore.purgeJobStore() to (find_one JobStore());
+    schedule this.configTimer generate JobManagementSpec.checkConfigUpdate() to this delay this.specUpdateRate;
+	
+exception
+	when others => 	
+	
+		logMessage := "JobManagement::JobManagementSpec.ConfigChecked : failed to load configuration file";
+		Logger::log(Logger::Error, "JobManagement", logMessage);
+		raise program_error;
+		
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
