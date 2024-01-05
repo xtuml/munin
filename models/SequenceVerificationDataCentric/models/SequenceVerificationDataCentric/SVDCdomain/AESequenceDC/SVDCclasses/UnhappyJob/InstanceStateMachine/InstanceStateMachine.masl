@@ -323,7 +323,7 @@ begin
   // verification process of the Protocol Verifier itself).
   instrumentationEventId := "Unused";
   instrumentationEventType := "SVDC_PVJobDeleted";
-  BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", jobId, instrumentationEventId, instrumentationEventType);
+  BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", theJobID, instrumentationEventId, instrumentationEventType);
   
   // Initialise the synchronisation of the deletion of any counterpart Job instances in other domains.
   JobAdmin~>deleteJob(theJobID);

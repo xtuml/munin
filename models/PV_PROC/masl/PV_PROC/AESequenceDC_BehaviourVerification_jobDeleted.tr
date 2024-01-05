@@ -1,0 +1,4 @@
+public service AESequenceDC::BehaviourVerification~>jobDeleted ( jobId : in string) is
+begin
+  VerificationGateway::deleteVerifiableJob(jobId);
+end service;
