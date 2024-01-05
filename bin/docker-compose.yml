@@ -3,6 +3,7 @@ name: munin
 
 volumes:
   ConanCache:
+    name: ConanCache
 
 services:
   bash:
@@ -42,4 +43,4 @@ services:
       - type: volume
         source: ConanCache
         target: /conan-cache
-    command: bash -c "conan build --build=missing --options test=${INCLUDE_TEST:-False} . && conan export-pkg ."
+    command: bash -c "conan build --version=$${MUNIN_VERSION} --build=missing --options test=${INCLUDE_TEST:-False} . && conan export-pkg --version=$${MUNIN_VERSION} ."

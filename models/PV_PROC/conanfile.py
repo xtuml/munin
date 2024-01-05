@@ -3,7 +3,6 @@ import os
 
 class ConanFile(conan.ConanFile):
     name = 'pv_proc'
-    version = '1.2.0'
     user = 'xtuml'
     channel = 'stable'
     python_requires = f'masl_conan/[>={os.environ["MASL_VERSION"]}]@xtuml/stable'
@@ -31,14 +30,14 @@ class ConanFile(conan.ConanFile):
     def requirements(self):
         self.requires(f'masl_core/[>={os.environ["MASL_VERSION"]}]@xtuml/stable')
         self.requires(f'masl_utils/[>={os.environ["MASL_VERSION"]}]@xtuml/stable')
-        self.requires('asynclogger/[>=1.1.1]@xtuml/stable')
-        self.requires('aeordering/[>=1.1.1]@xtuml/stable')
-        self.requires('aereception/[>=1.1.1]@xtuml/stable')
-        self.requires('freception/[>=1.1.1]@xtuml/stable')
-        self.requires('istore/[>=1.1.1]@xtuml/stable')
-        self.requires('aesequencedc/[>=1.1.1]@xtuml/stable')
-        self.requires('verificationgateway/[>=1.1.1]@xtuml/stable')
-        self.requires('jobmanagement/[>=0.1.0]@xtuml/stable')
+        self.requires(f'asynclogger/{self.version}@xtuml/stable')
+        self.requires(f'aeordering/{self.version}@xtuml/stable')
+        self.requires(f'aereception/{self.version}@xtuml/stable')
+        self.requires(f'freception/{self.version}@xtuml/stable')
+        self.requires(f'istore/{self.version}@xtuml/stable')
+        self.requires(f'aesequencedc/{self.version}@xtuml/stable')
+        self.requires(f'verificationgateway/{self.version}@xtuml/stable')
+        self.requires(f'jobmanagement/{self.version}@xtuml/stable')
 
     def build_requirements(self):
         self.tool_requires(f'masl_codegen/[>={os.environ["MASL_VERSION"]}]@xtuml/stable')

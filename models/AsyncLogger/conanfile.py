@@ -4,7 +4,6 @@ import os
 
 class ConanFile(conan.ConanFile):
     name = 'asynclogger'
-    version = '1.2.0'
     user = 'xtuml'
     channel = 'stable'
     python_requires = f'masl_conan/[>={os.environ["MASL_VERSION"]}]@xtuml/stable'
