@@ -135,7 +135,7 @@ services:
     ulimits:
       sigpending: -1
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/LOGGER_PROC_transient -log-config config/log-config-pv-proc.xml -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/LOGGER_PROC_transient -log-config config/log-config-pv-proc.properties -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   zookeeper:
     image: wurstmeister/zookeeper:3.4.6
