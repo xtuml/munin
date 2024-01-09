@@ -20,4 +20,3 @@ domain AsyncLogger is
   public service fatalEnabled       ( logger : in anonymous string ) return boolean; pragma kafka_topic();
 
 end domain;
-pragma service_domain(true);
