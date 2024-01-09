@@ -23,6 +23,8 @@ services:
     ulimits:
       sigpending: -1
     working_dir: /root
+    logging:
+      driver: local
     command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/PV_PROC_transient -fileStore -configFile pv-config.json -log-config config/log-config-pv-proc.properties -util Inspector"
 
 volumes:
