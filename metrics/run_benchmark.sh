@@ -39,7 +39,11 @@ echo "Done."
 # launch the application
 echo "Launching the application..."
 export CONFIG_FILE=benchmarking-config.json
-docker compose -f docker-compose.kafka.yml up -d --wait &>/dev/null
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  docker compose -f docker-compose.kafka.yml.macos up -d --wait &>/dev/null
+else
+  docker compose -f docker-compose.kafka.yml up -d --wait &>/dev/null
+fi
 echo "Done."
 
 # generate source job
@@ -70,7 +74,11 @@ echo "Done."
 
 # tear down docker
 echo "Tearing down the application..."
-docker compose -f docker-compose.kafka.yml down
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  docker compose -f docker-compose.kafka.yml.macos down
+else
+  docker compose -f docker-compose.kafka.yml down
+fi
 echo "Done."
 
 exit_code=0
