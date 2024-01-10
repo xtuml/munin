@@ -1,0 +1,62 @@
+= Kafka Configuration
+
+xtUML Project Implementation Note
+
+== 1 Abstract
+
+This note documents the configuration of the Kafka message broker early in
+the Munin project.
+
+== 2 Introduction and Background
+
+Kafka has been prescribed as the medium for receiving runtime audit event
+streams for project Munin (external communication).  Kafka is also used
+for inter-process communication within the Protocol Verifier (internal
+communication).
+
+As of release 1.2.0 of Protocol Verifier, no special features of the
+message broker are being used.  The message broker simply serves as a
+message bus.  For example, capabilities to scale message routing based
+upon key material (partitions) are not implemented (yet).
+
+== 3 Requirements
+
+. Enumerate configuration settings.
+
+== 4 Configuration Settings
+
+----
+KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+KAFKA_LOG_RETENTION_MS: 300000                  # default retention of 5 minutes
+KAFKA_LOG_SEGMENT_BYTES: 1048576                # roll the log at 1MB
+KAFKA_LOG_SEGMENT_DELETE_DELAY_MS: 1            # delete immediately after log roll
+KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 10000    # check the retention condition every 10 seconds
+----
+
+# configure topics
+
+----
+default.AsyncLogger_service0 --add-config retention.ms=5000
+default.AsyncLogger_service1 --add-config retention.ms=5000
+default.AEReception_service2 --add-config retention.ms=60000
+default.AEOrdering_service2 --add-config retention.ms=300000
+default.AESequenceDC_service31 --add-config retention.ms=300000
+default.IStore_service2 --add-config retention.ms=30000
+default.IStore_service3 --add-config retention.ms=30000
+default.IStore_service4 --add-config retention.ms=30000
+default.BenchmarkingProbe_service0 --add-config retention.ms=600000 # 10 minutes
+----
+
+== 5 Document References
+
+. [[dr-1]] https://github.com/xtuml/munin/issues/181[181 - Message Bus Configuration]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
