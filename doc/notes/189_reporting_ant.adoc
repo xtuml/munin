@@ -1,0 +1,116 @@
+= Protocol Verifier Reporting
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note provides analysis of reporting requirements for the Munin
+Protocol Verifier.  These requirements will flow backwards into the
+strategy for logging and reporting.
+
+== 2 Introduction and Background
+
+Early in Project Munin, the engineering development team erred toward
+over-logging and over-reporting, because clear requirements for both were
+unavailable.  The understanding of the application has grown.
+Requirements may now be surmised with some hope of usefulness.
+
+== 3 Requirements
+
+=== 3.1 Dashboard Requirements
+
+A dashboard shall be constructed which puts key metrics on display.
+Following is a summary enumeration with details following.
+
+* instantaneous throughput (events per second) (speedometer)
+* throughput (events per second) over time period ("area under the curvel" line graph)
+* jobs succeeded versus failed versus alarmed (pie chart:  green, yellow, red)
+* list of alarmed job names with counters next to them counting the alarms sorted by incidence
+* list of failed job names with counters next to them counting the failures sorted by incidence
+* list of successful job names with counters next to them counting them sorted by incidence
+* number of running worker PVs
+* PV uptime
+
+==== 3.1.1 Instantaneous Throughput
+
+The instantantaneous throughput will display the throughput of the
+Protocol Verifier "right now".  It may be time-averaged for smoothing but
+the time window will be very short.  This could be displayed in something
+like a speedometer dial.
+
+The units shall be events per second.
+
+==== 3.1.2 Throughput Over Time
+
+A graph of the throughput of the Protocol Verifier shall be displayed
+supplying a view of the throughput over the last (say) 24 hours.
+Optionally the display window could be adjustable.  The curve may be
+colored in an "area under the curve" fashion.
+
+The units shall be events per second.
+
+==== 3.1.3 Alarmed versus Failed versus Successful Jobs
+
+A relative proportion of jobs that have ended in alarm conditions, failure
+and success shall be displayed.  A pie chart with the different conditions
+shown as different colors (e.g. red for alarm, yellow for failure and
+green for success) shall make the proportions visually clear.
+
+The units shall be total alarm/failure/success over a noted time period
+(e.g. "today" or "last 24 hours").
+
+==== 3.1.4 List of Alarmed Jobs
+
+A list of job types that experienced alarm condition shall be shown in
+list format.  The names of the jobs shall be shown in a readable format.
+A counter of the number of failures (over some period of time) shall be
+shown.  The list shall be sorted in descending order starting with the job
+type receiving the greatest incidence of alarms.
+
+==== 3.1.5 List of Failed Jobs
+
+A list of job types that failed shall be shown in list format.  The
+display format shall follow the format described in <<3.1.4 List of Alarmed Jobs>>.
+
+==== 3.1.6 list of successful job names with counters next to them counting them sorted by incidence
+
+A list of job types that succeeded shall be shown in list format.  The
+display format shall follow the format described in <<3.1.4 List of Alarmed Jobs>>.
+
+==== 3.1.7 Protocol Verifier Worker Count
+
+An integer number representing the current number of Protocol Verifier
+"worker" instances shall be shown.  A max count and a minimum count shall
+display the maximum and minimun number repsectively over a period of time
+(such as 24 hours).
+
+There are no units to this measurement.
+
+==== 3.1.8 Protocol Verifier Uptime
+
+The amount of time elapsed since the Protocol Verifier was started shall
+be displayed.
+
+The units shall be in time duration format
+
+=== 3.2 Other Requirements
+
+* NiFi
+* Stroom
+
+== 4 Analysis
+
+== 5 Work Required
+
+== 6 Acceptance Test
+
+== 7 Document References
+
+. [[dr-1]] https://github.com/xtuml/munin/issues/189[189 - Enhance Reporting]
+. [[dr-2]] link:./188_enhance_logging_ant.adoc[Enhance Logging Analysis Note]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---

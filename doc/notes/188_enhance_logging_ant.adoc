@@ -1,0 +1,59 @@
+= Enhance Logging with `log4cplus`
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note outlines enhancements to the practice of logging in the Munin
+Protocol Verifier application.
+
+== 2 Introduction and Background
+
+Until January 2024, the MASL C++ model compiler <<dr-2>> used POCO
+<<dr-3>> as the underlying logging technology.  Now MASL C++ uses
+`log4cplus` <<dr-4>>.  `log4cplus` provides more functionality and is
+consistent with `log4j`, which is a popular logging framework for Java.
+
+During testing of the Protocol Verifier, it was noted that the POCO logger
+was using more memory than expected.  This was the trigger to change
+logging technologies.
+
+`log4cplus` is a bit different.  It makes sense to revisit the logging
+strategy employed by the Munin project in the Protocol Verifier.  This
+note will outline a Way Forward.
+
+== 3 Requirements
+
+. Establish a Project Munin logging mission statement to guide decision
+  making.
+. Support logging levels:
+  ** Fatal
+  ** Error
+  ** Warning
+  ** Information
+  ** Debug
+  ** Trace
+. Support conditional log message string arithmetic.
+. Establish conventions for enabled logging.
+. Support logger hierarchy.
+. Establish naming conventions for logger hierarchy.
+. Establish rules and guidelines for the construction of log messages.
+
+== 4 Analysis
+
+== 5 Work Required
+
+== 6 Acceptance Test
+
+== 7 Document References
+
+. [[dr-1]] https://github.com/xtuml/munin/issues/188[188 - Enhance Logging]
+. [[dr-2]] https://github.com/xtuml/masl[MASL C++ Model Compiler GitHub Repository]
+. [[dr-3]] https://pocoproject.org/[POCO Project]
+. [[dr-4]] https://github.com/log4cplus/log4cplus[log4cplus]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
