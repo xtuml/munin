@@ -26,6 +26,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Create Conan Cache
+        run: docker volume create ConanCache
+
+      - name: Cache Artifacts
+        id: cache-primes
+        uses: actions/cache@v3
+        with:
+          path: /var/lib/docker/volumes/ConanCache
+          key: $(docker compose -f bin/docker-compose.yml run --rm bash conan profile show)
+
       - name: Generate MASL
         run: |
           cd models/
