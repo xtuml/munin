@@ -22,9 +22,6 @@ begin
     if updatedJobDefinitions'length > 0 then
     	this.loadJobDefinitions(updatedJobDefinitions);
     end if;
-    
-    // check the job store and purge if required
-    generate JobStore.purgeJobStore() to (find_one JobStore());
     schedule this.configTimer generate SystemSpec.checkConfigUpdate() to this delay this.specUpdateRate;
 	
 exception

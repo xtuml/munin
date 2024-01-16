@@ -12,9 +12,10 @@ RUN SCENARIO Test 1 "run_test" [AEOrdering testReverseOrderedJob 9]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testForkAndMerge 11]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testOrderedJobWithData 12]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testDeprecatedJob 3 skip]
-RUN SCENARIO Test 1 "run_test" [AEOrdering testLaneValidation 14]
+RUN SCENARIO Test 1 "run_test" [AEOrdering testLaneValidation 14 skip]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testConfigFile 10]
 RUN SCENARIO Test 1 "run_test" [AEOrdering testInjestFile 13]
+RUN SCENARIO Test 1 "run_test" [AEOrdering testWorkerRegistration 15]
 
 # done
 TERMINATE

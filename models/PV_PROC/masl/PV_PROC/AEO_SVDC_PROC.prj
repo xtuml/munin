@@ -68,6 +68,14 @@ project AEO_SVDC_PROC is
                                   eventLabel: in string,
                                   eventContent: in string );     
     end terminator;
+    
+    terminator Req_IF_JobManagement is
+      public service registerWorker ( workerId: in UUID::formatted_uuid );     
+      public service deregisterWorker ( workerId: in UUID::formatted_uuid );     
+      public service workerHeartbeat ( workerId: in UUID::formatted_uuid );     
+      public service jobCompleted ( workerId: in UUID::formatted_uuid,
+                                    jobId: in string );     
+    end terminator;
   end domain;
   
   domain AESequenceDC is

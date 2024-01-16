@@ -6,6 +6,7 @@ logMessage : string;
 systemSpec : instance of SystemSpec;
 startJobGroup : integer;
 endJobGroup : integer;
+worker : instance of Worker;
 
 begin
 
@@ -21,10 +22,16 @@ begin
 				                                   maximumJobTime => @PT10M@, jobCompletePeriod => @PT10M@, fileControlWaitTime => @PT1S@, 
 				                                   defaultJobExpiryDuration => duration'weeks(52), defaultStaleAuditEventDuration => duration'hours(24),
 				                                   defaultBlockedAuditEventDuration => duration'hours(24), 
-				                                   startJobGroup => startJobGroup, endJobGroup => endJobGroup, Current_State => Created);
+				                                   startJobGroup => startJobGroup, endJobGroup => endJobGroup, schemaValidate => true,
+				                                   schemaValidateFrequency => 1, schemaValidationCount => 0, Current_State => Created);
+			// load the JSON schema
+			systemSpec.auditEventSchema := JSONValidation::load_schema(Environment::getenv(Environment::variable_name("AUDIT_EVENT_SCHEMA_PATH")));
 		end if;
 		systemSpec.loadConfigFile();
     	generate SystemSpec.checkConfigUpdate() to systemSpec;
+    	
+    	worker := create Worker(workerId => UUID::generate_formatted(), requestRetryRate => @PT1S@, heartbeatRate => @PT1M@, registered => false, Current_State => Created);
+    	generate Worker.requestRegistration() to worker;
 	else
 		logMessage := "AEOrdering::init : failed to locate config file. Specified file = " & configFilePath & configFile;
 		Logger::log(Logger::Error, "AEOrdering", logMessage);

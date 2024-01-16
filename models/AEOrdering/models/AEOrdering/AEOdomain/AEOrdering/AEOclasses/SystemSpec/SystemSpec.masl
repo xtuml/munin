@@ -66,10 +66,6 @@ configJSONString : string;
 configJSONElement : JSON::JSONElement;
 configJSONObject : JSON::JSONObject;
 configValidationResult : JSON::JSONObject;
-jobStoreLocation : string := "./";
-jobStoreAgeLimit : duration := @P7D@;
-jobStore : instance of JobStore;
-jobStoreName : string := "JobIdStore.log";
 invariantStoreLoadRate : duration;
 maxIntraSequenceEventTimeoutPeriod : duration := @PT1S@;
 waitPeriodForAllJobsCompletedCheck : duration := @P1D@;
@@ -77,6 +73,7 @@ waitPeriodForJobDeletion : duration := @PT30M@;
 waitPeriodForInvariantDeletion : duration := @P1D@;
 timeoutPeriodForRetreivingStoredInvariants : duration := @PT10S@;              
 timeoutPeriodForHangingJob : duration := @PT15S@;
+worker : instance of Worker;
 
 begin
     
@@ -114,15 +111,6 @@ begin
             if configJSONObject'contains("DefaultBlockedAuditEventDuration") then
                 this.defaultBlockedAuditEventDuration := duration'parse(JSON::get_string(configJSONObject["DefaultBlockedAuditEventDuration"]));
             end if;
-            if configJSONObject'contains("JobStoreLocation") then
-                jobStoreLocation := JSON::get_string(configJSONObject["JobStoreLocation"]);
-                if not Filesystem::file_exists(Filesystem::filename(jobStoreLocation)) then
-                  Filesystem::create_directory(Filesystem::filename(jobStoreLocation));
-                end if;
-            end if;
-            if configJSONObject'contains("JobStoreAgeLimit") then
-                jobStoreAgeLimit := duration'parse(JSON::get_string(configJSONObject["JobStoreAgeLimit"]));
-            end if;
             if configJSONObject'contains("InvariantStoreLoadRate") then
                 invariantStoreLoadRate := duration'parse(JSON::get_string(configJSONObject["InvariantStoreLoadRate"]));
                 if this.invariantStoreLoadRate /= invariantStoreLoadRate then
@@ -147,8 +135,19 @@ begin
 			end if;
             if configJSONObject'contains("TimeoutPeriodForHangingJob") then
 				timeoutPeriodForHangingJob := duration'parse(JSON::get_string(configJSONObject["TimeoutPeriodForHangingJob"]));
+			end if;			
+			if configJSONObject'contains("SchemaValidate") then
+				this.schemaValidate := boolean'parse(JSON::get_string(configJSONObject["SchemaValidate"]));
 			end if;
-			
+			if configJSONObject'contains("SchemaValidateFrequency") then
+				this.schemaValidateFrequency := integer'parse(JSON::get_string(configJSONObject["SchemaValidateFrequency"]));
+			end if;
+			if configJSONObject'contains("WorkerHeartbeatRate") then
+				worker := find_one Worker();
+				if worker /= null then
+					worker.heartbeatRate := duration'parse(JSON::get_string(configJSONObject["WorkerHeartbeatRate"]));
+				end if;
+			end if;
 			// report the verification timer controls 
 			Req_IF_Verification~>reportVerificationTimerControls(maxIntraSequenceEventTimeoutPeriod, waitPeriodForAllJobsCompletedCheck,
 				                                                 waitPeriodForJobDeletion, waitPeriodForInvariantDeletion,
@@ -165,15 +164,6 @@ begin
         Logger::log(Logger::Error, "AEOrdering", logMessage);
     end if;
     
-    // if the job store does not exist then create it
-    jobStore := find_one JobStore();
-    if jobStore = null then
-    	jobStoreName := "JobIdStore" & "-" &  this.startJobGroup'image & "-" & this.endJobGroup'image;
-    	jobStoreLocation := jobStoreLocation & "/" & this.startJobGroup'image & "-" & this.endJobGroup'image;
-    	Filesystem::create_directory(Filesystem::filename(jobStoreLocation));
-    	jobStore := create JobStore(jobStoreName => jobStoreName, jobStoreLocation => jobStoreLocation, jobStoreAgeLimit => jobStoreAgeLimit, fileStoreCreationTime => timestamp'now, Current_State => Created);
-    	JobStore.loadJobStore();
-    end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -341,6 +331,43 @@ begin
             Req_IF_Verification~>extraJobInvariantDefinition(dataItemType.dataItemName, dataItemType.jobTypeName, dataItemType.eventType, dataItemType.occurrenceId, userEvents);
         end if;
     end loop;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '5fdcbaaf-b334-4b86-a09a-3ce0b6142fe4' DO NOT EDIT THIS LINE.
+public instance service AEOrdering::SystemSpec.schemaValidated ( auditEvent : in JSON::JSONObject ) return boolean is
+valid : boolean := true;
+eventId : string;
+eventContent : string;
+logMessage : string;
+validationResult: JSON::JSONObject;
+
+begin
+    
+	if this.schemaValidate = true then
+		this.schemaValidationCount := this.schemaValidationCount + 1;
+		if this.schemaValidationCount = this.schemaValidateFrequency then
+			this.schemaValidationCount := 0;
+            validationResult := JSONValidation::validate(JSON::to_json(auditEvent), this.auditEventSchema);
+			if JSON::get_boolean(validationResult["valid"]) = true then
+			else
+				valid := false;
+			    if auditEvent'contains("eventId") then
+			      	eventId := JSON::get_string(auditEvent["eventId"]);
+			    end if;
+				eventContent := "EventId = " & eventId;
+				Reporting~>reportEvent(Logger::Error, "reception_event_invalid", eventContent);
+				logMessage := "AEOrdering::AcceptJsonEvent : Dropping invalid event with ID: " & eventId & "\n" & JSON::dump(validationResult, true);
+				Logger::log(Logger::Debug, "AEOrdering", logMessage);
+			end if;
+		end if;
+	end if;
+	return valid;
+
+exception
+	when others => 	
+	        raise program_error("No schema loaded");
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

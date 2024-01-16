@@ -3,7 +3,7 @@ public instance service AEOrdering::Job.failJob ( failureReason : in string ) is
 logMessage : string;
 inProgressJob : instance of InProgressJob;
 failedJob : instance of FailedJob;
-archivedJob : instance of ArchivedJob;
+worker : instance of Worker;
 
 begin
 	
@@ -14,21 +14,19 @@ begin
 		link failedJob R2 this;
 		delete inProgressJob;
 		generate Job.jobFailed() to this;
+		// inform sequence verification
+		Req_IF_Verification~>failedJob(this.jobId, failureReason);
+		// inform Job Management that the job is complete
+		worker := find_one Worker();
+		Req_IF_JobManagement~>jobCompleted(worker.workerId, this.jobId);
 	else
-		archivedJob := this -> R2.ArchivedJob;
-		if archivedJob /= null then
-			unlink archivedJob R2 this;
-			failedJob := create FailedJob(jobId => this.jobId, failureReason => failureReason, jobFailureTime => timestamp'now);
-			link failedJob R2 this;
-			delete inProgressJob;
-			generate Job.jobFailed() to this;
-		else
+		failedJob := this -> R2.FailedJob;
+		if failedJob /= null then
 			failedJob := this -> R2.FailedJob;
 			failedJob.failureReason := failedJob.failureReason & " " & failureReason;
 		end if;
 	end if;
-	// inform sequence verification and audited
-	Req_IF_Verification~>failedJob(this.jobId, failureReason);
+	// audit the failure
 	Req_IF_Audited~>reportAuditFailure(this.jobId, failureReason);
 	
 	// now log the failure
@@ -116,8 +114,6 @@ begin
 			delete failedJob;
 		end if;
 	end if;
-	// add the job to the job store as there should be no more events
-	JobStore.addJobToStore(this.jobId);
 	delete this;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
