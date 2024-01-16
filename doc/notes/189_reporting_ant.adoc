@@ -12,8 +12,8 @@ strategy for logging and reporting.
 
 Early in Project Munin, the engineering development team erred toward
 over-logging and over-reporting, because clear requirements for both were
-unavailable.  The understanding of the application has grown.
-Requirements may now be surmised with some hope of usefulness.
+emerging.  The understanding of the application has grown.  Requirements
+may now be surmised with some hope of usefulness.
 
 == 3 Requirements
 
@@ -28,7 +28,7 @@ statistics of the Protocol Verifier.
 Following is a summary enumeration with details following.
 
 * instantaneous throughput (events per second) (speedometer)
-* throughput (events per second) over time period ("area under the curvel" line graph)
+* throughput (events per second) over time period ("area under the curve" line graph)
 * jobs succeeded versus failed versus alarmed (pie chart:  green, yellow, red)
 * list of alarmed job names with counters next to them counting the alarms sorted by incidence
 * list of failed job names with counters next to them counting the failures sorted by incidence
@@ -38,7 +38,7 @@ Following is a summary enumeration with details following.
 
 ===== 3.1.1.1 Instantaneous Throughput
 
-The instantantaneous throughput will display the throughput of the
+The instantaneous throughput will display the throughput of the
 Protocol Verifier "right now".  It may be time-averaged for smoothing but
 the time window will be very short.  This could be displayed in something
 like a speedometer dial.
@@ -50,7 +50,7 @@ The units shall be events per second.
 A graph of the throughput of the Protocol Verifier shall be displayed
 supplying a view of the throughput over the last (say) 24 hours.
 Optionally the display window could be adjustable.  The graph may be
-colored in an "area under the curve" fashion.
+coloured in an "area under the curve" fashion.
 
 The units shall be events per second.
 
@@ -58,7 +58,7 @@ The units shall be events per second.
 
 A relative proportion of jobs that have ended in alarm conditions, failure
 and success shall be displayed.  A pie chart with the different conditions
-shown as different colors (e.g. red for alarm, yellow for failure and
+shown as different colours (e.g. red for alarm, yellow for failure and
 green for success) shall make the proportions visually clear.
 
 The units shall be total alarm/failure/success over a noted time period
@@ -93,7 +93,7 @@ the greatest incidence of retries.
 ===== 3.1.1.8 Proportion of Happy versus Unhappy Jobs
 
 A relative proportion of happy jobs and unhappy jobs shall be displayed.
-A pie chart with the two types shown as different colors (e.g. blue for
+A pie chart with the two types shown as different colours (e.g. blue for
 happy, purple for unhappy) shall make the proportions visually clear.
 
 The units shall be total happy/unhappy job instances over a noted time
@@ -111,7 +111,7 @@ Following is a summary enumeration with details following.
 
 An integer number representing the current number of Protocol Verifier
 "worker" instances shall be shown.  A max count and a minimum count shall
-display the maximum and minimun number repsectively over a period of time
+display the maximum and minimum number respectively over a period of time
 (such as 24 hours, or since the Protocol Verifier started).
 
 There are no units to this measurement.
@@ -125,19 +125,68 @@ The units shall be in time duration format.
 
 === 3.2 Other Requirements
 
+* Reporting shall be supplied through a Kafka message broker topic.
+* The message shall be consumable by <<dr-3, Apache NiFi>>.
+
 == 4 Analysis
 
-* NiFi?
-* Stroom?
+Analysis for Protocol Verifier Reporting has been performed by the Munin
+engineering team with little outside input.  However, as understanding of
+protocol verification grew, an understanding of what would be useful on
+the back end grew.  The above dashboard and reporting requirements emerged
+from hours and days and weeks of running the Protocol Verifier with
+simulated input audit event streams.
+
+While testing the Protocol Verifier several questions arose.
+
+* How fast is the PV running?
+* How do I know when a job has failed?
+* How do I identify a failed job?
+* Which job types fail most often?
+* How many jobs have failed?
+* How many jobs have succeeded?
+* How many jobs are receiving alarm conditions?
+* What are my success/failure/alarm percentages?
+* What are the names of the jobs that receive alarm conditions?
+* Is the PV running optimally?
+* How long has the PV been running?
+* How does the throughput change when I adjust timing parameters?
+
+It is expected that more questions and reporting requirements will emerge.
+But for now, even basic usage of the Protocol Verifier raises these
+questions.  Thus, let us build reporting to answer the questions we have
+uncovered so far.
 
 == 5 Work Required
 
+=== 5.1 Protocol Verifier Instrumentation
+
+. Craft a mock-up dashboard using a graphics drawing tool (e.g.  PowerPoint).
+. Supplied with the requirements from this document, analyse the logging and
+  reporting instrumentation supplied by the Protocol Verifier.
+. Update the PV with sufficient logging and reporting to generate the data
+  needed by the reporting dashboard.
+
+=== 5.2 Protocol Verifier Back End
+
+* Build a dashboard using appropriate technology.
+
+=== 5.3 Technology Deployment
+
+* Implement a Kafka-compatible endpoint using <<dr-3, Apache NiFi>>.
+
 == 6 Acceptance Test
+
+. Launch the Protocol Verifier in benchmarking mode with the regression
+  suite set of job definitions.
+. Launch the Protocol Verifier dashboard.
+. See that all of the question in <<4 Analysis>> can be answered.
 
 == 7 Document References
 
 . [[dr-1]] https://github.com/xtuml/munin/issues/189[189 - Enhance Reporting]
 . [[dr-2]] link:./188_enhance_logging_ant.adoc[Enhance Logging Analysis Note]
+. [[dr-3]] https://nifi.apache.org/[Apache NiFi]
 
 ---
 
