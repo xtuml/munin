@@ -7,19 +7,6 @@
 - BridgePoint
 - [jq](https://jqlang.github.io/jq/)
 
-## Populate Conan Server
-
-Before building, it is required to populate a local cache with the MASL
-artifacts. This step is only required once before building.
-
-From the root of the repository, execute the following command:
-
-```
-./bin/populate.sh
-```
-
-This may take some time as it downloads ~500MB of data.
-
 ## Build Projects
 
 ### Generate MASL

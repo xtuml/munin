@@ -1,17 +1,17 @@
 import conan
+import os
 
 
 class ConanFile(conan.ConanFile):
     name = 'asynclogger'
-    version = '1.2.0'
     user = 'xtuml'
     channel = 'stable'
-    python_requires = 'masl_conan/[>=4.2.2]@xtuml/stable'
+    python_requires = f'masl_conan/{os.environ["MASL_VERSION"]}@xtuml/stable'
     python_requires_extend = 'masl_conan.MaslConanHelper'
 
     def requirements(self):
-        self.requires('masl_core/[>=4.2.2]@xtuml/stable')
-        self.requires('masl_utils/[>=4.2.2]@xtuml/stable')
+        self.requires(f'masl_core/{os.environ["MASL_VERSION"]}@xtuml/stable')
+        self.requires(f'masl_utils/{os.environ["MASL_VERSION"]}@xtuml/stable')
 
     def build_requirements(self):
-        self.tool_requires('masl_codegen/[>=4.2.2]@xtuml/stable')
+        self.tool_requires(f'masl_codegen/{os.environ["MASL_VERSION"]}@xtuml/stable')

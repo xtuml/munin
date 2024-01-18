@@ -270,7 +270,7 @@ begin
                     updatedJobTypes := updatedJobTypes & jobType;
                 else
                     logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid: " & jobDefinitionFile.jobDefinitionFileName & "\n" & JSON::dump(jobTypeValidationResult, true);
-                    Logger::log(Logger::Debug, logMessage);
+                    Logger::log(Logger::Debug, "AEOrdering", logMessage);
                     raise JSON::JSONException("Job definition file invalid");
                 end if;
             end if;

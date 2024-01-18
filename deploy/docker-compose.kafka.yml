@@ -1,7 +1,7 @@
 version: "3.9"
 volumes:
   ConanCache:
-    name: munin_ConanCache
+    name: ConanCache
     external: true
 
 services:
@@ -22,6 +22,8 @@ services:
       - "./reception-processed:/root/processed"
     ulimits:
       sigpending: -1
+    logging:
+      driver: local
     working_dir: /root
     command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AER_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id reception_group_1 -util MetaData"
 
@@ -40,6 +42,8 @@ services:
       - "./InvariantStore:/root/InvariantStore"
     ulimits:
       sigpending: -1
+    logging:
+      driver: local
     working_dir: /root
     command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
@@ -59,6 +63,8 @@ services:
       - "./JobIdStore:/root/JobIdStore"
     ulimits:
       sigpending: -1
+    logging:
+      driver: local
     working_dir: /root
     command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -startJobGroup 00 -endJobGroup 3F -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
@@ -78,6 +84,8 @@ services:
       - "./JobIdStore:/root/JobIdStore"
     ulimits:
       sigpending: -1
+    logging:
+      driver: local
     working_dir: /root
     command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -startJobGroup 40 -endJobGroup 7F -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
@@ -97,6 +105,8 @@ services:
       - "./JobIdStore:/root/JobIdStore"
     ulimits:
       sigpending: -1
+    logging:
+      driver: local
     working_dir: /root
     command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -startJobGroup 80 -endJobGroup BF -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
@@ -116,6 +126,8 @@ services:
       - "./JobIdStore:/root/JobIdStore"
     ulimits:
       sigpending: -1
+    logging:
+      driver: local
     working_dir: /root
     command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -startJobGroup C0 -endJobGroup FF -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
@@ -134,8 +146,10 @@ services:
       - "./logs/reception:/var/log/reception"
     ulimits:
       sigpending: -1
+    logging:
+      driver: local
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/LOGGER_PROC_transient -log-config config/log-config-pv-proc.xml -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/LOGGER_PROC_transient -log-config config/log-config-pv-proc.properties -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   zookeeper:
     image: wurstmeister/zookeeper:3.4.6
@@ -162,7 +176,7 @@ services:
       # KAFKA_LOG_ROLL_MS: 60000                      # roll the log every minute
       KAFKA_LOG_SEGMENT_DELETE_DELAY_MS: 1            # delete immediately after log roll
       KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 10000    # check the retention condition every 10 seconds
-      KAFKA_CREATE_TOPICS: "default.AEReception_service2:1:1,default.AEOrdering_service2:1:1,default.AESequenceDC_service31:1:1,default.IStore_service2:1:1,default.IStore_service3:1:1,default.IStore_service4:1:1,default.AsyncLogger_service0:1:1,default.AsyncLogger_service1:1:1,default.AsyncLogger_service2:1:1,default.AsyncLogger_service3:1:1,default.AsyncLogger_service4:1:1,default.AsyncLogger_service5:1:1,default.AsyncLogger_service6:1:1,default.AsyncLogger_service7:1:1,default.AsyncLogger_service8:1:1,default.AsyncLogger_service9:1:1,default.AsyncLogger_service10:1:1,default.AsyncLogger_service11:1:1,default.AsyncLogger_service12:1:1,default.AsyncLogger_service13:1:1,default.AsyncLogger_service14:1:1,default.AsyncLogger_service15:1:1,default.AsyncLogger_service16:1:1,default.AsyncLogger_service17:1:1,default.AsyncLogger_service18:1:1,default.AsyncLogger_service19:1:1,default.AsyncLogger_service20:1:1"
+      KAFKA_CREATE_TOPICS: "default.AEReception_service2:1:1,default.AEOrdering_service2:1:1,default.AESequenceDC_service31:1:1,default.IStore_service2:1:1,default.IStore_service3:1:1,default.IStore_service4:1:1,default.BenchmarkingProbe_service0:1:1,default.AsyncLogger_service0:1:1,default.AsyncLogger_service1:1:1,default.AsyncLogger_service2:1:1,default.AsyncLogger_service3:1:1,default.AsyncLogger_service4:1:1,default.AsyncLogger_service5:1:1,default.AsyncLogger_service6:1:1,default.AsyncLogger_service7:1:1,default.AsyncLogger_service8:1:1,default.AsyncLogger_service9:1:1,default.AsyncLogger_service10:1:1,default.AsyncLogger_service11:1:1,default.AsyncLogger_service12:1:1,default.AsyncLogger_service13:1:1,default.AsyncLogger_service14:1:1,default.AsyncLogger_service15:1:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
