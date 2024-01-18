@@ -31,6 +31,7 @@ class ConanFile(conan.ConanFile):
         self.requires(f'masl_core/{os.environ["MASL_VERSION"]}@xtuml/stable')
         self.requires(f'masl_utils/{os.environ["MASL_VERSION"]}@xtuml/stable')
         self.requires(f'asynclogger/{self.version}@xtuml/stable')
+        self.requires(f'benchmarkingprobe/{self.version}@xtuml/stable')
         self.requires(f'aeordering/{self.version}@xtuml/stable')
         self.requires(f'aereception/{self.version}@xtuml/stable')
         self.requires(f'freception/{self.version}@xtuml/stable')
