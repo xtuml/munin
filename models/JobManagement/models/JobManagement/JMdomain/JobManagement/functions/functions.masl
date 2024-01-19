@@ -1,5 +1,5 @@
 //! ACTIVITY BEGIN. '1a20be36-52a8-4bb8-b192-0c81141e29ae' DO NOT EDIT THIS LINE.
-private service JobManagement::registerWorker ( workerId : in UUID::formatted_uuid ) is
+public service JobManagement::registerWorker ( workerId : in UUID::formatted_uuid ) is
 jobWorker : instance of JobWorker;
 employedWorker : instance of EmployedWorker;
 retiredWorker : instance of RetiredWorker;
@@ -22,7 +22,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '0fb0455c-728d-4b65-8673-2eedf8a4ec9b' DO NOT EDIT THIS LINE.
-private service JobManagement::workerHeartbeat ( workerId : in UUID::formatted_uuid ) is
+public service JobManagement::workerHeartbeat ( workerId : in UUID::formatted_uuid ) is
 employedWorker : instance of EmployedWorker;
 
 begin
@@ -89,7 +89,7 @@ begin
 	        jmSpec := find_one JobManagementSpec();
 	        if unassignedJobIds'length > jmSpec.maxUnassignedJobs then
 		        eventContent := "Maximum number of of unassigned jobs exceeded. Job Count = " & (unassignedJobIds'length)'image;
-		        Reporting~>reportEvent(Logger::Error, "aeordering_duplicate_job_id", eventContent);
+		        Reporting~>reportEvent(Logger::Error, "jobmanagement_exceeded_max_jobs", eventContent);
 		    end if;
     	end if;    
     end if;
@@ -98,14 +98,15 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'd64e9daf-e005-46ed-8216-8cc7bf43d3b1' DO NOT EDIT THIS LINE.
-private service JobManagement::jobCompleted ( workerId : in UUID::formatted_uuid,
-                                             jobId : in string ) is
+public service JobManagement::jobCompleted ( workerId : in UUID::formatted_uuid,
+                                            jobId : in string ) is
 employedWorker : instance of EmployedWorker;
 assignedJob : instance of AssignedJob;
 job : instance of Job;
 auditEvents : sequence of instance of AuditEvent;
 jobManager : instance of JobManager;
 unassignedJobIds : sequence of string;
+eventContent : string;
 
 begin
 	
@@ -128,12 +129,16 @@ begin
 			delete assignedJob;
 			delete job;
 			
+	        eventContent := "Job completed. Job Id = " & jobId;
+	        Reporting~>reportEvent(Logger::Error, "jobcompleted", eventContent);
 			// report that the job completion is confirmed
 			Worker ~>jobCompletionConfirmed(workerId, jobId);
 			// check if there are not unassigned jobs and if there are and this employed worker has capacity then assign the job
 			jobManager := find_one JobManager();
 			unassignedJobIds := jobManager.unassignedJobIds;
 			if unassignedJobIds'length > 0 then
+		        eventContent := "Job completed. Unassigned Job count = " & unassignedJobIds'length'image;
+		        Reporting~>reportEvent(Logger::Error, "unassignedjobs", eventContent);
 				jobManager.assignJob(employedWorker);
 			end if;
 		end if;
@@ -143,7 +148,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'ff723fb4-c20f-4ab8-bc39-e807df00e8fc' DO NOT EDIT THIS LINE.
-private service JobManagement::deregisterWorker ( workerId : in UUID::formatted_uuid ) is
+public service JobManagement::deregisterWorker ( workerId : in UUID::formatted_uuid ) is
 employedWorker : instance of EmployedWorker;
 
 begin

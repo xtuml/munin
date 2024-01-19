@@ -3,7 +3,7 @@ public service JobManagement::Reporting~>reportEvent ( eventPriority : in Logger
                                                       eventLabel : in string,
                                                       eventContent : in string ) is
 begin
-  null;
+	Logger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

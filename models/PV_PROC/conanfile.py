@@ -7,7 +7,7 @@ class ConanFile(conan.ConanFile):
     channel = 'stable'
     python_requires = f'masl_conan/{os.environ["MASL_VERSION"]}@xtuml/stable'
     python_requires_extend = 'masl_conan.MaslConanHelper'
-    persistent_procs = ['ISTORE_PROC.prj', 'JM_PROC.prj']
+    persistent_procs = ['ISTORE_PROC.prj']
 
     def masl_extras(self):
         return ['-skiptranslator', 'Sqlite']
