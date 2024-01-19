@@ -84,14 +84,12 @@ end service;
 
 //! ACTIVITY BEGIN. 'd313277c-1d1c-4def-8303-bc6aa6b950dd' DO NOT EDIT THIS LINE.
 public service AEOrdering::deleteJob ( jobId : in string ) is
-logMessage : string;
 theJob : instance of Job;
 
 begin
   theJob := find_one Job(jobId = jobId);
   if theJob /= null then
-
-    // Then, check if the job has any blocked events and if so fail the job otherwise delete the job
+    // Check if the job has any blocked events and if so fail the job otherwise delete the job
 	if (theJob -> R9.AuditEvent -> R4.BlockedAuditEvent)'length > 0 then
 	  theJob.failJob("JobId = " & jobId & " : FailureReason = Job ended with blocked events");
     else  
