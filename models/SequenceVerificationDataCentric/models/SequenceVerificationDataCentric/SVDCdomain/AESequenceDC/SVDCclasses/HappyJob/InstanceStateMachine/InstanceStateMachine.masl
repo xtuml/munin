@@ -952,6 +952,8 @@ theJob : instance of Job;
 logMessage : string;
 theJobID : string;
 jobName : string;
+instrumentationEventId : string;
+instrumentationEventType : string;
 
 begin
   theJob := this -> R45;
@@ -960,7 +962,13 @@ begin
   jobName := theJob.jobName;
   theJob.deleteJob();
   
-  // Synchronise the deletion of any counterpart Job instances in other domains.
+  // Report that SVDC has deleted the Job (this is part of the behaviour
+  // verification process of the Protocol Verifier itself).
+  instrumentationEventId := "Unused";
+  instrumentationEventType := "SVDC_PVJobDeleted";
+  BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", theJobID, instrumentationEventId, instrumentationEventType);
+  
+  // Initialise the synchronisation of the deletion of any counterpart Job instances in other domains.
   JobAdmin~>deleteJob(theJobID);
 
   logMessage := "AESequenceDC::HappyJob.Deleted : Job with jobID: " & theJobID & " with Job Name = " & jobName & " has been deleted";
