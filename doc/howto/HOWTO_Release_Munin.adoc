@@ -50,25 +50,16 @@ First, release plus2json.  The HOWTO is found in <<dr-2>>.
 
 ==== 7.1.2 Release munin Second
 
-. Branch the munin repository.
-. Bump the 'version' values in the `conanfile.py` of each model project.
-  As of December 2023 these included the following:
-  .. AEOrdering
-  .. AEReception
-  .. AsyncLogger
-  .. FileReception
-  .. InvariantStore
-  .. PV_PROC
-  .. SequenceVerificationDataCentric
-  .. VerificationGateway
-. Commit and push (including the updated binary `plus2json.pyz`).
-. Prepare a pull request.
-. Review and service the pull request.
+. If changes have been made to plus2json:
+  .. Branch the munin repository.
+  .. Include the updated `plus2json.pyz` binary. Commit and push.
+  .. Prepare a pull request.
+  .. Review and service the pull request.
 . Create new release using GitHub.
   .. 'Releases' (along right-hand panes).
   .. 'Draft a new release'
   .. 'Choose a tag'
-  .. Create a new tag following the existing naming pattern.
+  .. Create a new tag following semantic versioning principles (<<dr-3>>).
   .. Paste a link to the release notes document or type a short summary of
      the release in the body of the release.
   .. 'Publish release'
@@ -77,6 +68,7 @@ First, release plus2json.  The HOWTO is found in <<dr-2>>.
 
 . [[dr-1]] https://onefact.atlassian.net/browse/MUN2-152[152 - HOWTO release Munin]
 . [[dr-2]] https://github.com/xtuml/plus2json/blob/main/doc/howto/HOWTO_release.adoc[HOWTO Release plus2json]
+. [[dr-3]] https://semver.org/[Semantic Versioning]
 
 ---
 

@@ -21,21 +21,29 @@ echo "Done."
 # launch the protocol verifier
 echo "Launching protocol verifier..."
 docker compose down
-docker compose up -d &>/dev/null
+docker compose up -d
 echo "Done."
 
+t0=`date +%s`
 # play all jobs
 for fn in ${puml_files}; do
-	echo "Generating runtime event data for '${fn}'..."
 	$P2J --play -o reception-incoming ${fn}
-	echo "Done."
-	sleep 1
+	sleep 0.1
 done
 
-# wait a reasonable amount of time
-delay=5
+# Delay only enough time to allow the unhappy jobs to finish (HangingJobTimer).
+t1=`date +%s`
+tdelta=$(($t1 - $t0))
+delay=$((45 - $tdelta))
+if [[ $delay -le 0 ]] ; then
+  delay=1
+fi
 echo "Waiting ${delay} seconds for protocol verifier to complete..."
 sleep $delay
+
+# tear down the protocol verifier
+echo "Tearing down protocol verifier..."
+docker compose down
 echo "Done."
 
 # make sure there is a success log for every job definition
@@ -56,11 +64,6 @@ for fn in config/job_definitions/*.json; do
 	fi
 done
 echo "--------------------------------------------------"
-echo "Done."
-
-# tear down the protocol verifier
-echo "Tearing down protocol verifier..."
-docker compose down
 echo "Done."
 
 # clean up repository
