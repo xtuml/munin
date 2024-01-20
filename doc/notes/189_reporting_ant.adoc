@@ -28,7 +28,7 @@ statistics of the Protocol Verifier.
 Following is a summary enumeration with details following.
 
 * instantaneous throughput (events per second) (speedometer)
-* throughput (events per second) over time period ("area under the curve" line graph)
+* throughput (events per second) over a time period ("area under the curve" line graph)
 * jobs succeeded versus failed versus alarmed (pie chart:  green, yellow, red)
 * list of alarmed job names with counters next to them counting the alarms sorted by incidence
 * list of failed job names with counters next to them counting the failures sorted by incidence
@@ -40,8 +40,8 @@ Following is a summary enumeration with details following.
 
 The instantaneous throughput will display the throughput of the
 Protocol Verifier "right now".  It may be time-averaged for smoothing but
-the time window will be very short.  This could be displayed in something
-like a speedometer dial.
+the time window will be short.  This could be displayed in something like
+a speedometer dial.
 
 The units shall be events per second.
 
@@ -102,6 +102,10 @@ period (e.g. "today" or "last 24 hours").
 
 ==== 3.1.2 Protocol Verifier Self-Reporting
 
+The Protocol Verifier provides metrics reflecting the behaviour of the
+monitored system(s).  However, it is useful to track a few key
+measurements supplying the current status of the Protocol Verifier itself.
+
 Following is a summary enumeration with details following.
 
 * number of running worker PVs
@@ -109,10 +113,12 @@ Following is a summary enumeration with details following.
 
 ===== 3.1.2.1 Protocol Verifier Worker Count
 
-An integer number representing the current number of Protocol Verifier
-"worker" instances shall be shown.  A max count and a minimum count shall
-display the maximum and minimum number respectively over a period of time
-(such as 24 hours, or since the Protocol Verifier started).
+The Protocol Verifier scales up and down to handle various audit event
+stream loads efficiently.  An integer number representing the current
+number of Protocol Verifier "worker" instances shall be shown.  A max
+count and a minimum count shall display the maximum and minimum number
+respectively over a period of time (such as 24 hours, or since the
+Protocol Verifier started).
 
 There are no units to this measurement.
 
@@ -137,16 +143,18 @@ the back end grew.  The above dashboard and reporting requirements emerged
 from hours and days and weeks of running the Protocol Verifier with
 simulated input audit event streams.
 
+=== 4.1 Questions
+
 While testing the Protocol Verifier several questions arose.
 
 * How fast is the PV running?
-* How do I know when a job has failed?
-* How do I identify a failed job?
+* How do we know when a job has failed?
+* How do we identify a failed job?
 * Which job types fail most often?
 * How many jobs have failed?
 * How many jobs have succeeded?
 * How many jobs are receiving alarm conditions?
-* What are my success/failure/alarm percentages?
+* What are the success/failure/alarm percentages?
 * What are the names of the jobs that receive alarm conditions?
 * Is the PV running optimally?
 * How long has the PV been running?
@@ -180,7 +188,7 @@ uncovered so far.
 . Launch the Protocol Verifier in benchmarking mode with the regression
   suite set of job definitions.
 . Launch the Protocol Verifier dashboard.
-. See that all of the question in <<4 Analysis>> can be answered.
+. See that all of the <<4.1 Questions>> can be answered.
 
 == 7 Document References
 

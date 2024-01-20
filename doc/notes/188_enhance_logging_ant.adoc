@@ -22,10 +22,22 @@ logging technologies.
 strategy employed by the Munin project in the Protocol Verifier.  This
 note will outline a Way Forward.
 
+=== 2.1 Logging Best Practices
+
+As preparation for enhancing logging, I studied a few published "Best
+Practice" guides.  We will take the opportunity in Munin to adopt/apply
+some of these practices while we are changing to the `log4*` idiom of
+logging.
+
+The first Best Practice to logging is to author a mission statement for
+the logging and proceed from there.  (This aligns with Shlaer-Mellor
+domain modelling quite nicely.)
+
 == 3 Requirements
 
 . Establish a Project Munin logging mission statement to guide decision
   making.
+. Enable reporting to flow from logging.
 . Support logging levels:
   ** Fatal
   ** Error
@@ -40,6 +52,52 @@ note will outline a Way Forward.
 . Establish rules and guidelines for the construction of log messages.
 
 == 4 Analysis
+
+=== 4.1 Munin Logging Mission Statement
+
+* Munin software shall log information critical to the verification of protocols.
+  This includes detection of alarms, failures and successes.
+* Munin software shall be instrumented to enable the measurement of the
+  perforance of the Protocol Verifier application itself (benchmarking).
+* Munin software shall be judiciously instrumented with debug statements
+  adequate to isolating bugs.
+* The volume of production-level logging shall not exceed the volume of
+  production audit event traffic.
+
+==== 4.1.1 Breakdown of Application Traffic
+
+The Protocol Verifier monitors devices through telemetry.  There are two
+levels of detail in this telemetry, that of a _job_ and that of an
+_event_.  In general, the user is interested in the status of a job.
+Events are interesting only when they are erroneous.  Summaries of events
+are interesting in terms of throughput.
+
+==== 4.1.2 Job Logging
+
+The primary deliverable log entry is the final status of a job.  A job
+completes with status _successful_, _failed_ or _alarm_.  Together with
+the job type (name) and identifier, this is the key status provided by the
+Protocol Verifier.
+
+==== 4.1.3 Event Logging
+
+A secondary 
+
+=== 4.1 Logger Hierarchy
+
+* The top-level logger shall be 'pv' (Protocol Verifier).
+* Each domain shall have a logger.
+  ** 'pv.jm':  Job Management
+  ** 'pv.aeo':  Audit Event Ordering
+  ** 'pv.sv':  Sequence Verification
+  ** 'pv.istore':  Invariant Store
+  ** 'pv.vg':  Verification Gateway
+* Each domain shall define at least 2 loggers:  'job' and 'event'.
+  ** 'pv.jm.job':  Job Management job logger
+  ** 'pv.jm.event':  Job Management event logger
+* Each domain may define lower-level loggers for specific purposes.
+  ** 'pv.sv.happy':  Sequence Verification Happy module (class)
+  ** 'pv.sv.unhappy':  Sequence Verification Unhappy module (class)
 
 == 5 Work Required
 
