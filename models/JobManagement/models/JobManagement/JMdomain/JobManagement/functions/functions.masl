@@ -106,7 +106,6 @@ job : instance of Job;
 auditEvents : sequence of instance of AuditEvent;
 jobManager : instance of JobManager;
 unassignedJobIds : sequence of string;
-eventContent : string;
 
 begin
 	
@@ -129,16 +128,12 @@ begin
 			delete assignedJob;
 			delete job;
 			
-	        eventContent := "Job completed. Job Id = " & jobId;
-	        Reporting~>reportEvent(Logger::Error, "jobcompleted", eventContent);
 			// report that the job completion is confirmed
 			Worker ~>jobCompletionConfirmed(workerId, jobId);
 			// check if there are not unassigned jobs and if there are and this employed worker has capacity then assign the job
 			jobManager := find_one JobManager();
 			unassignedJobIds := jobManager.unassignedJobIds;
 			if unassignedJobIds'length > 0 then
-		        eventContent := "Job completed. Unassigned Job count = " & unassignedJobIds'length'image;
-		        Reporting~>reportEvent(Logger::Error, "unassignedjobs", eventContent);
 				jobManager.assignJob(employedWorker);
 			end if;
 		end if;
