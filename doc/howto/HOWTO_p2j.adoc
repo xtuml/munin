@@ -1,0 +1,161 @@
+= plus2json
+
+This repository holds engineering artefacts for a PLUS language processor which
+parses PLUS (based on PlantUML) and produces Protocol Verifier job definitions
+formatted as JSON.
+
+== Build
+
+plus2json requires some files to be generated (Antlr-based parser and schema
+gen). To generate the necessary files run:
+
+  python bundle.py dev
+
+NOTE: For this build to work, the `WORKSPACE` variable must be set to an
+Eclipse workspace containing the `plus` BridgePoint project. The `antlr4-tools`
+python package must also be installed.
+
+== Run
+
+To run plus2json in the repository, run:
+
+  python -m plus2json
+
+To print usage and help, run:
+
+  python -m plus2json -h
+
+== Test
+
+To run unit tests, run:
+
+  python -m unittest
+
+== Usage
+
+----
+usage: python plus2json.pyz <command> [-v] [-h] [--debug] [--pretty-print] [-o dir]  [filenames ...]
+
+plus2json is a utility for processing PLUS job definitions and producing JSON output for configuring and testing the Protocol Verifier.
+
+Commands:
+  --job                 Output PLUS job definition
+  --play                Produce a stream of runtime audit events
+
+Global Options:
+  -v, --version         show program version number and exit
+  -h, --help            Show this help message and exit
+  --debug               Enable debug logging
+  -p, --pretty-print    Print human readable debug/visualisation output
+  -o dir, --outdir dir  Path to output directory
+  filenames             Input .puml files
+
+Play Options:
+  --integer-ids         Use deterministic integer IDs (potentially useful for debugging but not normal testing)
+  --msgbroker		Identifies the port on which the message broker is expecting to receive input messages
+  --topic		Identifies the message broker topic to be used
+  --shuffle		Mixes the order of events to test the PV capacity to cope with disordered events
+  --rate		Defines the rate at which plus2json will generate events in events per second 
+			(for a single instance of plus2json there is an upper limit of about 2000 events/second)
+  --num-events		Specifies the number of events to generate in a single run of plus2json
+
+Play Unhappy Event Options:
+  --replace		Replaces the named event with one of the unhappy events defined for the job
+  --sibling		Inserts an unhappy event (which is defined for the job) as a sibling 
+                        of the named event i.e. the inserted unhappy event and the named event
+			both refer to the same event in their previous event id field
+  --insert		Inserts an unhappy event (which is defined for the job) as the predecessor 
+                        of the named event i.e. the named event refers to the inserted unhappy event 
+			in its previous event id field
+
+Note: The behaviour of --play is non-deterministic when there is an unhappy event 
+defined in the job definition with no other unhappy event options . It will 
+either play the job with no unhappy events or it will randomly substitute an 
+unhappy event for a critical event (as defined for the job).
+
+Play Error Injection Options:
+  --injectAb4B		Injects the first named event before the second name event
+  --omit		Omits the named event but links the following event to the
+			previous event so that the sequence continues
+
+
+Job Definition Examples:
+    # load Tutorial_1.puml and print a human readable version of the definition to the console
+    python plus2json.pyz --job Tutorial_1.puml --pretty-print
+
+    # load Tutorial_1.puml and print a human readable version of the definition to the console
+    python plus2json.pyz --job -p Tutorial_1.puml
+
+    # convert Tutorial_1.puml into JSON and output to the console
+    python plus2json.pyz --job Tutorial_1.puml
+
+    # convert all .puml files in the 'puml' directory and write each to a JSON file in 'job_definitions'
+    python plus2json.pyz --job -o job_definitions puml/*.puml
+
+Play Examples:
+    # load Tutorial_1.puml and print a human readable stream of events to the console
+    python plus2json.pyz --play Tutorial_1.puml--pretty-print
+
+    # load Tutorial_1.puml and print a JSON stream of events to the console
+    python plus2json.pyz --play Tutorial_1.puml
+
+    # load all .puml files in the 'puml' directory and write steam of 
+    events for each to a JSON file in 'job_definitions'
+    python plus2json.pyz --play -o job_definitions puml/*.puml
+
+    # run the play option on the set of 'puml' files represented by $puml_files and generate a 
+    # stream of events to the Kafka message broker on port 9092 using topic default.AEReception_service0.
+    # The events will be shuffled in order and a total of 100000 will be sent at the rate of 
+    # 1000 events per second
+    python plus2json.pyz --play $puml_files --msgbroker localhost:9092 --topic default.AEReception_service0  
+    --shuffle --rate 1000 --num-events 100000
+
+TODO Question: What tells p2j to keep generating events rather than just generate one set of events? Is
+it merely the presence of --rate or --num-events. Should that be a variant of the --play option e.g. 
+--play generates one set of events and --stream generates events continuously as defined by the
+--rate and --num-events options?
+
+Play Unhappy Event Option Examples:
+    # run the play option on a single 'puml' file and generate an 
+    # event stream in a file in the reception-incoming directory replacing
+    # the CSJI event with one of the unhappy events in the job definition.
+    python plus2json.pyz -o reception-incoming ACriticalJob1.puml --play --replace CSJI
+
+    # run the play option on a single 'puml' file and generate an 
+    # event stream in a file in the reception-incoming directory adding
+    # a sibling unhappy event to the CSJD event. The unhappy event will be one
+    # defined in the job definition.
+    python plus2json.pyz -o reception-incoming ACriticalJob1.puml --play --sibling CSJD
+
+    # run the play option on a single 'puml' file and generate an 
+    # event stream in a file in the reception-incoming directory adding
+    # an unhappy event as a predecessor to the CSJC event. The unhappy 
+    # event will be one defined in the job definition.
+    python plus2json.pyz -o reception-incoming ACriticalJob1.puml --play --insert CSJC
+
+Play Error Injection Option Examples:
+----
+    # run the play option on a single 'puml' file and generate an 
+    # event stream in a file in the reception-incoming directory adding
+    # the event SSJA as a predecessor to the SSJE event. The injected
+    # event will refer to original predecessor of SSJE and its predecessor
+    python plus2json.pyz -o reception-incoming SimpleSequence.puml --play --injectAb4B SSJA SSJE
+
+    # run the play option on a single 'puml' file and generate an 
+    # event stream in a file in the reception-incoming directory omitting
+    # the event SSJC from the sequence. The original successor of SSJC
+    # will now refer to the original predecessor of SSJC as its predecessor.
+    python plus2json.pyz -o reception-incoming SimpleSequence.puml --play --omit SSJC
+
+=== Package for release
+
+To package the `plus2json.pyz` bundle, run:
+
+  python bundle.py
+
+=== Data Model
+
+This is the structure of the job definition. PLUS `.puml` files are parsed, and
+instances of these classes are created and linked.
+
+image::doc/plus_job_defn.png[PLUS Job Definition]
