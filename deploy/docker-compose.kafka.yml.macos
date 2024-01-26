@@ -19,6 +19,12 @@ services:
       - "../models/PV_PROC/build:/work/build"
       - "../models/PV_PROC/schedule:/root/schedule"
       - "./config:/root/config"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    environment:
+      - OOA_PORT=0
     ulimits:
       sigpending: -1
     working_dir: /root
@@ -58,12 +64,6 @@ services:
       - "./config:/root/config"
       - "./InvariantStore:/root/InvariantStore"
       - "./JobIdStore:/root/JobIdStore"
-    ports:
-      - "20000:20000"
-      - "30000:30000"
-      - "40000:40000"
-    environment:
-      - OOA_PORT=0
     ulimits:
       sigpending: -1
     logging:

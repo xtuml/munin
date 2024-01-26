@@ -16,7 +16,7 @@ fi
 ITERATIONS=$(($TOTAL_EVENTS / $BATCH_OF_EVENTS))
 
 # Allow over-riding the kafka topic (for MacOS builds)
-RECEPTION_TOPIC="default.AEReception_service2"
+RECEPTION_TOPIC="default.JobManagement_service2"
 if [[ $# -ge 3 ]] ; then
   RECEPTION_TOPIC=$3
 fi
@@ -40,10 +40,12 @@ echo "Done."
 echo "Launching the application..."
 export CONFIG_FILE=benchmarking-config.json
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  docker compose -f docker-compose.kafka.yml.macos up -d --wait &>/dev/null
+  docker compose -f docker-compose.kafka.yml.macos up -d 
 else
   docker compose -f docker-compose.kafka.yml up -d --wait &>/dev/null
 fi
+echo "Waiting to start"
+sleep 30
 echo "Done."
 
 # generate source job
@@ -64,7 +66,7 @@ for ((i = 0; i < $ITERATIONS; i++)); do
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
 done
-sleep 5
+sleep 20
 echo "Done."
 
 # run the benchmark script

@@ -2,6 +2,6 @@ public service JobManagement::Reporting~>reportEvent ( eventPriority: in Logger:
                                                        eventLabel: in string,
                                                        eventContent: in string ) is
 begin
-  AsyncLogger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
+  AsyncLogger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
   BenchmarkingProbe::mark(eventLabel, eventContent, timestamp'now);
 end service;

@@ -4,7 +4,7 @@ import kafka3
 import re
 
 
-KEY_EVENTS = ('reception_event_received', 'reception_event_valid', 'reception_event_invalid', 'reception_event_written', 'aeordering_events_processed', 'svdc_event_received', 'svdc_event_processed', 'svdc_happy_event_processed', 'svdc_unhappy_event_processed')
+KEY_EVENTS = ('jobmanagement_event_received', 'jobmanagement_event_written', 'aeordering_events_processed', 'svdc_event_received', 'svdc_event_processed', 'svdc_happy_event_processed', 'svdc_unhappy_event_processed')
 PATTERN = r'EventId = ([\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12})'
 
 
@@ -94,14 +94,9 @@ if __name__ == '__main__':
                     else:
                         evt = events[evt_id]
 
-                    if label == 'reception_event_received':
+                    if label == 'jobmanagement_event_received':
                         evt.received = d
-                    elif label == 'reception_event_valid':
-                        evt.validated = d
-                    elif label == 'reception_event_invalid':
-                        evt.validated = d
-                        evt.valid = False
-                    elif label == 'reception_event_written':
+                    elif label == 'jobmanagement_event_written':
                         evt.written = d
                     elif label == 'aeordering_events_processed':
                         evt.ordering_received = d
@@ -114,18 +109,18 @@ if __name__ == '__main__':
 
     evts = events.values()
     print(f'Total number of events: {len(evts)}')
-    print(f'Total number of events (Received by Reception): {len(list(filter(lambda e: e.received is not None, evts)))}')
-    print(f'Total number of events (Written by Reception): {len(list(filter(lambda e: e.written is not None, evts)))}')
+#    print(f'Total number of events (Received by JobManagement): {len(list(filter(lambda e: e.received is not None, evts)))}')
+#    print(f'Total number of events (Written by JobManagement): {len(list(filter(lambda e: e.written is not None, evts)))}')
     print(f'Total number of events (Loaded by Ordering): {len(list(filter(lambda e: e.ordering_received is not None, evts)))}')
     print(f'Total number of events (Received by SVDC): {len(list(filter(lambda e: e.svdc_received is not None, evts)))}')
     print(f'Total number of events (Processed by SVDC): {len(list(filter(lambda e: e.processed is not None, evts)))}')
 
-    evts = list(filter(lambda e: e.received is not None and e.processed is not None, evts))
+    evts = list(filter(lambda e: e.ordering_received is not None and e.processed is not None, evts))
     print(f'Total number of events (in calc): {len(evts)}')
     if len(evts) > 0:
-        td = max(map(lambda e: e.processed or datetime.min, evts)) - min(map(lambda e: e.received or datetime.max, evts))
+        td = max(map(lambda e: e.processed or datetime.min, evts)) - min(map(lambda e: e.ordering_received or datetime.max, evts))
         print(f'Total time: {td.total_seconds():.3f}')
         print(f'Events per second: {len(evts) / td.total_seconds():.3f}')
-        print(f'Average time in reception per event: {sum(map(lambda e: (e.written - e.received).total_seconds(), evts)) / len(evts):.3f}s')
-        print(f'Average time between reception and PV per event: {sum(map(lambda e: (e.ordering_received - e.written).total_seconds(), evts)) / len(evts):.3f}s')
+#        print(f'Average time in reception per event: {sum(map(lambda e: (e.written - e.received).total_seconds(), evts)) / len(evts):.3f}s')
+#        print(f'Average time between reception and PV per event: {sum(map(lambda e: (e.ordering_received - e.written).total_seconds(), evts)) / len(evts):.3f}s')
         print(f'Average time in PV per event: {sum(map(lambda e: (e.processed - e.ordering_received).total_seconds(), evts)) / len(evts):.3f}s')

@@ -1,6 +1,6 @@
 = Munin Horizontal Scaling Design
 
-xtUML Project Analysis Note
+xtUML Project Design Note
 
 == 1 Abstract
 
@@ -30,9 +30,13 @@ the heartbeat will cause the worker to be retired. Any in-progress jobs assigned
 a PV worker who has retired shall become unassigned and added to the queue of jobs
 that need processing.
 
-The current thinking is that Job Management will be deployed with Reception as a single 
-instance of the Reception domain has been performant in recent bench testing. Therefore 
-a PV worker shall be made up of AEO and SVDC. 
+AERecption shall be removed from the solution and role of validating the events against 
+the event schema shall be carried out be AEOrdering. Doing this validation in ordering 
+ensures that Job Management does not become a bottle neck performing schema validation.
+
+.Scaling Design
+image::ScalingDesign.png[Scaling Design]
+
 
 === 3.1 Register Worker
 
@@ -44,9 +48,8 @@ It shall then periodically send out the registerWorker message to Job Management
 When Job Management receives the request to register from the PV instance it shall be 
 added to the pool of employed PV Worker instances that are employed by Job Management.
 
-If Job Management thinks that the PV worker is already registered, then the request 
-shall be acknowledged as if it were not registered. QUESTION: What should it do with 
-any assigned jobs under this condition?
+If Job Management thinks that the PV worker is already registered, then it shall deregister 
+the worker and reassign any in progress jobs. 
 
 If Job Management thinks that the PV worker is retired, it shall migrate it back to 
 employed.
@@ -72,14 +75,12 @@ image::WorkerHeartbeat.png[Worker Heartbeat]
 
 === 3.3 Job Assignment
 
-Once Reception has validated the provided event against the schema rather than calling 
-AEOrdering interface acceptEvent, it shall call the Job Management interface acceptEvent.
+When Job Management receives an event it shall check for a job already existing for this event 
+and if not create a new unassigned job and attempt to allocate it to the next available PV worker 
+based on the round robin queue that is being employed. Once assigned the event shall be passed to 
+the PV worker.
 
-Job Managment shall check for a job already existing for this event and if not create a new
-unassigned job and attempt to allocate it to the next available PV worker based on the round
-robin queue that is being employed. Once assigned the event shall be passed to the PV worker.
-
-Job Managment shall have a maximum number of jobs per PV worker and if they are all maxed out 
+Job Management shall have a maximum number of jobs per PV worker and if they are all maxed out 
 then the job shall remain unassigned.
 
 If an event is received for an existing Job that is already assigned it shall be passed to the
@@ -87,9 +88,10 @@ PV worker.
 
 If an event is recieved for an unassigned job it shall be stored until that job can be assigned.
 
-Once the PV worker has completed the job it shall report back to job management indicating if it 
-passed or failed. Passed jobs shall be deleted immediately. Failed jobs have a deletion timer that
-during testing shall allow for further inspection.
+Once the PV worker has completed the job it shall report back to job management indicating that the 
+job is complete. Job Managemnt report back tah the completed job is confirmed and teh worker can 
+delete the job. Job Managment shall retain tehjob id in its set of stored job ids so that it can 
+detect duplicate job ids in the future.
 
 .Job Assignment
 image::JobAssignment.png[Job Assignment]
@@ -112,30 +114,64 @@ As all job assignemts are controlled by Job Management, if this process is made 
 then there is no requirement for a Job ID Store further reducing reliance on file I/O.
 
 .Job Management Class Diagram
-image::JobManagementClassDiagram.png[Job Management Class Diagram]
+image::JobManagementClassDiagram-2.png[Job Management Class Diagram]
 
-== 4 Work Required
+== 4 Reporting
 
-=== 5.1 Job Management
+The Job Management domain has been augmented with reporting that can be used to collect metrics.
+The following table identifies reported events shall be made from the Job Management domain.
 
-. Finish implementation of Job Management
-. Create a deployment process containing Job Management and Reception
+|===
 
-=== 5.2 AEOrdering
+| Reported Event | Description | Provided Data
+|jobmanagement_event_received
+|Indicates an event has been received by Job Management
+|None
+|jobmanagement_event_written
+|Indicates an event has been sent to a PV Worker
+|None
+|jobmanagement_duplicate_job_id
+|Indicates that a duplicate job id was detected by Job Management
+| *_JobId =_*
+|jobmanagement_exceeded_max_jobs
+|Indictes that the maximum number of unassigned jobs has been exceeded
+| *_Job Count =_*
+|jobmanagement_total_assigned_jobs
+|Reports the total number of assigned jobs
+| *_Job Count =_*
+|jobmanagement_total_unassigned_jobs 
+|Reports the toal number of unassignd jobs
+| *_Job Count =_*
+|jobmanagement_worker_assigned_job_count
+|Reports the number of currently assigned jobs for the specified worker
+| *_Worker id =_* and *_Job Count =_*
+|===
 
-. Remove "laning" from AEOrdering
-. Add the concept of a worker to AEOrdering to generate the worker id, register with Job Management, 
-deregister with Job Management and maintain the heartbeat with Job Management
-. Update the PV_PROC process to interact with Job Management
-. Remove Job ID Store.
+== 5 Configuration
 
-=== 5.3 PV_PROC and Kafka Deployment
+The addition of the Job Management domain has resulted in some new configuration data for pv_config.json
+and the details of these configuration items are capture in the following table.
 
-. Update the PV_PROC docker compose to be just one instance and use the docker replica feature.
-. Updte the kafka docker compose for the new messages.
+|===
 
-=== 5.4 Kubernetes
+| Name | Desription | Default Value
+| MaxJobsPerWorker | This is the maxi,um number of jobs that can be assigned to any one worker | 30000
+| MaxUnassignedJobs | This is the maximum number of jobs that can be unassigned before job Managemen 
+reports jobmanagement_exceeded_max_jobs | 100000
+| RetiredWorkerDeletionTime | The amount of time a retired worker is held in Job Managment before it is 
+deleted. This allows for a worker who is no longer registered to re-register. | PT10M
+| WorkerHeartbeatRate | The reate at which a worker should send the worker heartbeat to Job Management | PT1M
+| WorkerHeartbeatFailureThreshold | The number of missed heartbeats that have to occurr before Job 
+Management determins the worker is absent and retires the worker | 3
 
+
+|===
+
+== 6 Future Work Required
+
+=== 5.1 Kubernetes
+
+Currently the solution is till using a fixed numberof workers as specified in the docker compose file.
 To reach full horizontal scaling some research should be carried out into how we can scale the
 PV_PROC worker instances unsing Kubernetes.
 
