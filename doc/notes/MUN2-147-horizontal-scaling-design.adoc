@@ -17,7 +17,7 @@ Job Management that shall be used to manage the assignment of jobs to PV workers
 
 == 3 Design
 
-If we want to increase the number of PV procesess in the current design to manage 
+If we want to increase the number of PV processes in the current design to manage 
 the allocated lanes, it is necessary to stop the running system and reconfigure to
 define new instances of PV and their assigned lanes.
 
@@ -31,7 +31,7 @@ a PV worker who has retired shall become unassigned and added to the queue of jo
 that need processing.
 
 AERecption shall be removed from the solution and role of validating the events against 
-the event schema shall be carried out be AEOrdering. Doing this validation in ordering 
+the event schema shall be carried out by AEOrdering. Doing this validation in ordering
 ensures that Job Management does not become a bottle neck performing schema validation.
 
 .Scaling Design
@@ -63,14 +63,14 @@ The PV worker shall periodically send a heartbeat to Job Management to indicate 
 it is still operating.
 
 Job Management shall be configured with a timeout that indicates the frequency that
-this heartbeat should be recieved for each PV worker. When the heartbeat is not
+this heartbeat should be received for each PV worker. When the heartbeat is not
 received in this period, a counter is incremented and checked against a configurable
 threshold. If the threshold is breached, then the PV worker is considered to be retired.
 
 If a PV worker is retired while it has in-progress assigned jobs in Job Management, the jobs
 shall be moved to unassigned and placed back in the queue of jobs to be processed.
 
-.Woker Heartbeat
+.Worker Heartbeat
 image::WorkerHeartbeat.png[Worker Heartbeat]
 
 === 3.3 Job Assignment
@@ -86,11 +86,11 @@ then the job shall remain unassigned.
 If an event is received for an existing Job that is already assigned it shall be passed to the
 PV worker.
 
-If an event is recieved for an unassigned job it shall be stored until that job can be assigned.
+If an event is received for an unassigned job it shall be stored until that job can be assigned.
 
 Once the PV worker has completed the job it shall report back to job management indicating that the 
-job is complete. Job Managemnt report back tah the completed job is confirmed and teh worker can 
-delete the job. Job Managment shall retain tehjob id in its set of stored job ids so that it can 
+job is complete. Job Management report back that the completed job is confirmed and the worker can 
+delete the job. Job Management shall retain the job id in its set of stored job ids so that it can 
 detect duplicate job ids in the future.
 
 .Job Assignment
@@ -98,7 +98,7 @@ image::JobAssignment.png[Job Assignment]
 
 === 3.4 Deregister Worker
 
-It is possible for the PV worker to ask to be deregistered. If this happens any assigend jobs that
+It is possible for the PV worker to ask to be deregistered. If this happens any assigned jobs that
 are in progress are moved to unassigned and placed at the back of the queue to be re-assigned. the 
 PV worker is removed to retired and will eventually be deleted from Job Management.
 
@@ -110,7 +110,7 @@ image::DeregisterWorker.png[Deregister Worker]
 As can be seen from the class diagram the only class with any state behaviour is the Employed worker,
 and that is there to manage the heartbeat from the PV workers.
 
-As all job assignemts are controlled by Job Management, if this process is made persistent,
+As all job assignments are controlled by Job Management, if this process is made persistent,
 then there is no requirement for a Job ID Store further reducing reliance on file I/O.
 
 .Job Management Class Diagram
@@ -134,13 +134,13 @@ The following table identifies reported events shall be made from the Job Manage
 |Indicates that a duplicate job id was detected by Job Management
 | *_JobId =_*
 |jobmanagement_exceeded_max_jobs
-|Indictes that the maximum number of unassigned jobs has been exceeded
+|Indicates that the maximum number of unassigned jobs has been exceeded
 | *_Job Count =_*
 |jobmanagement_total_assigned_jobs
 |Reports the total number of assigned jobs
 | *_Job Count =_*
 |jobmanagement_total_unassigned_jobs 
-|Reports the toal number of unassignd jobs
+|Reports the total number of unassigned jobs
 | *_Job Count =_*
 |jobmanagement_worker_assigned_job_count
 |Reports the number of currently assigned jobs for the specified worker
@@ -154,15 +154,15 @@ and the details of these configuration items are capture in the following table.
 
 |===
 
-| Name | Desription | Default Value
-| MaxJobsPerWorker | This is the maxi,um number of jobs that can be assigned to any one worker | 30000
-| MaxUnassignedJobs | This is the maximum number of jobs that can be unassigned before job Managemen 
+| Name | Description | Default Value
+| MaxJobsPerWorker | This is the maximum number of jobs that can be assigned to any one worker | 30000
+| MaxUnassignedJobs | This is the maximum number of jobs that can be unassigned before job Management 
 reports jobmanagement_exceeded_max_jobs | 100000
-| RetiredWorkerDeletionTime | The amount of time a retired worker is held in Job Managment before it is 
+| RetiredWorkerDeletionTime | The amount of time a retired worker is held in Job Management before it is 
 deleted. This allows for a worker who is no longer registered to re-register. | PT10M
-| WorkerHeartbeatRate | The reate at which a worker should send the worker heartbeat to Job Management | PT1M
-| WorkerHeartbeatFailureThreshold | The number of missed heartbeats that have to occurr before Job 
-Management determins the worker is absent and retires the worker | 3
+| WorkerHeartbeatRate | The rate at which a worker should send the worker heartbeat to Job Management | PT1M
+| WorkerHeartbeatFailureThreshold | The number of missed heartbeats that have to occur before Job 
+Management determines the worker is absent and retires the worker | 3
 
 
 |===
@@ -171,9 +171,9 @@ Management determins the worker is absent and retires the worker | 3
 
 === 5.1 Kubernetes
 
-Currently the solution is till using a fixed numberof workers as specified in the docker compose file.
+Currently the solution is till using a fixed number of workers as specified in the docker compose file.
 To reach full horizontal scaling some research should be carried out into how we can scale the
-PV_PROC worker instances unsing Kubernetes.
+PV_PROC worker instances using Kubernetes.
 
 
 

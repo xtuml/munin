@@ -19,16 +19,12 @@ services:
       - "../models/PV_PROC/build:/work/build"
       - "../models/PV_PROC/schedule:/root/schedule"
       - "./config:/root/config"
-    ports:
-      - "20000:20000"
-      - "30000:30000"
-      - "40000:40000"
-    environment:
-      - OOA_PORT=0
     ulimits:
       sigpending: -1
+    logging:
+      driver: local
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/JM_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id reception_group_1 -util MetaData -util Inspector"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/JM_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   istore_proc:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
@@ -69,7 +65,7 @@ services:
     logging:
       driver: local
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -util MetaData -util Inspector"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   aeo_svdc_proc_2:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
@@ -191,6 +187,3 @@ services:
     volumes:
       - "./config:/root/config"
     command: /root/config/configure-kafka.sh.macos
-
-
-

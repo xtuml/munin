@@ -3,7 +3,7 @@ set -e
 
 # Usage:
 # run_benchmark.sh [rate (events/second)] [total number of events] [reception topic]
-# Executution defaults to:  run_benchmark.sh 1000 100000 default.AEReception_service2
+# Executution defaults to:  run_benchmark.sh 1000 100000 default.JobManagement_service0
 
 # Define batches of events for p2j to play.
 BATCH_OF_EVENTS=10000
@@ -16,7 +16,7 @@ fi
 ITERATIONS=$(($TOTAL_EVENTS / $BATCH_OF_EVENTS))
 
 # Allow over-riding the kafka topic (for MacOS builds)
-RECEPTION_TOPIC="default.JobManagement_service2"
+RECEPTION_TOPIC="default.JobManagement_service0"
 if [[ $# -ge 3 ]] ; then
   RECEPTION_TOPIC=$3
 fi
@@ -40,12 +40,10 @@ echo "Done."
 echo "Launching the application..."
 export CONFIG_FILE=benchmarking-config.json
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  docker compose -f docker-compose.kafka.yml.macos up -d 
+  docker compose -f docker-compose.kafka.yml.macos up -d --wait
 else
   docker compose -f docker-compose.kafka.yml up -d --wait &>/dev/null
 fi
-echo "Waiting to start"
-sleep 30
 echo "Done."
 
 # generate source job
@@ -66,7 +64,7 @@ for ((i = 0; i < $ITERATIONS; i++)); do
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
 done
-sleep 20
+sleep 5
 echo "Done."
 
 # run the benchmark script
