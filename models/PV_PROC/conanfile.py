@@ -33,7 +33,6 @@ class ConanFile(conan.ConanFile):
         self.requires(f'asynclogger/{self.version}@xtuml/stable')
         self.requires(f'benchmarkingprobe/{self.version}@xtuml/stable')
         self.requires(f'aeordering/{self.version}@xtuml/stable')
-        self.requires(f'aereception/{self.version}@xtuml/stable')
         self.requires(f'freception/{self.version}@xtuml/stable')
         self.requires(f'istore/{self.version}@xtuml/stable')
         self.requires(f'aesequencedc/{self.version}@xtuml/stable')
