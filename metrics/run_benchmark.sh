@@ -3,7 +3,7 @@ set -e
 
 # Usage:
 # run_benchmark.sh [rate (events/second)] [total number of events] [reception topic]
-# Executution defaults to:  run_benchmark.sh 1000 100000 default.JobManagement_service0
+# Executution defaults to:  run_benchmark.sh 1000 100000 default.JobManagement_service4
 
 # Define batches of events for p2j to play.
 BATCH_OF_EVENTS=10000
@@ -15,8 +15,12 @@ if [[ $# -ge 2 ]] ; then
 fi
 ITERATIONS=$(($TOTAL_EVENTS / $BATCH_OF_EVENTS))
 
-# Allow over-riding the kafka topic (for MacOS builds)
-RECEPTION_TOPIC="default.JobManagement_service0"
+# Allow over-riding the kafka topic.
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  RECEPTION_TOPIC="default.JobManagement_service2"
+else
+  RECEPTION_TOPIC="default.JobManagement_service4"
+fi
 if [[ $# -ge 3 ]] ; then
   RECEPTION_TOPIC=$3
 fi
@@ -39,11 +43,7 @@ echo "Done."
 # launch the application
 echo "Launching the application..."
 export CONFIG_FILE=benchmarking-config.json
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  docker compose -f docker-compose.kafka.yml.macos up -d --wait
-else
-  docker compose -f docker-compose.kafka.yml up -d --wait &>/dev/null
-fi
+docker compose -f docker-compose.kafka.yml up -d --wait &>/dev/null
 echo "Done."
 
 # generate source job
@@ -74,11 +74,7 @@ echo "Done."
 
 # tear down docker
 echo "Tearing down the application..."
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  docker compose -f docker-compose.kafka.yml.macos down
-else
-  docker compose -f docker-compose.kafka.yml down
-fi
+docker compose -f docker-compose.kafka.yml down
 echo "Done."
 
 exit_code=0
