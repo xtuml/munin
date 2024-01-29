@@ -44,7 +44,7 @@ begin
   	delete retiredWorker;
   end if;
   // create the employed worker
-  employedWorker := create EmployedWorker(workerId => this.workerId, Current_State => Created);
+  employedWorker := create EmployedWorker(workerId => this.workerId, working => false, Current_State => Created);
   link employedWorker R2 this;
   generate EmployedWorker.workerRegistered() to employedWorker;
   

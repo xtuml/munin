@@ -193,6 +193,7 @@ worker : instance of Worker;
 begin
     worker := find_one Worker(workerId = workerId);
     if worker /= null then
+		Reporting~>reportEvent(Logger::Information, "aeordering_worker_unregistered_received", ("Worker Id = " & string(workerId)));
     	generate Worker.deregistered() to worker;
 	end if;
 end service;
