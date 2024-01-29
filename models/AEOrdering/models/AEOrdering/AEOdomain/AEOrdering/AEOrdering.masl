@@ -112,7 +112,12 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '7de8f146-366c-421c-bd7c-58de8be8da3b' DO NOT EDIT THIS LINE.
-public service AEOrdering::Req_IF_Verification~>reportVerificationTimerControls () is
+public service AEOrdering::Req_IF_Verification~>reportVerificationTimerControls ( maxIntraSequenceEventTimeoutPeriod : in duration,
+                                                                                 waitPeriodForAllJobsCompletedCheck : in duration,
+                                                                                 waitPeriodForJobDeletion : in duration,
+                                                                                 waitPeriodForInvariantDeletion : in duration,
+                                                                                 timeoutPeriodForRetreivingStoredInvariants : in duration,
+                                                                                 timeoutPeriodForHangingJob : in duration ) is
 begin
   null;
 end service;
@@ -139,6 +144,35 @@ public service AEOrdering::Req_IF_BehaviourVerification~>sendInstrumentationEven
                                                                                    jobID : in string,
                                                                                    eventID : in string,
                                                                                    eventType : in string ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'e24e0a3d-2e90-4b31-ab0c-0cf631b24afd' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_JobManagement~>registerWorker ( workerId : in UUID::formatted_uuid ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'a9c8369f-2e32-4769-8684-a218fedff998' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_JobManagement~>deregisterWorker ( workerId : in UUID::formatted_uuid ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8b90c114-1ea4-4165-8464-ad0946bfd56d' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_JobManagement~>workerHeartbeat ( workerId : in UUID::formatted_uuid ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '20067b23-119e-45c1-bc24-1d98e32a29f4' DO NOT EDIT THIS LINE.
+public service AEOrdering::Req_IF_JobManagement~>jobCompleted ( workerId : in UUID::formatted_uuid,
+                                                               jobId : in string ) is
 begin
   null;
 end service;

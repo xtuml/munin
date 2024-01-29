@@ -1,0 +1,71 @@
+//! ACTIVITY BEGIN. '3b7bf8e8-8e8d-4d8f-b0df-9a9e4cb17ff1' 'afa63712-8b86-4987-8c39-c7d7e49721c1' DO NOT EDIT THIS LINE.
+state AEOrdering::Worker.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3b7bf8e8-8e8d-4d8f-b0df-9a9e4cb17ff1' '6c9f7dc2-428e-49d2-a712-7601d54d6cde' DO NOT EDIT THIS LINE.
+state AEOrdering::Worker.RegistrationRequested () is
+begin
+	
+	cancel this.workerTimer;
+	Req_IF_JobManagement~>registerWorker(this.workerId);
+	schedule this.workerTimer generate requestRegistration() to this delay this.requestRetryRate;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3b7bf8e8-8e8d-4d8f-b0df-9a9e4cb17ff1' 'c13ad07c-139e-4c79-a8b2-f79f37297184' DO NOT EDIT THIS LINE.
+state AEOrdering::Worker.Registered () is
+begin
+	cancel this.workerTimer;
+	this.registered := true;
+	schedule this.workerTimer generate Worker.reportHeartbeat() to this delay this.heartbeatRate;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3b7bf8e8-8e8d-4d8f-b0df-9a9e4cb17ff1' '77fd0300-aee1-48e0-9434-3d7658991fab' DO NOT EDIT THIS LINE.
+state AEOrdering::Worker.HeartbeatReported () is
+begin
+	cancel this.workerTimer;
+	Req_IF_JobManagement~>workerHeartbeat(this.workerId);
+	schedule this.workerTimer generate Worker.reportHeartbeat() to this delay this.heartbeatRate;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3b7bf8e8-8e8d-4d8f-b0df-9a9e4cb17ff1' '0764c144-d3f1-426b-a130-b65f19d6c00c' DO NOT EDIT THIS LINE.
+state AEOrdering::Worker.DeregistrationRequested () is
+begin
+	cancel this.workerTimer;
+	Req_IF_JobManagement~>deregisterWorker(workerId);
+	schedule this.workerTimer generate requestRegistration() to this delay this.requestRetryRate;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3b7bf8e8-8e8d-4d8f-b0df-9a9e4cb17ff1' 'b689c317-ee73-4b33-8fec-f03b47ff683f' DO NOT EDIT THIS LINE.
+state AEOrdering::Worker.Deregistered () is
+begin
+	
+	this.registered := false;
+	// locate any in progress jobs and fail them with worker performed requested deregister
+	for inProgressJob in find InProgressJob() loop
+		(inProgressJob -> R2.Job).failJob("Worker was requested to deregister with in progress jobs");
+	end loop;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '3b7bf8e8-8e8d-4d8f-b0df-9a9e4cb17ff1' '2f1ac76a-afe7-45b8-ad77-83084b03fb18' DO NOT EDIT THIS LINE.
+state AEOrdering::Worker.NotRegistered () is
+begin
+	
+	this.registered := false;
+	// locate any in progress jobs and fail them with worker performed requested deregister
+	for inProgressJob in find InProgressJob() loop
+		(inProgressJob -> R2.Job).failJob("Worker was received a deregistered message from Job Management with in progress jobs");
+	end loop;
+	generate Worker.requestRegistration() to this;
+	
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

@@ -1,5 +1,5 @@
 //! ACTIVITY BEGIN. '1a20be36-52a8-4bb8-b192-0c81141e29ae' DO NOT EDIT THIS LINE.
-private service JobManagement::registerWorker ( workerId : in UUID::formatted_uuid ) is
+public service JobManagement::registerWorker ( workerId : in UUID::formatted_uuid ) is
 jobWorker : instance of JobWorker;
 employedWorker : instance of EmployedWorker;
 retiredWorker : instance of RetiredWorker;
@@ -16,13 +16,18 @@ begin
 		if retiredWorker /= null then
 			// worker retired so put back into employment
 			jobWorker.employWorker();
+		else
+			// worker thinks it is not registered so deregister forcing 
+			// all in progress jobs to be reassigned.
+			employedWorker := jobWorker -> R2.EmployedWorker;
+			generate EmployedWorker.workerDeregistered() to employedWorker;
 		end if;
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '0fb0455c-728d-4b65-8673-2eedf8a4ec9b' DO NOT EDIT THIS LINE.
-private service JobManagement::workerHeartbeat ( workerId : in UUID::formatted_uuid ) is
+public service JobManagement::workerHeartbeat ( workerId : in UUID::formatted_uuid ) is
 employedWorker : instance of EmployedWorker;
 
 begin
@@ -57,6 +62,7 @@ begin
         jsonObject := JSON::get_object(jsonElement);
         if jsonObject'contains("jobId") then
 	        jobId := JSON::get_string(jsonObject["jobId"]);
+	        Reporting~>reportEvent(Logger::Error, "jobmanagement_event_received", "");
 	        jobManager := find_one JobManager();
 	        job := find_one Job(jobId = jobId);
 	        if job = null then
@@ -79,6 +85,8 @@ begin
 	        	if assignedWorker /= null then
 	        		jobManager.assignJob(assignedWorker);
 	        	end if;
+	        	// report assigned jobs
+	        	jobManager.reportJobAssignments();	        	
         	else
 	        	// report the event
 	        	acceptedAuditEvent.reportAuditEvent(assignedWorker);
@@ -87,9 +95,12 @@ begin
 	        // check if we have exceeded the max unassigned jobs and if so report an error
 	        unassignedJobIds := jobManager.unassignedJobIds;
 	        jmSpec := find_one JobManagementSpec();
-	        if unassignedJobIds'length > jmSpec.maxUnassignedJobs then
+	        if unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnaasignedJobsExceeded = false then
 		        eventContent := "Maximum number of of unassigned jobs exceeded. Job Count = " & (unassignedJobIds'length)'image;
-		        Reporting~>reportEvent(Logger::Error, "aeordering_duplicate_job_id", eventContent);
+		        Reporting~>reportEvent(Logger::Error, "jobmanagement_exceeded_max_jobs", eventContent);
+		        jmSpec.maxUnaasignedJobsExceeded := true;
+		    else
+		        jmSpec.maxUnaasignedJobsExceeded := false;
 		    end if;
     	end if;    
     end if;
@@ -98,14 +109,15 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'd64e9daf-e005-46ed-8216-8cc7bf43d3b1' DO NOT EDIT THIS LINE.
-private service JobManagement::jobCompleted ( workerId : in UUID::formatted_uuid,
-                                             jobId : in string ) is
+public service JobManagement::jobCompleted ( workerId : in UUID::formatted_uuid,
+                                            jobId : in string ) is
 employedWorker : instance of EmployedWorker;
 assignedJob : instance of AssignedJob;
 job : instance of Job;
 auditEvents : sequence of instance of AuditEvent;
 jobManager : instance of JobManager;
 unassignedJobIds : sequence of string;
+eventContent : string;
 
 begin
 	
@@ -130,8 +142,14 @@ begin
 			
 			// report that the job completion is confirmed
 			Worker ~>jobCompletionConfirmed(workerId, jobId);
-			// check if there are not unassigned jobs and if there are and this employed worker has capacity then assign the job
+			
+			// report completed job
 			jobManager := find_one JobManager();
+		    eventContent := "Job completed. Worker id = " & string(employedWorker.workerId) & " Jobs assigned = " & ((employedWorker -> R6.AssignedJob)'length)'image;
+		    Reporting~>reportEvent(Logger::Error, "jobmanagement_worker_assigned_job_count", eventContent);
+        	jobManager.reportJobAssignments();	        	
+			
+			// check if there are not unassigned jobs and if there are and this employed worker has capacity then assign the job
 			unassignedJobIds := jobManager.unassignedJobIds;
 			if unassignedJobIds'length > 0 then
 				jobManager.assignJob(employedWorker);
@@ -143,7 +161,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'ff723fb4-c20f-4ab8-bc39-e807df00e8fc' DO NOT EDIT THIS LINE.
-private service JobManagement::deregisterWorker ( workerId : in UUID::formatted_uuid ) is
+public service JobManagement::deregisterWorker ( workerId : in UUID::formatted_uuid ) is
 employedWorker : instance of EmployedWorker;
 
 begin

@@ -7,7 +7,7 @@ class ConanFile(conan.ConanFile):
     channel = 'stable'
     python_requires = f'masl_conan/{os.environ["MASL_VERSION"]}@xtuml/stable'
     python_requires_extend = 'masl_conan.MaslConanHelper'
-    persistent_procs = ['ISTORE_PROC.prj', 'JobManagement.prj']
+    persistent_procs = ['ISTORE_PROC.prj']
 
     def masl_extras(self):
         return ['-skiptranslator', 'Sqlite']
@@ -31,8 +31,8 @@ class ConanFile(conan.ConanFile):
         self.requires(f'masl_core/{os.environ["MASL_VERSION"]}@xtuml/stable')
         self.requires(f'masl_utils/{os.environ["MASL_VERSION"]}@xtuml/stable')
         self.requires(f'asynclogger/{self.version}@xtuml/stable')
+        self.requires(f'benchmarkingprobe/{self.version}@xtuml/stable')
         self.requires(f'aeordering/{self.version}@xtuml/stable')
-        self.requires(f'aereception/{self.version}@xtuml/stable')
         self.requires(f'freception/{self.version}@xtuml/stable')
         self.requires(f'istore/{self.version}@xtuml/stable')
         self.requires(f'aesequencedc/{self.version}@xtuml/stable')

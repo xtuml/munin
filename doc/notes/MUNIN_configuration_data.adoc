@@ -133,7 +133,7 @@ Definition is deleted.​
 | WaitPeriodForJobDeletion
 | The period of time after a Job has completed (whether succeeded or failed) that the Protocol Verifier waits 
 before that Job, and all its associated audit events, are deleted.​
-| Duraion
+| Duration
 | 30 minutes
 | WaitPeriodForInvariantDeletion
 | The period of time after an Extra Job Invariant has gone ‘out of force’ before it is deleted.​
@@ -149,5 +149,34 @@ Protocol Verifier waits before giving up and assuming that the respective Invari
 expected sequence of events within the period or because of a blocked event timeout for a job.
 | Duration
 | 15 seconds
+
+
+| MaxJobsPerWorker
+| This is the maximum number of jobs that can be assigned to any one workeri
+| Integer
+| 30000
+
+| MaxUnassignedJobs
+| This is the maximum number of jobs that can be unassigned before job Management 
+reports jobmanagement_exceeded_max_jobs
+| Integer
+| 100000
+
+| RetiredWorkerDeletionTime
+| The amount of time a retired worker is held in Job Management before it is 
+deleted. This allows for a worker who is no longer registered to re-register.
+| Duration
+| 10 minutes
+
+| WorkerHeartbeatRate
+| The rate at which a worker should send the worker heartbeat to Job Management
+| Duration
+| 1 minute
+
+| WorkerHeartbeatFailureThreshold
+| The number of missed heartbeats that have to occur before Job 
+Management determines the worker is absent and retires the worker
+| Integer
+| 3
 
 |===

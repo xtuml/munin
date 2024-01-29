@@ -106,6 +106,35 @@ INSERT INTO O_TPARM
 	'',
 	"00000000-0000-0000-0000-000000000000",
 	'');
+INSERT INTO O_TFR
+	VALUES ("5fdcbaaf-b334-4b86-a09a-3ce0b6142fe4",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	'schemaValidated',
+	'',
+	"937e7b24-4016-44da-abc5-a7bf3c67b00c",
+	1,
+	'',
+	3,
+	'',
+	"20792409-ecb1-4461-a693-09b0cc215a06",
+	1,
+	6);
+INSERT INTO O_TPARM
+	VALUES ("7a9b4238-b66b-49cb-90af-eb6c197d1bb7",
+	"5fdcbaaf-b334-4b86-a09a-3ce0b6142fe4",
+	'auditEvent',
+	"e6bd3cb7-f59d-4ddf-80da-a50541a32c4e",
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000",
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("e6bd3cb7-f59d-4ddf-80da-a50541a32c4e",
+	"00000000-0000-0000-0000-000000000000",
+	'JSON::JSONObject',
+	'',
+	'',
+	'../../types/types.xtuml');
 INSERT INTO O_NBATTR
 	VALUES ("c9295ae3-7ed7-40c3-a44d-48939d4d6b96",
 	"74b9e96a-542a-498e-a745-e5dfea718ecb");
@@ -519,6 +548,85 @@ INSERT INTO O_ATTR
 	"ba5eda7a-def5-0000-0000-000000000002",
 	'',
 	'');
+INSERT INTO O_NBATTR
+	VALUES ("773ea164-e0af-442a-a0c2-dd66dd600161",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("773ea164-e0af-442a-a0c2-dd66dd600161",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("773ea164-e0af-442a-a0c2-dd66dd600161",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"ce99bb60-a7d9-4c1b-815c-d7f20c49d22f",
+	'schemaValidate',
+	'Indicates that schema validation should be perfomred on incoming files',
+	'',
+	'schemaValidate',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000001",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("31acef6b-923e-422b-b168-10664158c882",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("31acef6b-923e-422b-b168-10664158c882",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("31acef6b-923e-422b-b168-10664158c882",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"773ea164-e0af-442a-a0c2-dd66dd600161",
+	'schemaValidateFrequency',
+	'Performing schema validationis a time consuming process and this field indicates the frequency that it should be performed e.g. every 10th file processed, when the schemaValidate flag is set to true.',
+	'',
+	'schemaValidateFrequency',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("c7c53d10-9221-432d-acc5-d2f4fd220194",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("c7c53d10-9221-432d-acc5-d2f4fd220194",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("c7c53d10-9221-432d-acc5-d2f4fd220194",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"31acef6b-923e-422b-b168-10664158c882",
+	'schemaValidationCount',
+	'',
+	'',
+	'schemaValidationCount',
+	0,
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'',
+	'');
+INSERT INTO O_NBATTR
+	VALUES ("c8fa7385-af0c-4063-9562-5fd420762f0c",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_BATTR
+	VALUES ("c8fa7385-af0c-4063-9562-5fd420762f0c",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb");
+INSERT INTO O_ATTR
+	VALUES ("c8fa7385-af0c-4063-9562-5fd420762f0c",
+	"74b9e96a-542a-498e-a745-e5dfea718ecb",
+	"c7c53d10-9221-432d-acc5-d2f4fd220194",
+	'auditEventSchema',
+	'',
+	'',
+	'auditEventSchema',
+	0,
+	"cbad8136-b524-4137-9085-debfdf874344",
+	'',
+	'');
+INSERT INTO S_DT_PROXY
+	VALUES ("cbad8136-b524-4137-9085-debfdf874344",
+	"00000000-0000-0000-0000-000000000000",
+	'JSONValidation::Schema',
+	'',
+	'',
+	'../../../../types/types.xtuml');
 INSERT INTO O_ID
 	VALUES (0,
 	"74b9e96a-542a-498e-a745-e5dfea718ecb");

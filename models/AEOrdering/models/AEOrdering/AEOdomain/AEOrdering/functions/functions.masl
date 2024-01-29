@@ -15,72 +15,69 @@ jobFailureReason : string;
 failureReason : string;
 systemSpec : instance of SystemSpec;
 eventContent : string;
-rawJobId : UUID::raw_uuid;
-lane : integer;
 instrumentationEventId : string;
 instrumentationEventType : string;
+worker : instance of Worker;
 
 begin
 
 	logMessage := "AEOrdering::AcceptEvent : jobId = " & jobId & ", auditEventType = " & auditEventType & ", auditEventId = " & auditEventId;
 	Logger::log(Logger::Debug, "AEOrdering", logMessage);
 	systemSpec := find_one SystemSpec();
-	rawJobId := UUID::extract_raw(UUID::formatted_uuid(jobId));
-	lane := integer(rawJobId[rawJobId'last]);
-	if lane >= systemSpec.startJobGroup and lane <= systemSpec.endJobGroup then
+	job := find_one Job(jobId = jobId);
+	if job = null then
+		job := create Job(jobId => jobId, outOfSequenceEventCount => 0, jobStartTime => timestamp'now, totalOutOfSequence => 0, maxOutOfSequence => 0, reportedJobName => jobName, Current_State => Created);
+		if find_one JobType(jobTypeName = jobName) /= null then
+			inProgressJob := create InProgressJob(jobId => job.jobId);
+			link inProgressJob R2 job;
+			generate Job.jobStarted() to job;
+			eventContent := "JobId = " & job.jobId;
+			Reporting~>reportEvent(Logger::Information, "aeordering_job_processed", eventContent);
+			// ...and then report that AEO has started processing a new job as part of the 
+        	// verification of the Protocol Verifier itself.
+        	instrumentationEventId := "Unused";
+        	instrumentationEventType := "AEO_PVJobStart";
+        	Req_IF_BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", job.jobId, instrumentationEventId, instrumentationEventType);
+		else
+			// we have created the job but the reported job name does not match a known JobType
+			// so we need to fail the job
+			failedJob := create FailedJob(jobId => job.jobId, failureReason => "Invalid job name supplied", jobFailureTime => timestamp'now);
+			failureReason := "JobId = " & job.jobId & "FailureReason = Invalid job name supplied, jobName = " & jobName;
+			link failedJob R2 job;
+			// inform Job Management that the job is complete
+			worker := find_one Worker();
+			Req_IF_JobManagement~>jobCompleted(worker.workerId, jobId);
+			generate Job.jobFailed() to job;
+		end if;
+	end if;
 	
-		job := find_one Job(jobId = jobId);
-		if job = null then
-			job := create Job(jobId => jobId, outOfSequenceEventCount => 0, jobStartTime => timestamp'now, totalOutOfSequence => 0, maxOutOfSequence => 0, reportedJobName => jobName, Current_State => Created);
-			if find_one JobType(jobTypeName = jobName) /= null then
-				inProgressJob := create InProgressJob(jobId => job.jobId);
-				link inProgressJob R2 job;
-				generate Job.jobStarted() to job;
-				eventContent := "JobId = " & job.jobId;
-				Reporting~>reportEvent(Logger::Information, "aeordering_job_processed", eventContent);
-				// ...and then report that AEO has started processing a new job as part of the 
-	        		// verification of the Protocol Verifier itself.
-	        		instrumentationEventId := "Unused";
-	        		instrumentationEventType := "AEO_PVJobStart";
-	        		Req_IF_BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", job.jobId, instrumentationEventId, instrumentationEventType);
-			else
-				// we have created the job but the reported job name does not match a known JobType
-				// so we need to fail the job
-				failedJob := create FailedJob(jobId => job.jobId, failureReason => "Invalid job name supplied", jobFailureTime => timestamp'now);
-				failureReason := "JobId = " & job.jobId & "FailureReason = Invalid job name supplied, jobName = " & jobName;
-				link failedJob R2 job;
-				generate Job.jobFailed() to job;
-			end if;
+	// create the audit event
+	if job -> R2.FailedJob /= null then
+		jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job has failed";
+	elsif job -> R2.ArchivedJob /= null then
+		jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job is already archived";
+	end if;
+	auditEvent := AuditEvent.createAuditEvent(job, jobName, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData, failureReason);
+	
+	// check if the audit event is blocked
+	if auditEvent = null or job -> R2.ArchivedJob /= null or job -> R2.FailedJob /= null then
+		job.failJob(jobFailureReason);
+	elsif auditEvent -> R4.BlockedAuditEvent /= null then
+		link auditEvent R1 job;
+		job.outOfSequenceEventCount := (job -> R1.AuditEvent)'length;
+		// if this out of sequence event count is higher than the current max out of sequence then update the current max out of sequence
+		if job.outOfSequenceEventCount > job.maxOutOfSequence then
+			job.maxOutOfSequence := job.outOfSequenceEventCount;
 		end if;
-		
-		// create the audit event
-		if job -> R2.FailedJob /= null then
-			jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job has failed";
-		elsif job -> R2.ArchivedJob /= null then
-			jobFailureReason := "JobId = " & job.jobId & " : FailureReason = Job is already archived";
-		end if;
-		auditEvent := AuditEvent.createAuditEvent(job, jobName, auditEventType, auditEventId, auditEventTime, prevAuditEventIds, auditEventData, failureReason);
-		
-		// check if the audit event is blocked
-		if auditEvent = null or job -> R2.ArchivedJob /= null or job -> R2.FailedJob /= null then
-			job.failJob(jobFailureReason);
-		elsif auditEvent -> R4.BlockedAuditEvent /= null then
-			link auditEvent R1 job;
-			job.outOfSequenceEventCount := (job -> R1.AuditEvent)'length;
-			// if this out of sequence event count is higher than the current max out of sequence then update the current max out of sequence
-			if job.outOfSequenceEventCount > job.maxOutOfSequence then
-				job.maxOutOfSequence := job.outOfSequenceEventCount;
-			end if;
-			// if we have exceeded the max out of sequence events then fail the job
-			if job.outOfSequenceEventCount >= systemSpec.maxOutOfSequenceEvents then
-				failureReason := "JobId = " & job.jobId & "FailureReason = Maximum out of sequence events reached, max = " & systemSpec.maxOutOfSequenceEvents'image;
-				job.failJob(failureReason);
-			end if;
-			
-		// check if we need to report a jobFailure
-		elsif auditEvent -> R4.FailedAuditEvent /= null and job -> R2.InProgressJob /= null then
+		// if we have exceeded the max out of sequence events then fail the job
+		if job.outOfSequenceEventCount >= systemSpec.maxOutOfSequenceEvents then
+			failureReason := "JobId = " & job.jobId & "FailureReason = Maximum out of sequence events reached, max = " & systemSpec.maxOutOfSequenceEvents'image;
 			job.failJob(failureReason);
 		end if;
+		
+	// check if we need to report a jobFailure
+	elsif auditEvent -> R4.FailedAuditEvent /= null and job -> R2.InProgressJob /= null then
+		job.failJob(failureReason);
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -96,13 +93,150 @@ begin
 	if (theJob -> R9.AuditEvent -> R4.BlockedAuditEvent)'length > 0 then
 	  theJob.failJob("JobId = " & jobId & " : FailureReason = Job ended with blocked events");
     else  
-	  theJob.jobDeleted();
-	  Req_IF_Verification~>jobComplete(jobId);
+    	generate Job.archiveJob() to theJob;
     end if;
   else
     // TODO - Raise log message that reports that the specified job does not exist  
   end if;
 	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '0928dd89-5bac-46c1-89a7-a1ca3beaac16' DO NOT EDIT THIS LINE.
+public service AEOrdering::AcceptJsonEvent ( workerId : in UUID::formatted_uuid,
+                                            auditEvent : in string ) is
+systemSpec : instance of SystemSpec;
+jsonElement: JSON::JSONElement;
+eventContent : string;
+jsonObject : JSON::JSONObject;
+logMessage : string;
+validate : boolean := false;
+prevIds: sequence of string;
+evtData: dictionary;
+worker : instance of Worker;
+
+begin
+	
+    worker := find_one Worker(workerId = workerId);
+    if worker /= null then
+		if worker.registered = true then
+			jsonElement := JSON::parse(auditEvent);
+			if jsonElement.kind = JSON::Object then
+				jsonObject := JSON::get_object(jsonElement);
+			    if jsonObject'keys'length = 1 and jsonObject'keys'any = "__comment__" then
+			        // ignore comment objects
+			        logMessage := "AEOrdering::AcceptJsonEvent : JSON comment: " & JSON::get_string(jsonObject[jsonObject'keys'any]);
+			        Logger::log(Logger::Debug, "AEOrdering",logMessage);
+			    else
+			
+			        // validate the event against schema
+					systemSpec := find_one SystemSpec();
+					if systemSpec.schemaValidated(jsonObject) = true then
+						
+						// process the event
+						if jsonObject'contains("previousEventIds") then
+							if jsonObject["previousEventIds"].kind = JSON::Array then
+								for prev_id_json in JSON::get_array(jsonObject["previousEventIds"]) loop
+									prevIds := prevIds & JSON::get_string(prev_id_json);
+								end loop;
+							elsif jsonObject["previousEventIds"].kind = JSON::String then
+			                    prevIds := prevIds & JSON::get_string(jsonObject["previousEventIds"]);
+			                end if;
+						end if;
+						for key in jsonObject'keys loop
+							if key /= "jobId" and
+							   key /= "jobName" and
+							   key /= "eventType" and
+							   key /= "eventId" and
+							   key /= "timestamp" and
+							   key /= "previousEventIds" then
+								if jsonObject[key].kind = JSON::String then
+									evtData[key] := JSON::get_string(jsonObject[key]);
+								else
+									evtData[key] := JSON::dump(jsonObject[key]);
+								end if;
+							end if;
+						end loop;
+						AcceptEvent(JSON::get_string(jsonObject["jobId"]), JSON::get_string(jsonObject["jobName"]), JSON::get_string(jsonObject["eventType"]),
+									JSON::get_string(jsonObject["eventId"]), JSON::get_string(jsonObject["timestamp"]), prevIds, evtData);
+			    	end if;
+				end if;
+			end if;
+		else
+			// the worker is not registered but job management thinks it is
+			// deregister the worker and log an error
+			Req_IF_JobManagement~>deregisterWorker(workerId);
+	        logMessage := "AEOrdering::AcceptJsonEvent : Received event for unregistered worker, workerId = : " & string(workerId);
+	        Logger::log(Logger::Debug, "AEOrdering",logMessage);			
+		end if;
+	end if;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '47e54723-c42e-4896-8f6b-222426f59115' DO NOT EDIT THIS LINE.
+public service AEOrdering::workerRegistered ( workerId : in UUID::formatted_uuid ) is
+worker : instance of Worker;
+
+begin
+    worker := find_one Worker(workerId = workerId);
+    if worker /= null then
+    	generate Worker.registrationAccepted() to worker;
+	end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '809725ba-6a72-4611-88a3-955ffdc7bec3' DO NOT EDIT THIS LINE.
+public service AEOrdering::workerUnregistered ( workerId : in UUID::formatted_uuid ) is
+worker : instance of Worker;
+
+begin
+    worker := find_one Worker(workerId = workerId);
+    if worker /= null then
+    	generate Worker.deregistered() to worker;
+	end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '979cf805-bf5c-445b-9027-fe365f39280d' DO NOT EDIT THIS LINE.
+public service AEOrdering::registerWorker () is
+worker : instance of Worker;
+
+begin
+	worker := find_one Worker();
+	if worker /= null and worker.registered = false then
+		generate Worker.requestRegistration() to worker;
+	end if;
+	
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '8b45dbe0-80ee-4c7a-a90a-4037cbff70c6' DO NOT EDIT THIS LINE.
+public service AEOrdering::deregisterWorker () is
+worker : instance of Worker;
+
+begin
+	worker := find_one Worker();
+	if worker /= null and worker.registered = true then
+		generate Worker.requestDeregistration() to worker;
+	end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c9240636-ce74-4ad8-b115-0d32b5e97fa2' DO NOT EDIT THIS LINE.
+public service AEOrdering::jobCompletionConfirmed ( workerId : in UUID::formatted_uuid,
+                                                   jobId : in string ) is
+worker : instance of Worker;
+job : instance of Job;
+
+begin
+    worker := find_one Worker(workerId = workerId);
+    if worker /= null then
+    	job := find_one Job(jobId = jobId);
+    	if job /= null then
+	    	generate Job.deleteJob() to job;
+		end if;
+	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

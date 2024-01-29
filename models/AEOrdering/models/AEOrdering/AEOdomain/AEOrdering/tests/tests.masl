@@ -211,10 +211,7 @@ begin
 		delete dataItemTypes;
 		delete find_all SourceDataItemForwardReference();
 	end if;
-	
-	// clear out the StoredJobIdentifiers
-	delete find_all StoredJobIdentifier();
-	
+		
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -562,8 +559,6 @@ verificationFailedJobs : sequence of instance of _TEST_Req_IF_Verification_faile
 prevEventIds : sequence of string;
 emptyPrevEventIds : sequence of string;
 auditEventData : AuditEventDataType;
-storedJobIdentifier : instance of StoredJobIdentifier;
-jobStore : instance of JobStore;
 jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
 jobId2 : string := "95a3b3a7-fada-41d5-b7e2-902079e81002";
 jobId3 : string := "95a3b3a7-fada-41d5-b7e2-902079e81003";
@@ -597,11 +592,7 @@ begin
 	else
 		Test::fail("", 1, "Test Job Complete: Failed to find Job");
 	end if;
-	
-	// check that the StoredJobIdentifier has been recorded
-	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId1);
-    Assertions::assertTrue((storedJobIdentifier /= null), "Test Job Complete: Failed to find StoredJobIdentifier");
-	
+		
 	// verify that the job was completed
     verificationAuditEvents:= find _TEST_Req_IF_Verification_audit_event();
     Assertions::assertTrue((verificationAuditEvents'length = 3), "Test Job Complete: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
@@ -654,27 +645,6 @@ begin
 		Test::fail("", 1, "Test Job Complete: Failed to find Failed Job");
 	end if;
 	
-	// check that the job store file exists and contains 
-	jobStore := find_one JobStore();
-	jobStore.jobStoreAgeLimit := @PT1H@;
-	generate JobStore.purgeJobStore() to jobStore;
-	Test::service_event_queue();
-	Assertions::assertTrue((Filesystem::file_exists(Filesystem::filename(jobStore.jobStoreLocation & "/" & jobStore.jobStoreName))), "Test Job Complete: Job store file does not exist");
-	// test purge job store
-	generate JobStore.purgeJobStore() to jobStore;
-	Test::service_event_queue();
-	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId1);
-    Assertions::assertTrue((storedJobIdentifier /= null), "Test Job Complete: Failed to find StoredJobIdentifier");
-	// check the archived file exists
-	Assertions::assertTrue((Filesystem::list_directory(Filesystem::filename(jobStore.jobStoreLocation))'length > 0), "Test Job Complete: Job store file not archived");
-	
-	// check the archived file has been removed
-	jobStore.jobStoreAgeLimit := @PT0S@;
-	generate JobStore.purgeJobStore() to jobStore;
-	Test::service_event_queue();
-	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId1);
-    Assertions::assertTrue((storedJobIdentifier = null), "Test Job Complete: Failed to find StoredJobIdentifier");
-	Assertions::assertTrue((Filesystem::list_directory(Filesystem::filename(jobStore.jobStoreLocation))'length = 0), "Test Job Complete: Job store file archive not removed");
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -688,9 +658,8 @@ verificationAuditEvents : sequence of instance of _TEST_Req_IF_Verification_audi
 verificationAuditEvent : instance of _TEST_Req_IF_Verification_audit_event;
 verificationFailedJobs : sequence of instance of _TEST_Req_IF_Verification_failedJob;
 completedJob : instance of ArchivedJob;
-verificationJobComplete : instance of _TEST_Req_IF_Verification_jobComplete;
 failedJob : instance of FailedJob;
-verificationJobFailed : instance of _TEST_Req_IF_Verification_failedJob;
+reportAuditFailure : instance of _TEST_Req_IF_Audited_reportAuditFailure;
 job : instance of Job;
 prevEventIds : sequence of string;
 emptyPrevEventIds : sequence of string;
@@ -699,6 +668,8 @@ jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
 jobId2 : string := "95a3b3a7-fada-41d5-b7e2-902079e81002";
 jobId3 : string := "95a3b3a7-fada-41d5-b7e2-902079e81003";
 jobId4 : string := "95a3b3a7-fada-41d5-b7e2-902079e81004";
+worker : instance of Worker;
+verificationJobComplete : instance of _TEST_Req_IF_Verification_jobComplete;
 
 begin
 	
@@ -707,6 +678,7 @@ begin
 	AEOrdering::clearDomain(true, false);
 	delete (find _TEST_Req_IF_Verification_audit_event());
 	delete (find _TEST_Req_IF_Verification_failedJob());
+	delete find _TEST_Req_IF_JobManagement_jobCompleted();
 	auditEventTime := timestamp'now;
 	
 	// start a new job
@@ -770,6 +742,8 @@ begin
 	// fire the job complete
 	job := find_one Job(jobId = jobId3);
 	if job /= null then
+		delete find _TEST_Req_IF_Audited_reportAuditFailure();
+		worker := find_one Worker();
 		generate Job.jobCompleted() to job;
 		Test::service_event_queue();
 		completedJob := find_one ArchivedJob(jobId = jobId3);
@@ -777,17 +751,21 @@ begin
 		verificationJobComplete := find_one _TEST_Req_IF_Verification_jobComplete(jobId = jobId3);
 		Assertions::assertTrue((verificationJobComplete /= null), "Test Job Failure: Job complete was not reported for job 3");
 		delete verificationJobComplete;
-		// send in  new event now that the job is complete
+		Assertions::assertTrue(((find _TEST_Req_IF_JobManagement_jobCompleted(workerId = worker.workerId and jobId = jobId3))'length = 1), "Test Job Failure: Job has not been reported completed");
+		delete find _TEST_Req_IF_JobManagement_jobCompleted();
+
+		// send in new event now that the job is complete
 		prevEventIds := emptyPrevEventIds & "1"; 
 		AEOrdering::AcceptEvent(jobId3, "AEOrdering-Test", "bbb", "32", auditEventTime'image, prevEventIds, auditEventData);
 		Test::service_event_queue();
-		failedJob := find_one FailedJob(jobId = jobId3);
-		Assertions::assertTrue((completedJob /= null), "Test Job Failure: Job id did not transition to failed for job 3");
-		verificationJobFailed := find_one _TEST_Req_IF_Verification_failedJob(jobId = jobId3);
-		Assertions::assertTrue((verificationJobFailed /= null), "Test Job Failure: Job failure was not reported for job 3");
-		delete verificationJobFailed;
+		reportAuditFailure := find_one _TEST_Req_IF_Audited_reportAuditFailure(jobId = jobId3);
+		Assertions::assertTrue((reportAuditFailure /= null), "Test Job Failure: Job failure was not audited for job 3");
+		AEOrdering::jobCompletionConfirmed(worker.workerId, jobId3);
+		Test::service_event_queue();
+		Assertions::assertTrue(((find Job(jobId = jobId3))'length = 0), "Test Job Failure: Job has not been deleted");
+		delete find _TEST_Req_IF_JobManagement_jobCompleted();
 	else
-		Test::fail("", 3, "Test Job Complete: Failed to find Job");
+		Test::fail("", 3, "Test Job Failure: Failed to find Job");
 	end if;
 
 	// test if an event in the same job has a different job name it fails
@@ -807,8 +785,6 @@ begin
     Assertions::assertTrue((verificationAuditEvents'length = 0), "Test Job Failure: Invalid number of verification audit event = " & verificationAuditEvents'length'image);
     AEOrdering::checkJobFailures(jobId4, "42");
 	delete verificationAuditEvents;
-	
-	
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -841,11 +817,13 @@ prevEventIds : sequence of string;
 emptyPrevEventIds : sequence of string;
 auditEventData : AuditEventDataType;
 jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
+worker : instance of Worker;
 
 begin
 	
 	logMessage := "AEOrdering::testOrderedJob";
 	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	delete find _TEST_Req_IF_JobManagement_jobCompleted();
 	AEOrdering::clearDomain(true, false);
 	
 	auditEventTime := timestamp'now;
@@ -877,9 +855,15 @@ begin
 	AEOrdering::checkOrderedJob();
 	
 	// test that the delete job can be called and the jobs are deleted
+	worker := find_one Worker();
 	AEOrdering::deleteJob(jobId1);
+	Test::service_event_queue();
+	Assertions::assertTrue(((find Job())'length = 1), "Test Ordered Job: Job has not been deleted");
+	Assertions::assertTrue(((find _TEST_Req_IF_JobManagement_jobCompleted(workerId = worker.workerId and jobId = jobId1))'length = 1), "Test Ordered Job: Job has not been reported completed");
+	AEOrdering::jobCompletionConfirmed(worker.workerId, jobId1);
+	Test::service_event_queue();
 	Assertions::assertTrue(((find Job())'length = 0), "Test Ordered Job: Job has not been deleted");
-	
+	delete find _TEST_Req_IF_JobManagement_jobCompleted();
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -1617,12 +1601,14 @@ verificationAuditEvent : instance of _TEST_Req_IF_Verification_audit_event;
 verificationFailedJobs : sequence of instance of _TEST_Req_IF_Verification_failedJob;
 jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
 jobId2 : string := "95a3b3a7-fada-41d5-b7e2-902079e81002";
+worker : instance of Worker;
 
 begin
 	
 	logMessage := "AEOrdering::testOrderedJobWithData";
 	Logger::log(Logger::Information, "AEOrdering", logMessage);
 	delete find _TEST_Req_IF_Verification_failedJob();
+	delete find _TEST_Req_IF_JobManagement_jobCompleted();
 	AEOrdering::clearDomain(true, false);
 	
 	auditEventTime := timestamp'now;
@@ -1698,7 +1684,12 @@ begin
 	
 	
 	// test that the delete job can be called and the jobs are deleted
+	worker := find_one Worker();
 	AEOrdering::deleteJob(jobId1);
+	Test::service_event_queue();
+	Assertions::assertTrue(((find _TEST_Req_IF_JobManagement_jobCompleted(workerId = worker.workerId and jobId = jobId1))'length = 1), "Test Ordered Job With Data: Job has not been reported completed");
+	AEOrdering::jobCompletionConfirmed(worker.workerId, jobId1);
+	Test::service_event_queue();
 	Assertions::assertTrue(((find Job())'length = 0), "Test Ordered Job With Data: Job has not been deleted");
 	
 	// test invalid dynamic control data	
@@ -1710,7 +1701,7 @@ begin
 
 	// verify that the job was reported as failed to verification
 	verificationFailedJobs := find _TEST_Req_IF_Verification_failedJob();
-    Assertions::assertTrue((verificationFailedJobs'length = 1), "Test Job Failure: Invalid number of failed jobs event = " & verificationFailedJobs'length'image);
+    Assertions::assertTrue((verificationFailedJobs'length = 1), "Test Ordered Job With Data: Invalid number of failed jobs event = " & verificationFailedJobs'length'image);
     Assertions::assertTrue(((find verificationFailedJobs(jobId = jobId2))'length = 1), "Test Job Failure: Failed to find failed job id = 2");
 	delete verificationFailedJobs;
 	
@@ -1836,6 +1827,213 @@ begin
 	Assertions::assertTrue((find_one Job(jobId = jobId) = null), "Test Lane Validation: Failed lower bound. Job exists");
 	delete verificationAuditEvents;	
 
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '2d3c10ac-6774-4fc4-a30f-010771824a4f' DO NOT EDIT THIS LINE.
+private service AEOrdering::testWorkerRegistration () is
+logMessage : string;
+worker : instance of Worker;
+registerWorkerRequest : sequence of instance of _TEST_Req_IF_JobManagement_registerWorker;
+jobId1 : string := "95a3b3a7-fada-41d5-b7e2-902079e81001";
+auditEventId : string := "1";
+auditEventTime : timestamp;
+prevEventIds : sequence of string;
+emptyPrevEventIds : sequence of string;
+auditEventData : AuditEventDataType;
+deregisterWorkerRequest : instance of _TEST_Req_IF_JobManagement_deregisterWorker;
+verificationAuditEvent : instance of _TEST_Req_IF_Verification_audit_event;
+job : instance of Job;
+verificationFailedJob : instance of _TEST_Req_IF_Verification_failedJob;
+jobCompletedReport : instance of _TEST_Req_IF_JobManagement_jobCompleted;
+reportedAuditEvent: JSON::JSONObject;
+eventId : string;
+jsonElement: JSON::JSONElement;
+reportedAuditEventString : string;
+
+begin
+	auditEventTime := timestamp'now;	
+	reportedAuditEvent["jobId"] := JSON::to_json(jobId1);
+	reportedAuditEvent["jobName"] := JSON::to_json("FileRequest");
+	reportedAuditEvent["eventType"] := JSON::to_json("RequestFile");
+	reportedAuditEvent["eventId"] := JSON::to_json(auditEventId);
+	reportedAuditEvent["timestamp"] := JSON::to_json(auditEventTime'image);
+	jsonElement := JSON::to_json(reportedAuditEvent);
+	reportedAuditEventString := JSON::dump(jsonElement);
+
+	logMessage := "AEOrdering::testWorkerRegistration";
+	Logger::log(Logger::Information, "AEOrdering", logMessage);
+	AEOrdering::clearDomain(true, false);
+	delete find _TEST_Req_IF_JobManagement_deregisterWorker();
+	delete find _TEST_Req_IF_Verification_audit_event();
+	
+	// verify we have a worker instance
+	worker := find_one Worker();
+    Assertions::assertTrue((worker /= null), "Test Worker Registration: Failed to find worker");
+	
+	// verify that the worker has sent a registration request - there should be at least on from start up
+	registerWorkerRequest := find_one _TEST_Req_IF_JobManagement_registerWorker(workerId = worker.workerId);
+	Assertions::assertTrue((registerWorkerRequest /= null), "Test Worker Registration: Failed to find registration request");
+	delete registerWorkerRequest;
+	// remove any old requests
+	delete find _TEST_Req_IF_JobManagement_registerWorker();
+	
+	// verify that when the retry timer fires a new registration request is sent
+	generate Worker.requestRegistration() to worker;
+	Test::service_event_queue();
+	registerWorkerRequest := find_one _TEST_Req_IF_JobManagement_registerWorker(workerId = worker.workerId);
+	Assertions::assertTrue((registerWorkerRequest /= null), "Test Worker Registration: Failed to find registration request");
+	delete registerWorkerRequest;
+	
+	// start a new job while the worker is attempting to register
+	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	Test::service_event_queue();
+	
+	// verify that the job is not accepted and the worker reports it is unregistered
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(jobId = jobId1 and auditEventId = auditEventId and jobName = "FileRequest");
+    Assertions::assertTrue((verificationAuditEvent = null), "Test Worker Registration: Found verification audit event id = 1");
+	job := find_one Job(jobId = jobId1);
+	Assertions::assertTrue((job = null), "Test Worker Registration: Found job for Job 1");
+	deregisterWorkerRequest := find_one _TEST_Req_IF_JobManagement_deregisterWorker(workerId = worker.workerId);
+    Assertions::assertTrue((deregisterWorkerRequest /= null), "Test Worker Registration: Faile to find deregistration request when starting a job for unregistered worker");
+	delete deregisterWorkerRequest;
+	
+	// confirm the worker registration
+	AEOrdering::workerRegistered(worker.workerId);
+	Test::service_event_queue();
+    Assertions::assertTrue((worker.registered = true), "Test Worker Registration: Worker is not registered");
+	
+	// start a new job
+	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	Test::service_event_queue();
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(jobId = jobId1 and auditEventId = auditEventId and jobName = "FileRequest");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Worker Registration: Failed to find verification audit event id = 1");
+    delete verificationAuditEvent;
+	job := find_one Job(jobId = jobId1);
+	Assertions::assertTrue((job /= null), "Test Worker Registration: Failed to find job for Job 1");
+	
+	// send a worker unregistered to the registered worker
+	AEOrdering::workerUnregistered(worker.workerId);
+	Test::service_event_queue();
+	
+	// verify that job is failed and the worker requests to register
+    verificationFailedJob := find_one _TEST_Req_IF_Verification_failedJob(jobId = jobId1);
+    Assertions::assertTrue((verificationFailedJob /= null), "Test Worker Registration: Failed to inform verification of failed job");
+    delete verificationFailedJob;
+	jobCompletedReport := find_one _TEST_Req_IF_JobManagement_jobCompleted(workerId = worker.workerId and jobId = jobId1);
+    Assertions::assertTrue((jobCompletedReport /= null), "Test Worker Registration: Failed to report completed for Job 1");
+	delete jobCompletedReport;
+	
+	// send job completion confirmed and verify the jobis deleted
+	AEOrdering::jobCompletionConfirmed(worker.workerId, jobId1);
+	Test::service_event_queue();
+	job := find_one Job(jobId = jobId1);
+	Assertions::assertTrue((job = null), "Test Worker Registration: Found job for Job 1 after job completion confirmed");
+	registerWorkerRequest := find_one _TEST_Req_IF_JobManagement_registerWorker(workerId = worker.workerId);
+	Assertions::assertTrue((registerWorkerRequest /= null), "Test Worker Registration: Failed to find registration request");
+	delete registerWorkerRequest;
+	
+	// confirm the worker registration
+	AEOrdering::workerRegistered(worker.workerId);
+	Test::service_event_queue();
+    Assertions::assertTrue((worker.registered = true), "Test Worker Registration: Worker is not registered");
+	
+	// start a job
+	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	Test::service_event_queue();
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(jobId = jobId1 and auditEventId = auditEventId and jobName = "FileRequest");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Worker Registration: Failed to find verification audit event id = 1");
+    delete verificationAuditEvent;
+	
+	// complete the job and verify it has been completed
+	AEOrdering::deleteJob(jobId1);
+	Test::service_event_queue();
+	jobCompletedReport := find_one _TEST_Req_IF_JobManagement_jobCompleted(workerId = worker.workerId and jobId = jobId1);
+    Assertions::assertTrue((jobCompletedReport /= null), "Test Worker Registration: Failed to report completed for Job 1");
+	delete jobCompletedReport;
+		
+	// acknowledge job completion and verify the job is deleted
+	AEOrdering::jobCompletionConfirmed(worker.workerId, jobId1);
+	Test::service_event_queue();
+	job := find_one Job(jobId = jobId1);
+	Assertions::assertTrue((job = null), "Test Worker Registration: Found job for Job 1 after job completion confirmed");
+	
+	// deregister a worker and verify it sends a deregistration request
+	AEOrdering::deregisterWorker();
+	Test::service_event_queue();
+	deregisterWorkerRequest := find_one _TEST_Req_IF_JobManagement_deregisterWorker(workerId = worker.workerId);
+	Assertions::assertTrue((deregisterWorkerRequest /= null), "Test Worker Registration: Failed to find deregistration request");
+	delete deregisterWorkerRequest;
+	
+	// verify that when the retry timer fires a new deregistration request is sent
+	generate Worker.requestDeregistration() to worker;
+	Test::service_event_queue();
+	deregisterWorkerRequest := find_one _TEST_Req_IF_JobManagement_deregisterWorker(workerId = worker.workerId);
+	Assertions::assertTrue((deregisterWorkerRequest /= null), "Test Worker Registration: Failed to find deregistration request");
+	delete deregisterWorkerRequest;
+	
+	// start a new job and verify that the job is accepted
+	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	Test::service_event_queue();
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(jobId = jobId1 and auditEventId = auditEventId and jobName = "FileRequest");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Worker Registration: Failed to find verification audit event id = 1");
+    delete verificationAuditEvent;
+	
+	// complete the job and verify that job completion is reported
+	AEOrdering::deleteJob(jobId1);
+	Test::service_event_queue();
+	jobCompletedReport := find_one _TEST_Req_IF_JobManagement_jobCompleted(workerId = worker.workerId and jobId = jobId1);
+    Assertions::assertTrue((jobCompletedReport /= null), "Test Worker Registration: Failed to report completed for Job 1");
+	delete jobCompletedReport;
+	
+	// acknowledge job completion and verify the job is deleted
+	AEOrdering::jobCompletionConfirmed(worker.workerId, jobId1);
+	Test::service_event_queue();
+	job := find_one Job(jobId = jobId1);
+	Assertions::assertTrue((job = null), "Test Worker Registration: Found job for Job 1 after job completion confirmed");
+	
+	// start a new job and verify that the job is accepted
+	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	Test::service_event_queue();
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(jobId = jobId1 and auditEventId = auditEventId and jobName = "FileRequest");
+    Assertions::assertTrue((verificationAuditEvent /= null), "Test Worker Registration: Failed to find verification audit event id = 1");
+    delete verificationAuditEvent;
+    
+	// confirm the deregistration
+	AEOrdering::workerUnregistered(worker.workerId);
+	Test::service_event_queue();
+    Assertions::assertTrue((worker.registered = false), "Test Worker Registration: Worker is still registered after deregistration");
+	
+	// verify that job is failed after the deregistration is complete
+    verificationFailedJob := find_one _TEST_Req_IF_Verification_failedJob(jobId = jobId1);
+    Assertions::assertTrue((verificationFailedJob /= null), "Test Worker Registration: Failed to inform verification of failed job");
+    delete verificationFailedJob;
+	jobCompletedReport := find_one _TEST_Req_IF_JobManagement_jobCompleted(workerId = worker.workerId and jobId = jobId1);
+    Assertions::assertTrue((jobCompletedReport /= null), "Test Worker Registration: Failed to report completed for Job 1");
+	delete jobCompletedReport;
+	job := find_one Job(jobId = jobId1);
+	generate Job.deleteJob() to job;
+	Test::service_event_queue();
+	job := find_one Job(jobId = jobId1);
+	Assertions::assertTrue((job = null), "Test Worker Registration: Found job for Job 1 after job completion confirmed");
+	
+	// start a new job after the worker is deregistered
+	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	Test::service_event_queue();
+	
+	// verify that the job is not accepted and the worker reports it is unregistered
+    verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(jobId = jobId1 and auditEventId = auditEventId and jobName = "FileRequest");
+    Assertions::assertTrue((verificationAuditEvent = null), "Test Worker Registration: Found job when it should have been rejected");
+    delete verificationAuditEvent;
+	
+	// restart the registration process and verify that a registration request is sent
+	AEOrdering::registerWorker();
+	Test::service_event_queue();
+	registerWorkerRequest := find_one _TEST_Req_IF_JobManagement_registerWorker(workerId = worker.workerId);
+	Assertions::assertTrue((registerWorkerRequest /= null), "Test Worker Registration: Failed to find registration request");
+	delete registerWorkerRequest;
+	
+	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

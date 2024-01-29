@@ -1,4 +1,6 @@
 public service JobManagement::Worker~>workerUnregistered ( workerId: in UUID::formatted_uuid ) is
 begin
-  null;
+
+  AEOrdering::workerUnregistered(workerId);
+
 end service;

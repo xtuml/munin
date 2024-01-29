@@ -31,3 +31,4 @@ class ConanFile(conan.ConanFile):
         super().package_info()
         self.runenv_info.define_path('JOB_DEFINITION_SCHEMA_PATH', os.path.join(self.package_folder, 'res', 'schema', 'job_definition_schema.json'))
         self.runenv_info.define_path('ORDERING_CONFIG_SCHEMA_PATH', os.path.join(self.package_folder, 'res', 'schema', 'ordering_config_schema.json'))
+        self.runenv_info.define_path('AUDIT_EVENT_SCHEMA_PATH', os.path.join(self.package_folder, 'res', 'schema', 'audit_event_schema.json'))
