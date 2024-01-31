@@ -19,12 +19,13 @@ services:
       - "../models/PV_PROC/build:/work/build"
       - "../models/PV_PROC/schedule:/root/schedule"
       - "./config:/root/config"
+      - "./JM_PROC-db:/root/JM_PROC-db"
     ulimits:
       sigpending: -1
     logging:
       driver: local
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/JM_PROC_transient -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/JM_PROC_sqlite -db ./JM_PROC-db/JM_PROC.db -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   istore_proc:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
