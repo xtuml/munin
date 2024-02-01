@@ -49,12 +49,13 @@ echo "Done."
 # generate source job
 echo "Generating invariant source runtime event stream..."
 # little delay to assure everything is initialized
-sleep 2
+sleep 5
 echo "../tests/PumlForTesting/PumlRegression/AAExtraJobInvariantSourceJob.puml" | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC
 echo "Done."
 
 # generate test event data
 echo "Generating audit event stream..."
+sleep 1
 # plus2json leaks memory when running continously.
 # Loop it up to free memory after small batches of events.
 echo "0 of " $TOTAL_EVENTS
@@ -64,7 +65,7 @@ for ((i = 0; i < $ITERATIONS; i++)); do
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
 done
-sleep 5
+sleep 30
 echo "Done."
 
 # run the benchmark script
