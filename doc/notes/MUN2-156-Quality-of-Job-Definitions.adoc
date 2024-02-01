@@ -1,0 +1,227 @@
+= Protocol Verifier - Quality of Job Defintions
+
+xtUML Project Design Note
+
+== 1 Abstract
+
+This note proposes a quantitative measure of the quality of each Job Definition 
+that is submitted to the Protocol Verifier.
+
+== 2 Introduction and Background
+
+The Protocol Verifier (PV) works with an infinitie variety of Job Definitions 
+and checks for a range of features in those Job Definitions. The effectiveness 
+of the PV is related to the properties of the Job Definitions it is asked to 
+monitor.
+
+It is possible to subvert the effectiveness of the PV by creating job definitions
+that avoid or minimise the features that the PV is monitoring.
+
+As a simple example, consider a job definition containing 20 audit event 
+definitions. Variant 1 of the job definition contains a single sequence definition
+with all 20 audit event definitions. Variant 2 contains 20 sequence definitions
+each with a single event. The PV can't sequence events across sequence boundaries
+so Variant 1 is very strong but Variant 2 completely subverts the sequencing
+checks performed by the PV. Variant 2 is a much weaker job definition than 
+Variant 1 though they outwardly look very similar.
+
+This paper does not seek to define all the terms relating to parts of a job 
+definition as that has been covered extensively elsewhere, e.g.
+
+. [[dr-1]] https://d.docs.live.net/9573da1ce9e0cfea/Project%20MUNIN%20-%20Shared%20Feb16th/Project%20Munin%20Audit%20Event%20Toplogies.pptx[The Audit Event Topologies Tutorial]
+
+
+== 3 Key Properties of a Job Definition
+
+This section introduces the properties of job definition that strengthen it and
+how they can be quantified.
+
+=== 3.1 Sequence Length
+
+The PV can only verify the correct order of events within a sequence. So the more
+events there are within a sequence the more effective the PV can be. It is 
+recognised in the design of the PV that it will not be possible to link together
+all events within a job. So a job definition is permitted to contain a number of 
+sequence definitions. The verification of event order is only performed within
+a sequence.
+
+Therefore one measure of a job definition's quality is the average number of 
+events per sequence. In the example above Variant 1 would score 20 and Variant 2
+would score 1. The higher the number the stronger the job definition. The value
+for each sequence is simply the number of events within the sequence. By 
+averaging that value across all the sequences within the job you get a sensible
+value for the job as a whole.
+
+=== 3.2 Intra Job Invariants
+
+Intra Job Invariants provide a mitigation for the weakness resulting from having
+to have multiple sequences within a job. They establish a link between sequences 
+that is not possible through event ordering.
+
+As a minimum an intra job invariant must be defined twice within a job to be 
+useful. These are termed the source and user definitions. However, there can be
+any number of user definitions within a single job definition. Each source and
+user pair adds value but it is the situation where the source is in one sequence 
+and the user is in another that special value is provided. In this circumstance,
+the intra job invariant is providing something simply not available through
+event sequencing.
+
+So each source-user pair scores a point but additional weighting should be given 
+where sources and users are in different sequence definitions.
+
+A further consideration is whether the number of intermediate events between
+the source and user adds value, e.g. a sequence definition with a source intra 
+job invariant on the first event and a user intra job invariant on the tenth 
+event is going to be more valuable than one with the source intra job 
+invariant on the first event and the user intra job invariant on the second 
+event.
+
+Also, where there are multiple user intra job invariants. Each one is more
+valuable if it occurs in a unique sequence definition. Several user invariants
+in the same sequence definition is less useful than each user invariant in 
+its own sequence definition.
+
+For each user intra job invariant that has a corresponding source intra job 
+invariant:
+
+. If the source and user are in the same sequence determine the number of
+intermediate events on the shortest path - this value plus one is invariant 
+distance (it is possible that the topology of the sequence means they are 
+not on a common path - if so the invariant is doing useful work so use a 
+default invariant distance which should be a relatively high value)
+
+. The invariant distance should be divided by intra sequence weighting to 
+achieve a value for each user invariant.
+
+. If the source and user are in different sequences then the number of
+intermediate events is indeterminate so simple assign an inter sequence
+weighting.
+
+Note: Proposed intra sequence weighting value and proposed inter sequence 
+weighting are shown <<4.2 Proposed Weighting Factor Values, here>> but these can be made configurable.
+
+=== 3.3 Extra Job Invariant
+
+The job definition that is the source of an extra job invariant and is a
+special type of job. It may be fairly simple but it is highly significant
+and so should be scored for its significance. Such a job should have the 
+source extra job invariant weighting factor added to its score for each 
+extra job invariant it sources (typically only one).
+
+Note: Proposed source extra job invariant weighting value is shown <<4.2 Proposed Weighting Factor Values, here>> but this can be made configurable.
+
+Any job definition that uses an extra job invariant again has a significant 
+security measure and so should have the user extra job invariant weighting 
+factor added to its score for each extra job invariant it uses.
+
+Note: Proposed user extra job invariant weighting value is shown <<4.2 Proposed Weighting Factor Values, here>> but this can be made configurable.
+
+=== 3.4 Branch, Merge and Loop Counts
+
+Each branch, merge and loop count within a job definition adds a constraint and
+improves the quality of the job. Each one should have a configurable factor 
+associated with them and that should be added to the job's score for each 
+of the dynamic controls in the job definition.
+
+Note: Proposed branch, merge and loop weighting values are shown <<4.2 Proposed Weighting Factor Values, here>> but these can be made configurable.
+
+=== 3.5 Unhappy Event Definitions
+
+Unhappy event defintions within a job definition may be inevitable but they do 
+weaken a job. For each unhappy event definition the unhappy event weighting factor 
+should be deleted from the job's score.
+
+Note: Proposed unhappy event weighting value is shown <<4.2 Proposed Weighting Factor Values, here>> but this can be made configurable.
+
+== 4. Job Quality Score Algorithm
+
+=== 4.1 The Quality Equation
+
+**JDQ = E/S + UIS*ID/WIS + WUID*UID + WSE*SE + WUE*UE + WB*B + WL*L + WM*M – WUH*UH**
+
+where:
+
+* JDQ – Job Definition Quality
+* E – Number of Audit Events in the Job Definition (each occurrence of an event increments the number)
+* S – Number of sequences in the Job Definition
+* UIS – Number of user intra Job Invariants in the same sequence as the corresponding source intra job invariant 
+* ID – Invariant Distance – Number of intermediate events between the events carrying the source and user intra job invariants + 1
+* WIS – Intra sequence weighting - a configurable weighting value
+* WUID – Inter sequence weighting for user intra job invariants in different sequences to their corresponding source
+* UID – Number of user intra job invariants in different sequences to their corresponding source within the job definition
+* WSE – Source Extra Job Invariant Weighting 
+* SE – Number of source extra job invariants in the job definition 
+* WUE – User Extra Job Invariant Weighting 
+* UE  - Number of Extra Job Invariants in the job definition
+* WB – Branch count weighting factor
+* B – Number of branch count declarations in the job definition
+* WL – Loop count weighting factor
+* L – Number of loop count declarations in the job definition
+* WM – Merge count weighting factor
+* M – Number of merge count declarations in the job definition
+* WUH – Unhappy event weighting factor
+* UH – Number of unhappy event definitions in the job definition
+
+=== 4.2 Proposed Weighting Factor Values
+
+. WIS = 4
+. WUID = 6
+. WSE = 12
+. WUE = 6
+. WB = 2
+. WL = 1
+. WM = 2
+. WUH = 1
+
+== 5. Job Quality Measure
+
+The algorithm deliberately contains configurable factors so that the weightings
+can be refined with usage. This means that there is no absolute scale of scoring.
+It is suggested that the scores are translated into one of 4 quality bands rather
+than having to worry about what the numbers mean. These should be something like:
+
+. Dismal
+. Weak
+. Adequate
+. Strong
+
+For the scoring scheme proposed above these might work as follows:
+
+. Score <2 - Dismal
+. Score >=2 and <5 - Weak
+. Score >=5 and <12 - Adequate
+. Score >= 12 Strong
+
+== 6 Runtime Considerations
+
+A word of caution - just because a job definition is high quality doesn't 
+ensure that the PV will be effective in monitoring the runtime job.
+
+Consider a job with invariants, branches, loops, merges etc but also has an
+XOR branch near the start that leads to an early termination of the Job. If
+this XOR branch is taken and the job terminates early with none of the 
+features being exercised then the effectiveness of the PV at runtime is 
+nothing compared with the effectiveness of the PV promised by the definition.
+
+A high quality job definition could be designed and implemented but the
+runtime behaviour of the system never uses the strong verification features 
+in practice.
+
+In other words a high quality definition only gets you so far. The good news 
+is weeding out low quality definitions is always worthwhile. A job at runtime
+can never be more effective than its definition promised.
+
+== 7 Examples
+
+The following link proposes a set of weighting values and illustrates the 
+Quality Equation with a range of example:
+
+* [[dr-2]] https://d.docs.live.net/9573da1ce9e0cfea/Project%20MUNIN%20-%20Shared%20Feb16th/JobDefinitionQualityExamples.pptx[Job Definition Quality Examples]
+
+== 8 Future Work Required
+
+. Consider implementation in plus2json
+. Revision of the equation and proposed weighting values when real examples 
+are available
+. Consideration of XOR nodes as a negative factor on job quality
+
