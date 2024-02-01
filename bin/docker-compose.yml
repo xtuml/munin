@@ -2,26 +2,9 @@ version: "3.9"
 name: munin
 
 volumes:
-  ConanServer:
   ConanCache:
 
 services:
-  conan-server:
-    image: levistarrett/conan-server:${MASL_VERSION:-latest}
-    restart: unless-stopped
-    ports:
-      - 9300:9300
-    volumes:
-      - type: volume
-        source: ConanServer
-        target: /conan-data
-
-  populate:
-    image: levistarrett/masl-populate:${MASL_VERSION:-latest}
-    depends_on:
-      conan-server:
-        condition: service_healthy
-
   bash:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
     stdin_open: true
@@ -55,9 +38,6 @@ services:
 
   build:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
-    depends_on:
-      conan-server:
-        condition: service_healthy
     volumes:
       - type: volume
         source: ConanCache
