@@ -1,0 +1,7 @@
+public service AEOrdering::Req_IF_JobManagement~>jobCompleted ( workerId: in UUID::formatted_uuid,
+                                                                jobId: in string ) is
+begin
+  
+  JobManagement::jobCompleted(workerId, jobId);
+  
+end service;

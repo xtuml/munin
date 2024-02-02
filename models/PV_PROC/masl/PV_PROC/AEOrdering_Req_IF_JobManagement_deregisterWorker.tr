@@ -1,0 +1,7 @@
+public service AEOrdering::Req_IF_JobManagement~>deregisterWorker ( workerId: in UUID::formatted_uuid ) is
+
+begin
+  
+  JobManagement::deregisterWorker(workerId);
+  
+end service;

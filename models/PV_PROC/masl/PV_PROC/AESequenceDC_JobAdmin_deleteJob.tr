@@ -1,6 +1,4 @@
 public service AESequenceDC::JobAdmin~>deleteJob ( jobID: in string ) is
 begin
   AEOrdering::deleteJob(jobID);
-  VerificationGateway::deleteVerifiableJob(jobID);
-  // TBD: Add call to Job Management function to delete the counterpart Job
 end service;

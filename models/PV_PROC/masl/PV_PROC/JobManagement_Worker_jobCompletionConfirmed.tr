@@ -1,5 +1,7 @@
 public service JobManagement::Worker~>jobCompletionConfirmed ( workerId: in UUID::formatted_uuid,
                                                                jobId: in string ) is
 begin
-  null;
+
+  AEOrdering::jobCompletionConfirmed(workerId, jobId);
+
 end service;

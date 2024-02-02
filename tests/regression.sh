@@ -34,7 +34,7 @@ done
 # Delay only enough time to allow the unhappy jobs to finish (HangingJobTimer).
 t1=`date +%s`
 tdelta=$(($t1 - $t0))
-delay=$((45 - $tdelta))
+delay=$((50 - $tdelta))
 if [[ $delay -le 0 ]] ; then
   delay=1
 fi

@@ -20,6 +20,15 @@ begin
 
     // check the job store and purge if required
     generate JobStore.purgeJobStore() to (find_one JobStore());
+    
+    // check for retired workers
+    for retiredWorker in find RetiredWorker() loop
+    	if retiredWorker.retirementDate + this.retiredWorkerDeletionTime < timestamp'now then
+    		unlink retiredWorker R2 (retiredWorker -> R2.JobWorker);
+    		delete retiredWorker;
+    	end if;
+    end loop;
+    
     schedule this.configTimer generate JobManagementSpec.checkConfigUpdate() to this delay this.specUpdateRate;
 	
 exception

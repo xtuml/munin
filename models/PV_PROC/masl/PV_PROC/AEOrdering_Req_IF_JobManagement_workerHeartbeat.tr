@@ -1,0 +1,6 @@
+public service AEOrdering::Req_IF_JobManagement~>workerHeartbeat ( workerId: in UUID::formatted_uuid ) is
+begin
+  
+  JobManagement::workerHeartbeat(workerId);
+  
+end service;

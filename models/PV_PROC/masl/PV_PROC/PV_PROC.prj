@@ -1,23 +1,19 @@
 project PV_PROC is
 
-  domain AEReception is
-
-    terminator Ordering is
-
-      public service AcceptEvent (
-        jobId : in string,
-        jobName : in string,
-        auditEventType : in string,
-        auditEventId : in string,
-        auditEventTime : in string,
-        prevAuditEventIds : in sequence of string,
-        auditEventData : in dictionary
-      );
-
-    end terminator;
-    
-  end domain;
-
+	domain JobManagement is
+		terminator Reporting is
+		end terminator;
+  
+		terminator Worker is
+			public service workerRegistered ( workerId: in UUID::formatted_uuid );     
+			public service workerUnregistered ( workerId: in UUID::formatted_uuid );     
+			public service reportEvent ( workerId: in UUID::formatted_uuid,
+			                             auditEvent: in string);     
+			public service jobCompletionConfirmed ( workerId: in UUID::formatted_uuid,
+                                                    jobId: in string );     
+		end terminator;
+	end domain;
+  
   domain FReception is
     
     terminator Reception is
@@ -94,6 +90,15 @@ project PV_PROC is
 
     terminator Reporting is
     end terminator;
+    
+    terminator Req_IF_JobManagement is
+      public service registerWorker ( workerId: in UUID::formatted_uuid );     
+      public service deregisterWorker ( workerId: in UUID::formatted_uuid );     
+      public service workerHeartbeat ( workerId: in UUID::formatted_uuid );     
+      public service jobCompleted ( workerId: in UUID::formatted_uuid,
+                                    jobId: in string );     
+    end terminator;
+  
   end domain;
   
   domain AESequenceDC is
