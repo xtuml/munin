@@ -59,10 +59,11 @@ end state;
 state AEOrdering::Worker.NotRegistered () is
 begin
 	
+	cancel this.workerTimer;
 	this.registered := false;
 	// locate any in progress jobs and fail them with worker performed requested deregister
 	for inProgressJob in find InProgressJob() loop
-		(inProgressJob -> R2.Job).failJob("Worker was received a deregistered message from Job Management with in progress jobs");
+		(inProgressJob -> R2.Job).failJob("Worker has received a deregistered message from Job Management with in progress jobs");
 	end loop;
 	generate Worker.requestRegistration() to this;
 	

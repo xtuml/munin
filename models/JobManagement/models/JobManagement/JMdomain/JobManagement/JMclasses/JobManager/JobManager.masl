@@ -109,7 +109,7 @@ begin
 	eventContent := "Assigned jobs. Job Count = " & ((this -> R1.JobWorker -> R2.EmployedWorker -> R6.AssignedJob)'length)'image;
 	Reporting~>reportEvent(Logger::Error, "jobmanagement_total_assigned_jobs", eventContent);
 
-	eventContent := "Unassigned jobs. . Job Count = " & ((find UnassignedJob())'length)'image;
+	eventContent := "Unassigned jobs. Job Count = " & ((find UnassignedJob())'length)'image;
 	Reporting~>reportEvent(Logger::Error, "jobmanagement_total_unassigned_jobs", eventContent);
 
 end service;

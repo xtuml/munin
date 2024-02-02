@@ -7,27 +7,11 @@ end state;
 
 //! ACTIVITY BEGIN. 'fafa08f1-e2d9-4091-aa70-9f3e4eb2da3c' 'ffef72a4-885a-4183-9a8c-8b168eb341de' DO NOT EDIT THIS LINE.
 state JobManagement::EmployedWorker.Registered () is
-jobManager : instance of JobManager;
-jmSpec : instance of JobManagementSpec;
-unassignedJobIds : sequence of string;
-
 begin
   
 	// report the worker as registered
 	Worker~>workerRegistered(this.workerId);
 	
-	// ask the job manager to assign a job
-	jobManager := find_one JobManager();
-	unassignedJobIds := jobManager.unassignedJobIds;
-	if unassignedJobIds'length > 0 then
-		jobManager.assignJob(this);
-	end if;
-	
-	// set the absence timer
-	this.failedHeartbeatCount := 0;
-	jmSpec := find_one JobManagementSpec();
-	schedule this.absenceTimer generate EmployedWorker.workerPresenceUnknown() to this delay jmSpec.workerHeartbeatRate;
-
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -36,6 +20,7 @@ state JobManagement::EmployedWorker.Deregistered () is
 begin
 	
 	// retire the worker
+	this.working := false;
 	(this -> R2.JobWorker).retireWorker();
 	
 end state;
@@ -44,6 +29,7 @@ end state;
 //! ACTIVITY BEGIN. 'fafa08f1-e2d9-4091-aa70-9f3e4eb2da3c' '30ee19e8-0252-4c72-adeb-fc162c3b2c7a' DO NOT EDIT THIS LINE.
 state JobManagement::EmployedWorker.Absent () is
 jmSpec : instance of JobManagementSpec;
+eventContent : string;
 
 begin
 	// cancel the absence timer
@@ -53,6 +39,8 @@ begin
 	jmSpec := find_one JobManagementSpec();
 	if this.failedHeartbeatCount > jmSpec.workerHeartbeatFailureThreshold then
 		generate EmployedWorker.workerDeregistered() to this;
+	    eventContent := "Worker id = " & string(this.workerId);
+	    Reporting~>reportEvent(Logger::Error, "jobmanagement_worker_deregistered_failed_heartbeat", eventContent);
 	else
 		// schedule the absence timer
 		schedule this.absenceTimer generate EmployedWorker.workerPresenceUnknown() to this delay jmSpec.workerHeartbeatRate;
@@ -61,7 +49,7 @@ end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'fafa08f1-e2d9-4091-aa70-9f3e4eb2da3c' 'be985925-f72b-42b2-851b-e7bba0ae5dc0' DO NOT EDIT THIS LINE.
-state JobManagement::EmployedWorker.AvailableForWork () is
+state JobManagement::EmployedWorker.Working () is
 jmSpec : instance of JobManagementSpec;
 
 begin
@@ -70,6 +58,28 @@ begin
 	// reset the failed heartbeat count
 	this.failedHeartbeatCount := 0;
 	// schedule the absence timer
+	jmSpec := find_one JobManagementSpec();
+	schedule this.absenceTimer generate EmployedWorker.workerPresenceUnknown() to this delay jmSpec.workerHeartbeatRate;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'fafa08f1-e2d9-4091-aa70-9f3e4eb2da3c' '23e326d4-5e29-417e-81dd-ddcfb9e40ce6' DO NOT EDIT THIS LINE.
+state JobManagement::EmployedWorker.AvailableForWork () is
+jobManager : instance of JobManager;
+jmSpec : instance of JobManagementSpec;
+unassignedJobIds : sequence of string;
+
+begin
+	// ask the job manager to assign a job
+	this.working := true;
+	jobManager := find_one JobManager();
+	unassignedJobIds := jobManager.unassignedJobIds;
+	if unassignedJobIds'length > 0 then
+		jobManager.assignJob(this);
+	end if;
+	
+	// set the absence timer
+	this.failedHeartbeatCount := 0;
 	jmSpec := find_one JobManagementSpec();
 	schedule this.absenceTimer generate EmployedWorker.workerPresenceUnknown() to this delay jmSpec.workerHeartbeatRate;
 end state;
