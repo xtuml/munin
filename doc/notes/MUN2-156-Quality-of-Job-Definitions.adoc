@@ -46,7 +46,8 @@ sequence definitions. The verification of event order is performed only within
 a sequence.
 
 Therefore one measure of a job definition's quality is the average number of 
-events per sequence. In the example above Variant 1 would score 20 and Variant 2
+events per sequence. [Paul : Strictly speaking shouldn't this be "event definitions per sequence definition - events per sequence would need to be 'measured' at run time]
+In the example above Variant 1 would score 20 and Variant 2
 would score 1. The higher the number the stronger the job definition. The value
 for each sequence is simply the number of events within the sequence. By 
 averaging that value across all the sequences within the job you get a sensible
@@ -54,17 +55,22 @@ value for the job as a whole.
 
 === 3.2 Intra Job Invariants
 
+[Paul: As part of a quality check would it also be worth checking for:
+(1) no user of a source invariant
+(2) no source invariant for a user
+These are possibly more of a measure of correctness rather than sequence quality]
+
 Intra Job Invariants provide a mitigation for the weakness resulting from having
 to have multiple sequences within a job. They establish a link between sequences 
 that is not possible through event ordering.
 
 As a minimum an intra job invariant must be defined twice within a job to be 
 useful. These are termed the source and user definitions. However, there can be
-any number of user definitions within a single job definition. Each source and
-user pair adds value, but it is the situation where the source is in one sequence,
-and the user is in another that special value is provided. In this circumstance,
-the intra job invariant is providing something simply not available through
-event sequencing.
+one or more (but not zero) user definitions within a single job definition. Each source and
+user pair adds value, but it is in the situation where the source is in one sequence,
+and the user is in another that added value is provided. In this circumstance,
+the intra job invariant is providing something that can be checked across sequences that is simply not available through
+event sequencing. [Paul: Do we need to say why this is more valuable?]
 
 So each source-user pair scores a point but additional weighting should be given 
 where sources and users are in different sequence definitions.
@@ -77,7 +83,7 @@ invariant on the first event and the user intra job invariant on the second
 event.
 
 Also, where there are multiple user intra job invariants, each one is more
-valuable if it occurs in a unique sequence definition. Several user invariants
+valuable if it occurs in a different sequence definition. Several user invariants
 in the same sequence definition are less useful than each user invariant in 
 its own sequence definition.
 
@@ -130,7 +136,7 @@ Note: Proposed branch, merge and loop weighting values are shown <<4.2 Proposed 
 
 Unhappy event definitions within a job definition may be inevitable, but they do
 weaken a job. For each unhappy event definition the unhappy event weighting factor 
-should be deleted from the job's score.
+should be subtracted from the job's score.
 
 Note: Proposed unhappy event weighting value is shown <<4.2 Proposed Weighting Factor Values, here>>, but this can be made configurable.
 
@@ -202,7 +208,7 @@ Consider a job with invariants, branches, loops, merges etc but also has an
 XOR branch near the start that leads to an early termination of the Job. If
 this XOR branch is taken and the job terminates early with none of the 
 features being exercised, then the effectiveness of the PV at runtime is 
-nothing compared with the effectiveness of the PV promised by the definition.
+significantly reduced compared with the effectiveness of the PV promised by the definition.
 
 A high quality job definition could be designed and implemented, but the
 runtime behaviour of the system never uses the strong verification features 
