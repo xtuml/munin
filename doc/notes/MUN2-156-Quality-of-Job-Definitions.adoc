@@ -1,4 +1,4 @@
-= Protocol Verifier - Quality of Job Defintions
+= Protocol Verifier - Quality of Job Definitions
 
 xtUML Project Design Note
 
@@ -9,7 +9,7 @@ that is submitted to the Protocol Verifier.
 
 == 2 Introduction and Background
 
-The Protocol Verifier (PV) works with an infinitie variety of Job Definitions 
+The Protocol Verifier (PV) works with an infinite variety of Job Definitions
 and checks for a range of features in those Job Definitions. The effectiveness 
 of the PV is related to the properties of the Job Definitions it is asked to 
 monitor.
@@ -20,29 +20,29 @@ that avoid or minimise the features that the PV is monitoring.
 As a simple example, consider a job definition containing 20 audit event 
 definitions. Variant 1 of the job definition contains a single sequence definition
 with all 20 audit event definitions. Variant 2 contains 20 sequence definitions
-each with a single event. The PV can't sequence events across sequence boundaries
+each with a single event. The PV cannot sequence events across sequence boundaries
 so Variant 1 is very strong but Variant 2 completely subverts the sequencing
 checks performed by the PV. Variant 2 is a much weaker job definition than 
 Variant 1 though they outwardly look very similar.
 
 This paper does not seek to define all the terms relating to parts of a job 
-definition as that has been covered extensively elsewhere, e.g.
+definition, as that has been covered extensively elsewhere, e.g.
 
 . [[dr-1]] https://d.docs.live.net/9573da1ce9e0cfea/Project%20MUNIN%20-%20Shared%20Feb16th/Project%20Munin%20Audit%20Event%20Toplogies.pptx[The Audit Event Topologies Tutorial]
 
 
 == 3 Key Properties of a Job Definition
 
-This section introduces the properties of job definition that strengthen it and
-how they can be quantified.
+This section introduces the properties of a job definition that strengthen it and
+how the properties can be quantified.
 
 === 3.1 Sequence Length
 
 The PV can only verify the correct order of events within a sequence. So the more
-events there are within a sequence the more effective the PV can be. It is 
+events there are within a sequence, the more effective the PV can be. It is 
 recognised in the design of the PV that it will not be possible to link together
 all events within a job. So a job definition is permitted to contain a number of 
-sequence definitions. The verification of event order is only performed within
+sequence definitions. The verification of event order is performed only within
 a sequence.
 
 Therefore one measure of a job definition's quality is the average number of 
@@ -61,7 +61,7 @@ that is not possible through event ordering.
 As a minimum an intra job invariant must be defined twice within a job to be 
 useful. These are termed the source and user definitions. However, there can be
 any number of user definitions within a single job definition. Each source and
-user pair adds value but it is the situation where the source is in one sequence 
+user pair adds value, but it is the situation where the source is in one sequence,
 and the user is in another that special value is provided. In this circumstance,
 the intra job invariant is providing something simply not available through
 event sequencing.
@@ -76,9 +76,9 @@ event is going to be more valuable than one with the source intra job
 invariant on the first event and the user intra job invariant on the second 
 event.
 
-Also, where there are multiple user intra job invariants. Each one is more
+Also, where there are multiple user intra job invariants, each one is more
 valuable if it occurs in a unique sequence definition. Several user invariants
-in the same sequence definition is less useful than each user invariant in 
+in the same sequence definition are less useful than each user invariant in 
 its own sequence definition.
 
 For each user intra job invariant that has a corresponding source intra job 
@@ -87,51 +87,52 @@ invariant:
 . If the source and user are in the same sequence determine the number of
 intermediate events on the shortest path - this value plus one is invariant 
 distance (it is possible that the topology of the sequence means they are 
-not on a common path - if so the invariant is doing useful work so use a 
+not on a common path - if so the invariant is doing useful work, so use a 
 default invariant distance which should be a relatively high value)
 
 . The invariant distance should be divided by intra sequence weighting to 
 achieve a value for each user invariant.
 
-. If the source and user are in different sequences then the number of
+. If the source and user are in different sequences, then the number of
 intermediate events is indeterminate so simple assign an inter sequence
 weighting.
 
 Note: Proposed intra sequence weighting value and proposed inter sequence 
-weighting are shown <<4.2 Proposed Weighting Factor Values, here>> but these can be made configurable.
+weighting are shown <<4.2 Proposed Weighting Factor Values, here>>, but these can be made configurable.
 
 === 3.3 Extra Job Invariant
 
-The job definition that is the source of an extra job invariant and is a
-special type of job. It may be fairly simple but it is highly significant
+The job definition that is the source of an extra job invariant is a
+special type of job. It may be fairly simple, but it is highly significant
 and so should be scored for its significance. Such a job should have the 
 source extra job invariant weighting factor added to its score for each 
 extra job invariant it sources (typically only one).
 
-Note: Proposed source extra job invariant weighting value is shown <<4.2 Proposed Weighting Factor Values, here>> but this can be made configurable.
+Note: Proposed source extra job invariant weighting value is shown
+<<4.2 Proposed Weighting Factor Values, here>>, but this can be made configurable.
 
 Any job definition that uses an extra job invariant again has a significant 
 security measure and so should have the user extra job invariant weighting 
 factor added to its score for each extra job invariant it uses.
 
-Note: Proposed user extra job invariant weighting value is shown <<4.2 Proposed Weighting Factor Values, here>> but this can be made configurable.
+Note: Proposed user extra job invariant weighting value is shown <<4.2 Proposed Weighting Factor Values, here>>, but this can be made configurable.
 
 === 3.4 Branch, Merge and Loop Counts
 
 Each branch, merge and loop count within a job definition adds a constraint and
 improves the quality of the job. Each one should have a configurable factor 
-associated with them and that should be added to the job's score for each 
+associated with them, and that should be added to the job's score for each 
 of the dynamic controls in the job definition.
 
-Note: Proposed branch, merge and loop weighting values are shown <<4.2 Proposed Weighting Factor Values, here>> but these can be made configurable.
+Note: Proposed branch, merge and loop weighting values are shown <<4.2 Proposed Weighting Factor Values, here>>, but these can be made configurable.
 
 === 3.5 Unhappy Event Definitions
 
-Unhappy event defintions within a job definition may be inevitable but they do 
+Unhappy event definitions within a job definition may be inevitable, but they do
 weaken a job. For each unhappy event definition the unhappy event weighting factor 
 should be deleted from the job's score.
 
-Note: Proposed unhappy event weighting value is shown <<4.2 Proposed Weighting Factor Values, here>> but this can be made configurable.
+Note: Proposed unhappy event weighting value is shown <<4.2 Proposed Weighting Factor Values, here>>, but this can be made configurable.
 
 == 4. Job Quality Score Algorithm
 
@@ -200,10 +201,10 @@ ensure that the PV will be effective in monitoring the runtime job.
 Consider a job with invariants, branches, loops, merges etc but also has an
 XOR branch near the start that leads to an early termination of the Job. If
 this XOR branch is taken and the job terminates early with none of the 
-features being exercised then the effectiveness of the PV at runtime is 
+features being exercised, then the effectiveness of the PV at runtime is 
 nothing compared with the effectiveness of the PV promised by the definition.
 
-A high quality job definition could be designed and implemented but the
+A high quality job definition could be designed and implemented, but the
 runtime behaviour of the system never uses the strong verification features 
 in practice.
 
