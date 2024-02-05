@@ -3,6 +3,7 @@ public service JobManagement::registerWorker ( workerId : in UUID::formatted_uui
 jobWorker : instance of JobWorker;
 employedWorker : instance of EmployedWorker;
 retiredWorker : instance of RetiredWorker;
+eventContent : string;
 
 begin
 	
@@ -20,7 +21,11 @@ begin
 			// worker thinks it is not registered so deregister forcing 
 			// all in progress jobs to be reassigned.
 			employedWorker := jobWorker -> R2.EmployedWorker;
-			generate EmployedWorker.workerDeregistered() to employedWorker;
+			if employedWorker.working = true then
+				generate EmployedWorker.workerDeregistered() to employedWorker;
+			    eventContent := "Worker id = " & string(employedWorker.workerId);
+			    Reporting~>reportEvent(Logger::Error, "jobmanagement_worker_deregistered_register_request", eventContent);
+			end if;
 		end if;
 	end if;
 end service;
@@ -62,7 +67,7 @@ begin
         jsonObject := JSON::get_object(jsonElement);
         if jsonObject'contains("jobId") then
 	        jobId := JSON::get_string(jsonObject["jobId"]);
-	        Reporting~>reportEvent(Logger::Error, "jobmanagement_event_received", "");
+//	        Reporting~>reportEvent(Logger::Error, "jobmanagement_event_received", "");
 	        jobManager := find_one JobManager();
 	        job := find_one Job(jobId = jobId);
 	        if job = null then
@@ -163,6 +168,7 @@ end service;
 //! ACTIVITY BEGIN. 'ff723fb4-c20f-4ab8-bc39-e807df00e8fc' DO NOT EDIT THIS LINE.
 public service JobManagement::deregisterWorker ( workerId : in UUID::formatted_uuid ) is
 employedWorker : instance of EmployedWorker;
+eventContent : string;
 
 begin
 	
@@ -170,6 +176,8 @@ begin
 	employedWorker := find_one EmployedWorker(workerId = workerId);
 	if employedWorker /= null then
 		generate EmployedWorker.workerDeregistered() to employedWorker;
+	    eventContent := "Worker id = " & string(employedWorker.workerId);
+	    Reporting~>reportEvent(Logger::Error, "jobmanagement_worker_deregistered_deregister_request", eventContent);
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
