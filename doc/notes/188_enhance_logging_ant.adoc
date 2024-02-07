@@ -9,8 +9,8 @@ Protocol Verifier application.
 
 == 2 Introduction and Background
 
-Until January 2024, the MASL C++ model compiler <<dr-2>> used POCO
-<<dr-3>> as the underlying logging technology.  Now MASL C++ uses
+Until January 2024, the MASL C{plus}{plus} model compiler <<dr-2>> used POCO
+<<dr-3>> as the underlying logging technology.  Now MASL uses
 `log4cplus` <<dr-4>>.  `log4cplus` provides more functionality and is
 consistent with `log4j`, which is a popular logging framework for Java.
 
@@ -30,8 +30,8 @@ some of these practices while we are changing to the `log4*` idiom of
 logging.
 
 The first Best Practice to logging is to author a mission statement for
-the logging and proceed from there.  (This aligns with Shlaer-Mellor
-domain modelling quite nicely.)
+the logging and proceed from there.  This aligns with Shlaer-Mellor
+domain modelling quite nicely.
 
 == 3 Requirements
 
@@ -58,7 +58,7 @@ domain modelling quite nicely.)
 * Munin software shall log information critical to the verification of protocols.
   This includes detection of alarms, failures and successes.
 * Munin software shall be instrumented to enable the measurement of the
-  perforance of the Protocol Verifier application itself (benchmarking).
+  performance of the Protocol Verifier application itself (benchmarking).
 * Munin software shall be judiciously instrumented with debug statements
   adequate to isolating bugs.
 * The volume of production-level logging shall not exceed the volume of
@@ -77,13 +77,71 @@ are interesting in terms of throughput.
 The primary deliverable log entry is the final status of a job.  A job
 completes with status _successful_, _failed_ or _alarm_.  Together with
 the job type (name) and identifier, this is the key status provided by the
-Protocol Verifier.
+Protocol Verifier.  Failed and alarmed jobs must also report internal
+state satisfactory to understanding failure modes in application-level
+jobs in the system being monitored.
+
+===== 5.1.2.1 Job-Level Statistics
+
+For failured and alarmed jobs, the following statistics are interesting:
+
+* job type (name)
+* job identifier
+* failure/alarm mode
+* event trace
+  ** event type (name)
+  ** event identifier
+  ** ordering
+
+For successful jobs, the following shall be reported:
+
+* job type (name)
+* job identifier
+* event count
+
+This job status report shall be logged exactly once at completion of the
+job.  This information shall be contained in a single structured log
+message.
+
+The recommended location of this logging is in Sequence Verification.
 
 ==== 4.1.3 Event Logging
 
-A secondary 
+Logging at the event level is largely infeasible in production configurations.
+However, in anticipation of a potential need, some event-level statistics
+shall be gathered in summary format.
 
-=== 4.1 Logger Hierarchy
+==== 4.1.3.1 Event Statistics
+
+==== 4.1.1 Protocol Verifier Statistics
+
+Several parameters are useful in the maintenance and support of the
+Protocol Verifier.
+
+The following statistics are reported as they happen.
+
+* worker registered
+* worker deregistered
+* unassigned job count exceeded
+  ** job count exceeded is reported once upon occurrence and then only
+     reported again if the job count goes below the threshold.
+
+The following statistic are reported periodically.
+
+* event count since start
+* event throughput
+* worker count
+* concurrent jobs at worker
+* concurrent jobs overall
+* unassigned jobs
+* unassigned job count exceeded
+
+This information shall be reported on a regular basis not exceeding once
+per second (1 Hertz).
+
+The recommended location of this logging is in Job Management.
+
+=== 4.2 Logger Hierarchy
 
 * The top-level logger shall be 'pv' (Protocol Verifier).
 * Each domain shall have a logger.
@@ -108,7 +166,7 @@ A secondary
 == 7 Document References
 
 . [[dr-1]] https://github.com/xtuml/munin/issues/188[188 - Enhance Logging]
-. [[dr-2]] https://github.com/xtuml/masl[MASL C++ Model Compiler GitHub Repository]
+. [[dr-2]] https://github.com/xtuml/masl[MASL C{plus}{plus} Model Compiler GitHub Repository]
 . [[dr-3]] https://pocoproject.org/[POCO Project]
 . [[dr-4]] https://github.com/log4cplus/log4cplus[log4cplus]
 
