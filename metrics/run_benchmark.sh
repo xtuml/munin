@@ -12,14 +12,17 @@ TOTAL_EVENTS=100000
 if [[ $# -ge 2 ]] ; then
   EVENTS_PER_SECOND=$1
   TOTAL_EVENTS=$2
+  if [[ $BATCH_OF_EVENTS -gt $TOTAL_EVENTS ]] ; then
+    BATCH_OF_EVENTS=$TOTAL_EVENTS
+  fi
 fi
 ITERATIONS=$(($TOTAL_EVENTS / $BATCH_OF_EVENTS))
 
 # Allow over-riding the kafka topic.
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  RECEPTION_TOPIC="default.JobManagement_service2"
+  RECEPTION_TOPIC="JobManagement_service2"
 else
-  RECEPTION_TOPIC="default.JobManagement_service4"
+  RECEPTION_TOPIC="JobManagement_service4"
 fi
 if [[ $# -ge 3 ]] ; then
   RECEPTION_TOPIC=$3
@@ -43,7 +46,7 @@ echo "Done."
 # launch the application
 echo "Launching the application..."
 export CONFIG_FILE=benchmarking-config.json
-docker compose -f docker-compose.kafka.yml up -d --wait &>/dev/null
+docker compose -f docker-compose.kafka.yml up -d --wait
 echo "Done."
 
 # generate source job
@@ -74,8 +77,8 @@ python ../metrics/benchmark.py --msgbroker localhost:9092 --topic default.Benchm
 echo "Done."
 
 # tear down docker
-echo "Tearing down the application..."
-docker compose -f docker-compose.kafka.yml down
+echo "not Tearing down the application..."
+#docker compose -f docker-compose.kafka.yml down
 echo "Done."
 
 exit_code=0
