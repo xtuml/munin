@@ -32,7 +32,7 @@ begin
 			end loop;
 			
 		    eventContent := "Job assigned. Worker id = " & string(employedWorker.workerId) & " Jobs assigned = " & ((employedWorker -> R6.AssignedJob)'length)'image;
-		    Reporting~>reportEvent(Logger::Error, "jobmanagement_worker_assigned_job_count", eventContent);
+		    Reporting~>reportEvent(Logger::Information, "jobmanagement_worker_assigned_job_count", eventContent);
 		else
 			// log an error as there is an unassigned job held by job manager but there is no instance of unassigned job
 			logMessage := "Found unassigned job id without an unassigned job, jobId = " & unassignedJobIds[unassignedJobIds'first];
@@ -107,10 +107,10 @@ eventContent : string;
 begin
 
 	eventContent := "Assigned jobs. Job Count = " & ((this -> R1.JobWorker -> R2.EmployedWorker -> R6.AssignedJob)'length)'image;
-	Reporting~>reportEvent(Logger::Error, "jobmanagement_total_assigned_jobs", eventContent);
+	Reporting~>reportEvent(Logger::Information, "jobmanagement_total_assigned_jobs", eventContent);
 
 	eventContent := "Unassigned jobs. Job Count = " & ((find UnassignedJob())'length)'image;
-	Reporting~>reportEvent(Logger::Error, "jobmanagement_total_unassigned_jobs", eventContent);
+	Reporting~>reportEvent(Logger::Information, "jobmanagement_total_unassigned_jobs", eventContent);
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
