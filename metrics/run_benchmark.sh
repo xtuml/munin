@@ -3,7 +3,7 @@ set -e
 
 # Usage:
 # run_benchmark.sh [rate (events/second)] [total number of events] [reception topic]
-# Executution defaults to:  run_benchmark.sh 1000 100000 default.JobManagement_service4
+# Executution defaults to:  run_benchmark.sh 1000 100000 JobManagement_service0
 
 # Define batches of events for p2j to play.
 BATCH_OF_EVENTS=10000
@@ -18,12 +18,8 @@ if [[ $# -ge 2 ]] ; then
 fi
 ITERATIONS=$(($TOTAL_EVENTS / $BATCH_OF_EVENTS))
 
-# Allow over-riding the kafka topic.
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  RECEPTION_TOPIC="JobManagement_service2"
-else
-  RECEPTION_TOPIC="JobManagement_service4"
-fi
+# Allow over-riding the kafka topic for reception.
+RECEPTION_TOPIC="JobManagement_service0"
 if [[ $# -ge 3 ]] ; then
   RECEPTION_TOPIC=$3
 fi
@@ -72,13 +68,13 @@ sleep 30
 echo "Done."
 
 # run the benchmark script
-echo "Running benchmark calculations..."
-python ../metrics/benchmark.py --msgbroker localhost:9092 --topic default.BenchmarkingProbe_service0
+echo "not Running benchmark calculations..."
+#python ../metrics/benchmark.py --msgbroker localhost:9092 --topic default.BenchmarkingProbe_service0
 echo "Done."
 
 # tear down docker
-echo "not Tearing down the application..."
-#docker compose -f docker-compose.kafka.yml down
+echo "Tearing down the application..."
+docker compose -f docker-compose.kafka.yml down
 echo "Done."
 
 exit_code=0
