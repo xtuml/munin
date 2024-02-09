@@ -73,17 +73,17 @@ begin
 			delete assignedJob;
 			unassignedJob := create UnassignedJob(jobId => job.jobId);
 			link unassignedJob R5.Job job;
-			unassignedJobIds := jobManager.unassignedJobIds;
 			unassignedJobIds := unassignedJobIds & job.jobId;
-        	jobManager.unassignedJobIds := unassignedJobIds;        	
 		end loop;
+		unassignedJobIds := unassignedJobIds & jobManager.unassignedJobIds;
+		jobManager.unassignedJobIds := unassignedJobIds;
 		// report the worker as unregistered
 		Worker~>workerUnregistered(workerId);
 		unlink employedWorker R2.JobWorker this;
 		delete employedWorker;
 	end if;
 	// create the employed worker
-	retiredWorker := create RetiredWorker(workerId => this.workerId);
+	retiredWorker := create RetiredWorker(workerId => this.workerId, retirementDate => timestamp'now);
 	link retiredWorker R2 this;
     
     // if we have unassigned jobs attempt to assign

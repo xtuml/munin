@@ -2,6 +2,7 @@
 RUN SCENARIO JobManagement 1 "init"
 
 # run tests
+PAUSE
 RUN SCENARIO Test 1 "run_test" [JobManagement testConfigData 101]
 RUN SCENARIO Test 1 "run_test" [JobManagement testRegisterWorker 102]
 RUN SCENARIO Test 1 "run_test" [JobManagement testWorkerHeartbeat 103]
