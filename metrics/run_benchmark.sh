@@ -64,16 +64,17 @@ for ((i = 0; i < $ITERATIONS; i++)); do
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
 done
-sleep 30
+sleep 20
 echo "Done."
 
 # run the benchmark script
-echo "not Running benchmark calculations..."
-#python ../metrics/benchmark.py --msgbroker localhost:9092 --topic default.BenchmarkingProbe_service0
+echo "Running benchmark calculations..."
+python ../metrics/benchmark.py --msgbroker localhost:9092 --topic BenchmarkingProbe_service0
 echo "Done."
 
 # tear down docker
-echo "Tearing down the application..."
+echo "Tearing down the application... (ctrl-c to leave it running)"
+sleep 10
 docker compose -f docker-compose.kafka.yml down
 echo "Done."
 
