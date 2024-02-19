@@ -7,20 +7,11 @@ end state;
 
 //! ACTIVITY BEGIN. 'bd61a1e0-c5a9-4881-99e7-3499570a0cc9' 'edc92be0-3c35-423d-88bd-7e39bf446606' DO NOT EDIT THIS LINE.
 state JobManagement::JobStore.JobStoreUpdated () is
-ageOffJobTime : timestamp;
-jobIdsToStore : string;
-
 begin
 		
 	// remove any StoredJobIdentifiers that are older than the age off limit and add the to the archive
-	ageOffJobTime := timestamp'now - this.jobStoreAgeLimit;
-	for jobStoreIdentifier in find StoredJobIdentifier(jobTime <= ageOffJobTime) loop
-		jobIdsToStore := jobIdsToStore & jobStoreIdentifier.jobTime'image & " " & jobStoreIdentifier.jobId & "\n";
-		delete jobStoreIdentifier;
-	end loop;
-	Logger::log(Logger::Information, "JobIdStore", jobIdsToStore);
-	
-	
+	this.purgeStore();
+		
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
