@@ -15,17 +15,6 @@ over-logging and over-reporting, because clear requirements for both were
 emerging.  The understanding of the application has grown.  Requirements
 may now be surmised with some hope of usefulness.
 
-=== 2.1 intro notes
-
-* Discuss the variable boundary between logging and reporting.
-  ** Maybe reporting is always a subset of logging.
-* Allocate logger to jobID store.
-* structure the log messages for machine parsing
-  ** Consider the format that Prometheus supports.
-* Deal with the concept of job-level logging and event-level logging.
-* Identify tool that will be used to harvest the log data.
-* Consider "canonical" logging (especially of the event sequence).
-
 == 3 Requirements
 
 === 3.1 Dashboard Requirements
@@ -119,10 +108,19 @@ measurements supplying the current status of the Protocol Verifier itself.
 
 Following is a summary enumeration with details following.
 
-* number of running worker PVs
 * PV uptime
+* number of running worker PVs
+* count of assigned jobs
+* count of unassigned jobs
 
-===== 3.1.2.1 Protocol Verifier Worker Count
+===== 3.1.2.1 Protocol Verifier Uptime
+
+The amount of time elapsed since the Protocol Verifier was started shall
+be displayed.
+
+The units shall be in time duration format.
+
+===== 3.1.2.2 Protocol Verifier Worker Count
 
 The Protocol Verifier scales up and down to handle various audit event
 stream loads efficiently.  An integer number representing the current
@@ -133,12 +131,19 @@ Protocol Verifier started).
 
 There are no units to this measurement.
 
-===== 3.1.2.2 Protocol Verifier Uptime
+===== 3.1.2.3 Count of Assigned Jobs (Jobs in Progress)
 
-The amount of time elapsed since the Protocol Verifier was started shall
-be displayed.
+The number of jobs which Job Management has assigned to a worker shall be
+displayed.
 
-The units shall be in time duration format.
+There are no units to this measurement.
+
+===== 3.1.2.4 Count of Unassigned Jobs
+
+The number of jobs which Job Management has seen but has not assigned to a
+work shall be displayed.
+
+There are no units to this measurement.
 
 === 3.2 Other Requirements
 
@@ -151,8 +156,8 @@ Analysis for Protocol Verifier Reporting has been performed by the Munin
 engineering team with little outside input.  However, as understanding of
 protocol verification grew, an understanding of what would be useful on
 the back end grew.  The above dashboard and reporting requirements emerged
-from hours and days and weeks of running the Protocol Verifier with
-simulated input audit event streams.
+from weeks of running the Protocol Verifier with simulated input audit
+event streams.
 
 === 4.1 Questions
 
@@ -181,6 +186,10 @@ uncovered so far.
 === 5.1 Protocol Verifier Instrumentation
 
 . Craft a mock-up dashboard using a graphics drawing tool (e.g.  PowerPoint).
++
+.Protocol Verifier Dashboard (MOCK-UP)
+image::dashboard1.png[Protocol Verifier Dashboard MOCK-UP]
+
 . Supplied with the requirements from this document, analyse the logging and
   reporting instrumentation supplied by the Protocol Verifier.
 . Update the PV with sufficient logging and reporting to generate the data
@@ -189,6 +198,7 @@ uncovered so far.
 === 5.2 Protocol Verifier Back End
 
 * Build a dashboard using appropriate technology.
+
 
 === 5.3 Technology Deployment
 
