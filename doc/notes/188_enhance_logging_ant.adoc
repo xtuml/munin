@@ -180,19 +180,37 @@ The recommended location of this logging is in Job Management.
 * A logger shall be defined for benchmarking.
   ** 'pv.benchmark':  throughput benchmark
 
+=== 4.7 Log Format
+
+There are two competing formats for log messages:  `LogFmt` and `JSON`.
+
+* LogFmt is simpler and cleaner looking in the source code.
+* JSON supports lists/arrays better.
+* LogFmt can be converted to JSON.
+
+In our source code, we will follow the LogFmt convention.  In our log
+formatter, we will convert to JSON.  Which can then be fed into Open
+Telemetry and just about any other log processing system.
+
+Read about LogFmt <<dr-6, here>>.
+
 == 5 Work Required
 
 . Remove the reporting terminator and use loggers for reporting.
-. Remove calls to AsyncLogger and use the new logging.
+. Remove calls to AsyncLogger and use Logger with the new logger hierarchy.
 . Log a benchmark for each event as seen in Job Management and again in
-  Sequence Verification.
-. Update the source code in the domains to conditionalise logging.
-. Update the source code in the domains to log canonically.
-. Update the source code in the domains to avoid logging inside loops.
+  Sequence Verification (tail end).
+. Update the source code in the domains to conditionalise log message
+  string arithmetic using `Logger::enabled`.
+. Update the source code in the domains to log canonically where
+  appropriate (svdc_job_failed).
+. Update the source code in the domains to avoid logging inside loops and
+  other high traffic areas.
 . Update the source code in the domains to adhere to the logger hierarchy
   and categories.
 . Update the source code in the domains to use structured logging
   according to the prescribed conventions.
+. Correctly use the logging levels.  'Error' is not for reporting job_failed; it is for reporting errors in the application.
 
 == 6 Acceptance Test
 
@@ -205,6 +223,12 @@ The recommended location of this logging is in Job Management.
 . `run_benchmark.sh` on new branch.  Measure the log data per unit time produced.
 . Ensure that we are logging less data.  If not, understand why.
 
+=== 6.2 Log Analysis
+
+. Run the Protocol Verifier.
+. Collect logs.
+. Parse them and validate that each field is detectable.
+
 == 7 Document References
 
 . [[dr-1]] https://github.com/xtuml/munin/issues/188[188 - Enhance Logging]
@@ -212,6 +236,7 @@ The recommended location of this logging is in Job Management.
 . [[dr-3]] https://pocoproject.org/[POCO Project]
 . [[dr-4]] https://github.com/log4cplus/log4cplus[log4cplus]
 . [[dr-5]] link:./189_reporting_ant.adoc[Enhance Reporting Analysis Note]
+. [[dr-6]] https://betterstack.com/community/guides/logging/logfmt/[Introduction to LogFmt]
 
 ---
 
