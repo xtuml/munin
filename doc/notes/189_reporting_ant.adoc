@@ -6,7 +6,7 @@ xtUML Project Analysis Note
 
 This note provides analysis of reporting requirements for the Munin
 Protocol Verifier.  These requirements will flow backwards into the
-strategy for logging and reporting.
+strategy for logging <<dr-2>>.
 
 == 2 Introduction and Background
 
@@ -14,6 +14,18 @@ Early in Project Munin, the engineering development team erred toward
 over-logging and over-reporting, because clear requirements for both were
 emerging.  The understanding of the application has grown.  Requirements
 may now be surmised with some hope of usefulness.
+
+In the Protocol Verifier application, reporting is a subset of logging.
+Logging will conditionally gather a great deal of information.  A
+multiplicity of logger categories and log levels will allow fine tuning of
+what is useful for reporting and what is useful for performance
+measurement, defect isolation, metrics and debug/trace scenarios.
+This fine tuning will be possible through configuration (not requiring
+code to be changed).
+
+Reporting involves gathering information about the audit event stream
+received from the system being monitored as well as gathering information
+about the Protcol Verifier itself.
 
 == 3 Requirements
 

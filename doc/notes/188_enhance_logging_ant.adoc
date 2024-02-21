@@ -57,7 +57,8 @@ domain modelling quite nicely.
 . Establish naming conventions for logger hierarchy.
 . Establish rules and guidelines for the construction of log messages.
 . Facilitate machine parsing of log messages (using structured logging).
-  TODO: Consider the format that Prometheus supports.
+  This will result in logs that can easily be ingested by log analysis
+  tooling.  TODO: Consider the format that Prometheus supports.
 . Identify tooling that will be used to harvest the log data.
 . Protect privacy and security by logging application-level information
   judiciously.
@@ -81,7 +82,7 @@ The Protocol Verifier monitors devices through telemetry.  There are two
 levels of detail in this telemetry, that of a _job_ and that of an
 _event_.  In general, the user is interested in the status of a job.
 Events are interesting only when they are erroneous.  Summaries of
-aggratated events are interesting in terms of throughput.
+aggregated events are interesting in terms of throughput.
 
 === 4.3 Job Logging
 
@@ -133,6 +134,8 @@ benchmarking, some event-level statistics shall be gathered in summary
 format.
 
 ==== 4.4.1 Event Statistics
+
+TODO
 
 === 4.5 Protocol Verifier Statistics
 
