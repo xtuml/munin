@@ -1,0 +1,69 @@
+= 1.2.2 Mid-stage Tag
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note describes differences between 1.2.1 and 1.2.2 that affect testing.
+
+== 2 Introduction and Background
+
+1.2.2 is a mid-stage tag to get pre-release test exposure to changes in the
+Protocol Verifier.
+
+== 3 Requirements
+
+=== 3.1 Enumerate Functional Changes
+
+List changes to the functionality of the Protocol Verifier.
+
+=== 3.2 Enumerate Test API Changes
+
+Supply all of the changes that may affect how tests run or observe the
+behaviour of the Protocol Verifier.
+
+== 4 Changes
+
+=== 4.1 Functional Changes
+
+==== 4.1.1 Logging with `log4cplus`.
+
+The underlying architecture (MASL C{plus}{plus}) has been updated to use
+`log4cplus` instead of `POCO` for logging.  Most functional changes are
+invisible.  Configuration is completely different.
+
+==== 4.1.2 Horizontal Scaling (Job Management)
+
+The Protocol Verifier has added <<dr-1,horizontal scaling>>.  This is the
+capability to add and remove PV workers.  When removing a PV worker,
+unfinished jobs are reassigned to remaining workers.
+
+Job Management is added.  Reception is removed.
+
+==== 4.1.3 Miscellaneous
+
+* docker is now using the 'local' log driver which is more lightweight.
+
+=== 4.2 Test API Changes
+
+* The 'default.' namespace on Kafka topics has been eliminated.
+* The service indexes (enum of interface messages) are now sorted, so that
+  the build is consistent from platform to platform.
+* Since Reception is gone, the Reception messages that used to go to the
+  Benchmark Probe are now absent.  The first message visible is
+  ordering_received.  In the future, we will bring this back in Job
+  Management but not until it can be configured on and off.
+* Kafka topic data retention times continue to be adjusted.
+* Configuring the loggers is completely different and compliant with
+  log4* logging.  The format of the logfiles has been mostly retained (for
+  now).
+
+== 5 Document References
+
+. [[dr-1]] link:./MUN2-147-horizontal-scaling-design.adoc[Munin Horizontal Scaling Design]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
