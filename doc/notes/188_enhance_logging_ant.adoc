@@ -26,24 +26,62 @@ The primary requirements for what to log come from the requirements for
 reporting which are documented in <<dr-5>>.  It is noted that logging and
 reporting are closely related.  If requirements change for reporting, it
 is helpful if a configuration change to the logging can supply the needed
-extra reporting information.
+extra reporting information.  And the mechanics for delivering reporting
+information and for delivering logging information can be common.
 
-=== 2.1 Logging Best Practices
+=== 2.1 `log4cplus` Features
+
+There are at least two features in `log4cplus` that make a difference in
+Protocol Verifier usage, Logger Hierarchy and 'appender' configuration.
+
+==== 2.1.1 Logger Hierarchy
+
+`log4cplus` (and `log4j`) support logger hierarchy.  A root logger is
+defined.  All loggers inherit from the root logger.  Additional subtype
+loggers can be defined which, by default, inherit the properties of the
+parent.  This allows for fine grained logger definition while keeping
+production configuration tractable.
+
+==== 2.1.2 Appender Designation
+
+`log4cplus` supports various 'appenders'.  These are destinations for log
+messages.  The most common destination for a log message is a file.
+Another type of appender directs log entries to `syslogd`.  There is
+support for appending to a Kafka topic.  This is useful in the Protocol
+Verifier.  For example, Logger entries bound for Reporting can be assigned
+to topics.  Likewise, benchmarking can be enabled, disabled and destined
+in this way.
+
+=== 2.2 Logging Best Practices
 
 As preparation for enhancing logging, a few published "Best Practice"
 guides were studied.  We will take the opportunity in Munin to adopt/apply
-some of these practices while we are changing to the `log4*` idiom of
-logging.
+some of these practices while changing to the `log4*` idiom of logging.
+
+==== 2.2.1 Mission Statement
 
 The first Best Practice to logging is to author a mission statement for
 the logging and proceed from there.  This aligns with Shlaer-Mellor
 domain modelling quite nicely.
 
+==== 2.2.2 Canonical Logging
+
+Canonical logging is the practice of strategically delivering log lines in
+a manner that eases the analysis of the logged data.  The technique
+accumulates multiple related key-value pairs and logs them together in a
+single entry.  An example canonical log message in the Protocol Verifier
+will be the 'job failed' log message.  This will be an assembly of all of
+the information needed to understand the failure including a trace of the
+events composing the failed job.
+
 == 3 Requirements
 
 . Establish a Project Munin logging mission statement to guide decision
   making.
-. Make reporting flow from logging.
+. Design Reporting to flow from Logging.
+  ** Reporting shall be mechanically identical to Logging.
+  ** Reporting shall be a subset of Logging.
+  ** Reporting shall be a configured set of loggers and log levels.
 . Support logging levels:
   ** Fatal
   ** Error
@@ -53,12 +91,12 @@ domain modelling quite nicely.
   ** Trace
 . Support conditional log message string arithmetic.
 . Establish conventions for enabled logging.
-. Support logger hierarchy.
+. Define and support a logger hierarchy.
 . Establish naming conventions for logger hierarchy.
 . Establish rules and guidelines for the construction of log messages.
 . Facilitate machine parsing of log messages (using structured logging).
   This will result in logs that can easily be ingested by log analysis
-  tooling.  TODO: Consider the format that Prometheus supports.
+  tooling.
 . Identify tooling that will be used to harvest the log data.
 . Protect privacy and security by logging application-level information
   judiciously.
@@ -80,8 +118,8 @@ domain modelling quite nicely.
 
 The Protocol Verifier monitors devices through telemetry.  There are two
 levels of detail in this telemetry, that of a _job_ and that of an
-_event_.  In general, the user is interested in the status of a job.
-Events are interesting only when they are erroneous.  Summaries of
+_event_.  In general, the user is interested in monitoring the status of a
+job.  Events are interesting only when they are erroneous.  Summaries of
 aggregated events are interesting in terms of throughput.
 
 === 4.3 Job Logging
@@ -124,48 +162,61 @@ For failed and alarmed jobs, the following statistics are required:
 * event trace
   ** event type (name)
   ** event identifier
-  ** ordering
+  ** ordering (e.g. previous event Ids)
 
-=== 4.4 Event Logging
+=== 4.4 Audit Event Logging
 
 Logging at the event level is largely infeasible and unnecessary in
 production configurations.  However, in anticipation of performance
 benchmarking, some event-level statistics shall be gathered in summary
 format.
 
-==== 4.4.1 Event Statistics
+==== 4.4.1 Audit Event Statistics
 
-TODO
+The primary statistics surrounding audit events are focused around timing.
+A logger specifically used for benchmarking shall be defined.  This
+benchmarking logger will log an entry at event arrival and another when
+the event is processed by Sequence Verification.
 
 === 4.5 Protocol Verifier Statistics
 
 Several parameters are useful in the maintenance and support of the
-Protocol Verifier.
+Protocol Verifier (itself, as opposed to the application the PV is
+monitoring).
 
 The following statistics are reported as they happen.
 
 * worker registered
 * worker deregistered
 * unassigned job count exceeded
-  ** job count exceeded is reported once upon occurrence and then only
-     reported again if the job count goes below the threshold.
+  ** unassigned job count exceeded is reported once upon occurrence and
+     then only reported again if the unassigned job count goes below the
+     threshold.
 
-The following statistic are reported periodically.
+The following statistics are reported periodically.
 
 * event count since start
 * event throughput
 * worker count
-* concurrent jobs at worker
-* concurrent jobs overall
+* concurrent jobs at each worker
+* concurrent jobs overall (Assigned Jobs)
 * unassigned jobs
 * unassigned job count exceeded
 
 This information shall be reported on a regular basis not exceeding once
-per second (1 Hertz).
+per second (1 Hertz).  The timing shall be configurable.
 
 The recommended location of this logging is in Job Management.
 
 === 4.6 Logger Hierarchy
+
+As described above, `log4cplus` supports a logger hierarchy.  This
+provides a dimension of configuration that can be quite helpful.  For
+example, if we define loggers at the class-level, by default they can be
+left unconfigured and simply inherit the configuration of the domain
+logger.  And then when selective and isolated debugging is needed
+(especially in a production environment), it can be accomplished class by
+class.
 
 * The top-level logger shall be 'pv' (Protocol Verifier).
 * Each domain shall have a logger.
@@ -174,16 +225,36 @@ The recommended location of this logging is in Job Management.
   ** 'pv.sv':  Sequence Verification
   ** 'pv.istore':  Invariant Store
   ** 'pv.vg':  Verification Gateway
-* Each domain shall define at least 2 loggers:  'job' and 'event'.
-  ** 'pv.jm.job':  Job Management job logger
-  ** 'pv.jm.event':  Job Management event logger
-* Each domain may define lower-level loggers for specific purposes.
-  ** 'pv.sv.happy':  Sequence Verification Happy module (class)
-  ** 'pv.sv.unhappy':  Sequence Verification Unhappy module (class)
-* A logger shall be defined for benchmarking.
-  ** 'pv.benchmark':  throughput benchmark
+     *** 'pv.vg.audit' will be the logger channel used to report PVprime
+          audit events.
+* Domain-level debug loggers shall append the class name or keyletters to
+  the domain-level logger designation.  Most of the Logger entries for
+  domain logging will be at the DEBUG level.  However, INFO or WARN level
+  logging from these domain level loggers will go to the Reporting back
+  end.
+  ** 'pv.sv.happyjob' (or 'pv.sv.job') INFO to declare job success, WARN
+     to declare job failure or alarm, DEBUG for engineering
+     instrumentation.
+  ** 'pv.sv.unhappyjob' ditto
+* A special logger shall be defined for benchmarking.
+  ** 'pv.benchmark':  throughput benchmark (likely used at event reception
+  in Job Management and at event processed in Sequence Verification.
 
-=== 4.7 Log Format
+=== 4.7 Log Level Meanings
+
+It is important that the log levels are used consistently throughout the
+application.
+
+. Log level meanings for Munin:
+  ** *Fatal* is used when the PV is about to crash or shut itself down.
+  ** *Error* is used when an error (e.g. cannot happen) happens.  (This is
+     an error in the PV, not an error detected in the observed system.)
+  ** *Warning* is used for job failures and alarms.  This goes to Reporting.
+  ** *Information* is used for everything else that goes to Reporting.
+  ** *Debug* is used for engineering diagnostics.
+  ** *Trace* is not used.
+
+=== 4.8 Log Format
 
 There are two competing formats for log messages:  `LogFmt` and `JSON`.
 
@@ -213,7 +284,44 @@ Read about LogFmt <<dr-6, here>>.
   and categories.
 . Update the source code in the domains to use structured logging
   according to the prescribed conventions.
-. Correctly use the logging levels.  'Error' is not for reporting job_failed; it is for reporting errors in the application.
+. Correctly use the logging levels.  'Error' is not for reporting
+  job_failed; it is for reporting errors in the application.
+
+=== 5.1 Project Plan
+
+. Benchmark existing configuration.
+  .. Benchmark on Linux EC2.  Attempt to determine maximum throughput.
+  .. Document concurrent jobs observed.
+  .. Document CPU usage.
+  .. Measure the amount of log information created in the various files
+     and topics (in bytes per unit time).
+. Configure new loggers.
+  .. In the logger configureation file, configure the new loggers keeping
+     the old loggers.
+  .. Observe unchanged behaviour.
+. Use new loggers.
+  .. Replace calls to Reporting{tilde}>reportEvent() with INFO and WARN
+     loggers using the new logger hierarchy.
+  .. Replace existing usage of the BenchmarkProbe with a new Logger.
+  .. Simply replace the domain logger parameters with the new hierachical
+     logger names.
+  .. Observe unchanged behaviour.
+. Conditionalise logging and log message arithmetic (using Logger::enabled).
+. Turn benchmarking on and off.
+. Turn debugging on and off.
+. Benchmark updated application
+  .. Benchmark on Linux EC2.  Try to determine maximum throughput.
+  .. Measure the amount of log information created in the various files
+     and topics (in bytes per unit time).
+. Implement canonical logging for job failures and alarms.
+. Implement structured logging.
+  .. Define keys for key-value pairs and document them.
+  .. Update the log messages to use structured logging employing the
+     key-value pairs.
+  .. Document the keys used to log.
+. Deprecate and remove the Reporting terminator.
+. Deprecate and remove the BenchmarkingProbe domain.
+. Deprecate and remove the AsyncLogger domain.
 
 == 6 Acceptance Test
 
@@ -231,6 +339,12 @@ Read about LogFmt <<dr-6, here>>.
 . Run the Protocol Verifier.
 . Collect logs.
 . Parse them and validate that each field is detectable.
+
+=== 6.3 Consider Concurrency
+
+. Run the PV with debug logs turned on for shared files.
+. Run multiple worker PVs.
+. Try to clobber files.
 
 == 7 Document References
 
