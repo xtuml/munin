@@ -26,7 +26,8 @@ begin
 	end if;
 	jobManager := find_one JobManager();
 	if jobManager = null then
-		jobManager := create unique JobManager();
+		jobManager := create unique JobManager(reportFrequency => @PT1S@, Current_State => Created);
+        schedule jobManager.reportTimer generate JobManager.generateReport() to jobManager delay jobManager.reportFrequency;
 	end if;
 	
 exception
