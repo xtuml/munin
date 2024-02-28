@@ -6,7 +6,7 @@ set -e
 # Executution defaults to:  run_benchmark.sh 1000 100000 JobManagement_service0
 
 # Define batches of events for p2j to play.
-BATCH_OF_EVENTS=10000
+BATCH_OF_EVENTS=100000
 EVENTS_PER_SECOND=1000
 TOTAL_EVENTS=100000
 if [[ $# -ge 2 ]] ; then
@@ -60,7 +60,7 @@ sleep 1
 echo "0 of " $TOTAL_EVENTS
 LOOP_COUNT=0
 for ((i = 0; i < $ITERATIONS; i++)); do
-  echo ${puml_files} | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS &> /dev/null
+  echo ${puml_files} | xargs python ../bin/plus2json.pyz --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
 done
