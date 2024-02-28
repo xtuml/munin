@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     # process messages
     events = {}
-    raw_msgs = consumer.poll(timeout_ms=30000)
+    raw_msgs = consumer.poll(timeout_ms=4000)
     while len(raw_msgs) > 0:
         for k, partition in raw_msgs.items():
             for msg in partition:
@@ -105,7 +105,7 @@ if __name__ == '__main__':
                     elif label in ('svdc_event_processed', 'svdc_happy_event_processed', 'svdc_unhappy_event_processed'):
                         evt.processed = d
 
-        raw_msgs = consumer.poll(timeout_ms=30000)
+        raw_msgs = consumer.poll(timeout_ms=4000)
 
     evts = events.values()
     print(f'Total number of events: {len(evts)}')
