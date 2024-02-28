@@ -89,8 +89,6 @@ begin
 	        	if assignedWorker /= null then
 	        		jobManager.assignJob(assignedWorker);
 	        	end if;
-	        	// report assigned jobs
-	        	jobManager.reportJobAssignments();	        	
         	else
 	        	// report the event
 	        	acceptedAuditEvent.reportAuditEvent(assignedWorker);
@@ -147,17 +145,12 @@ begin
 			
 			// report that the job completion is confirmed
 			Worker ~>jobCompletionConfirmed(workerId, jobId);
-			
-			// report completed job
-			jobManager := find_one JobManager();
-		    eventContent := "Job completed. Worker id = " & string(employedWorker.workerId) & " Jobs assigned = " & ((employedWorker -> R6.AssignedJob)'length)'image;
-		    Reporting~>reportEvent(Logger::Information, "jobmanagement_worker_assigned_job_count", eventContent);
-        	jobManager.reportJobAssignments();	        	
-			
+						
 			// we have had comms from the worker so reset the heartbeat failure count
 			employedWorker.failedHeartbeatCount := 0;;
 			
-			// check if there are not unassigned jobs and if there are and this employed worker has capacity then assign the job
+			// check if there are unassigned jobs and if there are and this employed worker has capacity then assign the job
+			jobManager := find_one JobManager();
 			unassignedJobIds := jobManager.unassignedJobIds;
 			if unassignedJobIds'length > 0 then
 				jobManager.assignJob(employedWorker);

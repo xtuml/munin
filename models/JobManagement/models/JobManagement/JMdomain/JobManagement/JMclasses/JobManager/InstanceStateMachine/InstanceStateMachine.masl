@@ -1,0 +1,20 @@
+//! ACTIVITY BEGIN. '21bb6d25-8540-4ab0-82b7-543853a0d436' '8784fd76-ec94-49fd-834b-ce980aa24d3a' DO NOT EDIT THIS LINE.
+state JobManagement::JobManager.Created () is
+begin
+  null;
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '21bb6d25-8540-4ab0-82b7-543853a0d436' 'b9a80e1d-2f2f-4e77-830f-e497b2de900c' DO NOT EDIT THIS LINE.
+state JobManagement::JobManager.Reported () is
+eventContent : string; 
+
+begin
+	
+	cancel this.reportTimer;
+	this.reportJobAssignments();	
+    schedule this.reportTimer generate JobManager.generateReport() to this delay this.reportFrequency;
+    
+end state;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
