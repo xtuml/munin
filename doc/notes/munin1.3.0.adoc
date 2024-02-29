@@ -1,0 +1,88 @@
+= Munin 1.3.0 Release Notes
+
+== 1 Summary
+
+The Munin Protocol Verifier experienced continued development progress
+during Phase 2 Stage 4.  The Technical Readiness Level (TRL, <<dr-1>>)
+continued solidly at level 5 while new functionality was added.  This
+release focused primarily on two tasks.  The first task was to provide
+horizontal scalability together with a degree of added resilience.  The
+second task provided flexibility of the deployment build.  Meanwhile,
+testing continued without ceasing during the period.  Collaboration
+between target users, supporters, testers and development engineering
+characterised the phase.
+
+== 2 Highlights
+
+=== 2.1 Horizontal Scaling
+
+In order to support high volumes of audit event data streams, the Protocol
+Verifier is able to leverage parallelism in the application and scale up.
+In order to operate efficiently using a minimum of expensive CPU and
+bandwidth resources, the Protocol Verifier is able to scale down.  The
+Munin Protocol Verifier is now able to scale up and down dynamically
+without stopping and restarting the application.
+
+A new Job Management domain is introduced that manages a population of PV
+Workers.  The Job Manager assigns jobs to workers and balances the
+workload across the available employed workers.  A heartbeat is supplied
+by employed workers to enable the detection of eliminated workers.  When a
+worker is removed or dies, Job Management reassigns unfinished jobs to
+other workers.  As new workers arrive, they register their availability
+with Job Management who then begins assigning jobs to the new workers
+along with the existing workers.
+
+Note that this job manager / worker pattern adds resilience to the
+Protocol Verifier.  Workers can die or be killed, and as long as at least
+one worker remains no jobs are lost.  See <<dr-8, Munin Horizontal Scaling
+Design>>.
+
+=== 2.2 Build Artefacts
+
+Discussion continues on whether deployment from source artefacts or
+deployment from binary (docker) images is best.  So, the Protocol Verifier
+is now able to support both approaches.  A middle ground is also possible
+and useful in engineering development in which source changes are
+recompiled while unchanged artefacts can be retrieved in their
+binary/compiled form from an "artefact server".
+
+The source-only and the source+binary build approaches are accomplished
+with <<dr-7, Conan>> dependency and software package management.
+
+The docker image approach is accomplished through the git repository on
+GitHub using the GitHub Container Registry.
+
+=== 2.3 Open Source Software Test Harness
+
+In the previous release (P2S3), <<dr-2, Munin>> and <<dr-3, plus2json>>
+were published as Open Source Software (OSS) licensed under Apache 2.0 and
+Creative Commons CC0.  In this release, two more repositories of software
+are published.
+
+In this release (P2S4) <<dr-4, Erebus>> and <<dr-5, Charon>> are published
+using the same licensing approach.  Erebus is a general purpose message
+driving Test Harness.  Charon is an HTTP endpoint utility to ferry files
+into and out of a test configuration.  The primary contributor and
+employer of the key committers is https://smartdcsit.co.uk/[smartDCSIT].
+
+== 3 Test
+
+Testing was mostly continuous during the P2S4 release cycle.  The
+development team together with an independent test team and a user team
+focused functional and performance testing on the Protocol Verifier.
+Stress testing, endurance testing and benchmarking got the most attention
+getting hours and days of non-stop running logged.  As functionality was
+added or changed, tests would be re-run to avoid functional regression and
+to maintain throughput.
+
+== 4 Document References
+
+. [[dr-1]] https://en.wikipedia.org/wiki/Technology_readiness_level[Technical Readiness Level]
+. [[dr-2]] https://github.com/xtuml/munin[Munin GitHub repository]
+. [[dr-3]] https://github.com/xtuml/plus2json[plus2json GitHub repository]
+. [[dr-4]] https://github.com/xtuml/erebus[Erebus GitHub repository]
+. [[dr-5]] https://github.com/xtuml/charon[Charon GitHub repository]
+. [[dr-6]] https://github.com/xtuml/munin/releases/tag/v1.3.0[Munin Phase 2 Stage 4 release tag]
+. [[dr-7]] https://conan.io/[Conan, software package manager for C and Cpass:[++] developers]
+. [[dr-8]] https://github.com/xtuml/munin/blob/main/doc/notes/MUN2-147-horizontal-scaling-design.adoc[Munin Horizontal Scaling Design]
+
