@@ -304,6 +304,10 @@ begin
 	// clear down the domain of all instance except Job Management Spec, Job Manager and Job Store
 	storedJobIdentifiers := find StoredJobIdentifier();
 	unlink storedJobIdentifiers R20;
+	unlink storedJobIdentifiers R23.isNext;
+	unlink storedJobIdentifiers R23.isPrevious;
+	unlink storedJobIdentifiers R24;
+	unlink storedJobIdentifiers R25;
 	delete storedJobIdentifiers;
 	
 	auditEvents := find AuditEvent();
@@ -530,14 +534,19 @@ begin
 	jmSpec := find_one JobManagementSpec();
 	jmSpec.maxJobsPerWorker := 1;
 	
-	// create three workers
+	// create two workers
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
 	Test::service_event_queue();
+	JobManagement::workerHeartbeat(workerId);
+	Test::service_event_queue();
+
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
 	Test::service_event_queue();
-	workerId := UUID::generate_formatted();
+	JobManagement::workerHeartbeat(workerId);
+	Test::service_event_queue();
+
 	Assertions::assertTrue(((find JobWorker())'length = 2), "Test Deregister Worker: Failed to find all workers");
 	jobManager := find_one JobManager();
 	worker1 := jobManager -> R22.JobWorker; 
@@ -566,6 +575,8 @@ begin
 	// register a new worker and check the job is assigned
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
+	Test::service_event_queue();
+	JobManagement::workerHeartbeat(workerId);
 	Test::service_event_queue();
 	worker3 := worker2 -> R3.employedBefore.JobWorker;
 	JobManagement::checkJobEventAssignment("JobId1", jobId1, reportedAuditEventString1, worker3.workerId);
