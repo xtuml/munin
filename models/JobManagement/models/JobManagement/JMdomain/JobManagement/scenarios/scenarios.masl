@@ -8,6 +8,12 @@ jobManager : instance of JobManager;
 
 begin
 
+	// Create JobManager first, so that it is available to be configured.
+	jobManager := find_one JobManager();
+	if jobManager = null then
+		jobManager := create unique JobManager(reportFrequency => @PT1S@, Current_State => Created);
+		schedule jobManager.reportTimer generate JobManager.generateReport() to jobManager delay jobManager.reportFrequency;
+	end if;
 	// get the supplied command line option for the config file and verify it is valid
 	configFilePath := CommandLine::get_option_value("-configPath", "config/");
 	configFile := CommandLine::get_option_value("-configFile", "config.json");
@@ -18,15 +24,11 @@ begin
 				                                   maxUnassignedJobs => 100, retiredWorkerDeletionTime => @PT10M@, maxUnaasignedJobsExceeded => false, Current_State => Created);
 		end if;
 		jobManagementSpec.loadConfigFile();
-    	generate JobManagementSpec.checkConfigUpdate() to jobManagementSpec;
+ 		generate JobManagementSpec.checkConfigUpdate() to jobManagementSpec;
 	else
 		logMessage := "JobManagement::init : failed to locate config file. Specified file = " & configFilePath & configFile;
 		Logger::log(Logger::Error, "JobManagement", logMessage);
 		raise program_error;
-	end if;
-	jobManager := find_one JobManager();
-	if jobManager = null then
-		jobManager := create unique JobManager();
 	end if;
 	
 exception
