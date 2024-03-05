@@ -47,8 +47,10 @@ logMessage : string;
 
 begin
   // Log info: Report that this VerifianleJob is being deleted. 
-  logMessage := "Deleting Job " & this.jobKey'image & " and all its InstrumentationEvents";
-  Logger::log(Logger::Debug, "VerificationGateway", logMessage);
+  if (Logger::enabled(Logger::Debug, "pv.vg.verifiablejob")) then
+    logMessage := "Deleting Job " & this.jobKey'image & " and all its InstrumentationEvents";
+    Logger::log(Logger::Debug, "pv.vg.verifiablejob", logMessage);
+  end if;
   
   theLastInstrumentationEvent := this -> R2;
   unlink this R2 theLastInstrumentationEvent;
