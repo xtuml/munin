@@ -27,7 +27,7 @@ begin
  		generate JobManagementSpec.checkConfigUpdate() to jobManagementSpec;
 	else
 		logMessage := "JobManagement::init : failed to locate config file. Specified file = " & configFilePath & configFile;
-		Logger::log(Logger::Error, "JobManagement", logMessage);
+		Logger::log(Logger::Fatal, "JobManagement", logMessage);
 		raise program_error;
 	end if;
 	
