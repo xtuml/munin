@@ -21,9 +21,6 @@ class ConanFile(conan.ConanFile):
     def build_requirements(self):
         self.tool_requires(f'masl_codegen/{os.environ["MASL_VERSION"]}@xtuml/stable')
 
-    def masl_extras(self):
-        return ['-skiptranslator', 'Sqlite']
-
     def package(self):
         super().package()
         res_dir = os.path.join(self.package_folder, 'res')
