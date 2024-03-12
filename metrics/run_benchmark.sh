@@ -55,6 +55,7 @@ echo "Done."
 # generate test event data
 echo "Generating audit event stream..."
 sleep 1
+echo start `date` >> runtime.txt
 # plus2json leaks memory when running continously.
 # Loop it up to free memory after small batches of events.
 echo "0 of " $TOTAL_EVENTS
@@ -64,6 +65,7 @@ for ((i = 0; i < $ITERATIONS; i++)); do
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
 done
+echo stop `date` >> runtime.txt
 sleep 20
 echo "Done."
 
