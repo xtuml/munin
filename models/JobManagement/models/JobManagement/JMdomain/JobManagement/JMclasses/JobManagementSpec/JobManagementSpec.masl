@@ -93,7 +93,7 @@ begin
     	end if;
     else
         logMessage := "JobManagement::JobManagementSpec.checkUpdatedConfig : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "pv.jm.logmanagementspec", logMessage);
+        Logger::log(Logger::Error, "pv.jm.jobmanagementspec", logMessage);
     end if;
     if configUpdates = true then
     	return true; 
@@ -117,7 +117,7 @@ begin
         mostRecentModificationTime := fileStatus.modification_time;
     else
         logMessage := "JobManagement::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "JobManagement", logMessage);
+        Logger::log(Logger::Error, "pv.jm.jobmanagementspec", logMessage);
         raise program_error;
     end if;
     return mostRecentModificationTime;

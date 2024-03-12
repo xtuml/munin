@@ -26,8 +26,10 @@ begin
     link newExtraJobInvariant R24 extraJobInvDefn;
     
     // Log info: Audit event data provided with this audit event has been captured
-	logMessage := "The persisted invariant " & newExtraJobInvariant.invariantName & " with value = " & newExtraJobInvariant.invariantValue & " has has been created";
-    Logger::log(Logger::Information, "AESequenceDC", logMessage); 
+    if (Logger::enabled(Logger::Information, "pv.sv.persistedinvariant.createsourceextrajobinvariant")) then
+      logMessage := "The persisted invariant " & newExtraJobInvariant.invariantName & " with value = " & newExtraJobInvariant.invariantValue & " has has been created";
+      Logger::log(Logger::Information, "pv.sv.persistedinvariant.createsourceextrajobinvariant", logMessage); 
+    end if;
     
     generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
     sourceAEOccurrenceDefn := extraJobInvDefn -> R20;
@@ -73,8 +75,10 @@ begin
     end if;
         
     // ... and finally deleted the specified instance of PersistedInvariant and log this.    
-    logMessage := "AESequenceDC::PersistedInvariant.deletePersistedInvariant : PersistentInvariant: " & this.invariantId'image & " deleted ";
-    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+    if (Logger::enabled(Logger::Information, "pv.sv.persistedinvariant.deletepersistedinvariant")) then
+      logMessage := "AESequenceDC::PersistedInvariant.deletePersistedInvariant : PersistentInvariant: " & this.invariantId'image & " deleted ";
+      Logger::log(Logger::Information, "pv.sv.persistedinvariant.deletepersistedinvariant", logMessage);
+    end if;
     delete this;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

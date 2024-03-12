@@ -13,8 +13,8 @@ begin
   
 	// report the worker as registered
 	Worker~>workerRegistered(this.workerId);
-	eventContent := "Worker id = " & string(this.workerId);
-	Reporting~>reportEvent(Logger::Information, "jobmanagement_worker_registered", eventContent);
+	eventContent := "jobmanagement_worker_registered : Worker id = " & string(this.workerId);
+	Logger::log(Logger::Information, "pv.jm.employedworker", eventContent);
 	
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -43,8 +43,8 @@ begin
 	jmSpec := find_one JobManagementSpec();
 	if this.failedHeartbeatCount > jmSpec.workerHeartbeatFailureThreshold then
 		generate EmployedWorker.workerDeregistered() to this;
-	    eventContent := "Worker id = " & string(this.workerId);
-	    Reporting~>reportEvent(Logger::Information, "jobmanagement_worker_deregistered_failed_heartbeat", eventContent);
+		eventContent := "jobmanagement_worker_deregistered_failed_heartbeat : Worker id = " & string(this.workerId);
+		Logger::log(Logger::Information, "pv.jm.employedworker", eventContent);
 	else
 		// schedule the absence timer
 		schedule this.absenceTimer generate EmployedWorker.workerPresenceUnknown() to this delay jmSpec.workerHeartbeatRate;

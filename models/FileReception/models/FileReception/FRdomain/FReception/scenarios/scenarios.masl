@@ -20,7 +20,7 @@ begin
 		generate FileReceptionSpec.loadConfig() to fileReceptionSpec;
 	else
 		logMessage := "FileReception::init : failed to locate config file. Specified file = " & configFilePath & configFile;
-		Logger::log(Logger::Information, "FileReception", logMessage);
+		Logger::log(Logger::Fatal, "pv.fr.init", logMessage);
 		raise program_error;
 	end if;
 
@@ -28,7 +28,7 @@ exception
 	when others =>
 	
 		logMessage := "FileReception::init : failed during start up";
-		Logger::log(Logger::Error, "FileReception", logMessage);
+		Logger::log(Logger::Fatal, "pv.fr.init", logMessage);
 		raise program_error;
 	
 end service;

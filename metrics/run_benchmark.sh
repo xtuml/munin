@@ -3,7 +3,7 @@ set -e
 
 # Usage:
 # run_benchmark.sh [rate (events/second)] [total number of events] [reception topic]
-# Executution defaults to:  run_benchmark.sh 1000 100000 JobManagement_service0
+# Executution defaults to:  run_benchmark.sh 1000 100000 Protocol_Verifier_Reception
 
 # Define batches of events for p2j to play.
 BATCH_OF_EVENTS=100000
@@ -19,7 +19,7 @@ fi
 ITERATIONS=$(($TOTAL_EVENTS / $BATCH_OF_EVENTS))
 
 # Allow over-riding the kafka topic for reception.
-RECEPTION_TOPIC="JobManagement_service0"
+RECEPTION_TOPIC="Protocol_Verifier_Reception"
 if [[ $# -ge 3 ]] ; then
   RECEPTION_TOPIC=$3
 fi

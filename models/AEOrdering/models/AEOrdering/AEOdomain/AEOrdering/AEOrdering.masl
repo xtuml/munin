@@ -135,7 +135,9 @@ public service AEOrdering::Reporting~>reportEvent ( eventPriority : in Logger::P
                                                    eventLabel : in string,
                                                    eventContent : in string ) is
 begin
-	Logger::log(eventPriority, "Verifier", eventLabel & " : " & eventContent);
+	if (Logger::enabled(eventPriority, "pv.aeo.reporting.reportevent")) then
+		Logger::log(eventPriority, "pv.aeo.reporting.reportevent", eventLabel & " : " & eventContent);
+	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

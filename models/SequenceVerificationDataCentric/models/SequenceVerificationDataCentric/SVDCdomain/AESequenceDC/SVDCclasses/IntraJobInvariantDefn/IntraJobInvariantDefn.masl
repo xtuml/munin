@@ -42,10 +42,8 @@ begin
         if theSequenceDefns'length = 1 then
           theSequenceDefn := find_one theSequenceDefns ();
         else
-          logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 4) = " & theJobDefn.jobName;
-          Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	      eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
-	      Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);                
+          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
+          Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn ", logMessage);
         end if;  
         
         if theSequenceDefn /= null then
@@ -58,25 +56,19 @@ begin
               link theInvariant R19 theEventOccInSeqDefn;
             end if;  
           else
-            logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 3) = " & theJobDefn.jobName;
-            Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	        eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
-	        Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);          
+            logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
+            Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn ", logMessage);
           end if;  
         else
-          logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 2) = " & theJobDefn.jobName;
-          Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	      eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
-	      Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);            
+          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
+          Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn ", logMessage);
         end if;  
       end if;
     end loop;
   else
-    // Digital Twin Error dues to failed configurations
-    logMessage := "AESequenceDC::IntraJobInvariantDefn.createIntraJobInvariantDefn : Invalid Job Definition for this intra-job invariant definition (type 1) = " & theJobDefn.jobName;
-    Logger::log(Logger::Error, "AESequenceDC", logMessage);
-	eventContent := "FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
-	Reporting~>reportEvent(Logger::Error, "svdc_job_definition_failed", eventContent);
+    // Protocol Verifier error due to failed configuration
+    logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
+    Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn ", logMessage);
   end if;
   
 end service;

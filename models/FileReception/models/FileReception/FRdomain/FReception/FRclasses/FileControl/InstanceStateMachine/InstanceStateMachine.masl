@@ -32,8 +32,10 @@ begin
 					link this R1 eventFile;
 					generate FileControl.allocateFile(eventFile) to this;
 					fileAssigned := true;
-					logMessage := "FileReception::FileControl.WaitingForFile : assigning file " & eventFile.fileName;
-					Logger::log(Logger::Debug, "FileReception", logMessage);
+					if (Logger::enabled(Logger::Debug, "pv.fr.filecontrol.waitingforfile")) then
+						logMessage := "FileReception::FileControl.WaitingForFile : assigning file " & eventFile.fileName;
+						Logger::log(Logger::Debug, "pv.fr.filecontrol.waitingforfile", logMessage);
+					end if;
 					exit; // for loop
 				end if;
 			end if;

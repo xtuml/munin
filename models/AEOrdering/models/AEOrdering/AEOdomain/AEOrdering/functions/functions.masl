@@ -21,8 +21,10 @@ worker : instance of Worker;
 
 begin
 
-	logMessage := "AEOrdering::AcceptEvent : jobId = " & jobId & ", auditEventType = " & auditEventType & ", auditEventId = " & auditEventId;
-	Logger::log(Logger::Debug, "AEOrdering", logMessage);
+	if (Logger::enabled(Logger::Debug, "pv.aeo.acceptevent")) then
+		logMessage := "AEOrdering::AcceptEvent : jobId = " & jobId & ", auditEventType = " & auditEventType & ", auditEventId = " & auditEventId;
+		Logger::log(Logger::Debug, "pv.aeo.acceptevent", logMessage);
+	end if;
 	systemSpec := find_one SystemSpec();
 	job := find_one Job(jobId = jobId);
 	if job = null then
@@ -31,8 +33,10 @@ begin
 			inProgressJob := create InProgressJob(jobId => job.jobId);
 			link inProgressJob R2 job;
 			generate Job.jobStarted() to job;
-			eventContent := "JobId = " & job.jobId;
-			Reporting~>reportEvent(Logger::Information, "aeordering_job_processed", eventContent);
+			if (Logger::enabled(Logger::Debug, "pv.aeo.acceptevent")) then
+				eventContent := "aeordering_job_processed : JobId = " & job.jobId;
+				Logger::log(Logger::Debug, "pv.aeo.acceptevent", eventContent);
+			end if;
 			// ...and then report that AEO has started processing a new job as part of the 
         	// verification of the Protocol Verifier itself.
         	instrumentationEventId := "Unused";
@@ -125,8 +129,10 @@ begin
 				jsonObject := JSON::get_object(jsonElement);
 			    if jsonObject'keys'length = 1 and jsonObject'keys'any = "__comment__" then
 			        // ignore comment objects
-			        logMessage := "AEOrdering::AcceptJsonEvent : JSON comment: " & JSON::get_string(jsonObject[jsonObject'keys'any]);
-			        Logger::log(Logger::Debug, "AEOrdering",logMessage);
+			        if (Logger::enabled(Logger::Debug, "pv.aeo.acceptjsonevent")) then
+			        	logMessage := "AEOrdering::AcceptJsonEvent : JSON comment: " & JSON::get_string(jsonObject[jsonObject'keys'any]);
+			        	Logger::log(Logger::Debug, "pv.aeo.acceptjsonevent",logMessage);
+			        end if;
 			    else
 			
 			        // validate the event against schema
@@ -166,8 +172,8 @@ begin
 			// the worker is not registered but job management thinks it is
 			// deregister the worker and log an error
 			Req_IF_JobManagement~>deregisterWorker(workerId);
-	        logMessage := "AEOrdering::AcceptJsonEvent : Received event for unregistered worker, workerId = : " & string(workerId);
-	        Logger::log(Logger::Debug, "AEOrdering",logMessage);			
+			logMessage := "AEOrdering::AcceptJsonEvent : Received event for unregistered worker, workerId = : " & string(workerId);
+			Logger::log(Logger::Debug, "pv.aeo.acceptjsonevent",logMessage);
 		end if;
 	end if;
 	
@@ -193,8 +199,8 @@ worker : instance of Worker;
 begin
     worker := find_one Worker(workerId = workerId);
     if worker /= null then
-		Reporting~>reportEvent(Logger::Information, "aeordering_worker_unregistered_received", ("Worker Id = " & string(workerId)));
-    	generate Worker.deregistered() to worker;
+		Logger::log(Logger::Information, "pv.aeo.workerunregistered", "aeordering_worker_unregistered_received : " & "Worker Id = " & string(workerId));
+		generate Worker.deregistered() to worker;
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
