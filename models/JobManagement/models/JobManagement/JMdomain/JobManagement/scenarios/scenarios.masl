@@ -21,7 +21,7 @@ begin
 		jobManagementSpec := find_one JobManagementSpec();
 		if jobManagementSpec = null then
 			jobManagementSpec := create unique JobManagementSpec(configFilePath => configFilePath, configFile => configFile, specUpdateRate => @PT2M@, maxJobsPerWorker => 10, 
-				                                   maxUnassignedJobs => 100, retiredWorkerDeletionTime => @PT10M@, maxUnaasignedJobsExceeded => false, Current_State => Created);
+				                                   maxUnassignedJobs => 100, retiredWorkerDeletionTime => @PT10M@, maxUnassignedJobsExceeded => false, Current_State => Created);
 		end if;
 		jobManagementSpec.loadConfigFile();
  		generate JobManagementSpec.checkConfigUpdate() to jobManagementSpec;

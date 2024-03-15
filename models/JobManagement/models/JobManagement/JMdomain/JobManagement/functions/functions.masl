@@ -97,12 +97,12 @@ begin
 	        // check if we have exceeded the max unassigned jobs and if so report an error
 	        unassignedJobIds := jobManager.unassignedJobIds;
 	        jmSpec := find_one JobManagementSpec();
-	        if unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnaasignedJobsExceeded = false then
-		        eventContent := "jobmanagement_exceeded_max_jobs : Maximum number of of unassigned jobs exceeded. Job Count = " & (unassignedJobIds'length)'image;
+	        if unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnassignedJobsExceeded = false then
+		        eventContent := "jobmanagement_exceeded_max_jobs : Maximum number of unassigned jobs exceeded. Job Count = " & (unassignedJobIds'length)'image;
 		        Logger::log(Logger::Information, "pv.jm.acceptevent", eventContent);
-		        jmSpec.maxUnaasignedJobsExceeded := true;
+		        jmSpec.maxUnassignedJobsExceeded := true;
 		    else
-		        jmSpec.maxUnaasignedJobsExceeded := false;
+		        jmSpec.maxUnassignedJobsExceeded := false;
 		    end if;
     	end if;    
     end if;
