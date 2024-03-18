@@ -50,7 +50,9 @@ Another type of appender directs log entries to `syslogd`.  There is
 support for appending to a Kafka topic.  This is useful in the Protocol
 Verifier.  For example, Logger entries bound for Reporting can be assigned
 to topics.  Likewise, benchmarking can be enabled, disabled and destined
-in this way.
+in this way.  A logger can configured with multiple appenders.  Appenders
+have functionality to filter what gets logged based upon log level,
+textual strings and more.
 
 === 2.2 Logging Best Practices
 
@@ -92,10 +94,10 @@ events composing the failed job.
 . Support conditional log message string arithmetic.
 . Establish conventions for enabled logging.
 . Define and support a logger hierarchy.
-. Establish naming conventions for logger hierarchy.
+. Establish naming conventions for the logger hierarchy.
 . Establish rules and guidelines for the construction of log messages.
 . Facilitate machine parsing of log messages (using structured logging).
-  This will result in logs that can easily be ingested by log analysis
+  This will result in logs that can be easily ingested by log analysis
   tooling.
 . Identify tooling that will be used to harvest the log data.
 . Protect privacy and security by logging application-level information
@@ -235,7 +237,10 @@ class.
   ** 'pv.sv.happyjob' (or 'pv.sv.job') INFO to declare job success, WARN
      to declare job failure or alarm, DEBUG for engineering
      instrumentation.
+     *** 'pv.sv.happyjob.assessingcontraints' is an example state machine
+     state of HappyJob.
   ** 'pv.sv.unhappyjob' ditto
+  ** 'pv.sv.acceptevent' is a domain function in Sequence Verification.
 * A special logger shall be defined for benchmarking.
   ** 'pv.benchmark':  throughput benchmark (likely used at event reception
   in Job Management and at event processed in Sequence Verification.
@@ -251,7 +256,9 @@ application.
      an error in the PV, not an error detected in the observed system.)
   ** *Warning* is used for job failures and alarms.  This goes to Reporting.
   ** *Information* is used for everything else that goes to Reporting.
-  ** *Debug* is used for engineering diagnostics.
+  ** *Debug* is used for engineering diagnostics.  Log message
+  construction is conditionalised if the debug message is in a high
+  traffic state or function.
   ** *Trace* is not used.
 
 === 4.8 Log Format
@@ -284,8 +291,8 @@ Read about LogFmt <<dr-6, here>>.
   and categories.
 . Update the source code in the domains to use structured logging
   according to the prescribed conventions.
-. Correctly use the logging levels.  'Error' is not for reporting
-  job_failed; it is for reporting errors in the application.
+. Correctly use the logging levels.  (e.g. 'Error' is not for reporting
+  job_failed; it is for reporting errors in the application.)
 
 === 5.1 Project Plan
 

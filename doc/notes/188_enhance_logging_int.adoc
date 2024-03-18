@@ -1,0 +1,175 @@
+= Enhance Logging
+
+xtUML Project Implementation Note
+
+== 1 Abstract
+
+This note describes the implementation of the `log4cplus` logging.
+
+== 2 Introduction and Background
+
+See <<dr-4>> for requirements, analysis and design of the enhanced
+logging.
+
+As part of fulfilling these requirements, the MASL C{plus}{plus} model
+compiler <<dr-2>> was extended.  An overview will be provided here.
+
+The big win with this logging is that Reporting requirements are fulfilled
+together and consistently with Logging requirements.  Reporting is a
+subset of Logging and uses the same infrastructure and conventions.  By
+having a hierarchical set of loggers, the application can be instrumented
+to configure data acquisition for Reporting and for Logging in a flexible
+manner which minimises performance impacts.  This provides some resilience
+to Reporting requirements changes allowing the PV to be re-configured to
+supply more (or less) information to the Reporting back end.
+
+It is noted that as of March 2024, this work is incomplete.  Structured
+logging, deprecation of the Reporting terminator and other details remain.
+However, the work is ready for a first merge into main to facilitate
+integration issues with test and benchmarking.
+
+=== 2.1 Examples
+
+Through configuration changes alone, the following can/could be
+accomplished:
+
+* We can debug to a Kafka topic or the syslog daemon instead of a file (or
+  to both).
+* Within a single logger (e.g. 'pv.aeo') We can send INFO level logs to one
+  file (or topic) and send DEBUG level logs to a different file (or topic).
+  This is done with the logger filtering capability of `log4cplus`.
+* By extending our logger hierarchy, we can enable future debug of
+  individual classes, operations, functions and/or states.  For example, since
+  we are instrumenting the Sequence Verification domain HappyJob class
+  JobInProgress state machine state as 'pv.sv.happyjob.jobinprogress', we
+  enable the ability to debug only JobInProgress if we desire.  This
+  additional fine-grained logger hierarchy brings no additional configuration
+  burden, since 'pv.sv.happyjob.jobinprogress' can inherit from 'pv.sv' in
+  production mode.  It is only when we desire to debug that state do we
+  configure a specific logger at the lower level.  No code change is
+  required.
+* Many features for formatting the log messages with file names, operation
+  names, timestamps, line numbers, etc. are now available.
+* These hierarchical loggers (e.g. 'system.domain.class.state') are
+  complemented with horizontal loggers (e.g. 'system.benchmarking').  (We
+  will use 'pv.benchmarking.jm', 'pv.benchmarking.aeo' and
+  'pv.benchmarking.sv' to empower the fine-grained concept horizontally as
+  well).
+* `log4cplus` has a mode which allows for multiple processes to append to
+  the same file at the same time.  This obviates the need for the AsyncLogger
+  domain, which required Kafka messaging.
+
+== 3 Requirements
+
+See <<dr-4>>.
+
+== 4 Work Required
+
+See <<dr-4>>.
+
+== 5 Implementation Comments
+
+* log4cplus support
+  ** different types of appenders
+     *** files
+     *** kafka topics
+     *** syslogd
+  ** multiple appenders (per logger)
+  ** log message filtering
+  ** model-level file names and line numbers
+  ** model-level class and operation names
+* Kafka appender support
+  ** JSON format
+  ** string format
+* fine-grained logging
+* vertical and horizontal loggers
+
+== 6 Code Changes
+
+- fork/repository:  xtuml/munin
+- branch:  188_enhance_reporting
+
+----
+ bin/.env                                           |   2 +-
+ deploy/.env                                        |   2 +-
+ deploy/config/configure-kafka.sh                   |  29 --
+ deploy/config/log-config-pv-proc.properties        | 154 ++++-----
+ deploy/docker-compose.kafka.yml                    |  33 +-
+ deploy/docker-compose.yml                          |   4 +-
+ deploy/runtime.txt                                 |  26 ++
+ doc/notes/188_enhance_logging_ant.adoc             | 369 +++++++++++++++++++++
+ doc/notes/188_enhance_logging_int.adoc             | 100 ++++++
+ doc/notes/189_reporting_ant.adoc                   | 236 +++++++++++++
+ doc/notes/dashboard1.png                           | Bin 0 -> 398417 bytes
+ metrics/run_benchmark.sh                           |  11 +-
+ models/AEOrdering/conanfile.py                     |   1 -
+ .../AEOclasses/AuditEvent/AuditEvent.masl          |  30 +-
+ .../AEOclasses/AuditEventType/AuditEventType.masl  |   8 +-
+ .../AEOdomain/AEOrdering/AEOclasses/Job/Job.masl   |   5 +-
+ .../AEOrdering/AEOclasses/JobType/JobType.masl     |   8 +-
+ .../ReportedAuditEvent/ReportedAuditEvent.masl     |  36 +-
+ .../SourceDataItemForwardReference.masl            |   2 +-
+ .../InstanceStateMachine/InstanceStateMachine.masl |   2 +-
+ .../AEOclasses/SystemSpec/SystemSpec.masl          |  18 +-
+ .../AEOdomain/AEOrdering/AEOrdering.masl           |   4 +-
+ .../AEOdomain/AEOrdering/functions/functions.masl  |  26 +-
+ .../AEOdomain/AEOrdering/scenarios/scenarios.masl  |   4 +-
+ .../AEOdomain/AEOrdering/tests/tests.masl          |  38 +--
+ models/FileReception/conanfile.py                  |   1 -
+ .../InstanceStateMachine/InstanceStateMachine.masl |   6 +-
+ .../InstanceStateMachine/InstanceStateMachine.masl |  12 +-
+ .../FRdomain/FReception/FReception.masl            |   2 +-
+ .../FRdomain/FReception/scenarios/scenarios.masl   |   4 +-
+ models/InvariantStore/conanfile.py                 |   1 -
+ .../InstanceStateMachine/InstanceStateMachine.masl |   6 +-
+ .../ISdomain/IStore/scenarios/scenarios.masl       |   2 +-
+ .../ISdomain/IStore/tests/tests.masl               |  28 +-
+ models/JobManagement/conanfile.py                  |   1 -
+ models/JobManagement/gen/application.mark          |   4 +-
+ .../InstanceStateMachine/InstanceStateMachine.masl |   8 +-
+ .../InstanceStateMachine/InstanceStateMachine.masl |   2 +-
+ .../JobManagementSpec/JobManagementSpec.masl       |   8 +-
+ .../JobManagementSpec/JobManagementSpec.xtuml      |   4 +-
+ .../JMclasses/JobManager/JobManager.masl           |  15 +-
+ .../JobManagement/JMclasses/JobStore/JobStore.masl |   4 +-
+ .../JMdomain/JobManagement/JobManagement.masl      |   2 +-
+ .../JobManagement/functions/functions.masl         |  18 +-
+ .../JobManagement/scenarios/scenarios.masl         |   6 +-
+ models/PV_PROC/conanfile.py                        |   1 -
+ .../PV_PROC/AEOrdering_Reporting_reportEvent.tr    |   9 +-
+ .../PV_PROC/AESequenceDC_Reporting_reportEvent.tr  |   9 +-
+ .../PV_PROC/JobManagement_Reporting_reportEvent.tr |   9 +-
+ .../SVDCdomain/AESequenceDC/AESequenceDC.masl      |  14 +-
+ .../DynamicControlDefinition.masl                  |  48 +--
+ .../ExtraJobInvariantDefn.masl                     |  64 ++--
+ .../InstanceStateMachine/InstanceStateMachine.masl | 279 +++++++++-------
+ .../IntraJobInvariantDefn.masl                     |  26 +-
+ .../AESequenceDC/SVDCclasses/Job/Job.masl          |  18 +-
+ .../InstanceStateMachine/InstanceStateMachine.masl |   4 +-
+ .../SVDCclasses/JobDefinition/JobDefinition.masl   |   6 +-
+ .../InstanceStateMachine/InstanceStateMachine.masl |   6 +-
+ .../PersistedInvariant/PersistedInvariant.masl     |  12 +-
+ .../SequencedAuditEvent/SequencedAuditEvent.masl   |  56 ++--
+ .../InstanceStateMachine/InstanceStateMachine.masl | 149 +++++----
+ .../UnsequencedAuditEvent.masl                     |  23 +-
+ .../AESequenceDC/functions/functions.masl          | 121 ++++---
+ .../AESequenceDC/scenarios/scenarios.masl          |   4 +-
+ .../VerifiableJob/VerifiableJob.masl               |   6 +-
+ .../VerificationGateway/VerificationGateway.masl   |  10 +-
+ tests/regression.sh                                |   2 +-
+ 67 files changed, 1457 insertions(+), 701 deletions(-)
+----
+
+== 7 Document References
+
+. [[dr-1]] https://github.com/xtuml/munin/issues/188[188 - Enhance Logging]
+. [[dr-2]] https://github.com/xtuml/masl[MASL C{plus}{plus} Model Compiler GitHub Repository]
+. [[dr-3]] https://github.com/log4cplus/log4cplus[log4cplus]
+. [[dr-4]] link:./188_enhance_logging_ant.adoc[Enhance Logging Analysis Note]
+
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
