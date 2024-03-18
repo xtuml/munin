@@ -1,3 +1,6 @@
+* instructions for review
+  ** Do note when I have changed the log level.  Confirm agreement (according to rules in 188_ant.adoc).
+
 = Enhance Logging
 
 xtUML Project Implementation Note
@@ -33,11 +36,13 @@ integration issues with test and benchmarking.
 Through configuration changes alone, the following can/could be
 accomplished:
 
-* We can debug to a Kafka topic or the syslog daemon instead of a file (or
+* We can log to a Kafka topic or the syslog daemon instead of a file (or
   to both).
 * Within a single logger (e.g. 'pv.aeo') We can send INFO level logs to one
   file (or topic) and send DEBUG level logs to a different file (or topic).
   This is done with the logger filtering capability of `log4cplus`.
+  In our current usage, this makes it simple to divide Debug and
+  Information/Warning traffic into different destinations.
 * By extending our logger hierarchy, we can enable future debug of
   individual classes, operations, functions and/or states.  For example, since
   we are instrumenting the Sequence Verification domain HappyJob class
@@ -59,17 +64,49 @@ accomplished:
   the same file at the same time.  This obviates the need for the AsyncLogger
   domain, which required Kafka messaging.
 
-== 3 Requirements
+=== 2.2 Performance Improvements
 
-See <<dr-4>>.
+...in order of estimated impact.
 
-== 4 Work Required
+. We have omitted event-level logs from the reporting channel.  These are
+  demoted to DEBUG level.  The result is a > 10x reduction in data going to
+  the logs in production mode.
+. Benchmarking is now configurable.  Turning it off reduces traffic by >
+  10x over production mode.  In the previous build, we could not avoid (at
+  least) the message broker overhead.
+. AsyncLogger is deprecated.  `log4cplus` can append to files (or topics)
+  asynchronously avoiding file write collisions.  This divides by 2 the
+  amount of message handling.  The log message goes directly to the file
+  or to the topic and does not need to cycle through AsyncLogger along the
+  way.
+. Debug message construction is now conditionalised (using
+  `Logger::enable()`) in high-traffic states and functions.  The result has
+  not been measured but is non-zero by inspection.
+. Reporting and Logging were duplicating each other.  The (effectively)
+  same message was being logged independently to Reporting and to Logging.
+  This is a substantial reduction in traffic/handling in Sequence
+  Verification.
 
-See <<dr-4>>.
+=== 2.3 Logging File System
 
-== 5 Implementation Comments
+The organisation of the logging file system is changed.
 
-* log4cplus support
+* The parent logging folder is now named 'protocol_verifier'.
+* There is no longer a 'reception' folder.
+* When logging to files, the following are in the baseline configuration.
+  ** 'pv.log' contains the Reporting information.  In production, this
+     will likely be directed to a Kafka topic.
+  ** 'pv_debug.log' receives debug messages from all domains.  With a
+     simple configuration change, the debug messages for a particular domain
+     (and/or class, function, etc.) can be directed to yet a different
+     endpoint.
+  ** 'pv_vg_audit.log' receives PVprime messages.
+  ** 'pv_benchmark.log' receives benchmark messages.  In actual benchmark
+     testing, this will likely be directed to a Kafka topic.
+
+=== 2.4 MASL C{plus}{plus} Extensions
+
+* `log4cplus` support
   ** different types of appenders
      *** files
      *** kafka topics
@@ -78,13 +115,19 @@ See <<dr-4>>.
   ** log message filtering
   ** model-level file names and line numbers
   ** model-level class and operation names
+  ** asynchronous log appending (thread-safe)
 * Kafka appender support
   ** JSON format
   ** string format
 * fine-grained logging
 * vertical and horizontal loggers
+* new hash utility domain
 
-== 6 Code Changes
+== 3 Requirements
+
+See <<dr-4>>.
+
+== 4 Code Changes
 
 - fork/repository:  xtuml/munin
 - branch:  188_enhance_reporting
@@ -160,7 +203,7 @@ See <<dr-4>>.
  67 files changed, 1457 insertions(+), 701 deletions(-)
 ----
 
-== 7 Document References
+== 5 Document References
 
 . [[dr-1]] https://github.com/xtuml/munin/issues/188[188 - Enhance Logging]
 . [[dr-2]] https://github.com/xtuml/masl[MASL C{plus}{plus} Model Compiler GitHub Repository]
