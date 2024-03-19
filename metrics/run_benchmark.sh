@@ -55,7 +55,7 @@ echo "Done."
 # generate test event data
 echo "Generating audit event stream..."
 sleep 1
-echo start `date` $TOTAL_EVENTS "on" `hostname` >> runtime.txt
+echo start `date` $TOTAL_EVENTS "at" $EVENTS_PER_SECOND "on" `hostname` >> runtime.txt
 start_seconds=`date +%s`
 # plus2json leaks memory when running continously.
 # Loop it up to free memory after small batches of events.
