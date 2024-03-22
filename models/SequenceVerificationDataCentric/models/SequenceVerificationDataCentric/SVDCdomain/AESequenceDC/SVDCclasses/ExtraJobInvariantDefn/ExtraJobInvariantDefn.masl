@@ -13,7 +13,6 @@ theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
 logMessage : string;
-eventContent : string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobDefnName);
@@ -59,7 +58,7 @@ begin
       Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn", logMessage);
     end if;              
   else
-    eventContent := "svdc_job_definition_failed : FailureReason = Invalid Job Definition provided for Extra Job Invariant Name" & " : JobName = " & jobDefnName & " : InvariantName = " & invariantName;
+    logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition provided for Extra Job Invariant Name" & " : JobName = " & jobDefnName & " : InvariantName = " & invariantName;
     Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn", logMessage);
   end if;
 
@@ -80,7 +79,6 @@ theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
 logMessage : string;
-eventContent : string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobDefnName);
@@ -169,17 +167,15 @@ begin
   	              
   	       else
   	              
-             if (Logger::enabled(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreInvariantOfThisDefinition")) then
-               logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreinvariantofthisdefinition : Something went wrong restoring the Extra-Job Invariant's state " & restoredInvariant.invariantName;
-               Logger::log(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
-             end if;
+             logMessage := "svdc_restore_eji_state : Something went wrong restoring the Extra-Job Invariant's state " & restoredInvariant.invariantName;
+             Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
   	                                                          
   	       end if; 
   	       
   	     else
   	     
              if (Logger::enabled(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreInvariantOfThisDefinition")) then
-               logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The restored Extra-Job Invariant is already present in the cache " & restoredInvariant.invariantName;
+               logMessage := "The restored Extra-Job Invariant is already present in the cache " & restoredInvariant.invariantName;
                Logger::log(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
              end if;
   	     
@@ -191,20 +187,16 @@ begin
                     
          else
                   
-           if (Logger::enabled(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreInvariantOfThisDefinition")) then
-             logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The Extra-Job Invariant has not been restored successfully " & restoredInvariant.invariantName;
-             Logger::log(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
-           end if;
+           logMessage := "svdc_restore_eji_not_restored : The Extra-Job Invariant has not been restored successfully " & restoredInvariant.invariantName;
+           Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
   	                                                          
          end if;  
                 
        else
                 
-         if (Logger::enabled(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreInvariantOfThisDefinition")) then
-           logMessage := "AESequenceDC::ExtraJobInvariantDefn.restoreInvariantOfThisDefinition : The Extra-Job Invariant to be restored does not match any known definition " & restoredInvariant.invariantName;
-           Logger::log(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
-         end if;
-  	                                                                           
+         logMessage := "svdc_restore_eji_no_match : The Extra-Job Invariant to be restored does not match any known definition " & restoredInvariant.invariantName;
+         Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
+
        end if;     
  
 end service;
