@@ -157,8 +157,10 @@ begin
     delete theConstraintDefinitions;
     delete this;
     
-    logMessage := "AESequenceDC::JobDefinition.deleteJobDefinition : Job Definition " & jobName & " has been deleted";
-	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+    if (Logger::enabled(Logger::Debug, "pv.sv.jobdefinition.deletejobdefinition")) then
+      logMessage := "AESequenceDC::JobDefinition.deleteJobDefinition : Job Definition " & jobName & " has been deleted";
+      Logger::log(Logger::Debug, "pv.sv.jobdefinition.deletejobdefinition", logMessage);
+    end if;
     
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

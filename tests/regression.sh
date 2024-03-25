@@ -34,7 +34,7 @@ done
 # Delay only enough time to allow the unhappy jobs to finish (HangingJobTimer).
 t1=`date +%s`
 tdelta=$(($t1 - $t0))
-delay=$((50 - $tdelta))
+delay=$((90 - $tdelta))
 if [[ $delay -le 0 ]] ; then
   delay=1
 fi
@@ -55,7 +55,7 @@ echo "Checking results..."
 echo "--------------------------------------------------"
 for fn in config/job_definitions/*.json; do
 	job_name=$(jq -r '.JobDefinitionName' "${fn}")
-	grep "svdc_job_success : JobId = [a-f0-9-]* : JobName = ${job_name}" logs/verifier/Verifier.log &>/dev/null
+	grep "svdc_job_success : JobId = [a-f0-9-]* : JobName = ${job_name}" logs/protocol_verifier/pv.log &>/dev/null
 	if [[ $? == 0 ]]; then
 		printf "%-40s %s\n" "${job_name}" "[${GREEN}SUCCESS${NORMAL}]"
 	else

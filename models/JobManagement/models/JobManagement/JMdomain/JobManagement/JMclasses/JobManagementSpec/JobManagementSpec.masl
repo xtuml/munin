@@ -9,6 +9,8 @@ configValidationResult : JSON::JSONObject;
 jobStore : instance of JobStore;
 jobStoreName : string := "JobIdStore.log";
 jobStoreAgeLimit : duration := @PT1H@;
+reportFrequency : duration := @PT1S@;
+jobManager : instance of JobManager;
 
 begin
     
@@ -43,16 +45,25 @@ begin
             if configJSONObject'contains("JobStoreAgeLimit") then
                 jobStoreAgeLimit := duration'parse(JSON::get_string(configJSONObject["JobStoreAgeLimit"]));
             end if;
+            if configJSONObject'contains("ReportFrequency") then
+                reportFrequency := duration'parse(JSON::get_string(configJSONObject["ReportFrequency"]));
+                jobManager := find_one JobManager();
+                if jobManager /= null then
+                	jobManager.reportFrequency := reportFrequency;
+                	cancel jobManager.reportTimer;
+                	schedule jobManager.reportTimer generate JobManager.generateReport() to jobManager delay jobManager.reportFrequency;
+                end if;
+            end if;
         else
             logMessage := "JobManagement::JobManagementSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
-            Logger::log(Logger::Debug, "JobManagement", logMessage);
+            Logger::log(Logger::Error, "pv.jm.jobmanagementspec", logMessage);
             raise JSON::JSONException("Config file invalid");
         end if;
         // set the config file mod time
         this.configFileModificationTime := this.lastModificationTime();        
     else
         logMessage := "JobManagement::ConfigUpdated : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "JobManagement", logMessage);
+        Logger::log(Logger::Error, "pv.jm.jobmanagementspec", logMessage);
     end if;
     
     // if the job store does not exist then create it
@@ -82,7 +93,7 @@ begin
     	end if;
     else
         logMessage := "JobManagement::JobManagementSpec.checkUpdatedConfig : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "JobManagement", logMessage);
+        Logger::log(Logger::Error, "pv.jm.jobmanagementspec", logMessage);
     end if;
     if configUpdates = true then
     	return true; 
@@ -106,7 +117,7 @@ begin
         mostRecentModificationTime := fileStatus.modification_time;
     else
         logMessage := "JobManagement::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "JobManagement", logMessage);
+        Logger::log(Logger::Error, "pv.jm.jobmanagementspec", logMessage);
         raise program_error;
     end if;
     return mostRecentModificationTime;

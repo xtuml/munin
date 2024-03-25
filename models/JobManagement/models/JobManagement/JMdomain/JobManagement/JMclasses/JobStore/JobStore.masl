@@ -1,15 +1,66 @@
 //! ACTIVITY BEGIN. 'b049f533-d814-4309-b6da-d4f28cabaedc' DO NOT EDIT THIS LINE.
-public service JobManagement::JobStore.addJobToStore ( jobId : in string ) is
-storedJobIdentifier : instance of StoredJobIdentifier;
+public instance service JobManagement::JobStore.addJobToStore ( jobId : in string ) is
+newStoredJobIdentifier : instance of StoredJobIdentifier;
+mostRecentJobId : instance of StoredJobIdentifier;
+oldestJobId : instance of StoredJobIdentifier;
 eventContent : string;
 
 begin
-	storedJobIdentifier := find_one StoredJobIdentifier(jobId = jobId);
-	if storedJobIdentifier = null then
-		storedJobIdentifier := create StoredJobIdentifier(jobId => jobId, jobTime => timestamp'now);
+	newStoredJobIdentifier := find_one StoredJobIdentifier(jobId = jobId);
+	if newStoredJobIdentifier = null then
+		newStoredJobIdentifier := create StoredJobIdentifier(jobId => jobId, jobTime => timestamp'now);
+		mostRecentJobId := this -> R25.StoredJobIdentifier;
+		oldestJobId := this -> R24.StoredJobIdentifier;
+		if mostRecentJobId /= null then
+			unlink this R25 mostRecentJobId;
+			link mostRecentJobId R23.isNext newStoredJobIdentifier;
+			link newStoredJobIdentifier R25 this;
+		else
+			link newStoredJobIdentifier R25 this;
+		end if;
+		if oldestJobId = null then
+			link this R24 newStoredJobIdentifier;
+		end if;
+		
+		// force the job store to evaluate if there are ids to remove
+	    this.purgeStore();
+	    
 	else
-	    eventContent := "Duplicate job id reported to job store JobId = " & jobId;
-	    Reporting~>reportEvent(Logger::Error, "jobmanagement_duplicate_job_id", eventContent);
+	    eventContent := "jobmanagement_duplicate_job_id : Duplicate job id reported to job store JobId = " & jobId;
+	    Logger::log(Logger::Warning, "pv.jm.jobstore", eventContent);
+	end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '891d9f4b-d787-4874-9e7c-2f658334d0eb' DO NOT EDIT THIS LINE.
+public instance service JobManagement::JobStore.purgeStore () is
+ageOffJobTime : timestamp;
+jobIdsToStore : string;
+oldestJobStoreIdentifier : instance of StoredJobIdentifier;
+nextJobId : instance of StoredJobIdentifier;
+
+begin
+		
+	// remove any StoredJobIdentifiers that are older than the age off limit and add the to the archive
+	ageOffJobTime := timestamp'now - this.jobStoreAgeLimit;
+	oldestJobStoreIdentifier := this -> R24.StoredJobIdentifier;
+	if oldestJobStoreIdentifier /= null then
+		while oldestJobStoreIdentifier.jobTime <= ageOffJobTime loop
+			nextJobId := oldestJobStoreIdentifier -> R23.isNext.StoredJobIdentifier;
+			if nextJobId /= null then
+				unlink oldestJobStoreIdentifier R23.isNext nextJobId;
+			end if;
+			unlink this R24 oldestJobStoreIdentifier;
+			if oldestJobStoreIdentifier -> R25 /= null then
+				unlink this R25 oldestJobStoreIdentifier;
+			end if;
+			delete oldestJobStoreIdentifier;
+			if nextJobId /= null then
+				oldestJobStoreIdentifier := nextJobId;
+				link this R24 oldestJobStoreIdentifier;
+			end if;
+			exit when nextJobId = null;
+		end loop;
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

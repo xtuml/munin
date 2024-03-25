@@ -131,8 +131,10 @@ begin
       // ...and then check that just one of these matches with an event occurrence that is expected for the previous event
       if (prevAuditEventIds /= empty) and (prevAuditEventIds /= emptyPrevId) then
         // Log info: Event has previous event ids
-        logMessage := "AESequenceDC::HappyJob.JobInProgress : Follow on event (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
-	    Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
+        if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobinprogress")) then
+          logMessage := "AESequenceDC::HappyJob.JobInProgress : Follow on event (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & theEventType.AEType & " with " & prevAuditEventIds'length'image & " previous event ids";
+          Logger::log(Logger::Debug, "pv.sv.happyjob.jobinprogress", logMessage);
+        end if;
 
         auditEventDataProcessed := false;
         for aPrevEventId in prevAuditEventIds loop 
@@ -183,8 +185,6 @@ begin
                 newSeqEvent.TestPreviousEventIsValid (prevEvent, prevEventIsValid); 
                 if prevEventIsValid then
                   // Previous event is valid 
-                  //logMessage := "AESequenceDC::Job.JobInProgress : Previous event is valid - jobId = " & this.jobID & ", audit event sequence = " & theSequenceDef.sequenceDefinitionName & ", current event type = " & theEventType.AEType;
-	              //Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
                   // The new event is a follow on event to the previous event so we know it is part of the same sequence as the previous event
                   currentSequence := prevEvent -> R11;
                   if currentSequence /= null then
@@ -225,18 +225,22 @@ begin
                           else
                             theJob.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId ); 
                           end if;
-                          logMessage := "AESequenceDC::HappyJob.JobInProgress : The Dynamic Control value must be a positive integer and it is not " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID & " with Job Name = " & theJob.jobName & " has value = " & theUserDynamicControl.expectedDynamicControlValue'image;
-	                      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+                          if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobinprogress")) then
+                            logMessage := "AESequenceDC::HappyJob.JobInProgress : The Dynamic Control value must be a positive integer and it is not " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID & " with Job Name = " & theJob.jobName & " has value = " & theUserDynamicControl.expectedDynamicControlValue'image;
+                            Logger::log(Logger::Debug, "pv.sv.happyjob.jobinprogress", logMessage);
+                          end if;
                         end if;  
                         
-	                  else
-                        logMessage := "AESequenceDC::HappyJob.JobInProgress : This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID & " with Job Name = " & theJob.jobName;
-	                    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-	                  end if;  
-	                  
-	                else 
-	                  // This event doesn't have a loop count defined on it and so can be ignored
-	                end if;  
+                      else
+                        if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobinprogress")) then
+                          logMessage := "AESequenceDC::HappyJob.JobInProgress : This event is not carrying a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID & " with Job Name = " & theJob.jobName;
+                          Logger::log(Logger::Debug, "pv.sv.happyjob.jobinprogress", logMessage);
+                        end if;  
+                      end if;  
+                  
+                    else 
+                      // This event does not have a loop count defined on it and so can be ignored
+                    end if;  
 
                     // Check to see if this is a break event causing us to exit a loop and cancel the loop count
                     // TODO Is there a better way to do this now R36 and R37 have been added
@@ -250,7 +254,7 @@ begin
                         end if;
                       end loop;
                     end if;
-	                
+                
 
                     // Add logic for creating user Branch Count on Fork event
                     theUserDynamicControlDefn := theAeOccInSequenceDef -> R31;
@@ -297,8 +301,10 @@ begin
                     if thePrevUserDynamicControl /= null and thePrevUserDynamicControl.isUser then
                       thePrevUserDynamicControl.currentDynamicControlValue := thePrevUserDynamicControl.currentDynamicControlValue + 1;
 
-                      logMessage := "AESequenceDC::HappyJob.JobInProgress : Incrementing the Branch Count for job: " & this.jobID & " with Job Name = " & theJob.jobName & " to value = " & thePrevUserDynamicControl.currentDynamicControlValue'image;
-                      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+                      if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobinprogress")) then
+                        logMessage := "AESequenceDC::HappyJob.JobInProgress : Incrementing the Branch Count for job: " & this.jobID & " with Job Name = " & theJob.jobName & " to value = " & thePrevUserDynamicControl.currentDynamicControlValue'image;
+                        Logger::log(Logger::Debug, "pv.sv.happyjob.jobinprogress", logMessage);
+                      end if;
 
                     end if;
 
@@ -329,8 +335,10 @@ begin
                         if thePrevUserDynamicControl /= null and thePrevUserDynamicControl.isUser then                        
                           thePrevUserDynamicControlDefn := thePrevUserDynamicControl -> R29;
                           if thePrevUserDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT and thePrevUserDynamicControl.expectedDynamicControlValue > 0 then
-                            logMessage := "AESequenceDC::HappyJob.JobInProgress : Valid Branch Count found on instance fork in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " at Event Type = " & (prevEvent -> R2).AEType;
-	                        Logger::log(Logger::Debug, "AESequenceDC", logMessage);                       
+                            if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobinprogress")) then
+                              logMessage := "AESequenceDC::HappyJob.JobInProgress : Valid Branch Count found on instance fork in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " at Event Type = " & (prevEvent -> R2).AEType;
+                              Logger::log(Logger::Debug, "pv.sv.happyjob.jobinprogress", logMessage);
+                            end if;
                           else
                             theJob.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " at Event Type = " & (prevEvent -> R2).AEType);                         
                           end if;
@@ -365,14 +373,16 @@ begin
                           // The current Merge count value is set to the number of previous event ids
                           theUserDynamicControl.currentDynamicControlValue := prevAuditEventIds'length;                                           
                         end if;  
-	                  else
-                        logMessage := "AESequenceDC::HappyJob.JobInProgress : There is no event using a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID & " with Job Name = " & theJob.jobName;
-	                    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-	                  end if;  
+                      else
+                        if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobinprogress")) then
+                          logMessage := "AESequenceDC::HappyJob.JobInProgress : There is no event using a Dynamic Control of type " & theUserDynamicControlDefn.dynamicControlType'image & " for " & this.jobID & " with Job Name = " & theJob.jobName;
+                          Logger::log(Logger::Debug, "pv.sv.happyjob.jobinprogress", logMessage);
+                        end if;
+                      end if;  
 
 	                  
 	                else 
-	                  // This event doesn't have an event that has a loop count defined on it and so can be ignored
+	                  // This event does not have an event that has a loop count defined on it and so can be ignored
 	                end if;  
                     
                   else
@@ -444,42 +454,48 @@ begin
           incompleteSequences := find sequencesForJob (isComplete = false);
           if incompleteSequences'length = 0 then
             // Log info: Received a new sequence start event for an existing Job but other sequences are complete
-	        logMessage := "AESequenceDC::HappyJob.JobInProgress : A further new sequence has been started for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", with audit event = " & theEventType.AEType;
-	        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-	        
-	        // This must be the first start event seen for a new sequence so create and link the sequence
-	        newSequence := create unique Sequence (isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
-	        link newSequence R10 theJob;
-	        link newSequence R11 newSeqEvent;
-	        link newSequence R14 theSequenceDef;
-	        
-	      else
+            if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobinprogress")) then
+              logMessage := "AESequenceDC::HappyJob.JobInProgress : A further new sequence has been started for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", with audit event = " & theEventType.AEType;
+              Logger::log(Logger::Debug, "pv.sv.happyjob.jobinprogress", logMessage);
+            end if;
+        
+            // This must be the first start event seen for a new sequence so create and link the sequence
+            newSequence := create unique Sequence (isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
+            link newSequence R10 theJob;
+            link newSequence R11 newSeqEvent;
+            link newSequence R14 theSequenceDef;
+        
+          else
             // Log info: Received a new sequence start event for an existing Job - but other sequences are still in progress
-	        logMessage := "AESequenceDC::HappyJob.JobInProgress : A new sequence start event has been seen with other sequences incomplete for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", with audit event = " & theEventType.AEType;
-	        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-	        
-	        // Need to check if an incomplete sequence is one of the right type for this event
-	        for incompleteSequence in incompleteSequences loop
-	          if (incompleteSequence -> R14) = theSequenceDef then
-	            // We have an incomplete sequence of the same type as the new event belongs to so this must be another start event for that sequence
-	            link incompleteSequence R11 newSeqEvent;
-	            // So increment the branch extent
-	            incompleteSequence.branchExtent := incompleteSequence.branchExtent + 1;
+            if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobinprogress")) then
+              logMessage := "AESequenceDC::HappyJob.JobInProgress : A new sequence start event has been seen with other sequences incomplete for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", with audit event = " & theEventType.AEType;
+              Logger::log(Logger::Debug, "pv.sv.happyjob.jobinprogress", logMessage);
+            end if;
+        
+            // Need to check if an incomplete sequence is one of the right type for this event
+            for incompleteSequence in incompleteSequences loop
+              if (incompleteSequence -> R14) = theSequenceDef then
+                // We have an incomplete sequence of the same type as the new event belongs to so this must be another start event for that sequence
+                link incompleteSequence R11 newSeqEvent;
+                // So increment the branch extent
+                incompleteSequence.branchExtent := incompleteSequence.branchExtent + 1;
                 // Log info: Received a new sequence start event that is an additional start event for an existing sequence
-	            logMessage := "AESequenceDC::HappyJob.JobInProgress : An additional sequence start event has been seen for an existing sequence for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", in sequence = " & incompleteSequence.AESequenceId'image & "with audit event type = " & theEventType.AEType;
-	            Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+                if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobinprogress")) then
+                  logMessage := "AESequenceDC::HappyJob.JobInProgress : An additional sequence start event has been seen for an existing sequence for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", in sequence = " & incompleteSequence.AESequenceId'image & "with audit event type = " & theEventType.AEType;
+                  Logger::log(Logger::Debug, "pv.sv.happyjob.jobinprogress", logMessage);
+                end if;
 	            
-	          end if;
-	        end loop;
-	        // If the new start sequence event didn't match any existing sequences then it must be a new sequence
-	        if (newSeqEvent -> R11) = null then
-	          // This must be the first start event seen for a new sequence so create and link the sequence
-	          newSequence := create unique Sequence (isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
-	          link newSequence R10 theJob;
-	          link newSequence R11 newSeqEvent;
-	          link newSequence R14 theSequenceDef;          
-	        end if;
-	      end if;  
+              end if;
+            end loop;
+            // If the new start sequence event didn't match any existing sequences then it must be a new sequence
+            if (newSeqEvent -> R11) = null then
+              // This must be the first start event seen for a new sequence so create and link the sequence
+              newSequence := create unique Sequence (isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
+              link newSequence R10 theJob;
+              link newSequence R11 newSeqEvent;
+              link newSequence R14 theSequenceDef;          
+            end if;
+          end if;  
 
 
 
@@ -535,9 +551,9 @@ begin
     
   else
     theJob.sequencingFailed := true;
-    theJob.failJob("This event has an identifier that's been seen before. Identifiers must be unique for a Job to be valid - Event Type = " & auditEventType);
-    eventContent := "JobId = " & theJob.jobID & " with Job Name = " & theJob.jobName & " : FailureReason = The audit event has been seen before"  & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
-	Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
+    theJob.failJob("This event has an identifier that has been seen before. Identifiers must be unique for a Job to be valid - Event Type = " & auditEventType);
+    logMessage := "svdc_job_failed : JobId = " & theJob.jobID & " with Job Name = " & theJob.jobName & " : FailureReason = The audit event has been seen before"  & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
+    Logger::log(Logger::Warning, "pv.sv.happyjob.jobinprogress", logMessage);
   
   end if;     
   
@@ -602,13 +618,15 @@ begin
           theFollowingAuditEventPairs := thePreviousAuditEvent -> R4.has_next.SequencedAuditEventPair;
           if theFollowingAuditEventPairs'length /= 1 then
             validatedConstraint := false;
-            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : XOR Constraint failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " at event " & (thePreviousAuditEvent -> R2).AEType & " with " & theFollowingAuditEventPairs'length'image & " branches following the XOR node";
-            Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
+            if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints")) then
+              logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : XOR Constraint failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " at event " & (thePreviousAuditEvent -> R2).AEType & " with " & theFollowingAuditEventPairs'length'image & " branches following the XOR node";
+              Logger::log(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints", logMessage);
+            end if;
           end if;
         end loop;  
       else
         logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Unsupported Constraint Type for Job = " & this.jobID & " with Job Name = " & theJob.jobName;
-        Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
+        Logger::log(Logger::Error, "pv.sv.happyjob.assessingjobconstraints", logMessage);
       end if;
     end if;  
   end loop;
@@ -626,11 +644,15 @@ begin
       if theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.LOOPCOUNT then
         if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
           validatedDynamicControl := false;          
-          logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Loop Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
-          Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
+          if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints")) then
+            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Loop Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
+            Logger::log(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints", logMessage);
+          end if;
         else
-          logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Loop Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
-          Logger::log(Logger::Debug, "AESequenceDC", logMessage);              
+          if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints")) then
+            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Loop Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Loop Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Loop Count = " & theDynamicControl.currentDynamicControlValue'image;
+            Logger::log(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints", logMessage);
+          end if;
         end if;
       elsif theDynamicControlDefn.dynamicControlType = dynamicControlTypeEnum.BRANCHCOUNT then
 //        if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
@@ -640,11 +662,15 @@ begin
         // We have a user dynamic control so check its values
           if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.currentDynamicControlValue /= theDynamicControl.expectedDynamicControlValue) then
             validatedDynamicControl := false;          
-            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Branch Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
-            Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
+            if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints")) then
+              logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Branch Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
+              Logger::log(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints", logMessage);
+            end if;
           else
-            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Branch Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
-            Logger::log(Logger::Debug, "AESequenceDC", logMessage);              
+            if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints")) then
+              logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Branch Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
+              Logger::log(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints", logMessage);
+            end if;
           end if;
         else
           // This is the source branch count which isn't checked
@@ -655,11 +681,15 @@ begin
           if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.expectedDynamicControlValue /= theDynamicControl.currentDynamicControlValue) then
             validatedDynamicControl := false;    
             // TODO Remove debug log message      
-            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Merge Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Merge Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Merge Count = " & theDynamicControl.currentDynamicControlValue'image;
-            Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
+            if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints")) then
+              logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Merge Count check failed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Merge Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Merge Count = " & theDynamicControl.currentDynamicControlValue'image;
+              Logger::log(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints", logMessage);
+            end if;
           else
-            logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Merge Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Merge Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Merge Count = " & theDynamicControl.currentDynamicControlValue'image;
-            Logger::log(Logger::Debug, "AESequenceDC", logMessage);              
+            if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints")) then
+              logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Merge Count check passed for Job = " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Merge Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Merge Count = " & theDynamicControl.currentDynamicControlValue'image;
+              Logger::log(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints", logMessage);
+            end if;
           end if;
         else
           // An event with the merge count has not been encountered so no need to check
@@ -687,8 +717,10 @@ begin
     end if;
   else
     // All constraint and dynamic control checks have passed for this Job
-    logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Constraint and dynamic control checks passed for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+    if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints")) then
+      logMessage := "AESequenceDC::HappyJob.AssessingJobConstraints : Constraint and dynamic control checks passed for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+      Logger::log(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints", logMessage);
+    end if;
     generate Job.constraintCheckSuccessful() to theJob;
   end if;
   
@@ -697,7 +729,7 @@ begin
 //    generate Job.jobFailed(failureReason) to this;
 //  else
 //    logMessage := "Constraint check passed for - jobId = " & this.jobID;
-//    Logger::log(Logger::Information, "AESequenceDC", logMessage);
+//    Logger::log(Logger::Information, "pv.sv.happyjob.assessingjobconstraints", logMessage);
 //    generate Job.constraintCheckSuccessful() to this;
 //  end if;
 //
@@ -734,14 +766,14 @@ begin
   theJob.jobCompleted := false;
   
   // Log info: Audit Event Sequence Verification has been informed of Job failure
-  logMessage := "AESequenceDC::HappyJob.JobFailed : Job Failed - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " due to: " & failureReason;
-  Logger::log(Logger::Error, "AESequenceDC", logMessage);
-  eventContent := "FailureReason = " & failureReason & " : JobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
+  logMessage := "svdc_job_failed : FailureReason = " & failureReason & " : JobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+  Logger::log(Logger::Warning, "pv.sv.happyjob.jobfailed", logMessage);
+  // TODO:  accumulate a well-formed, structured, canonical log message here.
+  logMessage := "";
   for evt in theJob->R10->R11.SequencedAuditEvent loop
-	  eventContent := "EventId = " & evt.AuditEventId;
-	  Reporting~>reportEvent(Logger::Information, "svdc_event_processed", eventContent);
+    logMessage := logMessage & "\nsvdc_event_processed : EventId = " & evt.AuditEventId;
   end loop;
+  Logger::log(Logger::Warning, "pv.sv.happyjob.jobfailed", logMessage);
   
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
@@ -777,11 +809,9 @@ begin
   theJob.jobCompleted := false;
 
   // Log error: new follow on event received for completed or failed Job
-      // Log info: Audit Event Sequence Verification has been informed of Job completion
-  logMessage := "AESequenceDC::HappyJob.JobGoneHorriblyWrong : Job gone horribly wrong - a follow on event for a completed or failed job has been received - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-  Logger::log(Logger::Error, "AESequenceDC", logMessage);
-  eventContent := "FailureReason = Job gone horribly wrong - a follow on event for a completed or failed job has been received" & " : JobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
+  // Log info: Audit Event Sequence Verification has been informed of Job completion
+  logMessage := "svdc_job_failed : FailureReason = Job gone horribly wrong - a follow on event for a completed or failed job has been received" & " : JobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+  Logger::log(Logger::Warning, "pv.sv.happyjob.jobgonehorriblywrong", logMessage);
 
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
@@ -811,8 +841,10 @@ logMessage : string;
 begin
   theJob := this -> R45;
   // Log info: Audit Event Sequence Verification is checking for completion of a Sequence or Job
-  logMessage := "AESequenceDC::HappyJob.AssessingSequenceCompletion : Checking for completion of a Sequence or Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " ,sequenceId = " & thePotentiallyCompletedSequence.sequenceId'image & " and branch extent = " & thePotentiallyCompletedSequence.branchExtent'image;
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
+  if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingsequencecompletion")) then
+    logMessage := "AESequenceDC::HappyJob.AssessingSequenceCompletion : Checking for completion of a Sequence or Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " ,sequenceId = " & thePotentiallyCompletedSequence.sequenceId'image & " and branch extent = " & thePotentiallyCompletedSequence.branchExtent'image;
+    Logger::log(Logger::Debug, "pv.sv.happyjob.assessingsequencecompletion", logMessage);
+  end if;
 
   // Test to see if this is the last 'end' event for the current sequence
   thePotentiallyCompletedSequence.branchExtent := thePotentiallyCompletedSequence.branchExtent - 1;
@@ -859,8 +891,10 @@ begin
         // We have a user dynamic control so check its values
         if (theDynamicControl.expectedDynamicControlValue > 0) and (theDynamicControl.currentDynamicControlValue /= theDynamicControl.expectedDynamicControlValue) then
             branchCountIncomplete := true;          
-            logMessage := "AESequenceDC::HappyJob.AssessingSequenceCompletion : Branch Count suggests job is incomplete for " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
-            Logger::log(Logger::Debug, "AESequenceDC", logMessage);    
+            if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingsequencecompletion")) then
+              logMessage := "AESequenceDC::HappyJob.AssessingSequenceCompletion : Branch Count suggests job is incomplete for " & this.jobID & " with Job Name = " & theJob.jobName & " Expected Branch Count = " & theDynamicControl.expectedDynamicControlValue'image & " Current Branch Count = " & theDynamicControl.currentDynamicControlValue'image;
+              Logger::log(Logger::Debug, "pv.sv.happyjob.assessingsequencecompletion", logMessage);
+            end if;
         end if;
       else
           // This is the source branch count which doesn't need to be checked
@@ -893,8 +927,10 @@ logMessage : string;
 begin
   // TODO: Can a jobFailed event occur once this state is reached?
   theJob := this -> R45;  
-  logMessage := "AESequenceDC::HappyJob.JobTimeoutReported : The Job has been reported having timed out - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+  if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobtimeoutreported")) then
+    logMessage := "AESequenceDC::HappyJob.JobTimeoutReported : The Job has been reported having timed out - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+    Logger::log(Logger::Debug, "pv.sv.happyjob.jobtimeoutreported", logMessage);
+  end if;
   
   
   theJob.sequencingFailed := true;
@@ -930,14 +966,14 @@ begin
   theJob.jobCompleted := true;
   jobDefinition := theJob -> R8.JobDefinition;
   // Log info: Audit Event Sequence Verification has determined that the Job is Complete
-  logMessage := "AESequenceDC::HappyJob.JobSuccessful : Sequence Verification determines that the Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " is complete.";
-  Logger::log(Logger::Debug, "Monitored System Status", logMessage);
-  eventContent := "JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
-  Reporting~>reportEvent(Logger::Information, "svdc_job_success", eventContent);
-  for evt in theJob->R10->R11.SequencedAuditEvent loop
-	  eventContent := "EventId = " & evt.AuditEventId;
-	  Reporting~>reportEvent(Logger::Information, "svdc_event_processed", eventContent);
-  end loop;
+  logMessage := "svdc_job_success : JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
+  Logger::log(Logger::Information, "pv.sv.happyjob.jobsuccessful", logMessage);
+  if (Logger::enabled(Logger::Information, "pv.benchmark.happyjob.jobsuccessful")) then
+    for evt in theJob->R10->R11.SequencedAuditEvent loop
+      logMessage := "svdc_event_processed : EventId = " & evt.AuditEventId;
+      Logger::log(Logger::Information, "pv.benchmark.happyjob.jobsuccessful", logMessage);
+    end loop;
+  end if;
   
   // The Job is thus near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
@@ -971,8 +1007,10 @@ begin
   // Initialise the synchronisation of the deletion of any counterpart Job instances in other domains.
   JobAdmin~>deleteJob(theJobID);
 
-  logMessage := "AESequenceDC::HappyJob.Deleted : Job with jobID: " & theJobID & " with Job Name = " & jobName & " has been deleted";
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+  if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.deleted")) then
+    logMessage := "AESequenceDC::HappyJob.Deleted : Job with jobID: " & theJobID & " with Job Name = " & jobName & " has been deleted";
+    Logger::log(Logger::Debug, "pv.sv.happyjob.deleted", logMessage);
+  end if;
   //
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -1030,8 +1068,10 @@ begin
       end loop;
       
       if intraJobInvariantCheckPassed then
-        logMessage := "AESequenceDC::HappyJob.AssessingIntraJobInvariants : Intra-Job Invariant check passed for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+        if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessingintrajobinvariants")) then
+          logMessage := "AESequenceDC::HappyJob.AssessingIntraJobInvariants : Intra-Job Invariant check passed for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+          Logger::log(Logger::Debug, "pv.sv.happyjob.assessingintrajobinvariants", logMessage);
+        end if;
         generate Job.intraJobInvariantCheckSuccessful() to theJob;
       else
         failureReason := "Check of Intra-Job Invariants Failed";
@@ -1051,9 +1091,10 @@ logMessage : string;
 begin
   theJob := this -> R45;
 
-  //TODO Remove debug message
-  logMessage := "AESequenceDC::HappyJob.AwaitingPersistenceService : Entered state Awaiting Persistence Service for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+  if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.awaitingpersistenceservice")) then
+    logMessage := "AESequenceDC::HappyJob.AwaitingPersistenceService : Entered state Awaiting Persistence Service for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+    Logger::log(Logger::Debug, "pv.sv.happyjob.awaitingpersistenceservice", logMessage);
+  end if;
   
   theSystemSpec := find_one SystemSpecification ();
   failureReason := " Request for invariants from the persistence store has timed out meaning the Extra Job Invariant Check has failed " & this.jobID & " with Job Name = " & theJob.jobName;
@@ -1122,12 +1163,16 @@ begin
 
 
       if extraJobInvariantCheckPassed then
-        logMessage := "AESequenceDC::HappyJob.AssessingLocalExtraJobInvariants : Extra-Job Invariant check passed for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+        if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants")) then
+          logMessage := "AESequenceDC::HappyJob.AssessingLocalExtraJobInvariants : Extra-Job Invariant check passed for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+          Logger::log(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants", logMessage);
+        end if;
         generate Job.extraJobInvariantCheckSuccessful() to theJob;
       else
-        logMessage := "AESequenceDC::HappyJob.AssessingLocalExtraJobInvariants : Local Extra-Job Invariants insufficient so checking stored value for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+        if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants")) then
+          logMessage := "AESequenceDC::HappyJob.AssessingLocalExtraJobInvariants : Local Extra-Job Invariants insufficient so checking stored value for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+          Logger::log(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants", logMessage);
+        end if;
       end if;  
   
 end state;
@@ -1189,8 +1234,10 @@ begin
 
 
       if extraJobInvariantCheckPassed then
-        logMessage := "AESequenceDC::HappyJob.ReassessingExtraJobInvariants : Extra-Job Invariant check passed for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+        if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.reassessingextrajobinvariants")) then
+          logMessage := "AESequenceDC::HappyJob.ReassessingExtraJobInvariants : Extra-Job Invariant check passed for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+          Logger::log(Logger::Debug, "pv.sv.happyjob.reassessingextrajobinvariants", logMessage);
+        end if;
         generate Job.extraJobInvariantCheckSuccessful() to theJob;
       else
         failureReason := "Extra-Job Invariant check failed including checking stored invariants";

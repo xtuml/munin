@@ -8,12 +8,10 @@ services:
         target: /conan-cache
       - "../models/PV_PROC/build:/work/build"
       - "./config:/root/config"
-      - "./logs/reception:/var/log/reception"
-      - "./logs/verifier:/var/log/verifier"
+      - "./logs/protocol_verifier:/var/log/protocol_verifier"
       - "./reception-incoming:/root/incoming"
       - "./reception-processed:/root/processed"
       - "./InvariantStore:/root/InvariantStore"
-      - "./JobIdStore:/root/JobIdStore"
     ports:
       - "20000:20000"
       - "30000:30000"

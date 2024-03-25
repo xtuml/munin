@@ -2,7 +2,6 @@
 public instance service JobManagement::AuditEvent.reportAuditEvent ( assignedWorker : in instance of EmployedWorker ) is
 begin
 	
-    Reporting~>reportEvent(Logger::Error, "jobmanagement_event_written", "");
 	Worker~>reportEvent(assignedWorker.workerId, this.auditEvent);
 	
 end service;

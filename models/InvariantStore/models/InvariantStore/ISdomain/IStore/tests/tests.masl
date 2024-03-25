@@ -12,17 +12,17 @@ invariantList : sequence of persistedInvariantStructure;
 begin
 	
 	// check the store and the store file exists
-	Logger::log(Logger::Information, "IStore", "Running Test01 - Store Exists");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test01 - Store Exists");
 	
 	delete find Invariant();
 	delete find _TEST_StoreClient_addInvariants();
 	Assertions::assertTrue((find InvStore())'length = 1, "Test Invariant Store: wrong number of invariant store, expected 1 found: " & ((find InvStore())'length)'image);
 	invStore := find_one InvStore();
 	Assertions::assertTrue(Filesystem::file_exists(invStore.invStoreName), "Test Invariant Store: invariant store does not exist: " & (invStore.invStoreName));
-	Logger::log(Logger::Information, "IStore", "Running Test01 - Passed");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test01 - Passed");
 	
 	// make sure that the invariant store is empty
-	Logger::log(Logger::Information, "IStore", "Running Test02 - Reload Store on Update");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test02 - Reload Store on Update");
 	Filesystem::touch_file(emptyInvaraintFile);
 	Filesystem::move_file(emptyInvaraintFile, invStore.invStoreName);
 	delay duration'milliseconds(100); // short delay to make sure the modification time changes
@@ -33,10 +33,10 @@ begin
 	generate InvStore.checkStore() to invStore;
 	Test::service_event_queue();
 	Assertions::assertTrue(currentStoredModificationTime /= invStore.storeModificationTime, "Test Invariant Store: invariant store file was not re-read: " & (invStore.invStoreName));
-	Logger::log(Logger::Information, "IStore", "Running Test02 - Passed");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test02 - Passed");
 	
 	// move the test invariant store into place
-	Logger::log(Logger::Information, "IStore", "Running Test03 - Reload Store containing invariants");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test03 - Reload Store containing invariants");
 	delay duration'milliseconds(100); // short delay to make sure the modification time changes
 	Filesystem::copy_file(testFile, tmpFile);
 	Filesystem::move_file(tmpFile, invStore.invStoreName);
@@ -53,10 +53,10 @@ begin
 	Assertions::assertTrue(reportedInvariants'length = 1, "Test Invariant Store: Invariants not reported to client");
 	invariantList := reportedInvariants'any.invariantsToReport;
 	Assertions::assertTrue(invariantList'length = 2, "Test Invariant Store: Expected 2 invariants to be reported to client found: " &invariantList'length'image);
-	Logger::log(Logger::Information, "IStore", "Running Test03 - Passed");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test03 - Passed");
 	
 	// add an invariant
-	Logger::log(Logger::Information, "IStore", "Running Test04 - Add invariants");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test04 - Add invariants");
 	IStore::persistInvariant("inv3", "11111", timestamp'now, timestamp'now + @PT10M@, "Job2", "Event3", 0);
 	Test::service_event_queue();
 	Assertions::assertTrue((find Invariant())'length = 3, "Test Invariant Store: Expected 3 invariants found: " & (find Invariant())'length'image);
@@ -76,10 +76,10 @@ begin
 	Assertions::assertTrue(reportedInvariants'length = 1, "Test Invariant Store: Invariants not reported to client");
 	invariantList := reportedInvariants'any.invariantsToReport;
 	Assertions::assertTrue(invariantList'length = 3, "Test Invariant Store: Expected 3 invariants to be reported to client found: " &invariantList'length'image);
-	Logger::log(Logger::Information, "IStore", "Running Test04 - Passed");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test04 - Passed");
 	
 	// add an invariant that will expire
-	Logger::log(Logger::Information, "IStore", "Running Test05 - Expired invariants");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test05 - Expired invariants");
 	IStore::persistInvariant("inv4", "99999", timestamp'now, timestamp'now + @PT1S@, "Job2", "Event4", 0);
 	Test::service_event_queue();
 	Assertions::assertTrue((find Invariant())'length = 4, "Test Invariant Store: Expected 4 invariants found: " & (find Invariant())'length'image);
@@ -98,20 +98,20 @@ begin
 	Assertions::assertTrue(reportedInvariants'length = 1, "Test Invariant Store: Invariants not reported to client");
 	invariantList := reportedInvariants'any.invariantsToReport;
 	Assertions::assertTrue(invariantList'length = 3, "Test Invariant Store: Expected 3 invariants to be reported to client found: " &invariantList'length'image);
-	Logger::log(Logger::Information, "IStore", "Running Test05 - Passed");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test05 - Passed");
 	
 	// request an invariant that the store knows about is restored
-	Logger::log(Logger::Information, "IStore", "Running Test06 - Recover known invariant");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test06 - Recover known invariant");
 	delete reportedInvariants;
 	IStore::restoreNamedInvariant("inv1", "11111");
 	Test::service_event_queue();
 	reportedInvariants := find _TEST_StoreClient_addInvariants();
 	Assertions::assertTrue(reportedInvariants'length = 1, "Test Invariant Store: Invariants not reported to client");
 	Assertions::assertTrue(find_one Invariant(invariantName = "inv1") /= null, "Test Invariant Store: Failed to find invariant inv1");
-	Logger::log(Logger::Information, "IStore", "Running Test06 - Passed");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test06 - Passed");
 
 	// request an invariant that the store does not know about is restored
-	Logger::log(Logger::Information, "IStore", "Running Test07 - Recover unknown invariant");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test07 - Recover unknown invariant");
 	delete (find Invariant(invariantName = "inv1"));
 	delete reportedInvariants;
 	IStore::restoreNamedInvariant("inv1", "11111");
@@ -119,7 +119,7 @@ begin
 	reportedInvariants := find _TEST_StoreClient_addInvariants();
 	Assertions::assertTrue(reportedInvariants'length = 1, "Test Invariant Store: Invariants not reported to client");
 	Assertions::assertTrue(find_one Invariant(invariantName = "inv1") /= null, "Test Invariant Store: Failed to find invariant inv1");
-	Logger::log(Logger::Information, "IStore", "Running Test07 - Passed");
+	Logger::log(Logger::Information, "pv.istore.testinvariantstore", "Running Test07 - Passed");
 
 
 

@@ -31,12 +31,10 @@ begin
 				auditEvent.reportAuditEvent(employedWorker);
 			end loop;
 			
-		    eventContent := "Job assigned. Worker id = " & string(employedWorker.workerId) & " Jobs assigned = " & ((employedWorker -> R6.AssignedJob)'length)'image;
-		    Reporting~>reportEvent(Logger::Error, "jobmanagement_worker_assigned_job_count", eventContent);
 		else
 			// log an error as there is an unassigned job held by job manager but there is no instance of unassigned job
 			logMessage := "Found unassigned job id without an unassigned job, jobId = " & unassignedJobIds[unassignedJobIds'first];
-			Logger::log(Logger::Error, "JobManagement", logMessage);
+			Logger::log(Logger::Error, "pv.jm.jobmanager", logMessage);
 			// remove the unassigned job id
 			unassignedJobIds := unassignedJobIds[unassignedJobIds'first + 1 .. unassignedJobIds'last];
 			this.unassignedJobIds := unassignedJobIds;
@@ -106,11 +104,16 @@ eventContent : string;
 
 begin
 
-	eventContent := "Assigned jobs. Job Count = " & ((this -> R1.JobWorker -> R2.EmployedWorker -> R6.AssignedJob)'length)'image;
-	Reporting~>reportEvent(Logger::Error, "jobmanagement_total_assigned_jobs", eventContent);
+	eventContent := "jobmanagement_employed_workers : Employed workers. Employee Count = " & ((this -> R1.JobWorker -> R2.EmployedWorker)'length)'image;
+	
+	for employedWorker in this -> R1.JobWorker -> R2.EmployedWorker loop 
+		eventContent := eventContent & ",jobmanagement_worker_assigned_job_count : Worker id = " & string(employedWorker.workerId) & " Jobs assigned = " & ((employedWorker -> R6.AssignedJob)'length)'image;
+	end loop;
+	
+	eventContent := eventContent & ",jobmanagement_total_assigned_jobs : Assigned Job Count = " & ((this -> R1.JobWorker -> R2.EmployedWorker -> R6.AssignedJob)'length)'image;
 
-	eventContent := "Unassigned jobs. . Job Count = " & ((find UnassignedJob())'length)'image;
-	Reporting~>reportEvent(Logger::Error, "jobmanagement_total_unassigned_jobs", eventContent);
+	eventContent := eventContent & ",jobmanagement_total_unassigned_jobs : Unassigned Job Count = " & ((find UnassignedJob())'length)'image;
+	Logger::log(Logger::Information, "pv.jm.jobmanager", eventContent);
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
