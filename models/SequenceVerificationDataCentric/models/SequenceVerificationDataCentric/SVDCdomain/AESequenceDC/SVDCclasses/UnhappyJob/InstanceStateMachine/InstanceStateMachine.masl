@@ -62,8 +62,10 @@ begin
     link theJob R44 newSeqEvent;
     // and to the sequenced event definition
     link newSeqEvent R2 theEventType;
-    logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Happy event seen in Unhappy Job (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & auditEventType & " with " & prevAuditEventIds'length'image & " previous event ids";
-	Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
+    if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.jobinprogress")) then
+      logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Happy event seen in Unhappy Job (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & auditEventType & " with " & prevAuditEventIds'length'image & " previous event ids";
+      Logger::log(Logger::Debug, "pv.sv.unhappyjob.jobinprogress", logMessage);   
+    end if;
     
   end if;
 
@@ -79,8 +81,10 @@ begin
     // and to the sequenced event definition
     link newUnseqEvent R41 theUnseqEventType;
 
-    logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Unhappy event seen in Unhappy Job (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & auditEventType & " with " & prevAuditEventIds'length'image & " previous event ids";
-	Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
+    if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.jobinprogress")) then
+      logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Unhappy event seen in Unhappy Job (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & auditEventType & " with " & prevAuditEventIds'length'image & " previous event ids";
+      Logger::log(Logger::Debug, "pv.sv.unhappyjob.jobinprogress", logMessage);   
+    end if;
     
    // TODO Add possible section to deal with an Unhappy Event being marked as a Job End event
    if theUnseqEventType.isEndEvent then
@@ -93,8 +97,10 @@ begin
   if (theEventType /= null) or (theUnseqEventType /= null) then        
     if (prevAuditEventIds /= empty) and (prevAuditEventIds /= emptyPrevId) then
       // Log info: Event has previous event ids
-      logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Follow on event in Unhappy Job (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & auditEventType & " with " & prevAuditEventIds'length'image & " previous event ids";
-	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
+      if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.jobinprogress")) then
+        logMessage := "AESequenceDC::UnhappyJob.JobInProgress : Follow on event in Unhappy Job (" & auditEventId & ") for existing Job received with jobId = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & auditEventType & " with " & prevAuditEventIds'length'image & " previous event ids";
+        Logger::log(Logger::Debug, "pv.sv.unhappyjob.jobinprogress", logMessage);   
+      end if;
 
       //auditEventDataProcessed := false;
       for aPrevEventId in prevAuditEventIds loop 
@@ -169,8 +175,8 @@ begin
   else
     theJob.sequencingFailed := true;
     theJob.failJob("This event has an identifier that's been seen before. Identifiers must be unique for a Job to be valid - Event Type = " & auditEventType);
-    eventContent := "JobId = " & theJob.jobID & " : FailureReason = The audit event has been seen before"  & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
-	Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
+    logMessage := "svdc_job_failed : JobId = " & theJob.jobID & " : FailureReason = The audit event has been seen before"  & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
+    Logger::log(Logger::Warning, "pv.sv.happyjob.jobinprogress", logMessage);  
   end if;   
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -197,18 +203,17 @@ unhappyJobFailureReason := failureReason;
   theJob.jobCompleted := false;
   
   // Log info: Audit Event Sequence Verification has been informed of Job failure
-  logMessage := "AESequenceDC::Job.JobFailed : Alarm Condition in - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " due to: " & unhappyJobFailureReason;
-  Logger::log(Logger::Error, "AESequenceDC", logMessage);
-  eventContent := "Alarm Condition = " & unhappyJobFailureReason & " : JobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-  Reporting~>reportEvent(Logger::Error, "svdc_job_alarm", eventContent);
+  // TODO:  accumulate a well-formed, structured, canonical log message here.
+  logMessage := "svdc_job_alarm : Alarm Condition = " & unhappyJobFailureReason & " : JobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+  Logger::log(Logger::Warning, "pv.sv.unhappyjob.jobfailed", logMessage);
+  logMessage := "";
   for evt in theJob-> R44.SequencedAuditEvent loop
-	  eventContent := "EventId = " & evt.AuditEventId;
-	  Reporting~>reportEvent(Logger::Information, "svdc_happy_event_processed", eventContent);
+    logMessage := logMessage & "\nsvdc_happy_event_processed : EventId = " & evt.AuditEventId;
   end loop;
   for evt in theJob-> R3.UnsequencedAuditEvent loop
-	  eventContent := "EventId = " & evt.unsequencedAuditEventId;
-	  Reporting~>reportEvent(Logger::Information, "svdc_unhappy_event_processed", eventContent);
+    logMessage := logMessage & "\nsvdc_unhappy_event_processed : EventId = " & evt.unsequencedAuditEventId;
   end loop;
+  Logger::log(Logger::Warning, "pv.sv.unhappyjob.jobfailed", logMessage);
     
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
@@ -235,11 +240,9 @@ begin
   theJob.jobCompleted := false;
 
   // Log error: new follow on event received for completed or failed Job
-      // Log info: Audit Event Sequence Verification has been informed of Job completion
-  logMessage := "AESequenceDC::UnhappyJob.JobGoneHorriblyWrong : Job gone horribly wrong - a follow on event for a completed or failed job has been received - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-  Logger::log(Logger::Error, "AESequenceDC", logMessage);
-  eventContent := "FailureReason = Job gone horribly wrong - a follow on event for a completed or failed job has been received" & " : JobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);
+  // Log info: Audit Event Sequence Verification has been informed of Job completion
+  logMessage := "svdc_job_failed : FailureReason = Job gone horribly wrong - a follow on event for a completed or failed job has been received" & " : JobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+  Logger::log(Logger::Warning, "pv.sv.unhappyjob.jobgonehorriblywrong", logMessage);
 
   // The Job is near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
@@ -255,8 +258,10 @@ logMessage : string;
 begin
   // TODO: Can a jobFailed event occur once this state is reached?
   theJob := this -> R45;  
-  logMessage := "AESequenceDC::UnhappyJob.JobTimeoutReported : The Unhappy Job has been reported having timed out - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+  if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobtimeoutreported")) then
+    logMessage := "AESequenceDC::UnhappyJob.JobTimeoutReported : The Unhappy Job has been reported having timed out - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+    Logger::log(Logger::Debug, "pv.sv.happyjob.jobtimeoutreported", logMessage);  
+  end if;
   
   // As this is a normal way of detecting the end of an Unhappy Job this will not be regarded as a failure condition
   // However, this is left as a separate state in case there is other behaviour we need to add.
@@ -283,19 +288,19 @@ begin
   theJob.jobCompleted := true;
   jobDefinition := theJob -> R8.JobDefinition;
   // Log info: Audit Event Sequence Verification has determined that the Job is Complete
-  logMessage := "AESequenceDC::UnhappyJob.JobSuccessful : Sequence Verification determines that the Unhappy Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " has ended without an alarm condition being raised.";
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-  eventContent := "JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
-  Reporting~>reportEvent(Logger::Information, "svdc_job_success", eventContent);
-  for evt in theJob-> R44.SequencedAuditEvent loop
-	  eventContent := "EventId = " & evt.AuditEventId;
-	  Reporting~>reportEvent(Logger::Information, "svdc_happy_event_processed", eventContent);
-  end loop;
-  for evt in theJob-> R3.UnsequencedAuditEvent loop
-	  eventContent := "EventId = " & evt.unsequencedAuditEventId;
-	  Reporting~>reportEvent(Logger::Information, "svdc_unhappy_event_processed", eventContent);
-  end loop;
-  
+  logMessage := "svdc_job_success : JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
+  Logger::log(Logger::Information, "pv.sv.happyjob.jobsuccessful", logMessage);
+  if (Logger::enabled(Logger::Information, "pv.benchmark.happyjob.jobsuccessful")) then
+    for evt in theJob-> R44.SequencedAuditEvent loop
+      logMessage := "svdc_happy_event_processed : EventId = " & evt.AuditEventId;
+      Logger::log(Logger::Information, "pv.benchmark.happyjob.jobsuccessful", logMessage);
+    end loop;
+    for evt in theJob-> R3.UnsequencedAuditEvent loop
+      logMessage := "svdc_unhappy_event_processed : EventId = " & evt.unsequencedAuditEventId;
+      Logger::log(Logger::Information, "pv.benchmark.happyjob.jobsuccessful", logMessage);
+    end loop;
+  end if;
+
   // The Job is thus near the end of it's useful life - wait a bit longer and then trigger its final demise.
   theSystemSpec := find_one SystemSpecification();
   schedule theJob.jobDeletionTimer generate Job.endOfLifeReached() to theJob delay theSystemSpec.jobDeletionWaitPeriod;
@@ -328,8 +333,10 @@ begin
   // Initialise the synchronisation of the deletion of any counterpart Job instances in other domains.
   JobAdmin~>deleteJob(theJobID);
 
-  logMessage := "AESequenceDC::Job.Deleted : Job with jobID: " & theJobID & " with Job Name = " & jobName & " has been deleted";
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+  if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.jobdeleted")) then
+    logMessage := "AESequenceDC::Job.Deleted : Job with jobID: " & theJobID & " with Job Name = " & jobName & " has been deleted";
+    Logger::log(Logger::Debug, "pv.sv.unhappyjob.jobdeleted", logMessage);
+  end if;
   //
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -383,8 +390,10 @@ begin
       
       
       if intraJobInvariantCheckPassed then
-        logMessage := "AESequenceDC::UnhappyJob.AssessingIntraJobInvariants : Intra-Job Invariant check passed for Unhappy Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+        if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.assessingintrajobinvariants")) then
+          logMessage := "AESequenceDC::UnhappyJob.AssessingIntraJobInvariants : Intra-Job Invariant check passed for Unhappy Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+          Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessingintrajobinvariants", logMessage);
+        end if;
         generate Job.intraJobInvariantCheckSuccessful() to theJob;
       else
         failureReason := "Check of Intra-Job Invariants in Unhappy Job Failed";
@@ -404,9 +413,10 @@ logMessage : string;
 begin
   theJob := this -> R45;
 
-  //TODO Remove debug message
-  logMessage := "AESequenceDC::UnhappyJob.AwaitingPersistenceService : Entered state Awaiting Persistence Service for Unhappy job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+  if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.awaitingpersistenceservice")) then
+    logMessage := "AESequenceDC::UnhappyJob.AwaitingPersistenceService : Entered state Awaiting Persistence Service for Unhappy job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+    Logger::log(Logger::Debug, "pv.sv.unhappyjob.awaitingpersistenceservice", logMessage);
+  end if;
   
   theSystemSpec := find_one SystemSpecification ();
   failureReason := " Request for invariants from the persistence store has timed out meaning the Extra Job Invariant Check has failed " & this.jobID;
@@ -475,12 +485,16 @@ begin
 
 
       if extraJobInvariantCheckPassed then
-        logMessage := "AESequenceDC::UnhappyJob.AssessingLocalExtraJobInvariants : Extra-Job Invariant check passed for Unhappy Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+        if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants")) then
+          logMessage := "AESequenceDC::UnhappyJob.AssessingLocalExtraJobInvariants : Extra-Job Invariant check passed for Unhappy Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+          Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants", logMessage);
+        end if;
         generate Job.extraJobInvariantCheckSuccessful() to theJob;
       else
-        logMessage := "AESequenceDC::UnhappyJob.AssessingLocalExtraJobInvariants : Local Extra-Job Invariants insufficient so checking stored value for Unhappy Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+        if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants")) then
+          logMessage := "AESequenceDC::UnhappyJob.AssessingLocalExtraJobInvariants : Local Extra-Job Invariants insufficient so checking stored value for Unhappy Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+          Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants", logMessage);
+        end if;
       end if;  
   
 end state;
@@ -542,8 +556,10 @@ begin
 
 
       if extraJobInvariantCheckPassed then
-        logMessage := "AESequenceDC::UnhappyJob.ReassessingExtraJobInvariants : Extra-Job Invariant check passed for Unhappy Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
-        Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+        if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.reassessingextrajobinvariants")) then
+          logMessage := "AESequenceDC::UnhappyJob.ReassessingExtraJobInvariants : Extra-Job Invariant check passed for Unhappy Job - jobId = " & this.jobID & " with Job Name = " & theJob.jobName;
+          Logger::log(Logger::Debug, "pv.sv.unhappyjob.reassessingextrajobinvariants", logMessage);
+        end if;
         generate Job.extraJobInvariantCheckSuccessful() to theJob;
       else
         failureReason := "Extra-Job Invariant check failed including checking stored invariants for Unhappy Job";
@@ -588,9 +604,11 @@ begin
   theJobsEvents := theJob -> R44;
   theJobsCriticalEvents := theJobsEvents intersection theCriticalEvents;
 
-  logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion for Job with jobId = " & theJob.jobID;
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage);   
-  
+  if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.assessingunhappyjobcompletion")) then
+    logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion for Job with jobId = " & theJob.jobID;
+    Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessingunhappyjobcompletion", logMessage);   
+  end if;
+ 
   for eachCriticalEvent in theJobsCriticalEvents loop
     theParentEvents := eachCriticalEvent -> R46 -> R47.has_previous.AuditEvent;
     if theParentEvents /= null then
@@ -658,20 +676,23 @@ begin
         
       end loop;  
     else
-      logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion - No child events found for unhappy event in Job with jobId = " & theJob.jobID & " and job type " & theJob.jobName;
-      Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+      if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.assessingunhappyjobcompletion")) then
+        logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion - No child events found for unhappy event in Job with jobId = " & theJob.jobID & " and job type " & theJob.jobName;
+        Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessingunhappyjobcompletion", logMessage);
+      end if;
     end if;
     
     theJobsCriticalAuditEvents := theJobsCriticalEvents -> R46;  
     inScopeCriticalEvents := (theJobsCriticalAuditEvents intersection theDecendantEvents);    
     
-    logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion - The following critical events are in the scope of the unhappy event for Job with jobId = " & theJob.jobID & " and job type " & theJob.jobName;
-    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-    for inScopeCriticalEvent in inScopeCriticalEvents loop
-      inScopeCriticalEventDefinition := inScopeCriticalEvent -> R46.SequencedAuditEvent -> R2;
-      logMessage := "  In scope Critical Event  = " & inScopeCriticalEvent.AEId & " of type " & inScopeCriticalEventDefinition.AEType;
-      Logger::log(Logger::Debug, "AESequenceDC", logMessage);      
-    end loop;   
+    if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.assessingunhappyjobcompletion")) then
+      logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion - The following critical events are in the scope of the unhappy event for Job with jobId = " & theJob.jobID & " and job type " & theJob.jobName;
+      for inScopeCriticalEvent in inScopeCriticalEvents loop
+        inScopeCriticalEventDefinition := inScopeCriticalEvent -> R46.SequencedAuditEvent -> R2;
+        logMessage := logMessage & ", In scope Critical Event  = " & inScopeCriticalEvent.AEId & " of type " & inScopeCriticalEventDefinition.AEType;
+      end loop;   
+      Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessingunhappyjobcompletion", logMessage);      
+    end if;
   end if;     
   
   // Also need to check to see if any unhappy events have no previous events
@@ -688,8 +709,10 @@ begin
   end if;
   
   if isSuccess then
-    logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion - The Unhappy Job has completed without an alarm condition for jobId = " & theJob.jobID & " and job type " & theJob.jobName;
-    Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+    if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.assessingunhappyjobcompletion")) then
+      logMessage := "AESequenceDC::UnhappyJob.AssessingUnhappyJobCompletion - The Unhappy Job has completed without an alarm condition for jobId = " & theJob.jobID & " and job type " & theJob.jobName;
+      Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessingunhappyjobcompletion", logMessage);      
+    end if;
     generate UnhappyJob.unhappyJobBehavedAsExpected () to this;
   else
     // TODO At the moment we are treating this as a job failed condition. We may want to raise this to an alarm condition

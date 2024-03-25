@@ -33,7 +33,7 @@ exception
 	when others =>
 	
 		logMessage := "IStore::init : failed during start up";
-		Logger::log(Logger::Error, "IStore", logMessage);
+		Logger::log(Logger::Fatal, "pv.istore.init", logMessage);
 		raise program_error;
 	
 end service;

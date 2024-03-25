@@ -20,12 +20,14 @@ begin
   oldEvent := find_one AuditEvent (AEId = eventId);
   // Check to see if we've seen this event instance before
   if (oldEvent = null) then
-    //We have received an unhappy path event as the first event in the Job. So we need to create a new job 
+    // We have received an unhappy path event as the first event in the Job. So we need to create a new job 
     // with its corresponding UnhappyJob subtype and this event is an unsequenced event for a Job
     // Note: SequencingFailed is marked true for an UnhappyJob
 
-    logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob : First event for Job is an unhappy event - job id = " & jobId & " with Job Name = " & jobName & ", Initial audit event: " & eventId & " of type " & aeType;
-	Logger::log(Logger::Debug, "AESequenceDC", logMessage);
+    if (Logger::enabled(Logger::Debug, "pv.sv.unsequencedauditevent.addeventfornewunhappyjob")) then
+      logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob : First event for Job is an unhappy event - job id = " & jobId & " with Job Name = " & jobName & ", Initial audit event: " & eventId & " of type " & aeType;
+      Logger::log(Logger::Debug, "pv.sv.unsequencedauditevent.addeventfornewunhappyjob", logMessage);
+    end if;
     
     newJob := create Job (jobID => jobId, sequencingFailed => true, jobCompleted => false );
     newUnhappyJob := create UnhappyJob (jobID => jobId, Current_State => Created );
@@ -38,21 +40,22 @@ begin
         // Generate firstUnhappyEvent event polymorphically to UnhappyJob (this needs to leave it in a different JobInProgress state for further events which may be happy or unhappy)
         generate Job.unhappyJobCreated (eventId, prevAEIds, aeType, aeData) to newJob;
 
-	    eventContent := "JobId = " & newJob.jobID & " with Job Name = " & newJob.jobName & " : EventId = " & eventId & " : EventType = " & aeType;
-	    Reporting~>reportEvent(Logger::Information, "svdc_new_unhappy_job_started", eventContent);
+        if (Logger::enabled(Logger::Debug, "pv.sv.unsequencedauditevent.addeventfornewunhappyjob")) then
+          logMessage := "svdc_new_unhappy_job_started : JobId = " & newJob.jobID & " with Job Name = " & newJob.jobName & " : EventId = " & eventId & " : EventType = " & aeType;
+          Logger::log(Logger::Debug, "pv.sv.unsequencedauditevent.addeventfornewunhappyjob", logMessage);
+        end if;
 
       else
         newJob.failJob("An unrecognised job definition has been received - Job Id = " & newJob.jobID & " with Job Name = " & newJob.jobName & " Event Type = " & aeType);      
         logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewUnhappyJob : No Job Definition found for - job Name = " & jobName & ", Initial audit event: " & eventId & " of type " & aeType;
-	    Logger::log(Logger::Error, "AESequenceDC", logMessage);
+        Logger::log(Logger::Warning, "pv.sv.unsequencedauditevent.addeventfornewunhappyjob", logMessage);
       end if;  
     
   else
       // Log error: The audit event id received has been seen before
-	  logMessage := "AESequenceDC::UnsequencedAuditEvent.AddEventForNewJob : The audit event has been seen before for jobId = " & jobId & " with Job Name = " & jobName & ", Initial audit event = " & aeType;
-	  Logger::log(Logger::Debug, "AESequenceDC", logMessage);
-      eventContent := "JobId = " & jobId & " with Job Name = " & jobName & " : FailureReason = The audit event has been seen before"  & " : EventId = " & eventId & " : EventType = " & aeType;
-	  Reporting~>reportEvent(Logger::Error, "svdc_job_failed", eventContent);  
+      // TODO:  svdc_job_failed should only be in the JobFailed state of happy and unhappy job.
+      logMessage := "svdc_job_failed : JobId = " & jobId & " with Job Name = " & jobName & " : FailureReason = The audit event has been seen before"  & " : EventId = " & eventId & " : EventType = " & aeType;
+      Logger::log(Logger::Warning, "pv.sv.unsequencedauditevent.addeventfornewunhappyjob", logMessage);
 
    
   end if;  

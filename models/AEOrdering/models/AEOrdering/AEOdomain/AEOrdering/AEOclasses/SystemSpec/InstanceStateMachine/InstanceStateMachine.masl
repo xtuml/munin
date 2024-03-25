@@ -28,7 +28,7 @@ exception
 	when others => 	
 	
 		logMessage := "AEOrdering::SystemSpec.ConfigChecked : failed to load configuration file";
-		Logger::log(Logger::Error, "AEOrdering", logMessage);
+		Logger::log(Logger::Fatal, "pv.aeo.systemspec.configchecked", logMessage);
 		raise program_error;
 		
 end state;

@@ -26,8 +26,8 @@ begin
 	    this.purgeStore();
 	    
 	else
-	    eventContent := "Duplicate job id reported to job store JobId = " & jobId;
-	    Reporting~>reportEvent(Logger::Error, "jobmanagement_duplicate_job_id", eventContent);
+	    eventContent := "jobmanagement_duplicate_job_id : Duplicate job id reported to job store JobId = " & jobId;
+	    Logger::log(Logger::Warning, "pv.jm.jobstore", eventContent);
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

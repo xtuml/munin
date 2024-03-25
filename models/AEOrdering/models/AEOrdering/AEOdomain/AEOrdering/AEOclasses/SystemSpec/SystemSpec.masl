@@ -11,7 +11,7 @@ begin
         mostRecentModificationTime := fileStatus.modification_time;
     else
         logMessage := "AEOrdering::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        Logger::log(Logger::Fatal, "pv.aeo.systemspec", logMessage);
         raise program_error;
     end if;
     if Filesystem::file_exists(Filesystem::filename(this.jobDefinitionDirectory)) then
@@ -48,7 +48,7 @@ begin
     	end if;
     else
         logMessage := "AEOrdering::locateUpdatedConfig : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        Logger::log(Logger::Error, "pv.aeo.systemspec", logMessage);
     end if;
     if configUpdates = true then
     	return true; 
@@ -154,14 +154,14 @@ begin
 				                                                 timeoutPeriodForRetreivingStoredInvariants, timeoutPeriodForHangingJob);
         else
             logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
-            Logger::log(Logger::Debug, "AEOrdering", logMessage);
+            Logger::log(Logger::Debug, "pv.aeo.systemspec", logMessage);
             raise JSON::JSONException("Config file invalid");
         end if;
         // set the config file mod time
         this.configFileModificationTime := this.lastModificationTime();        
     else
         logMessage := "AEOrdering::ConfigUpdated : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        Logger::log(Logger::Error, "pv.aeo.systemspec", logMessage);
     end if;
     
 end service;
@@ -198,7 +198,7 @@ begin
         end loop;
     else
         logMessage := "AEOrdering::locateUpdatedConfig : failed to locate job definition directory. Specified directory = " & this.jobDefinitionDirectory;
-        Logger::log(Logger::Error, "AEOrdering", logMessage);
+        Logger::log(Logger::Error, "pv.aeo.systemspec", logMessage);
     end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -270,7 +270,7 @@ begin
                     updatedJobTypes := updatedJobTypes & jobType;
                 else
                     logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid: " & jobDefinitionFile.jobDefinitionFileName & "\n" & JSON::dump(jobTypeValidationResult, true);
-                    Logger::log(Logger::Debug, "AEOrdering", logMessage);
+                    Logger::log(Logger::Debug, "pv.aeo.systemspec", logMessage);
                     raise JSON::JSONException("Job definition file invalid");
                 end if;
             end if;
@@ -355,10 +355,10 @@ begin
 			    if auditEvent'contains("eventId") then
 			      	eventId := JSON::get_string(auditEvent["eventId"]);
 			    end if;
-				eventContent := "EventId = " & eventId;
-				Reporting~>reportEvent(Logger::Error, "reception_event_invalid", eventContent);
+				eventContent := "reception_event_invalid : EventId = " & eventId;
+				Logger::log(Logger::Warning, "pv.aeo.systemspec.schemavalidated", eventContent);
 				logMessage := "AEOrdering::AcceptJsonEvent : Dropping invalid event with ID: " & eventId & "\n" & JSON::dump(validationResult, true);
-				Logger::log(Logger::Debug, "AEOrdering", logMessage);
+				Logger::log(Logger::Debug, "pv.aeo.systemspce.schemavalidated", logMessage);
 			end if;
 		end if;
 	end if;

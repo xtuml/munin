@@ -3,7 +3,7 @@ set -e
 
 # Usage:
 # run_benchmark.sh [rate (events/second)] [total number of events] [reception topic]
-# Executution defaults to:  run_benchmark.sh 1000 100000 JobManagement_service0
+# Executution defaults to:  run_benchmark.sh 1000 100000 Protocol_Verifier_Reception
 
 # Define batches of events for p2j to play.
 BATCH_OF_EVENTS=100000
@@ -19,7 +19,7 @@ fi
 ITERATIONS=$(($TOTAL_EVENTS / $BATCH_OF_EVENTS))
 
 # Allow over-riding the kafka topic for reception.
-RECEPTION_TOPIC="JobManagement_service0"
+RECEPTION_TOPIC="Protocol_Verifier_Reception"
 if [[ $# -ge 3 ]] ; then
   RECEPTION_TOPIC=$3
 fi
@@ -55,6 +55,8 @@ echo "Done."
 # generate test event data
 echo "Generating audit event stream..."
 sleep 1
+echo start `date` $TOTAL_EVENTS "at" $EVENTS_PER_SECOND "on" `hostname` >> runtime.txt
+start_seconds=`date +%s`
 # plus2json leaks memory when running continously.
 # Loop it up to free memory after small batches of events.
 echo "0 of " $TOTAL_EVENTS
@@ -64,6 +66,11 @@ for ((i = 0; i < $ITERATIONS; i++)); do
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
 done
+stop_seconds=`date +%s`
+echo "stop " `date` >> runtime.txt
+runtime=$(($stop_seconds - $start_seconds))
+events_per_second=$(($TOTAL_EVENTS / $runtime))
+echo $runtime "seconds at rate:" $events_per_second >> runtime.txt
 sleep 20
 echo "Done."
 

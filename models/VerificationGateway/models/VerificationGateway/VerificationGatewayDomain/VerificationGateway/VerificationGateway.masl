@@ -11,14 +11,18 @@ theEventDetails : string;
 theAuditEventData : string;
 
 begin
+  if (Logger::enabled(Logger::Information, "pv.vg.audit")) then
+
     // Construct the reportedEvent string...
     theJobDetails := "jobName = " & jobName & " : jobId = " & jobID;
     theEventDetails := " : eventType = " & eventType & " : eventId = " & eventID;
     theAuditEventData := " : auditEventData = " & "NotUsed";
-    
-    // Report the instrumented event for inclusion in the behavioural verification of the Protocol Verifier.
     reportedEvent := theJobDetails & theEventDetails & " : previousEventIds = " & previousEventID & theAuditEventData;
-    AsyncLogger::log(Logger::Information, "VerifierInstrumentation", reportedEvent);
+
+    // Report the instrumented event for inclusion in the behavioural verification of the Protocol Verifier.
+    Logger::log(Logger::Information, "pv.vg.audit", reportedEvent);
+
+  end if;
    
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

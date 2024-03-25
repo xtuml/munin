@@ -15,7 +15,7 @@ begin
   this.isDeprecated := true;
   // Log info: Report that the JobDefinition has been deprecated.
   logMessage := "AESequenceDC::JobDefinition.Deprecated : JobDefinition has been deprecated - jobName = " & this.jobName;
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
+  Logger::log(Logger::Information, "pv.sv.jobdefinition.active", logMessage); 
   
   // Check to see if there are any Jobs in progress that are dependent upon this JobDefinition.
   if (this -> R8)'length = 0 then
@@ -51,7 +51,7 @@ begin
   
   // Log info: Report that the deprecated JobDefinition has been deleted.
   logMessage := "AESequenceDC::JobDefinition.Deleted : Deprecated JobDefinition has been deleted - jobName = " & theJobName;
-  Logger::log(Logger::Debug, "AESequenceDC", logMessage); 
+  Logger::log(Logger::Information, "pv.sv.jobdefinition.deleted", logMessage); 
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

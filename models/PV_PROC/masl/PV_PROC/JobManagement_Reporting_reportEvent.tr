@@ -2,6 +2,11 @@ public service JobManagement::Reporting~>reportEvent ( eventPriority: in Logger:
                                                        eventLabel: in string,
                                                        eventContent: in string ) is
 begin
-  AsyncLogger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
-  BenchmarkingProbe::mark(eventLabel, eventContent, timestamp'now);
+  if (Logger::enabled(eventPriority, "Reception")) then
+    Logger::log(eventPriority, "Reception", eventLabel & " : " & eventContent);
+  end if;
+  if (Logger::enabled(eventPriority, "pv.benchmark")) then
+    Logger::log(eventPriority, "pv.benchmark", "{{ event_label: " & eventLabel & ",event_content: " & eventContent & "}}");
+    //BenchmarkingProbe::mark(eventLabel, eventContent, timestamp'now);
+  end if;
 end service;

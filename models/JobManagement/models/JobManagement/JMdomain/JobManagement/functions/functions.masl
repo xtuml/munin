@@ -23,8 +23,8 @@ begin
 			employedWorker := jobWorker -> R2.EmployedWorker;
 			if employedWorker.working = true then
 				generate EmployedWorker.workerDeregistered() to employedWorker;
-			    eventContent := "Worker id = " & string(employedWorker.workerId);
-			    Reporting~>reportEvent(Logger::Information, "jobmanagement_worker_deregistered_register_request", eventContent);
+				eventContent := "jobmanagement_worker_deregistered_register_request : Worker id = " & string(employedWorker.workerId);
+				Logger::log(Logger::Information, "pv.jm.registerworker", eventContent);
 			end if;
 		end if;
 	end if;
@@ -97,12 +97,12 @@ begin
 	        // check if we have exceeded the max unassigned jobs and if so report an error
 	        unassignedJobIds := jobManager.unassignedJobIds;
 	        jmSpec := find_one JobManagementSpec();
-	        if unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnaasignedJobsExceeded = false then
-		        eventContent := "Maximum number of of unassigned jobs exceeded. Job Count = " & (unassignedJobIds'length)'image;
-		        Reporting~>reportEvent(Logger::Information, "jobmanagement_exceeded_max_jobs", eventContent);
-		        jmSpec.maxUnaasignedJobsExceeded := true;
+	        if unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnassignedJobsExceeded = false then
+		        eventContent := "jobmanagement_exceeded_max_jobs : Maximum number of unassigned jobs exceeded. Job Count = " & (unassignedJobIds'length)'image;
+		        Logger::log(Logger::Information, "pv.jm.acceptevent", eventContent);
+		        jmSpec.maxUnassignedJobsExceeded := true;
 		    else
-		        jmSpec.maxUnaasignedJobsExceeded := false;
+		        jmSpec.maxUnassignedJobsExceeded := false;
 		    end if;
     	end if;    
     end if;
@@ -172,8 +172,8 @@ begin
 	employedWorker := find_one EmployedWorker(workerId = workerId);
 	if employedWorker /= null then
 		generate EmployedWorker.workerDeregistered() to employedWorker;
-	    eventContent := "Worker id = " & string(employedWorker.workerId);
-	    Reporting~>reportEvent(Logger::Information, "jobmanagement_worker_deregistered_deregister_request", eventContent);
+		eventContent := "jobmanagement_worker_deregistered_deregister_request : Worker id = " & string(employedWorker.workerId);
+		Logger::log(Logger::Information, "pv.jm.deregisterworker", eventContent);
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
