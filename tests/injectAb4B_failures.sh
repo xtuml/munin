@@ -62,11 +62,11 @@ echo "Checking results..."
 echo "--------------------------------------------------"
 # Check for job_failed and be sure no success or alarm.
 for fn in config/job_definitions/*.json; do
-	grep "svdc_job_failed" logs/verifier/Verifier.log &>/dev/null
+	grep "svdc_job_failed" logs/protocol_verifier/pv.log &>/dev/null
 	if [[ $? == 0 ]]; then
-		grep "svdc_job_success" logs/verifier/Verifier.log &>/dev/null
+		grep "svdc_job_success" logs/protocol_verifier/pv.log &>/dev/null
 		if [[ $? != 0 ]]; then
-			grep "svdc_job_alarm" logs/verifier/Verifier.log &>/dev/null
+			grep "svdc_job_alarm" logs/protocol_verifier/pv.log &>/dev/null
 			if [[ $? != 0 ]]; then
 				printf "%-40s %s\n" "${job_name}" "[${GREEN}SUCCESS${NORMAL}]"
 			else
