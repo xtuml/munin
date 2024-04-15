@@ -52,7 +52,7 @@ set +x
 echo "Done."
 
 # wait a reasonable amount of time
-delay=15
+delay=45
 echo "Waiting ${delay} seconds for protocol verifier to complete..."
 sleep $delay
 echo "Done."

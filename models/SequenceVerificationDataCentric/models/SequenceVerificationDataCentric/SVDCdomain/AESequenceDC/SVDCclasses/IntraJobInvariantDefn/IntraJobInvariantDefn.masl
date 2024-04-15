@@ -42,8 +42,8 @@ begin
         if theSequenceDefns'length = 1 then
           theSequenceDefn := find_one theSequenceDefns ();
         else
-          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
-          Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn ", logMessage);
+          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition (type 4)" & " : JobName = " & theJobDefn.jobName;
+          Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn", logMessage);
         end if;  
         
         if theSequenceDefn /= null then
@@ -56,19 +56,19 @@ begin
               link theInvariant R19 theEventOccInSeqDefn;
             end if;  
           else
-            logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
-            Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn ", logMessage);
+            logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition (type 3)" & " : JobName = " & theJobDefn.jobName;
+            Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn", logMessage);
           end if;  
         else
-          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
-          Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn ", logMessage);
+          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition (type 2)" & " : JobName = " & theJobDefn.jobName;
+          Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn", logMessage);
         end if;  
       end if;
     end loop;
   else
     // Protocol Verifier error due to failed configuration
-    logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition" & " : JobName = " & theJobDefn.jobName;
-    Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn ", logMessage);
+    logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition (type 1)" & " : JobName = " & theJobDefn.jobName;
+    Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn", logMessage);
   end if;
   
 end service;

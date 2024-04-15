@@ -46,15 +46,15 @@ begin
         if theEventOccInSeqDefn /= null then
           link theInvariant R20 theEventOccInSeqDefn;
         else
-          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
+          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Event Definition provided (type 3) for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
           Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn", logMessage);
         end if;  
       else
-        logMessage := "svdc_job_definition_failed : FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
+        logMessage := "svdc_job_definition_failed : FailureReason = Invalid Event Definition provided (type 2) for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
         Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn", logMessage);
       end if;
     else
-      logMessage := "svdc_job_definition_failed : FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
+      logMessage := "svdc_job_definition_failed : FailureReason = Invalid Event Definition provided (type 1) for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
       Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn", logMessage);
     end if;              
   else
