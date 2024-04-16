@@ -292,11 +292,11 @@ begin
   Logger::log(Logger::Information, "pv.sv.unhappyjob.jobsuccessful", logMessage);
   if (Logger::enabled(Logger::Information, "pv.benchmark.unhappyjob.jobsuccessful")) then
     for evt in theJob-> R44.SequencedAuditEvent loop
-      logMessage := "svdc_happy_event_processed : EventId = " & evt.AuditEventId;
+      logMessage := "\"tag\":\"svdc_unhappy_event_processed\",\"EventId\":\"" & evt.AuditEventId & "\"";
       Logger::log(Logger::Information, "pv.benchmark.unhappyjob.jobsuccessful", logMessage);
     end loop;
     for evt in theJob-> R3.UnsequencedAuditEvent loop
-      logMessage := "svdc_unhappy_event_processed : EventId = " & evt.unsequencedAuditEventId;
+      logMessage := "\"tag\":\"svdc_unhappy_event_processed\",\"EventId\":\"" & evt.unsequencedAuditEventId & "\"";
       Logger::log(Logger::Information, "pv.benchmark.unhappyjob.jobsuccessful", logMessage);
     end loop;
   end if;
