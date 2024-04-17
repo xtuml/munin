@@ -26,7 +26,7 @@ begin
 			                            auditEventData => auditEventData, reportedJobName => reportedJobName);
 		link auditEvent R9 job;
 		if (Logger::enabled(Logger::Information, "pv.benchmark.aeo.auditevent")) then
-			eventContent := "\"tag\":\"aeordering_events_processed\",\"EventId\":\"" & auditEventId &"\"";
+			eventContent := "\"tag\":\"aeordering_event_processed\",\"EventId\":\"" & auditEventId &"\"";
 			Logger::log(Logger::Information, "pv.benchmark.aeo.auditevent", eventContent);
 		end if;
 		for prevEventId in prevAuditEventIds loop
