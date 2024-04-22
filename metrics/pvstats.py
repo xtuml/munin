@@ -47,7 +47,7 @@ class Report:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='infowarn.py', description='dashboard for protocol verifier')
-    parser.add_argument('--msgbroker', required=False, help='Specify the message broker <host:port>')
+    parser.add_argument('--msgbroker', required=True, help='Specify the message broker <host:port>')
     parser.add_argument('--topic', required=False, help='Specify topic')
     args = parser.parse_args()
 
@@ -74,5 +74,5 @@ if __name__ == '__main__':
             report.report()
             t0 = t1
 
-        raw_msgs = consumer.poll(timeout_ms=2000)
+        raw_msgs = consumer.poll(timeout_ms=8000)
 
