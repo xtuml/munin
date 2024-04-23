@@ -970,7 +970,7 @@ begin
   Logger::log(Logger::Information, "pv.sv.happyjob.jobsuccessful", logMessage);
   if (Logger::enabled(Logger::Information, "pv.benchmark.happyjob.jobsuccessful")) then
     for evt in theJob->R10->R11.SequencedAuditEvent loop
-      logMessage := "svdc_event_processed : EventId = " & evt.AuditEventId;
+      logMessage := "\"tag\":\"svdc_event_processed\",\"EventId\":\"" & evt.AuditEventId & "\"";
       Logger::log(Logger::Information, "pv.benchmark.happyjob.jobsuccessful", logMessage);
     end loop;
   end if;

@@ -27,7 +27,7 @@ begin
 
   if (Logger::enabled(Logger::Information, "pv.sv.persistinvariant ")) then
     logMessage := "AESequenceDC::Persistence_Req_IF~>PersistInvariant : PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
-    Logger::log(Logger::Information, "pv.sv.persistinvariant ", logMessage);
+    Logger::log(Logger::Information, "pv.sv.persistinvariant", logMessage);
   end if;
 
 end service;
@@ -42,7 +42,7 @@ begin
 
   if (Logger::enabled(Logger::Information, "pv.sv.restorenamedinvariant ")) then
     logMessage := "AESequenceDC::Persistence_Req_IF~>RestoreNamedInvariant : PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
-    Logger::log(Logger::Information, "pv.sv.restorenamedinvariant ", logMessage);
+    Logger::log(Logger::Information, "pv.sv.restorenamedinvariant", logMessage);
   end if;
   
 end service;
