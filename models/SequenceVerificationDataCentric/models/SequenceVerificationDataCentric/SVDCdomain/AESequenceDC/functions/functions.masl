@@ -21,13 +21,13 @@ knownJobDefinition : instance of JobDefinition;
 theUnhappyJob : instance of UnhappyJob;
 jobCheckResult : boolean;
 logMessage : string;
-eventContent : string;
+kvps : dictionary of string;
 
 begin
   // Report the event
   if (Logger::enabled(Logger::Debug, "pv.sv.acceptorderedevent")) then
-    eventContent := "svdc_event_received : EventId = " & id;
-    Logger::log(Logger::Debug, "pv.sv.acceptorderedevent", eventContent);
+    kvps["eventId"] := id;
+    Logger::log(Logger::Debug, "pv.sv.acceptorderedevent", svLog("svdc_event_received", "initial receipt", jobId, jobName, kvps));
   end if;
   //NEW Check the jobType refers to a known JobDefinition
   knownJobDefinition := find_only JobDefinition (jobName = jobName);
@@ -38,8 +38,8 @@ begin
   
     if (knownJobDefinition.isSuspended = true) or (knownJobDefinition.isDeprecated = true)then
       // Log info: The accepted event is for a new Job that has a non-active JobDefinition 
-      eventContent := "svdc_invalid_event : JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = The event cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
-      Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", eventContent);
+      logMessage := "svdc_invalid_event : JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = The event cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
+      Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", logMessage);
     else    
         
         
@@ -73,19 +73,19 @@ begin
           else
             // Log info: Report that the specified audit event type (ae_type) does not exist for this job definition.
             logMessage := "svdc_invalid_event : JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
-            Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", logMessage); 
+            Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", logMessage);
           end if;
         else
           // The jobId corresponds to that of a deleted job so this is an error condition
           logMessage := "svdc_invalid_event : JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Event has been sent to a previously deleted Job";
-          Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", eventContent);          
+          Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", logMessage);
         end if;
       end if;
     end if;  
   else
     // Log info: Report that the specified job definition as indicated by jobName does not exist.
     logMessage := "svdc_invalid_event : JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Job type";
-    Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", logMessage); 
+    Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", logMessage);
     
   end if;
 
@@ -688,6 +688,29 @@ begin
     Logger::log(Logger::Warning, "pv.sv.createjobdefinition", logMessage);            
   end if;
      
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'db79ebe9-6208-482a-b58e-6dd4661cdb14' DO NOT EDIT THIS LINE.
+private service AESequenceDC::svLog ( tag : in string,
+                                     message : in string,
+                                     jobId : in string,
+                                     jobName : in string,
+                                     key_value_pairs : in dictionary of string ) return string is
+j : JSON::JSONElement;
+k : string;
+s : dictionary of string;
+
+begin
+  s["tag"] := tag;
+  s["message"] := message;
+  s["jobId"] := jobId;
+  s["jobName"] := jobName;
+  for k in key_value_pairs'keys loop
+    s[k] := key_value_pairs[k];
+  end loop;
+  j := JSON::to_json( s );
+  return JSON::dump( j );
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

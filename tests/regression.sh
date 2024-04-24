@@ -55,7 +55,7 @@ echo "Checking results..."
 echo "--------------------------------------------------"
 for fn in config/job_definitions/*.json; do
 	job_name=$(jq -r '.JobDefinitionName' "${fn}")
-	grep "svdc_job_success : JobId = [a-f0-9-]* : JobName = ${job_name}" logs/protocol_verifier/pv.log &>/dev/null
+	grep "jobId\":\"[a-f0-9-]*\",\"jobName\":\"${job_name}\".*\"tag\":\"svdc_job_success\"" logs/protocol_verifier/pv.log &>/dev/null
 	if [[ $? == 0 ]]; then
 		printf "%-40s %s\n" "${job_name}" "[${GREEN}SUCCESS${NORMAL}]"
 	else
