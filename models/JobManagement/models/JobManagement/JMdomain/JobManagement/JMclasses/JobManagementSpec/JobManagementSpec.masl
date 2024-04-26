@@ -1,6 +1,7 @@
 //! ACTIVITY BEGIN. 'a047fd83-4215-488f-9f08-7f25eada71d2' DO NOT EDIT THIS LINE.
 public instance service JobManagement::JobManagementSpec.loadConfigFile () is
 logMessage : string;
+kvps : dictionary of string;
 fileName : Filesystem::filename;
 configJSONString : string;
 configJSONElement : JSON::JSONElement;
@@ -55,15 +56,16 @@ begin
                 end if;
             end if;
         else
-            logMessage := "JobManagement::JobManagementSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
-            Logger::log(Logger::Error, "pv.jm.jobmanagementspec", logMessage);
+            logMessage := "Config file invalid:\n" & JSON::dump(configValidationResult, true);
+            Logger::log(Logger::Error, "pv.jm.jobmanagementspec.loadconfigfile", logMessage);
             raise JSON::JSONException("Config file invalid");
         end if;
         // set the config file mod time
         this.configFileModificationTime := this.lastModificationTime();        
     else
-        logMessage := "JobManagement::ConfigUpdated : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "pv.jm.jobmanagementspec", logMessage);
+        kvps["configFile"] := this.configFilePath & this.configFile;
+        Logger::log(Logger::Error, "pv.jm.jobmanagementspec.loadconfigfile",
+            jmLog("jobmanagement_no_config_file", "failed to locate config file", kvps));
     end if;
     
     // if the job store does not exist then create it
@@ -78,7 +80,7 @@ end service;
 
 //! ACTIVITY BEGIN. '8b9190af-ba32-49e2-9e6b-4e21d11d6c50' DO NOT EDIT THIS LINE.
 public instance service JobManagement::JobManagementSpec.checkUpdatedConfig () return boolean is
-logMessage : string;
+kvps : dictionary of string;
 fileName : Filesystem::filename;
 fileStatus : Filesystem::file_status;
 configUpdates : boolean := false;
@@ -92,8 +94,9 @@ begin
     	    configUpdates := true;
     	end if;
     else
-        logMessage := "JobManagement::JobManagementSpec.checkUpdatedConfig : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "pv.jm.jobmanagementspec", logMessage);
+        kvps["configFile"] := this.configFilePath & this.configFile;
+        Logger::log(Logger::Error, "pv.jm.jobmanagementspec.checkupdatedconfig",
+            jmLog("jobmanagement_no_config_file", "failed to locate config file", kvps));
     end if;
     if configUpdates = true then
     	return true; 
@@ -108,7 +111,7 @@ public instance service JobManagement::JobManagementSpec.lastModificationTime ()
 fileName: Filesystem::filename;
 fileStatus: Filesystem::file_status;
 mostRecentModificationTime: timestamp;
-logMessage: string;
+kvps: dictionary of string;
 
 begin
     fileName := Filesystem::filename(this.configFilePath & this.configFile);
@@ -116,8 +119,9 @@ begin
         fileStatus := Filesystem::get_file_status(fileName);
         mostRecentModificationTime := fileStatus.modification_time;
     else
-        logMessage := "JobManagement::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "pv.jm.jobmanagementspec", logMessage);
+        kvps["configFile"] := this.configFilePath & this.configFile;
+        Logger::log(Logger::Fatal, "pv.jm.jobmanagementspec.lastmodificationtime",
+            jmLog("jobmanagement_no_config_file", "failed to locate config file", kvps));
         raise program_error;
     end if;
     return mostRecentModificationTime;

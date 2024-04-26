@@ -2,7 +2,7 @@
 private service JobManagement::init () is
 configFilePath : string;
 configFile : string;
-logMessage : string;
+kvps : dictionary of string;
 jobManagementSpec : instance of JobManagementSpec;
 jobManager : instance of JobManager;
 
@@ -26,16 +26,15 @@ begin
 		jobManagementSpec.loadConfigFile();
  		generate JobManagementSpec.checkConfigUpdate() to jobManagementSpec;
 	else
-		logMessage := "JobManagement::init : failed to locate config file. Specified file = " & configFilePath & configFile;
-		Logger::log(Logger::Fatal, "pv.jm.init", logMessage);
+		kvps["configFile"] := configFilePath & configFile;
+		Logger::log(Logger::Fatal, "pv.jm.init", jmLog("jobmanagement_no_config_file", "could not locate config file", kvps));
 		raise program_error;
 	end if;
 	
 exception
 	when others =>
 	
-		logMessage := "JobManagement::init : failed during start up";
-		Logger::log(Logger::Error, "pv.jm.init", logMessage);
+		Logger::log(Logger::Fatal, "pv.jm.init", jmLog("jobmanagement_failed_startup", "exception during startup", kvps));
 		raise program_error;
 	
 end service;

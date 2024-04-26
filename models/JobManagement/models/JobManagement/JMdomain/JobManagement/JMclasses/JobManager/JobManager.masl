@@ -5,8 +5,7 @@ emptyUnassignedJobIds : sequence of string;
 unassignedJob : instance of UnassignedJob;
 job : instance of Job;
 assignedJob : instance of AssignedJob;
-logMessage : string;
-eventContent : string;
+kvps : dictionary of string;
 
 begin
 	
@@ -33,8 +32,9 @@ begin
 			
 		else
 			// log an error as there is an unassigned job held by job manager but there is no instance of unassigned job
-			logMessage := "Found unassigned job id without an unassigned job, jobId = " & unassignedJobIds[unassignedJobIds'first];
-			Logger::log(Logger::Error, "pv.jm.jobmanager", logMessage);
+			kvps["jobId"] := unassignedJobIds[unassignedJobIds'first];
+			Logger::log(Logger::Error, "pv.jm.jobmanager",
+				jmLog("jobmanagement_jobid_without_job", "Found unassigned job id without an unassigned job", kvps));
 			// remove the unassigned job id
 			unassignedJobIds := unassignedJobIds[unassignedJobIds'first + 1 .. unassignedJobIds'last];
 			this.unassignedJobIds := unassignedJobIds;
@@ -100,20 +100,25 @@ end service;
 
 //! ACTIVITY BEGIN. '9772cd75-ad08-49ee-b402-2f4f149008bc' DO NOT EDIT THIS LINE.
 public instance service JobManagement::JobManager.reportJobAssignments () is
-eventContent : string;
+kvps : JSON::JSONObject;
+wkvps : JSON::JSONObject;
+workerList : JSON::JSONArray;
 
 begin
 
-	eventContent := "jobmanagement_employed_workers : Employed workers. Employee Count = " & ((this -> R1.JobWorker -> R2.EmployedWorker)'length)'image;
-	
+	// Report key Protocol Verifier Job Management statistics.
+	kvps["tag"] := JSON::to_json("jobmanagement_stats");
+	kvps["message"] := JSON::to_json("periodic statistics");
+	kvps["employedWorkers"] := JSON::to_json((this -> R1.JobWorker -> R2.EmployedWorker)'length);
+	kvps["assignedJobs"] := JSON::to_json(((this -> R1.JobWorker -> R2.EmployedWorker -> R6.AssignedJob)'length));
+	kvps["unassignedJobs"] := JSON::to_json(((find UnassignedJob())'length));
 	for employedWorker in this -> R1.JobWorker -> R2.EmployedWorker loop 
-		eventContent := eventContent & ",jobmanagement_worker_assigned_job_count : Worker id = " & string(employedWorker.workerId) & " Jobs assigned = " & ((employedWorker -> R6.AssignedJob)'length)'image;
+		wkvps["assignedJobCount"] := JSON::to_json(((employedWorker -> R6.AssignedJob)'length));
+		wkvps["workerId"] := JSON::to_json(string(employedWorker.workerId));
+		workerList := workerList & JSON::to_json(wkvps);
 	end loop;
-	
-	eventContent := eventContent & ",jobmanagement_total_assigned_jobs : Assigned Job Count = " & ((this -> R1.JobWorker -> R2.EmployedWorker -> R6.AssignedJob)'length)'image;
-
-	eventContent := eventContent & ",jobmanagement_total_unassigned_jobs : Unassigned Job Count = " & ((find UnassignedJob())'length)'image;
-	Logger::log(Logger::Information, "pv.jm.jobmanager", eventContent);
+	kvps["workerStats"] := JSON::to_json(workerList);
+	Logger::log(Logger::Information, "pv.jm.jobmanager.reportjobassignments", JSON::dump(kvps));
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

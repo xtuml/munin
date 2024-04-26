@@ -11,7 +11,9 @@ class Report:
         self.id = id
         self.job_success = 0
         self.job_fail = 0
+        self.employed_workers = 0
         self.total_assigned_jobs = 0
+        self.workers = []
 
     def poll_for_messages(self, s):
         ''' Poll the message broker and process messages. '''
@@ -19,11 +21,25 @@ class Report:
     def consume_statistics(self, s):
         ''' Consume a message and gather job manager statistics. '''
         try:
-            taji = s.index('Assigned Job Count = ')
-            if taji > 0:
-                s = s[taji+21:-1]
-                comma = s.index(',')
-                self.total_assigned_jobs = int(s[:comma])
+            if 'jobmanagement_stats' in s:
+                try:
+                    j = json.loads(s)
+                except json.decoder.JSONDecodeError:
+                    print(f'INVALID JSON')
+                    sys.exit(1)
+                else:
+                    payload = j['payload']
+                    self.employed_workers = payload['employedWorkers']
+                    self.total_assigned_jobs = payload['assignedJobs']
+                    worker_stats = payload['workerStats']
+                    i = 0
+                    for worker in worker_stats:
+                        if len(self.workers) < self.employed_workers:
+                            self.workers.append(worker['assignedJobCount'])
+                        else:
+                            self.workers[i] = worker['assignedJobCount']
+                            i += 1
+                    i = 0
         except ValueError:
             return
 
@@ -41,9 +57,15 @@ class Report:
         ''' Report the status of the Protocol Verifier. '''
         print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
         print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
+        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
+        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
         print( "job_fail:", str(report.job_fail), end='', flush=True )
         print( " job_success:", str(report.job_success), end='', flush=True )
+        print( " employed_workers:", str(report.employed_workers), ' ', end='', flush=True )
         print( " total_assigned_jobs:", str(report.total_assigned_jobs), ' ', end='', flush=True )
+        for worker in report.workers:
+            print( " worker_assigned_jobs:", str(worker), ' ', end='', flush=True )
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='infowarn.py', description='dashboard for protocol verifier')
