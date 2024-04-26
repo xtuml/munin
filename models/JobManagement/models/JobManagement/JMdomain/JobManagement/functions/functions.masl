@@ -69,6 +69,8 @@ begin
         if jsonObject'contains("jobId") then
 	        jobId := JSON::get_string(jsonObject["jobId"]);
 	        jobManager := find_one JobManager();
+	        // increment counter for total received audit events since start-up
+	        jobManager.receivedAuditEventCount := jobManager.receivedAuditEventCount + 1;
 	        job := find_one Job(jobId = jobId);
 	        if job = null then
 	        	job := create Job(jobId => jobId);
