@@ -21,29 +21,23 @@ knownJobDefinition : instance of JobDefinition;
 theUnhappyJob : instance of UnhappyJob;
 jobCheckResult : boolean;
 logMessage : string;
-eventContent : string;
+kvps : dictionary of string;
 
 begin
+
+  kvps["eventId"] := id; kvps["eventType"] := ae_type;
   // Report the event
   if (Logger::enabled(Logger::Debug, "pv.sv.acceptorderedevent")) then
-    eventContent := "svdc_event_received : EventId = " & id;
-    Logger::log(Logger::Debug, "pv.sv.acceptorderedevent", eventContent);
+    Logger::log(Logger::Debug, "pv.sv.acceptorderedevent", svLog("svdc_event_received", "initial receipt", jobId, jobName, kvps));
   end if;
   //NEW Check the jobType refers to a known JobDefinition
   knownJobDefinition := find_only JobDefinition (jobName = jobName);
   if knownJobDefinition /= null then
   
-  
-  
-  
-    if (knownJobDefinition.isSuspended = true) or (knownJobDefinition.isDeprecated = true)then
-      // Log info: The accepted event is for a new Job that has a non-active JobDefinition 
-      eventContent := "svdc_invalid_event : JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = The event cannot be accepted because it relates to a new Job whose JobDefinition is either Suspended or Deprecated";
-      Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", eventContent);
+    if (knownJobDefinition.isSuspended = true) or (knownJobDefinition.isDeprecated = true) then
+      Logger::log(Logger::Warning, "pv.sv.acceptorderedevent",
+        svLog("svdc_invalid_event", "The accepted event is for a new Job that has a non-active JobDefinition (suspended or deprecated)", jobId, jobName, kvps));
     else    
-        
-        
-        
          
       existingJobs := knownJobDefinition -> R8;
       possibleSeqAuditEventDefinitions := knownJobDefinition -> R7 -> R1.SequencedAuditEventDefinition;
@@ -72,20 +66,20 @@ begin
       
           else
             // Log info: Report that the specified audit event type (ae_type) does not exist for this job definition.
-            logMessage := "svdc_invalid_event : JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Event type";
-            Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", logMessage); 
+            Logger::log(Logger::Warning, "pv.sv.acceptorderedevent",
+              svLog("svdc_invalid_event", "accepted event is of an unknown event type", jobId, jobName, kvps));
           end if;
         else
           // The jobId corresponds to that of a deleted job so this is an error condition
-          logMessage := "svdc_invalid_event : JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Event has been sent to a previously deleted Job";
-          Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", eventContent);          
+          Logger::log(Logger::Warning, "pv.sv.acceptorderedevent",
+            svLog("svdc_invalid_event", "Event has been sent to a previously deleted Job", jobId, jobName, kvps));
         end if;
       end if;
     end if;  
   else
     // Log info: Report that the specified job definition as indicated by jobName does not exist.
-    logMessage := "svdc_invalid_event : JobId = " & jobId  & " with Job Name = " & jobName & " : EventId = " & id & " : EventType = " & ae_type & " : FailureReason = Accepted event is of an unknown Job type";
-    Logger::log(Logger::Warning, "pv.sv.acceptorderedevent", logMessage); 
+    Logger::log(Logger::Warning, "pv.sv.acceptorderedevent",
+      svLog("svdc_invalid_event", "Accepted event is of an unknown Job type", jobId, jobName, kvps));
     
   end if;
 
@@ -152,14 +146,19 @@ theConstraintDefn : instance of ConstraintDefinition;
 theUnseqEventDefn : instance of UnsequencedAuditEventDefinition;
 theUnseqEventDefnInJobDefn  : instance of UnsequencedAEDefnInJobDefn;
 newCriticalEventDefnInJobDefn : instance of CriticalEventDefnForJobDefn;
-logMessage : string;
+kvps : dictionary of string; 
+logMessage : string; 
 previousEventType : eventStructure;
-eventContent : string; 
 
 //
 begin
-  logMessage := "AESequenceDC::eventDefinition : New Event Definition, Job Definition = " & jobName & "Sequence Name = " & sequenceName & " event type = " & eventType & " Start = " & isSequenceStart'image & " End = " & isSequenceEnd'image & " Break = " & isBreak'image & " Happy = " & isHappy'image & " Critical = " & isCritical'image ;
-  Logger::log(Logger::Debug, "pv.sv.eventdefinition", logMessage);
+  if Logger::enabled(Logger::Debug, "pv.sv.eventdefinition") then
+    kvps["sequenceName"] := sequenceName; kvps["eventType"] := eventType;
+    kvps["isSequenceStart"] := isSequenceStart'image; kvps["isSequenceEnd"] := isSequenceEnd'image;
+    kvps["isBreak"] := isBreak'image; kvps["isHappy"] := isHappy'image; kvps["isCritical"] := isCritical'image;
+    Logger::log(Logger::Debug, "pv.sv.eventdefinition",
+      svLog("svdc_event_definition", "create new event defintion", "", jobName, kvps));
+  end if;
   theJobDefn := find_one JobDefinition (jobName = jobName);
   if theJobDefn = null then
     // Event Definition for new Job so create the Job Definition
@@ -688,6 +687,29 @@ begin
     Logger::log(Logger::Warning, "pv.sv.createjobdefinition", logMessage);            
   end if;
      
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'db79ebe9-6208-482a-b58e-6dd4661cdb14' DO NOT EDIT THIS LINE.
+private service AESequenceDC::svLog ( tag : in string,
+                                     message : in string,
+                                     jobId : in string,
+                                     jobName : in string,
+                                     key_value_pairs : in dictionary of string ) return string is
+jsonElement : JSON::JSONElement;
+key : string;
+logMessageKeyValuePairs : dictionary of string;
+
+begin
+  logMessageKeyValuePairs["tag"] := tag;
+  logMessageKeyValuePairs["message"] := message;
+  logMessageKeyValuePairs["jobId"] := jobId;
+  logMessageKeyValuePairs["jobName"] := jobName;
+  for key in key_value_pairs'keys loop
+    logMessageKeyValuePairs[key] := key_value_pairs[key];
+  end loop;
+  jsonElement := JSON::to_json( logMessageKeyValuePairs );
+  return JSON::dump( jsonElement );
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

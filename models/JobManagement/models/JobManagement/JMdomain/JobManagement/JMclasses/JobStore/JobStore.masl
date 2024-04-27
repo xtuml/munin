@@ -3,7 +3,7 @@ public instance service JobManagement::JobStore.addJobToStore ( jobId : in strin
 newStoredJobIdentifier : instance of StoredJobIdentifier;
 mostRecentJobId : instance of StoredJobIdentifier;
 oldestJobId : instance of StoredJobIdentifier;
-eventContent : string;
+kvps : dictionary of string;
 
 begin
 	newStoredJobIdentifier := find_one StoredJobIdentifier(jobId = jobId);
@@ -26,8 +26,9 @@ begin
 	    this.purgeStore();
 	    
 	else
-	    eventContent := "jobmanagement_duplicate_job_id : Duplicate job id reported to job store JobId = " & jobId;
-	    Logger::log(Logger::Warning, "pv.jm.jobstore", eventContent);
+	    kvps["jobId"] := jobId;
+	    Logger::log(Logger::Warning, "pv.jm.jobstore",
+	        jmLog("jobmanagement_duplicate_job_id", "Duplicate job id reported to job store", kvps ));
 	end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

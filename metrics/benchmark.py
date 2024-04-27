@@ -36,9 +36,10 @@ if __name__ == '__main__':
                     print(f'INVALID JSON')
                     sys.exit(1)
                 else:
-                    label = j['tag']
+                    payload = j['payload']
+                    label = payload['tag']
+                    evt_id = payload['eventId']
                     d = datetime.datetime.strptime(j['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
-                    evt_id = j['EventId']
                 if label in KEY_EVENTS:
 
                     # create or find event

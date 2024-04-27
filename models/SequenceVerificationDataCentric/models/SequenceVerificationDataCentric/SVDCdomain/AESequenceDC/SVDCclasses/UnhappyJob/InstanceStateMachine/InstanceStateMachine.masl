@@ -281,6 +281,9 @@ logMessage : string;
 theSystemSpec : instance of SystemSpecification;
 eventContent : string;
 jobDefinition : instance of JobDefinition;
+bmsg : dictionary of string;
+lmsg : dictionary of string;
+j : JSON::JSONElement;
 
 begin
   // Job is considered to have completed - Record and log this fact.
@@ -288,16 +291,19 @@ begin
   theJob.jobCompleted := true;
   jobDefinition := theJob -> R8.JobDefinition;
   // Log info: Audit Event Sequence Verification has determined that the Job is Complete
-  logMessage := "svdc_job_success : JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
-  Logger::log(Logger::Information, "pv.sv.unhappyjob.jobsuccessful", logMessage);
+  lmsg["tag"] := "svdc_job_success"; lmsg["jobId"] := this.jobID; lmsg["jobName"] := jobDefinition.jobName; j := JSON::to_json( lmsg );
+  Logger::log(Logger::Information, "pv.sv.unhappyjob.jobsuccessful", JSON::dump(j));
+  // Benchmark the processed events.
   if (Logger::enabled(Logger::Information, "pv.benchmark.unhappyjob.jobsuccessful")) then
+    bmsg["tag"] := "svdc_happy_event_processed";
     for evt in theJob-> R44.SequencedAuditEvent loop
-      logMessage := "\"tag\":\"svdc_unhappy_event_processed\",\"EventId\":\"" & evt.AuditEventId & "\"";
-      Logger::log(Logger::Information, "pv.benchmark.unhappyjob.jobsuccessful", logMessage);
+      bmsg["eventId"] := evt.AuditEventId; j := JSON::to_json( bmsg );
+      Logger::log(Logger::Information, "pv.benchmark.unhappyjob.jobsuccessful", JSON::dump(j));
     end loop;
+    bmsg["tag"] := "svdc_unhappy_event_processed";
     for evt in theJob-> R3.UnsequencedAuditEvent loop
-      logMessage := "\"tag\":\"svdc_unhappy_event_processed\",\"EventId\":\"" & evt.unsequencedAuditEventId & "\"";
-      Logger::log(Logger::Information, "pv.benchmark.unhappyjob.jobsuccessful", logMessage);
+      bmsg["eventId"] := evt.unsequencedAuditEventId; j := JSON::to_json( bmsg );
+      Logger::log(Logger::Information, "pv.benchmark.unhappyjob.jobsuccessful", JSON::dump(j));
     end loop;
   end if;
 

@@ -7,14 +7,15 @@ end state;
 
 //! ACTIVITY BEGIN. 'fafa08f1-e2d9-4091-aa70-9f3e4eb2da3c' 'ffef72a4-885a-4183-9a8c-8b168eb341de' DO NOT EDIT THIS LINE.
 state JobManagement::EmployedWorker.Registered () is
-eventContent : string;
+kvps : dictionary of string;
 
 begin
   
 	// report the worker as registered
 	Worker~>workerRegistered(this.workerId);
-	eventContent := "jobmanagement_worker_registered : Worker id = " & string(this.workerId);
-	Logger::log(Logger::Information, "pv.jm.employedworker", eventContent);
+	kvps["workerId"] := string(this.workerId);
+	Logger::log(Logger::Information, "pv.jm.employedworker.created",
+		jmLog("jobmanagement_worker_registered", "worker registered", kvps));
 	
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -33,7 +34,7 @@ end state;
 //! ACTIVITY BEGIN. 'fafa08f1-e2d9-4091-aa70-9f3e4eb2da3c' '30ee19e8-0252-4c72-adeb-fc162c3b2c7a' DO NOT EDIT THIS LINE.
 state JobManagement::EmployedWorker.Absent () is
 jmSpec : instance of JobManagementSpec;
-eventContent : string;
+kvps : dictionary of string;
 
 begin
 	// cancel the absence timer
@@ -43,8 +44,9 @@ begin
 	jmSpec := find_one JobManagementSpec();
 	if this.failedHeartbeatCount > jmSpec.workerHeartbeatFailureThreshold then
 		generate EmployedWorker.workerDeregistered() to this;
-		eventContent := "jobmanagement_worker_deregistered_failed_heartbeat : Worker id = " & string(this.workerId);
-		Logger::log(Logger::Information, "pv.jm.employedworker", eventContent);
+		kvps["workerId"] := string(this.workerId);
+		Logger::log(Logger::Information, "pv.jm.employedworker.absent",
+			jmLog("jobmanagement_worker_deregistered_failed_heartbeat ", "worker absent", kvps));
 	else
 		// schedule the absence timer
 		schedule this.absenceTimer generate EmployedWorker.workerPresenceUnknown() to this delay jmSpec.workerHeartbeatRate;

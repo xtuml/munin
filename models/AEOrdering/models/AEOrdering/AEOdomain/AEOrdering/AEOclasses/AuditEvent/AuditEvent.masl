@@ -15,6 +15,8 @@ failedAuditEvent : instance of FailedAuditEvent;
 previousJob : instance of Job;
 previousAuditEvent : instance of PreviousAuditEvent;
 eventContent : string;
+lmsg : dictionary of string;
+j : JSON::JSONElement;
 
 begin
 	
@@ -26,8 +28,8 @@ begin
 			                            auditEventData => auditEventData, reportedJobName => reportedJobName);
 		link auditEvent R9 job;
 		if (Logger::enabled(Logger::Information, "pv.benchmark.aeo.auditevent")) then
-			eventContent := "\"tag\":\"aeordering_event_processed\",\"EventId\":\"" & auditEventId &"\"";
-			Logger::log(Logger::Information, "pv.benchmark.aeo.auditevent", eventContent);
+			lmsg["tag"] := "aeordering_event_processed"; lmsg["eventId"] := auditEventId; j := JSON::to_json( lmsg );
+			Logger::log(Logger::Information, "pv.benchmark.aeo.auditevent", JSON::dump(j));
 		end if;
 		for prevEventId in prevAuditEventIds loop
 			previousAuditEvent := find_one (auditEvent -> R13.PreviousAuditEvent)(previousAuditEventId = prevEventId and auditEventId = auditEvent.auditEventId);

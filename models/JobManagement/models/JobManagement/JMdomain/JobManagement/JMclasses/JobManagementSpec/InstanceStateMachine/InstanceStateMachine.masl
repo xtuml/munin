@@ -7,7 +7,7 @@ end state;
 
 //! ACTIVITY BEGIN. 'bc228894-cfb7-474d-8c76-39c4a407dfe9' 'fa12ba83-ec76-4262-ba3a-82c2fe335363' DO NOT EDIT THIS LINE.
 state JobManagement::JobManagementSpec.ConfigChecked () is
-logMessage : string;
+kvps : dictionary of string;
 fileStatus : Filesystem::file_status;
 fileName : Filesystem::filename;
 configUpdates : boolean;
@@ -30,14 +30,14 @@ begin
     end loop;
     
     schedule this.configTimer generate JobManagementSpec.checkConfigUpdate() to this delay this.specUpdateRate;
-	
+
 exception
-	when others => 	
-	
-		logMessage := "JobManagement::JobManagementSpec.ConfigChecked : failed to load configuration file";
-		Logger::log(Logger::Fatal, "pv.jm.jobmanagementspec", logMessage);
+	when others =>
+
+		Logger::log(Logger::Fatal, "pv.jm.jobmanagementspec.configchecked",
+			jmLog("jobmanagement_failed_config_file", "failed to load configuration file", kvps));
 		raise program_error;
-		
+
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

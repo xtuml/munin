@@ -3,7 +3,7 @@ public service JobManagement::registerWorker ( workerId : in UUID::formatted_uui
 jobWorker : instance of JobWorker;
 employedWorker : instance of EmployedWorker;
 retiredWorker : instance of RetiredWorker;
-eventContent : string;
+kvps : dictionary of string;
 
 begin
 	
@@ -23,8 +23,9 @@ begin
 			employedWorker := jobWorker -> R2.EmployedWorker;
 			if employedWorker.working = true then
 				generate EmployedWorker.workerDeregistered() to employedWorker;
-				eventContent := "jobmanagement_worker_deregistered_register_request : Worker id = " & string(employedWorker.workerId);
-				Logger::log(Logger::Information, "pv.jm.registerworker", eventContent);
+				kvps["workerId"] := string(employedWorker.workerId);
+				Logger::log(Logger::Information, "pv.jm.registerworker",
+					jmLog("jobmanagement_worker_deregistered_register_request", "(re)register retired worker", kvps));
 			end if;
 		end if;
 	end if;
@@ -58,7 +59,7 @@ unassignedJob : instance of UnassignedJob;
 acceptedAuditEvent : instance of AuditEvent;
 assignedWorker : instance of EmployedWorker;
 jmSpec : instance of JobManagementSpec;
-eventContent : string;
+kvps : dictionary of string;
 
 begin
     // parse the event and extract the job id
@@ -68,6 +69,8 @@ begin
         if jsonObject'contains("jobId") then
 	        jobId := JSON::get_string(jsonObject["jobId"]);
 	        jobManager := find_one JobManager();
+	        // increment counter for total received audit events since start-up
+	        jobManager.receivedAuditEventCount := jobManager.receivedAuditEventCount + 1;
 	        job := find_one Job(jobId = jobId);
 	        if job = null then
 	        	job := create Job(jobId => jobId);
@@ -98,8 +101,9 @@ begin
 	        unassignedJobIds := jobManager.unassignedJobIds;
 	        jmSpec := find_one JobManagementSpec();
 	        if unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnassignedJobsExceeded = false then
-		        eventContent := "jobmanagement_exceeded_max_jobs : Maximum number of unassigned jobs exceeded. Job Count = " & (unassignedJobIds'length)'image;
-		        Logger::log(Logger::Information, "pv.jm.acceptevent", eventContent);
+		        kvps["jobCount"] := (unassignedJobIds'length)'image;
+		        Logger::log(Logger::Information, "pv.jm.acceptevent",
+		                jmLog("jobmanagement_exceeded_max_jobs", "Maximum number of unassigned jobs exceeded.", kvps));
 		        jmSpec.maxUnassignedJobsExceeded := true;
 		    else
 		        jmSpec.maxUnassignedJobsExceeded := false;
@@ -164,17 +168,37 @@ end service;
 //! ACTIVITY BEGIN. 'ff723fb4-c20f-4ab8-bc39-e807df00e8fc' DO NOT EDIT THIS LINE.
 public service JobManagement::deregisterWorker ( workerId : in UUID::formatted_uuid ) is
 employedWorker : instance of EmployedWorker;
-eventContent : string;
+kvps : dictionary of string;
 
 begin
-	
+
 	// check if this is a new worker
 	employedWorker := find_one EmployedWorker(workerId = workerId);
 	if employedWorker /= null then
 		generate EmployedWorker.workerDeregistered() to employedWorker;
-		eventContent := "jobmanagement_worker_deregistered_deregister_request : Worker id = " & string(employedWorker.workerId);
-		Logger::log(Logger::Information, "pv.jm.deregisterworker", eventContent);
+		kvps["workerId"] := string(employedWorker.workerId);
+		Logger::log(Logger::Information, "pv.jm.deregisterworker",
+			jmLog("jobmanagement_worker_deregistered_deregister_request", "deregistering a worker", kvps));
 	end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'd054a7ef-0dab-4814-be5c-99250450e2bb' DO NOT EDIT THIS LINE.
+private service JobManagement::jmLog ( tag : in string,
+                                      message : in string,
+                                      key_value_pairs : in dictionary of string ) return string is
+jsonElement : JSON::JSONElement;
+key : string;
+logMessageKeyValuePairs : dictionary of string;
+
+begin
+  logMessageKeyValuePairs["tag"] := tag;
+  logMessageKeyValuePairs["message"] := message;
+  for key in key_value_pairs'keys loop
+    logMessageKeyValuePairs[key] := key_value_pairs[key];
+  end loop;
+  jsonElement := JSON::to_json( logMessageKeyValuePairs );
+  return JSON::dump( jsonElement );
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

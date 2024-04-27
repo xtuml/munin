@@ -952,6 +952,9 @@ eventContent : string;
 jobDefinition : instance of JobDefinition;
 instrumentationEventId : string;
 instrumentationEventType : string;
+bmsg : dictionary of string;
+lmsg : dictionary of string;
+j : JSON::JSONElement;
 
 
 begin
@@ -966,12 +969,13 @@ begin
   theJob.jobCompleted := true;
   jobDefinition := theJob -> R8.JobDefinition;
   // Log info: Audit Event Sequence Verification has determined that the Job is Complete
-  logMessage := "svdc_job_success : JobId = " & this.jobID & " : JobName = " & jobDefinition.jobName;
-  Logger::log(Logger::Information, "pv.sv.happyjob.jobsuccessful", logMessage);
+  Logger::log(Logger::Information, "pv.sv.happyjob.jobsuccessful", svLog("svdc_job_success", "happy success", this.jobID, jobDefinition.jobName, lmsg));
+  // Benchmark the processed events.
   if (Logger::enabled(Logger::Information, "pv.benchmark.happyjob.jobsuccessful")) then
+    bmsg["tag"] := "svdc_event_processed";
     for evt in theJob->R10->R11.SequencedAuditEvent loop
-      logMessage := "\"tag\":\"svdc_event_processed\",\"EventId\":\"" & evt.AuditEventId & "\"";
-      Logger::log(Logger::Information, "pv.benchmark.happyjob.jobsuccessful", logMessage);
+      bmsg["eventId"] := evt.AuditEventId; j := JSON::to_json( bmsg );
+      Logger::log(Logger::Information, "pv.benchmark.happyjob.jobsuccessful", JSON::dump(j));
     end loop;
   end if;
   
