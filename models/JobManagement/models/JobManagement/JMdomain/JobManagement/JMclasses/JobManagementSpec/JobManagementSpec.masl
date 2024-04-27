@@ -1,6 +1,5 @@
 //! ACTIVITY BEGIN. 'a047fd83-4215-488f-9f08-7f25eada71d2' DO NOT EDIT THIS LINE.
 public instance service JobManagement::JobManagementSpec.loadConfigFile () is
-logMessage : string;
 kvps : dictionary of string;
 fileName : Filesystem::filename;
 configJSONString : string;
@@ -56,8 +55,7 @@ begin
                 end if;
             end if;
         else
-            logMessage := "Config file invalid:\n" & JSON::dump(configValidationResult, true);
-            Logger::log(Logger::Error, "pv.jm.jobmanagementspec.loadconfigfile", logMessage);
+            Logger::log(Logger::Error, "pv.jm.jobmanagementspec.loadconfigfile", JSON::dump(configValidationResult, true));
             raise JSON::JSONException("Config file invalid");
         end if;
         // set the config file mod time

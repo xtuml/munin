@@ -187,18 +187,18 @@ end service;
 private service JobManagement::jmLog ( tag : in string,
                                       message : in string,
                                       key_value_pairs : in dictionary of string ) return string is
-j : JSON::JSONElement;
-k : string;
-s : dictionary of string;
+jsonElement : JSON::JSONElement;
+key : string;
+logMessageKeyValuePairs : dictionary of string;
 
 begin
-  s["tag"] := tag;
-  s["message"] := message;
-  for k in key_value_pairs'keys loop
-    s[k] := key_value_pairs[k];
+  logMessageKeyValuePairs["tag"] := tag;
+  logMessageKeyValuePairs["message"] := message;
+  for key in key_value_pairs'keys loop
+    logMessageKeyValuePairs[key] := key_value_pairs[key];
   end loop;
-  j := JSON::to_json( s );
-  return JSON::dump( j );
+  jsonElement := JSON::to_json( logMessageKeyValuePairs );
+  return JSON::dump( jsonElement );
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
