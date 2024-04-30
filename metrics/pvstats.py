@@ -2,8 +2,10 @@ import argparse
 import datetime
 import kafka3
 import json
+import os
 import time
 import re
+from string import Template
 
 class Report:
 
@@ -59,25 +61,24 @@ class Report:
             self.job_success += 1
 
     def report(self):
-        ''' Report the status of the Protocol Verifier. '''
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( "job_fail:", str(report.job_fail), end='', flush=True )
-        print( " job_success:", str(report.job_success), end='', flush=True )
-        print( " rcvd_events:", str(report.receivedAuditEventCount), end='', flush=True )
-        print( " employed_workers:", str(report.employed_workers), ' ', end='', flush=True )
-        print( " assignedJobs:", str(report.assignedJobs), ' ', end='', flush=True )
+        ''' Report the status of the Protocol Verifier to a templated string. '''
+        tstr = """
+job_fail: \033[0;31;40m$job_fail\033[0;0m  job_success: \033[0;32;40m$job_success\033[0;0m
+rcvd_events: $rcvd_events  employed_workers: $employed_workers  assignedJobs: $assignedJobs
+"""
+        tobj = Template(tstr)
+        h = tobj.substitute(job_fail=report.job_fail,
+                           job_success=report.job_success,
+                           rcvd_events=report.receivedAuditEventCount,
+                           employed_workers=report.employed_workers,
+                           assignedJobs=report.assignedJobs)
+        print( h, end='', flush=True )
         for worker in report.worker_assignments:
-            print( " w_jobs:", str(worker), ' ', end='', flush=True )
+            print( "w_jobs:", str(worker), ' ', end='', flush=True )
+        print()
         for wcount in report.worker_event_counts:
-            print( " w_ecount:", str(wcount), ' ', end='', flush=True )
+            print( "w_ecount:", str(wcount), ' ', end='', flush=True )
+        print()
 
 
 if __name__ == '__main__':
@@ -93,6 +94,7 @@ if __name__ == '__main__':
     report = Report(1)
 
     t0 = time.monotonic()
+    os.system('cls' if os.name == 'nt' else 'clear')
     # process messages
     raw_msgs = consumer.poll(timeout_ms=20000)
     while len(raw_msgs) > 0:
@@ -105,9 +107,9 @@ if __name__ == '__main__':
                     report.consume_infowarn(s)
         # log periodically
         t1 = time.monotonic()
-        if ( t1 - t0 ) > 2:
+        if ( t1 - t0 ) > 1:
+            os.system('cls' if os.name == 'nt' else 'clear')
             report.report()
             t0 = t1
 
         raw_msgs = consumer.poll(timeout_ms=8000)
-

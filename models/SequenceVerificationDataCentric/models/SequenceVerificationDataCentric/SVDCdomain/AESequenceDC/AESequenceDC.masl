@@ -21,13 +21,15 @@ public service AESequenceDC::Persistence_Req_IF~>PersistInvariant ( extraJobInva
                                                                    sourceJobDefinitionType : in string,
                                                                    sourceAuditEventType : in string,
                                                                    sourceAuditEventOccurrenceId : in integer ) is
-logMessage : string;
+kvps : dictionary of string;
 
 begin
 
-  if (Logger::enabled(Logger::Information, "pv.sv.persistinvariant ")) then
-    logMessage := "AESequenceDC::Persistence_Req_IF~>PersistInvariant : PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been saved to the persistence service";
-    Logger::log(Logger::Information, "pv.sv.persistinvariant", logMessage);
+  if (Logger::enabled(Logger::Debug, "pv.sv.persistinvariant ")) then
+    // Do not log invariant values.  These could be sensitive security information.
+    kvps["extraJobInvariantName"] := extraJobInvariantName;
+    Logger::log(Logger::Debug, "pv.sv.persistinvariant",
+      svLog("svdc_persist_invariant", "PERSISTENCE: The Extra-Job Invariant has been saved to the persistence service", "", sourceJobDefinitionType, kvps));
   end if;
 
 end service;
@@ -36,13 +38,15 @@ end service;
 //! ACTIVITY BEGIN. 'bc7d23ca-6429-4a37-b8bb-dfeda616a204' DO NOT EDIT THIS LINE.
 public service AESequenceDC::Persistence_Req_IF~>RestoreNamedInvariant ( extraJobInvariantName : in string,
                                                                         invariantValue : in string ) is
-logMessage : string;
+kvps : dictionary of string;
 
 begin
 
-  if (Logger::enabled(Logger::Information, "pv.sv.restorenamedinvariant ")) then
-    logMessage := "AESequenceDC::Persistence_Req_IF~>RestoreNamedInvariant : PERSISTENCE: The Extra-Job Invariant " & extraJobInvariantName & " with value = " & invariantValue & " has been requested from the persistence service";
-    Logger::log(Logger::Information, "pv.sv.restorenamedinvariant", logMessage);
+  if (Logger::enabled(Logger::Debug, "pv.sv.restorenamedinvariant ")) then
+    // Do not log invariant values.  These could be sensitive security information.
+    kvps["extraJobInvariantName"] := extraJobInvariantName;
+    Logger::log(Logger::Debug, "pv.sv.restorenamedinvariant",
+      svLog("svdc_restore_invariant", "PERSISTENCE: The Extra-Job Invariant has been requested from the persistence service", "", "", kvps));
   end if;
   
 end service;
