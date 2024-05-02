@@ -13,7 +13,7 @@ theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefiniti
 theCurrentAEOccDefns : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
 theAuditEventDefinitions : set of instance of SequencedAuditEventDefinition;
-logMessage: string;
+kvps: dictionary of string;
 eventContent : string;
 
 begin
@@ -42,8 +42,8 @@ begin
         if theSequenceDefns'length = 1 then
           theSequenceDefn := find_one theSequenceDefns ();
         else
-          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition (type 4)" & " : JobName = " & theJobDefn.jobName;
-          Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn", logMessage);
+          Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn",
+            svLog("svdc_job_definition_failed", "Invalid Job Definition for this intra-job invariant definition (type 4)", "", theJobDefn.jobName, kvps));
         end if;  
         
         if theSequenceDefn /= null then
@@ -56,19 +56,19 @@ begin
               link theInvariant R19 theEventOccInSeqDefn;
             end if;  
           else
-            logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition (type 3)" & " : JobName = " & theJobDefn.jobName;
-            Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn", logMessage);
+            Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn",
+              svLog("svdc_job_definition_failed", "Invalid Job Definition for this intra-job invariant definition (type 3)", "", theJobDefn.jobName, kvps));
           end if;  
         else
-          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition (type 2)" & " : JobName = " & theJobDefn.jobName;
-          Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn", logMessage);
+          Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn",
+            svLog("svdc_job_definition_failed", "Invalid Job Definition for this intra-job invariant definition (type 2)", "", theJobDefn.jobName, kvps));
         end if;  
       end if;
     end loop;
   else
     // Protocol Verifier error due to failed configuration
-    logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition for this intra-job invariant definition (type 1)" & " : JobName = " & theJobDefn.jobName;
-    Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn", logMessage);
+    Logger::log(Logger::Warning, "pv.sv.intrajobinvariantdefn.createintrajobinvariantdefn",
+      svLog("svdc_job_definition_failed", "Invalid Job Definition for this intra-job invariant definition (type 1)", "", theJobDefn.jobName, kvps));
   end if;
   
 end service;

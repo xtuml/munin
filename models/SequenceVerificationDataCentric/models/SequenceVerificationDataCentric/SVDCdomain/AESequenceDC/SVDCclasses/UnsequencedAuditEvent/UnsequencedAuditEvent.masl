@@ -49,10 +49,10 @@ begin
     
   else
       // Log error: The audit event id received has been seen before
-      // TODO:  svdc_job_failed should only be in the JobFailed state of happy and unhappy job.
+      // A previously used event has been received as the first event for a new job, so the job has not been created
       kvps["eventId"] := eventId; kvps["eventType"] := aeType;
       Logger::log(Logger::Warning, "pv.sv.unsequencedauditevent.addeventfornewunhappyjob",
-        svLog("svdc_event_seen_before", "FailureReason = The audit event has been seen before", jobId, jobName, kvps));
+        svLog("svdc_job_failed", "a previously used event has been received as the first event for a new job, so the job has not been created", jobId, jobName, kvps));
 
   end if;  
 

@@ -9,11 +9,12 @@ end state;
 
 //! ACTIVITY BEGIN. '3375866b-104a-4aff-81a1-0700473341ec' '19fc27f3-c846-4314-b2a6-1672390094f4' DO NOT EDIT THIS LINE.
 state AESequenceDC::PersistedInvariant.InForce () is
-logMessage : string;
+kvps : dictionary of string;
 begin
   // Report the current state of PersistedInvariant
-  logMessage := "AESequenceDC::PersistedInvariant.InForce : PersistedInvariant: " & this.invariantId'image & " is InForce";
-  Logger::log(Logger::Information, "pv.sv.persistedinvariant.pending", logMessage); 
+  kvps["invariantName"] := this.invariantName;
+  Logger::log(Logger::Information, "pv.sv.persistedinvariant.pending",
+    svLog("svdc_invariant_inforce", "PersistedInvariant is InForce", "", "", kvps));
   
   this.inForce := true;
   schedule this.invariantTimer generate PersistedInvariant.invariantExpires() to this at this.validUntil;
@@ -24,13 +25,14 @@ end state;
 //! ACTIVITY BEGIN. '3375866b-104a-4aff-81a1-0700473341ec' 'f9a05d3e-85e6-4c59-8511-70aec2d23d2f' DO NOT EDIT THIS LINE.
 state AESequenceDC::PersistedInvariant.Deprecated () is
 theSystemSpec : instance of SystemSpecification;
-logMessage : string;
+kvps : dictionary of string;
 
 begin
   // Report the current state of PersistedInvariant
-  logMessage := "AESequenceDC::PersistedInvariant.Deprecated : PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") has been Deprecated";
-  Logger::log(Logger::Information, "pv.sv.persistedinvariant.deprecated", logMessage); 
-  
+  kvps["invariantName"] := this.invariantName;
+  Logger::log(Logger::Information, "pv.sv.persistedinvariant.deprecated",
+    svLog("svdc_invariant_deprecated", "PersistedInvariant has been Deprecated", "", "", kvps));
+
   theSystemSpec := find_only SystemSpecification();
   this.inForce := false;
   schedule this.invariantTimer generate PersistedInvariant.timeToDeleteInvariant() to this delay theSystemSpec.sourceExtraJobInvariantDeletionPeriod;
@@ -40,13 +42,14 @@ end state;
 
 //! ACTIVITY BEGIN. '3375866b-104a-4aff-81a1-0700473341ec' 'f2044761-d5ae-440b-b5f4-12ebac12d9ce' DO NOT EDIT THIS LINE.
 state AESequenceDC::PersistedInvariant.Deleted () is
-logMessage : string;
+kvps : dictionary of string;
 
 begin
   // Report the current state of PersistedInvariant
-  logMessage := "AESequenceDC::PersistedInvariant.Deleted : PersistedInvariant: " & this.invariantId'image & " (Name: " & this.invariantName & ", Value: " & this.invariantValue & ") is about to be deleted";
-  Logger::log(Logger::Information, "pv.sv.persistedinvariant.deleted", logMessage); 
-  
+  kvps["invariantName"] := this.invariantName;
+  Logger::log(Logger::Information, "pv.sv.persistedinvariant.deleted",
+    svLog("svdc_invariant_deleted", "PersistedInvariant is being deleted", "", "", kvps));
+
   // Unlink the specification class
   if (this -> R24) /= null then
     unlink this R24 (this -> R24);

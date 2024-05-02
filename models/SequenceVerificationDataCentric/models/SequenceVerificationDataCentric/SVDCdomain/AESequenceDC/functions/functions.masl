@@ -16,7 +16,6 @@ eventsSequenceDefs : set of instance of AESequenceDefinition;
 jobsSequenceDefs : set of instance of AESequenceDefinition;
 aeSequenceDefs : set of instance of AESequenceDefinition;
 theSequenceDef : instance of AESequenceDefinition;
-//theJobDefinition : instance of JobDefinition;
 knownJobDefinition : instance of JobDefinition;
 theUnhappyJob : instance of UnhappyJob;
 jobCheckResult : boolean;
@@ -151,18 +150,20 @@ previousEventType : eventStructure;
 
 //
 begin
+  theJobDefn := find_one JobDefinition (jobName = jobName);
+  if theJobDefn = null then
+    // Event Definition for new Job so create the Job Definition
+    theJobDefn := create unique JobDefinition (jobName => jobName, isDeprecated => false, isSuspended => false, Current_State => Active);
+    // Log as INFO the creation of a new job definition
+    Logger::log(Logger::Information, "pv.sv.eventdefinition",
+      svLog("svdc_job_definition", "new job definition added", "", jobName, kvps));
+  end if; 
+
   kvps["sequenceName"] := sequenceName; kvps["eventType"] := eventType;
   kvps["isSequenceStart"] := isSequenceStart'image; kvps["isSequenceEnd"] := isSequenceEnd'image;
   kvps["isBreak"] := isBreak'image; kvps["isHappy"] := isHappy'image; kvps["isCritical"] := isCritical'image;
   Logger::log(Logger::Debug, "pv.sv.eventdefinition",
     svLog("svdc_event_definition", "create new event defintion", "", jobName, kvps));
-  theJobDefn := find_one JobDefinition (jobName = jobName);
-  if theJobDefn = null then
-    // Event Definition for new Job so create the Job Definition
-    theJobDefn := create unique JobDefinition (jobName => jobName, isDeprecated => false, isSuspended => false, Current_State => Active);
-    Logger::log(Logger::Debug, "pv.sv.eventdefinition",
-      svLog("svdc_event_definition", "new job definition added", "", jobName, kvps));
-  end if; 
 
   if isHappy then
     // We have a definition for a Sequenced (or Happy) Event 
