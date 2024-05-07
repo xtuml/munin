@@ -53,7 +53,7 @@ begin
           aeoLog("aeordering_no_config_file", "failed to locate config", "", "", "", "", kvps));
     end if;
     if configUpdates = true then
-        return true; 
+        return true;
     else
         return false;
     end if;
@@ -365,7 +365,7 @@ begin
 				  aeoLog("aeordering_reception_event_invalid", "event schema validation failed", "", "", eventId, "", kvps));
 				kvps["validationResult"] := JSON::dump(validationResult, true);
 				Logger::log(Logger::Debug, "pv.aeo.systemspce.schemavalidated",
-				  aeoLog("aeordering_invalid_event", "dropping invalid event ", "", "", eventId, "", kvps));
+				  aeoLog("aeordering_invalid_event", "dropping invalid event", "", "", eventId, "", kvps));
 			end if;
 		end if;
 	end if;

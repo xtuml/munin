@@ -58,7 +58,7 @@ begin
 					generate BlockedAuditEvent.eventBlocked() to blockedAuditEvent;
 					if (Logger::enabled(Logger::Debug, "pv.aeo.auditevent")) then
 						Logger::log(Logger::Debug, "pv.aeo.auditevent",
-						  aeoLog("aeordering_events_blocked", "events blocked", job.jobId, job.reportedJobName, auditEventId, auditEventType, kvps)); 
+						  aeoLog("aeordering_events_blocked", "events blocked", job.jobId, job.reportedJobName, auditEventId, auditEventType, kvps));
 					end if;
 				end;
 			when EventStateEnum.FAILED =>
@@ -66,7 +66,7 @@ begin
 					failedAuditEvent := create FailedAuditEvent(auditEventId => auditEventId, failureTime => timestamp'now, failureReason => failureReason);
 					link failedAuditEvent R4 auditEvent;
 					Logger::log(Logger::Warning, "pv.aeo.auditevent",
-					  aeoLog("aeordering_events_failed", failureReason, job.jobId, job.reportedJobName, auditEventId, auditEventType, kvps)); 
+					  aeoLog("aeordering_events_failed", failureReason, job.jobId, job.reportedJobName, auditEventId, auditEventType, kvps));
 				end;
 		end case;
 	else
@@ -79,7 +79,7 @@ begin
 			failureReason := "Audit Event has previously been reported for a different job. PreviousJobId = " & previousJob.jobId;
 		end if;
 		Logger::log(Logger::Warning, "pv.aeo.auditevent",
-		  aeoLog("aeordering_events_failed", failureReason, job.jobId, job.reportedJobName, auditEventId, auditEventType, kvps)); 
+		  aeoLog("aeordering_events_failed", failureReason, job.jobId, job.reportedJobName, auditEventId, auditEventType, kvps));
 		auditEvent := null;
 	
 	end if;
@@ -143,7 +143,7 @@ begin
 		
 	else
 		Logger::log(Logger::Warning, "pv.aeo.auditevent",
-		  aeoLog("aeordering_set_event_state", failureReason, job.jobId, job.reportedJobName, this.auditEventId, this.eventType, kvps)); 
+		  aeoLog("aeordering_set_event_state", failureReason, job.jobId, job.reportedJobName, "", "", kvps));
 		this.eventState := EventStateEnum.FAILED;
 	end if;
 

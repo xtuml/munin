@@ -173,7 +173,7 @@ begin
 			Req_IF_JobManagement~>deregisterWorker(workerId);
 			kvps["workerId"] := string(workerId);
 			Logger::log(Logger::Error, "pv.aeo.acceptjsonevent",
-			  aeoLog("aeordering_accept_json_event", "received event for unregistered worker", "", "", "", "", kvps));
+			  aeoLog("aeordering_rcvd_unregistered", "received event for unregistered worker", "", "", "", "", kvps));
 		end if;
 	end if;
 	
@@ -195,13 +195,16 @@ end service;
 //! ACTIVITY BEGIN. '809725ba-6a72-4611-88a3-955ffdc7bec3' DO NOT EDIT THIS LINE.
 public service AEOrdering::workerUnregistered ( workerId : in UUID::formatted_uuid ) is
 worker : instance of Worker;
+kvps : dictionary of string;
 
 begin
     worker := find_one Worker(workerId = workerId);
     if worker /= null then
-		Logger::log(Logger::Information, "pv.aeo.workerunregistered", "aeordering_worker_unregistered_received : " & "Worker Id = " & string(workerId));
-		generate Worker.deregistered() to worker;
-	end if;
+        kvps["workerId"] := string(workerId);
+        Logger::log(Logger::Information, "pv.aeo.workerunregistered",
+          aeoLog("aeordering_worker_unregistered_received", "received event for unregistered worker", "", "", "", "", kvps));
+        generate Worker.deregistered() to worker;
+    end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

@@ -4,23 +4,24 @@ public service VerificationGateway::Verification~>verifyInstrumentationEvent ( j
                                                                               eventID : in string,
                                                                               eventType : in string,
                                                                               previousEventID : in string ) is
-reportedEvent : string;
-theJobDetails : string;
-theNodeDetails : string;
-theEventDetails : string;
-theAuditEventData : string;
+keyValuePairs : JSON::JSONObject;
+previousEventIds : JSON::JSONArray;
 
 begin
   if (Logger::enabled(Logger::Information, "pv.vg.audit")) then
 
-    // Construct the reportedEvent string...
-    theJobDetails := "jobName = " & jobName & " : jobId = " & jobID;
-    theEventDetails := " : eventType = " & eventType & " : eventId = " & eventID;
-    theAuditEventData := " : auditEventData = " & "NotUsed";
-    reportedEvent := theJobDetails & theEventDetails & " : previousEventIds = " & previousEventID & theAuditEventData;
+    keyValuePairs["timestamp"] := JSON::to_json(timestamp'now);
+    keyValuePairs["jobId"] := JSON::to_json(jobID);
+    keyValuePairs["jobName"] := JSON::to_json(jobName);
+    keyValuePairs["eventType"] := JSON::to_json(eventType);
+    keyValuePairs["eventId"] := JSON::to_json(eventID);
+    if previousEventID /= "" then
+      previousEventIds := previousEventIds & JSON::to_json(previousEventID);
+      keyValuePairs["previousEventIds"] := JSON::to_json(previousEventIds);
+    end if;
 
     // Report the instrumented event for inclusion in the behavioural verification of the Protocol Verifier.
-    Logger::log(Logger::Information, "pv.vg.audit", reportedEvent);
+    Logger::log(Logger::Information, "pv.vg.audit", JSON::dump(keyValuePairs));
 
   end if;
    

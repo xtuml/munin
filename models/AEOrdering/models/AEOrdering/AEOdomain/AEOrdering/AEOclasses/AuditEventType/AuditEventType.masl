@@ -6,6 +6,7 @@ validEvent : boolean := true;
 job : instance of Job;
 theAuditEventData : AuditEventDataType;
 dataValue : integer;
+kvps : dictionary of string;
 
 begin
 
@@ -14,18 +15,21 @@ begin
 	// failed to identify the event
 	if eventType = null then
 		validEvent := false;
-		failureReason := "JobId = " & job.jobId & " : EventType = " & auditEvent.reportedEventType & " : FailureReason = Event type is not allowed for job name, Job Name = " & auditEvent.reportedJobName;
-		Logger::log(Logger::Warning, "pv.aeo.auditeventtype", "validEvent - " & failureReason);
+		failureReason := "event type is not allowed for job name";
+		Logger::log(Logger::Warning, "pv.aeo.auditeventtype.validevent",
+		  aeoLog("aeordering_invalid_event_type", failureReason, job.jobId, auditEvent.reportedJobName, auditEvent.auditEventId, auditEvent.reportedEventType, kvps));
 	else
 		// check if the reported job name matches the reported job name held for the job
 		// this may be different as the job is created when the first event on the job id is received
-		// subsequent events against this job id shold have the same job name if not it a failure
+		// subsequent events against this job id should have the same job name if not it a failure
 		if auditEvent.reportedJobName /= job.reportedJobName then
-			failureReason := "JobId = " & job.jobId & " :  JobType = " & (eventType -> R12.JobType).jobTypeName &
-					                 " : EventType = " & auditEvent.reportedEventType & " : FailureReason = Job names are different, Event Job Name = " & 
-					                 auditEvent.reportedJobName & ", Job Name = " & job.reportedJobName;
 			validEvent := false;		
-			Logger::log(Logger::Warning, "pv.aeo.auditeventtype", "validEvent - " & failureReason);
+			failureReason := "job names are different";
+			kvps["jobJobName"] := job.reportedJobName;
+			kvps["eventJobName"] := auditEvent.reportedJobName;
+			kvps["jobTypeName"] := (eventType -> R12.JobType).jobTypeName;
+			Logger::log(Logger::Warning, "pv.aeo.auditeventtype.validevent",
+			  aeoLog("aeordering_reported_job_name", failureReason, job.jobId, auditEvent.reportedJobName, auditEvent.auditEventId, auditEvent.reportedEventType, kvps));
 		end if;
 		
 		// check if the event has dynamic controls that the value is valid. Only integer values are allowed and they have to be greater than 0
@@ -34,10 +38,10 @@ begin
 			if theAuditEventData.dataItems'contains(dynamicControl.dynamicControlName) = true then
 				dataValue := integer'parse(theAuditEventData.dataItems[dynamicControl.dynamicControlName]);
 				if dataValue < 1 then
-					failureReason := "JobId = " & job.jobId & " :  JobType = " & (eventType -> R12.JobType).jobTypeName &
-					                 " : EventType = " & auditEvent.reportedEventType & " : FailureReason = Event type has invalid dynamic control";
 					validEvent := false;
-					Logger::log(Logger::Warning, "pv.aeo.auditeventtype", "validEvent - " & failureReason);
+					failureReason := "event type has invalid dynamic control";
+					Logger::log(Logger::Warning, "pv.aeo.auditeventtype.validevent",
+					  aeoLog("aeordering_invalid_dynamic_control", failureReason, job.jobId, auditEvent.reportedJobName, auditEvent.auditEventId, auditEvent.reportedEventType, kvps));
 				end if;
 			end if;
 		end loop;
@@ -48,9 +52,9 @@ begin
 	return validEvent;
 exception
 	when others =>
-		failureReason := "JobId = " & job.jobId & " :  JobType = " & (eventType -> R12.JobType).jobTypeName & 
-		                 " : EventType = " & auditEvent.reportedEventType & " : FailureReason = Event type has invalid dynamic control";
-		Logger::log(Logger::Warning, "pv.aeo.auditeventtype", "validEvent - " & failureReason);
+		failureReason := "exception: event type has invalid dynamic control";
+		Logger::log(Logger::Warning, "pv.aeo.auditeventtype.validevent",
+		  aeoLog("aeordering_invalid_dynamic_control", failureReason, job.jobId, auditEvent.reportedJobName, auditEvent.auditEventId, auditEvent.reportedEventType, kvps));
 		return false;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
