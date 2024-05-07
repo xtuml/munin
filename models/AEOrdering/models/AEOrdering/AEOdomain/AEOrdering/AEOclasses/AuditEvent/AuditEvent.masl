@@ -7,14 +7,13 @@ public service AEOrdering::AuditEvent.createAuditEvent ( job : in instance of Jo
                                                         prevAuditEventIds : in sequence of string,
                                                         auditEventData : in AuditEventDataType,
                                                         failureReason : out string ) return instance of AuditEvent is
-logMessage : string;
 auditEvent : instance of AuditEvent;
 reportedAuditEvent : instance of ReportedAuditEvent;
 blockedAuditEvent : instance of BlockedAuditEvent;
 failedAuditEvent : instance of FailedAuditEvent;
 previousJob : instance of Job;
 previousAuditEvent : instance of PreviousAuditEvent;
-eventContent : string;
+kvps : dictionary of string;
 lmsg : dictionary of string;
 j : JSON::JSONElement;
 
@@ -58,16 +57,16 @@ begin
 					job.totalOutOfSequence := job.totalOutOfSequence + 1;
 					generate BlockedAuditEvent.eventBlocked() to blockedAuditEvent;
 					if (Logger::enabled(Logger::Debug, "pv.aeo.auditevent")) then
-						eventContent := "aeordering_events_blocked : JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType;
-						Logger::log(Logger::Debug, "pv.aeo.auditevent", eventContent);
+						Logger::log(Logger::Debug, "pv.aeo.auditevent",
+						  aeoLog("aeordering_events_blocked", "events blocked", job.jobId, job.reportedJobName, auditEventId, auditEventType, kvps)); 
 					end if;
 				end;
 			when EventStateEnum.FAILED =>
 				begin
 					failedAuditEvent := create FailedAuditEvent(auditEventId => auditEventId, failureTime => timestamp'now, failureReason => failureReason);
 					link failedAuditEvent R4 auditEvent;
-					eventContent := "aeordering_events_failed : JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType & " : FailureReason = " & failureReason;
-					Logger::log(Logger::Warning, "pv.aeo.auditevent", eventContent);
+					Logger::log(Logger::Warning, "pv.aeo.auditevent",
+					  aeoLog("aeordering_events_failed", failureReason, job.jobId, job.reportedJobName, auditEventId, auditEventType, kvps)); 
 				end;
 		end case;
 	else
@@ -79,8 +78,8 @@ begin
 		else
 			failureReason := "Audit Event has previously been reported for a different job. PreviousJobId = " & previousJob.jobId;
 		end if;
-		eventContent := "aeordering_events_failed : JobId = " & job.jobId & " : EventId = " & auditEventId & " : EventType = " & auditEventType & " : FailureReason = " & failureReason;
-		Logger::log(Logger::Warning, "pv.aeo.auditevent", eventContent);
+		Logger::log(Logger::Warning, "pv.aeo.auditevent",
+		  aeoLog("aeordering_events_failed", failureReason, job.jobId, job.reportedJobName, auditEventId, auditEventType, kvps)); 
 		auditEvent := null;
 	
 	end if;
@@ -93,13 +92,13 @@ end service;
 //! ACTIVITY BEGIN. 'ca3f8c05-5cac-45fe-ae6e-8b7ef6387d97' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::AuditEvent.setEventState ( job : in instance of Job,
                                                               failureReason : out string ) is
-logMessage : string;
 eventTime : timestamp;
 eventType : instance of AuditEventType;
 lastReportedAuditEvent : instance of AuditEvent;
 previousReportedEvents : sequence of instance of ReportedAuditEvent;
 previousEventsReported : boolean := false;
 eventValid : boolean;
+kvps : dictionary of string;
 
 begin
 	
@@ -143,7 +142,8 @@ begin
 		end if;
 		
 	else
-		Logger::log(Logger::Warning, "pv.aeo.auditevent", "setEventState - " & failureReason);
+		Logger::log(Logger::Warning, "pv.aeo.auditevent",
+		  aeoLog("aeordering_set_event_state", failureReason, job.jobId, job.reportedJobName, this.auditEventId, this.eventType, kvps)); 
 		this.eventState := EventStateEnum.FAILED;
 	end if;
 

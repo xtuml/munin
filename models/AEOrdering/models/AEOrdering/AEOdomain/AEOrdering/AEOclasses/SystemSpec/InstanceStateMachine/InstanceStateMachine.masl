@@ -7,7 +7,7 @@ end state;
 
 //! ACTIVITY BEGIN. 'ff1e8b5d-11f3-496a-825a-79a87399f6d3' '6429e330-5929-44e0-ac73-7a2be9959a84' DO NOT EDIT THIS LINE.
 state AEOrdering::SystemSpec.ConfigChecked () is
-logMessage : string;
+kvps : dictionary of string;
 fileStatus : Filesystem::file_status;
 fileName : Filesystem::filename;
 configUpdates : boolean;
@@ -27,8 +27,8 @@ begin
 exception
 	when others => 	
 	
-		logMessage := "AEOrdering::SystemSpec.ConfigChecked : failed to load configuration file";
-		Logger::log(Logger::Fatal, "pv.aeo.systemspec.configchecked", logMessage);
+		Logger::log(Logger::Fatal, "pv.aeo.systemspec.configchecked",
+		  aeoLog("aeordering_config_check", "failed to load configuration file", "", "", "", "", kvps));
 		raise program_error;
 		
 end state;

@@ -13,7 +13,7 @@ kvps : dictionary of string;
 begin
   // Report the current state of PersistedInvariant
   kvps["invariantName"] := this.invariantName;
-  Logger::log(Logger::Information, "pv.sv.persistedinvariant.pending",
+  Logger::log(Logger::Debug, "pv.sv.persistedinvariant.pending",
     svLog("svdc_invariant_inforce", "PersistedInvariant is InForce", "", "", kvps));
   
   this.inForce := true;
@@ -30,7 +30,7 @@ kvps : dictionary of string;
 begin
   // Report the current state of PersistedInvariant
   kvps["invariantName"] := this.invariantName;
-  Logger::log(Logger::Information, "pv.sv.persistedinvariant.deprecated",
+  Logger::log(Logger::Debug, "pv.sv.persistedinvariant.deprecated",
     svLog("svdc_invariant_deprecated", "PersistedInvariant has been Deprecated", "", "", kvps));
 
   theSystemSpec := find_only SystemSpecification();
@@ -47,7 +47,7 @@ kvps : dictionary of string;
 begin
   // Report the current state of PersistedInvariant
   kvps["invariantName"] := this.invariantName;
-  Logger::log(Logger::Information, "pv.sv.persistedinvariant.deleted",
+  Logger::log(Logger::Debug, "pv.sv.persistedinvariant.deleted",
     svLog("svdc_invariant_deleted", "PersistedInvariant is being deleted", "", "", kvps));
 
   // Unlink the specification class

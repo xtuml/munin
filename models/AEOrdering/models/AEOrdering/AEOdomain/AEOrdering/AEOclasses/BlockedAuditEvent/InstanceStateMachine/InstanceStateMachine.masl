@@ -7,7 +7,6 @@ end state;
 
 //! ACTIVITY BEGIN. '8ccfb9c6-9ebb-4977-af73-d83e86e76531' 'f361886b-cab0-4738-a427-8ced29d273fb' DO NOT EDIT THIS LINE.
 state AEOrdering::BlockedAuditEvent.Waiting () is
-logMessage : string;
 eventType : instance of AuditEventType;
 
 begin
@@ -20,7 +19,6 @@ end state;
 
 //! ACTIVITY BEGIN. '8ccfb9c6-9ebb-4977-af73-d83e86e76531' 'd0891e75-9b0c-40bf-9711-e7efca6c0004' DO NOT EDIT THIS LINE.
 state AEOrdering::BlockedAuditEvent.Failed () is
-logMessage : string;
 failedAuditEvent : instance of FailedAuditEvent;
 auditEvent : instance of AuditEvent;
 failureReason : string;

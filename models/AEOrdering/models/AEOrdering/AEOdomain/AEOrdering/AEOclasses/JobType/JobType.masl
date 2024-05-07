@@ -1,6 +1,6 @@
 //! ACTIVITY BEGIN. 'b38f7f4c-1bb3-42e4-a42f-80debcdc30cc' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::JobType.loadEventTypes ( jobTypeJSONObject : in JSON::JSONObject ) is
-logMessage : string;
+kvps : dictionary of string;
 jobDefinitionName : string;
 eventTypeJSONElement : JSON::JSONElement;
 eventDefJSONObject : JSON::JSONObject;
@@ -146,8 +146,10 @@ begin
 				                    if sourceDataItemType /= null then
 				                        link sourceDataItemType R18.constrains dataItemType;
 				                    else
-				                        logMessage := "AEOrdering::JobType.loadEventTypes : Failed to process INTRAJOBINV event data item type for unknown Source Event Type " & JSON::get_string(eventDataJSONObject["SourceEventType"]) & ", Occurrence Id " & JSON::get_integer(eventDataJSONObject["SourceEventOccurrenceId"])'image;
-				                        Logger::log(Logger::Fatal, "pv.aeo.jobtype", logMessage);
+				                        kvps["sourceEventType"] := JSON::get_string(eventDataJSONObject["SourceEventType"]);
+				                        kvps["occurrenceId"] := JSON::get_integer(eventDataJSONObject["SourceEventOccurrenceId"])'image;
+				                        Logger::log(Logger::Fatal, "pv.aeo.jobtype",
+				                          aeoLog("aeordering_ini_unknown", "Failed to process INTRAJOBINV event data item type for unknown Source Event Type", "", "", "", "", kvps));
 				                        raise program_error;
 				                    end if;
 				                else
@@ -200,8 +202,8 @@ begin
 			end loop;
 		end if;
 	else
-		logMessage := "AEOrdering::JobType.loadEventTypes : Failed to process event type for unknown Job Type " & jobTypeName;
-		Logger::log(Logger::Fatal, "pv.aeo.jobtype", logMessage);
+		Logger::log(Logger::Fatal, "pv.aeo.jobtype",
+		  aeoLog("aeordering_unknown_jobtype", "Failed to process event type for unknown Job Type", "", jobTypeName, "", "", kvps));
 		raise program_error;
 	end if;
 	
@@ -210,7 +212,6 @@ end service;
 
 //! ACTIVITY BEGIN. '4cb90deb-ec72-4c55-a54c-050a3e3307ad' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::JobType.updateAuditEventDurations ( eventRulesJSONArray : in JSON::JSONArray ) is
-logMessage : string;
 eventRuleJSONObject : JSON::JSONObject;
 auditEventType : instance of AuditEventType;
 auditEventTypeName : string;

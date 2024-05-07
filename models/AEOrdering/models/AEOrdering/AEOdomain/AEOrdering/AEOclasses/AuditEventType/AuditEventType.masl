@@ -1,7 +1,6 @@
 //! ACTIVITY BEGIN. '5b355e81-b15f-44af-87ca-70f6ec5ca38a' DO NOT EDIT THIS LINE.
 public service AEOrdering::AuditEventType.validEvent ( auditEvent : in instance of AuditEvent,
                                                       failureReason : out string ) return boolean is
-logMessage : string;
 eventType : instance of AuditEventType;
 validEvent : boolean := true;
 job : instance of Job;

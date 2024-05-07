@@ -1,6 +1,6 @@
 //! ACTIVITY BEGIN. 'd5bc3732-696d-40e1-9238-c57209150c1e' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::Job.failJob ( failureReason : in string ) is
-logMessage : string;
+kvps : dictionary of string;
 inProgressJob : instance of InProgressJob;
 failedJob : instance of FailedJob;
 worker : instance of Worker;
@@ -30,15 +30,15 @@ begin
 	Req_IF_Audited~>reportAuditFailure(this.jobId, failureReason);
 	
 	// now log the failure
-	logMessage := "aeordering_job_failed : " & failureReason;
-	Logger::log(Logger::Warning, "pv.aeo.job.failjob", logMessage);
+	Logger::log(Logger::Warning, "pv.aeo.job.failjob",
+	  aeoLog("aeordering_job_failed", failureReason, this.jobId, this.reportedJobName, "", "", kvps));
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'eb7daf4b-9cb3-4ab9-b0a8-8f19e30802f2' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::Job.jobDeleted () is
-logMessage : string;
+kvps : dictionary of string;
 associatedAuditEvent : instance of AssociatedAuditEvent;
 reportedAuditEvent : instance of ReportedAuditEvent;
 blockedAuditEvent : instance of BlockedAuditEvent;

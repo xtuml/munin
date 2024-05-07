@@ -3,15 +3,16 @@ public instance service AEOrdering::SystemSpec.lastModificationTime () return ti
 fileName: Filesystem::filename;
 fileStatus: Filesystem::file_status;
 mostRecentModificationTime: timestamp;
-logMessage: string;
+kvps: dictionary of string;
 begin
     fileName := Filesystem::filename(this.configFilePath & this.configFile);
     if Filesystem::file_exists(fileName) then
         fileStatus := Filesystem::get_file_status(fileName);
         mostRecentModificationTime := fileStatus.modification_time;
     else
-        logMessage := "AEOrdering::lastModificationTime : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Fatal, "pv.aeo.systemspec", logMessage);
+        kvps["configFile"] := this.configFilePath & this.configFile;
+        Logger::log(Logger::Fatal, "pv.aeo.systemspec",
+          aeoLog("aeordering_no_config_file", "failed to locate config", "", "", "", "", kvps));
         raise program_error;
     end if;
     if Filesystem::file_exists(Filesystem::filename(this.jobDefinitionDirectory)) then
@@ -31,7 +32,7 @@ end service;
 
 //! ACTIVITY BEGIN. '09b64602-e158-4716-a9b1-a304ca456f4f' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::SystemSpec.checkUpdatedConfig () return boolean is
-logMessage : string;
+kvps : dictionary of string;
 fileName : Filesystem::filename;
 fileStatus : Filesystem::file_status;
 jobType : instance of JobType;
@@ -42,25 +43,26 @@ begin
     fileName := Filesystem::filename(this.configFilePath & this.configFile);
     if Filesystem::file_exists(fileName) then
         fileStatus := Filesystem::get_file_status(fileName);
-	    if this.configFileModificationTime /= fileStatus.modification_time then
-    	    this.configFileModificationTime := fileStatus.modification_time;
-    	    configUpdates := true;
-    	end if;
+        if this.configFileModificationTime /= fileStatus.modification_time then
+            this.configFileModificationTime := fileStatus.modification_time;
+            configUpdates := true;
+        end if;
     else
-        logMessage := "AEOrdering::locateUpdatedConfig : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "pv.aeo.systemspec", logMessage);
+        kvps["configFile"] := this.configFilePath & this.configFile;
+        Logger::log(Logger::Error, "pv.aeo.systemspec",
+          aeoLog("aeordering_no_config_file", "failed to locate config", "", "", "", "", kvps));
     end if;
     if configUpdates = true then
-    	return true; 
+        return true; 
     else
-    	return false;
+        return false;
     end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '1976b22d-34c9-4df2-a045-4c41c0c7149d' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::SystemSpec.loadConfigFile () is
-logMessage : string;
+kvps : dictionary of string;
 fileName : Filesystem::filename;
 configJSONString : string;
 configJSONElement : JSON::JSONElement;
@@ -153,15 +155,17 @@ begin
 				                                                 waitPeriodForJobDeletion, waitPeriodForInvariantDeletion,
 				                                                 timeoutPeriodForRetreivingStoredInvariants, timeoutPeriodForHangingJob);
         else
-            logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Config file invalid:\n" & JSON::dump(configValidationResult, true);
-            Logger::log(Logger::Debug, "pv.aeo.systemspec", logMessage);
+            kvps["configJSON"] := JSON::dump(configValidationResult, true);
+            Logger::log(Logger::Error, "pv.aeo.systemspec",
+              aeoLog("aeordering_invalid_config_file", "config file invalid", "", "", "", "", kvps));
             raise JSON::JSONException("Config file invalid");
         end if;
         // set the config file mod time
         this.configFileModificationTime := this.lastModificationTime();        
     else
-        logMessage := "AEOrdering::ConfigUpdated : failed to locate config file. Specified file = " & this.configFilePath & this.configFile;
-        Logger::log(Logger::Error, "pv.aeo.systemspec", logMessage);
+        kvps["configFile"] := this.configFilePath & this.configFile;
+        Logger::log(Logger::Error, "pv.aeo.systemspec",
+          aeoLog("aeordering_no_config_file", "failed to locate config file", "", "", "", "", kvps));
     end if;
     
 end service;
@@ -169,7 +173,7 @@ end service;
 
 //! ACTIVITY BEGIN. '4fb59be1-16d5-495d-91b8-e131f269a1ab' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::SystemSpec.checkUpdatedJobDefinitions ( updatedJobDefinitions : out sequence of JobDefinitionFileType ) is
-logMessage : string;
+kvps : dictionary of string;
 fileName : Filesystem::filename;
 fileStatus : Filesystem::file_status;
 jobType : instance of JobType;
@@ -197,15 +201,16 @@ begin
             end if;
         end loop;
     else
-        logMessage := "AEOrdering::locateUpdatedConfig : failed to locate job definition directory. Specified directory = " & this.jobDefinitionDirectory;
-        Logger::log(Logger::Error, "pv.aeo.systemspec", logMessage);
+        kvps["jobDefinitionDirectory"] := this.jobDefinitionDirectory;
+        Logger::log(Logger::Error, "pv.aeo.systemspec",
+          aeoLog("aeordering_no_job_defn", "failed to locate job definition directory", "", "", "", "", kvps));
     end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '20792409-ecb1-4461-a693-09b0cc215a06' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::SystemSpec.loadJobDefinitions ( updatedJobDefinitions : out sequence of JobDefinitionFileType ) is
-logMessage : string;
+kvps : dictionary of string;
 jobType : instance of JobType;
 jobTypeJSONString : string;
 jobTypeJSONElement : JSON::JSONElement;
@@ -269,8 +274,10 @@ begin
                     // TODO update event specific rules
                     updatedJobTypes := updatedJobTypes & jobType;
                 else
-                    logMessage := "AEOrdering::SystemSpec.ConfigUpdated : Job definition file invalid: " & jobDefinitionFile.jobDefinitionFileName & "\n" & JSON::dump(jobTypeValidationResult, true);
-                    Logger::log(Logger::Debug, "pv.aeo.systemspec", logMessage);
+                    kvps["jobDefinitionFile"] := jobDefinitionFile.jobDefinitionFileName;
+                    kvps["jobTypeValidation"] := JSON::dump(jobTypeValidationResult, true);
+                    Logger::log(Logger::Error, "pv.aeo.systemspec",
+                      aeoLog("aeordering_invalid_job_defn", "job definition file invalid", "", "", "", "", kvps));
                     raise JSON::JSONException("Job definition file invalid");
                 end if;
             end if;
@@ -338,8 +345,7 @@ end service;
 public instance service AEOrdering::SystemSpec.schemaValidated ( auditEvent : in JSON::JSONObject ) return boolean is
 valid : boolean := true;
 eventId : string;
-eventContent : string;
-logMessage : string;
+kvps : dictionary of string;
 validationResult: JSON::JSONObject;
 
 begin
@@ -348,17 +354,18 @@ begin
 		this.schemaValidationCount := this.schemaValidationCount + 1;
 		if this.schemaValidationCount = this.schemaValidateFrequency then
 			this.schemaValidationCount := 0;
-            validationResult := JSONValidation::validate(JSON::to_json(auditEvent), this.auditEventSchema);
+			validationResult := JSONValidation::validate(JSON::to_json(auditEvent), this.auditEventSchema);
 			if JSON::get_boolean(validationResult["valid"]) = true then
 			else
 				valid := false;
-			    if auditEvent'contains("eventId") then
-			      	eventId := JSON::get_string(auditEvent["eventId"]);
-			    end if;
-				eventContent := "reception_event_invalid : EventId = " & eventId;
-				Logger::log(Logger::Warning, "pv.aeo.systemspec.schemavalidated", eventContent);
-				logMessage := "AEOrdering::AcceptJsonEvent : Dropping invalid event with ID: " & eventId & "\n" & JSON::dump(validationResult, true);
-				Logger::log(Logger::Debug, "pv.aeo.systemspce.schemavalidated", logMessage);
+				if auditEvent'contains("eventId") then
+					eventId := JSON::get_string(auditEvent["eventId"]);
+				end if;
+				Logger::log(Logger::Warning, "pv.aeo.systemspec.schemavalidated",
+				  aeoLog("aeordering_reception_event_invalid", "event schema validation failed", "", "", eventId, "", kvps));
+				kvps["validationResult"] := JSON::dump(validationResult, true);
+				Logger::log(Logger::Debug, "pv.aeo.systemspce.schemavalidated",
+				  aeoLog("aeordering_invalid_event", "dropping invalid event ", "", "", eventId, "", kvps));
 			end if;
 		end if;
 	end if;

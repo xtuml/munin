@@ -2,7 +2,7 @@
 private service AEOrdering::init () is
 configFilePath : string;
 configFile : string;
-logMessage : string;
+kvps : dictionary of string;
 systemSpec : instance of SystemSpec;
 startJobGroup : integer;
 endJobGroup : integer;
@@ -33,16 +33,17 @@ begin
     	worker := create Worker(workerId => UUID::generate_formatted(), requestRetryRate => @PT1S@, heartbeatRate => @PT1M@, registered => false, Current_State => Created);
     	generate Worker.requestRegistration() to worker;
 	else
-		logMessage := "AEOrdering::init : failed to locate config file. Specified file = " & configFilePath & configFile;
-		Logger::log(Logger::Fatal, "pv.aeo.init", logMessage);
+		kvps["configFile"] := configFilePath & configFile;
+		Logger::log(Logger::Fatal, "pv.aeo.init",
+		  aeoLog("aeordering_no_config_file", "failed to locate config file", "", "", "", "", kvps));
 		raise program_error;
 	end if;
 
 exception
 	when others =>
 	
-		logMessage := "AEOrdering::init : failed during start up";
-		Logger::log(Logger::Fatal, "pv.aeo.init", logMessage);
+		Logger::log(Logger::Fatal, "pv.aeo.init",
+		  aeoLog("aeordering_start_failed", "failed during init start up", "", "", "", "", kvps));
 		raise program_error;
 	
 end service;
