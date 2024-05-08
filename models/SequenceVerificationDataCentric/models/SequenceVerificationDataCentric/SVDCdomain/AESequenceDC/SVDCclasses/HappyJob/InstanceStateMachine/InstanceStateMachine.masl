@@ -411,8 +411,8 @@ begin
             elsif possibleAeOccInSequenceDef'length = 0 then
               // There is no available definition for this situation so the sequence is broken.
               theJob.sequencingFailed := true;
-              theJob.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
-        
+              theJob.failJob("There is no available definition for this situation so the sequence is broken - Prev Event Type = " & (prevEvent -> R2).AEType);
+
             else
               // There are multiple possible Audit Event Occurrences In the Sequence Definition 
               // TODO What does this circumstance imply and what can we do about it.
