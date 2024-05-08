@@ -12,7 +12,7 @@ theSequenceDefns: set of instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
-logMessage : string;
+kvps : dictionary of string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobDefnName);
@@ -46,20 +46,24 @@ begin
         if theEventOccInSeqDefn /= null then
           link theInvariant R20 theEventOccInSeqDefn;
         else
-          logMessage := "svdc_job_definition_failed : FailureReason = Invalid Event Definition provided (type 3) for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
-          Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn", logMessage);
+          kvps["eventType"] := invariantEventDefn.eventTypeName; kvps["invariantName"] := invariantName;
+          Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn",
+            svLog("svdc_job_definition_failed", "Invalid Event Definition provided (type 3) for Extra Job Invariant Name", "", jobDefnName, kvps)); 
         end if;  
       else
-        logMessage := "svdc_job_definition_failed : FailureReason = Invalid Event Definition provided (type 2) for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
-        Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn", logMessage);
+        kvps["eventType"] := invariantEventDefn.eventTypeName; kvps["invariantName"] := invariantName;
+        Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn",
+          svLog("svdc_job_definition_failed", "Invalid Event Definition provided (type 2) for Extra Job Invariant Name", "", jobDefnName, kvps)); 
       end if;
     else
-      logMessage := "svdc_job_definition_failed : FailureReason = Invalid Event Definition provided (type 1) for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
-      Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn", logMessage);
+      kvps["eventType"] := invariantEventDefn.eventTypeName; kvps["invariantName"] := invariantName;
+      Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn",
+        svLog("svdc_job_definition_failed", "Invalid Event Definition provided (type 1) for Extra Job Invariant Name", "", jobDefnName, kvps)); 
     end if;              
   else
-    logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition provided for Extra Job Invariant Name" & " : JobName = " & jobDefnName & " : InvariantName = " & invariantName;
-    Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn", logMessage);
+    kvps["eventType"] := invariantEventDefn.eventTypeName; kvps["invariantName"] := invariantName;
+    Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.createsourceextrajobinvariantdefn",
+      svLog("svdc_job_definition_failed", "Invalid Job Definition provided for Extra Job Invariant Name", "", jobDefnName, kvps)); 
   end if;
 
 end service;
@@ -78,7 +82,7 @@ theSequenceDefns: set of instance of AESequenceDefinition;
 theEventInSeqDefn : instance of AEInSequenceDefinition;
 theEventOccurrencesInSeqDefn : set of instance of AEOccurrenceInSequenceDefinition;
 theEventOccInSeqDefn : instance of AEOccurrenceInSequenceDefinition;
-logMessage : string;
+kvps : dictionary of string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobDefnName);
@@ -97,12 +101,14 @@ begin
       theEventOccInSeqDefn := find_one theEventOccurrencesInSeqDefn (occurrenceNumberInSequence = invariantEventDefn.occurrenceId);
       link theInvariantDefn R21 theEventOccInSeqDefn;
     else
-      logMessage := "svdc_job_definition_failed : FailureReason = Invalid Event Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
-      Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.linkuserextrajobinvariantdefn", logMessage);
+      kvps["eventType"] := invariantEventDefn.eventTypeName; kvps["invariantName"] := invariantName;
+      Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.linkuserextrajobinvariantdefn",
+        svLog("svdc_job_definition_failed", "Invalid Event Definition provided for Extra Job Invariant Name", "", jobDefnName, kvps)); 
     end if;              
   else
-    logMessage := "svdc_job_definition_failed : FailureReason = Invalid Job Definition provided for Extra Job Invariant Name" & " : EventType = " & invariantEventDefn.eventTypeName & " : InvariantName = " & invariantName;
-    Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.linkuserextrajobinvariantdefn", logMessage);
+    kvps["eventType"] := invariantEventDefn.eventTypeName; kvps["invariantName"] := invariantName;
+    Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.linkuserextrajobinvariantdefn",
+      svLog("svdc_job_definition_failed", "Invalid Job Definition provided for Extra Job Invariant Name", "", jobDefnName, kvps)); 
   end if;  
 
 end service;
@@ -116,89 +122,84 @@ theJobDefn : instance of JobDefinition;
 theRestoredPersistentInvariant : instance of PersistedInvariant;
 existingInvariant : instance of PersistedInvariant;
 theSystemSpec : instance of SystemSpecification;
-
-logMessage : string;
+kvps : dictionary of string;
 
 begin
-      theAEOccurrenceDefn := this -> R20;
-      theEventDefn := theAEOccurrenceDefn -> R12 -> R1.SequencedAuditEventDefinition;
-      theJobDefn := theAEOccurrenceDefn -> R12 -> R1.AESequenceDefinition -> R7;
-      if restoredInvariant.sourceJobDefinitionType = theJobDefn.jobName and
-         restoredInvariant.sourceAuditEventType = theEventDefn.AEType and
-         restoredInvariant.sourceAuditEventOccurrenceId = theAEOccurrenceDefn.occurrenceNumberInSequence then
-         // The restored invariant checks out against the source event definition
-         
-         existingInvariant := find_one PersistedInvariant (extraJobInvName = restoredInvariant.invariantName and
-         	                                               invariantValue = restoredInvariant.invariantValue);
-         if existingInvariant = null then                                              
+  theAEOccurrenceDefn := this -> R20;
+  theEventDefn := theAEOccurrenceDefn -> R12 -> R1.SequencedAuditEventDefinition;
+  theJobDefn := theAEOccurrenceDefn -> R12 -> R1.AESequenceDefinition -> R7;
+  if restoredInvariant.sourceJobDefinitionType = theJobDefn.jobName and
+     restoredInvariant.sourceAuditEventType = theEventDefn.AEType and
+     restoredInvariant.sourceAuditEventOccurrenceId = theAEOccurrenceDefn.occurrenceNumberInSequence then
+    // The restored invariant checks out against the source event definition
 
-           if restoredInvariant.validFrom > timestamp'now then
-             // The Persistent Invariant will be valid in the future
-             theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.invariantName,
-  	                                                                           invariantValue => restoredInvariant.invariantValue,
-  	                                                                           validFrom => restoredInvariant.validFrom, 
-  	                                                                           validUntil => restoredInvariant.validTo,
-  	                                                                           inForce => false, 
-  	                                                                           Current_State => Pending );
-  	         schedule theRestoredPersistentInvariant.invariantTimer generate PersistedInvariant.invariantComesIntoForce() to theRestoredPersistentInvariant at theRestoredPersistentInvariant.validFrom;
+    existingInvariant := find_one PersistedInvariant (extraJobInvName = restoredInvariant.invariantName and
+                                                      invariantValue = restoredInvariant.invariantValue);
+    if existingInvariant = null then
 
-  	       elsif restoredInvariant.validFrom < timestamp'now and 
-  	             restoredInvariant.validTo > timestamp'now then
-             // The Persistent Invariant is valid now
-             theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.invariantName,
-  	                                                                           invariantValue => restoredInvariant.invariantValue,
-  	                                                                           validFrom => restoredInvariant.validFrom, 
-  	                                                                           validUntil => restoredInvariant.validTo,
-  	                                                                           inForce => true, 
-  	                                                                           Current_State => InForce );
-  	         schedule theRestoredPersistentInvariant.invariantTimer generate PersistedInvariant.invariantExpires() to theRestoredPersistentInvariant at theRestoredPersistentInvariant.validUntil;
-  	                                                          
-  	       elsif restoredInvariant.validTo < timestamp'now then
-             // The Persistent Invariant is out of date
-             theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.invariantName,
-  	                                                                           invariantValue => restoredInvariant.invariantValue,
-  	                                                                           validFrom => restoredInvariant.validFrom, 
-  	                                                                           validUntil => restoredInvariant.validTo,
-  	                                                                           inForce => false, 
-  	                                                                           Current_State => Deprecated );
-  	                                                          
-  	         theSystemSpec := find_only SystemSpecification();                                                    
-  	         schedule theRestoredPersistentInvariant.invariantTimer generate PersistedInvariant.timeToDeleteInvariant() to theRestoredPersistentInvariant delay theSystemSpec.sourceExtraJobInvariantDeletionPeriod;
-  	              
-  	       else
-  	              
-             logMessage := "svdc_restore_eji_state : Something went wrong restoring the Extra-Job Invariant's state " & restoredInvariant.invariantName;
-             Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
-  	                                                          
-  	       end if; 
-  	       
-  	     else
-  	     
-             if (Logger::enabled(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreInvariantOfThisDefinition")) then
-               logMessage := "The restored Extra-Job Invariant is already present in the cache " & restoredInvariant.invariantName;
-               Logger::log(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
-             end if;
-  	     
-  	     end if;  
+      if restoredInvariant.validFrom > timestamp'now then
+        // The Persistent Invariant will be valid in the future
+        theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.invariantName,
+                                                                            invariantValue => restoredInvariant.invariantValue,
+                                                                            validFrom => restoredInvariant.validFrom,
+                                                                            validUntil => restoredInvariant.validTo,
+                                                                            inForce => false,
+                                                                            Current_State => Pending );
+        schedule theRestoredPersistentInvariant.invariantTimer generate PersistedInvariant.invariantComesIntoForce() to theRestoredPersistentInvariant at theRestoredPersistentInvariant.validFrom;
 
-  	     if theRestoredPersistentInvariant /= null then
-  	       link theRestoredPersistentInvariant R24 this;                                          
-  	                     
-                    
-         else
-                  
-           logMessage := "svdc_restore_eji_not_restored : The Extra-Job Invariant has not been restored successfully " & restoredInvariant.invariantName;
-           Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
-  	                                                          
-         end if;  
-                
-       else
-                
-         logMessage := "svdc_restore_eji_no_match : The Extra-Job Invariant to be restored does not match any known definition " & restoredInvariant.invariantName;
-         Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition", logMessage);
+      elsif restoredInvariant.validFrom < timestamp'now and
+        restoredInvariant.validTo > timestamp'now then
+        // The Persistent Invariant is valid now
+        theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.invariantName,
+                                                                            invariantValue => restoredInvariant.invariantValue,
+                                                                            validFrom => restoredInvariant.validFrom,
+                                                                            validUntil => restoredInvariant.validTo,
+                                                                            inForce => true,
+                                                                            Current_State => InForce );
+        schedule theRestoredPersistentInvariant.invariantTimer generate PersistedInvariant.invariantExpires() to theRestoredPersistentInvariant at theRestoredPersistentInvariant.validUntil;
 
-       end if;     
- 
+      elsif restoredInvariant.validTo < timestamp'now then
+        // The Persistent Invariant is out of date
+        theRestoredPersistentInvariant := create unique PersistedInvariant (invariantName => restoredInvariant.invariantName,
+                                                                            invariantValue => restoredInvariant.invariantValue,
+                                                                            validFrom => restoredInvariant.validFrom,
+                                                                            validUntil => restoredInvariant.validTo,
+                                                                            inForce => false,
+                                                                            Current_State => Deprecated );
+
+        theSystemSpec := find_only SystemSpecification();
+        schedule theRestoredPersistentInvariant.invariantTimer generate PersistedInvariant.timeToDeleteInvariant() to theRestoredPersistentInvariant delay theSystemSpec.sourceExtraJobInvariantDeletionPeriod;
+
+      else
+
+        kvps["restoredInvariantName"] := restoredInvariant.invariantName;
+        Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition",
+          svLog("svdc_restore_eji_state", "Something went wrong restoring the Extra-Job Invariant state", "", theJobDefn.jobName, kvps));
+
+      end if;
+
+    else
+
+      if (Logger::enabled(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition")) then
+        kvps["restoredInvariantName"] := restoredInvariant.invariantName;
+        Logger::log(Logger::Debug, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition",
+          svLog("svdc_restore_eji_state", "The restored Extra-Job Invariant is already present in the cache", "", theJobDefn.jobName, kvps));
+      end if;
+
+    end if;
+
+    if theRestoredPersistentInvariant /= null then
+      link theRestoredPersistentInvariant R24 this;
+    end if;
+
+  else
+
+    kvps["restoredInvariantName"] := restoredInvariant.invariantName;
+    Logger::log(Logger::Warning, "pv.sv.extrajobinvariantdefn.restoreinvariantofthisdefinition",
+      svLog("svdc_restore_eji_no_match", "The Extra-Job Invariant to be restored does not match any known definition", "", theJobDefn.jobName, kvps));
+
+  end if;
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

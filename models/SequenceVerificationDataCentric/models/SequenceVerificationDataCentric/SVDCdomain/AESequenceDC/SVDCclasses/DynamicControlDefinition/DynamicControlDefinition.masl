@@ -15,8 +15,7 @@ theJobsSourceSequenceDefns : set of instance of AESequenceDefinition;
 sourceAEInSequenceDefn : instance of AEInSequenceDefinition;
 sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 sourceAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
-logMessage : string;
-eventContent : string;
+kvps : dictionary of string;
 
 begin
   theJobDefn := find_one JobDefinition (jobName = jobName);
@@ -53,24 +52,26 @@ begin
           link theDynamicControlDefinition R30 sourceAEOccurrenceDefn;
         else
           // Error handling for the specified Audit Event Occurrence Definition was not found
-          logMessage := "svdc_job_definition_failed : FailureReason = There is no known Audit Event Occurrence Definition with Audit Event Definition name corresponding to the source event specified for Dynamic Control Definition" & " : EventType = " & sourceEventType & " : Occurrence Id = " & sourceOccurrenceId'image;
-          Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.createdynamiccontroldefinition", logMessage);
+          kvps["eventType"] := sourceEventType; kvps["occurrenceId"] := sourceOccurrenceId'image;
+          Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.createdynamiccontroldefinition",
+            svLog("svdc_job_definition_failed", "There is no known Audit Event Occurrence Definition with Audit Event Definition name corresponding to the source event specified for Dynamic Control Definition", "", jobName, kvps));
         end if;  
       else
         // Error handling for the Sequence Definition corresponding to this Audit Event was not found
-        logMessage := "svdc_job_definition_failed : FailureReason = There is no known Sequence Definition associated with Audit Event Definition named corresponding to the source event specified for Dynamic Control Definition" & "EventType = " & sourceEventType;
-        Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.createdynamiccontroldefinition", logMessage);
+        kvps["eventType"] := sourceEventType;
+        Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.createdynamiccontroldefinition",
+          svLog("svdc_job_definition_failed", "There is no known Sequence Definition associated with Audit Event Definition named corresponding to the source event specified for Dynamic Control Definition", "", jobName, kvps));
       end if;    
     else
       // Error handling for the sourceEventType specified is invalid
-      logMessage := "svdc_job_definition_failed : FailureReason = There is no known Audit Event Definition with name corresponding to the source event specified for Dynamic Control Definition" & " : EventType = " & sourceEventType;
-      Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.createdynamiccontroldefinition", logMessage);
+      kvps["eventType"] := sourceEventType;
+      Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.createdynamiccontroldefinition",
+        svLog("svdc_job_definition_failed", "There is no known Audit Event Definition with name corresponding to the source event specified for Dynamic Control Definition", "", jobName, kvps));
     end if;    
   else
     // Error handling for Error Job Definition Unknown
-    logMessage := "svdc_job_definition_failed : FailureReason = There is no known Job Definition with name corresponding to the source event specified for Dynamic Control Definition" & " :JobName = " & jobName;
-    Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.createdynamiccontroldefinition", logMessage);
-    
+    Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.createdynamiccontroldefinition",
+      svLog("svdc_job_definition_failed", "There is no known Job Definition with name corresponding to the source event specified for Dynamic Control Definition", "", jobName, kvps));
   end if;  
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -89,8 +90,7 @@ userSequenceDefns : set of instance of AESequenceDefinition;
 userAEInSequenceDefn : instance of AEInSequenceDefinition;
 userAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 userAEOccurrenceDefns : set of instance of AEOccurrenceInSequenceDefinition;
-logMessage : string;
-eventContent : string;
+kvps : dictionary of string;
 
 begin
   theDynamicControlDefn := find_one DynamicControlDefinition (jobName = jobName and 
@@ -114,24 +114,27 @@ begin
           link theDynamicControlDefn R31 userAEOccurrenceDefn;
         else
           // Error handling for the specified Audit Event Occurrence Definition was not found
-          logMessage := "svdc_job_definition_failed : FailureReason = There is no known Audit Event Occurrence Definition with Audit Event Definition name corresponding to the user event specified for Dynamic Control Definition" & " : EventType = " & userEventType & " : Occurrence Id = " & userOccurrenceId'image;
-          Logger::log(Logger::Error, "pv.sv.dynamiccontroldefinition.linkusereventdefn", logMessage);
+          kvps["eventType"] := userEventType; kvps["occurrenceId"] := userOccurrenceId'image;
+          Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.linkusereventdefn",
+            svLog("svdc_job_definition_failed", "There is no known Audit Event Occurrence Definition with Audit Event Definition name corresponding to the user event specified for Dynamic Control Definition", "", jobName, kvps));
         end if;  
       else
         // Error handling for the Sequence Definition corresponding to this Audit Event was not found
-        logMessage := "svdc_job_definition_failed : FailureReason = There is no known Sequence Definition associated with Audit Event Definition named corresponding to the user event specified for Dynamic Control Definition" & " : EventType = " & userEventType;
-        Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.linkusereventdefn", logMessage);
+        kvps["eventType"] := userEventType;
+        Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.linkusereventdefn",
+          svLog("svdc_job_definition_failed", "There is no known Sequence Definition associated with Audit Event Definition named corresponding to the user event specified for Dynamic Control Definition", "", jobName, kvps));
       end if;    
     else
       // Error handling for the userEventType specified is invalid
-      logMessage := "svdc_job_definition_failed : FailureReason = There is no known Audit Event Definition with name corresponding to the user event specified for Dynamic Control Definition" & " : EventType = " & userEventType;
-      Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.linkusereventdefn", logMessage);
+      kvps["eventType"] := userEventType;
+      Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.linkusereventdefn",
+        svLog("svdc_job_definition_failed", "There is no known Audit Event Definition with name corresponding to the user event specified for Dynamic Control Definition", "", jobName, kvps));
     end if;    
     
   else
     //Error handling for the specified Dynamic Control Definition instance was not found
-    logMessage := "svdc_job_definition_failed : FailureReason = There is no known Job Definition with name corresponding to the user event specified for Dynamic Control Definition" & " : JobName = " & jobName;
-    Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.linkusereventdefn", logMessage);
+    Logger::log(Logger::Warning, "pv.sv.dynamiccontroldefinition.linkusereventdefn",
+      svLog("svdc_job_definition_failed", "There is no known Job Definition with name corresponding to the user event specified for Dynamic Control Definition", "", jobName, kvps));
   end if;
 
     

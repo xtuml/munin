@@ -6,7 +6,6 @@ public service AEOrdering::AcceptEvent ( jobId : in string,
                                         auditEventTime : in string,
                                         prevAuditEventIds : in sequence of string,
                                         auditEventData : in AuditEventDataType ) is
-logMessage : string;
 job : instance of Job;
 inProgressJob : instance of InProgressJob;
 failedJob : instance of FailedJob;
@@ -14,7 +13,7 @@ auditEvent : instance of AuditEvent;
 jobFailureReason : string;
 failureReason : string;
 systemSpec : instance of SystemSpec;
-eventContent : string;
+kvps : dictionary of string;
 instrumentationEventId : string;
 instrumentationEventType : string;
 worker : instance of Worker;
@@ -22,8 +21,8 @@ worker : instance of Worker;
 begin
 
 	if (Logger::enabled(Logger::Debug, "pv.aeo.acceptevent")) then
-		logMessage := "AEOrdering::AcceptEvent : jobId = " & jobId & ", auditEventType = " & auditEventType & ", auditEventId = " & auditEventId;
-		Logger::log(Logger::Debug, "pv.aeo.acceptevent", logMessage);
+		Logger::log(Logger::Debug, "pv.aeo.acceptevent",
+		  aeoLog("aeordering_accept_event", "receiving event", jobId, jobName, auditEventId, auditEventType, kvps));
 	end if;
 	systemSpec := find_one SystemSpec();
 	job := find_one Job(jobId = jobId);
@@ -34,14 +33,14 @@ begin
 			link inProgressJob R2 job;
 			generate Job.jobStarted() to job;
 			if (Logger::enabled(Logger::Debug, "pv.aeo.acceptevent")) then
-				eventContent := "aeordering_job_processed : JobId = " & job.jobId;
-				Logger::log(Logger::Debug, "pv.aeo.acceptevent", eventContent);
+				Logger::log(Logger::Debug, "pv.aeo.acceptevent",
+				  aeoLog("aeordering_job_processed", "starting job", job.jobId, jobName, auditEventId, auditEventType, kvps));
 			end if;
 			// ...and then report that AEO has started processing a new job as part of the 
-        	// verification of the Protocol Verifier itself.
-        	instrumentationEventId := "Unused";
-        	instrumentationEventType := "AEO_PVJobStart";
-        	Req_IF_BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", job.jobId, instrumentationEventId, instrumentationEventType);
+			// verification of the Protocol Verifier itself.
+			instrumentationEventId := "Unused";
+			instrumentationEventType := "AEO_PVJobStart";
+			Req_IF_BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", job.jobId, instrumentationEventId, instrumentationEventType);
 		else
 			// we have created the job but the reported job name does not match a known JobType
 			// so we need to fail the job
@@ -111,31 +110,31 @@ public service AEOrdering::AcceptJsonEvent ( workerId : in UUID::formatted_uuid,
                                             auditEvent : in string ) is
 systemSpec : instance of SystemSpec;
 jsonElement: JSON::JSONElement;
-eventContent : string;
 jsonObject : JSON::JSONObject;
-logMessage : string;
 validate : boolean := false;
 prevIds: sequence of string;
 evtData: dictionary;
 worker : instance of Worker;
+kvps : dictionary of string;
 
 begin
-	
-    worker := find_one Worker(workerId = workerId);
-    if worker /= null then
+
+	worker := find_one Worker(workerId = workerId);
+	if worker /= null then
 		if worker.registered = true then
 			jsonElement := JSON::parse(auditEvent);
 			if jsonElement.kind = JSON::Object then
 				jsonObject := JSON::get_object(jsonElement);
-			    if jsonObject'keys'length = 1 and jsonObject'keys'any = "__comment__" then
-			        // ignore comment objects
-			        if (Logger::enabled(Logger::Debug, "pv.aeo.acceptjsonevent")) then
-			        	logMessage := "AEOrdering::AcceptJsonEvent : JSON comment: " & JSON::get_string(jsonObject[jsonObject'keys'any]);
-			        	Logger::log(Logger::Debug, "pv.aeo.acceptjsonevent",logMessage);
-			        end if;
-			    else
-			
-			        // validate the event against schema
+				if jsonObject'keys'length = 1 and jsonObject'keys'any = "__comment__" then
+					// ignore comment objects
+					if (Logger::enabled(Logger::Debug, "pv.aeo.acceptjsonevent")) then
+						kvps["comment"] := JSON::get_string(jsonObject[jsonObject'keys'any]);
+						Logger::log(Logger::Debug, "pv.aeo.acceptjsonevent",
+						  aeoLog("aeordering_accept_json_event", "receiving event JSON with comment", "", "", "", "", kvps));
+					end if;
+				else
+
+					// validate the event against schema
 					systemSpec := find_one SystemSpec();
 					if systemSpec.schemaValidated(jsonObject) = true then
 						
@@ -146,8 +145,8 @@ begin
 									prevIds := prevIds & JSON::get_string(prev_id_json);
 								end loop;
 							elsif jsonObject["previousEventIds"].kind = JSON::String then
-			                    prevIds := prevIds & JSON::get_string(jsonObject["previousEventIds"]);
-			                end if;
+								prevIds := prevIds & JSON::get_string(jsonObject["previousEventIds"]);
+							end if;
 						end if;
 						for key in jsonObject'keys loop
 							if key /= "jobId" and
@@ -165,15 +164,16 @@ begin
 						end loop;
 						AcceptEvent(JSON::get_string(jsonObject["jobId"]), JSON::get_string(jsonObject["jobName"]), JSON::get_string(jsonObject["eventType"]),
 									JSON::get_string(jsonObject["eventId"]), JSON::get_string(jsonObject["timestamp"]), prevIds, evtData);
-			    	end if;
+					end if;
 				end if;
 			end if;
 		else
 			// the worker is not registered but job management thinks it is
 			// deregister the worker and log an error
 			Req_IF_JobManagement~>deregisterWorker(workerId);
-			logMessage := "AEOrdering::AcceptJsonEvent : Received event for unregistered worker, workerId = : " & string(workerId);
-			Logger::log(Logger::Debug, "pv.aeo.acceptjsonevent",logMessage);
+			kvps["workerId"] := string(workerId);
+			Logger::log(Logger::Error, "pv.aeo.acceptjsonevent",
+			  aeoLog("aeordering_rcvd_unregistered", "received event for unregistered worker", "", "", "", "", kvps));
 		end if;
 	end if;
 	
@@ -195,13 +195,16 @@ end service;
 //! ACTIVITY BEGIN. '809725ba-6a72-4611-88a3-955ffdc7bec3' DO NOT EDIT THIS LINE.
 public service AEOrdering::workerUnregistered ( workerId : in UUID::formatted_uuid ) is
 worker : instance of Worker;
+kvps : dictionary of string;
 
 begin
     worker := find_one Worker(workerId = workerId);
     if worker /= null then
-		Logger::log(Logger::Information, "pv.aeo.workerunregistered", "aeordering_worker_unregistered_received : " & "Worker Id = " & string(workerId));
-		generate Worker.deregistered() to worker;
-	end if;
+        kvps["workerId"] := string(workerId);
+        Logger::log(Logger::Information, "pv.aeo.workerunregistered",
+          aeoLog("aeordering_worker_unregistered_received", "received event for unregistered worker", "", "", "", "", kvps));
+        generate Worker.deregistered() to worker;
+    end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -244,6 +247,33 @@ begin
 	    	generate Job.deleteJob() to job;
 		end if;
 	end if;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b0135310-396f-4580-99b3-a3acba08de50' DO NOT EDIT THIS LINE.
+private service AEOrdering::aeoLog ( tag : in string,
+                                    message : in string,
+                                    jobId : in string,
+                                    jobName : in string,
+                                    eventId : in string,
+                                    eventName : in string,
+                                    key_value_pairs : in dictionary of string ) return string is
+jsonElement : JSON::JSONElement;
+key : string;
+logMessageKeyValuePairs : dictionary of string;
+
+begin
+  logMessageKeyValuePairs["tag"] := tag;
+  logMessageKeyValuePairs["message"] := message;
+  logMessageKeyValuePairs["jobId"] := jobId;
+  logMessageKeyValuePairs["jobName"] := jobName;
+  logMessageKeyValuePairs["eventId"] := eventId;
+  logMessageKeyValuePairs["eventName"] := eventName;
+  for key in key_value_pairs'keys loop
+    logMessageKeyValuePairs[key] := key_value_pairs[key];
+  end loop;
+  jsonElement := JSON::to_json( logMessageKeyValuePairs );
+  return JSON::dump( jsonElement );
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

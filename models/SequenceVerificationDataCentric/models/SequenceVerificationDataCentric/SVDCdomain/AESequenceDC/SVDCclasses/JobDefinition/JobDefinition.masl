@@ -30,7 +30,7 @@ theCriticalEventDefns : set of instance of SequencedAuditEventDefinition;
 theCriticalEventInJobDefn : instance of CriticalEventDefnForJobDefn;
 theJobs: set of instance of Job;
 theJob: instance of Job;
-logMessage : string;
+kvps : dictionary of string;
 previousEventType : string;
 
 begin
@@ -156,12 +156,10 @@ begin
     end if;
     delete theConstraintDefinitions;
     delete this;
-    
-    if (Logger::enabled(Logger::Debug, "pv.sv.jobdefinition.deletejobdefinition")) then
-      logMessage := "AESequenceDC::JobDefinition.deleteJobDefinition : Job Definition " & jobName & " has been deleted";
-      Logger::log(Logger::Debug, "pv.sv.jobdefinition.deletejobdefinition", logMessage);
-    end if;
-    
+
+    Logger::log(Logger::Debug, "pv.sv.jobdefinition.deletejobdefinition",
+      svLog("svdc_jobdefn_deleted", "Job Definition has been deleted", "", jobName, kvps));
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

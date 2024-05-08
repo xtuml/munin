@@ -1,6 +1,6 @@
 //! ACTIVITY BEGIN. 'c6da956b-01c1-4061-8e07-9f0c61f1548c' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::ReportedAuditEvent.reportEvent () is
-logMessage : string;
+kvps : dictionary of string;
 auditEvent : instance of AuditEvent;
 job : instance of Job;
 blockedAuditEvent : instance of BlockedAuditEvent;
@@ -9,7 +9,6 @@ reportedAuditEvent : instance of ReportedAuditEvent;
 theAuditEventData : AuditEventDataType;
 reportableAuditEventData : ReportableAuditEventDataType;
 allReportableAuditEventData : sequence of ReportableAuditEventDataType;
-eventContent : string;
 auditEventTypes : set of instance of AuditEventType;
 
 begin
@@ -50,8 +49,9 @@ begin
 		end if;
 	end loop;
 	if (Logger::enabled(Logger::Debug, "pv.aeo.reportedauditevent")) then
-		logMessage := "AEOrdering::ReportedAuditEvent.reportEvent : REPORTING EVENT JobId = " & job.jobId & " : EventId = " & auditEvent.auditEventId & " EventType = " & auditEvent.eventType  & " : PreviousEventId = " & auditEvent.reportedPrevEventIds'image;
-		Logger::log(Logger::Debug, "pv.aeo.reportedauditevent", logMessage);
+		kvps["previousEventId"] := auditEvent.reportedPrevEventIds'image;
+		Logger::log(Logger::Debug, "pv.aeo.reportedauditevent",
+		  aeoLog("aeordering_report_event", "reporting event", job.jobId, job.reportedJobName, auditEvent.auditEventId, auditEvent.eventType, kvps));
 	end if;
 	Req_IF_Verification~>audit_event(job.jobId, auditEvent.reportedJobName, auditEvent.reportedEventType, auditEvent.auditEventId, auditEvent.reportedAuditEventTime, auditEvent.reportedPrevEventIds, allReportableAuditEventData);
 	// check for any following events that need reporting
@@ -68,31 +68,36 @@ begin
 				delete blockedAuditEvent;
 				followedByEvent.eventState := EventStateEnum.REPORTED;
 				if (Logger::enabled(Logger::Debug, "pv.aeo.reportedauditevent")) then
-					logMessage := "AEOrdering::ReportedAuditEvent.reportEvent : REPORTING BLOCKED EVENT JobId = " & job.jobId & " : EventId = " & followedByEvent.auditEventId & " EventType = " & followedByEvent.eventType  & " : PreviousEventId = " & this.auditEventId;
-					Logger::log(Logger::Debug, "pv.aeo.reportedauditevent", logMessage);
+					kvps["followedByEventId"] := followedByEvent.auditEventId;
+					kvps["followedByEventType"] := followedByEvent.eventType;
+					kvps["previousEventId"] := this.auditEventId;
+					Logger::log(Logger::Debug, "pv.aeo.reportedauditevent",
+					  aeoLog("aeordering_blocked_event", "reporting blocked event", job.jobId, job.reportedJobName, auditEvent.auditEventId, auditEvent.eventType, kvps));
 				end if;
 				reportedAuditEvent.reportEvent();
 			else
-				logMessage := "AEOrdering::ReportedAuditEvent.reportEvent : followed by event was not blocked, jobId " & job.jobId & ", eventId " & this.auditEventId & " expected blocked EventId = " & followedByEvent.auditEventId;
-				Logger::log(Logger::Error, "pv.aeo.reportedauditevent", logMessage);
-				eventContent := "verifier_failure : JobId = " & job.jobId & " : EventId = " & auditEvent.auditEventId & " EventType = " & auditEvent.eventType  & " : FailureReason = followed by event was not blocked";
-				Logger::log(Logger::Fatal, "pv.aeo.reportedauditevent", eventContent);
+				kvps["expectedBlockedEventId"] := followedByEvent.auditEventId;
+				Logger::log(Logger::Fatal, "pv.aeo.reportedauditevent",
+				  aeoLog("aeordering_verifier_failure", "followed by event was not blocked", job.jobId, job.reportedJobName, auditEvent.auditEventId, auditEvent.eventType, kvps));
 				raise program_error;
 			end if;
 		else
 			if (Logger::enabled(Logger::Debug, "pv.aeo.reportedauditevent")) then
-				logMessage := "AEOrdering::ReportedAuditEvent.reportEvent : EVENT BLOCKED NOT ALL PREVIOUS EVENTS RECEIVED JobId = " & job.jobId & " : EventId = " & followedByEvent.auditEventId  & " EventType = " & followedByEvent.eventType  & " Not all previous events reported do not report this event";
-				Logger::log(Logger::Debug, "pv.aeo.reportedauditevent", logMessage);
+				kvps["followedByEventId"] := followedByEvent.auditEventId;
+				kvps["followedByEventType"] := followedByEvent.eventType;
+				kvps["previousEventId"] := this.auditEventId;
+				Logger::log(Logger::Debug, "pv.aeo.reportedauditevent",
+				  aeoLog("aeordering_blocked_not_received", "not all previous events reported do not report this event", job.jobId, job.reportedJobName, auditEvent.auditEventId, auditEvent.eventType, kvps));
 			end if;
 		end if;
 	end loop;
-	
+
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '4c07a037-130b-4e0d-8979-c6a5421a4b20' DO NOT EDIT THIS LINE.
 public instance service AEOrdering::ReportedAuditEvent.verifyPreviousEventsAvailable ( followingEvent : in instance of AuditEvent ) return boolean is
-logMessage : string;
+kvps : dictionary of string;
 reportedPreceedingEvents : sequence of instance of PreviousAuditEvent;
 allPreviousEventsReceived : boolean := true;
 previousEvent : instance of AuditEvent;
@@ -101,8 +106,8 @@ begin
 	// check that all the previous events for this followed by event have been received
 	reportedPreceedingEvents := followingEvent -> R13.PreviousAuditEvent;
 	if (Logger::enabled(Logger::Debug, "pv.aeo.reportedauditeent")) then
-		logMessage := "AEOrdering::ReportedAuditEvent.verifyPreviousEventsAvailable : EventId = " & followingEvent.auditEventId  & " EventType = " & followingEvent.eventType;
-		Logger::log(Logger::Debug, "pv.aeo.reportedauditeent", logMessage);
+		Logger::log(Logger::Debug, "pv.aeo.reportedauditeent",
+		  aeoLog("aeordering_prev_available", "", "", "", followingEvent.auditEventId, followingEvent.eventType, kvps));
 	end if;
 	for reportedPreceedingEvent in reportedPreceedingEvents loop
 		previousEvent := find_one AuditEvent(auditEventId = reportedPreceedingEvent.previousAuditEventId and eventState = EventStateEnum.REPORTED);
@@ -111,8 +116,12 @@ begin
 			exit;
 		else
 			if (Logger::enabled(Logger::Debug, "pv.aeo.reportedauditeent")) then
-				logMessage := "AEOrdering::ReportedAuditEvent.verifyPreviousEventsAvailable : reportedPreceedingEvent.previousAuditEventId " & reportedPreceedingEvent.previousAuditEventId & " previousEventId = " & previousEvent.auditEventId  & " EventType = " & previousEvent.eventType & " EventState = " & previousEvent.eventState'image;
-				Logger::log(Logger::Debug, "pv.aeo.reportedauditeent", logMessage);
+				kvps["reportedPreceedingEvent"] := reportedPreceedingEvent.previousAuditEventId;
+				kvps["previousEventId"] := previousEvent.auditEventId;
+				kvps["previousEeventType"] := previousEvent.eventType;
+				kvps["eventState"] := previousEvent.eventState'image;
+				Logger::log(Logger::Debug, "pv.aeo.reportedauditeent",
+				  aeoLog("aeordering_prev_available2", "", "", "", "", "", kvps));
 			end if;
 		end if;
 	end loop;

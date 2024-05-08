@@ -2,7 +2,7 @@
 public instance service AEOrdering::SourceDataItemForwardReference.resolve () is
 dataItemType: instance of DataItemType;
 sourceDataItemType: instance of DataItemType;
-logMessage: string;
+kvps: dictionary of string;
 begin
     dataItemType := this -> R21.DataItemType;
     sourceDataItemType := find_one (
@@ -13,8 +13,9 @@ begin
         unlink this R21;
         delete this;
     else
-        logMessage := "AEOrdering::JobType.SourceDataItemForwardReference : Failed to process EXTRAJOBINV event data item type for unknown Source Job Type = " & this.sourceJobTypeName & ", Event Data Name = " & this.sourceDataItemName;
-        Logger::log(Logger::Fatal, "pv.aeo.sourcedataitemforwardreference", logMessage);
+        kvps["dataItemName"] := this.sourceDataItemName;
+        Logger::log(Logger::Fatal, "pv.aeo.sourcedataitemforwardreference",
+          aeoLog("aeordering_eji_unknown", "failed to process EXTRAJOBINV event data item type for unknown Source Job Type", "", this.sourceJobTypeName, "", "", kvps));
         raise program_error;
     end if;
 end service;

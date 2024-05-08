@@ -9,13 +9,13 @@ end state;
 //! ACTIVITY BEGIN. '7c60a2b8-d138-4002-8b06-0793a4ad6635' '9eacda2c-4dfd-45ac-9d5e-111bdcfd90ba' DO NOT EDIT THIS LINE.
 state AESequenceDC::JobDefinition.Deprecated () is
 theSystemSpec : instance of SystemSpecification;
-logMessage : string;
+kvps : dictionary of string;
 
 begin
   this.isDeprecated := true;
   // Log info: Report that the JobDefinition has been deprecated.
-  logMessage := "AESequenceDC::JobDefinition.Deprecated : JobDefinition has been deprecated - jobName = " & this.jobName;
-  Logger::log(Logger::Information, "pv.sv.jobdefinition.active", logMessage); 
+  Logger::log(Logger::Information, "pv.sv.jobdefinition.active",
+    svLog("svdc_job_deprecated", "JobDefinition has been deprecated", "", this.jobName, kvps));
   
   // Check to see if there are any Jobs in progress that are dependent upon this JobDefinition.
   if (this -> R8)'length = 0 then
@@ -39,7 +39,7 @@ end state;
 //! ACTIVITY BEGIN. '7c60a2b8-d138-4002-8b06-0793a4ad6635' 'ce307922-2855-427f-b621-7137b0f50edc' DO NOT EDIT THIS LINE.
 state AESequenceDC::JobDefinition.Deleted () is
 theJobName : string;
-logMessage : string;
+kvps : dictionary of string;
 begin
   // TODO: The deleteJobDefinition function also deletes all related Jobs (if any) - this needs to be removed
   // from that function because Jobs will auto delete after a period (and the JobDefinition will not be deleted
@@ -50,8 +50,8 @@ begin
   this.deleteJobDefinition(this.jobName);
   
   // Log info: Report that the deprecated JobDefinition has been deleted.
-  logMessage := "AESequenceDC::JobDefinition.Deleted : Deprecated JobDefinition has been deleted - jobName = " & theJobName;
-  Logger::log(Logger::Information, "pv.sv.jobdefinition.deleted", logMessage); 
+  Logger::log(Logger::Information, "pv.sv.jobdefinition.deleted",
+    svLog("svdc_jobdefn_deleted", "Deprecated JobDefinition has been deleted", "", this.jobName, kvps));
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

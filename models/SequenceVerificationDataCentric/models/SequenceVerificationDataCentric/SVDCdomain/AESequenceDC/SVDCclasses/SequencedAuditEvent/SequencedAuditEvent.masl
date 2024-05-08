@@ -22,7 +22,7 @@ theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
 theAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
 theJobDef : instance of JobDefinition;
 newSequence : instance of Sequence;
-logMessage : string;
+kvps : dictionary of string;
 creationErrorMessage : string;
 eventDataCheckHasPassed : boolean;
 failureReason : string;
@@ -72,8 +72,9 @@ begin
         // The first event for this new Job is a valid event type for starting the sequence
         // Log info: new Job and event sequence started
         if (Logger::enabled(Logger::Debug, "pv.sv.sequencedauditevent.addeventfornewjob")) then
-          logMessage := "svdc_new_job_started : JobId = " & newJob.jobID & " : EventId = " & eventId & " : EventType = " & newEventType.AEType;
-          Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.addeventfornewjob", logMessage);
+          kvps["eventId"] := eventId; kvps["eventType"] := aeType;
+          Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.addeventfornewjob",
+            svLog("svdc_new_job_started", "new job and event sequence started", jobId, jobName, kvps));
         end if;
         
         // ...and then report that job sequencing has started for the new job as part of the 
@@ -102,10 +103,10 @@ begin
   else
       // Log error: The audit event id received has been seen before
       // TODO:  CDS - Does the job (state machine) get failed?
-      logMessage := "svdc_job_failed : JobId = " & jobId & " with Job Name = " & jobName & " : FailureReason = The audit event has been seen before"  & " : EventId = " & eventId & " : EventType = " & aeType;
-      Logger::log(Logger::Warning, "pv.sv.sequencedauditevent.addeventfornewjob", logMessage);
+      kvps["eventId"] := eventId; kvps["eventType"] := aeType;
+      Logger::log(Logger::Warning, "pv.sv.sequencedauditevent.addeventfornewjob",
+        svLog("svdc_job_failed", "audit event has been seen before", jobId, jobName, kvps));
 
-   
   end if;  
   //
 end service;
@@ -211,7 +212,7 @@ loopCount : integer;
 branchCount : integer;    
 mergeCount : integer;
 dynamicControlDefinitionFound : boolean;
-logMessage : string;
+kvps : dictionary of string;
 creationErrorMessage : string;
 //TODO Remove Debug declaration
 totalDynamicControls : set of instance of DynamicControl;
@@ -236,18 +237,18 @@ totalDynamicControls : set of instance of DynamicControl;
                   link newIntraJobInvariant R26 theIntraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
                   if (Logger::enabled(Logger::Debug, "pv.sv.sequencedauditevent.processauditeventdata")) then
-                    logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " with Job Name = " & theJob.jobName & " has been added for this type of audit event = " & theEventType.AEType & " with value = " & newIntraJobInvariant.invariantValue;
-                    Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.processauditeventdata", logMessage); 
+                    kvps["eventDataName"] := aeDataElement.aedName; kvps["eventDataType"] := theEventType.AEType;
+                    Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.processauditeventdata",
+                      svLog("svdc_event_data_captured", "Audit event data provided with this audit event has been captured", theJob.jobID, theJob.jobName, kvps));
                   end if;
                 else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
                 end if;                 
               else
-                // Log warning: The audit event data type provided with this audit event is of a disallowed type for this type of audit event
-                if (Logger::enabled(Logger::Debug, "pv.sv.sequencedauditevent.processauditeventdata")) then
-                  logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " with Job Name = " & theJob.jobName & " is disallowed for this type of audit event = " & theEventType.AEType;
-                  Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.processauditeventdata", logMessage);                
-                end if;
+                // Log: The audit event data type provided with this audit event is of a disallowed type for this type of audit event
+                kvps["eventDataName"] := aeDataElement.aedName; kvps["eventDataType"] := theEventType.AEType;
+                Logger::log(Logger::Information, "pv.sv.sequencedauditevent.processauditeventdata",
+                  svLog("svdc_disallowed_data", "audit event data type provided with this audit event is of a disallowed type for this type of audit event", theJob.jobID, theJob.jobName, kvps));
                 theJob.failJob("Invalid audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
               end if;
             else
@@ -288,8 +289,9 @@ totalDynamicControls : set of instance of DynamicControl;
                   link theUserExtraJobInvariant R28 theUserExtraJobInvariantDefn;
                   // Log info: Audit event data provided with this audit event has been captured
                   if (Logger::enabled(Logger::Debug, "pv.sv.sequencedauditevent.processauditeventdata")) then
-                    logMessage := "AESequenceDC::SequencedAuditEvent.ProcessAuditEventData : The audit event data type " & aeDataElement.aedName & " provided for jobId = " & theJob.jobID & " with Job Name = " & theJob.jobName & " has been added for this type of audit event = " & theEventType.AEType;
-                    Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.processauditeventdata", logMessage); 
+                    kvps["eventDataName"] := aeDataElement.aedName; kvps["eventDataType"] := theEventType.AEType;
+                    Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.processauditeventdata",
+                      svLog("svdc_event_data_captured", "Audit event data provided with this audit event has been captured", theJob.jobID, theJob.jobName, kvps));
                   end if;
                 else
                   theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
@@ -436,12 +438,14 @@ theReceivedCarriedExtraJobInvariantDef : instance of ExtraJobInvariantDefn;
 theReceivedCarriedExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theReceivedCarriedIntraJobInvariantDef : instance of IntraJobInvariantDefn;
 theReceivedCarriedIntraJobInvariantDefn : instance of IntraJobInvariantDefn;
-logMessage : string;
+theJob : instance of Job;
+kvps : dictionary of string;
 
 begin
   if (Logger::enabled(Logger::Debug, "pv.sv.sequencedauditevent.checkeventcarriesexpectedeventdata")) then
-    logMessage := "Checking received event data against definition";
-    Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.checkeventcarriesexpectedeventdata", logMessage);
+    theJob := this -> R11 -> R10;
+    Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.checkeventcarriesexpectedeventdata",
+      svLog("svdc_event_data_check", "checking received event data against definition", theJob.jobID, theJob.jobName, kvps));
   end if;
 	
   // Initialise return parameters

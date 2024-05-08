@@ -9,7 +9,7 @@ newExtraJobInvariant : instance of PersistedInvariant;
 sourceAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
 sourceEventDefn : instance of SequencedAuditEventDefinition;
 sourceJobDefn : instance of JobDefinition;
-logMessage : string;
+kvps : dictionary of string;
 
 begin
   endTime := timestamp'now + extraJobInvDefn.lifetime;
@@ -26,9 +26,11 @@ begin
     link newExtraJobInvariant R24 extraJobInvDefn;
     
     // Log info: Audit event data provided with this audit event has been captured
-    if (Logger::enabled(Logger::Information, "pv.sv.persistedinvariant.createsourceextrajobinvariant")) then
-      logMessage := "The persisted invariant " & newExtraJobInvariant.invariantName & " with value = " & newExtraJobInvariant.invariantValue & " has been created";
-      Logger::log(Logger::Information, "pv.sv.persistedinvariant.createsourceextrajobinvariant", logMessage); 
+    if (Logger::enabled(Logger::Debug, "pv.sv.persistedinvariant.createsourceextrajobinvariant")) then
+      // Do not log invariant values.  These could be sensitive security information.
+      kvps["invariantName"] := newExtraJobInvariant.invariantName;
+      Logger::log(Logger::Debug, "pv.sv.persistedinvariant.createsourceextrajobinvariant",
+        svLog("svdc_eji_new_invariant", "persisted invariant has been created", "", "", kvps));
     end if;
     
     generate PersistedInvariant.invariantComesIntoForce() to newExtraJobInvariant;
@@ -57,7 +59,7 @@ public instance service AESequenceDC::PersistedInvariant.deletePersistedInvarian
 theExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theProvidingAuditEvent : instance of SequencedAuditEvent;
 
-logMessage : string;
+kvps : dictionary of string;
 
 begin
   // This operation deletes the respective instance of PersistedInvariant
@@ -75,9 +77,10 @@ begin
     end if;
         
     // ... and finally deleted the specified instance of PersistedInvariant and log this.    
-    if (Logger::enabled(Logger::Information, "pv.sv.persistedinvariant.deletepersistedinvariant")) then
-      logMessage := "AESequenceDC::PersistedInvariant.deletePersistedInvariant : PersistentInvariant: " & this.invariantId'image & " deleted ";
-      Logger::log(Logger::Information, "pv.sv.persistedinvariant.deletepersistedinvariant", logMessage);
+    if (Logger::enabled(Logger::Debug, "pv.sv.persistedinvariant.deletepersistedinvariant")) then
+      // Do not log invariant values.  These could be sensitive security information.
+      Logger::log(Logger::Debug, "pv.sv.persistedinvariant.deletepersistedinvariant",
+        svLog("svdc_invariant_deleted", "persisted invariant has been deleted", "", "", kvps));
     end if;
     delete this;
 end service;

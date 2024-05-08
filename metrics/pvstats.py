@@ -2,8 +2,11 @@ import argparse
 import datetime
 import kafka3
 import json
-import time
+import os
 import re
+import sys
+import time
+from string import Template
 
 class Report:
 
@@ -11,11 +14,16 @@ class Report:
         self.id = id
         self.job_success = 0
         self.job_fail = 0
+        self.job_alarm = 0
+        self.lastSuccessfulJob = ""
+        self.lastFailedJob = ""
+        self.lastAlarmedJob = ""
         self.receivedAuditEventCount = 0
-        self.employed_workers = 0
+        self.employedWorkers = 0
         self.assignedJobs = 0
-        self.worker_assignments = []
-        self.worker_event_counts = []
+        self.unassignedJobs = 0
+        self.workerAssignments = []
+        self.workerEventCounts = []
 
     def poll_for_messages(self, s):
         ''' Poll the message broker and process messages. '''
@@ -31,53 +39,80 @@ class Report:
                     sys.exit(1)
                 else:
                     payload = j['payload']
-                    self.employed_workers = payload['employedWorkers']
+                    self.employedWorkers = payload['employedWorkers']
                     self.assignedJobs = payload['assignedJobs']
+                    self.unassignedJobs = payload['unassignedJobs']
                     self.receivedAuditEventCount = payload['receivedAuditEventCount']
                     worker_stats = payload['workerStats']
                     i = 0
-                    for worker in worker_stats:
-                        if len(self.worker_assignments) < self.employed_workers:
-                            self.worker_assignments.append(worker['assignedJobCount'])
-                            self.worker_event_counts.append(worker['reportedAuditEventCount'])
-                        else:
-                            self.worker_assignments[i] = worker['assignedJobCount']
-                            self.worker_event_counts[i] = worker['reportedAuditEventCount']
-                            i += 1
+                    if worker_stats:
+                        for worker in worker_stats:
+                            if len(self.workerAssignments) < self.employedWorkers:
+                                self.workerAssignments.append(worker['assignedJobCount'])
+                                self.workerEventCounts.append(worker['reportedAuditEventCount'])
+                            else:
+                                self.workerAssignments[i] = worker['assignedJobCount']
+                                self.workerEventCounts[i] = worker['reportedAuditEventCount']
+                                i += 1
                     i = 0
         except ValueError:
             return
 
     def consume_infowarn(self, s):
         ''' Consume a message and gather job results. '''
-        if 'job_fail' in s:
-            self.job_fail += 1
+        j = None
+        if 'job_fail' in s or 'job_success' in s or 'job_alarm' in s:
+            try:
+                j = json.loads(s)
+            except json.decoder.JSONDecodeError:
+                print("INVALID JSON", s)
+                sys.exit(1)
+            else:
+                payload = j['payload']
+                if 'job_fail' in s:
+                    self.job_fail += 1
+                    self.lastFailedJob = payload['jobName']
+                    print( s )
+                elif 'job_alarm' in s:
+                    self.job_alarm += 1
+                    self.lastAlarmedJob = payload['jobName']
+                    print( s )
+                elif 'job_success' in s:
+                    self.job_success += 1
+                    self.lastSuccessfulJob = payload['jobName']
+        else:
             print( s )
-        elif 'job_success' not in s:
-            print( s )
-        elif 'job_success' in s:
-            self.job_success += 1
 
     def report(self):
-        ''' Report the status of the Protocol Verifier. '''
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b', end='', flush=True )
-        print( "job_fail:", str(report.job_fail), end='', flush=True )
-        print( " job_success:", str(report.job_success), end='', flush=True )
-        print( " rcvd_events:", str(report.receivedAuditEventCount), end='', flush=True )
-        print( " employed_workers:", str(report.employed_workers), ' ', end='', flush=True )
-        print( " assignedJobs:", str(report.assignedJobs), ' ', end='', flush=True )
-        for worker in report.worker_assignments:
-            print( " w_jobs:", str(worker), ' ', end='', flush=True )
-        for wcount in report.worker_event_counts:
-            print( " w_ecount:", str(wcount), ' ', end='', flush=True )
+        ''' Report the status of the Protocol Verifier to a templated string. '''
+        lines1 = """
+job_success: \033[0;32;40m$job_success\033[0;0m job_fail: \033[0;33;40m$job_fail\033[0;0m job_alarm: \033[0;31;40m$job_alarm\033[0;0m
+rcvd_events: $rcvd_events  employedWorkers: $employedWorkers  assignedJobs: $assignedJobs  unassignedJobs: $unassignedJobs
+"""
+        tobj1 = Template(lines1)
+        h = tobj1.substitute(job_alarm=report.job_alarm,
+                            job_fail=report.job_fail,
+                            job_success=report.job_success,
+                            rcvd_events=report.receivedAuditEventCount,
+                            employedWorkers=report.employedWorkers,
+                            assignedJobs=report.assignedJobs,
+                            unassignedJobs=report.unassignedJobs)
+        print( h, end='', flush=True )
+        for worker in report.workerAssignments:
+            print( "w_jobs:", str(worker), ' ', end='', flush=True )
+        print()
+        for wcount in report.workerEventCounts:
+            print( "w_ecount:", str(wcount), ' ', end='', flush=True )
+        lines2 = """
+lastSuccessfulJob: \033[0;32;40m$lastSuccessfulJob\033[0;0m
+lastFailedJob: \033[0;33;40m$lastFailedJob\033[0;0m
+lastAlarmedJob: \033[0;31;40m$lastAlarmedJob\033[0;0m
+"""
+        tobj2 = Template(lines2)
+        h = tobj2.substitute(lastAlarmedJob=report.lastAlarmedJob,
+                            lastFailedJob=report.lastFailedJob,
+                            lastSuccessfulJob=report.lastSuccessfulJob)
+        print( h, end='', flush=True )
 
 
 if __name__ == '__main__':
@@ -93,6 +128,7 @@ if __name__ == '__main__':
     report = Report(1)
 
     t0 = time.monotonic()
+    os.system('cls' if os.name == 'nt' else 'clear')
     # process messages
     raw_msgs = consumer.poll(timeout_ms=20000)
     while len(raw_msgs) > 0:
@@ -105,9 +141,9 @@ if __name__ == '__main__':
                     report.consume_infowarn(s)
         # log periodically
         t1 = time.monotonic()
-        if ( t1 - t0 ) > 2:
+        if ( t1 - t0 ) > 1:
+            os.system('cls' if os.name == 'nt' else 'clear')
             report.report()
             t0 = t1
 
-        raw_msgs = consumer.poll(timeout_ms=8000)
-
+        raw_msgs = consumer.poll(timeout_ms=2000)
