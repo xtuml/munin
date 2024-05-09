@@ -68,12 +68,12 @@ services:
     command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -util MetaData"
 
   zookeeper:
-    image: wurstmeister/zookeeper:3.4.6
+    image: levistarrett/zookeeper:3.4.6
     ports:
       - "2181:2181"
 
   kafka:
-    image: wurstmeister/kafka
+    image: levistarrett/kafka
     ports:
       - "9092:9092"
     expose:
@@ -97,7 +97,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   kafka_config:
-    image: wurstmeister/kafka
+    image: levistarrett/kafka
     depends_on:
       kafka:
         condition: service_healthy
