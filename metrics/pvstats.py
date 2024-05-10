@@ -146,4 +146,4 @@ if __name__ == '__main__':
             report.report()
             t0 = t1
 
-        raw_msgs = consumer.poll(timeout_ms=2000)
+        raw_msgs = consumer.poll(timeout_ms=8000)

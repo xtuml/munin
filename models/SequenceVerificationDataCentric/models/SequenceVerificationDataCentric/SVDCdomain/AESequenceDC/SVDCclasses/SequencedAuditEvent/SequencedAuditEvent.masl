@@ -438,14 +438,12 @@ theReceivedCarriedExtraJobInvariantDef : instance of ExtraJobInvariantDefn;
 theReceivedCarriedExtraJobInvariantDefn : instance of ExtraJobInvariantDefn;
 theReceivedCarriedIntraJobInvariantDef : instance of IntraJobInvariantDefn;
 theReceivedCarriedIntraJobInvariantDefn : instance of IntraJobInvariantDefn;
-theJob : instance of Job;
 kvps : dictionary of string;
 
 begin
   if (Logger::enabled(Logger::Debug, "pv.sv.sequencedauditevent.checkeventcarriesexpectedeventdata")) then
-    theJob := this -> R11 -> R10;
     Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.checkeventcarriesexpectedeventdata",
-      svLog("svdc_event_data_check", "checking received event data against definition", theJob.jobID, theJob.jobName, kvps));
+      svLog("svdc_event_data_check", "checking received event data against definition", "", "", kvps));
   end if;
 	
   // Initialise return parameters
