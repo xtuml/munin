@@ -72,16 +72,16 @@ class Report:
                 if 'job_fail' in s:
                     self.job_fail += 1
                     self.lastFailedJob = payload['jobName']
-                    print( s )
+                    print( s, file=sys.stderr )
                 elif 'job_alarm' in s:
                     self.job_alarm += 1
                     self.lastAlarmedJob = payload['jobName']
-                    print( s )
+                    print( s, file=sys.stderr )
                 elif 'job_success' in s:
                     self.job_success += 1
                     self.lastSuccessfulJob = payload['jobName']
         else:
-            print( s )
+            print( s, file=sys.stderr )
 
     def report(self):
         ''' Report the status of the Protocol Verifier to a templated string. '''
@@ -146,4 +146,4 @@ if __name__ == '__main__':
             report.report()
             t0 = t1
 
-        raw_msgs = consumer.poll(timeout_ms=2000)
+        raw_msgs = consumer.poll(timeout_ms=8000)
