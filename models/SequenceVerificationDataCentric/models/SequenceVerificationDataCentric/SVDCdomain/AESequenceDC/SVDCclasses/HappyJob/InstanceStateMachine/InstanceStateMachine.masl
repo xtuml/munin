@@ -1188,7 +1188,8 @@ begin
           // If any one of them matches the value of the transient invariant then the transient invariant is valid
           theInForcePersistedExtraJobInvariants := find thePersistedExtraJobInvariants (inForce = true);
           for eachInForceInvariant in theInForcePersistedExtraJobInvariants loop
-            if eachInForceInvariant.invariantValue = theTransientExtraJobInvariant.invariantValue then
+            // Compare the persisted hash of the invariant with the hash of the transient invariant.
+            if eachInForceInvariant.invariantValue = Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue)) then
               matched := true;
               exit;
             else
