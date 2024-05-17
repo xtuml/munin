@@ -20,18 +20,18 @@ begin
     // Hash the invariant value and persist (only) the (string encoded) hash.
     newExtraJobInvariant := create unique PersistedInvariant (invariantName => invariantName,
                                                               invariantValue => Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, invariantValue)),
-                                                              validFrom => timestamp'now, 
-                                                              validUntil => endTime, 
-                                                              Current_State => Pending );
+                                                              validFrom => timestamp'now,
+                                                              validUntil => endTime,
+                                                              Current_State => Pending);
 
     link newExtraJobInvariant R24 extraJobInvDefn;
     
     // Log info: Audit event data provided with this audit event has been captured
     if (Logger::enabled(Logger::Debug, "pv.sv.persistedinvariant.createsourceextrajobinvariant")) then
-      // Do not log invariant values.  These could be sensitive security information.
       kvps["invariantName"] := newExtraJobInvariant.invariantName;
-      kvps["invariantValue"] := newExtraJobInvariant.invariantValue; // CDS Delete!
-      kvps["invariantHashString"] := Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, invariantValue)); // CDS Delete!
+      // Do not log invariant values.  These could be sensitive security information.  Uncomment only in a development build.
+      kvps["invariantValue"] := invariantValue;
+      kvps["invariantHashString"] := newExtraJobInvariant.invariantValue;
       Logger::log(Logger::Debug, "pv.sv.persistedinvariant.createsourceextrajobinvariant",
         svLog("svdc_eji_new_invariant", "persisted invariant has been created", "", "", kvps));
     end if;
