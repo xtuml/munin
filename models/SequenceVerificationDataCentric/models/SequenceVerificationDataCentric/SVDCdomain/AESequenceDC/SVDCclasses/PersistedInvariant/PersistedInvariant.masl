@@ -30,8 +30,8 @@ begin
     if (Logger::enabled(Logger::Debug, "pv.sv.persistedinvariant.createsourceextrajobinvariant")) then
       kvps["invariantName"] := newExtraJobInvariant.invariantName;
       // Do not log invariant values.  These could be sensitive security information.  Uncomment only in a development build.
-      kvps["invariantValue"] := invariantValue;
-      kvps["invariantHashString"] := newExtraJobInvariant.invariantValue;
+      //kvps["invariantValue"] := invariantValue;
+      //kvps["invariantHashString"] := newExtraJobInvariant.invariantValue;
       Logger::log(Logger::Debug, "pv.sv.persistedinvariant.createsourceextrajobinvariant",
         svLog("svdc_eji_new_invariant", "persisted invariant has been created", "", "", kvps));
     end if;

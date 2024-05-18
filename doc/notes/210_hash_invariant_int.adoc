@@ -26,7 +26,7 @@ of the Protocol Verifier.
 Going forward, the Protocol Verifier will hash the extra-job invariant
 upon receipt in the source job and persist the hash.  User jobs will hash
 the audit event stream extra-job invariants and compare to the hash of
-source invariant.
+source invariants.
 
 There will be no change to processing of intra-job invariants.
 
@@ -56,12 +56,45 @@ Store a hash of an invariant rather than the plaintext invariant value.
 . In `HappyJob_AssessingLocalExtraJobInvariants`, compare the
   `eachInForceInvariant.invariantValue` with a hash of the
   `theTransientExtraJobInvariant.invariantValue`.
+. Also, when requesting invariants to be restored, hash the value.
 . Do the same in `UnhappyJob_AssessingLocalExtraJobInvariants`.
 . Do the same in `UnhappyJob_ReassessingExtraJobInvariants`.
 
 == 5 Implementation Comments
 
-* Chose 'SHA3_256' as the hashing algorithm.
+=== 5.1 Hash
+
+* The recently added 'Hash' utility domain had a few problems.  These had
+  to be addressed before the domain could be used.
+* I chose 'SHA3_256' as the hashing algorithm.  It is modern and not
+  unreasonably long.
+
+=== 5.2 Timing Window?
+
+I found a potential bug that is revealed with the development build.
+The scenario is as follows:
+
+. Use `plus2json` to produce job definitions for
+  ** AAExtraJobInvariantSourceJob.puml
+  ** ExtraJobInvariantUserJob1.puml
+. Launch Protocol Verifier.
+. Use `plus2json` to play AAExtraJobInvariantSourceJob.puml.
+  ** This will cause an extra-job invariant to be persisted.
+. Bring down the Protocol Verifier.
+. Re-launch the Protocol Verifier.
+. Use `plus2json` to play ExtraJobInvariantUserJob1.puml.
+
+I observe that this job fails.  If I play the same job again, it succeeds.
+
+In the relaunch of Protocol Verifier, I observe that IStore loads the
+persisted invariants immediately and sends them (it) to Sequence
+Verification.  However, Sequence Verification has not (even) loaded job
+definitions, yet.  So it does not recognise the invariants, because it has
+no invariants defined in the instance population (yet).
+
+This scenario is run with `eji_reboot.sh`.
+
+I have not attempted to reproduce this in the multi-process (Kafka) space, yet.
 
 == 6 Unit Test
 
@@ -79,17 +112,21 @@ N/A
 - branch:  210_hash_invariant
 
 ----
- doc/notes/210_hash_invariant_int.adoc                        | 93 +++++++++++++++++++++++++++
- .../HappyJob/InstanceStateMachine/InstanceStateMachine.masl  |  3 +-
- .../SVDCclasses/PersistedInvariant/PersistedInvariant.masl   | 13 ++--
- .../InstanceStateMachine/InstanceStateMachine.masl           |  4 +-
- models/utils/Hash.int                                        | 54 ++++++++++++++++
- 5 files changed, 159 insertions(+), 8 deletions(-)
+ bin/.env                                                    |  2 +-
+ deploy/.env                                                 |  2 +-
+ doc/notes/210_hash_invariant_int.adoc                       | 98 +++++++++++++++++++++++++++
+ .../HappyJob/InstanceStateMachine/InstanceStateMachine.masl | 31 +++++++--
+ .../SVDCclasses/PersistedInvariant/PersistedInvariant.masl  | 15 ++--
+ .../InstanceStateMachine/InstanceStateMachine.masl          | 15 +++-
+ .../SVDCdomain/AESequenceDC/functions/functions.masl        | 45 ++++++------
+ models/utils/Hash.int                                       | 55 +++++++++++++++
+ tests/eji_reboot.sh                                         | 48 +++++++++++++
+ 10 files changed, 276 insertions(+), 39 deletions(-)
 ----
 
 == 9 Document References
 
-. [[dr-1]] https://github.com/xtuml/munin/issues/210[210 - headline]
+. [[dr-1]] https://github.com/xtuml/munin/issues/210[210 - Hash persisted invariants]
 
 ---
 

@@ -616,22 +616,24 @@ end service;
 //! ACTIVITY BEGIN. '9ebd061a-f613-4920-9250-f9095dc73be3' DO NOT EDIT THIS LINE.
 public service AESequenceDC::restoreInvariants ( restoredInvariants : in sequence of persistedInvariantStructure ) is
 theRestoredExtraJobInvDefn : instance of ExtraJobInvariantDefn;
-theAEOccurrenceDefn : instance of AEOccurrenceInSequenceDefinition;
-theEventDefn : instance of SequencedAuditEventDefinition;
-theJobDefn : instance of JobDefinition;
 theJobs : set of instance of Job;
-theRestoredPersistentInvariant : instance of PersistedInvariant;
-existingInvariant : instance of PersistedInvariant;
-theSystemSpec : instance of SystemSpecification;
+found : boolean := false;
 kvps : dictionary of string;
 
 begin
   for restoredInvariant in restoredInvariants loop
                 
     theRestoredExtraJobInvDefn := find_one ExtraJobInvariantDefn (extraJobInvName = restoredInvariant.invariantName);
-    if theRestoredExtraJobInvDefn /= null then    
+    if theRestoredExtraJobInvDefn /= null then
+
+      if (Logger::enabled(Logger::Debug, "pv.sv.restoreinvariants")) then
+        kvps["invariantName"] := restoredInvariant.invariantName;
+        Logger::log(Logger::Debug, "pv.sv.restoreinvariants",
+          svLog("svdc_restore_invariant", "Found the Extra-Job Invariant Definition", "", "", kvps));
+      end if;
       theRestoredExtraJobInvDefn.restoreInvariantOfThisDefinition (restoredInvariant);      
-    
+      found := true;
+
     else
 
       if (Logger::enabled(Logger::Debug, "pv.sv.restoreinvariants")) then
@@ -643,20 +645,19 @@ begin
     end if;  
                  
   end loop;
-  
-  // Tell all extant Jobs that stored invariants have been found
-  theJobs := find Job (jobCompleted = false);
-  // generate event to all jobs here
-  for eachJob in theJobs loop
-    
-    // TODO Remove debug message
-    if (Logger::enabled(Logger::Debug, "pv.sv.restoreinvariants")) then
-      Logger::log(Logger::Debug, "pv.sv.restoreinvariants",
-        svLog("svdc_restore_invariant", "Additional Source Invariants found so re-evaluate the extra job invariants for Job", eachJob.jobID, "", kvps));
-    end if;
-    
-    generate Job.StoredInvariantsReceived () to eachJob;
-  end loop;
+
+  if found = true then
+    // Tell all extant Jobs that stored invariants have been found
+    theJobs := find Job (jobCompleted = false);
+    // generate event to all jobs here
+    for eachJob in theJobs loop
+      if (Logger::enabled(Logger::Debug, "pv.sv.restoreinvariants")) then
+        Logger::log(Logger::Debug, "pv.sv.restoreinvariants",
+          svLog("svdc_restore_invariant", "Additional Source Invariants found so re-evaluate the extra job invariants for Job", eachJob.jobID, "", kvps));
+      end if;
+      generate Job.StoredInvariantsReceived () to eachJob;
+    end loop;
+  end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

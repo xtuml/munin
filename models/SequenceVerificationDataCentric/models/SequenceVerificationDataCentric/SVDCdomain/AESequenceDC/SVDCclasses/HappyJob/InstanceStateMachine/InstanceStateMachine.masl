@@ -1144,7 +1144,7 @@ begin
   end if;
   
   theSystemSpec := find_one SystemSpecification ();
-  failureReason := " Request for invariants from the persistence store has timed out meaning the Extra Job Invariant Check has failed " & this.jobID & " with Job Name = " & theJob.jobName;
+  failureReason := "Request for invariants from the persistence store has timed out meaning the Extra Job Invariant Check has failed " & this.jobID & " with Job Name = " & theJob.jobName;
   schedule theJob.jobInvariantSyncTimer generate Job.persistenceSyncTimedOut(failureReason) to theJob delay theSystemSpec.persistentInvariantRestoreTimeoutPeriod;
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -1191,11 +1191,11 @@ begin
             if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants")) then
               kvps["invariantName"] := eachInForceInvariant.invariantName;
               // Do not log invariant values.  These could be sensitive security information.  Uncomment only in a development build.
-              kvps["inforceInvariantValue"] := eachInForceInvariant.invariantValue;
-              kvps["transientInvariantValue"] := theTransientExtraJobInvariant.invariantValue;
-              kvps["invariantHashString"] := Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue));
+              //kvps["inforceInvariantValue"] := eachInForceInvariant.invariantValue;
+              //kvps["transientInvariantValue"] := theTransientExtraJobInvariant.invariantValue;
+              //kvps["invariantHashString"] := Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue));
               Logger::log(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants",
-                svLog("svdc_eji_new_invariant", "happy invariant comparison", "", "", kvps));
+                svLog("svdc_eji_assessment", "happy invariant comparison", "", "", kvps));
             end if;
             // Compare the persisted hash of the invariant with the hash of the transient invariant.
             if eachInForceInvariant.invariantValue = Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue)) then
@@ -1207,9 +1207,13 @@ begin
           end loop;
 
           if not matched then
+            if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants")) then
+              Logger::log(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants",
+                svLog("svdc_eji_no_match", "happy invariant no match yet", "", "", kvps));
+            end if;
             // Check to see if there is a stored persistent invariant 
             Persistence_Req_IF~>RestoreNamedInvariant(theTransientExtraJobInvariant.extraJobInvName,
-                                           theTransientExtraJobInvariant.invariantValue);
+               Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue)));
             generate Job.WaitForStoredInvariants() to theJob;   
             extraJobInvariantCheckPassed := false;
             exit;
@@ -1276,9 +1280,9 @@ begin
             if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.reassessingextrajobinvariants")) then
               kvps["invariantName"] := eachInForceInvariant.invariantName;
               // Do not log invariant values.  These could be sensitive security information.  Uncomment only in a development build.
-              kvps["inforceInvariantValue"] := eachInForceInvariant.invariantValue;
-              kvps["transientInvariantValue"] := theTransientExtraJobInvariant.invariantValue;
-              kvps["invariantHashString"] := Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue));
+              //kvps["inforceInvariantValue"] := eachInForceInvariant.invariantValue;
+              //kvps["transientInvariantValue"] := theTransientExtraJobInvariant.invariantValue;
+              //kvps["invariantHashString"] := Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue));
               Logger::log(Logger::Debug, "pv.sv.happyjob.reassessingextrajobinvariants",
                 svLog("svdc_eji_new_invariant", "happy reassessment invariant comparison", "", "", kvps));
             end if;

@@ -484,9 +484,9 @@ begin
             if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants")) then
               kvps["invariantName"] := eachInForceInvariant.invariantName;
               // Do not log invariant values.  These could be sensitive security information.  Uncomment only in a development build.
-              kvps["inforceInvariantValue"] := eachInForceInvariant.invariantValue;
-              kvps["transientInvariantValue"] := theTransientExtraJobInvariant.invariantValue;
-              kvps["invariantHashString"] := Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue));
+              //kvps["inforceInvariantValue"] := eachInForceInvariant.invariantValue;
+              //kvps["transientInvariantValue"] := theTransientExtraJobInvariant.invariantValue;
+              //kvps["invariantHashString"] := Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue));
               Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants",
                 svLog("svdc_eji_new_invariant", "unhappy invariant comparison", "", "", kvps));
             end if;
