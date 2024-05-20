@@ -56,7 +56,8 @@ Store a hash of an invariant rather than the plaintext invariant value.
 . In `HappyJob_AssessingLocalExtraJobInvariants`, compare the
   `eachInForceInvariant.invariantValue` with a hash of the
   `theTransientExtraJobInvariant.invariantValue`.
-. Also, when requesting invariants to be restored, hash the value.
+. Also, when requesting restoration of a named invariant, pass in a
+  hash of the requested invariant value.
 . Do the same in `UnhappyJob_AssessingLocalExtraJobInvariants`.
 . Do the same in `UnhappyJob_ReassessingExtraJobInvariants`.
 
@@ -69,7 +70,19 @@ Store a hash of an invariant rather than the plaintext invariant value.
 * I chose 'SHA3_256' as the hashing algorithm.  It is modern and not
   unreasonably long.
 
-=== 5.2 Timing Window?
+=== 5.2 `EncodeBase64`
+
+The types of invariant values are 'string'.  A hash is types as 'sequence
+of byte'.  'Strings::encodeBase64' converts a sequence of byte into a
+string in a predictable way.  In order to keep this typing, the hash is
+encoded into a string.  This minimises the impact interfaces and structure
+definitions.  It also maintains consistency with inter-job invariants.
+
+=== 5.3 Salt
+
+In the future, consider strengthening the hash with a salt.
+
+=== 5.4 Timing Window?
 
 I found a potential bug that is revealed with the development build.
 The scenario is as follows:
