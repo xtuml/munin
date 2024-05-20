@@ -481,7 +481,16 @@ begin
           // If any one of them matches the value of the transient invariant then the transient invariant is valid
           theInForcePersistedExtraJobInvariants := find thePersistedExtraJobInvariants (inForce = true);
           for eachInForceInvariant in theInForcePersistedExtraJobInvariants loop
-            if eachInForceInvariant.invariantValue = theTransientExtraJobInvariant.invariantValue then
+            if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants")) then
+              kvps["invariantName"] := eachInForceInvariant.invariantName;
+              // Do not log invariant values.  These could be sensitive security information.  Uncomment only in a development build.
+              //kvps["inforceInvariantValue"] := eachInForceInvariant.invariantValue;
+              //kvps["transientInvariantValue"] := theTransientExtraJobInvariant.invariantValue;
+              //kvps["invariantHashString"] := Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue));
+              Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants",
+                svLog("svdc_eji_new_invariant", "unhappy invariant comparison", "", "", kvps));
+            end if;
+            if eachInForceInvariant.invariantValue = Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue)) then
               matched := true;
               exit;
             else
@@ -492,7 +501,7 @@ begin
           if not matched then
             // Check to see if there is a stored persistent invariant 
             Persistence_Req_IF~>RestoreNamedInvariant(theTransientExtraJobInvariant.extraJobInvName,
-            	                               theTransientExtraJobInvariant.invariantValue);
+                                                      theTransientExtraJobInvariant.invariantValue);
             generate Job.WaitForStoredInvariants() to theJob;   
             extraJobInvariantCheckPassed := false;
             exit;
@@ -556,7 +565,7 @@ begin
           // If any one of them matches the value of the transient invariant then the transient invariant is valid
           theInForcePersistedExtraJobInvariants := find thePersistedExtraJobInvariants (inForce = true);
           for eachInForceInvariant in theInForcePersistedExtraJobInvariants loop
-            if eachInForceInvariant.invariantValue = theTransientExtraJobInvariant.invariantValue then
+            if eachInForceInvariant.invariantValue = Strings::encodeBase64(Hash::hash(Hash::Algorithm.SHA3_256, theTransientExtraJobInvariant.invariantValue)) then
               matched := true;
               exit;
             else
