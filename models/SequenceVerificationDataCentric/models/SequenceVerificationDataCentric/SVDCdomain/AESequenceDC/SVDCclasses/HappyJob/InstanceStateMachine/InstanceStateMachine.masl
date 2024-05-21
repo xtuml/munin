@@ -727,16 +727,16 @@ begin
     if (validatedConstraint = false) and (validatedDynamicControl = true) then
       // Only the constraint checks have failed
       failureReason := "one or more constraint checks have failed";
-      generate Job.jobFailed(failureReason) to theJob;
+      generate Job.jobFailed(failureReason) to this;
     else
       if (validatedConstraint = true) and (validatedDynamicControl = false) then
         // Only the dynamic control checks have failed
         failureReason := "one or more dynamic control checks have failed";
-        generate Job.jobFailed(failureReason) to theJob;
+        generate Job.jobFailed(failureReason) to this;
       else
         // Both checks must have failed
         failureReason := "one or more constraint checks AND one or more dynamic control checks have failed";
-        generate Job.jobFailed(failureReason) to theJob;
+        generate Job.jobFailed(failureReason) to this;
       end if;
     end if;
   else
@@ -745,7 +745,7 @@ begin
       Logger::log(Logger::Debug, "pv.sv.happyjob.assessingjobconstraints",
         svLog("svdc_constraints_pass", "Constraint and dynamic control checks passed", this.jobID, theJob.jobName, kvps));
     end if;
-    generate Job.constraintCheckSuccessful() to theJob;
+    generate Job.constraintCheckSuccessful() to this;
   end if;
   
 //  if validatedConstraint = false then
@@ -1119,10 +1119,10 @@ begin
           Logger::log(Logger::Debug, "pv.sv.happyjob.assessingintrajobinvariants",
             svLog("svdc_iji_check", "Intra-Job Invariant check passed", this.jobID, theJob.jobName, kvps));
         end if;
-        generate Job.intraJobInvariantCheckSuccessful() to theJob;
+        generate Job.intraJobInvariantCheckSuccessful() to this;
       else
         failureReason := "Check of Intra-Job Invariants Failed";
-        generate Job.jobFailed(failureReason) to theJob;
+        generate Job.jobFailed(failureReason) to this;
       end if;  
   
 end state;
@@ -1228,7 +1228,7 @@ begin
           Logger::log(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants",
             svLog("svdc_eji_check_passed", "Extra-Job Invariant check passed", this.jobID, theJob.jobName, kvps));
         end if;
-        generate Job.extraJobInvariantCheckSuccessful() to theJob;
+        generate Job.extraJobInvariantCheckSuccessful() to this;
       else
         if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants")) then
           Logger::log(Logger::Debug, "pv.sv.happyjob.assessinglocalextrajobinvariants",
@@ -1308,10 +1308,10 @@ begin
           Logger::log(Logger::Debug, "pv.sv.happyjob.reassessingextrajobinvariants",
             svLog("svdc_eji_check_passed", "Extra-Job Invariant check passed", this.jobID, theJob.jobName, kvps));
         end if;
-        generate Job.extraJobInvariantCheckSuccessful() to theJob;
+        generate Job.extraJobInvariantCheckSuccessful() to this;
       else
         failureReason := "Extra-Job Invariant check failed including checking stored invariants";
-        generate Job.jobFailed (failureReason) to theJob;
+        generate Job.jobFailed (failureReason) to this;
       end if;  
   
 end state;
