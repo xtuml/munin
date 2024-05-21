@@ -502,7 +502,7 @@ begin
             // Check to see if there is a stored persistent invariant 
             Persistence_Req_IF~>RestoreNamedInvariant(theTransientExtraJobInvariant.extraJobInvName,
                                                       theTransientExtraJobInvariant.invariantValue);
-            generate Job.WaitForStoredInvariants() to theJob;   
+            generate Job.WaitForStoredInvariants() to this;
             extraJobInvariantCheckPassed := false;
             exit;
           end if;      

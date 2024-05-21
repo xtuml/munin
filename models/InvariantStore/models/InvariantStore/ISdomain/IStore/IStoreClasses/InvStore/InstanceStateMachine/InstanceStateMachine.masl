@@ -19,7 +19,6 @@ sourceAuditEventType : string;
 sourceAuditEventOccurrenceId : string;
 invariant : instance of Invariant;
 invariantToReport : persistedInvariantStructure;
-invariantsToReport : sequence of persistedInvariantStructure;
 logMessage : string;
 fileStatus : Filesystem::file_status;
 
@@ -57,26 +56,12 @@ begin
 			for validInvariant in find Invariant() loop
 				storeContents := storeContents & validInvariant.invariantName & "," & validInvariant.invariantValue & "," & validInvariant.validFrom'image & "," & validInvariant.validTo'image
 				                 & "," & validInvariant.sourceJobDefinitionType & "," & validInvariant.sourceAuditEventType & "," &  validInvariant.sourceAuditEventOccurrenceId & "\n";  
-				if validInvariant.reportedToLocalClient = false then
-					invariantToReport.invariantName := validInvariant.invariantName;
-					invariantToReport.invariantValue := validInvariant.invariantValue;
-					invariantToReport.validFrom := validInvariant.validFrom;
-					invariantToReport.validTo := validInvariant.validTo;
-					invariantToReport.sourceJobDefinitionType := validInvariant.sourceJobDefinitionType;
-					invariantToReport.sourceAuditEventType := validInvariant.sourceAuditEventType;
-					invariantToReport.sourceAuditEventOccurrenceId := integer'parse(validInvariant.sourceAuditEventOccurrenceId);
-					invariantsToReport := invariantsToReport & invariantToReport;
-					validInvariant.reportedToLocalClient := true;
-				end if;
 				validInvariant.stored := true;
 			end loop;
-			if invariantsToReport'length > 0 then
-				StoreClient~>addInvariants(invariantsToReport);
-			end if;
-			
+
 			// write the file
 			Filesystem::write_file(this.invStoreName, storeContents);
-			
+
 			// unlock the file
 			Filesystem::unlock_file(lock);
 			schedule this.storeTimer generate InvStore.checkStore() to this delay this.loadRate;
