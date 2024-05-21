@@ -100,7 +100,7 @@ repository from GitHub. Follow the steps from the guide linked in the
 workspace:
 
 * Protocol Verifier Domains
-  ** AEReception (AER)
+  ** JobManagement (JM)
   ** AEOrdering (AEO)
   ** FileReception (FR) - only required if input event streams are file based
   ** SequenceVerificationDataCentric (SVDC)
@@ -621,7 +621,7 @@ steps to building and running the projects:
 
 Before getting into the actual build, it is often an instructive process to
 go through the project structure file by file and explore the purpose of each
-file in the context of the build. We will use the `AEReception` domain for this.
+file in the context of the build. We will use the `JobManagement` domain for this.
 Each of the other domains follows a similar pattern. Not every file/directory
 seen here will exist in each domain project.
 
@@ -633,7 +633,7 @@ byproducts of the build that should not be committed to the repository (e.g.
 build logs, test results). Not every one of these files will be covered in the
 section below, but it is good to be aware of them.
 
-  ▾ AEReception/
+  ▾ JobManagement/
     ▸ build/
     ▸ config/
     ▾ gen/
@@ -652,7 +652,7 @@ section below, but it is good to be aware of them.
       conanfile.py
       test.env
 
-For a visual overview of the directory structure for the AEReception domain 
+For a visual overview of the directory structure for the JobManagement domain 
 click link:images/AEReception_Directory_Structure.pdf[here]. TODO Update the diagram
 
 ==== `build`
