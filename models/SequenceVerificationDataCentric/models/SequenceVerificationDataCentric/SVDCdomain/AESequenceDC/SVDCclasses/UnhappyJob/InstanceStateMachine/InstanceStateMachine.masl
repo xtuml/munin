@@ -412,10 +412,10 @@ begin
           Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessingintrajobinvariants",
             svLog("svdc_iji_check_passed", "Intra-Job Invariant check passed for Unhappy Job", this.jobID, theJob.jobName, kvps));
         end if;
-        generate Job.intraJobInvariantCheckSuccessful() to theJob;
+        generate Job.intraJobInvariantCheckSuccessful() to this;
       else
         failureReason := "Check of Intra-Job Invariants in Unhappy Job Failed";
-        generate Job.jobFailed(failureReason) to theJob;
+        generate Job.jobFailed(failureReason) to this;
       end if;  
   
 end state;
@@ -516,7 +516,7 @@ begin
           Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants",
             svLog("svdc_eji_check_passed", "Extra-Job Invariant check passed for Unhappy Job", this.jobID, theJob.jobName, kvps));
         end if;
-        generate Job.extraJobInvariantCheckSuccessful() to theJob;
+        generate Job.extraJobInvariantCheckSuccessful() to this;
       else
         if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants")) then
           Logger::log(Logger::Debug, "pv.sv.unhappyjob.assessinglocalextrajobinvariants",
@@ -586,10 +586,10 @@ begin
           Logger::log(Logger::Debug, "pv.sv.unhappyjob.reassessingextrajobinvariants",
             svLog("svdc_eji_check_passed", "Extra-Job Invariant check passed for Unhappy Job", this.jobID, theJob.jobName, kvps));
         end if;
-        generate Job.extraJobInvariantCheckSuccessful() to theJob;
+        generate Job.extraJobInvariantCheckSuccessful() to this;
       else
         failureReason := "Extra-Job Invariant check failed including checking stored invariants for Unhappy Job";
-        generate Job.jobFailed (failureReason) to theJob;
+        generate Job.jobFailed (failureReason) to this;
       end if;  
   
 end state;
@@ -742,7 +742,7 @@ begin
     generate UnhappyJob.unhappyJobBehavedAsExpected () to this;
   else
     // TODO At the moment we are treating this as a job failed condition. We may want to raise this to an alarm condition
-    generate Job.jobFailed (failureReason) to theJob;   
+    generate Job.jobFailed (failureReason) to this;   
   end if;
   // if in due course we want to do invariant checks then generate the
   // event to transition to checking intra job invariants
