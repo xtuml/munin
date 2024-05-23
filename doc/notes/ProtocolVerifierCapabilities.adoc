@@ -1,0 +1,115 @@
+= Protocol Verifier Capabilities
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note briefly outlines the verification and detection capabilities of
+the Munin Protocol Verifier.
+
+== 2 Introduction and Background
+
+=== 2.1 Terminology
+
+system under observation::
+A computer system or application that is being observed and verified for
+correct behaviour through telemetry and protocol verification.
+
+protocol::
+A protocol is a well-defined set of rules governing the format and
+sequencing of information that is exchanged between computers or computer
+processes.
+
+job::
+A named task running on the system under observation.  A job will complete
+a specific cohesive task (such as transferring a file or debiting an
+account in a banking application).  A job will produce audit events which
+are delivered as telemetry to the Protocol Verifier.  A well-behaved job
+will produce predictable audit event telemetry every time the job runs.
+
+audit event::
+Sometimes 'event' for short, an audit event is a single named atom of
+telemetry produced by a job running on a system under observation.  Audit
+events are produced by instrumentation (tracing) inside the computer
+program(s) running as part of the job.  Example audit events might be:
+"packet arrived at gateway", "account debited", "authorisation granted".
+
+audit event sequence::
+An audit event sequence is an ordered set of audit events.  Sequencing is
+the single most important and useful relationship between the audit events
+in a job.
+
+job definition::
+A job definition is a PLUS (PlantUML) description/prescription for the
+protocol of a specific job running on the system under observation.  The
+job definition defines the expected behaviour of the job running on the
+system under observation.  In a concise manner, a job definition describes
+all of the possible legal paths for the job to take.  A job definition
+also can define legal ways that a job experiences expected error
+conditions.
++
+A job definition can be thought of as like a 'recipe' for a job with the
+audit events being the steps in the recipe.
+
+=== 2.2 Example Job Definition
+
+image::../howto/images/PLUS_05_XORForkNoMerge.png[Simple Job Definition]
+
+== 3 Requirements
+
+=== 3.1 Present Capabilities
+
+Enumerate capabilities for verification and detection as presently (May
+2024) in the Protocol Verifier.
+
+=== 3.2 Potential Capabilities
+
+Enumerate capabilities for verification and detection that could
+potentially be implemented with reasonable engineering effort.
+
+== 4 Analysis
+
+Fundamentally, the Protocol Verifier confirms that a job running on a
+system under observation does what it was defined to do.  On the flip
+side, the Protocol Verifier detects when a job running on a system under
+observation violates the protocol prescribed for it.
+
+The Protocol Verifier verifies that jobs are doing what they were designed
+to do and nothing more or less.  "Are you doing what you said you are
+doing?"
+
+=== 4.1 Present Capabilities
+
+* Verify that an event occurs.
+* Verify that all events occur.
+* Verify that events occur in the prescribed order (sequence).
+* Verify that only one event occurs in an XOR fork.
+* Verify that all events occur in an AND fork.
+* Verify that prescribed merges occur after forks.
+* Verify that a branch prescribed in the protocol occurs and that it
+  occurs the prescribed number of times.
+* Verify that a loop cycles the prescribed number of times.
+* Verify that events marked as 'Critical' do not occur when 'Unhappy' events are present.
+* Verify that an event is carrying an invariant (key) that matches the
+  expected value established earlier in the job.
+* Verify that an event is carrying an invariant that matches the expected
+  value established in a previous job.
+
+=== 4.2 Potential Capabilities
+
+* "Grade" job definitions on their strength to detect correct behaviour.
+* Identify statistical deviations in legally running jobs.  (This job
+  takes path X 99.9% of the time but has recently been taking a different
+  path.)
+* Identify statistical deviations in the mix of jobs.  (The percentage and
+  balance of job types has recently changed significantly.)
+
+== 6 Document References
+
+. [[dr-1]] https://github.com/xtuml/plus2json/blob/main/doc/tutorial/AuditEventTopologyTutorial.pdf[Audit Event Tutorial]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
