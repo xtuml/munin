@@ -1,0 +1,119 @@
+= Protocol Verifier Overrun
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note provides analysis around making an application (e.g. Protocol
+Verifier) robust in the face of large quantities of extra-domain messages
+(messages from outside the modelled domains) and specifically from a
+persistent message broker.
+
+== 2 Introduction and Background
+
+MASL C++ supports Kafka messaging for both inter-domain messaging and
+extra-domain messaging.  As of May 2024, there is no distinction between
+message handling for messages coming to the application from the outside
+world and those representing inter-domain (intra-application) messaging.
+
+This poses a problem.
+
+=== 2.1 Problem:  Extra-domain Message Overrun
+
+In the context of a persistent message broker, an application can come
+online with a large number of extra-domain messages already available for
+consumption.  Without some means of throttling these "external" messages,
+the application can be overrun and become overwhelmed.
+
+=== 2.2 Use Case
+
+. Start Kafka and zookeeper creating the 'Protocol_Verifier_Reception' topic.
+. Run `plus2json --job` to create job definitions.
+. Run `plus2json --play` to produce a stream of run-time audit events.
+  ** This will pre-populate the 'Protocol_Verifier_Reception' topic.
+. After some time (e.g. 10 minutes), launch the Protocol Verifier.
+  .. See it crash?
+  .. See it manage to "catch up gracefully".
+
+Note that the extra-domain Kafka topic could have millions of messages
+waiting.  The application must receive these at a rate that it can handle
+allowing the domains to process as fast as possible without overrunning.
+
+== 3 Requirements
+
+=== 3.1 Overrun Protection
+
+Provide a mechanism for the application to not receive a message(s) when
+the application is not ready/able.
+
+== 4 Analysis
+
+A few options have been identified for consideration in addressing the
+above stated requirements.
+
+=== 4.1 Buffer Limiting
+
+* On any Kafka consumer, limit the number of messages consumed.
+  ** When the limit is reached, wait until the buffer drains.
+
+This option does not satisfy the requirements.  This option does not
+actually limit the number of messages received; it just consumes them in
+chunks.  Overrun would still occur.
+
+=== 4.2 Rate Limiting
+
+* Mark a maximum (average) rate of consumption for a consumer.
+
+This option satisfies the requirements at the cost of tuning the
+application with marks.
+
+=== 4.3 Ratio Limiting
+
+* Mark a distinction between inter-domain consumers and extra-domain
+  consumers.
+* Give priority to inter-domain consumers.
+  .. Only service extra-domain topics when inter-domain topics are empty?
+  .. Service N extra-domain messages for each M inter-domain messages?
+
+This could potentially meet the requirements.  However, it cannot work
+without application-specific tuning.
+
+=== 4.4 Application-Level Throttling
+
+* Provide a means by which the application can enable/disable message consumption.
+
+For Protocol Verifier, Job Management has an instance population of
+Unassigned Jobs.  When MaxUnassignedJobs is exceeded, the application
+could disable consumption of messages on the 'Protocol_Verifier_Reception'
+topic.  After all jobs are assigned, it could enable consumption of more
+extra-domain messages.
+
+This option does satisfy the requirements.  However, it explicitly pollutes
+the application with an architectural "hook".
+
+=== 4.5 Unable to Consume Exception
+
+* Using a modelled exception, allow a domain service to raise the
+  exception when it is unable to receive a message.
+* The architecture could catch the exception and leave the incoming
+  message uncommitted.  The message could be re-queued (after a delay?).
+
+Even though this option does introduce some knowledge of the architecture
+to the application, it does so in a clean, generic manner.  This option
+would work equally well on extra-domain messaging and inter-domain
+messaging.
+
+== 5 Work Required
+
+== 6 Acceptance Test
+
+== 7 Document References
+
+. [[dr-1]] https://github.com/xtuml/munin/issues/219[219 Application Messaging Overrun]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
+

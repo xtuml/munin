@@ -103,13 +103,17 @@ public instance service JobManagement::JobManager.reportJobAssignments () is
 kvps : JSON::JSONObject;
 wkvps : JSON::JSONObject;
 workerList : JSON::JSONArray;
+uptime : duration;
 
 begin
-
 	// Report key Protocol Verifier Job Management statistics.
+	uptime := timestamp'now - this.startTime;
 	kvps["tag"] := JSON::to_json("jobmanagement_stats");
 	kvps["message"] := JSON::to_json("periodic statistics");
 	kvps["receivedAuditEventCount"] := JSON::to_json(this.receivedAuditEventCount);
+	kvps["upTime"] := JSON::to_json(uptime'image);
+	kvps["buildName"] := JSON::to_json(#PROP["package.name"]#);
+	kvps["buildVersion"] := JSON::to_json(#PROP["package.version"]#);
 	kvps["employedWorkers"] := JSON::to_json((this -> R1.JobWorker -> R2.EmployedWorker)'length);
 	kvps["assignedJobs"] := JSON::to_json(((this -> R1.JobWorker -> R2.EmployedWorker -> R6.AssignedJob)'length));
 	kvps["unassignedJobs"] := JSON::to_json(((find UnassignedJob())'length));

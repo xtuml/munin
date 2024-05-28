@@ -22,6 +22,9 @@ class Report:
         self.employedWorkers = 0
         self.assignedJobs = 0
         self.unassignedJobs = 0
+        self.buildName = ""
+        self.buildVersion = ""
+        self.upTime = ""
         self.workerAssignments = []
         self.workerEventCounts = []
 
@@ -43,6 +46,9 @@ class Report:
                     self.assignedJobs = payload['assignedJobs']
                     self.unassignedJobs = payload['unassignedJobs']
                     self.receivedAuditEventCount = payload['receivedAuditEventCount']
+                    self.buildName = payload['buildName']
+                    self.buildVersion = payload['buildVersion']
+                    self.upTime = payload['upTime']
                     worker_stats = payload['workerStats']
                     i = 0
                     if worker_stats:
@@ -87,13 +93,41 @@ class Report:
         ''' Report the status of the Protocol Verifier to a templated string. '''
         lines1 = """
 job_success: \033[0;32;40m$job_success\033[0;0m job_fail: \033[0;33;40m$job_fail\033[0;0m job_alarm: \033[0;31;40m$job_alarm\033[0;0m
-rcvd_events: $rcvd_events  employedWorkers: $employedWorkers  assignedJobs: $assignedJobs  unassignedJobs: $unassignedJobs
+lastSuccessfulJob: \033[0;32;40m$lastSuccessfulJob\033[0;0m
+lastFailedJob: \033[0;33;40m$lastFailedJob\033[0;0m
+lastAlarmedJob: \033[0;31;40m$lastAlarmedJob\033[0;0m
+rcvd_events: $rcvd_events  throughput: $throughput  up_time: $upTime
+build_name: $buildName  version: $buildVersion
+employedWorkers: $employedWorkers  assignedJobs: $assignedJobs  unassignedJobs: $unassignedJobs
 """
         tobj1 = Template(lines1)
+        uptime = parse_isoduration(report.upTime, True)
+        upstring = ''
+        upseconds = 0
+        if uptime['days'] != 0:
+            upstring = str(uptime['days']) + " days "
+            upseconds = upseconds + uptime['days'] * 86400
+        if uptime['hours'] != 0:
+            upstring = upstring + str(uptime['hours']) + " hours "
+            upseconds = upseconds + uptime['hours'] * 3600
+        if uptime['minutes'] != 0:
+            upstring = upstring + str(uptime['minutes']) + " minutes "
+            upseconds = upseconds + uptime['minutes'] * 60
+        if uptime['seconds'] != 0:
+            upstring = upstring + str(int(uptime['seconds'])) + " seconds "
+            upseconds = upseconds + uptime['seconds']
+        throughput = int(report.receivedAuditEventCount / upseconds)
         h = tobj1.substitute(job_alarm=report.job_alarm,
                             job_fail=report.job_fail,
                             job_success=report.job_success,
+                            lastAlarmedJob=report.lastAlarmedJob,
+                            lastFailedJob=report.lastFailedJob,
+                            lastSuccessfulJob=report.lastSuccessfulJob,
                             rcvd_events=report.receivedAuditEventCount,
+                            buildName=report.buildName,
+                            buildVersion=report.buildVersion,
+                            upTime=upstring,
+                            throughput=throughput,
                             employedWorkers=report.employedWorkers,
                             assignedJobs=report.assignedJobs,
                             unassignedJobs=report.unassignedJobs)
@@ -103,16 +137,40 @@ rcvd_events: $rcvd_events  employedWorkers: $employedWorkers  assignedJobs: $ass
         print()
         for wcount in report.workerEventCounts:
             print( "w_ecount:", str(wcount), ' ', end='', flush=True )
-        lines2 = """
-lastSuccessfulJob: \033[0;32;40m$lastSuccessfulJob\033[0;0m
-lastFailedJob: \033[0;33;40m$lastFailedJob\033[0;0m
-lastAlarmedJob: \033[0;31;40m$lastAlarmedJob\033[0;0m
-"""
-        tobj2 = Template(lines2)
-        h = tobj2.substitute(lastAlarmedJob=report.lastAlarmedJob,
-                            lastFailedJob=report.lastFailedJob,
-                            lastSuccessfulJob=report.lastSuccessfulJob)
-        print( h, end='', flush=True )
+
+def parse_isoduration(isostring, as_dict=False):
+    """
+    Parse the ISO8601 duration string as hours, minutes, seconds
+    """
+    separators = {
+        "PT": None,
+        "W": "weeks",
+        "D": "days",
+        "H": "hours",
+        "M": "minutes",
+        "S": "seconds",
+    }
+    duration_vals = {}
+    for sep, unit in separators.items():
+        partitioned = isostring.partition(sep)
+        if partitioned[1] == sep:
+            # Matched this unit
+            isostring = partitioned[2]
+            if sep == "PT":
+                continue # Successful prefix match
+            dur_str = partitioned[0]
+            dur_val = float(dur_str) if "." in dur_str else int(dur_str)
+            duration_vals.update({unit: dur_val})
+        else:
+            if sep == "PT":
+                raise ValueError("Missing PT prefix")
+            else:
+                # No match for this unit: it's absent
+                duration_vals.update({unit: 0})
+    if as_dict:
+        return duration_vals
+    else:
+        return tuple(duration_vals.values())
 
 
 if __name__ == '__main__':
