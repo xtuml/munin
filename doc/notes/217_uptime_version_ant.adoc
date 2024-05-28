@@ -50,8 +50,8 @@ statistic, 'throughput' (in events per second) can be reported.
 
 . Add an attribute to JobManager to carry the timestamp of the start time.
 . When Job Manager is created, initialise this start-up timestamp.
-. Report this timestamp in the periodic Protocol Verifier Statistics
-  log message.
+. Report the difference between current time and this timestamp in the
+  periodic Protocol Verifier Statistics log message.
 
 === 5.2 Version
 
@@ -60,13 +60,13 @@ version in the periodic Protocol Verifier Statistics log message.
 
 === 5.3 `pvstats.py`
 
-Update `pvstats.py` to report the new values on the dashboard.
+Update `pvstats.py` to collect and display the new values on the dashboard.
 
 image::pvstats.png[dashboard]
 
 == 6 Acceptance Test
 
-`run_benchmark 2000 100000` and see new statistics.
+`run_benchmark 2000 100000` and `pvstats.py` and see new statistics.
 
 == 7 Document References
 
