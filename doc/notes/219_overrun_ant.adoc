@@ -91,6 +91,11 @@ extra-domain messages.
 This option does satisfy the requirements.  However, it explicitly pollutes
 the application with an architectural "hook".
 
+A fairly clean example of this option is to add terminator service such as
+`Reception~>requestEvent( eventCount : in integer )`.  Coupled with the
+existing public service (`JobManagement::acceptEvent ( auditEvent : in
+string )`), requestEvent could request a certain number of messages.
+
 === 4.5 Unable to Consume Exception
 
 * Using a modelled exception, allow a domain service to raise the
@@ -102,6 +107,19 @@ Even though this option does introduce some knowledge of the architecture
 to the application, it does so in a clean, generic manner.  This option
 would work equally well on extra-domain messaging and inter-domain
 messaging.
+
+=== 4.6 Strictly Polled Event Reception
+
+It may be careless design to expose an asynchronous messaging interface
+that potentially can be overrun.  The primary means of receiving messages
+only when ready is polling.
+
+Consider a terminator service that returned a single audit event.
+`Reception~>takeEvent( auditEvent : out string )`.  (Notice that the
+parameter can return a value.  A similar terminator service could be
+provided with a return value.)  This terminator will be invoked by the
+domain exactly as often as it can handle another input message (audit
+event).
 
 == 5 Work Required
 
