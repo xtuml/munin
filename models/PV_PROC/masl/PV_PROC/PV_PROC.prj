@@ -1,9 +1,6 @@
 project PV_PROC is
 
 	domain JobManagement is
-		terminator Reporting is
-		end terminator;
-  
 		terminator Worker is
 			public service workerRegistered ( workerId: in UUID::formatted_uuid );     
 			public service workerUnregistered ( workerId: in UUID::formatted_uuid );     

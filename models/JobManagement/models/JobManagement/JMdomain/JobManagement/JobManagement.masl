@@ -1,12 +1,3 @@
-//! ACTIVITY BEGIN. 'f9c9eb81-59e1-432c-89ab-0c818e951b45' DO NOT EDIT THIS LINE.
-public service JobManagement::Reporting~>reportEvent ( eventPriority : in Logger::Priority,
-                                                      eventLabel : in string,
-                                                      eventContent : in string ) is
-begin
-	Logger::log(eventPriority, "pv.jm.reportevent", eventLabel & " : " & eventContent);
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
 //! ACTIVITY BEGIN. '2265df2c-a66b-42e1-8fb2-8659b9924fd3' DO NOT EDIT THIS LINE.
 public service JobManagement::Worker~>workerRegistered ( workerId : in UUID::formatted_uuid ) is
 begin
