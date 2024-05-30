@@ -29,7 +29,7 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. 'b932902e-d5c9-4826-801a-bc1eb8590b08' DO NOT EDIT THIS LINE.
-public service JobManagement::Reception~>takeEvent () return string is
+public service JobManagement::Reception~>takeEvent ( auditEvent : out string ) is
 begin
   null;
 end service;
@@ -39,6 +39,13 @@ end service;
 public service JobManagement::Reception~>requestEvent ( eventCount : in integer ) is
 begin
   null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '57a42f3a-3ec7-4edd-8c12-81bfb41dee0d' DO NOT EDIT THIS LINE.
+public service JobManagement::Reception~>obtainEvent () return string is
+begin
+  return "";
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
