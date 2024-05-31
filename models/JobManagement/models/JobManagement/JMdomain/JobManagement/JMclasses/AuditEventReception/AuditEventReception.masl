@@ -1,0 +1,15 @@
+//! ACTIVITY BEGIN. 'e45c3858-f562-4289-8cfa-3dabb42bac5d' DO NOT EDIT THIS LINE.
+public service JobManagement::AuditEventReception.createAuditEventReception () is
+auditEventReception : instance of AuditEventReception;
+jobManager : instance of JobManager;
+begin
+    auditEventReception := create unique AuditEventReception(receivedAuditEventCount => 0, Current_State => Receiving);
+    jobManager := find_one JobManager();
+    if ( jobManager /= null) then
+        link auditEventReception R26 jobManager;
+    end if;
+    // Start receiving after a second.
+    schedule auditEventReception.pollTimer generate AuditEventReception.nextReception() to auditEventReception delay @PT1S@;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

@@ -14,6 +14,8 @@ begin
 		jobManager := create unique JobManager(reportFrequency => @PT1S@, startTime => timestamp'now, Current_State => Created);
 		schedule jobManager.reportTimer generate JobManager.generateReport() to jobManager delay jobManager.reportFrequency;
 	end if;
+	// Create AuditEventReception to receive and throttle events from the system under observation.
+	AuditEventReception.createAuditEventReception();
 	// get the supplied command line option for the config file and verify it is valid
 	configFilePath := CommandLine::get_option_value("-configPath", "config/");
 	configFile := CommandLine::get_option_value("-configFile", "config.json");

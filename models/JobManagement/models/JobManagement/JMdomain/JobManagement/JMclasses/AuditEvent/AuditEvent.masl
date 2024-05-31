@@ -2,9 +2,76 @@
 public instance service JobManagement::AuditEvent.reportAuditEvent ( assignedWorker : in instance of EmployedWorker ) is
 begin
 
-	Worker~>reportEvent(assignedWorker.workerId, this.auditEvent);
-	// increment the counter for the events processed by this worker
-	assignedWorker.reportedAuditEventCount := assignedWorker.reportedAuditEventCount + 1;
+    Worker~>reportEvent(assignedWorker.workerId, this.auditEvent);
+    // increment the counter for the events processed by this worker
+    assignedWorker.reportedAuditEventCount := assignedWorker.reportedAuditEventCount + 1;
+
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'ea123b1a-82f9-4fbe-ad81-7025e5a604d4' DO NOT EDIT THIS LINE.
+public service JobManagement::AuditEvent.acceptEvent ( auditEvent : in string ) is
+jsonElement: JSON::JSONElement;
+jsonObject: JSON::JSONObject;
+jobId : string;
+jobManager : instance of JobManager;
+job : instance of Job;
+unassignedJobIds : sequence of string;
+unassignedJob : instance of UnassignedJob;
+acceptedAuditEvent : instance of AuditEvent;
+assignedWorker : instance of EmployedWorker;
+jmSpec : instance of JobManagementSpec;
+kvps : dictionary of string;
+
+begin
+    // parse the event and extract the job id
+    jsonElement := JSON::parse(auditEvent);
+        if jsonElement.kind = JSON::Object then
+        jsonObject := JSON::get_object(jsonElement);
+        if jsonObject'contains("jobId") then
+            jobId := JSON::get_string(jsonObject["jobId"]);
+            jobManager := find_one JobManager();
+            // increment counter for total received audit events since start-up
+            jobManager.receivedAuditEventCount := jobManager.receivedAuditEventCount + 1;
+            job := find_one Job(jobId = jobId);
+            if job = null then
+                job := create Job(jobId => jobId);
+                unassignedJob := create UnassignedJob(jobId => jobId);
+                link unassignedJob R5.Job job;
+                unassignedJobIds := jobManager.unassignedJobIds;
+                unassignedJobIds := unassignedJobIds & jobId;
+                jobManager.unassignedJobIds := unassignedJobIds;
+            end if;
+            // add the event to the job
+            acceptedAuditEvent := create unique AuditEvent(auditEvent => auditEvent);
+            link acceptedAuditEvent R7 job;
+            // check if this is an assigned job
+            assignedWorker := job -> R5.AssignedJob -> R6.EmployedWorker;
+            if assignedWorker = null then
+                // select worker for job
+                assignedWorker := jobManager.selectWorkerForJob();
+                // if worker selected assign job
+                if assignedWorker /= null then
+                    jobManager.assignJob(assignedWorker);
+                end if;
+            else
+                // report the event
+                acceptedAuditEvent.reportAuditEvent(assignedWorker);
+            end if;
+
+            // check if we have exceeded the max unassigned jobs and if so report an error
+            unassignedJobIds := jobManager.unassignedJobIds;
+            jmSpec := find_one JobManagementSpec();
+            if unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnassignedJobsExceeded = false then
+                kvps["jobCount"] := (unassignedJobIds'length)'image;
+                Logger::log(Logger::Information, "pv.jm.acceptevent",
+                        jmLog("jobmanagement_exceeded_max_jobs", "Maximum number of unassigned jobs exceeded.", kvps));
+                jmSpec.maxUnassignedJobsExceeded := true;
+            else
+                jmSpec.maxUnassignedJobsExceeded := false;
+            end if;
+        end if;
+    end if;
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
