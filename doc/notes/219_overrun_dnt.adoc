@@ -20,6 +20,14 @@ See <<dr-1,Application Messaging Overrun Analysis Note>>.
 
 == 5 Design
 
+=== 5.1 Model
+
+image::aer_class_diagram.jpg[AuditEventReception Class Diagram]
+
+image::aer_state_machine.jpg[AuditEventReception State Machine]
+
+=== 5.2 Steps
+
 . Add AuditEventReception class.
   .. auditEventReceptionId : MASLunique;
   .. pollTimer : timer;
@@ -82,12 +90,6 @@ See <<dr-1,Application Messaging Overrun Analysis Note>>.
      ... Commit it.
 
 == 6 Design Comments
-
-=== 6.1 Steps
-
-. Move acceptEvent functionality to AuditEvent class-based activity.
-. Add classes
-. Build and test.
 
 == 7 User Documentation
 
