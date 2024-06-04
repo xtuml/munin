@@ -46,9 +46,13 @@ end service;
 //! ACTIVITY BEGIN. '57a42f3a-3ec7-4edd-8c12-81bfb41dee0d' DO NOT EDIT THIS LINE.
 public service JobManagement::Reception~>obtainEvent ( auditEvent : out string ) is
 begin
-    // This is temporary behaviour.
-    // Go find an instance of raw event created by acceptEvent.
+    // This is temporary behaviour for testing.
     auditEvent := AuditEventReception.getEvent();
+    if (auditEvent /= "") then
+        return true;
+    else
+        return false;
+    end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
