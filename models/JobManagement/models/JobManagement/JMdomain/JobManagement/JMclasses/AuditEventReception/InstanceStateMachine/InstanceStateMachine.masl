@@ -1,12 +1,13 @@
 //! ACTIVITY BEGIN. 'b64e4fb8-83d6-417d-bade-c72200a621ea' '6e3f5d40-8281-4037-b473-ad3fb6e8e8b1' DO NOT EDIT THIS LINE.
 state JobManagement::AuditEventReception.Receiving () is
 rawAuditEvent : string := "";
+pollSuccess : boolean;
 delayValue : duration;
 begin
 
     // Obtain and process an audit event from the system under observation.
-    Reception~>obtainEvent(rawAuditEvent);
-    if (rawAuditEvent /= "") then
+    pollSuccess := Reception~>obtainEvent(rawAuditEvent);
+    if (pollSuccess) then
         AuditEvent.acceptEvent(rawAuditEvent);
     end if;
 
