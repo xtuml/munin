@@ -53,8 +53,10 @@ begin
     if (rawAuditEvent /= null) then
         auditEvent := rawAuditEvent.body;
         delete rawAuditEvent;
+        return true;
     else
         auditEvent := "";
+        return false;
     end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
