@@ -40,6 +40,7 @@ echo "Done."
 # get list of puml files (stripping DOS CR)
 puml_files=$(cat ../metrics/benchmark_job_definitions.txt | sed "s/\r$//")
 puml_file_for_injection="../tests/PumlForTesting/PumlRegression/ComplexNoEventDataJob.puml"
+puml_file_for_alarm="../tests/PumlForTesting/PumlRegression/ACritical1.puml"
 puml_file_for_prepopulation="../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml"
 
 # generate job definitions
@@ -95,9 +96,9 @@ for ((i = 0; i < $ITERATIONS; i++)); do
   echo ${puml_files} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
   # Inject an error to fail one job.
   echo "Inject error to fail a job."
-  $P2J ../tests/PumlForTesting/PumlRegression/ComplexNoEventDataJob.puml --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --omit C
+  $P2J ${puml_file_for_injection} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --omit C
   echo "Inject error to alarm a job."
-  $P2J ../tests/PumlForTesting/PumlRegression/ACritical1.puml --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --sibling CSJC
+  $P2J ${puml_file_for_alarm} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --sibling CSJC
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
 done

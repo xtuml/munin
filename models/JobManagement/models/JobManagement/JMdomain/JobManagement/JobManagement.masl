@@ -31,7 +31,8 @@ end service;
 //! ACTIVITY BEGIN. 'b932902e-d5c9-4826-801a-bc1eb8590b08' DO NOT EDIT THIS LINE.
 public service JobManagement::Reception~>takeEvent () return string is
 begin
-  return "";
+    // This is temporary behaviour.
+    return AuditEventReception.getEvent();
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -44,18 +45,10 @@ end service;
 
 //! ACTIVITY BEGIN. '57a42f3a-3ec7-4edd-8c12-81bfb41dee0d' DO NOT EDIT THIS LINE.
 public service JobManagement::Reception~>obtainEvent ( auditEvent : out string ) is
-rawAuditEvent : instance of RawAuditEvent;
 begin
-
     // This is temporary behaviour.
     // Go find an instance of raw event created by acceptEvent.
-    rawAuditEvent := find_one RawAuditEvent();
-    if (rawAuditEvent /= null) then
-        auditEvent := rawAuditEvent.body;
-        delete rawAuditEvent;
-    else
-        auditEvent := "";
-    end if;
+    auditEvent := AuditEventReception.getEvent();
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

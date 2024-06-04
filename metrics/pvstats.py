@@ -61,6 +61,8 @@ class Report:
                                 self.workerEventCounts[i] = worker['reportedAuditEventCount']
                                 i += 1
                     i = 0
+            else:
+                print( s, file=sys.stderr )
         except ValueError:
             return
 

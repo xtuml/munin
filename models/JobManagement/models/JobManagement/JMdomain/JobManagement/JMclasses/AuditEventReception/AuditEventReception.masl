@@ -13,3 +13,36 @@ begin
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
+//! ACTIVITY BEGIN. 'e6368609-4b52-47bf-943d-241b2e4bb67f' DO NOT EDIT THIS LINE.
+public service JobManagement::AuditEventReception.putEvent ( auditEventString : in string ) is
+auditEventReception : instance of AuditEventReception;
+auditEventList : sequence of string;
+begin
+  auditEventReception := find_one AuditEventReception();
+  auditEventList := auditEventReception.auditEventFIFO & auditEventString;
+  auditEventReception.auditEventFIFO := auditEventList;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '31fc83c7-7d7e-4511-8317-2289a847148c' DO NOT EDIT THIS LINE.
+public service JobManagement::AuditEventReception.getEvent () return string is
+auditEventReception : instance of AuditEventReception;
+auditEventString : string := "";
+auditEventList : sequence of string;
+emptyAuditEventList : sequence of string;
+begin
+    auditEventReception := find_one AuditEventReception();
+    auditEventList := auditEventReception.auditEventFIFO;
+    if (auditEventList'length > 0) then
+        auditEventString := auditEventList[auditEventList'first];
+        if (auditEventList'length > 1) then
+            auditEventList := auditEventList[auditEventList'first + 1 .. auditEventList'last];
+        else
+            auditEventList := emptyAuditEventList;
+        end if;
+        auditEventReception.auditEventFIFO := auditEventList;
+    end if;
+    return auditEventString;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+

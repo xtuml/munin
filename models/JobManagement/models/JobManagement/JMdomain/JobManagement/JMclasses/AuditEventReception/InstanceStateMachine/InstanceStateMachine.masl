@@ -1,25 +1,23 @@
 //! ACTIVITY BEGIN. 'b64e4fb8-83d6-417d-bade-c72200a621ea' '6e3f5d40-8281-4037-b473-ad3fb6e8e8b1' DO NOT EDIT THIS LINE.
 state JobManagement::AuditEventReception.Receiving () is
-rawAuditEvent : string := "";
+auditEventString : string := "";
 delayValue : duration;
+kvps : dictionary of string;
 begin
 
+    // If we receive an event, then get another immediately, otherwise delay.
+    delayValue := @PT1S@;
     // Obtain and process an audit event from the system under observation.
-    Reception~>obtainEvent(rawAuditEvent);
-    if (rawAuditEvent /= "") then
-        AuditEvent.acceptEvent(rawAuditEvent);
+    auditEventString := Reception~>takeEvent();
+    if (auditEventString /= "") then
+        AuditEvent.acceptEvent(auditEventString);
+        delayValue := @PT0S@;
     end if;
 
     // See if the protocol verifier is getting too busy to receive more audit events.
     if ((find UnassignedJob())'length > (find_one JobManagementSpec()).maxUnassignedJobs) then
         generate AuditEventReception.tooBusy() to this;
     else
-        // If we actually received an event, then get another immediately, otherwise delay.
-        if (rawAuditEvent /= "") then
-            delayValue := @PT0S@;
-        else
-            delayValue := @PT1S@;
-        end if;
         schedule this.pollTimer generate AuditEventReception.nextReception() to this delay delayValue;
     end if;
 
@@ -34,18 +32,14 @@ begin
 
     // See if the protocol verifier has completed enough work to receive more audit events.
     unassignedJobCount := (find UnassignedJob())'length;
-    if (unassignedJobCount = 0) then
+    if (unassignedJobCount < (find_one JobManagementSpec()).maxUnassignedJobs) then
         generate AuditEventReception.readyToReceive() to this;
     else
         schedule this.pollTimer generate AuditEventReception.nextReception() to this delay @PT1S@;
-    end if;
-
-    if (Logger::enabled(Logger::Debug,"pv.jm.auditeventreception.throttling")) then
-        kvps["jobCount"] := unassignedJobCount'image;
-        Logger::log(Logger::Debug, "pv.jm.auditeventreception.throttling",
+        kvps["unassignedJobCount"] := unassignedJobCount'image;
+        Logger::log(Logger::Information, "pv.jm.auditeventreception.throttling",
             jmLog("jobmanagement_reception_throttling", "throttling audit event reception", kvps));
     end if;
-    
 
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

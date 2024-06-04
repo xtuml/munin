@@ -49,14 +49,9 @@ end service;
 
 //! ACTIVITY BEGIN. '2c4a7088-e8df-4d3e-bf4c-8ea74c88aa8b' DO NOT EDIT THIS LINE.
 public service JobManagement::acceptEvent ( auditEvent : in string ) is
-rawAuditEvent: instance of RawAuditEvent;
-auditEventReception : instance of AuditEventReception;
 begin
-    //AuditEvent.acceptEvent(auditEvent);
-    // Temporary behaviour.  Create an instance to be "discovered" by AuditEventReception.
-    auditEventReception := find_one AuditEventReception();
-    rawAuditEvent := create RawAuditEvent(sequenceId => auditEventReception.receivedAuditEventCount, body => auditEvent);
-    auditEventReception.receivedAuditEventCount := auditEventReception.receivedAuditEventCount + 1;
+    // Temporary behaviour.
+    AuditEventReception.putEvent(auditEvent);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
