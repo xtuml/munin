@@ -8,9 +8,9 @@ assignedJob : instance of AssignedJob;
 kvps : dictionary of string;
 
 begin
-	
-	unassignedJobIds := this.unassignedJobIds;
-	if unassignedJobIds'length > 0 then
+
+	if this.unassignedJobIds'length > 0 then
+		unassignedJobIds := this.unassignedJobIds;
 		unassignedJob := find_one UnassignedJob(jobId = unassignedJobIds[unassignedJobIds'first]);
 		if unassignedJob /= null then
 			job := unassignedJob -> R5.Job;
@@ -33,7 +33,7 @@ begin
 		else
 			// log an error as there is an unassigned job held by job manager but there is no instance of unassigned job
 			kvps["jobId"] := unassignedJobIds[unassignedJobIds'first];
-			Logger::log(Logger::Error, "pv.jm.jobmanager",
+			Logger::log(Logger::Error, "pv.jm.jobmanager.assignjob",
 				jmLog("jobmanagement_jobid_without_job", "Found unassigned job id without an unassigned job", kvps));
 			// remove the unassigned job id
 			unassignedJobIds := unassignedJobIds[unassignedJobIds'first + 1 .. unassignedJobIds'last];

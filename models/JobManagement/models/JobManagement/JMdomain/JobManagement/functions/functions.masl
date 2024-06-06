@@ -63,7 +63,6 @@ assignedJob : instance of AssignedJob;
 job : instance of Job;
 auditEvents : sequence of instance of AuditEvent;
 jobManager : instance of JobManager;
-unassignedJobIds : sequence of string;
 eventContent : string;
 
 begin
@@ -96,8 +95,7 @@ begin
 			
 			// check if there are unassigned jobs and if there are and this employed worker has capacity then assign the job
 			jobManager := find_one JobManager();
-			unassignedJobIds := jobManager.unassignedJobIds;
-			if unassignedJobIds'length > 0 then
+			if jobManager.unassignedJobIds'length > 0 then
 				jobManager.assignJob(employedWorker);
 			end if;
 		end if;

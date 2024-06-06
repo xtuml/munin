@@ -17,7 +17,6 @@ jobId : string;
 jobManager : instance of JobManager;
 auditEventReception : instance of AuditEventReception;
 job : instance of Job;
-unassignedJobIds : sequence of string;
 unassignedJob : instance of UnassignedJob;
 acceptedAuditEvent : instance of AuditEvent;
 assignedWorker : instance of EmployedWorker;
@@ -40,9 +39,7 @@ begin
                 job := create Job(jobId => jobId);
                 unassignedJob := create UnassignedJob(jobId => jobId);
                 link unassignedJob R5.Job job;
-                unassignedJobIds := jobManager.unassignedJobIds;
-                unassignedJobIds := unassignedJobIds & jobId;
-                jobManager.unassignedJobIds := unassignedJobIds;
+                jobManager.unassignedJobIds := jobManager.unassignedJobIds & jobId;
             end if;
             // add the event to the job
             acceptedAuditEvent := create unique AuditEvent(auditEvent => auditEvent);
@@ -62,11 +59,10 @@ begin
             end if;
 
             // check if we have exceeded the max unassigned jobs and if so report an error
-            unassignedJobIds := jobManager.unassignedJobIds;
             jmSpec := find_one JobManagementSpec();
-            if unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnassignedJobsExceeded = false then
-                kvps["jobCount"] := (unassignedJobIds'length)'image;
-                Logger::log(Logger::Information, "pv.jm.acceptevent",
+            if jobManager.unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnassignedJobsExceeded = false then
+                kvps["jobCount"] := (jobManager.unassignedJobIds'length)'image;
+                Logger::log(Logger::Information, "pv.jm.auditevent.acceptevent",
                         jmLog("jobmanagement_exceeded_max_jobs", "Maximum number of unassigned jobs exceeded.", kvps));
                 jmSpec.maxUnassignedJobsExceeded := true;
             else
