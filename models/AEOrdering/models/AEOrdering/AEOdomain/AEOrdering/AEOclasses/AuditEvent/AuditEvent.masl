@@ -65,7 +65,7 @@ begin
 				begin
 					failedAuditEvent := create FailedAuditEvent(auditEventId => auditEventId, failureTime => timestamp'now, failureReason => failureReason);
 					link failedAuditEvent R4 auditEvent;
-					Logger::log(Logger::Warning, "pv.aeo.auditevent",
+					Logger::log(Logger::Debug, "pv.aeo.auditevent",
 					  aeoLog("aeordering_events_failed", failureReason, job.jobId, job.reportedJobName, auditEventId, auditEventType, kvps));
 				end;
 		end case;
@@ -142,7 +142,7 @@ begin
 		end if;
 		
 	else
-		Logger::log(Logger::Warning, "pv.aeo.auditevent",
+		Logger::log(Logger::Debug, "pv.aeo.auditevent",
 		  aeoLog("aeordering_set_event_state", failureReason, job.jobId, job.reportedJobName, "", "", kvps));
 		this.eventState := EventStateEnum.FAILED;
 	end if;
