@@ -79,8 +79,7 @@ begin
 	// ask the job manager to assign a job
 	this.working := true;
 	jobManager := find_one JobManager();
-	unassignedJobIds := jobManager.unassignedJobIds;
-	if unassignedJobIds'length > 0 then
+	if jobManager.unassignedJobIds'length > 0 then
 		jobManager.assignJob(this);
 	end if;
 	

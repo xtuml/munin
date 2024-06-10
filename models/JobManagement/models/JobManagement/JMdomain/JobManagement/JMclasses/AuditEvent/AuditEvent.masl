@@ -61,9 +61,11 @@ begin
             // check if we have exceeded the max unassigned jobs and if so report an error
             jmSpec := find_one JobManagementSpec();
             if jobManager.unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnassignedJobsExceeded = false then
-                kvps["jobCount"] := (jobManager.unassignedJobIds'length)'image;
-                Logger::log(Logger::Information, "pv.jm.auditevent.acceptevent",
-                        jmLog("jobmanagement_exceeded_max_jobs", "Maximum number of unassigned jobs exceeded.", kvps));
+                if (Logger::enabled(Logger::Debug, "pv.jm.auditevent.acceptevent")) then
+                    kvps["jobCount"] := (jobManager.unassignedJobIds'length)'image;
+                    Logger::log(Logger::Debug, "pv.jm.auditevent.acceptevent",
+                            jmLog("jobmanagement_exceeded_max_jobs", "Maximum number of unassigned jobs exceeded.", kvps));
+                end if;
                 jmSpec.maxUnassignedJobsExceeded := true;
             else
                 jmSpec.maxUnassignedJobsExceeded := false;
