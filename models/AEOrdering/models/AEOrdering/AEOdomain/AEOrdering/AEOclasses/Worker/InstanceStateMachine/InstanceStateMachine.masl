@@ -21,7 +21,7 @@ state AEOrdering::Worker.Registered () is
 begin
 	cancel this.workerTimer;
 	this.registered := true;
-	schedule this.workerTimer generate Worker.reportHeartbeat() to this delay this.heartbeatRate;
+	schedule this.workerTimer generate Worker.reportHeartbeat() to this delay @PT0S@;
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
