@@ -8,9 +8,9 @@ assignedJob : instance of AssignedJob;
 kvps : dictionary of string;
 
 begin
-	
-	unassignedJobIds := this.unassignedJobIds;
-	if unassignedJobIds'length > 0 then
+
+	if this.unassignedJobIds'length > 0 then
+		unassignedJobIds := this.unassignedJobIds;
 		unassignedJob := find_one UnassignedJob(jobId = unassignedJobIds[unassignedJobIds'first]);
 		if unassignedJob /= null then
 			job := unassignedJob -> R5.Job;
@@ -33,7 +33,7 @@ begin
 		else
 			// log an error as there is an unassigned job held by job manager but there is no instance of unassigned job
 			kvps["jobId"] := unassignedJobIds[unassignedJobIds'first];
-			Logger::log(Logger::Error, "pv.jm.jobmanager",
+			Logger::log(Logger::Error, "pv.jm.jobmanager.assignjob",
 				jmLog("jobmanagement_jobid_without_job", "Found unassigned job id without an unassigned job", kvps));
 			// remove the unassigned job id
 			unassignedJobIds := unassignedJobIds[unassignedJobIds'first + 1 .. unassignedJobIds'last];
@@ -104,27 +104,29 @@ kvps : JSON::JSONObject;
 wkvps : JSON::JSONObject;
 workerList : JSON::JSONArray;
 uptime : duration;
+auditEventReception : instance of AuditEventReception;
 
 begin
-	// Report key Protocol Verifier Job Management statistics.
-	uptime := timestamp'now - this.startTime;
-	kvps["tag"] := JSON::to_json("jobmanagement_stats");
-	kvps["message"] := JSON::to_json("periodic statistics");
-	kvps["receivedAuditEventCount"] := JSON::to_json(this.receivedAuditEventCount);
-	kvps["upTime"] := JSON::to_json(uptime'image);
-	kvps["buildName"] := JSON::to_json(#PROP["package.name"]#);
-	kvps["buildVersion"] := JSON::to_json(#PROP["package.version"]#);
-	kvps["employedWorkers"] := JSON::to_json((this -> R1.JobWorker -> R2.EmployedWorker)'length);
-	kvps["assignedJobs"] := JSON::to_json(((this -> R1.JobWorker -> R2.EmployedWorker -> R6.AssignedJob)'length));
-	kvps["unassignedJobs"] := JSON::to_json(((find UnassignedJob())'length));
-	for employedWorker in this -> R1.JobWorker -> R2.EmployedWorker loop 
-		wkvps["assignedJobCount"] := JSON::to_json(((employedWorker -> R6.AssignedJob)'length));
-		wkvps["reportedAuditEventCount"] := JSON::to_json(employedWorker.reportedAuditEventCount);
-		wkvps["workerId"] := JSON::to_json(string(employedWorker.workerId));
-		workerList := workerList & JSON::to_json(wkvps);
-	end loop;
-	kvps["workerStats"] := JSON::to_json(workerList);
-	Logger::log(Logger::Information, "pv.jm.jobmanager.reportjobassignments", JSON::dump(kvps));
+    // Report key Protocol Verifier Job Management statistics.
+    uptime := timestamp'now - this.startTime;
+    kvps["tag"] := JSON::to_json("jobmanagement_stats");
+    kvps["message"] := JSON::to_json("periodic statistics");
+    auditEventReception := this -> R26.AuditEventReception;
+    kvps["receivedAuditEventCount"] := JSON::to_json(auditEventReception.receivedAuditEventCount);
+    kvps["upTime"] := JSON::to_json(uptime'image);
+    kvps["buildName"] := JSON::to_json(#PROP["package.name"]#);
+    kvps["buildVersion"] := JSON::to_json(#PROP["package.version"]#);
+    kvps["employedWorkers"] := JSON::to_json((this -> R1.JobWorker -> R2.EmployedWorker)'length);
+    kvps["assignedJobs"] := JSON::to_json(((this -> R1.JobWorker -> R2.EmployedWorker -> R6.AssignedJob)'length));
+    kvps["unassignedJobs"] := JSON::to_json(((find UnassignedJob())'length));
+    for employedWorker in this -> R1.JobWorker -> R2.EmployedWorker loop 
+        wkvps["assignedJobCount"] := JSON::to_json(((employedWorker -> R6.AssignedJob)'length));
+        wkvps["reportedAuditEventCount"] := JSON::to_json(employedWorker.reportedAuditEventCount);
+        wkvps["workerId"] := JSON::to_json(string(employedWorker.workerId));
+        workerList := workerList & JSON::to_json(wkvps);
+    end loop;
+    kvps["workerStats"] := JSON::to_json(workerList);
+    Logger::log(Logger::Information, "pv.jm.jobmanager.reportjobassignments", JSON::dump(kvps));
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

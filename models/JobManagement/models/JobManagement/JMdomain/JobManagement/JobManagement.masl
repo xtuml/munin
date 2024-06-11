@@ -1,12 +1,3 @@
-//! ACTIVITY BEGIN. 'f9c9eb81-59e1-432c-89ab-0c818e951b45' DO NOT EDIT THIS LINE.
-public service JobManagement::Reporting~>reportEvent ( eventPriority : in Logger::Priority,
-                                                      eventLabel : in string,
-                                                      eventContent : in string ) is
-begin
-	Logger::log(eventPriority, "pv.jm.reportevent", eventLabel & " : " & eventContent);
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
 //! ACTIVITY BEGIN. '2265df2c-a66b-42e1-8fb2-8659b9924fd3' DO NOT EDIT THIS LINE.
 public service JobManagement::Worker~>workerRegistered ( workerId : in UUID::formatted_uuid ) is
 begin
@@ -34,6 +25,34 @@ public service JobManagement::Worker~>jobCompletionConfirmed ( workerId : in UUI
                                                               jobId : in string ) is
 begin
   null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'b932902e-d5c9-4826-801a-bc1eb8590b08' DO NOT EDIT THIS LINE.
+public service JobManagement::Reception~>takeEvent () return string is
+begin
+    // This is temporary behaviour.
+    return AuditEventReception.getEvent();
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'c18a6038-3f47-4cc3-98b3-9b84841875ef' DO NOT EDIT THIS LINE.
+public service JobManagement::Reception~>requestEvent ( eventCount : in integer ) is
+begin
+  null;
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '57a42f3a-3ec7-4edd-8c12-81bfb41dee0d' DO NOT EDIT THIS LINE.
+public service JobManagement::Reception~>obtainEvent ( auditEvent : out string ) is
+begin
+    // This is temporary behaviour for testing.
+    auditEvent := AuditEventReception.getEvent();
+    if (auditEvent /= "") then
+        return true;
+    else
+        return false;
+    end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

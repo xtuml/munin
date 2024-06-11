@@ -1,12 +1,6 @@
 project JM_PROC is
 
 	domain JobManagement is
-		terminator Reporting is
-			public service reportEvent ( eventPriority: in Logger::Priority,
-                                         eventLabel: in string,
-                                         eventContent: in string );     
-		end terminator;
-  
 		terminator Worker is
 			public service workerRegistered ( workerId: in UUID::formatted_uuid );     
 			public service workerUnregistered ( workerId: in UUID::formatted_uuid );     

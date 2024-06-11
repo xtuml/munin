@@ -1,55 +1,10 @@
 version: "3.9"
+volumes:
+  ConanCache:
+    name: ConanCache
+    external: true
+
 services:
-  jm_proc:
-    image: ghcr.io/xtuml/protocol_verifier:latest
-    deploy:
-      replicas: 1
-    depends_on:
-      kafka:
-        condition: service_healthy
-    volumes:
-      - "../models/PV_PROC/schedule:/root/schedule"
-      - "./config:/root/config"
-    ulimits:
-      sigpending: -1
-    logging:
-      driver: local
-    working_dir: /root
-    command: JM_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -util MetaData
-
-  istore_proc:
-    image: ghcr.io/xtuml/protocol_verifier:latest
-    depends_on:
-      kafka:
-        condition: service_healthy
-    volumes:
-      - "../models/PV_PROC/schedule:/root/schedule"
-      - "./config:/root/config"
-      - "./InvariantStore:/root/InvariantStore"
-    ulimits:
-      sigpending: -1
-    logging:
-      driver: local
-    working_dir: /root
-    command: ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -log-config config/log-pv-kafka.properties -util Kafka -kafka-broker-list kafka:9093 -util MetaData
-
-  aeo_svdc_proc:
-    image: ghcr.io/xtuml/protocol_verifier:latest
-    deploy:
-      replicas: 4
-    depends_on:
-      kafka:
-        condition: service_healthy
-    volumes:
-      - "../models/PV_PROC/schedule:/root/schedule"
-      - "./config:/root/config"
-    ulimits:
-      sigpending: -1
-    logging:
-      driver: local
-    working_dir: /root
-    command: AEO_SVDC_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -util MetaData
-
   zookeeper:
     image: levistarrett/zookeeper:3.4.6
     ports:

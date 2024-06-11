@@ -2,8 +2,8 @@
 set -e
 
 # Usage:
-# run_benchmark.sh [rate (events/second)] [total number of events] [reception topic]
-# Executution defaults to:  run_benchmark.sh 1000 100000 Protocol_Verifier_Reception
+# run_benchmark.sh [rate (events/second)] [total number of events] [prepopulated events] [reception topic]
+# Executution defaults to:  run_benchmark.sh 1000 100000 0 Protocol_Verifier_Reception
 
 P2J="python ../bin/plus2json.pyz"
 # Define batches of events for p2j to play.
@@ -19,10 +19,16 @@ if [[ $# -ge 2 ]] ; then
 fi
 ITERATIONS=$(($TOTAL_EVENTS / $BATCH_OF_EVENTS))
 
+# Define prepopulation quantity.
+PREPOPULATION_QUANTITY=0
+if [[ $# -ge 3 ]] ; then
+  PREPOPULATION_QUANTITY=$3
+fi
+
 # Allow over-riding the kafka topic for reception.
 RECEPTION_TOPIC="Protocol_Verifier_Reception"
-if [[ $# -ge 3 ]] ; then
-  RECEPTION_TOPIC=$3
+if [[ $# -ge 4 ]] ; then
+  RECEPTION_TOPIC=$4
 fi
 
 # prepare the deploy folder
@@ -34,6 +40,8 @@ echo "Done."
 # get list of puml files (stripping DOS CR)
 puml_files=$(cat ../metrics/benchmark_job_definitions.txt | sed "s/\r$//")
 puml_file_for_injection="../tests/PumlForTesting/PumlRegression/ComplexNoEventDataJob.puml"
+puml_file_for_alarm="../tests/PumlForTesting/PumlRegression/ACritical1.puml"
+puml_file_for_prepopulation="../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml"
 
 # generate job definitions
 echo "Generating job definitions..."
@@ -41,11 +49,32 @@ echo ${puml_files} | xargs $P2J --job -o config/job_definitions
 echo "../tests/PumlForTesting/PumlRegression/AAExtraJobInvariantSourceJob.puml" | xargs $P2J --job -o config/job_definitions
 echo "Done."
 
-# launch the application
-echo "Launching the application..."
-export CONFIG_FILE=benchmarking-config.json
-docker compose -f docker-compose.kafka.yml up -d --wait
-echo "Done."
+if [[ $PREPOPULATION_QUANTITY -gt 0 ]] ; then
+
+  # launch the broker
+  echo "Launching the message broker..."
+  docker compose -f docker-compose.onlykafka.yml up -d --wait
+  echo "Done."
+
+  echo "Prepopulating broker with" $PREPOPULATION_QUANTITY "events..."
+  echo ${puml_file_for_prepopulation} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $PREPOPULATION_QUANTITY
+  echo "Done."
+
+  # launch the application
+  echo "Launching the application..."
+  export CONFIG_FILE=benchmarking-config.json
+  docker compose -f docker-compose.onlypv.yml up -d --wait
+  echo "Done."
+
+else
+
+  # launch the broker and application
+  echo "Launching the application..."
+  export CONFIG_FILE=benchmarking-config.json
+  docker compose -f docker-compose.kafka.yml up -d --wait
+  echo "Done."
+
+fi
 
 # generate source job
 echo "Generating invariant source runtime event stream..."
@@ -67,9 +96,9 @@ for ((i = 0; i < $ITERATIONS; i++)); do
   echo ${puml_files} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
   # Inject an error to fail one job.
   echo "Inject error to fail a job."
-  $P2J ../tests/PumlForTesting/PumlRegression/ComplexNoEventDataJob.puml --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --omit C
+  $P2J ${puml_file_for_injection} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --omit C
   echo "Inject error to alarm a job."
-  $P2J ../tests/PumlForTesting/PumlRegression/ACritical1.puml --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --sibling CSJC
+  $P2J ${puml_file_for_alarm} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --sibling CSJC
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
 done

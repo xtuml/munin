@@ -61,6 +61,8 @@ class Report:
                                 self.workerEventCounts[i] = worker['reportedAuditEventCount']
                                 i += 1
                     i = 0
+            else:
+                print( s, file=sys.stderr )
         except ValueError:
             return
 
@@ -96,7 +98,7 @@ job_success: \033[0;32;40m$job_success\033[0;0m job_fail: \033[0;33;40m$job_fail
 lastSuccessfulJob: \033[0;32;40m$lastSuccessfulJob\033[0;0m
 lastFailedJob: \033[0;33;40m$lastFailedJob\033[0;0m
 lastAlarmedJob: \033[0;31;40m$lastAlarmedJob\033[0;0m
-rcvd_events: $rcvd_events  throughput: $throughput  up_time: $upTime
+rcvd_events: \033[0;96;40m$rcvd_events\033[0;0m  throughput: \033[0;95;40m$throughput\033[0;0m  up_time: $upTime
 build_name: $buildName  version: $buildVersion
 employedWorkers: $employedWorkers  assignedJobs: $assignedJobs  unassignedJobs: $unassignedJobs
 """

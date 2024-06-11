@@ -21,13 +21,13 @@ begin
 		if oldestJobId = null then
 			link this R24 newStoredJobIdentifier;
 		end if;
-		
+
 		// force the job store to evaluate if there are ids to remove
-	    this.purgeStore();
-	    
+		this.purgeStore();
+
 	else
 	    kvps["jobId"] := jobId;
-	    Logger::log(Logger::Warning, "pv.jm.jobstore",
+	    Logger::log(Logger::Warning, "pv.jm.jobstore.addjobtostore",
 	        jmLog("jobmanagement_duplicate_job_id", "Duplicate job id reported to job store", kvps ));
 	end if;
 end service;
@@ -41,11 +41,11 @@ oldestJobStoreIdentifier : instance of StoredJobIdentifier;
 nextJobId : instance of StoredJobIdentifier;
 
 begin
-		
+
 	// remove any StoredJobIdentifiers that are older than the age off limit and add the to the archive
-	ageOffJobTime := timestamp'now - this.jobStoreAgeLimit;
 	oldestJobStoreIdentifier := this -> R24.StoredJobIdentifier;
 	if oldestJobStoreIdentifier /= null then
+		ageOffJobTime := timestamp'now - this.jobStoreAgeLimit;
 		while oldestJobStoreIdentifier.jobTime <= ageOffJobTime loop
 			nextJobId := oldestJobStoreIdentifier -> R23.isNext.StoredJobIdentifier;
 			if nextJobId /= null then

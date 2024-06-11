@@ -1,0 +1,84 @@
+-- BP 7.1.6 content: Interface syschar: 3 persistence-version: 7.1.6
+
+INSERT INTO C_I
+	VALUES ("dc7a2e51-7c4b-4d8b-9037-d089b4b560ad",
+	"00000000-0000-0000-0000-000000000000",
+	'Reception',
+	'');
+INSERT INTO C_EP
+	VALUES ("1b823eaf-45f6-4622-9650-2e6cf02d3a76",
+	"dc7a2e51-7c4b-4d8b-9037-d089b4b560ad",
+	0,
+	'takeEvent',
+	'',
+	1);
+INSERT INTO C_IO
+	VALUES ("1b823eaf-45f6-4622-9650-2e6cf02d3a76",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'takeEvent',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_EP
+	VALUES ("7f2f9047-7166-40af-8a85-d9a01b62ebf0",
+	"dc7a2e51-7c4b-4d8b-9037-d089b4b560ad",
+	0,
+	'requestEvent',
+	'',
+	2);
+INSERT INTO C_IO
+	VALUES ("7f2f9047-7166-40af-8a85-d9a01b62ebf0",
+	"ba5eda7a-def5-0000-0000-000000000000",
+	'requestEvent',
+	'',
+	0,
+	'',
+	"1b823eaf-45f6-4622-9650-2e6cf02d3a76");
+INSERT INTO C_PP
+	VALUES ("aa87df50-c480-4d0d-b0c3-3580d47366a7",
+	"7f2f9047-7166-40af-8a85-d9a01b62ebf0",
+	"ba5eda7a-def5-0000-0000-000000000002",
+	'eventCount',
+	'',
+	0,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO C_EP
+	VALUES ("7d92be56-6801-4ef8-8438-a0c4f592bd30",
+	"dc7a2e51-7c4b-4d8b-9037-d089b4b560ad",
+	0,
+	'obtainEvent',
+	'',
+	3);
+INSERT INTO C_IO
+	VALUES ("7d92be56-6801-4ef8-8438-a0c4f592bd30",
+	"ba5eda7a-def5-0000-0000-000000000001",
+	'obtainEvent',
+	'',
+	0,
+	'',
+	"7f2f9047-7166-40af-8a85-d9a01b62ebf0");
+INSERT INTO C_PP
+	VALUES ("de05702f-8adc-4849-884f-46c80d313216",
+	"7d92be56-6801-4ef8-8438-a0c4f592bd30",
+	"ba5eda7a-def5-0000-0000-000000000004",
+	'auditEvent',
+	'',
+	1,
+	'',
+	"00000000-0000-0000-0000-000000000000");
+INSERT INTO PE_PE
+	VALUES ("dc7a2e51-7c4b-4d8b-9037-d089b4b560ad",
+	1,
+	"156efb60-da74-4f13-a3f8-5e1f82ed5610",
+	"00000000-0000-0000-0000-000000000000",
+	6);
+INSERT INTO EP_PKG_PROXY
+	VALUES ("156efb60-da74-4f13-a3f8-5e1f82ed5610",
+	"00000000-0000-0000-0000-000000000000",
+	"3c543db5-ae82-4b0c-bac1-17aad787c18a",
+	'Shared',
+	'',
+	0,
+	'../Shared.xtuml');
