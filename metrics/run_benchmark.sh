@@ -94,11 +94,13 @@ echo "0 of " $TOTAL_EVENTS
 LOOP_COUNT=0
 for ((i = 0; i < $ITERATIONS; i++)); do
   echo ${puml_files} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
-  # Inject an error to fail one job.
-  echo "Inject error to fail a job."
-  $P2J ${puml_file_for_injection} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --omit C
-  echo "Inject error to alarm a job."
-  $P2J ${puml_file_for_alarm} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --sibling CSJC
+  if [[ $# -lt 3 ]] ; then
+    # Inject an error to fail one job.
+    echo "Inject error to fail a job."
+    $P2J ${puml_file_for_injection} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --omit C
+    echo "Inject error to alarm a job."
+    $P2J ${puml_file_for_alarm} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --sibling CSJC
+  fi
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
 done
@@ -109,6 +111,10 @@ events_per_second=$(($TOTAL_EVENTS / $runtime))
 echo $runtime "seconds at rate:" $events_per_second >> runtime.txt
 sleep 20
 echo "Done."
+if [[ $# -ge 3 ]] ; then
+  echo "Press ENTER to continue..."
+  read a
+fi
 
 # run the benchmark script
 echo "Running benchmark calculations..."

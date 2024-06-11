@@ -67,7 +67,7 @@ begin
 	while noWorkersAvailable = false loop
 		// check worker capacity
 		employedWorker := nextWorker -> R2.EmployedWorker;
-		if employedWorker /= null and (employedWorker -> R6.AssignedJob)'length < jmSpec.maxJobsPerWorker then
+		if employedWorker /= null and employedWorker.working and (employedWorker -> R6.AssignedJob)'length < jmSpec.maxJobsPerWorker then
 				
 			// set up the next worker to be assigned
 			unlink this R4;
