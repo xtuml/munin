@@ -15,7 +15,7 @@ services:
     logging:
       driver: local
     working_dir: /root
-    command: JM_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -util MetaData
+    command: JM_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData
 
   istore_proc:
     image: ghcr.io/xtuml/protocol_verifier:latest
@@ -31,7 +31,7 @@ services:
     logging:
       driver: local
     working_dir: /root
-    command: ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -log-config config/log-pv-kafka.properties -util Kafka -kafka-broker-list kafka:9093 -util MetaData
+    command: ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -log-config config/log-pv-kafka.properties -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData
 
   aeo_svdc_proc:
     image: ghcr.io/xtuml/protocol_verifier:latest
@@ -48,7 +48,7 @@ services:
     logging:
       driver: local
     working_dir: /root
-    command: AEO_SVDC_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -util MetaData
+    command: AEO_SVDC_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData
 
   zookeeper:
     image: levistarrett/zookeeper:3.4.6
