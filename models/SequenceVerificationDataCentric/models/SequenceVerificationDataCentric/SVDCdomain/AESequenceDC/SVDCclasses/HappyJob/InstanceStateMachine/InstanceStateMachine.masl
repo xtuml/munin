@@ -76,6 +76,7 @@ failureMessage : string;
 creationErrorMessage : string;
 eventDataCheckHasPassed : boolean;
 theSystemSpec : instance of SystemSpecification;
+failureMode : string;
 failureReason : string;
 auditEventType : string;
 auditEventId : string;
@@ -85,7 +86,9 @@ auditEventData : sequence of auditEventDataStructure;
 
 
 begin
-
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+  
   //Map the event parameters to local variables
   auditEventType := aeType;
   auditEventId := eventId;
@@ -178,7 +181,7 @@ begin
                   
                 else
                     theJob.sequencingFailed := true;
-                    theJob.failJob("The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId & " and Previous Event Id = " & prevEvent.AuditEventId );              
+                    theJob.failJob(failureMode,"The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId & " and Previous Event Id = " & prevEvent.AuditEventId );              
                 end if;  
              
                 // Now test to see if this is a valid event sequence
@@ -223,7 +226,7 @@ begin
                           if theUserDynamicControl.currentDynamicControlValue < theUserDynamicControl.expectedDynamicControlValue then
                             theUserDynamicControl.currentDynamicControlValue := theUserDynamicControl.currentDynamicControlValue + 1;
                           else
-                            theJob.failJob("The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId ); 
+                            theJob.failJob(failureMode,"The loop count will exceed the expected loop count which is an error for jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId ); 
                           end if;
                           if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobinprogress")) then
                             kvps["dynamicControlType"] := theUserDynamicControlDefn.dynamicControlType'image;
@@ -286,12 +289,12 @@ begin
                           link theUserDynamicControl R35 theJob;
 
                         else
-                          //this.failJob("This event already has a user branch count associated with it for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
+                          //this.failJob(failureMode,"This event already has a user branch count associated with it for jobId = " & this.jobID & " , current event type = " & theEventType.AEType & " , Event Id = " & newEvent.AuditEventId ); 
 
                         end if;  
                     
 	                  else
-                        theJob.failJob("The fork point has been found but no corresponding source branch count is associated with it for jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId ); 
+                        theJob.failJob(failureMode,"The fork point has been found but no corresponding source branch count is associated with it for jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " , current event type = " & theEventType.AEType & " , Event Id = " & newSeqEvent.AuditEventId ); 
 	                  end if;  
 	                  
 	                else 
@@ -345,12 +348,12 @@ begin
                                 svLog("svdc_valid_branch_count", "Valid Branch Count found on instance fork in Job", this.jobID, theJob.jobName, kvps));
                             end if;
                           else
-                            theJob.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " at Event Type = " & (prevEvent -> R2).AEType);                         
+                            theJob.failJob(failureMode,"There is no Branch Count defined for this fork point in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " at Event Type = " & (prevEvent -> R2).AEType);                         
                           end if;
 
                         else
                           // An instance fork has occurred but the Job Definition does not expect this to occur at this point in the sequence.
-                          theJob.failJob("There is no Branch Count defined for this fork point in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " at Event Type = " & (prevEvent -> R2).AEType);
+                          theJob.failJob(failureMode,"There is no Branch Count defined for this fork point in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " at Event Type = " & (prevEvent -> R2).AEType);
                         end if;
                       else
                         // There is no instance fork here so carry on
@@ -394,35 +397,35 @@ begin
                   else
                     //Log Job failure: Previous event is valid but is part of a broken sequence
                     theJob.sequencingFailed := true;
-                    theJob.failJob("The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
+                    theJob.failJob(failureMode,"The previous event is valid but is part of a broken sequence - Event Type = " & (prevEvent -> R2).AEType);
                   end if;  
           
                 else
                   //Log Job failure: Previous event is not valid for this sequence
                   theJob.sequencingFailed := true;
-                  theJob.failJob("The type of a previous event provided is not known or not valid - Event Id = " & aPrevEventId);
+                  theJob.failJob(failureMode,"The type of a previous event provided is not known or not valid - Event Id = " & aPrevEventId);
          
                 end if;
               else
                 // The received event is a sequence start event but it has a previous event with it. This is an error condition
                 theJob.sequencingFailed := true;
-                theJob.failJob("This is a sequence start event with a previous event which can't happen - in Job = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & theEventType.AEType & ". event id = " & newSeqEvent.AuditEventId);
+                theJob.failJob(failureMode,"This is a sequence start event with a previous event which can't happen - in Job = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & theEventType.AEType & ". event id = " & newSeqEvent.AuditEventId);
               end if;  
             elsif possibleAeOccInSequenceDef'length = 0 then
               // There is no available definition for this situation so the sequence is broken.
               theJob.sequencingFailed := true;
-              theJob.failJob("There is no available definition for this situation so the sequence is broken - Prev Event Type = " & (prevEvent -> R2).AEType);
+              theJob.failJob(failureMode,"There is no available definition for this situation so the sequence is broken - Prev Event Type = " & (prevEvent -> R2).AEType);
 
             else
               // There are multiple possible Audit Event Occurrences In the Sequence Definition 
               // TODO What does this circumstance imply and what can we do about it.
               theJob.sequencingFailed := true;
-              theJob.failJob("There are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & theEventType.AEType & ". event id = " & newSeqEvent.AuditEventId);
+              theJob.failJob(failureMode,"There are multiple possible outcomes so this situation was not foreseen - in Job = " & this.jobID & " with Job Name = " & theJob.jobName & ", current event type = " & theEventType.AEType & ". event id = " & newSeqEvent.AuditEventId);
             end if;
           else
             // The previous event id provided in the audit event data is not recognised as a previous event 
             theJob.sequencingFailed := true;
-            theJob.failJob("The previous event id provided in the audit event data is not recognised as a previous event - in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " provided previous event id = " & aPrevEventId);
+            theJob.failJob(failureMode,"The previous event id provided in the audit event data is not recognised as a previous event - in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " provided previous event id = " & aPrevEventId);
             
           end if;
         end loop; //End of loop over each previous event id  
@@ -431,7 +434,7 @@ begin
         // ...and now check that the received audit event data matches that which is expected
         newSeqEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
         if eventDataCheckHasPassed /= true then
-          theJob.failJob(failureReason);
+          theJob.failJob(failureMode,failureReason);
         end if;   
         // End of MUN2-65 Addition
                     
@@ -443,7 +446,7 @@ begin
         else
           //Log Job failure: Previous event is valid but is part of a broken sequence
           theJob.sequencingFailed := true;
-          theJob.failJob("No current sequence has been found for this audit event - Event Type = " & (newSeqEvent -> R2).AEType);
+          theJob.failJob(failureMode,"No current sequence has been found for this audit event - Event Type = " & (newSeqEvent -> R2).AEType);
         end if;  
 
       else
@@ -514,7 +517,7 @@ begin
           // ...and then check that the received audit event data matches that which is expected
           newSeqEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
           if eventDataCheckHasPassed /= true then
-            theJob.failJob(failureReason);
+            theJob.failJob(failureMode,failureReason);
           end if;
           
         else
@@ -522,7 +525,7 @@ begin
           // a new sequence within a Job yet the definition is ambiguous about which start event it is
           // TODO Check: Can this ever happen and if so what can we do about it?
           theJob.sequencingFailed := true;
-          theJob.failJob("An event starting a new sequence has been received but there is no matching start event definition for Job = " & this.jobID & " with Job Name = " & theJob.jobName & ", with audit event type = " & theEventType.AEType);
+          theJob.failJob(failureMode,"An event starting a new sequence has been received but there is no matching start event definition for Job = " & this.jobID & " with Job Name = " & theJob.jobName & ", with audit event type = " & theEventType.AEType);
         end if; 
       end if;    
  
@@ -537,7 +540,7 @@ begin
         else
           //Log Job failure: This event marks the end of a sequence but is part of a broken sequence
           theJob.sequencingFailed := true;
-          theJob.failJob("This event marks the end of a sequence but is part of a broken sequence - Event Type = " & theEventType.AEType);
+          theJob.failJob(failureMode,"This event marks the end of a sequence but is part of a broken sequence - Event Type = " & theEventType.AEType);
         end if;
   
       end if;
@@ -550,7 +553,7 @@ begin
     else
       // Log error: unrecognised event type received
       theJob.sequencingFailed := true;
-      theJob.failJob("An unrecognised event type - " & auditEventType & "has been received for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName);
+      theJob.failJob(failureMode,"An unrecognised event type - " & auditEventType & "has been received for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName);
     //
     end if;
     //  
@@ -560,7 +563,7 @@ begin
     
   else
     theJob.sequencingFailed := true;
-    theJob.failJob("This event has an identifier that has been seen before. Identifiers must be unique for a Job to be valid - Event Type = " & auditEventType);
+    theJob.failJob(failureMode,"This event has an identifier that has been seen before. Identifiers must be unique for a Job to be valid - Event Type = " & auditEventType);
     kvps["eventId"] := auditEventId; kvps["eventType"] := auditEventType;
     Logger::log(Logger::Warning, "pv.sv.happyjob.jobinprogress",
       svLog("svdc_job_failed", "audit event has been seen before", this.jobID, theJob.jobName, kvps));
@@ -587,12 +590,16 @@ theBranchedEvents : set of instance of SequencedAuditEvent;
 validatedConstraint : boolean;
 validatedDynamicControl : boolean;
 kvps : dictionary of string;
+failureMode : string;
 failureReason : string;
 instrumentationEventId : string;
 instrumentationEventType : string;
 
 
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+
   // Report that job sequencing has completed and constraint checking is about to begin as part of the 
   // verification of the Protocol Verifier itself.
   instrumentationEventId := "Unused";
@@ -727,16 +734,16 @@ begin
     if (validatedConstraint = false) and (validatedDynamicControl = true) then
       // Only the constraint checks have failed
       failureReason := "one or more constraint checks have failed";
-      generate Job.jobFailed(failureReason) to this;
+      generate Job.jobFailed(failureMode,failureReason) to this;
     else
       if (validatedConstraint = true) and (validatedDynamicControl = false) then
         // Only the dynamic control checks have failed
         failureReason := "one or more dynamic control checks have failed";
-        generate Job.jobFailed(failureReason) to this;
+        generate Job.jobFailed(failureMode,failureReason) to this;
       else
         // Both checks must have failed
         failureReason := "one or more constraint checks AND one or more dynamic control checks have failed";
-        generate Job.jobFailed(failureReason) to this;
+        generate Job.jobFailed(failureMode,failureReason) to this;
       end if;
     end if;
   else
@@ -969,7 +976,11 @@ end state;
 state AESequenceDC::HappyJob.JobTimeoutReported () is
 theJob : instance of Job;
 kvps : dictionary of string;
+failureMode : string;
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+
   // TODO: Can a jobFailed event occur once this state is reached?
   theJob := this -> R45;  
   if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.jobtimeoutreported")) then
@@ -978,7 +989,7 @@ begin
   end if;
 
   theJob.sequencingFailed := true;
-  theJob.failJob("The job has timed out because it has not seen a complete expected sequence of events within the Job Hanging Timeout Period or because of a blocked event timeout for jobId = " & this.jobID & " with Job Name = " & theJob.jobName);
+  theJob.failJob(failureMode,"The job has timed out because it has not seen a complete expected sequence of events within the Job Hanging Timeout Period or because of a blocked event timeout for jobId = " & this.jobID & " with Job Name = " & theJob.jobName);
 
   // TODO: Consider adding a jobTimedOut (boolean) attribute to Job and set this to true on
   //       entry to this state such that it can be used in test assertions (because you cannot
@@ -1074,6 +1085,7 @@ theIntraJobInvariant : instance of TransientInvariant;
 intraJobInvariantCheckPassed : boolean;
 matched : boolean;
 invariantValue : string := "";
+failureMode : string;
 failureReason : string;
 kvps : dictionary of string;
 instrumentationEventId : string;
@@ -1081,6 +1093,9 @@ instrumentationEventType : string;
 
 
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+
   // Report that job constraint checking has passed and invariant checking is about to begin as part of the 
   // verification of the Protocol Verifier itself.
   instrumentationEventId := "Unused";
@@ -1122,7 +1137,7 @@ begin
         generate Job.intraJobInvariantCheckSuccessful() to this;
       else
         failureReason := "Check of Intra-Job Invariants Failed";
-        generate Job.jobFailed(failureReason) to this;
+        generate Job.jobFailed(failureMode,failureReason) to this;
       end if;  
   
 end state;
@@ -1253,10 +1268,14 @@ thePersistedExtraJobInvariants : set of instance of PersistedInvariant;
 theInForcePersistedExtraJobInvariants : set of instance of PersistedInvariant;
 extraJobInvariantCheckPassed : boolean;
 matched : boolean;
+failureMode : string;
 failureReason : string;
 kvps : dictionary of string;
 
 begin  
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+
   // Clear the time
   theJob := this -> R45;
   cancel theJob.jobInvariantSyncTimer;    
@@ -1311,7 +1330,7 @@ begin
         generate Job.extraJobInvariantCheckSuccessful() to this;
       else
         failureReason := "Extra-Job Invariant check failed including checking stored invariants";
-        generate Job.jobFailed (failureReason) to this;
+        generate Job.jobFailed (failureMode,failureReason) to this;
       end if;  
   
 end state;

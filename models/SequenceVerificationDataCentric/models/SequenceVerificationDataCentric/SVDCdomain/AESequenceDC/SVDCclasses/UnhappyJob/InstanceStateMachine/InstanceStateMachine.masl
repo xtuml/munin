@@ -27,6 +27,7 @@ failureMessage : string;
 creationErrorMessage : string;
 eventDataCheckHasPassed : boolean;
 theSystemSpec : instance of SystemSpecification;
+failureMode : string;
 failureReason : string;
 auditEventType : string;
 auditEventId : string;
@@ -35,6 +36,9 @@ auditEventData : sequence of auditEventDataStructure;
 eventContent : string;
 
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+
   auditEventType := aeType;
   auditEventId := eventId;
   prevAuditEventIds := prevAEIds;
@@ -124,7 +128,7 @@ begin
             link prevEvt R47.has_next.AuditEvent newEvent using newAuditEventLink;
                   
           else
-            theJob.failJob("The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " , current event type = " & auditEventType & " , Event Id = " & newEvent.AEId & " and Previous Event Id = " & prevEvt.AEId );              
+            theJob.failJob(failureMode,"The previous event has been repeated with this event which is an error for jobId = " & this.jobID & " with Job Name = " & theJob.jobName & " , current event type = " & auditEventType & " , Event Id = " & newEvent.AEId & " and Previous Event Id = " & prevEvt.AEId );              
           end if;  
              
           //TODO Confirm whether there is a need to support any audit event data (probably only invariants) for Unhappy Jobs
@@ -145,7 +149,7 @@ begin
         else
           // The previous event id provided in the audit event data is not recognised as a previous event 
           theJob.sequencingFailed := true;
-          theJob.failJob("The previous event id provided in the audit event data is not recognised as a previous event - in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " provided previous event id = " & aPrevEventId);
+          theJob.failJob(failureMode,"The previous event id provided in the audit event data is not recognised as a previous event - in Job = " & this.jobID & " with Job Name = " & theJob.jobName & " provided previous event id = " & aPrevEventId);
             
         end if;
       end loop; //End of loop over each previous event id  
@@ -167,7 +171,7 @@ begin
   else
     // Log error: unrecognised event type received
     theJob.sequencingFailed := true;
-    theJob.failJob("An unrecognised event type - " & auditEventType & "has been received for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName );
+    theJob.failJob(failureMode,"An unrecognised event type - " & auditEventType & "has been received for - jobId = " & this.jobID & " with Job Name = " & theJob.jobName );
   //
   end if;
 
@@ -177,7 +181,7 @@ begin
     
   else
     theJob.sequencingFailed := true;
-    theJob.failJob("This event has an identifier that has been seen before. Identifiers must be unique for a Job to be valid - Event Type = " & auditEventType);
+    theJob.failJob(failureMode,"This event has an identifier that has been seen before. Identifiers must be unique for a Job to be valid - Event Type = " & auditEventType);
     kvps["eventId"] := auditEventId; kvps["eventType"] := auditEventType;
     Logger::log(Logger::Warning, "pv.sv.unhappyjob.jobinprogress",
       svLog("svdc_failing_unhappy", "event has an identifier that has been seen before", this.jobID, theJob.jobName, kvps));
@@ -371,10 +375,14 @@ theSiblingIntraJobInvariants : set of instance of TransientInvariant;
 intraJobInvariantCheckPassed : boolean;
 matched : boolean;
 invariantValue : string := "";
+failureMode : string;
 failureReason : string;
 kvps : dictionary of string;
 
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+
 // Checking Intra Job Invariants if any
 
 // TODO This version is not fully validated but is left for now
@@ -415,7 +423,7 @@ begin
         generate Job.intraJobInvariantCheckSuccessful() to this;
       else
         failureReason := "Check of Intra-Job Invariants in Unhappy Job Failed";
-        generate Job.jobFailed(failureReason) to this;
+        generate Job.jobFailed(failureMode,failureReason) to this;
       end if;  
   
 end state;
@@ -541,10 +549,14 @@ thePersistedExtraJobInvariants : set of instance of PersistedInvariant;
 theInForcePersistedExtraJobInvariants : set of instance of PersistedInvariant;
 extraJobInvariantCheckPassed : boolean;
 matched : boolean;
+failureMode : string;
 failureReason : string;
 kvps : dictionary of string;
 
 begin  
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+
   // Clear the time
   theJob := this -> R45;
   cancel theJob.jobInvariantSyncTimer;    
@@ -589,7 +601,7 @@ begin
         generate Job.extraJobInvariantCheckSuccessful() to this;
       else
         failureReason := "Extra-Job Invariant check failed including checking stored invariants for Unhappy Job";
-        generate Job.jobFailed (failureReason) to this;
+        generate Job.jobFailed (failureMode,failureReason) to this;
       end if;  
   
 end state;
