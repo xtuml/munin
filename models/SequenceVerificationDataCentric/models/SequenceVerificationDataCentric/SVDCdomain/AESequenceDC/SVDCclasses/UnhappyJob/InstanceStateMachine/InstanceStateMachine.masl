@@ -618,9 +618,13 @@ theJobsCriticalAuditEvents : set of instance of AuditEvent;
 inScopeCriticalEventDefinition : instance of SequencedAuditEventDefinition;
 kvps : dictionary of string;
 isSuccess : boolean;
+failureMode : string;
 failureReason : string;
 
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+  
   theJob := this -> R45;
   theJobDefn := theJob -> R8;
 
@@ -729,6 +733,7 @@ begin
     for anUnhappyEvent in theUnhappyEvents loop
       if (anUnhappyEvent -> R47.has_previous.AuditEvent) = null then
         isSuccess := false;
+        failureMode := "AlarmMode";
         failureReason := "ALARM: Unhappy event with no limited scope seen in Job with Critical event";
       end if;  
     end loop;
@@ -742,7 +747,9 @@ begin
     generate UnhappyJob.unhappyJobBehavedAsExpected () to this;
   else
     // TODO At the moment we are treating this as a job failed condition. We may want to raise this to an alarm condition
-    generate Job.jobFailed (failureReason) to this;   
+    // TODO Paul&Colin to review above comment as part of issue 222
+    //generate Job.jobFailed (failureReason) to this;
+    theJob.jobFail(failureMode,failureReason);
   end if;
   // if in due course we want to do invariant checks then generate the
   // event to transition to checking intra job invariants
