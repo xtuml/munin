@@ -89,11 +89,17 @@ end service;
 public service AESequenceDC::failedJob ( jobId : in string,
                                         failureReason : in string ) is
 theJob : instance of Job;
+failureMode : string;
 
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  // NOTE: Alarms can only be detected within SVDC - so failures detected externally and 
+  // reported to SVDC via this domain service would therefore be considered to be Errors.
+  failureMode := "ErrorMode";
+
   theJob := find_only Job (jobID = jobId);
   if theJob /= null then
-    generate Job.jobFailed(failureReason) to theJob;
+    generate Job.jobFailed(failureMode,failureReason) to theJob;
   end if;
 
 end service;
