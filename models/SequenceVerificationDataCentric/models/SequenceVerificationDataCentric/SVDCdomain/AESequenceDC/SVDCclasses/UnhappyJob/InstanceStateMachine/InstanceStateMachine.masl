@@ -433,10 +433,14 @@ end state;
 state AESequenceDC::UnhappyJob.AwaitingPersistenceService () is
 theJob : instance of Job;
 theSystemSpec : instance of SystemSpecification;
+failureMode : string;
 failureReason : string;
 kvps : dictionary of string;
 
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+  
   theJob := this -> R45;
 
   if (Logger::enabled(Logger::Debug, "pv.sv.unhappyjob.awaitingpersistenceservice")) then
@@ -446,7 +450,7 @@ begin
   
   theSystemSpec := find_one SystemSpecification ();
   failureReason := " Request for invariants from the persistence store has timed out meaning the Extra Job Invariant Check has failed " & this.jobID;
-  schedule theJob.jobInvariantSyncTimer generate Job.persistenceSyncTimedOut(failureReason) to theJob delay theSystemSpec.persistentInvariantRestoreTimeoutPeriod;
+  schedule theJob.jobInvariantSyncTimer generate Job.persistenceSyncTimedOut(failureMode,failureReason) to theJob delay theSystemSpec.persistentInvariantRestoreTimeoutPeriod;
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
@@ -761,7 +765,7 @@ begin
     // TODO At the moment we are treating this as a job failed condition. We may want to raise this to an alarm condition
     // TODO Paul&Colin to review above comment as part of issue 222
     //generate Job.jobFailed (failureReason) to this;
-    theJob.jobFail(failureMode,failureReason);
+    theJob.failJob(failureMode,failureReason);
   end if;
   // if in due course we want to do invariant checks then generate the
   // event to transition to checking intra job invariants

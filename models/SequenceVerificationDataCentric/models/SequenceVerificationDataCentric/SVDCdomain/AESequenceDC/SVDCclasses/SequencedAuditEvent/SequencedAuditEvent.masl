@@ -25,12 +25,16 @@ newSequence : instance of Sequence;
 kvps : dictionary of string;
 creationErrorMessage : string;
 eventDataCheckHasPassed : boolean;
+failureMode : string;
 failureReason : string;
 eventContent : string;
 empty : sequence of string;
 emptyString : sequence of string := empty & ("");
 
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+
   oldEvent := find_one AuditEvent (AEId = eventId);
   // Check to see if we've seen this event instance before
   if (oldEvent = null) then
@@ -87,17 +91,17 @@ begin
         // ...and then check that the received audit event data matches that which is expected
         newSeqEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
         if eventDataCheckHasPassed /= true then
-          newJob.failJob(failureReason);
+          newJob.failJob(failureMode,failureReason);
         end if;
         
       else
-        newJob.failJob("Invalid audit event definition for a start event in job definition = " & theJobDef.jobName & " since the occurrenceNumberInSequence is expected to be 1");    
+        newJob.failJob(failureMode,"Invalid audit event definition for a start event in job definition = " & theJobDef.jobName & " since the occurrenceNumberInSequence is expected to be 1");    
       end if;  
     else
       //We have an unrecognised event type
       // Log error: unrecognised event type received
       newJob.sequencingFailed := true;
-      newJob.failJob("An unrecognised event type has been received - Job Id = " & newJob.jobID & " with Job Name = " & newJob.jobName & " Event Type = " & newEventType.AEType);
+      newJob.failJob(failureMode,"An unrecognised event type has been received - Job Id = " & newJob.jobID & " with Job Name = " & newJob.jobName & " Event Type = " & newEventType.AEType);
     
     end if;
   else
@@ -208,6 +212,7 @@ thisJobsDynamicControls : set of instance of DynamicControl;
 theCurrentDynamicControls : set of instance of DynamicControl;
 thePrevUserDynamicControlDefn : instance of DynamicControlDefinition;
 thePrevUserDynamicControl : instance of DynamicControl;
+failureMode : string;
 loopCount : integer;
 branchCount : integer;    
 mergeCount : integer;
@@ -218,6 +223,9 @@ creationErrorMessage : string;
 totalDynamicControls : set of instance of DynamicControl;
     
     begin
+      // Initialise failureMode to "ErrorMode" (the default value).
+      failureMode := "ErrorMode";
+    
       // Capture any audit event data associated with this audit event
       theJob := this -> R11 -> R10;
       theEventType := this -> R2;
@@ -242,17 +250,17 @@ totalDynamicControls : set of instance of DynamicControl;
                       svLog("svdc_event_data_captured", "Audit event data provided with this audit event has been captured", theJob.jobID, theJob.jobName, kvps));
                   end if;
                 else
-                  theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
+                  theJob.failJob(failureMode,"Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
                 end if;                 
               else
                 // Log: The audit event data type provided with this audit event is of a disallowed type for this type of audit event
                 kvps["eventDataName"] := aeDataElement.aedName; kvps["eventDataType"] := theEventType.AEType;
                 Logger::log(Logger::Information, "pv.sv.sequencedauditevent.processauditeventdata",
                   svLog("svdc_disallowed_data", "audit event data type provided with this audit event is of a disallowed type for this type of audit event", theJob.jobID, theJob.jobName, kvps));
-                theJob.failJob("Invalid audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
+                theJob.failJob(failureMode,"Invalid audit event data type for - Job Id = " & theJob.jobID & " and Event Type = " & theEventType.AEType);
               end if;
             else
-               theJob.failJob("INTRAJOBINV Audit event data sent on an event type is not the expected audit event data - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);               
+               theJob.failJob(failureMode,"INTRAJOBINV Audit event data sent on an event type is not the expected audit event data - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);               
             end if;  
           when aeDataKindEnum.EXTRAJOBINV =>  
             // For this Audit Event Occurrence only the following ExtraJobInvariantDefinition is allowed
@@ -270,10 +278,10 @@ totalDynamicControls : set of instance of DynamicControl;
                	if theSourceExtraJobInvariant /= null then                                                                            
                   link theSourceExtraJobInvariant R27 this;
                 else
-                  theJob.failJob(creationErrorMessage & " for Job: " & theJob.jobID);
+                  theJob.failJob(failureMode,creationErrorMessage & " for Job: " & theJob.jobID);
                 end if;    
               else
-                theJob.failJob("Invalid audit event data - the name of the audit event data does not match that expected - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
+                theJob.failJob(failureMode,"Invalid audit event data - the name of the audit event data does not match that expected - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
                     
               end if;
 
@@ -294,16 +302,16 @@ totalDynamicControls : set of instance of DynamicControl;
                       svLog("svdc_event_data_captured", "Audit event data provided with this audit event has been captured", theJob.jobID, theJob.jobName, kvps));
                   end if;
                 else
-                  theJob.failJob("Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
+                  theJob.failJob(failureMode,"Empty Invariant Value provided for this Job = " & theJob.jobID & " and Event Type = " & theEventType.AEType);        
                 end if; 
               else                  
                 // This Invariant not expected to be provided on this audit event
-                theJob.failJob("Extra Job Invariant: " & aeDataElement.aedName & " not expected on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
+                theJob.failJob(failureMode,"Extra Job Invariant: " & aeDataElement.aedName & " not expected on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
               end if;
             
             else
               // The definition does not match the audit event data seen so this is an error condition
-              theJob.failJob("EXTRAJOBINV Audit event data sent on the event type is not the expected audit event data - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);               
+              theJob.failJob(failureMode,"EXTRAJOBINV Audit event data sent on the event type is not the expected audit event data - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);               
                 
             end if;
             
@@ -328,7 +336,7 @@ totalDynamicControls : set of instance of DynamicControl;
                     
                   else
                     // No Loop Count value provided
-                    theJob.failJob("No valid loop count value provided on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
+                    theJob.failJob(failureMode,"No valid loop count value provided on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
                   end if;
                   exit when dynamicControlDefinitionFound = true;
                 else
@@ -337,7 +345,7 @@ totalDynamicControls : set of instance of DynamicControl;
               end loop;
               if dynamicControlDefinitionFound = false then    
                 // This Loop Count not expected to be provided on this audit event
-                theJob.failJob("Loop count not expected on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
+                theJob.failJob(failureMode,"Loop count not expected on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
               end if;
              
             when aeDataKindEnum.BRANCHCOUNT =>  
@@ -361,7 +369,7 @@ totalDynamicControls : set of instance of DynamicControl;
 
                   else
                     // No Branch Count value provided
-                    theJob.failJob("No valid branch count value provided on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
+                    theJob.failJob(failureMode,"No valid branch count value provided on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
                   end if;
                   exit when dynamicControlDefinitionFound = true;
                 else
@@ -370,7 +378,7 @@ totalDynamicControls : set of instance of DynamicControl;
               end loop;  
               if dynamicControlDefinitionFound = false then    
                 // This Branch Count not expected to be provided on this audit event
-                theJob.failJob("Branch count not expected on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
+                theJob.failJob(failureMode,"Branch count not expected on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
               end if;
                
             when aeDataKindEnum.MERGECOUNT =>  
@@ -394,7 +402,7 @@ totalDynamicControls : set of instance of DynamicControl;
 
                   else
                     // No Merge Count value provided
-                    theJob.failJob("No valid merge count value provided on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
+                    theJob.failJob(failureMode,"No valid merge count value provided on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
                   end if;
                   exit when dynamicControlDefinitionFound = true;
                 else
@@ -403,18 +411,18 @@ totalDynamicControls : set of instance of DynamicControl;
               end loop;  
               if dynamicControlDefinitionFound = false then    
                 // This Merge Count not expected to be provided on this audit event
-                theJob.failJob("Merge count not expected on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
+                theJob.failJob(failureMode,"Merge count not expected on this audit event data type for - Job Id = " & theJob.jobID & " with Job Name = " & theJob.jobName & " and Event Type = " & theEventType.AEType);
               end if;
 
           when others =>
             // Log warning: Unsupported audit event data type
-            theJob.failJob("The audit event data type provided for jobId = " & theJob.jobID & " with Job Name = " & theJob.jobName & " is an unsupported type of audit event data = " & aeDataElement.aedName'image);               
+            theJob.failJob(failureMode,"The audit event data type provided for jobId = " & theJob.jobID & " with Job Name = " & theJob.jobName & " is an unsupported type of audit event data = " & aeDataElement.aedName'image);               
         end case;  
       end loop;
       
 exception
     when program_error =>
-      theJob.failJob("Program Error in AuditEvent.ProcessAuditEventData for " & theJob.jobID & " with Job Name = " & theJob.jobName & " possibly caused by a non-integer loop or branch count in the audit event data : " & aeDataElement.aedValue);               
+      theJob.failJob(failureMode,"Program Error in AuditEvent.ProcessAuditEventData for " & theJob.jobID & " with Job Name = " & theJob.jobName & " possibly caused by a non-integer loop or branch count in the audit event data : " & aeDataElement.aedValue);               
             
 end service;
 //

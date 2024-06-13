@@ -13,8 +13,11 @@ newEvent : instance of AuditEvent;
 theJobDefinition : instance of JobDefinition;
 newEventType : instance of UnsequencedAuditEventDefinition;
 kvps : dictionary of string;
+failureMode : string;
 
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
 
   oldEvent := find_one AuditEvent (AEId = eventId);
   // Check to see if we've seen this event instance before
@@ -42,7 +45,7 @@ begin
           svLog("svdc_new_unhappy_job_started", "starting", jobId, jobName, kvps));
 
       else
-        newJob.failJob("An unrecognised job definition has been received - Job Id = " & newJob.jobID & " with Job Name = " & newJob.jobName & " Event Type = " & aeType);      
+        newJob.failJob(failureMode,"An unrecognised job definition has been received - Job Id = " & newJob.jobID & " with Job Name = " & newJob.jobName & " Event Type = " & aeType);      
         Logger::log(Logger::Warning, "pv.sv.unsequencedauditevent.addeventfornewunhappyjob",
           svLog("svdc_defn_not_found", "No Job Definition found", jobId, jobName, kvps));
       end if;  

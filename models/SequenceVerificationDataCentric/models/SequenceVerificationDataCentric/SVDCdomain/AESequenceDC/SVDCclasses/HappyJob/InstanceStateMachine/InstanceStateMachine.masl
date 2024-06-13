@@ -1147,10 +1147,14 @@ end state;
 state AESequenceDC::HappyJob.AwaitingPersistenceService () is
 theJob : instance of Job;
 theSystemSpec : instance of SystemSpecification;
+failureMode : string;
 failureReason : string;
 kvps : dictionary of string;
 
 begin
+  // Initialise failureMode to "ErrorMode" (the default value).
+  failureMode := "ErrorMode";
+
   theJob := this -> R45;
 
   if (Logger::enabled(Logger::Debug, "pv.sv.happyjob.awaitingpersistenceservice")) then
@@ -1160,7 +1164,7 @@ begin
   
   theSystemSpec := find_one SystemSpecification ();
   failureReason := "Request for invariants from the persistence store has timed out meaning the Extra Job Invariant Check has failed " & this.jobID & " with Job Name = " & theJob.jobName;
-  schedule theJob.jobInvariantSyncTimer generate Job.persistenceSyncTimedOut(failureReason) to theJob delay theSystemSpec.persistentInvariantRestoreTimeoutPeriod;
+  schedule theJob.jobInvariantSyncTimer generate Job.persistenceSyncTimedOut(failureMode,failureReason) to theJob delay theSystemSpec.persistentInvariantRestoreTimeoutPeriod;
 end state;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
