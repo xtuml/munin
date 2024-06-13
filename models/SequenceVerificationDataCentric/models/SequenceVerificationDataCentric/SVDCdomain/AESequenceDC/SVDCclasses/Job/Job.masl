@@ -11,7 +11,7 @@ begin
       svLog("svdc_fail_job", "failed job", this.jobID, this.jobName, kvps));
   end if;
 
-  generate Job.jobFailed(failureReason) to this;
+  generate Job.jobFailed(failureMode,failureReason) to this;
 
   // TODO: Every call to this function (elsewhere in the model) could be replaced
   // with the generate Job.jobFailed(failureReason) to this; statement and then this
