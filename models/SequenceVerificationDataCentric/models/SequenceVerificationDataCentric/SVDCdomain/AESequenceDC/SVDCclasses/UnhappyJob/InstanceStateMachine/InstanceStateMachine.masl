@@ -213,7 +213,11 @@ begin
   
   // Log info: Audit Event Sequence Verification has been informed of Job failure
   // Accumulate a well-formed, structured, canonical log message here.
-  kvps["tag"] := JSON::to_json("svdc_job_alarm");
+  if failureMode = "AlarmMode" then
+    kvps["tag"] := JSON::to_json("svdc_job_alarm");
+  else
+    kvps["tag"] := JSON::to_json("svdc_job_failed");
+  end if;
   kvps["message"] := JSON::to_json(failureReason);
   kvps["jobId"] := JSON::to_json(this.jobID);
   kvps["jobName"] := JSON::to_json(theJob.jobName);
@@ -695,6 +699,7 @@ begin
     isSuccess := true;
   else
     isSuccess := false;
+    failureMode := "AlarmMode";
     failureReason := "ALARM: Unhappy event seen within the scope of a Critical event";
     
     //Find and report the critical events that are in scope of the unhappy events
@@ -762,9 +767,7 @@ begin
     end if;
     generate UnhappyJob.unhappyJobBehavedAsExpected () to this;
   else
-    // TODO At the moment we are treating this as a job failed condition. We may want to raise this to an alarm condition
-    // TODO Paul&Colin to review above comment as part of issue 222
-    //generate Job.jobFailed (failureReason) to this;
+
     theJob.failJob(failureMode,failureReason);
   end if;
   // if in due course we want to do invariant checks then generate the

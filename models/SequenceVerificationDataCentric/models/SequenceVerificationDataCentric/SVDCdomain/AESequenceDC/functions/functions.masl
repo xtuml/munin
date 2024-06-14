@@ -90,6 +90,8 @@ public service AESequenceDC::failedJob ( jobId : in string,
                                         failureReason : in string ) is
 theJob : instance of Job;
 failureMode : string;
+failureReason : string;
+kvps : dictionary of string;
 
 begin
   // Initialise failureMode to "ErrorMode" (the default value).
@@ -98,6 +100,14 @@ begin
   failureMode := "ErrorMode";
 
   theJob := find_only Job (jobID = jobId);
+
+  // This is just a progress message - the failure is reported in the state machine
+  if (Logger::enabled(Logger::Debug, "pv.sv.job.failjob")) then
+    kvps["failureReason"] := failureReason;
+    Logger::log(Logger::Debug, "pv.sv.job.failjob",
+      svLog("svdc_fail_job", "failed job", theJob.jobID, theJob.jobName, kvps));
+  end if;
+
   if theJob /= null then
     generate Job.jobFailed(failureMode,failureReason) to theJob;
   end if;
