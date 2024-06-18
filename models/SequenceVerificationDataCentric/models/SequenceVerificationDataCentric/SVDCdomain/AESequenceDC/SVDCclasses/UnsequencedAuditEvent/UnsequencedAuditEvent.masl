@@ -27,7 +27,7 @@ begin
     Logger::log(Logger::Debug, "pv.sv.unsequencedauditevent.addeventfornewunhappyjob",
       svLog("svdc_add_unhappy_event", "First event for Job is an unhappy event", jobId, jobName, kvps));
     
-    newJob := create Job (jobID => jobId, sequencingFailed => true, jobCompleted => false );
+    newJob := create Job (jobID => jobId, sequencingFailed => true, jobCompleted => false, alarm => false );
     newUnhappyJob := create UnhappyJob (jobID => jobId, Current_State => Created );
     link newUnhappyJob R45 newJob;
 

@@ -39,7 +39,7 @@ echo "Done."
 
 # get list of puml files (stripping DOS CR)
 puml_files=$(cat ../metrics/benchmark_job_definitions.txt | sed "s/\r$//")
-puml_file_for_injection="../tests/PumlForTesting/PumlRegression/ComplexNoEventDataJob.puml"
+puml_file_for_injection="../tests/PumlForTesting/PumlRegression/ACritical2.puml"
 puml_file_for_alarm="../tests/PumlForTesting/PumlRegression/ACritical1.puml"
 puml_file_for_prepopulation="../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml"
 
@@ -97,7 +97,7 @@ for ((i = 0; i < $ITERATIONS; i++)); do
   if [[ $# -lt 3 ]] ; then
     # Inject an error to fail one job.
     echo "Inject error to fail a job."
-    $P2J ${puml_file_for_injection} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --omit C
+    $P2J ${puml_file_for_injection} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --omit CSJI
     echo "Inject error to alarm a job."
     $P2J ${puml_file_for_alarm} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --sibling CSJC
   fi
