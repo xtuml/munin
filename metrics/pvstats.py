@@ -18,6 +18,7 @@ class Report:
         self.lastSuccessfulJob = ""
         self.lastFailedJob = ""
         self.lastAlarmedJob = ""
+        self.preReceivedAuditEventCount = 0
         self.receivedAuditEventCount = 0
         self.employedWorkers = 0
         self.assignedJobs = 0
@@ -98,7 +99,7 @@ job_success: \033[0;32;40m$job_success\033[0;0m job_fail: \033[0;33;40m$job_fail
 lastSuccessfulJob: \033[0;32;40m$lastSuccessfulJob\033[0;0m
 lastFailedJob: \033[0;33;40m$lastFailedJob\033[0;0m
 lastAlarmedJob: \033[0;31;40m$lastAlarmedJob\033[0;0m
-rcvd_events: \033[0;96;40m$rcvd_events\033[0;0m  throughput: \033[0;95;40m$throughput\033[0;0m  up_time: $upTime
+rcvd_events: \033[0;96;40m$rcvd_events\033[0;0m  in_rate: \033[0;96;40m$in_rate\033[0;0m  throughput: \033[0;95;40m$throughput\033[0;0m  up_time: $upTime
 build_name: $buildName  version: $buildVersion
 employedWorkers: $employedWorkers  assignedJobs: $assignedJobs  unassignedJobs: $unassignedJobs
 """
@@ -126,6 +127,7 @@ employedWorkers: $employedWorkers  assignedJobs: $assignedJobs  unassignedJobs: 
                             lastFailedJob=report.lastFailedJob,
                             lastSuccessfulJob=report.lastSuccessfulJob,
                             rcvd_events=report.receivedAuditEventCount,
+                            in_rate=int(report.preReceivedAuditEventCount / upseconds),
                             buildName=report.buildName,
                             buildVersion=report.buildVersion,
                             upTime=upstring,
@@ -182,7 +184,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     consumer = kafka3.KafkaConsumer(bootstrap_servers=args.msgbroker, auto_offset_reset='earliest')
-    consumer.subscribe( ['Protocol_Verifier_Statistics','Protocol_Verifier_InfoWarn'] )
+    consumer.subscribe( ['Protocol_Verifier_Statistics','Protocol_Verifier_InfoWarn','Protocol_Verifier_Reception'] )
 
     # initialise a report
     report = Report(1)
@@ -199,6 +201,8 @@ if __name__ == '__main__':
                     report.consume_statistics(s)
                 elif tp.topic == 'Protocol_Verifier_InfoWarn':
                     report.consume_infowarn(s)
+                elif tp.topic == 'Protocol_Verifier_Reception':
+                    report.preReceivedAuditEventCount += 1
         # log periodically
         t1 = time.monotonic()
         if ( t1 - t0 ) > 1:
