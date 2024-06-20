@@ -6,7 +6,12 @@ retiredWorker : instance of RetiredWorker;
 kvps : dictionary of string;
 
 begin
-	
+
+	if (Logger::enabled(Logger::Debug, "pv.jm.registerworker")) then
+		kvps["workerId"] := string(workerId);
+		Logger::log(Logger::Debug, "pv.jm.registerworker",
+			jmLog("jobmanagement_worker_register_worker", "register worker request", kvps));
+	end if;
 	// check if this is a new worker
 	jobWorker := find_one JobWorker(workerId = workerId);
 	if jobWorker = null then

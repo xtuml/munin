@@ -79,7 +79,7 @@ fi
 # generate source job
 echo "Generating invariant source runtime event stream..."
 # little delay to assure everything is initialized
-sleep 5
+sleep 1
 echo "../tests/PumlForTesting/PumlRegression/AAExtraJobInvariantSourceJob.puml" | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC
 echo "Done."
 
@@ -109,11 +109,12 @@ echo "stop " `date` >> runtime.txt
 runtime=$(($stop_seconds - $start_seconds))
 events_per_second=$(($TOTAL_EVENTS / $runtime))
 echo $runtime "seconds at rate:" $events_per_second >> runtime.txt
-sleep 20
 echo "Done."
 if [[ $# -ge 3 ]] ; then
   echo "Press ENTER to continue..."
   read a
+else
+  sleep 20
 fi
 
 # run the benchmark script
@@ -123,7 +124,7 @@ echo "Done."
 
 # tear down docker
 echo "Tearing down the application... (ctrl-c to leave it running)"
-sleep 10
+sleep 2
 docker compose -f docker-compose.kafka.yml down
 echo "Done."
 

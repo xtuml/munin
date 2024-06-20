@@ -25,7 +25,7 @@ class Report:
         self.unassignedJobs = 0
         self.buildName = ""
         self.buildVersion = ""
-        self.upTime = ""
+        self.upTime = "PT0S"
         self.workerAssignments = []
         self.workerEventCounts = []
 
