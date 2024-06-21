@@ -171,9 +171,9 @@ begin
   //
   end if;
 
-  // Set a timer to timeout if the job hangs waiting for another event
+  // Set a timer to timeout to detect the end of the unhappy job.
   theSystemSpec := find_one SystemSpecification();
-  schedule theJob.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.jobHangingTimeoutPeriod;  
+  schedule theJob.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.intraSequenceEventTimeoutPeriod;
     
   else
     theJob.sequencingFailed := true;

@@ -956,7 +956,7 @@ begin
     // All sequences for the Job appear to be complete - but just in case there's a late delivery of the first
     // event in a previously unseen optional branch of one of those sequences then give a short period for it to 
     // arrive before moving the Job into the JobCompleted state.
-    schedule theJob.jobEventTimer generate Job.jobComplete() to theJob delay theSystemSpec.intraSequenceEventTimeoutPeriod;
+    schedule theJob.jobEventTimer generate Job.jobComplete() to theJob delay @PT0S@;
   else
     // The job or sequence is waiting for another event to arrive but one doesn't happen
     schedule theJob.jobHangingTimer generate Job.jobTimedOut() to theJob delay theSystemSpec.jobHangingTimeoutPeriod;    
