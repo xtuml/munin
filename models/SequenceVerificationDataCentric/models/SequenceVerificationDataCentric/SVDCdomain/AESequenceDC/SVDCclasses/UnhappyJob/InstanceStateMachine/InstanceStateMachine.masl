@@ -173,7 +173,7 @@ begin
 
   // Set a timer to timeout to detect the end of the unhappy job.
   theSystemSpec := find_one SystemSpecification();
-  schedule theJob.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.intraSequenceEventTimeoutPeriod;
+  schedule theJob.jobHangingTimer generate Job.jobTimedOut() to this delay theSystemSpec.persistentInvariantRestoreTimeoutPeriod;
     
   else
     theJob.sequencingFailed := true;
