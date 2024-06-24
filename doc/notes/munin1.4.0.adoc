@@ -63,7 +63,8 @@ channels through configuration:
 * The benchmark probe is now switchable.  It can be enabled and disabled
   through configuration.
 * The PV Prime capability also can be switched on and off as needed
-  without changes to code or build environment.
+  without changes to code or build environment.  (Note that a PV Prime
+  instance must be separate from the PV under observation.)
 * Logger categories are established for logging information,
   warnings and alarms for the __system under observation__.
 * Debug and engineering logging categories are established with a
@@ -73,7 +74,7 @@ channels through configuration:
   of possibilities for the reporting back end.  JSON is the most supported
   format for reporting and filtering and monitoring systems.
 
-The content and frequency of log messages was carefully analysed.  The
+The content and frequency of log messages were carefully analysed.  The
 reporting of good behaviour has been reduced; the reporting of bad
 behaviour is now more detailed.  Successful jobs have short log messages
 carrying the name and identifier of the successful job.  Failed and
