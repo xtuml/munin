@@ -21,28 +21,45 @@ doing what you said you are doing?"
 The Protocol Verifier reports each job as finishing with status 'success',
 'fail' or 'alarm'.
 
-== References
-
-https://github.com/xtuml/munin/blob/main/doc/notes/ProtocolVerifierCapabilities.adoc[Protocol
-Verifier Capabilities] defines fundamental terms and gives a brief
-overview of what the PV can do.
-
-https://github.com/xtuml/plus2json/blob/main/doc/tutorial/AuditEventTopologyTutorial.pdf[Audit
-Event Tutorial] is an instructive slide presentation explaining the various
-means of observation and constraint application.
-
-https://www.youtube.com/watch?v=UjR9AR8M2Ew[Munin Protocol Verifier] is a
-27 minute youtube video that was presented at the
-https://xtuml.github.io/xday/smdays2023.html[2023 Shlaer-Mellor Day]
-conference.
-
-https://github.com/xtuml/munin/blob/main/doc/howto/HOWTO_Munin.adoc[HOWTO
-Munin] explains how to build and run the Protocol Verifier.
-
 == Access and Getting Involved
 
 The Protocol Verifier and associated utilities are Open Source Software.
 You are welcome to fork, clone, raise issues and join in the
 collaboration.
 
+== References
+
+* link:./doc/notes/ProtocolVerifierCapabilities.adoc[Protocol Verifier
+  Capabilities] defines fundamental terms and gives a brief overview of
+  what the PV can do.  (It is recommended to visit this document and read
+  the technical terms before looking at anything else.)
+* https://www.youtube.com/watch?v=UjR9AR8M2Ew[Munin Protocol Verifier] is a
+  27 minute youtube video that was presented at the
+  https://xtuml.github.io/xday/smdays2023.html[2023 Shlaer-Mellor Day]
+  conference.  It explains protocol verification, describes the Protocol
+  Verifier and shows a running demonstration.
+* https://github.com/xtuml/plus2json/blob/main/doc/tutorial/AuditEventTopologyTutorial.pdf[Audit
+  Event Tutorial] is an instructive slide presentation explaining the various
+  means of observation and constraint application.
+* link:./doc/howto/HOWTO_Munin.adoc[HOWTO Munin] explains how to build (from
+  source) and run the Protocol Verifier.  (Warning, as of Summer 2024, it is
+  a bit out of date.)
+* https://github.com/xtuml/plus2json[plus2json - PLUS to JSON git
+  repository] is a utility for converting PLUS (PlantUML) job definitions
+  into the JSON format consumed by Protocol Verifier.  This utility also
+  runs in '--play' mode which interprets a job definition and produces a
+  compliant stream of run-time audit events.  In other words, `plus2json --play`
+  can simulate any system under observation.
+* https://github.com/xtuml/munin/tree/main/tests/PumlForTesting/PumlRegression/[PLUS
+  (PlantUML) job definitions used for regression testing] - These PLUS job
+  definitions provide examples of all of the various topologies and
+  constraints supported by the Protocol Verifier.  (Edit them with a
+  PlantUML capable editor to see the graphical representation.)
+
+== Release Notes
+
+* link:./doc/notes/munin1.4.0.adoc[Protocol Verifier Release Notes (1.4.0)]
+* link:./doc/notes/munin1.3.0.adoc[Protocol Verifier Release Notes (1.3.0)]
+* link:./doc/notes/munin1.2.0.adoc[Protocol Verifier Release Notes (1.2.0)]
+* link:./doc/notes/munin1.1.0.adoc[Protocol Verifier Release Notes (1.1.0)]
 
