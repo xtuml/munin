@@ -1,9 +1,15 @@
 = HOWTO build and run the Protocol Verifier
 
-Enough talk! <<Export MASL,Skip to the steps>>
+Enough talk! <<Export MASL,Skip to the steps>>.
 
-If you want to run the latest version of the project without building,
-<<Running the latest published version of the protocol verifier, see here>>
+If you want to run the latest version of the Protocol Verifier without building,
+<<Running the latest published version of the protocol verifier, see here>>.
+
+== Introduction
+
+This HOWTO is targeted primarily to new developers.  It gives background
+on setting up a build environment, building the application and running
+it.
 
 == Prerequisites
 
@@ -33,8 +39,8 @@ link:https://docs.docker.com/get-docker/[Docker Desktop].
 === BridgePoint
 
 Install the latest BridgePoint release. If you already have BridgePoint
-installed, confirm that your version is more recent than 7.3.0
-(2022-11-30) by checking the build ID.
+installed, confirm that your version is more recent than 7.6.0
+(2023-12-21) by checking the build ID.
 
 Refer to
 link:https://github.com/xtuml/bridgepoint/blob/master/doc-bridgepoint/process/HOWTO-install-bridgepoint.adoc[this guide]
@@ -108,8 +114,8 @@ workspace:
   ** Verification Gateway (VG)
 * Deployments
   ** AEO_SVDC (AEO + SVDC + VG)
-  ** IStore (a single domain deployment) (TODO Does this include Job Id Store too?)
-  ** AER (a single domain deployment)
+  ** IStore (a single domain deployment)
+  ** JM (a single domain deployment)
 * Utilities
   ** utils
   ** plus2json
@@ -127,7 +133,7 @@ this also maps one-to-one with an Eclipse/BridgePoint project.
 ==== Domain
 
 A "domain" represents an encapsulated set of data objects and behaviours. The
-term comes from the original Shlaer-Mellor method, and in MASL a domain is the
+term comes from the original Shlaer-Mellor Method, and in MASL a domain is the
 basic unit of compilation. Each domain exists in its own project.
 
 ==== Deployment
@@ -142,13 +148,13 @@ general term "project".
 "Protocol Verifier" refers to the overall application as well as the BridgePoint
 project where all of the domains are integrated together using a set of deployments.
 The Protocol Verifier is built to use kafka as an inter-process messaging service.
-However, if kafka is not present then the Protocol Verifier will revert to file-based
+However, if kafka is not present, then the Protocol Verifier will revert to file-based
 transfers. This includes getting event streams into the PV. The kafka configuration
 is described below.
 
 In our context the Protocol Verifier is the collections of the following deployments:
 
-* AER
+* JM
 * IStore
 * AEO_SVDC (includes Verification Gateway)
 
@@ -163,8 +169,8 @@ can be found link:https://github.com/xtuml/munin/blob/main/doc/howto/PLUS_guide.
 
 "plus2json" refers to the application which processes PLUS files (textual
 `.puml` activity diagrams) and produces JSON job definition and runtime
-configuration files consumable by the Protocol Verifier (and the Audit
-Event Simulator). plus2json can also be used to generate runtime test 
+configuration files consumable by the Protocol Verifier.
+plus2json can also be used to generate runtime test 
 data based on the job definitions. It is capable of generating valid
 runtime event streams and also of injecting errors into runtime event
 streams.
@@ -200,7 +206,7 @@ generator (see next section).
 
 ==== MASL C++ code generator and software architecture (via Docker)
 
-The code generator and target architecture chosen for Munin Phase 1 is the MASL
+The code generator and target architecture chosen for Munin is the MASL
 C++ software architecture published as Open Source Software in 2016. The code
 generator consists of a Java-based MASL parser/generator which produces C++
 source code for an application model. The code generator is designed to be
@@ -211,85 +217,46 @@ runtime libraries written in C++ which provide mechanisms to implement the rules
 of Shlaer-Mellor in a single threaded process. The code generator is designed
 to produce generated code compatible with the runtime architecture.
 
-.Click for more details
-[%collapsible]
-====
-
-Since it was published in 2016, the MASL C++ project has been hosted
-link:https://github.com/xtuml/masl[on GitHub] and managed by the xtUML
-community. However, in the period since being published, the project has seen
-little maintenance activity and has fallen behind the upstream version. As a
-result, build tool and third party library dependencies have locked this
-architecture in time. We have created a set of container images using Docker to
-encapsulate the code generator and runtime libraries. This allows us to build
-and execute models in two primary modes:
-
-1. In the first mode, the project source MASL is passed into a container via a
-shared folder where the code generator and C++ compiler are free to execute in
-the context of all required dependencies. The generated C++ source code,
-compiled libraries, executables, and supporting files are passed back out to the
-development host machine using the same shared folder mechanism. Once compiled,
-the binary file can be executed using another container image which provides all
-necessary runtime shared libraries (MASL architecture and third party). This
-mode of execution can be thought of as analogous to executing Java byte code in
-an instance of the JVM.
-
-2. In the second mode, an alternative Docker image is created by extending a base
-image that already contains all of the MASL dependencies. The code is generated
-and compiled during the image build phase and the resultant executable is set up
-as the entrypoint for the image. Once the image is produced, it can be executed
-on any platform that supports the docker engine.
-
-The first mode is more flexible, better for iterative development, and results
-in much smaller generated artefacts. The second mode is less error prone and is
-more suited for deployment. We used the first mode primarily during the PoC and
-have since switched to the second mode in anticipation of deployment and
-scaling.
-
-====
-
 ==== Testing and GitHub Actions (Continuous Integration)
 
 We are using features of the MASL code generator along with custom domains to
 define and run tests for each domain and the whole system. Like all other actions,
 the tests are defined in MASL.  A domain service is created for each test.
-Test are specially marked to be excluded from
+Tests are specially marked to be excluded from
 the production application and are added to a test schedule. When the project is
 built in the testing configuration, the tests are generated and executed and
 results are logged to the console and output as a set of JSON files in the test
 results directory.
 
 We are using GitHub Actions to automatically build and run tests for each domain
-and the system deployment any time new code is merged into the main development
-branch of the repository. The output from each test schedule is consolidated and
-formatted into an HTML report. The most recent report from the main branch can
-be viewed link:https://s3.amazonaws.com/1f-outgoing/munin/main/index.html[here].
-New failures or build issues are flagged before code is merged into the
-mainline.
+and the system deployment any time a release is drafted.
+The output from each test schedule is consolidated and
+formatted into an HTML report.
 
-=== Domain overview
+=== Domain Overview
 
 ==== Protocol Verifier Domains
 
-===== Reception (AER)
+===== Job Management (JM)
 
-The role of the Audit Event Reception domain is to convert audit events received
-from the monitored system, in json format, into audit event
-objects that can be used by the other domains in the model. Any changes to the
-json format of received audit events will be addressed by the Audit Event Reception
-domain. The format of delivery to the other domains will remain consistent. This
-isolates the impact of changes in received audit event format to a single
-domain. Unexpected input formats are rejected and errors are notified.
+Job Management makes use of the worker pattern allowing PV instances to be started 
+without the use of fixed lanes. Jobs shall be assigned by the Job Management domain 
+to PV workers using a round robin technique.
+
+Each PV worker will have to maintain a heartbeat with Job Management, and loss of
+the heartbeat will cause the worker to be retired. Any in-progress jobs assigned to
+a PV worker who has retired shall become unassigned and added to the queue of jobs
+that need processing.
 
 ===== File Reception (FR)
 
-The Reception Domain (AER) takes json format event streams as its input.
-Some configurations of the PV will take json event streams as direct input
-say from a messaging fabric. Other configuartions of the PV can receive
+The File Reception Domain (FR) takes JSON format event streams as its input.
+Some configurations of the PV will take JSON event streams as direct input
+say from a messaging fabric. Other configurations of the PV can receive
 events streams in a file-based format. Each file contains a number of
-json fomratted events. This domain deals with the file-based reception
+JSON formatted events. This domain deals with the file-based reception
 of audit event files. It is not required in configurations where the
-json events are provided directly over a messaging fabric.
+JSON events are provided directly over a messaging fabric.
 
 ===== Ordering (AEO)
 
@@ -345,30 +312,27 @@ of audit events. The PV can be said to be "eating its own dog food".
 
 The Protocol Verifier is partitioned into a set of deployments that can be instantiated and
 deployed in parallel to provide for performance scaling. The deployments are made up
-of one or more of the Protocol Verifer domains and some supporting infrastructure. 
+of one or more of the Protocol Verifier domains and some supporting infrastructure. 
 Deployments can use file-based messaging between domains but the preferred option is
 based upon a messaging infrastructure. The following shows the components for a
 deployment using Kafka for messaging:
 
-* Reception (AER) - typically a single instance
+* JobManagement (JM) - typically a single instance
 * IStore - single instance
-* Ordering, Sequence Verification, Job Store (TODO ?), Verification Gateway (AEO_SVDC) - multiple instances
-* async_logger - single instance
+* Ordering, Sequence Verification, Verification Gateway (AEO_SVDC) - multiple instances
 * zookeeper - single instance
 * kafka - single instance
 
-
-TODO IS this still relevant?
 For a description of how this architecture achieves scaling see
-link:https://github.com/xtuml/munin/blob/main/doc/notes/MUN-151_scaling_ant.adoc[here].
+link:https://github.com/xtuml/munin/blob/main/doc/notes/MUN2-147-horizontal-scaling-design.adoc[here].
 
 === Supporting Application Overview
 
 ==== plus2json
 
-plus2json is an application that converts the PLUS language into JSON
-files that the Protocol Verifier and the Audit Event
-Simulator can consume. Since the Protocol Verifier is data driven, the use
+`plus2json` is an application that converts the PLUS language into JSON
+files that the Protocol Verifier
+can consume. Since the Protocol Verifier is data driven, the use
 of plus2json is essential to set up a new instance of the Protocol
 Verifier to monitor and check a new protocol. Once configured and supplied
 with a set of job definitions, the Protocol Verifier can be run without
@@ -379,7 +343,8 @@ plus2json is also capable of providing test audit event streams. The
 regression testing of the PV uses plus2json to generate valid and 
 invalid event streams.
 
-See LINK HERE for details of plus2json commands
+See the https://github.com/xtuml/plus2json[plus2json git repository] for
+details of plus2json commands.
 
 == Configuring the Protocol Verifier
 
@@ -389,7 +354,7 @@ This splits into the following main parts:
 * Configuring Runtime Parameters
 * Configuring the messaging fabric
 
-For a visual overview of the configuration of the Protocol Verifier (and the associated Audit Event Simulator) 
+For a visual overview of the configuration of the Protocol Verifier
 click link:images/MUNIN_Configuration_Setup.pdf[here].
 
 === Specifying Job and Event Data Definitions
@@ -406,7 +371,7 @@ place for the protocols being monitored. After this has been done
 initially, it needs to be repeated only to add or change the definitions of
 monitored jobs.  The configuration for the protocol verifier is found in
 the `deploy` directory. This is loaded at start up and checked on a
-regular basis for updates.
+periodic basis for updates.
 
 The structure of the `deploy` directory is shown link:images/MUNIN_Domains_and_Key_Interactions.pdf[here].
 
@@ -427,20 +392,20 @@ The plus2json application takes as input PLUS (`.puml`) text files and
 produces a number of possible outputs.  The primary output is the
 JSON-formatted job definition for a particular protocol.  plus2json also
 can produce runtime configuration files in a format that the Protocol
-Verifier and the Audit Event Simulator can consume.
+Verifier can consume.
 
 For details on using plus2json and its options refer to
 link:https://github.com/xtuml/plus2json[plus2json].
 
 The commands described below produce a single config.json file which contains a 
-number of configuation parameters and a list of the job specification
-names together with individual job configuation parameters. In addition they 
+number of configuration parameters and a list of the job specification
+names together with individual job configuration parameters. In addition they 
 generate a file for each job definition and the event definitions relevant to 
 that job definition. Further, if the job definition requires any supplementary 
 audit event data then an additional configuration file defining the audit event 
 data definitions for that job definition can be created.
 
-Currently, PLUS files should each contain a single job defintion.
+Currently, PLUS files should each contain a single job definition.
 
 Assume a PlantUML file containing a single job definition called `Tutorial_1.puml` 
 has been created. The typical sequence of plus2json commands is as follows:
@@ -449,7 +414,7 @@ Optionally backup the existing configuration file by moving the contents of
 link:https://github.com/xtuml/munin/deploy/config[this directory] 
 to a backup location of your choice.
 
-The following commands convert the PLUS files into json files and load them into the appropriate
+The following commands convert the PLUS files into JSON files and load them into the appropriate
 configuration directories: 
 
 . `python plus2json.pyz Tutorial_1.puml` 
@@ -510,7 +475,7 @@ domain with all associated events.
 *JobDefinitionDirectory* - The file location relative to the deploy directory where
 the job definition json files are stored.
 
-*DefaultJobExpiryDuration* - TODO CHECK - This defines the default period of validiaty 
+*DefaultJobExpiryDuration* - TODO CHECK - This defines the default period of validity 
 for a job definition
 
 *DefaultStaleAuditEventDuration* - This is the period of time for which a received 
@@ -541,11 +506,13 @@ complete.
 
 *WaitPeriodForInvariantDeletion* - TODO
 
-*TimeoutPeriodForRetreivingStoredInvariants* - TODO
+*TimeoutPeriodForRetreivingStoredInvariants* - When loading invariants, a
+warning will be issued if this time period expires.  Jobs depending upon
+the loaded invariants will fail.
 
 *TimeoutPeriodForHangingJob* - This determines how long the PV will wait for 
 events in the circumstances where the PV knows the job is incomplete and
-further events are expected. If this timer times out then the job is
+further events are expected. If this timer times out, then the job is
 deemed to have failed.
 
 Example:
@@ -581,7 +548,7 @@ Example:
 
 The selection of timer values can have a significant impact on the performance 
 of the PV. For example, the MaxIntraSequenceEventTimeoutPeriod defines how long
-jobs will wait for any additional events. If this timer was set to 10 minutes
+jobs will wait for any additional events. If this timer were set to 10 minutes
 and the PV is running at 500 events/sec then 300000 events will be retained
 in the PV after the potential completion of their associated jobs. This will
 utilise memory and decrease performance. 
@@ -594,7 +561,7 @@ in performance tests.
 
 There are a variety of possible applications that could provide the messaging
 fabric. The chosen one for this release is Kafka. However, it is important to 
-note that none of the PV domains have any explicit dependency on Kafka. Chnaging
+note that none of the PV domains have any explicit dependency on Kafka. Changing
 to a different messaging fabric would have some impact would in would not be
 major.
 
@@ -604,9 +571,6 @@ This determines the number of instances of each of the deployments to
 instantiate at start up. Note: This version of the Protocol Verifier 
 supports static scaling. This yml script also launches the logging service 
 and the kafka and associated zookeeper processes.
-
-TODO How much detail to include on docker-compose.kafka.yml
-
 
 == Building and Running the Protocol Verifier
 
@@ -657,8 +621,7 @@ click link:images/AEReception_Directory_Structure.pdf[here]. TODO Update the dia
 
 ==== `build`
 
-The `build` directory contains atrefacts produced in the code generation process.
-TODO Any more required here
+The `build` directory contains artefacts produced in the code generation process.
 
 ==== `config`
 
@@ -721,7 +684,7 @@ TODO
 
 ==== `.project`
 
-TODO This files contains some Bridgepoint configuration paramaters for the domain.
+TODO This files contains some Bridgepoint configuration parameters for the domain.
 
 ==== `conanfile.py`
 
@@ -750,7 +713,7 @@ This may take some time as it downloads ~500MB of data.
 === Export MASL
 
 There is a script to help with this that works on MacOS. However, it
-doesn't work on Windows so use the manual approach decribed below.
+doesn't work on Windows so use the manual approach described below.
 
 ==== Generate MASL using script
 
@@ -807,7 +770,7 @@ directory and execute:
 ./build_all.sh
 ```
 
-All build artifacts including C++ source code can be found in the `build/`
+All build artefacts including C++ source code can be found in the `build/`
 directory in each project.
 
 ==== regression.sh
@@ -850,7 +813,7 @@ It then launches the PV application and uses the same set of job definition
 files to generate test event streams using plus2json --play. Options on 
 --play allow thousands of jobs to be injected into the PV in a single test.
 The rate of event generation and whether the events are shuffled or not can 
-be speicifed by options.
+be specified by options.
 
 Finally, it analyses the log files, characterises the performance and 
 summarises the passes and failures.
@@ -877,9 +840,9 @@ the integrated application.
 
 === Cleaning
 
-Sometimes artifacts that are no longer required are left in the build and
+Sometimes artefacts that are no longer required are left in the build and
 need to be cleaned out. If there are build issues then a clean is recommended.
-Artifacts generated by the build can be removed by navigating to the project
+Artefacts generated by the build can be removed by navigating to the project
 directory and executing the command:
 
 ```
@@ -960,12 +923,6 @@ Extra Job Invariants have to be persisted beyond the lifetime of the executing
 processes. This is directory contains the repository for persisted invariant 
 values.
 
-`JobIdStore`
-
-It is necessary to maintain job ids beyond the lifetime of the jobs to look for
-illegal reuse of job ids. This directory contains the simple file based store 
-of job ids. This feature is soon to be replaced with a Job Management domain.
-
 `logs`
 
 This directory contains log files generated by the reception and verifier parts
@@ -982,18 +939,12 @@ This is the docker compose file that is used to build the version of the PV
 that achieves inter-process messaging using kafka. This default version of 
 the docker compose file supports Linux and Windows builds.
 
-`docker-compose.kafka.yml.macos`
+`p2jInvariantStore`
 
-This is the docker compose file that is used to build the version of the PV
-that achieves inter-process messaging using kafka. This special version of 
-the docker compose file supports MacOS builds.
-
-`P2JInvariantStore`
-
-Just a the PV needs to retain extra job invariants over extended periods of 
+Just as the PV needs to retain extra job invariants over extended periods of 
 time so does plus2json. A plus2json job which uses an extra job invariant
 hours or days after it was created needs to be able to locate and reuse the 
-appropriate value. This file is the store of invariants the plus2json uses. 
+appropriate value. This file is the store of invariants that plus2json uses. 
 
 `.env`
 
@@ -1033,15 +984,18 @@ compose -f docker-compose.test.yml up` to start the application, you should run
 `docker compose -f docker-compose.test.yml down` in the same directory to tear
 it down.)
 
-If there is only one command to remember from this section, it is this:
+If there are only two commands to remember from this section, they are:
 
   docker system prune
+  docker volume prune
 
-This command causes Docker to remove all stopped containers, networks, dangling
+The first command causes Docker to remove all stopped containers, networks, dangling
 images and build cache. This usually works to give a "fresh" start if you get
-stuck.
+stuck.  The second command removes data volumes (disk storage) created while
+the system is running.  The Kafka message broker creates large storage volumes
+that need to be cleaned up periodically.
 
-If you are making changes but not observing different behavior check the
+If you are making changes but not observing different behaviour check the
 following:
 
 . Assure you have re-exported MASL (build projects from within BridgePoint)
@@ -1052,39 +1006,21 @@ ones created from the latest image).
 
 ==== Running the latest published version of the protocol verifier
 
-TODO Check This section is out of date. Is this still relevant and needs to be
-updated or can it be removed?
-
-As mentioned above, the application is built and published automatically each
-time new code is merged into the main repository branch. It is possible to use
+As mentioned above, the application is built and published automatically (to the
+https://docs.github.com/en/enterprise-cloud@latest/packages/working-with-a-github-packages-registry/working-with-the-container-registry[GitHub Container Registry])
+each time a new release is drafted. It is possible to use
 docker to run the latest version of the application without any build at all.
-
-. Authenticate with the GitHub Container Registry by executing the command:
-
-  docker login ghcr.io
-
-+
-Use your GitHub.com account name and password to log in. If you have two-factor
-authentication enabled on your account, you will have to create a new personal
-access token to use in place of your password. Follow the guide
-link:https://github.com/xtuml/bridgepoint/blob/master/doc-bridgepoint/process/HOWTO-use-git.adoc#generating-authentication-credentials[here]
-to generate a new token with the
-link:images/08_read_packages.png["read:packages"] scope.
 
 . Execute the application by running the following commands from the munin/deploy directory:
 
-  docker-composer -f reception.yml up
-
-  docker-compose -f verifier.yml up
-
-. link:images/04_drag_and_drop.gif[Drag and drop] a test file e.g.
-link:https://github.com/xtuml/tower/blob/main/deploy/processed/FileRequest_HappyPath.json[`FileRequest_HappyPath.json`]
-to the `/reception-incoming/` directory in your current directory. You will see
-a flurry of output from the application and the file will reappear in the
-`verifier-processed/` directory. Inspect the logs and you will see that the audit events
-have been received, ordered, and verified by the application.
+```
+docker compose -f docker-compose.prod.yml up
+```
 
 . Kill the process by pressing `Ctrl-C`.
+
+Understand that job definitions need to be supplied, and audit event stream
+JSON is expected on the Kafka topic:  `Protocol_Verifier_Reception`.
 
 === Building a domain with test
 

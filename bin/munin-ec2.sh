@@ -25,7 +25,7 @@
 NAME=myname                         # name to prepend for tagging the instance
 
 AMI_REGION=us-east-1                # Virginia
-AMI_ID=ami-05cf4407f1a37ffb2        # us-east AMI name PV benchmarking 4
+AMI_ID=ami-05e0abce17b3ccb4d        # us-east AMI name PV benchmarking 5
 SG_ID=sg-017c46e14320a0f5d          # us-east security group name "Remote Access"
 KEY_PAIR=pvlinuxtest                # keypair for logging in with ssh to us-east
 

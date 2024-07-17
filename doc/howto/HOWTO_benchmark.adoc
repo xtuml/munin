@@ -9,10 +9,17 @@ Verifier (PV) under stressful loads.
 
 == 2 Introduction and Background
 
-A regression script exists which does a small amount of coverage testing
-of the Protocol Verifier.  Stress testing also uses a script to set up and
-run the PV.  The stress testing utilises features of `plus2json --play`
-which repeatedly run jobs playing out audit event instance streams.
+A regression script exists (`tests/regression.sh`) which does a small
+amount of coverage testing of the Protocol Verifier.  Stress testing also
+uses a script (`metrics/run_benchmark.sh`) to set up and run the PV.  The
+stress testing utilises features of `plus2json --play` which repeatedly
+run jobs playing out audit event instance streams.
+
+The regression script runs the single container single process build of
+the Protocol Verivier.  The benchmarking script runs a more production
+oriented configuration of the Protocol Verifier including multiple
+instances of the AEO_SVDC "workers", an independent job manager and the
+Kafka message broker.
 
 == 3 Requirements
 
@@ -33,7 +40,7 @@ N/A
 == 6 Unit Test
 
 When a random, intelligent engineer can follow these instructions and
-successfully stess test the Munin PV, then unit test passes.
+successfully stess test the Munin PV, then unit testing passes.
 
 == 7 User Documentation
 
@@ -42,10 +49,11 @@ successfully stess test the Munin PV, then unit test passes.
 . Navigate to munin/bin on your local machine.
 . Start a remote Linux instance with munin repos pre-populated.
   (Substitute your own name for "dave".)
-  .. `munin-ec2.sh start davePV`
-. Log in to your remote Linux instance.
-  .. `munin-ec2.sh login`
-  .. `ssh -i ~/.ssh/pvlinuxtest.pem ubuntu@ec2-35-153-105-133.compute-1.amazonaws.com`
+  .. `./munin-ec2.sh start davePV`
+. Log in to your remote Linux instance.  (You need an authentication token from the 1F sysadmin.)
+  .. `./munin-ec2.sh login`
+  .. Or, find the external hostname of the EC2 instance and login like
+     this:  `ssh -i ~/.ssh/pvlinuxtest.pem ubuntu@ec2-35-153-105-133.compute-1.amazonaws.com`
 . Start a detachable terminal session to protect against network outages.
    * `tmux`
    * Detach with ctrl-b followed by d.
@@ -54,23 +62,19 @@ successfully stess test the Munin PV, then unit test passes.
 . Navigate to munin/metrics.
 . Delete the logs and cruft from previous runs.
   * `../bin/clean_for_benchmark.sh`
-    ** (same as) `sudo rm -rf ../deploy/logs ../deploy/InvariantStore/ ../deploy/JobIdStore/ ../deploy/reception-incoming/ ../deploy/reception-processed/ ../deploy/p2jInvariantStore`
-. Run `run_benchmark.sh` at 1000 events per second for 50000 events.
-  * `run_benchmark.sh 1000 50000`
-. Open a separate shell or log in to your Linux instance in a separate shell.
-  * `munin-ec2.sh login`
-. Observe the log files.
+    ** (same as) `sudo rm -rf ../deploy/logs ../deploy/InvariantStore/ ../deploy/reception-incoming/ ../deploy/reception-processed/ ../deploy/p2jInvariantStore`
+. Run `run_benchmark.sh` at (near) 1000 events per second for 50000 events.
+  * `./run_benchmark.sh 1000 50000`
+. Launch the (rudimentary) dashboard.
+  .. Open a separate shell or log in to your Linux instance in a separate shell.
+  .. `./munin-ec2.sh login`
   .. Navigate to munin/deploy.
-  .. Check for failed jobs.
-     * `grep -c job_fail logs/verifier/*`
-  .. Count successful jobs.
-     * `grep -c job_succ logs/verifier/*`
-  .. Count persisted JobIDs.  (Multiply by number of instances of PV.)
-     * `wc JobIdStore/0-63/*`
+  .. Wait for the Protocol Verifier to be up and running.
+  .. `python ../metrics/pvstats.py --msgbroker localhost:9092`
 . Log out of your remote Linux instance.
   .. `exit`
 . Terminate your remote Linux instance.  (IMPORTANT:  machines left running cost money.)
-  .. `munin-ec2.sh terminate`
+  .. `./munin-ec2.sh terminate`
 
 === 7.2 References
 
@@ -81,19 +85,15 @@ successfully stess test the Munin PV, then unit test passes.
 
 ==== 7.2.2 Interesting Commands
 
-* Delete unused docker images.
-  ** `docker system prune`
 * Delete unused docker volumes (e.g. Kafka logs).
   ** `docker volume prune`
+* Delete unused docker images.
+  ** `docker system prune`
 * See CPU and memory usage.
   ** `docker stats --no-stream`
   ** `top`
 * See disk usage.
   ** `df -vh`
-
-== 8 Document References
-
-. [[dr-1]] https://onefact.atlassian.net/browse/MUN2-153[153 - build and test artefacts]
 
 ---
 
