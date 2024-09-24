@@ -1,0 +1,11 @@
+@startuml
+partition "testing if without else" {
+group "if statement"
+  #green:BEFORE;
+  if (XOR) then ("error")
+    :INSIDEIF;
+  endif
+  #red:AFTER;
+end group
+}
+@enduml
