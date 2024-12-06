@@ -1,10 +1,13 @@
 //! ACTIVITY BEGIN. '9cbac07b-6dc4-4fa8-b9d8-55d50c527727' DO NOT EDIT THIS LINE.
 public instance service JobManagement::AuditEvent.reportAuditEvent ( assignedWorker : in instance of EmployedWorker ) is
+jsonElement: JSON::JSONElement;
 begin
 
-    Worker~>reportEvent(assignedWorker.workerId, this.auditEvent);
-    // increment the counter for the events processed by this worker
-    assignedWorker.reportedAuditEventCount := assignedWorker.reportedAuditEventCount + 1;
+    for jsonElement in this.auditEvents loop
+        Worker~>reportEvent(assignedWorker.workerId, JSON::dump(jsonElement));
+        // increment the counter for the events processed by this worker
+        assignedWorker.reportedAuditEventCount := assignedWorker.reportedAuditEventCount + 1;
+    end loop;
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -26,7 +29,7 @@ kvps : dictionary of string;
 begin
     // parse the event and extract the job id
     jsonElement := JSON::parse(auditEvent);
-        if jsonElement.kind = JSON::Object then
+    if jsonElement.kind = JSON::Object then
         jsonObject := JSON::get_object(jsonElement);
         if jsonObject'contains("jobId") then
             jobId := JSON::get_string(jsonObject["jobId"]);
@@ -73,6 +76,95 @@ begin
         end if;
     end if;
 
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. 'e0164458-d8d5-404c-8e10-77acafd2975d' DO NOT EDIT THIS LINE.
+public service JobManagement::AuditEvent.acceptAuditEvents ( auditEvents : in string ) is
+rootJsonElement: JSON::JSONElement;
+jsonElement: JSON::JSONElement;
+jsonObject: JSON::JSONObject;
+jsonArray: JSON::JSONArray;
+jobId : string;
+jobManager : instance of JobManager;
+auditEventReception : instance of AuditEventReception;
+job : instance of Job;
+unassignedJob : instance of UnassignedJob;
+acceptedAuditEvent : instance of AuditEvent;
+assignedWorker : instance of EmployedWorker;
+jmSpec : instance of JobManagementSpec;
+kvps : dictionary of string;
+
+begin
+    // Parse the auditEvents string and determine single audit event or array.
+    rootJsonElement := JSON::parse(auditEvents);
+    if rootJsonElement.kind = JSON::Object then
+        // We have received a single audit event JSON object.
+        jsonObject := JSON::get_object(rootJsonElement);
+    elsif rootJsonElement.kind = JSON::Array then
+        // We have received an array of audit event JSON objects.
+        jsonArray := JSON::get_array(rootJsonElement);
+        jsonElement := jsonArray[jsonArray'first];
+        if jsonElement.kind = JSON::Object then
+            jsonObject := JSON::get_object(jsonElement);
+        end if;
+    else
+        // We detect empty jsonObject below.
+    end if;
+
+    // Create the audit event instance and link to job.  Add audit event(s) as attribute.
+    if jsonObject'length > 0 and jsonObject'contains("jobId") then
+        jobId := JSON::get_string(jsonObject["jobId"]);
+        jobManager := find_one JobManager();
+        job := find_one Job(jobId = jobId);
+        if job = null then
+            job := create Job(jobId => jobId);
+            unassignedJob := create UnassignedJob(jobId => jobId);
+            link unassignedJob R5.Job job;
+            jobManager.unassignedJobIds := jobManager.unassignedJobIds & jobId;
+        end if;
+        // add the event to the job
+        acceptedAuditEvent := create unique AuditEvent(auditEvent => auditEvents);
+        link acceptedAuditEvent R7 job;
+        auditEventReception := jobManager -> R26.AuditEventReception;
+        // Assign events to attribute and increment counter for total received audit events since start-up.
+        if rootJsonElement.kind = JSON::Array then
+            acceptedAuditEvent.auditEvents := jsonArray;
+            auditEventReception.receivedAuditEventCount := auditEventReception.receivedAuditEventCount + jsonArray'length;
+            // TODO - should we check for consistent jobIDs on all array elements?
+        else
+            acceptedAuditEvent.auditEvents := acceptedAuditEvent.auditEvents & rootJsonElement;
+            auditEventReception.receivedAuditEventCount := auditEventReception.receivedAuditEventCount + 1;
+        end if;
+        // check if this is an assigned job
+        assignedWorker := job -> R5.AssignedJob -> R6.EmployedWorker;
+        if assignedWorker = null then
+            // select worker for job
+            assignedWorker := jobManager.selectWorkerForJob();
+            // if worker selected assign job
+            if assignedWorker /= null then
+                jobManager.assignJob(assignedWorker);
+            end if;
+        else
+            // report the event
+            acceptedAuditEvent.reportAuditEvent(assignedWorker);
+        end if;
+
+        // check if we have exceeded the max unassigned jobs and if so report an error
+        jmSpec := find_one JobManagementSpec();
+        if jobManager.unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnassignedJobsExceeded = false then
+            if (Logger::enabled(Logger::Debug, "pv.jm.auditevent.acceptevent")) then
+                kvps["jobCount"] := (jobManager.unassignedJobIds'length)'image;
+                Logger::log(Logger::Debug, "pv.jm.auditevent.acceptevent",
+                        jmLog("jobmanagement_exceeded_max_jobs", "Maximum number of unassigned jobs exceeded.", kvps));
+            end if;
+            jmSpec.maxUnassignedJobsExceeded := true;
+        else
+            jmSpec.maxUnassignedJobsExceeded := false;
+        end if;
+    else
+        // TODO - Warning:  unrecognised audit event message
+    end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

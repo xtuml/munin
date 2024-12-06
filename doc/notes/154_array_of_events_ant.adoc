@@ -132,21 +132,22 @@ notes:
 . Step 1 (parsing to JSON and passing JSON arrays and objects internally)
   .. Change `AuditEventReception::Receiving` to use a transient called
      `rawAuditEvents`.
-  .. Change `AuditEvent.acceptEvent` to parse the input string.
+  .. Add `AuditEvent.acceptAuditEvents` to parse the input string.
      ... Detect object versus array.
-     ... If array, populate transient array variable.
-     ... If object, append the object to the transient array.
-     ... Get the jobID from the first element in the transient array.
+     ... If array, populate auditEvents array attribute.
+     ... Get the jobID from the first element in the array.
+     ... If object, append the element to the auditEvents array attribute.
      ... Count the array elements and use the result to increment
          `receivedAuditEventCount`.
-  .. On class AuditEvent, add attribute `auditEvent` to `auditEvents` and
-     change the type to JSON::JSONArray (sequence of JSONElement).
+  .. On class AuditEvent, add attribute `auditEvents` and of type
+     JSON::JSONArray (sequence of JSONElement).
   .. On class AuditEvent, change instance service reportAuditEvent to deal
      with input audit event of type JSON::JSONObject.
      ... As first increment, dump the JSON event to a string before sending to AEO.
   .. Test that this works within the current mode (one event at a time).
-  .. On class AuditEvent, remove attribute `auditEvent`.
-     ... Update tests to work with the list of JSON `auditEvents`.
+  .. TODO On class AuditEvent, remove attribute `auditEvent`.
+     ... TODO Update tests to work with the list of JSON `auditEvents`.
+  .. TODO Remove `AuditEvent.acceptEvent` (in lieu of `AuditEvent.acceptAuditEvents`).
   .. Test again that this works within the current mode (one event at a time).
 . Step 2 (native JSON to Audit Event Ordering)
   .. Supply a new terminator service, `reportAuditEvent` that handles an
@@ -154,7 +155,7 @@ notes:
   .. Test that this works within the current mode (one event at a time).
 . Step 3 (reception of an array of audit events)
   .. Consider supplying a new terminator service, `reportAuditEvents` that
-     handles an array of audit event JSON objects.
+     handles an array of audit event JSON objects... or do this as the first go.
 . Step 4
   .. On class AuditEvent, add state machine with two states:  `Reporting` and
      `Reported`.  Reporting  which reports an audit events (to Audit Event Ordering).
@@ -164,12 +165,15 @@ notes:
 ==== 5.1.2 Audit Event Ordering
 
 . Step 1
-  .. Fix bug in SystemSpec.schemaValidated where we are redundantly converting
-     JSON to JSON (to_json on input auditEvent).
-  .. Test.
+  .. nothing
 . Step 2
   .. Supply a new domain service, `acceptJsonAuditEvent` that receives an
      audit event as a native JSON object.
+. Step 3
+  .. Supply a new domain service, `acceptJsonAuditEvents` that receives an
+     array of audit events as a native JSON Array.
+. Step 4
+  .. Bug fix:  Allow multiple event data items on an audit event.
 
 ==== 5.1.3 Sequence Verification
 
