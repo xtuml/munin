@@ -3,11 +3,9 @@ public instance service JobManagement::AuditEvent.reportAuditEvent ( assignedWor
 jsonElement: JSON::JSONElement;
 begin
 
-    for jsonElement in this.auditEvents loop
-        Worker~>reportEvent(assignedWorker.workerId, JSON::dump(jsonElement));
-        // increment the counter for the events processed by this worker
-        assignedWorker.reportedAuditEventCount := assignedWorker.reportedAuditEventCount + 1;
-    end loop;
+    Worker~>reportAuditEvents(assignedWorker.workerId, this.auditEvents);
+    // increment the counter for the events processed by this worker
+    assignedWorker.reportedAuditEventCount := assignedWorker.reportedAuditEventCount + this.auditEvents'length;
 
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -132,6 +130,7 @@ begin
             acceptedAuditEvent.auditEvents := jsonArray;
             auditEventReception.receivedAuditEventCount := auditEventReception.receivedAuditEventCount + jsonArray'length;
             // TODO - should we check for consistent jobIDs on all array elements?
+            // TODO - sort out the audit events to the various jobs before reporting each.
         else
             acceptedAuditEvent.auditEvents := acceptedAuditEvent.auditEvents & rootJsonElement;
             auditEventReception.receivedAuditEventCount := auditEventReception.receivedAuditEventCount + 1;

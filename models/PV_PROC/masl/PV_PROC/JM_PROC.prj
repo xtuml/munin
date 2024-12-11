@@ -6,6 +6,8 @@ project JM_PROC is
 			public service workerUnregistered ( workerId: in UUID::formatted_uuid );     
 			public service reportEvent ( workerId: in UUID::formatted_uuid,
 			                             auditEvent: in string);     
+			public service reportAuditEvents ( workerId: in UUID::formatted_uuid,
+			                                   auditEvents: in JSON::JSONArray);
 			public service jobCompletionConfirmed ( workerId: in UUID::formatted_uuid,
                                                     jobId: in string );     
 		end terminator;

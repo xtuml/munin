@@ -61,11 +61,21 @@ Using the same topic and public service, update Job Management to detect
 both individual audit event JSON objects and JSON arrays of audit event
 JSON objects.
 
-Job Management::AuditEvent can collect these audit event JSON objects in
+`Job Management::AuditEvent` can collect these audit event JSON objects in
 a list attribute of the Audit Event class (instead of the current string
 attribute for a single audit event).  Support of single and multiple audit
 events will be accomplished to retain compatibility with single-event
 reception.
+
+===== 4.2.1.1
+
+Experimentation seems to be revealing that the ordering of events is not
+that much overhead compared to the reduction in message traffic of
+grouping multiple events into a single message.  This may imply that we
+can perform this grouping in Job Management even when the list of audit
+events received involves multiple jobs.  In such a scenario, Job
+Management would process a received message entirely and then forward the
+events in batches to Audit Event Ordering.
 
 ==== 4.2.2 Single Bypass
 
@@ -127,7 +137,7 @@ notes:
   the unassigned job.  When assignment can be made, all of the events are
   reported in a loop.  I don't trust this loop in a configuration where
   AEO/SVDC synchronously receive inter-domain messages.  (Consider the
-  case of a single message containing 100s of audit events.)
+  case of a single message containing 100 audit events.)
 
 . Step 1 (parsing to JSON and passing JSON arrays and objects internally)
   .. Change `AuditEventReception::Receiving` to use a transient called
@@ -153,6 +163,7 @@ notes:
   .. Supply a new terminator service, `reportAuditEvent` that handles an
      audit event as a native JSON object.
   .. Test that this works within the current mode (one event at a time).
+  .. skipped
 . Step 3 (reception of an array of audit events)
   .. Consider supplying a new terminator service, `reportAuditEvents` that
      handles an array of audit event JSON objects... or do this as the first go.
@@ -161,17 +172,33 @@ notes:
      `Reported`.  Reporting  which reports an audit events (to Audit Event Ordering).
      and generates `Report` to self (un-expedited) when more exist or `Done`
      when the last event in the list is delivered downstream.
+. Step 5
+  .. Determine a maximum number of audit events that are acceptable in a
+     single audit event JSONArray.  Report a Warning if this is exceeded.
+  .. Fix counting of received events and events on workers.
+. Step 6
+  .. Generalise audit event reception to remove the assumption that all
+     jobIDs in a received message will be homogeneous.  Cycle through all
+     audit events in the message creating needed audit events and
+     appending audit event to lists of existing jobs.
 
 ==== 5.1.2 Audit Event Ordering
 
 . Step 1
   .. nothing
 . Step 2
-  .. Supply a new domain service, `acceptJsonAuditEvent` that receives an
+  .. Supply a new domain service, `AcceptJsonAuditEvent` that receives an
      audit event as a native JSON object.
+  .. skipped
 . Step 3
-  .. Supply a new domain service, `acceptJsonAuditEvents` that receives an
+  .. Supply a new domain service, `AcceptJsonAuditEvents` that receives an
      array of audit events as a native JSON Array.
+  .. As a first increment, dump each event to a string and call
+     `acceptJsonEvent` in a loop.
+  .. Test this increment.
+  .. Enhance `AcceptJsonAuditEvents` to do the work that `AcceptJsonEvent`
+     does with regard to parsing out the fields.  Only do it without the
+     JSON.parse step.
 . Step 4
   .. Bug fix:  Allow multiple event data items on an audit event.
 
@@ -183,8 +210,10 @@ notes:
 . Step 1
 . Step 2
 . Step 3
-  .. Supply an option to plus2json to batch ordered events by job into a
-     single message.
+  .. Supply an option (event-array) to plus2json to send JSON arrays of
+     events in a single message.
+  .. Supply an option (batch-by-job) to plus2json to batch events by job
+     into a single message.
 
 == 6 Acceptance Test
 

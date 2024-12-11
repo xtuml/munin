@@ -1,0 +1,7 @@
+public service JobManagement::Worker~>reportAuditEvents ( workerId: in UUID::formatted_uuid,
+                                                          auditEvents: in JSON::JSONArray ) is
+begin
+
+  AEOrdering::AcceptJsonAuditEvents(workerId, auditEvents);
+
+end service;
