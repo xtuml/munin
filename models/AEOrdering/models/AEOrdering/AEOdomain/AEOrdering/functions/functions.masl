@@ -344,15 +344,8 @@ begin
                                     end if;
                                 end if;
                             end loop;
-                            //AcceptJsonEvent( workerId, JSON::dump(jsonObject) );
-                            //AcceptJsonEvent( workerId, JSON::dump(jsonElement) );
                             AcceptEvent(JSON::get_string(jsonObject["jobId"]), JSON::get_string(jsonObject["jobName"]), JSON::get_string(jsonObject["eventType"]),
                               JSON::get_string(jsonObject["eventId"]), JSON::get_string(jsonObject["timestamp"]), prevIds, evtData);
-                            //kvps["workerId"] := string(workerId);
-                            //Logger::log(Logger::Error, "pv.aeo.acceptjsonauditevents",
-		              //aeoLog("aeordering_rcvd_debugging", "debugging at event submission",
-                                //JSON::get_string(jsonObject["jobId"]), JSON::get_string(jsonObject["jobName"]),
-                                //JSON::get_string(jsonObject["eventId"]), JSON::get_string(jsonObject["eventType"]), kvps));
                         else
                             // schema validation error
                             kvps["workerId"] := string(workerId);

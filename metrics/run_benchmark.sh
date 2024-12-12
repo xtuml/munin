@@ -7,7 +7,7 @@ set -e
 
 P2J="python ../bin/plus2json.pyz"
 # Define batches of events for p2j to play.
-BATCH_OF_EVENTS=10000
+BATCH_OF_EVENTS=1000000
 EVENTS_PER_SECOND=1000
 TOTAL_EVENTS=100000
 if [[ $# -ge 2 ]] ; then
@@ -93,7 +93,7 @@ start_seconds=`date +%s`
 echo "0 of " $TOTAL_EVENTS
 LOOP_COUNT=0
 for ((i = 0; i < $ITERATIONS; i++)); do
-  echo ${puml_files} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
+  echo ${puml_files} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --event-array --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
   if [[ $# -lt 3 ]] ; then
     # Inject an error to fail one job.
     echo "Inject error to fail a job."
