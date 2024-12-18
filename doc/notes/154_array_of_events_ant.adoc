@@ -174,10 +174,60 @@ notes:
      audit events in the message creating needed audit event instances and
      appending audit events to lists of existing jobs.
   .. TODO Change `AuditEvent.reportAuditEvent` to `AuditEvent.reportAuditEvents`.
-  .. TODO See if unit tests pass on main.  It may be that these tests were not
+  .. See if unit tests pass on main.  It may be that these tests were not
      updated after the addition of `AuditEventReception` in the previous
      functional change.  But since File Reception still uses it, and it
-     works, then keep it?
+     works, then keep it?  [tests fail on main]
+  .. TODO `AuditEvent.auditEvent` and `AuditEvent.auditEvents` contain the
+     entire list of events, which can be very long.  Shorten `auditEvent`
+     somehow.  It is still needed for unit tests.
+
+===== 5.1.1.1
+
+  parse input
+  if object
+    jsonObject = JSON::get_objectrootJsonElement)
+    jsonArray = jsonArray & jsonObject
+  elsif array
+    jsonObject = first object
+    jsonArray = JSON::get_array(rootJsonElement)
+  else
+    // re-detect problem below
+  end if
+
+  if jsonObject'length > 0 and contains("jobId") then
+    auditEventReception := jobManager -> R26
+    for jsonElement in jsonArray loop
+      jsonObject := get_object(jsonElement)
+      if jsonObject'length > 0 and contains("jobId") then
+        // create job (if needed) and audit event
+        jobid = get_jobid()
+        job = find job(jobid)
+        if job = null
+          create job
+          create unassigned job
+          link job to unassigned job
+          add unassigned job to unassigned job list
+        end if
+        create acceptedAuditEvent
+        link to job
+    end loop
+
+acceptedAuditEvents
+for rawAuditEvent in auditEventArray
+  jobId = extract job Id
+  find acceptedAuditEvent in acceptedAuditEvents where (jobId)
+  if null
+    create acceptedAuditEvent
+
+
+dictionary_of_JSONArray:  dictionary of JSON::JSONArray
+for ae in rawAuditEvents loop
+  jsonObject := JSON::get_object(ae)
+  jobId := JSON::get_string(jsonObject["jobId"]);
+  dictionary_of_JSONArray[jobId] := dictionary_of_JSONArray[jobId] & jsonObject
+
+
 
 ==== 5.1.2 Audit Event Ordering
 
@@ -204,26 +254,15 @@ The regression script works.  This means that the old
 `JobManagement::acceptEvent` still works.  So, the JM unit tests should be
 able to continue using this mechanism.
 
-. Step 1
-  .. nothing
-. Step 2
-  .. skipped
-. Step 3
-  .. TODO Change terminator service, `Reception~>acceptEvents` that handles an
-     array of audit event JSON objects.
-
 ==== 5.1.4 Sequence Verification
 
 
 === 5.2 plus2json
 
-. Step 1
-. Step 2
-. Step 3
-  .. Supply an option (event-array) to plus2json to send JSON arrays of
-     events in a single message.
-  .. Supply an option (batch-by-job) to plus2json to batch events by job
-     into a single message.
+. Supply an option (event-array) to plus2json to send JSON arrays of
+  events in a single message.
+. Supply an option (batch-by-job) to plus2json to batch events by job
+  into a single message.
 
 == 6 Acceptance Test
 

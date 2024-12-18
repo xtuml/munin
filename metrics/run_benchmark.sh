@@ -93,7 +93,7 @@ start_seconds=`date +%s`
 echo "0 of " $TOTAL_EVENTS
 LOOP_COUNT=0
 for ((i = 0; i < $ITERATIONS; i++)); do
-  echo ${puml_files} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --event-array --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
+  echo ${puml_files} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --event-array --batch-size 500 --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
   if [[ $# -lt 3 ]] ; then
     # Inject an error to fail one job.
     echo "Inject error to fail a job."
