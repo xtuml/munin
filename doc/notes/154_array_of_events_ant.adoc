@@ -1,30 +1,40 @@
-= Support Array of Audit Events
+= Audit Events Arrays
 
 xtUML Project Analysis Note
 
 == 1 Abstract
 
-This note provides analysis, requirements and work required to support the
-reception of arrays of audit events (in JSON format).
+This note provides requirements, analysis and work required to support the
+reception of arrays of audit events (in JSON format) in the Protocol
+Verifier.
 
 == 2 Introduction and Background
 
-As of the 1.4.0 release of Protocol Verifier, audit event reception
-supports only one individual audit event JSON object per message.
-By supporting arrays of audit events the following benefits may be realised:
+As of the 1.4.0 (June 2024) release of Protocol Verifier, audit event
+reception supports only one individual audit event JSON object per
+message.  By supporting arrays of audit events the following benefits may
+be realised:
 
 * Convenience will be supplied to the upstream source of audit events in
   cases where all events for a job are in hand.
 * The number of interactions with the message broker will be reduced.
-  This may have a positive effect on performance.
+  This may have a positive effect on performance depending upon the
+  characteristics of a particular message broker.
 * When the audit events are pre-ordered, the performance of the Protocol
   Verifier may be enhanced due to a reduction in processing and memory
   usage.
 
 == 3 Requirements
 
-. Support receiving JSON arrays of audit events in the Protocol Verifier.
-. Support sending JSON arrays of audit events in 'plus2json' <<dr-2>>.
+. In the Protocol Verifier, support receiving JSON arrays of audit events
+  on the 'Protocol_Verifier_Reception' topic.
+. In the Protocol Verifier, support exchanging JSON arrays of audit events
+  in the inter-component messaging between Job Management and Audit Event
+  Ordering.
+. In 'plus2json' (<<dr-2>>), support providing JSON arrays of audit events
+  to the 'Protocol_Verifier_Reception' topic.
+. In 'plus2json', retain support for providing individual audit
+  events as discrete JSON objects to the 'Protocol_Verifier_Reception' topic.
 
 == 4 Analysis
 
@@ -32,19 +42,11 @@ By supporting arrays of audit events the following benefits may be realised:
 
 ==== 4.1.1 Scaling and Ordering Features
 
-The Protocol Verifier may have functionality and generality that can
-overlap with upstream event sources.  As long as performance remains
-satisfactory, this is fine.  The scalibility supplied by Job Management
-and the out-of-order event reception capability are strong features.
-
-In configurations in which events arrive ordered and batched by job, the
-functionality of Job Management and Audit Event Ordering are less
-important.  However, in such configurations, the packaging of the Protocol
-Verifier can be such that Job Management, Audit Event Ordering and
-Sequence Verification reside in a single executable.  Such packaging
-reduces the load of message passing which will more than make up for the
-redundant processing of Job Management and Audit Event Ordering while
-leaving the Protocol Verifier general purpose for scaling and ordering.
+The Protocol Verifier has functionality and generality that may overlap
+with upstream event sources.  As long as performance remains satisfactory,
+this is fine.  The scalability supplied by Job Management is a strong
+feature.  The out-of-order event reception capability is also a useful
+feature.
 
 ==== 4.1.2 JSON Parsing
 
@@ -55,29 +57,7 @@ first received.
 
 === 4.2 Options to Consider
 
-==== 4.2.1 Simple Updated Reception
-
-Using the same topic and public service, update Job Management to detect
-both individual audit event JSON objects and JSON arrays of audit event
-JSON objects.
-
-`Job Management::AuditEvent` can collect these audit event JSON objects in
-a list attribute of the Audit Event class (instead of the current string
-attribute for a single audit event).  Support of single and multiple audit
-events will be accomplished to retain compatibility with single-event
-reception.
-
-===== 4.2.1.1
-
-Experimentation seems to be revealing that the ordering of events is not
-that much overhead compared to the reduction in message traffic of
-grouping multiple events into a single message.  This may imply that we
-can perform this grouping in Job Management even when the list of audit
-events received involves multiple jobs.  In such a scenario, Job
-Management would process a received message entirely and then forward the
-events in batches to Audit Event Ordering.
-
-==== 4.2.2 Single Bypass
+==== 4.2.1 Single Bypass
 
 Bypass Job Management and go straight to Audit Event Ordering using a different
 public service and topic.
@@ -86,7 +66,11 @@ This enhancement would be accomplished without deprecating Job Management.
 The Protocol Verifier would be configured accordingly making explicit the
 assumption of audit event grouping by job.
 
-==== 4.2.3 Double Bypass
+This option loses functionality.  Job Management serves as a nexus of
+application health and performance statistics.  Scaling options also
+are lost.
+
+==== 4.2.2 Double Bypass
 
 Bypass Job Management and Audit Event Ordering and go straight to Sequence
 Verification using a different public service and topic.  This assumes
@@ -97,27 +81,119 @@ and Audit Event Ordering.  The Protocol Verifier would be configured
 accordingly making explicit the assumption of audit event grouping by job
 and pre-ordering.
 
+Just as 'Single Bypass', 'Double Bypass' loses functionality.  Job
+Management serves as a nexus of application health and performance
+statistics.  Scaling options also are lost.
+
+==== 4.2.3 Simple Updated Reception
+
+Using the same topic and public service, update Job Management to detect
+both individual audit event JSON objects and JSON arrays of audit event
+JSON objects.
+
+`Job Management::AuditEvent` can collect these audit event JSON objects in
+a list attribute of the Audit Event class (instead of the current string
+attribute for a single audit event).  Support of single and multiple audit
+events can be accomplished to retain capability/compatibility with
+single-event reception.
+
+Experimentation has revealed that the overhead added by the ordering of
+events is small compared to the performance gained by reducing message
+transaction frequency by grouping multiple events into a single message.
+This implies that we can perform job grouping in Job Management even when
+the list of audit events received involves multiple jobs.  In such a
+scenario, Job Management can process a received message entirely and then
+report the events in batches (by job) to Audit Event Ordering.
+
+After research and experimentation, 'Simple Updated Reception' is the
+option chosen.
+
 === 4.3 Notes
 
-* keeping the array in order
-  ** If JM parses out the array elements, how do we make sure we send them
-     to the worker in the order received?  (after linking them to the job)
-* Job Management Reception rips through the array?  [yes]
-* Supply a public service on Audit Event Ordering that receives the audit event as a
-  native JSON object.
-* Audit Event Ordering receives the array and rips through it?  [yes, in
-  separate work]
+* Should Job Management Reception iterate through the received array?  [yes]
+* Enhance Audit Event Ordering by supplying a new public service
+  (`AcceptJsonAuditEvents`) that receives the audit event as a native array
+  (`JSON::JSONArray`).
+  ** In this service, Audit Event Ordering receives the array and iterates
+     through it.
 * Does JSON::JSON necessarily parse an entire JSON array/object when:
   ** array elements are counted?  [yes]
   ** when a field is accessed in a single array element?  [yes]
-* What do we do with the audit event counter in JM?  [increment in the
-  same place (reportAuditEvent)]
-* What about the other throughput and health metrics from JM?  [remain the
-  same for now]
 
-=== 4.1 Protocol Verifier Proper
+=== 4.4 Research and Benchmarking
+
+==== 4.4.1 Concurrency
+
+With large groups of audit events arriving at one time, the granularity of
+concurrency may be affected.  Audit Event Ordering can behave in a
+synchronous manner with an invocation on a domain service resulting in
+direct invocation of a terminator service.  (Consider the case of a single
+message containing 100 audit events.) However, Sequence Verification
+processes one audit event at a time generating an event to a state machine
+between each reception of an ordered audit event.  This ensures that
+multiple jobs can be processed concurrently.
+
+==== 4.4.2 Performance
+
+Performance has been significantly improved with this work.  It seems that
+the latency of interactions with the message broker is more substantial
+than previously recognised.  By grouping audit events, fewer interactions
+with the message broker are required.  The same amount of overall data is
+being transmitted but in fewer transactions.  The observed CPU usage of
+the message broker is down substantially.
+
+It seems that a single audit event is too small of a unit of work to
+efficiently transmit through the network and Protocol Verifier.
+
+The following table documents a few samples of benchmarking results
+running the Protocol Verifier in a Kafka configuration with 4 workers
+being driven by `plus2json --play`.  `plus2json --play` was configured to
+shuffle the events.  When events are sequenced and delivered in batches by
+job, performance is even better (but only slightly).
+
+.Performance Measurements
+[options="header"]
+|===
+| Release              | Linux EC2 t3.xlarge | MacBook Air M2
+| 1.3.0 March 2024     | 1000 events/second  | 3000 events/second
+| 1.4.0 June 2024      | 700 events/second   | 2200 events/second
+| 1.4.0+ December 2024 | 1200 events/second  | 4000 events/second
+|===
+
+It is noted that the performance impact of the benchmarking probe will now
+be more significant and invasive.  The benchmarking probe sends multiple
+messages per audit event.  Therefore, the benchmarking probe is actually
+relegated to a debugging-level tool to observe audit event processing
+through the Protocol Verifier.  By default, the benchmarking probe is
+disabled.
 
 === 4.2 plus2json
+
+`plus2json` is easily adapted to play events grouped into arrays.  The
+first experiment grouped ordered audit events into arrays batched by job.
+Performance improvements in the Protocol Verifier were observed
+immediately.  However, a question remained whether the performance
+increase was due to the audit event grouping, batching by job or ordering.
+To explore this, `plus2json` was further enhanced to play out arrays of
+audit events _not_ grouped by job and _not_ ordered.  This enabled the
+discovery that the performance increase was primarily due to the reduction
+in transactions with the messsage broker.
+
+`plus2json` has been enhanced to support two new command line options.
+
+`--event-array`::  Group audit events into arrays (whether shuffled or not).
+
+`--batch-by-job`::  Group audit events into an array by job such that all
+                    audit events in the message are for the same job
+                    (shuffled or not).
+
+`plus2json` retains the following command line options which are pertinent
+here.
+
+`--batch-size`:: Specify the size of the array to be used when `--event-array`
+                 is active
+
+`--shuffle`:: Shuffle audit events into a random order.
 
 == 5 Work Required
 
@@ -125,28 +201,28 @@ and pre-ordering.
 
 ==== 5.1.1 Job Management
 
-notes:
+===== 5.1.1.1 Dictionary of JSON Arrays of Audit Events
 
-* Today, an event gets reported when first received if worker assignment is
-  successful.
-  ** So, in the case that this is a single audit event, we add it, generate
-     an event to it, and it reports itself. ???
-  ** In the case that this is a list of audit events, we add it, generate
-     an event to it, and it reports itself and iterates. ???
-* If worker assignment is not successful, the event accumulates against
-  the unassigned job.  When assignment can be made, all of the events are
-  reported in a loop.  I don't trust this loop in a configuration where
-  AEO/SVDC synchronously receive inter-domain messages.  (Consider the
-  case of a single message containing 100 audit events.)
+The incoming array of audit events received on the
+'Protocol_Verifier_Reception' topic may contain events from multiple
+different jobs.  As a strategy to divide up the incoming array of audit
+events by job, introduce a dictionary of audit event arrays (of JSON
+object) keyed by jobId.  This will be populated in a loop in the
+`AuditEvent.acceptAuditEvents` class-based operation.
+
+===== 5.1.1.2 Array Reception from System Under Observation
 
 . Step 1 (parsing to JSON and passing JSON arrays and objects internally)
   .. Change `AuditEventReception::Receiving` to use a transient called
      `rawAuditEvents`.
   .. Add `AuditEvent.acceptAuditEvents` to parse the input string.
+     ... Introduce dictionary of JSON:JSONArray transient.
      ... Detect object versus array.
-     ... If array, populate auditEvents array attribute.
-     ... Get the jobID from the first element in the array.
-     ... If object, append the element to the auditEvents array attribute.
+     ... If array, loop through audit events and populate dictionary of
+         audit event arrays.
+     ... If object, append the element to the dictionary.
+     ... Iterate the dictionary by key (jobId) and populate the
+         auditEvents array attribute of the AuditEvent class.
      ... Count the array elements and use the result to increment
          `receivedAuditEventCount`.
   .. On class AuditEvent, add attribute `auditEvents` and of type
@@ -159,83 +235,28 @@ notes:
      ... TODO Update tests to work with the list of JSON `auditEvents`.
   .. TODO Remove `AuditEvent.acceptEvent` (in lieu of `AuditEvent.acceptAuditEvents`).
   .. Test again that this works within the current mode (one event at a time).
-. Step 2 (native JSON to Audit Event Ordering)
-  .. skipped
-. Step 3 (reception of an array of audit events)
+. Step 2 (reception of an array of audit events)
   .. Supply a new terminator service, `reportAuditEvents` that handles an
      array of audit event JSON objects.
-. Step 4
+. Step 3
   .. TODO Determine a maximum number of audit events that are acceptable in a
      single audit event JSONArray.  Report a Warning if this is exceeded.
-  .. Fix counting of received events and events on workers.
-. Step 5
-  .. TODO Generalise audit event reception to remove the assumption that all
-     jobIDs in a received message will be homogeneous.  Cycle through all
-     audit events in the message creating needed audit event instances and
-     appending audit events to lists of existing jobs.
+  .. Adjust counting of received audit events and events on workers.
+
+===== 5.1.1.1 Array Transmission to Audit Event Ordering
+
+. Step 1
   .. TODO Change `AuditEvent.reportAuditEvent` to `AuditEvent.reportAuditEvents`.
   .. See if unit tests pass on main.  It may be that these tests were not
      updated after the addition of `AuditEventReception` in the previous
      functional change.  But since File Reception still uses it, and it
      works, then keep it?  [tests fail on main]
-  .. TODO `AuditEvent.auditEvent` and `AuditEvent.auditEvents` contain the
-     entire list of events, which can be very long.  Shorten `auditEvent`
-     somehow.  It is still needed for unit tests.
-
-===== 5.1.1.1
-
-  parse input
-  if object
-    jsonObject = JSON::get_objectrootJsonElement)
-    jsonArray = jsonArray & jsonObject
-  elsif array
-    jsonObject = first object
-    jsonArray = JSON::get_array(rootJsonElement)
-  else
-    // re-detect problem below
-  end if
-
-  if jsonObject'length > 0 and contains("jobId") then
-    auditEventReception := jobManager -> R26
-    for jsonElement in jsonArray loop
-      jsonObject := get_object(jsonElement)
-      if jsonObject'length > 0 and contains("jobId") then
-        // create job (if needed) and audit event
-        jobid = get_jobid()
-        job = find job(jobid)
-        if job = null
-          create job
-          create unassigned job
-          link job to unassigned job
-          add unassigned job to unassigned job list
-        end if
-        create acceptedAuditEvent
-        link to job
-    end loop
-
-acceptedAuditEvents
-for rawAuditEvent in auditEventArray
-  jobId = extract job Id
-  find acceptedAuditEvent in acceptedAuditEvents where (jobId)
-  if null
-    create acceptedAuditEvent
-
-
-dictionary_of_JSONArray:  dictionary of JSON::JSONArray
-for ae in rawAuditEvents loop
-  jsonObject := JSON::get_object(ae)
-  jobId := JSON::get_string(jsonObject["jobId"]);
-  dictionary_of_JSONArray[jobId] := dictionary_of_JSONArray[jobId] & jsonObject
-
-
 
 ==== 5.1.2 Audit Event Ordering
 
+===== 5.1.2.1
+
 . Step 1
-  .. nothing
-. Step 2
-  .. skipped
-. Step 3
   .. Supply a new domain service, `AcceptJsonAuditEvents` that receives an
      array of audit events as a native JSON Array.
   .. As a first increment, dump each event to a string and call
@@ -244,9 +265,13 @@ for ae in rawAuditEvents loop
   .. Enhance `AcceptJsonAuditEvents` to do the work that `AcceptJsonEvent`
      does/did with regard to parsing out the fields.  Only do it without
      the JSON.parse step.
-. Step 4
+. Step 2
   .. TODO Bug fix <<dr-4>> :  Allow multiple event data items on an audit event.
   .. TODO Deprecate `acceptJsonEvent` and update tests.
+. Step 3
+  .. Adjust configured timer delays for job timeout and blocked events to
+     be a bit shorter, since we can be more confident that events for each
+     job will be grouped quite tightly from a temporal standpoint.
 
 ==== 5.1.3 File Reception
 
@@ -256,12 +281,13 @@ able to continue using this mechanism.
 
 ==== 5.1.4 Sequence Verification
 
+No work required.
 
 === 5.2 plus2json
 
-. Supply an option (event-array) to plus2json to send JSON arrays of
+. Supply an option (`event-array`) to plus2json to send JSON arrays of
   events in a single message.
-. Supply an option (batch-by-job) to plus2json to batch events by job
+. Supply an option (`batch-by-job`) to plus2json to batch events by job
   into a single message.
 
 == 6 Acceptance Test

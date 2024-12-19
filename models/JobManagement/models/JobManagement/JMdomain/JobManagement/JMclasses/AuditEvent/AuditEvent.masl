@@ -170,7 +170,7 @@ begin
 
     end loop;
 
-    // check if we have exceeded the max unassigned jobs and if so trigger the report of an error
+    // check if we have exceeded the max unassigned jobs and if so set a bit that will cause us to throttle
     if jobManager.unassignedJobIds'length > jmSpec.maxUnassignedJobs and jmSpec.maxUnassignedJobsExceeded = false then
         if (Logger::enabled(Logger::Debug, "pv.jm.auditevent.acceptauditevents")) then
             kvps["jobCount"] := (jobManager.unassignedJobIds'length)'image;
