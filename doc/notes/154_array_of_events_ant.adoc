@@ -1,4 +1,4 @@
-= Audit Events Arrays
+= Audit Event Arrays
 
 xtUML Project Analysis Note
 
@@ -243,7 +243,7 @@ object) keyed by jobId.  This will be populated in a loop in the
      single audit event JSONArray.  Report a Warning if this is exceeded.
   .. Adjust counting of received audit events and events on workers.
 
-===== 5.1.1.1 Array Transmission to Audit Event Ordering
+===== 5.1.1.3 Array Transmission to Audit Event Ordering
 
 . Step 1
   .. TODO Change `AuditEvent.reportAuditEvent` to `AuditEvent.reportAuditEvents`.
@@ -278,6 +278,10 @@ object) keyed by jobId.  This will be populated in a loop in the
 The regression script works.  This means that the old
 `JobManagement::acceptEvent` still works.  So, the JM unit tests should be
 able to continue using this mechanism.
+
+. Step 1
+  .. Instead of looping over the terminator service AcceptEvents, pass the
+     entire array (or object as the case may be).?
 
 ==== 5.1.4 Sequence Verification
 

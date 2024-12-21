@@ -55,8 +55,7 @@ end service;
 //! ACTIVITY BEGIN. '2c4a7088-e8df-4d3e-bf4c-8ea74c88aa8b' DO NOT EDIT THIS LINE.
 public service JobManagement::acceptEvent ( auditEvent : in string ) is
 begin
-    // Temporary behaviour.
-    AuditEventReception.putEvent(auditEvent);
+    AuditEvent.acceptAuditEvents(auditEvent);
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

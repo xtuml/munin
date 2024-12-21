@@ -29,22 +29,8 @@ end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
 //! ACTIVITY BEGIN. '00838ae6-bdde-4e57-8203-996668aa501e' DO NOT EDIT THIS LINE.
-public service JobManagement::Worker~>reportAuditEents () is
-begin
-  null;
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'b932902e-d5c9-4826-801a-bc1eb8590b08' DO NOT EDIT THIS LINE.
-public service JobManagement::Reception~>takeEvent () return string is
-begin
-    // This is temporary behaviour.
-    return AuditEventReception.getEvent();
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. 'c18a6038-3f47-4cc3-98b3-9b84841875ef' DO NOT EDIT THIS LINE.
-public service JobManagement::Reception~>requestEvent ( eventCount : in integer ) is
+public service JobManagement::Worker~>reportAuditEvents ( workerId : in UUID::formatted_uuid,
+                                                         auditEvents : in JSON::JSONArray ) is
 begin
   null;
 end service;
@@ -53,13 +39,7 @@ end service;
 //! ACTIVITY BEGIN. '57a42f3a-3ec7-4edd-8c12-81bfb41dee0d' DO NOT EDIT THIS LINE.
 public service JobManagement::Reception~>obtainEvent ( auditEvent : out string ) return boolean is
 begin
-    // This is temporary behaviour for testing.
-    auditEvent := AuditEventReception.getEvent();
-    if (auditEvent /= "") then
-        return true;
-    else
-        return false;
-    end if;
+  return false;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 
