@@ -228,12 +228,15 @@ begin
 	// create three workers
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
+	JobManagement::workerHeartbeat(workerId);
 	Test::service_event_queue();
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
+	JobManagement::workerHeartbeat(workerId);
 	Test::service_event_queue();
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
+	JobManagement::workerHeartbeat(workerId);
 	Test::service_event_queue();
 	Assertions::assertTrue(((find JobWorker())'length = 3), "Test Assign Work: Failed to find all workers");
 	jobManager := find_one JobManager();
@@ -423,9 +426,11 @@ begin
 	// create three workers
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
+	JobManagement::workerHeartbeat(workerId);
 	Test::service_event_queue();
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
+	JobManagement::workerHeartbeat(workerId);
 	Test::service_event_queue();
 
 	Assertions::assertTrue(((find JobWorker())'length = 2), "Test Job Completed: Failed to find all workers");
@@ -637,15 +642,19 @@ begin
 	// create four workers
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
+	JobManagement::workerHeartbeat(workerId);
 	Test::service_event_queue();
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
+	JobManagement::workerHeartbeat(workerId);
 	Test::service_event_queue();
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
+	JobManagement::workerHeartbeat(workerId);
 	Test::service_event_queue();
 	workerId := UUID::generate_formatted();
 	JobManagement::registerWorker(workerId);
+	JobManagement::workerHeartbeat(workerId);
 	Test::service_event_queue();
 	Assertions::assertTrue(((find JobWorker())'length = 4), "Test Assign Job Queue: Failed to find all workers");
 	jobManager := find_one JobManager();
