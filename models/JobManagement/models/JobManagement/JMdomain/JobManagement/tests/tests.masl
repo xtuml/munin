@@ -374,7 +374,7 @@ private service JobManagement::checkJobEventAssignment ( jobName : in string,
                                                         workerId : in UUID::formatted_uuid ) is
 assignedJob : instance of AssignedJob;
 auditEvent : instance of AuditEvent;
-workerReportedEvent : instance of _TEST_Worker_reportEvent;
+workerReportedEvent : instance of _TEST_Worker_reportAuditEvents;
 employedWorker : instance of EmployedWorker;
 assignedWorker : instance of EmployedWorker;
 
@@ -386,7 +386,7 @@ begin
 	employedWorker := find_one EmployedWorker(workerId = workerId);
 	assignedWorker := assignedJob -> R6.EmployedWorker;
 	Assertions::assertTrue((assignedWorker = employedWorker), "Test Assign Work: Failed to assign job to correct worker " & jobName);
-	workerReportedEvent := find_one _TEST_Worker_reportEvent(workerId = workerId and auditEvent = reportedAuditEventString);
+	workerReportedEvent := find_one _TEST_Worker_reportAuditEvents(workerId = workerId);
 	delete workerReportedEvent;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
