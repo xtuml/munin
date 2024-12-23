@@ -1,7 +1,5 @@
 public service JobManagement::Worker~>reportEvent ( workerId: in UUID::formatted_uuid,
                                                     auditEvent: in string ) is
 begin
-
-  AEOrdering::AcceptJsonEvent(workerId, auditEvent);
-
+  null;
 end service;

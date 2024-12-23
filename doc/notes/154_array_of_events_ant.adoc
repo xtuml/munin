@@ -231,9 +231,8 @@ object) keyed by jobId.  This will be populated in a loop in the
      with input audit event of type JSON::JSONObject.
      ... As first increment, dump the JSON event to a string before sending to AEO.
   .. Test that this works within the current mode (one event at a time).
-  .. TODO On class AuditEvent, remove attribute `auditEvent`.
-     ... TODO Update tests to work with the list of JSON `auditEvents`.
-  .. TODO Remove `AuditEvent.acceptEvent` (in lieu of `AuditEvent.acceptAuditEvents`).
+  .. Update tests to work with the list of JSON `auditEvents`.
+  .. Remove `AuditEvent.acceptEvent` (in lieu of `AuditEvent.acceptAuditEvents`).
   .. Test again that this works within the current mode (one event at a time).
 . Step 2 (reception of an array of audit events)
   .. Supply a new terminator service, `reportAuditEvents` that handles an
@@ -246,11 +245,13 @@ object) keyed by jobId.  This will be populated in a loop in the
 ===== 5.1.1.3 Array Transmission to Audit Event Ordering
 
 . Step 1
-  .. TODO Change `AuditEvent.reportAuditEvent` to `AuditEvent.reportAuditEvents`.
   .. See if unit tests pass on main.  It may be that these tests were not
      updated after the addition of `AuditEventReception` in the previous
      functional change.  But since File Reception still uses it, and it
      works, then keep it?  [tests fail on main]
+     ... Unit tests were failing on main because of fix #223 which added
+         extra synchronisation between JM and AEO.  The unit tests are
+         now fixed and working.
 
 ==== 5.1.2 Audit Event Ordering
 
@@ -267,7 +268,7 @@ object) keyed by jobId.  This will be populated in a loop in the
      the JSON.parse step.
 . Step 2
   .. TODO Bug fix <<dr-4>> :  Allow multiple event data items on an audit event.
-  .. TODO Deprecate `acceptJsonEvent` and update tests.
+  .. Deprecate `acceptJsonEvent` and update tests.
 . Step 3
   .. Adjust configured timer delays for job timeout and blocked events to
      be a bit shorter, since we can be more confident that events for each
