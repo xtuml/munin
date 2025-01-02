@@ -1,0 +1,278 @@
+= Protocol Verifier Deployment Readiness
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note provides analysis of deployment readiness for the Protocol
+Verifier.  Requirements are outlined.  Work to accomplish the readiness
+will be done and documented in sub-tasks with references.
+
+== 2 Introduction and Background
+
+=== 2.1 Terminology
+
+development team::
+One team will be responsible for engineering the Protocol Verifier
+application and supporting applications.  This team will be referred to
+as the 'development team'.
+
+support team::
+A 'support team' will be responsible for ongoing deployment support of the
+Protocol Verifier and accompanying applications.  The support team will be
+involved in development to supply, classify and prioritise requirements on
+the deployability and supportability of the system.
+
+=== 2.2 Challenges
+
+The Protocol Verifier may be deployed in a secure and isolated environment
+requiring minimal dependencies on external software components and
+libraries.  In addition, the Protocol Verifier must be maintainable by
+technicians with little to no software development experience.
+
+== 3 Requirements
+
+=== 3.1 Minimal Base Linux
+
+* Minimise the operating system and dependent components to what is
+  absolutely necessary.
+* Each container will have only the executable(s) required for its own
+  functionality.
+
+=== 3.2 Up-to-Date Software Components
+
+Update operating system and dependent software components to current yet
+stable versions.
+
+=== 3.3 User Mode Execution
+
+Run with user-level permissions (e.g. without root).
+
+=== 3.4 Shared File System Restriction
+
+* Applications may not communicate with each other through a shared file
+  system on the host or through a shared volume.
+* Configuration files on the host shall be mounted as read-only within the
+  containers.
+* Any writable volumes will be writable by only a single container and not
+  mounted or accessed by other containers (e.g. InvariantStore SQLite
+  database file).
+* File access shall be clearly documented and reviewed.
+* The bandwidth of traffic accessing files shall be calculated and documented.
+
+=== 3.5 Message Broker
+
+Support ActiveMQ and/or RabbitMQ as a message broker for internal and
+external messaging.
+
+TODO: This is still in discussion.
+
+=== 3.6 TLS and Authentication
+
+* Authenticate all messaging participants.
+* Encrypt inter-component messaging.
+* Encrypt messages to/from the Protocol Verifier (inputs and outputs).
+* Employ standard and configurable protocols throughout.
+
+=== 3.7 Exemplar Implementation
+
+Provide an exemplar (preferred embodiment) of the Protocol Verifier
+application configured with reasonable defaults.
+
+=== 3.8 Documentation
+
+* Document the Protocol Verifier application and its use.
+* Follow documentation standards familiar to popular Open Source Software
+  projects such as READMEs and HOWTOs.
+* Maintain documentation in close proximity to the application software.
+
+=== 3.9 User Training and Knowledge Transfer
+
+Provide training and explanations to ensure the support team has the
+knowledge necessary to maintain the Protocol Verifier application on an
+on-going basis.
+
+== 4 Analysis
+
+=== 4.1 Minimal Base Linux
+
+==== 4.1.1 Base Recommendations
+
+* The support team recommends 'Alpine' due to its small size.
+* 'Debian bullseye-slim' is another option and would likely be
+  straight-forward, because it uses standard 'glibc'.
+  ** Note that 'bullseye' is not the current stable release.
+  ** 'bookworm' is the current stable release.
+  ** 'slim' reduces the size (and potentially reduces vulnerabilities) by
+     removing non-functional files.
+* "The exact base image does not matter so much, providing the final images
+  are small, focused to run a single application and contain minimal CVEs."
+* It may be that we want to run different bases for the different
+  containers.  For example, we may want to run 'Alpine' for the message
+  broker container and 'Debian bookwork-slim' for the Protocol Verifier
+  application containers.
+
+==== 4.1.2 Image Hardening
+
+* Image hardening is the process of scanning a base image and addressing
+  detected vulnerabilities and then re-building the image.  Several command
+  line tools exist to do this including commands integrated into Docker
+  ('scout').
+* Pre-hardened images are available.
+* Hardening or at least scanning can be added to the CI chain.
+* Let us incorporate image hardening into our delivery process.
+
+==== 4.1.3 Build Hardening
+
+* There are hardening options (CPPFLAGS) when building C/{cpp}
+  applications.  Supply these options when building {cpp} the Protocol
+  Verifier executables.
+
+==== 4.1.4 Latest and Specific Tags
+
+* For the build images, use 'latest' images.
+* For the deployment images, use specific image tags.
+
+=== 4.2 Up-to-Date Software Components
+
+The image hardening process will identify down-level packages and
+recommend updates.
+
+=== 4.3 User Mode Execution
+
+We currently are running as USER on the host.  However, we are running as
+root within the container.
+
+=== 4.4 Shared File System Restriction
+
+It is noted that it is possible to mount a volume within a container and
+not mount it on the host.  However, any additional perceived security is
+likely lost to complexity of configuration.
+
+=== 4.5 Message Broker
+
+Architecturally, ActiveMQ (and RabbitMQ) and Kafka differ substantially.
+See <<dr-3>>.  The messaging architecture is mostly invisible to the
+application clients.  Usage in the application will be mostly independent
+of message broker choice.
+
+==== 4.5.1 Protocol Verifier Proper
+
+The changes to support Protocol Verifier will live largely in the MASL
+{cpp} model compiler.  Build, configuration and launch will also required
+updates.
+
+The Protocol Verifier is both a producer and consumer of messages.
+
+TODO - more...
+
+==== 4.5.1 plus2json
+
+plus2json is a message producer.
+
+plus2json imports 'KafkaProducer' from the 'kafka3' Python package.
+
+plus2json can import 'pika' and create a channel, connection, queue and
+publish messages to RabbitMQ broker.
+
+plus2json can import 'stomp' and create a channel, connection, queue and
+publish messages to ActiveMQ broker.
+
+==== 4.5.3 pvstats.py
+
+`pvstats.py` is a message consumer.
+
+pvstats.py imports 'KafkaConsumer' from the 'kafka3' Python package.
+
+pvstats.py can import 'pika' and create a channel, connection, queue and
+consume messages from a RabbitMQ broker.
+
+pvstats.py can import 'stomp' and create a channel, connection, queue and
+consume messages from a ActiveMQ broker.
+
+=== 4.6 TLS and Authentication
+=== 4.7 Exemplar Implementation
+=== 4.8 Documentation
+=== 4.9 User Training and Knowledge Transfer
+=== 4.10 Report on MASL {cpp} Portability
+
+Analyse the MASL {cpp} model compiler and document dependencies and
+portability.
+
+* Identify key dependencies on operating systems, libraries and software
+  components.
+* Prioritise by degree of difficulty the reduction of dependencies and
+  increases in portability.
+* Estimate the effort required to run MASL {cpp} generated code on
+  a few choice distributions of Linux.
+* Estimate the effort required to run MASL {cpp} generated code on
+  VxWorks.
+* Estimate the effort required to run MASL {cpp} generated code on
+  Windows.
+
+
+== 5 Work Required
+
+=== 5.1 Minimal Base Linux
+
+. Start from minimal base as recommended by the support team.
+. Remove the MASL {cpp} compiler and associated build chain.
+. Add in the necessary runtime libraries.
+. Provide a separate image for each build.  For example, the
+  InvariantStore application will be alone on an image.
+
+=== 5.2 Up-to-Date Software Components
+
+* glibc/musl ({cpp})
+* log4cplus
+* POCO
+* Kafka
+* ActiveMQ
+* RabbitMQ
+
+=== 5.3 User Mode Execution
+=== 5.4 Shared File System Restriction
+=== 5.5 Message Broker
+
+==== 5.5.1 Protocol Verifier Proper
+
+TODO
+
+==== 5.5.2 plus2json
+
+* Update the '--play' option to support a Rabbit publisher.  (Note that
+  Kafka uses the term 'producer'; Rabbit uses the term 'publisher' to mean
+  an application that sends messages through the broker.)
+
+==== 5.5.3 pvstats.py
+
+* Update the simplistic dashboard option to support a Rabbit consumer.
+  (Note that Kafka and Rabbit use the same term here.)
+
+=== 5.6 TLS and Authentication
+=== 5.7 Exemplar Implementation
+=== 5.8 Documentation
+=== 5.9 User Training and Knowledge Transfer
+=== 5.10 Report on MASL {cpp} Portability
+
+== 6 Acceptance Test
+
+=== 6.1 Regression
+
+Run the `regression.sh` script and see it pass.
+
+=== 6.2 Benchmark Stress
+
+Run the `run_benchmark.sh` script and see it pass with adequate throughput.
+
+== 7 Document References
+
+. [[dr-1]] https://github.com/xtuml/munin/issues/247[247 - Munin Deployment Readiness]
+. [[dr-2]] https://www.rabbitmq.com/[RabbitMQ - messaging and streaming broker]
+. [[dr-3]] https://aws.amazon.com/compare/the-difference-between-rabbitmq-and-kafka/[What is the Difference Between Kafka and RabbitMQ?]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
