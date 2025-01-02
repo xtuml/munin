@@ -1,0 +1,64 @@
+= Single Event Sequence
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note provides requirements, analysis and work required to support
+jobs with sequences of a single event being both a start event and an
+end event.
+
+== 2 Introduction and Background
+
+The Protocol Verifier __raison d'etre__ is to verify that a system under
+observation is "doing what it said it would do".  This is accomplished by
+providing job definitions that presribe legal behaviour and then evaluating
+actual behaviour to the prescribed behaviour.
+
+Job definitions can be simple or complex, loosely constrained or tightly
+constrained.  Tightly constrained jobs provide a higher degree of
+confidence that the system is behaving correctly.  However, simple jobs
+may exist in the real world.  The Protocol Verifier should verify these
+simple jobs.
+
+The degenerate case of a simple job is a job with a single event.  As of
+December 2024, the Protocol Verifier suffers from an assumption that any
+sequence is at least two events long.  This work documents changes to
+enable the Protocol Verifier to verify such simple sequences.
+
+It is noted that there is a danger of loosening a job definition so much
+that the Protocol Verifier is not only providing very little verification,
+but may also be supplying a false sense of security.  Other work is in
+progress that provides a "grading system" for job definitions to highlight
+job definitions that are so loose as to be useless.  This work does not
+address that concern but highlights it here.
+
+== 3 Requirements
+
+== 4 Analysis
+
+=== 4.1
+
+== 5 Work Required
+
+=== 5.1
+
+== 6 Acceptance Test
+
+=== 6.1 Regression
+
+Run the `regression.sh` script and see it pass.
+
+=== 6.2 Benchmark Stress
+
+Run the `run_benchmark.sh` script and see it pass with adequate throughput.
+
+== 7 Document References
+
+. [[dr-1]] https://github.com/xtuml/munin/issues/246[246 - Multiple start events that are also end events]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
