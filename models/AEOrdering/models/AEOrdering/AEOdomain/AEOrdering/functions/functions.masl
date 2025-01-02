@@ -17,10 +17,16 @@ kvps : dictionary of string;
 instrumentationEventId : string;
 instrumentationEventType : string;
 worker : instance of Worker;
+pes : string := "";
+pe  : string := "";
 
 begin
 
 	if (Logger::enabled(Logger::Debug, "pv.aeo.acceptevent")) then
+		for pe in prevAuditEventIds loop
+			pes := pes & pe;
+		end loop;
+		kvps["previds"] := pes;
 		Logger::log(Logger::Debug, "pv.aeo.acceptevent",
 		  aeoLog("aeordering_accept_event", "receiving event", jobId, jobName, auditEventId, auditEventType, kvps));
 	end if;
@@ -101,81 +107,6 @@ begin
   else
     // TODO - Raise log message that reports that the specified job does not exist  
   end if;
-	
-end service;
-//! ACTIVITY END. DO NOT EDIT THIS LINE.
-
-//! ACTIVITY BEGIN. '0928dd89-5bac-46c1-89a7-a1ca3beaac16' DO NOT EDIT THIS LINE.
-public service AEOrdering::AcceptJsonEvent ( workerId : in UUID::formatted_uuid,
-                                            auditEvent : in string ) is
-systemSpec : instance of SystemSpec;
-jsonElement: JSON::JSONElement;
-jsonObject : JSON::JSONObject;
-validate : boolean := false;
-prevIds: sequence of string;
-evtData: dictionary;
-worker : instance of Worker;
-kvps : dictionary of string;
-
-begin
-
-	worker := find_one Worker(workerId = workerId);
-	if worker /= null then
-		if worker.registered = true then
-			jsonElement := JSON::parse(auditEvent);
-			if jsonElement.kind = JSON::Object then
-				jsonObject := JSON::get_object(jsonElement);
-				if jsonObject'keys'length = 1 and jsonObject'keys'any = "__comment__" then
-					// ignore comment objects
-					if (Logger::enabled(Logger::Debug, "pv.aeo.acceptjsonevent")) then
-						kvps["comment"] := JSON::get_string(jsonObject[jsonObject'keys'any]);
-						Logger::log(Logger::Debug, "pv.aeo.acceptjsonevent",
-						  aeoLog("aeordering_accept_json_event", "receiving event JSON with comment", "", "", "", "", kvps));
-					end if;
-				else
-
-					// validate the event against schema
-					systemSpec := find_one SystemSpec();
-					if systemSpec.schemaValidated(jsonObject) = true then
-						
-						// process the event
-						if jsonObject'contains("previousEventIds") then
-							if jsonObject["previousEventIds"].kind = JSON::Array then
-								for prev_id_json in JSON::get_array(jsonObject["previousEventIds"]) loop
-									prevIds := prevIds & JSON::get_string(prev_id_json);
-								end loop;
-							elsif jsonObject["previousEventIds"].kind = JSON::String then
-								prevIds := prevIds & JSON::get_string(jsonObject["previousEventIds"]);
-							end if;
-						end if;
-						for key in jsonObject'keys loop
-							if key /= "jobId" and
-							   key /= "jobName" and
-							   key /= "eventType" and
-							   key /= "eventId" and
-							   key /= "timestamp" and
-							   key /= "previousEventIds" then
-								if jsonObject[key].kind = JSON::String then
-									evtData[key] := JSON::get_string(jsonObject[key]);
-								else
-									evtData[key] := JSON::dump(jsonObject[key]);
-								end if;
-							end if;
-						end loop;
-						AcceptEvent(JSON::get_string(jsonObject["jobId"]), JSON::get_string(jsonObject["jobName"]), JSON::get_string(jsonObject["eventType"]),
-									JSON::get_string(jsonObject["eventId"]), JSON::get_string(jsonObject["timestamp"]), prevIds, evtData);
-					end if;
-				end if;
-			end if;
-		else
-			// the worker is not registered but job management thinks it is
-			// deregister the worker and log an error
-			Req_IF_JobManagement~>deregisterWorker(workerId);
-			kvps["workerId"] := string(workerId);
-			Logger::log(Logger::Error, "pv.aeo.acceptjsonevent",
-			  aeoLog("aeordering_rcvd_unregistered", "received event for unregistered worker", "", "", "", "", kvps));
-		end if;
-	end if;
 	
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -274,6 +205,90 @@ begin
   end loop;
   jsonElement := JSON::to_json( logMessageKeyValuePairs );
   return JSON::dump( jsonElement );
+end service;
+//! ACTIVITY END. DO NOT EDIT THIS LINE.
+
+//! ACTIVITY BEGIN. '514a37de-9293-457c-af09-761c82437003' DO NOT EDIT THIS LINE.
+public service AEOrdering::AcceptJsonAuditEvents ( workerId : in UUID::formatted_uuid,
+                                                  auditEvents : in JSON::JSONArray ) is
+systemSpec : instance of SystemSpec;
+jsonElement: JSON::JSONElement;
+jsonObject : JSON::JSONObject;
+prevIds: sequence of string;
+emptyPrevIds: sequence of string;
+evtData: dictionary;
+emptyEvtData: dictionary;
+worker : instance of Worker;
+kvps : dictionary of string;
+
+begin
+    worker := find_one Worker(workerId = workerId);
+    if worker /= null then
+        if worker.registered = true then
+            systemSpec := find_one SystemSpec();
+            for jsonElement in auditEvents loop
+                prevIds := emptyPrevIds;
+                if jsonElement.kind = JSON::Object then
+                    jsonObject := JSON::get_object(jsonElement);
+                    if jsonObject'keys'length = 1 and jsonObject'keys'any = "__comment__" then
+                        // ignore comment objects
+                        if (Logger::enabled(Logger::Debug, "pv.aeo.acceptjsonauditevents")) then
+                            kvps["comment"] := JSON::get_string(jsonObject[jsonObject'keys'any]);
+                            Logger::log(Logger::Debug, "pv.aeo.acceptjsonauditevents",
+                              aeoLog("aeordering_accept_json_event", "receiving event JSON with comment", "", "", "", "", kvps));
+                        end if;
+                    else
+
+                        // validate the event against schema
+                        if systemSpec.schemaValidated(jsonObject) = true then
+
+                            // process the event
+                            if jsonObject'contains("previousEventIds") then
+                                if jsonObject["previousEventIds"].kind = JSON::Array then
+                                    for prev_id_json in JSON::get_array(jsonObject["previousEventIds"]) loop
+                                        prevIds := prevIds & JSON::get_string(prev_id_json);
+                                    end loop;
+                                elsif jsonObject["previousEventIds"].kind = JSON::String then
+                                    prevIds := prevIds & JSON::get_string(jsonObject["previousEventIds"]);
+                                end if;
+                            end if;
+                            evtData := emptyEvtData;
+                            for key in jsonObject'keys loop
+                                if key /= "jobId" and
+                                   key /= "jobName" and
+                                   key /= "eventType" and
+                                   key /= "eventId" and
+                                   key /= "timestamp" and
+                                   key /= "previousEventIds" then
+                                    if jsonObject[key].kind = JSON::String then
+                                        evtData[key] := JSON::get_string(jsonObject[key]);
+                                    else
+                                        evtData[key] := JSON::dump(jsonObject[key]);
+                                    end if;
+                                end if;
+                            end loop;
+                            AcceptEvent(JSON::get_string(jsonObject["jobId"]), JSON::get_string(jsonObject["jobName"]), JSON::get_string(jsonObject["eventType"]),
+                              JSON::get_string(jsonObject["eventId"]), JSON::get_string(jsonObject["timestamp"]), prevIds, evtData);
+                        else
+                            // schema validation error
+                            kvps["workerId"] := string(workerId);
+                            Logger::log(Logger::Error, "pv.aeo.acceptjsonauditevents",
+                              aeoLog("aeordering_schema_invalid", "received event failed schema validation", "", "", "", "", kvps));
+                        end if;
+                    end if;
+                end if;
+            end loop;
+        else
+            // The worker is not registered but job management thinks it is.
+            // Deregister the worker and log an error.
+            Req_IF_JobManagement~>deregisterWorker(workerId);
+            kvps["workerId"] := string(workerId);
+            Logger::log(Logger::Error, "pv.aeo.acceptjsonauditevents",
+              aeoLog("aeordering_rcvd_unregistered", "received event for unregistered worker", "", "", "", "", kvps));
+        end if;
+    else
+        // This event is not for this worker.  Ignore it.
+    end if;
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
 

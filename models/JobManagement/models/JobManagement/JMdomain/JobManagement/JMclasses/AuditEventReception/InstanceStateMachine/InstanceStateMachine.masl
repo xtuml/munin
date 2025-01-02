@@ -1,6 +1,6 @@
 //! ACTIVITY BEGIN. 'b64e4fb8-83d6-417d-bade-c72200a621ea' '6e3f5d40-8281-4037-b473-ad3fb6e8e8b1' DO NOT EDIT THIS LINE.
 state JobManagement::AuditEventReception.Receiving () is
-rawAuditEvent : string := "";
+rawAuditEvents : string := "";
 pollSuccess : boolean;
 delayValue : duration;
 kvps : dictionary of string;
@@ -8,9 +8,11 @@ begin
     // Obtain and process an audit event from the system under observation.
     // If we receive an event, then get another immediately, otherwise delay.
     delayValue := @PT1S@;
-    pollSuccess := Reception~>obtainEvent(rawAuditEvent);
+    pollSuccess := Reception~>obtainEvent(rawAuditEvents);
     if (pollSuccess) then
-        AuditEvent.acceptEvent(rawAuditEvent);
+        AuditEvent.acceptAuditEvents(rawAuditEvents);
+        // Note that we leverage the zero duration timer idiom to send an event to
+        // self without it being expedited, allowing other state machines to run.
         delayValue := @PT0S@;
     end if;
 

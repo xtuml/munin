@@ -1847,9 +1847,8 @@ job : instance of Job;
 verificationFailedJob : instance of _TEST_Req_IF_Verification_failedJob;
 jobCompletedReport : instance of _TEST_Req_IF_JobManagement_jobCompleted;
 reportedAuditEvent: JSON::JSONObject;
+reportedAuditEvents: JSON::JSONArray;
 eventId : string;
-jsonElement: JSON::JSONElement;
-reportedAuditEventString : string;
 
 begin
 	auditEventTime := timestamp'now;	
@@ -1858,8 +1857,7 @@ begin
 	reportedAuditEvent["eventType"] := JSON::to_json("RequestFile");
 	reportedAuditEvent["eventId"] := JSON::to_json(auditEventId);
 	reportedAuditEvent["timestamp"] := JSON::to_json(auditEventTime'image);
-	jsonElement := JSON::to_json(reportedAuditEvent);
-	reportedAuditEventString := JSON::dump(jsonElement);
+	reportedAuditEvents := reportedAuditEvents & JSON::to_json(reportedAuditEvent);
 
 	logMessage := "AEOrdering::testWorkerRegistration";
 	Logger::log(Logger::Information, "pv.aeo.tests", logMessage);
@@ -1886,7 +1884,7 @@ begin
 	delete registerWorkerRequest;
 	
 	// start a new job while the worker is attempting to register
-	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	AEOrdering::AcceptJsonAuditEvents(worker.workerId, reportedAuditEvents);
 	Test::service_event_queue();
 	
 	// verify that the job is not accepted and the worker reports it is unregistered
@@ -1904,7 +1902,7 @@ begin
     Assertions::assertTrue((worker.registered = true), "Test Worker Registration: Worker is not registered");
 	
 	// start a new job
-	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	AEOrdering::AcceptJsonAuditEvents(worker.workerId, reportedAuditEvents);
 	Test::service_event_queue();
     verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(jobId = jobId1 and auditEventId = auditEventId and jobName = "FileRequest");
     Assertions::assertTrue((verificationAuditEvent /= null), "Test Worker Registration: Failed to find verification audit event id = 1");
@@ -1939,7 +1937,7 @@ begin
     Assertions::assertTrue((worker.registered = true), "Test Worker Registration: Worker is not registered");
 	
 	// start a job
-	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	AEOrdering::AcceptJsonAuditEvents(worker.workerId, reportedAuditEvents);
 	Test::service_event_queue();
     verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(jobId = jobId1 and auditEventId = auditEventId and jobName = "FileRequest");
     Assertions::assertTrue((verificationAuditEvent /= null), "Test Worker Registration: Failed to find verification audit event id = 1");
@@ -1973,7 +1971,7 @@ begin
 	delete deregisterWorkerRequest;
 	
 	// start a new job and verify that the job is accepted
-	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	AEOrdering::AcceptJsonAuditEvents(worker.workerId, reportedAuditEvents);
 	Test::service_event_queue();
     verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(jobId = jobId1 and auditEventId = auditEventId and jobName = "FileRequest");
     Assertions::assertTrue((verificationAuditEvent /= null), "Test Worker Registration: Failed to find verification audit event id = 1");
@@ -1993,7 +1991,7 @@ begin
 	Assertions::assertTrue((job = null), "Test Worker Registration: Found job for Job 1 after job completion confirmed");
 	
 	// start a new job and verify that the job is accepted
-	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	AEOrdering::AcceptJsonAuditEvents(worker.workerId, reportedAuditEvents);
 	Test::service_event_queue();
     verificationAuditEvent := find_one _TEST_Req_IF_Verification_audit_event(jobId = jobId1 and auditEventId = auditEventId and jobName = "FileRequest");
     Assertions::assertTrue((verificationAuditEvent /= null), "Test Worker Registration: Failed to find verification audit event id = 1");
@@ -2018,7 +2016,7 @@ begin
 	Assertions::assertTrue((job = null), "Test Worker Registration: Found job for Job 1 after job completion confirmed");
 	
 	// start a new job after the worker is deregistered
-	AEOrdering::AcceptJsonEvent(worker.workerId, reportedAuditEventString);
+	AEOrdering::AcceptJsonAuditEvents(worker.workerId, reportedAuditEvents);
 	Test::service_event_queue();
 	
 	// verify that the job is not accepted and the worker reports it is unregistered
