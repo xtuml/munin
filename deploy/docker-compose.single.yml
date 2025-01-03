@@ -1,0 +1,30 @@
+services:
+  pv_proc:
+    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
+    volumes:
+      - type: volume
+        source: ConanCache
+        target: /conan-cache
+      - "../models/PV_PROC/build:/work/build"
+      - "./config:/root/config"
+      - "./logs/protocol_verifier:/var/log/protocol_verifier"
+      - "./reception-incoming:/root/incoming"
+      - "./reception-processed:/root/processed"
+      - "./InvariantStore:/root/InvariantStore"
+    ports:
+      - "20000:20000"
+      - "30000:30000"
+      - "40000:40000"
+    environment:
+      - OOA_PORT=0
+    ulimits:
+      sigpending: -1
+    working_dir: /root
+    logging:
+      driver: local
+    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/PV_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData"
+
+volumes:
+  ConanCache:
+    name: ConanCache
+    external: true
