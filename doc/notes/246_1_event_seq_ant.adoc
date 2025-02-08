@@ -5,15 +5,15 @@ xtUML Project Analysis Note
 == 1 Abstract
 
 This note provides requirements, analysis and work required to support
-jobs with sequences of a single event being both a start event and an
-end event.
+jobs with sequences of a single event being both a __start event__ and
+an __end event__.
 
 == 2 Introduction and Background
 
 The Protocol Verifier __raison d'etre__ is to verify that a system under
 observation is "doing what it said it would do".  This is accomplished by
 providing job definitions that presribe legal behaviour and then evaluating
-actual behaviour to the prescribed behaviour.
+actual behaviour against the prescribed behaviour.
 
 Job definitions can be simple or complex, loosely constrained or tightly
 constrained.  Tightly constrained jobs provide a higher degree of
@@ -26,28 +26,97 @@ December 2024, the Protocol Verifier suffers from an assumption that any
 sequence is at least two events long.  This work documents changes to
 enable the Protocol Verifier to verify such simple sequences.
 
-It is noted that there is a danger of loosening a job definition so much
-that the Protocol Verifier is not only providing very little verification,
-but may also be supplying a false sense of security.  Other work is in
-progress that provides a "grading system" for job definitions to highlight
-job definitions that are so loose as to be useless.  This work does not
-address that concern but highlights it here.
+NOTE:  It is noted that there is a danger of loosening a job definition
+so much that the Protocol Verifier is not only providing very little
+verification, but may also be supplying a false sense of security.  Other
+work is in progress that provides a "grading system" for job definitions
+to highlight job definitions that are so loose as to be useless.  This
+work does not address that concern but highlights it here.
 
 == 3 Requirements
 
+. Support sequences with a single audit event.
+. Support audit events that are both a __start event__ and an __end event__.
+
 == 4 Analysis
 
-=== 4.1
+=== 4.1 Audit Event Acceptance Processing
+
+Sequence Verification performs processing on audit events in two places in
+the model.  Sequencing and validity checks are performed both in the
+domain service (actually class operation called from the domain service) in
+which the audit event is accepted and in the Job state machine (subtype
+state machines).
+
+A strategy is explored to refactor audit event processing to be packaged
+largely in the Job state machine.  This strategy has already been taken
+for the UnhappyJob subtype.
+
+==== 4.1.1 Existing Steps to Audit Event Processing
+
+. (`acceptOrderedEvent`)
+. check Job Type/Name
+. check if Job Type is suspended or deprecated
+. Look for existing job instance, if found generate `newEventForExistingJob`
+  to job instance.
+. If no job found, determine whether this is a happy event type or an
+  unhappy event type.
+. If happy event, invoke class-based operation `AddEventForNewJob` on
+  class `SequencedAuditEvent`.
+  .. Check if event has been seen before.
+  .. Create the instances of Job and HappyJob and link them.
+  .. Create the instances of AuditEvent and SeqAuditEvent and link them and
+     link them to the instance of Job.
+     ... NOTE:  Consider linking at the subtype acknowledging that the model
+         edit may be risky.  (Actually, this one does not look too risky.
+         There are no propagated referentials-as-identifiers.) However,
+         the existing relations are traversed in several places.  [After
+         consideration, this is left as-is to avoid clouding the pointed
+         code change.]
+  .. NOTE:  Check to see if the hanging job timer is started at reception
+     of a sequence start event.  I don't think so due to the way the start
+     event is received differently from following events.  This means
+     there is a window in the timing.  This is also more reason to use the
+     state machine for processing the (first) start event.  [Addressed.]
+. If unhappy event, invoke class-based operation `AddEventForNewUnhappyJob`.
+
+==== 4.1.2 Notes
+
+* Both `SequencedAuditEvent` and `UnsequencedAuditEvent` have a class-based
+  operation to AddEventForNew(Unhappy)Job.
+* Domain service `acceptOrderedEvent` does not need to change.  The
+  class-based operation on `SequencedAuditEvent` does.
+* The existing `JobInProgress` state can handle the first event in a job.
+  ** The action language in `SequencedAuditEvent.AddEventForNewJob` is a
+     (redundant) subset of the action language in the `HappyJob.JobInProgress`
+     state.
+  ** The job needs to already exist and be linked to the appropriate
+     instance of the `JobDefinition` specification class before the
+     `HappyJob` state machine runs.
+  ** The invocation across the bridge to `VerificationGateway` must be made.
+* The existing `JobInProgress` state starts the hanging job timer,
+  which was not being started for the first event of a job.  By using the
+  existing `JobInProgress` state, we will close this timeout window.
 
 == 5 Work Required
 
-=== 5.1
+=== 5.1 Change `SequencedAuditEvent.AddEventForNewJob`
+
+. Check for a valid job definition before creating the job and subtype
+  instances.
+. Create and link instances of the `Job` and `HappyJob` subtype hierarchy.
+. Link to the instance of `JobDefinition`.
+. Generate an event to the job instance (happy job).
+. Report the start of sequencing to the `VerificationGateway`.
+. Remove the redundant code.
+. Remove the unused local variable declarations.
 
 == 6 Acceptance Test
 
 === 6.1 Regression
 
-Run the `regression.sh` script and see it pass.
+Run the `regression.sh` script and see it pass (including the
+'single_event.puml' test case).
 
 === 6.2 Benchmark Stress
 

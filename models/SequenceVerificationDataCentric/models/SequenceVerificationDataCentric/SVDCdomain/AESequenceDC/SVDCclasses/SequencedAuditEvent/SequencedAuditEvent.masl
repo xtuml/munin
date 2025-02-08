@@ -7,107 +7,27 @@ public service AESequenceDC::SequencedAuditEvent.AddEventForNewJob ( jobId : in 
                                                                     aeData : in sequence of auditEventDataStructure ) is
 newJob :  instance of Job;
 newHappyJob : instance of HappyJob;
-newEvent : instance of AuditEvent;
-newSeqEvent : instance of SequencedAuditEvent;
-oldEvent : instance of AuditEvent;
-newEventType : instance of SequencedAuditEventDefinition;
-possibleEventTypes : set of instance of SequencedAuditEventDefinition;
-prevEvent : instance of SequencedAuditEvent;
-theAeSequenceDef : instance of AESequenceDefinition;
-theEventsSequenceDefs : set of instance of AESequenceDefinition;
-theJobsSequenceDefs : set of instance of AESequenceDefinition;
-theAeSequenceDefs : set of instance of AESequenceDefinition;
-theAeInSequenceDef : instance of AEInSequenceDefinition;
-theAeOccInSequenceDef : instance of AEOccurrenceInSequenceDefinition;
-theAeOccurrencesInSequenceDef : set of instance of AEOccurrenceInSequenceDefinition;
 theJobDef : instance of JobDefinition;
-newSequence : instance of Sequence;
 kvps : dictionary of string;
-creationErrorMessage : string;
-eventDataCheckHasPassed : boolean;
-failureReason : string;
-eventContent : string;
-empty : sequence of string;
-emptyString : sequence of string := empty & ("");
 
 begin
-  oldEvent := find_one AuditEvent (AEId = eventId);
-  // Check to see if we've seen this event instance before
-  if (oldEvent = null) then
-    //We have a new job and this event must be a valid initial event for a Job
+  theJobDef := find_one JobDefinition (jobName = jobName);
+  if (theJobDef /= null) then
+    // We have a new job and this event must be a valid initial event for a Job
     newJob := create Job (jobID => jobId, sequencingFailed => false, jobCompleted => false, alarm => false );
     newHappyJob := create HappyJob (jobID => jobId, Current_State => JobInProgress );
     link newHappyJob R45 newJob;
-    newEvent := create AuditEvent (AEId => eventId);
-    newSeqEvent := create SequencedAuditEvent (AuditEventId => eventId, AEId => newEvent.AEId); 
-    link newSeqEvent R46 newEvent;
-    link newSeqEvent R44 newJob;
-    newEventType := find_only SequencedAuditEventDefinition (AEType = aeType);
-    theJobDef := find_one JobDefinition (jobName = jobName);
     link newJob R8 theJobDef;
-    possibleEventTypes := theJobDef -> R7 -> R1.SequencedAuditEventDefinition;
-    
-    if (newEventType /= null) and (newEventType intersection possibleEventTypes /= null) and ((prevAEIds = empty) or (prevAEIds = emptyString)) then
-  	  //We have a valid event type and no previous events
-  	  // So check that it is also the first event of a sequence in that Job
-      link newSeqEvent R2 newEventType;
-      theEventsSequenceDefs := newEventType -> R1.AESequenceDefinition;
-      theJobsSequenceDefs := theJobDef -> R7;
-      theAeSequenceDefs := theEventsSequenceDefs intersection theJobsSequenceDefs;
-      // As in Highlander - There can be only one!
-      theAeSequenceDef := find_one theAeSequenceDefs();
-      
-      
-      theAeInSequenceDef := theAeSequenceDef with newEventType -> R1.AEInSequenceDefinition;
-      theAeOccurrencesInSequenceDef := theAeInSequenceDef -> R12;
-      //TODO should the following be a find and then check there is only one since more than one would be a definition error
-      theAeOccInSequenceDef := find_one theAeOccurrencesInSequenceDef (isSequenceStart = true);
-      if theAeOccInSequenceDef /= null then
-        link newSeqEvent R13 theAeOccInSequenceDef;
-        newSequence := create unique Sequence(isComplete => theAeOccInSequenceDef.isSequenceEnd, branchExtent => 1);
-        link newSequence R10 newJob;
-        link newSequence R11 newSeqEvent;
-        link newSequence R14 theAeSequenceDef;
-   
-        // The first event for this new Job is a valid event type for starting the sequence
-        // Log info: new Job and event sequence started
-        if (Logger::enabled(Logger::Debug, "pv.sv.sequencedauditevent.addeventfornewjob")) then
-          kvps["eventId"] := eventId; kvps["eventType"] := aeType;
-          Logger::log(Logger::Debug, "pv.sv.sequencedauditevent.addeventfornewjob",
-            svLog("svdc_new_job_started", "new job and event sequence started", jobId, jobName, kvps));
-        end if;
-        
-        // ...and then report that job sequencing has started for the new job as part of the 
-        // verification of the Protocol Verifier itself.
-        BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", jobId, "Unused", "SVDC_PVSequencingStart");
-        
-        // Process the audit event data for this new event      
-        newSeqEvent.ProcessAuditEventData (aeData);
-      
-        // ...and then check that the received audit event data matches that which is expected
-        newSeqEvent.CheckEventCarriesExpectedEventData (eventDataCheckHasPassed, failureReason); 
-        if eventDataCheckHasPassed /= true then
-          newJob.failJob(failureReason);
-        end if;
-        
-      else
-        newJob.failJob("Invalid audit event definition for a start event in job definition = " & theJobDef.jobName & " since the occurrenceNumberInSequence is expected to be 1");    
-      end if;  
-    else
-      //We have an unrecognised event type
-      // Log error: unrecognised event type received
-      newJob.sequencingFailed := true;
-      newJob.failJob("An unrecognised event type has been received - Job Id = " & newJob.jobID & " with Job Name = " & newJob.jobName & " Event Type = " & newEventType.AEType);
-    
-    end if;
+    generate Job.newEventForExistingJob (eventId, prevAEIds, aeType, aeData) to newJob;
+    // Report that job sequencing has started for the new job as part of the
+    // verification of the Protocol Verifier itself.
+    BehaviourVerification~>sendInstrumentationEvent("ProtocolVerifier", jobId, "Unused", "SVDC_PVSequencingStart");
   else
-      // Log error: The audit event id received has been seen before
-      // TODO:  CDS - Does the job (state machine) get failed?
-      kvps["eventId"] := eventId; kvps["eventType"] := aeType;
-      Logger::log(Logger::Warning, "pv.sv.sequencedauditevent.addeventfornewjob",
-        svLog("svdc_job_failed", "audit event has been seen before", jobId, jobName, kvps));
-
-  end if;  
+    // Log warning: The job name is not recognised.
+    kvps["eventId"] := eventId; kvps["eventType"] := aeType;
+    Logger::log(Logger::Warning, "pv.sv.sequencedauditevent.addeventfornewjob",
+      svLog("svdc_job_failed", "job name/type does not match a supplied job definition", jobId, jobName, kvps));
+  end if;
   //
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
