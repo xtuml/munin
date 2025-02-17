@@ -106,7 +106,7 @@ employedWorkers: $employedWorkers  assignedJobs: $assignedJobs  unassignedJobs: 
         tobj1 = Template(lines1)
         uptime = parse_isoduration(report.upTime, True)
         upstring = ''
-        upseconds = 0
+        upseconds = 1
         if uptime['days'] != 0:
             upstring = str(uptime['days']) + " days "
             upseconds = upseconds + uptime['days'] * 86400
