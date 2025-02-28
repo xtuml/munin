@@ -87,6 +87,29 @@ keytool -import -alias client -keystore broker.ts -file client.pem
 keytool -exportcert -rfc -alias broker -keystore broker.ks -file broker.pem
 ```
 
+== Bridging on the Back End
+
+`amqp2kafka.py` bridges from AMQP to Kafka on the front end.  This allows
+testing of `plus2json --play` in advance of an AMQP-capable Protocol
+Verifier.  We also wish to provide a prototype back-end dashboard similar
+to the Kafka-based `pvstats.py` dashboard.  We perform the same "trick" of
+bridging to allow this development to be tested on simulation data from a
+running Protocol Verifier.
+
+`kafka2amqp.py` bridges from Kafka to AMQP.  `kafka2amqp.py` will
+subscribe to the back-end topics on the Kafka broker and relay them to an
+ActiveMQ broker.
+
+`pvdashboard.py` is an AMQP-capable dashboard for Protocol Verifier.
+
+=== Steps to Take
+
+. Base `kafka2amqp.py` on `pvstats.py`.
+  ** Instead of processing the statistics simply do the forwarding.
+. Base `pvdashboard.py` on a set of listeners, one per topic to receive
+  messages and update report data.
+
+
 == Document References
 
 . [[dr-1]] https://stackoverflow.com/questions/46770328/activemq-stompssl-with-python-stomp-client/[ActiveMQ - STOMP+SSL with Python STOMP client]
