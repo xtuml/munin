@@ -11,8 +11,8 @@ from string import Template
 class AMQPStatistics(object):
 
     def __init__(self):
-        self.conn = stomp.Connection([('localhost', 61613)])
-        #self.conn.set_ssl(for_hosts=[('localhost', 61613)], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
+        self.conn = stomp.Connection([(host, int(port))])
+        #self.conn.set_ssl(for_hosts=[(host, int(port))], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
         self.conn.connect(username='ProtocolVerifier', passcode='ProtocolVerifier', wait=True)
 
     def on_message(self, message):
@@ -26,8 +26,8 @@ class AMQPStatistics(object):
 class AMQPInfoWarn(object):
 
     def __init__(self):
-        self.conn = stomp.Connection([('localhost', 61613)])
-        #self.conn.set_ssl(for_hosts=[('localhost', 61613)], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
+        self.conn = stomp.Connection([(host, int(port))])
+        #self.conn.set_ssl(for_hosts=[(host, int(port))], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
         self.conn.connect(username='ProtocolVerifier', passcode='ProtocolVerifier', wait=True)
 
     def on_message(self, message):
@@ -41,8 +41,8 @@ class AMQPInfoWarn(object):
 class AMQPReception(object):
 
     def __init__(self):
-        self.conn = stomp.Connection([('localhost', 61613)])
-        #self.conn.set_ssl(for_hosts=[('localhost', 61613)], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
+        self.conn = stomp.Connection([(host, int(port))])
+        #self.conn.set_ssl(for_hosts=[(host, int(port))], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
         self.conn.connect(username='ProtocolVerifier', passcode='ProtocolVerifier', wait=True)
 
     def on_message(self, message):
@@ -224,9 +224,10 @@ def parse_isoduration(isostring, as_dict=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='pvdashboard.py', description='dashboard for Protocol Verifier')
-    parser.add_argument('--msgbroker', required=True, help='Specify the message broker <host:port>')
-    parser.add_argument('--topic', required=False, help='Specify topic')
+    parser.add_argument('--amqpbroker', required=True, help='Specify the AMQP message broker <host:port>')
     args = parser.parse_args()
+
+    host, port = args.amqpbroker.split(':')
 
     # initialise a report
     report = Report(1)
