@@ -27,14 +27,6 @@ jobs:
           cd models/
           ./gen_all.sh
 
-      - name: Load .env
-        id: dotenv
-        uses: falti/dotenv-action@v1.1
-        with:
-          path: bin/.env
-          log-variables: true
-          export-variables: true
-
       - name: Build and Publish
         env:
           MUNIN_VERSION: ${{ github.ref_name }}
@@ -61,7 +53,6 @@ jobs:
         with:
           context: bin/docker
           build-args: |
-            MASL_VERSION=${{ steps.dotenv.outputs.masl_version }}
             MUNIN_VERSION=${{ github.ref_name }}
           tags: ${{ steps.meta.outputs.tags }}
           push: true

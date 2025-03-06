@@ -5,7 +5,7 @@ volumes:
 
 services:
   jm_proc:
-    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
+    image: levistarrett/masl-dev:latest
     deploy:
       replicas: 1
     depends_on:
@@ -26,7 +26,7 @@ services:
     command: bash -c "source /work/build/linux-armv8-gcc-14/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/linux-armv8-gcc-14/Release/lib && /work/build/linux-armv8-gcc-14/Release/bin/JM_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData"
 
   istore_proc:
-    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
+    image: levistarrett/masl-dev:latest
     depends_on:
       kafka:
         condition: service_healthy
@@ -46,7 +46,7 @@ services:
     command: bash -c "source /work/build/linux-armv8-gcc-14/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/linux-armv8-gcc-14/Release/lib && /work/build/linux-armv8-gcc-14/Release/bin/ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -log-config config/log-pv-kafka.properties -util Kafka -kafka-broker-list kafka:9093 -kafka-offset-reset latest -util MetaData"
 
   aeo_svdc_proc:
-    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
+    image: levistarrett/masl-dev:latest
     deploy:
       replicas: 8
     depends_on:
@@ -99,11 +99,11 @@ services:
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LOG_RETENTION_MS: 300000                  # default retention of 5 minutes
-      KAFKA_LOG_SEGMENT_BYTES: 1048576                # roll the log at 1MB
+      KAFKA_LOG_RETENTION_MS: 300000 # default retention of 5 minutes
+      KAFKA_LOG_SEGMENT_BYTES: 1048576 # roll the log at 1MB
       # KAFKA_LOG_ROLL_MS: 60000                      # roll the log every minute
-      KAFKA_LOG_SEGMENT_DELETE_DELAY_MS: 1            # delete immediately after log roll
-      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 10000    # check the retention condition every 10 seconds
+      KAFKA_LOG_SEGMENT_DELETE_DELAY_MS: 1 # delete immediately after log roll
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 10000 # check the retention condition every 10 seconds
       KAFKA_CREATE_TOPICS: "Protocol_Verifier_Reception:1:1,Protocol_Verifier_InfoWarn:1:1,Protocol_Verifier_Statistics:1:1,Protocol_Verifier_VGateway:1:1,BenchmarkingProbe_service0:1:1,JobManagement_service0:1:1,JobManagement_service1:1:1,JobManagement_service2:1:1,JobManagement_service3:1:1,JobManagement_service4:1:1,JobManagement_service5:1:1,JobManagement_service6:1:1,JobManagement_service7:1:1,AEOrdering_service0:1:1,AEOrdering_service1:1:1,AEOrdering_service2:1:1,AEOrdering_service3:1:1,AEOrdering_service4:1:1,AEOrdering_service5:1:1,AEOrdering_service6:1:1,AEOrdering_service7:1:1,AEOrdering_service8:1:1,AEOrdering_service9:1:1,AEOrdering_service10:1:1,AESequenceDC_service12:1:1,AESequenceDC_service29:1:1,AESequenceDC_service31:1:1,IStore_service0:1:1,IStore_service1:1:1,IStore_service2:1:1,IStore_service3:1:1,IStore_service4:1:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -116,8 +116,8 @@ services:
     volumes:
       - "./config:/root/config"
     command: /root/config/configure-kafka.sh
-# BEGIN ANSIBLE MANAGED BLOCK
-# indent comment
+    # BEGIN ANSIBLE MANAGED BLOCK
+    # indent comment
     ulimits:
       nofile:
         soft: 65536

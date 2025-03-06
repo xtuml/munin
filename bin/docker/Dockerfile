@@ -1,14 +1,8 @@
-ARG MASL_VERSION
-
-FROM levistarrett/masl-dev:${MASL_VERSION}
-
-ARG MASL_VERSION
+FROM levistarrett/masl-dev:latest
 
 ARG MUNIN_VERSION
 
 LABEL org.opencontainers.image.source="https://github.com/xtuml/munin"
-
-ENV MASL_VERSION=${MASL_VERSION}
 
 RUN conan install --requires=pv_proc/${MUNIN_VERSION}@xtuml/stable --deployer=full_deploy
 

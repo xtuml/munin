@@ -5,7 +5,7 @@ volumes:
 
 services:
   jm_proc:
-    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
+    image: levistarrett/masl-dev:latest
     deploy:
       replicas: 1
     volumes:
@@ -23,7 +23,7 @@ services:
     command: bash -c "source /work/build/linux-armv8-gcc-14/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/linux-armv8-gcc-14/Release/lib && /work/build/linux-armv8-gcc-14/Release/bin/JM_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData"
 
   istore_proc:
-    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
+    image: levistarrett/masl-dev:latest
     volumes:
       - type: volume
         source: conan-cache
@@ -40,7 +40,7 @@ services:
     command: bash -c "source /work/build/linux-armv8-gcc-14/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/linux-armv8-gcc-14/Release/lib && /work/build/linux-armv8-gcc-14/Release/bin/ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -log-config config/log-pv-kafka.properties -util Kafka -kafka-broker-list kafka:9093 -kafka-offset-reset latest -util MetaData"
 
   aeo_svdc_proc:
-    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
+    image: levistarrett/masl-dev:latest
     deploy:
       replicas: 4
     volumes:
