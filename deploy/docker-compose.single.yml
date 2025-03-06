@@ -3,7 +3,7 @@ services:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
     volumes:
       - type: volume
-        source: ConanCache
+        source: conan-cache
         target: /conan-cache
       - "../models/PV_PROC/build:/work/build"
       - "./config:/root/config"
@@ -22,9 +22,9 @@ services:
     working_dir: /root
     logging:
       driver: local
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/PV_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData"
+    command: bash -c "source /work/build/linux-armv8-gcc-14/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/linux-armv8-gcc-14/Release/lib && /work/build/linux-armv8-gcc-14/Release/bin/PV_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData"
 
 volumes:
-  ConanCache:
-    name: ConanCache
+  conan-cache:
+    name: conan-cache
     external: true

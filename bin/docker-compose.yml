@@ -1,8 +1,8 @@
 name: munin
 
 volumes:
-  ConanCache:
-    name: ConanCache
+  conan-cache:
+    name: conan-cache
 
 services:
   bash:
@@ -11,7 +11,7 @@ services:
     tty: true
     volumes:
       - type: volume
-        source: ConanCache
+        source: conan-cache
         target: /conan-cache
     ports:
       - "20000:20000"
@@ -26,7 +26,7 @@ services:
     tty: true
     volumes:
       - type: volume
-        source: ConanCache
+        source: conan-cache
         target: /conan-cache
     ports:
       - "20000:20000"
@@ -40,7 +40,7 @@ services:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
     volumes:
       - type: volume
-        source: ConanCache
+        source: conan-cache
         target: /conan-cache
     command: bash -c "conan build --version=$${MUNIN_VERSION} --build=missing --options test=${INCLUDE_TEST:-False} . && conan export-pkg --version=$${MUNIN_VERSION} ."
 
@@ -48,6 +48,6 @@ services:
     image: levistarrett/masl-dev:${MASL_VERSION:-latest}
     volumes:
       - type: volume
-        source: ConanCache
+        source: conan-cache
         target: /conan-cache
     command: bash -c "conan-publish --version=$${MUNIN_VERSION}"
