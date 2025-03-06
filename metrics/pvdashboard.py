@@ -13,7 +13,7 @@ class AMQPStatistics(object):
     def __init__(self):
         self.conn = stomp.Connection([(host, int(port))])
         #self.conn.set_ssl(for_hosts=[(host, int(port))], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
-        self.conn.connect(username='ProtocolVerifier', passcode='ProtocolVerifier', wait=True)
+        self.conn.connect(username='admin', passcode='admin', wait=True)
 
     def on_message(self, message):
         # process Statistics message
@@ -28,7 +28,7 @@ class AMQPInfoWarn(object):
     def __init__(self):
         self.conn = stomp.Connection([(host, int(port))])
         #self.conn.set_ssl(for_hosts=[(host, int(port))], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
-        self.conn.connect(username='ProtocolVerifier', passcode='ProtocolVerifier', wait=True)
+        self.conn.connect(username='admin', passcode='admin', wait=True)
 
     def on_message(self, message):
         # process InfoWarn message
@@ -43,7 +43,7 @@ class AMQPReception(object):
     def __init__(self):
         self.conn = stomp.Connection([(host, int(port))])
         #self.conn.set_ssl(for_hosts=[(host, int(port))], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
-        self.conn.connect(username='ProtocolVerifier', passcode='ProtocolVerifier', wait=True)
+        self.conn.connect(username='admin', passcode='admin', wait=True)
 
     def on_message(self, message):
         # process Reception message

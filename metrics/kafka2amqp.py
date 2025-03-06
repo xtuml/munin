@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # AMQP broker
     amqpconn = stomp.Connection([('localhost', 61613)])
     #amqpconn.set_ssl(for_hosts=[('localhost', 61613)], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
-    amqpconn.connect(username='ProtocolVerifier', passcode='ProtocolVerifier', wait=True)
+    amqpconn.connect(username='admin', passcode='admin', wait=True)
 
     # process messages
     raw_msgs = consumer.poll(timeout_ms=20000)
