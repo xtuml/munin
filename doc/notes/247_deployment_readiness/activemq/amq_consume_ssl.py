@@ -6,6 +6,8 @@ class SampleListener(object):
     def __init__(self):
         self.location_queue = "test-activemq-queue"
         self.conn = stomp.Connection([('localhost', 61613)])
+        #self.conn.set_ssl(for_hosts=[('localhost', 61613)], key_file='/tmp/client.key', cert_file='/tmp/client.pem')
+        self.conn.set_ssl(for_hosts=[('localhost', 61613)], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
         self.conn.connect(username='admin', passcode='admin', wait=True)
 
     def on_message(self, message):
