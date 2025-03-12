@@ -5,7 +5,6 @@ import os
 class ConanFile(conan.ConanFile):
     name = 'aesequencedc'
     user = 'xtuml'
-    channel = 'stable'
     python_requires = 'xtuml_masl_conan/[>=5.0 <6]@xtuml'
     python_requires_extend = 'xtuml_masl_conan.MaslConanHelper'
 

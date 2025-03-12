@@ -7,7 +7,6 @@ from conan.tools.files import copy
 class ConanFile(conan.ConanFile):
     name = 'jobmanagement'
     user = 'xtuml'
-    channel = 'stable'
     python_requires = 'xtuml_masl_conan/[>=5.0 <6]@xtuml'
     python_requires_extend = 'xtuml_masl_conan.MaslConanHelper'
 
