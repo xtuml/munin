@@ -23,7 +23,8 @@ services:
     logging:
       driver: local
     working_dir: /root
-    command: bash -c "source /work/build/linux-armv8-gcc-14/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/linux-armv8-gcc-14/Release/lib && /work/build/linux-armv8-gcc-14/Release/bin/JM_PROC_transient -log-config config/log-pv-files.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData"
+    entrypoint: ./config/entrypoint.sh
+    command: JM_PROC_transient -log-config config/log-pv-files.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData
 
   istore_proc:
     image: levistarrett/masl-dev:latest
@@ -43,7 +44,8 @@ services:
     logging:
       driver: local
     working_dir: /root
-    command: bash -c "source /work/build/linux-armv8-gcc-14/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/linux-armv8-gcc-14/Release/lib && /work/build/linux-armv8-gcc-14/Release/bin/ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -log-config config/log-pv-files.properties -util Kafka -kafka-broker-list kafka:9093 -kafka-offset-reset latest -util MetaData"
+    entrypoint: ./config/entrypoint.sh
+    command: ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -log-config config/log-pv-files.properties -util Kafka -kafka-broker-list kafka:9093 -kafka-offset-reset latest -util MetaData
 
   aeo_svdc_proc:
     image: levistarrett/masl-dev:latest
@@ -65,7 +67,8 @@ services:
     logging:
       driver: local
     working_dir: /root
-    command: bash -c "source /work/build/linux-armv8-gcc-14/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/linux-armv8-gcc-14/Release/lib && /work/build/linux-armv8-gcc-14/Release/bin/AEO_SVDC_PROC_transient -log-config config/log-pv-files.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-offset-reset latest -util MetaData"
+    entrypoint: ./config/entrypoint.sh
+    command: AEO_SVDC_PROC_transient -log-config config/log-pv-files.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-offset-reset latest -util MetaData
 
   http_server:
     image: "ghcr.io/xtuml/charon:v0.1.0"
