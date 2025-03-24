@@ -10,13 +10,13 @@ domain IStore is
 end structure;
     public service persistInvariant (
         invariantName : in string,        invariantValue : in string,        validFrom : in timestamp,        validTo : in timestamp,        sourceJobDefinitionType : in string,        sourceAuditEventType : in string,        sourceAuditEventOccurrenceId : in integer    );
-pragma kafka_topic ( true ); 
+pragma idm_topic ( true ); 
     public service setLoadRate (
         loadRate : in duration    );
-pragma kafka_topic ( true ); 
+pragma idm_topic ( true ); 
     public service restoreNamedInvariant (
         invariantName : in string,        invariantValue : in string    );
-pragma kafka_topic ( true ); 
+pragma idm_topic ( true ); 
   terminator StoreClient is
     public service addInvariants (
         invariantsToReport : in sequence of persistedInvariantStructure    );
