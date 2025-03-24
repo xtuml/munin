@@ -1,0 +1,116 @@
+= Python STOMP SSL AMQP Prototyping
+
+== Gist
+
+This directory contains small files used to learn, explore and understand
+using SSL+TLS to authenticate participants in AMQP messaging and to
+encrypt the messages on the wire.
+
+== Files
+
+amq_consume.py:: This is a simple AMQP STOMP consumer connecting in the
+simplest possible way.
+
+amq_produce.py:: This is a simple AMQP STOMP producer meant to work
+together with `amq_consume.py` to demonstrate simple messaging.
+
+The requirement for the above 2 files is an AMQP server running in a
+default configuration on localhost.
+
+amq_consume_ssl.py:: This is the above consumer modified to work with
+authentication and encryption requirements (STOMP+SSL).
+
+amq_produce_ssl.py:: This is the above producer modified to work with
+authentication and encryption requirements.
+
+The requirement for the above 2 files is an AMQP server running with a
+STOMP+SSL transport configuration on localhost.  <<dr-1>> provides
+instructions for setting up the keys and certificates.  A distillation of
+those instructions are in the script below.
+
+amqp2kafka.py:: This is an AMQP-to-Kafka bridge.  This enables(d) testing
+of `plus2json` before AMQP capable Protocol Verifier is (was) delivered.
+
+The requirements for this file include an AMQP enabled `plus2json --play`
+producing runtime audit events into a 'Protocol_Verifier_Reception' queue
+of an AMQP broker.  Additionally, a Kafka-enabled Protocol Verifier needs
+to run to receive audit events that have been forwarded from the AMQP
+broker into the Kafka broker.
+
+broker.ks:: ActiveMQ broker key store (password is 'broker')
+
+broker.ts:: ActiveMQ broker trust store (password is 'broker')
+
+broker.pem:: ActiveMQ broker certificate to be used for client
+authentication of the broker
+
+client.key:: client key used by the SSL producer and consumer
+
+client.pem:: client certificate supplied for the SSL producer and consumer
+above and imported into the ActiveMQ trust store.
+
+keys.sh:: shell script to produce new key pairs, stores and certificates
+
+== Steps to Creating Keys and Certificates
+
+=== Client Key and Certificate
+
+. Create client key.
+  * openssl genrsa -out client.key 4096
+. Create client certificate signing request (CSR).
+  * openssl req -new -out client.csr -key client.key
+. Sign and produce the certificate.
+  * openssl x509 -req -days 365 -in client.csr -signkey client.key -out client.pem
+. Remove the certificate signing request.  We are done with it.
+  * rm client.csr
+
+=== Broker Keystore, Truststore and Certificate
+
+For testing, use 'localhost' and provide a password.
+
+. Create broker key pair and store it in a keystore file.
+  * keytool -genkeypair -alias broker -keyalg RSA -keysize 4096 -keystore broker.ks
+. Import the client certifcate into the broker trust store.
+  * keytool -import -alias client -keystore broker.ts -file client.pem
+. Export a broker certificate file for use by the client.
+  * keytool -exportcert -rfc -alias broker -keystore broker.ks -file broker.pem
+
+```
+set -x
+
+openssl genrsa -out client.key 4096
+openssl req -new -out client.csr -key client.key
+openssl x509 -req -days 365 -in client.csr -signkey client.key -out client.pem
+rm client.csr
+keytool -genkeypair -alias broker -keyalg RSA -keysize 4096 -keystore broker.ks
+keytool -import -alias client -keystore broker.ts -file client.pem
+keytool -exportcert -rfc -alias broker -keystore broker.ks -file broker.pem
+```
+
+== Bridging on the Back End
+
+`amqp2kafka.py` bridges from AMQP to Kafka on the front end.  This allows
+testing of `plus2json --play` in advance of an AMQP-capable Protocol
+Verifier.  We also wish to provide a prototype back-end dashboard similar
+to the Kafka-based `pvstats.py` dashboard.  We perform the same "trick" of
+bridging to allow this development to be tested on simulation data from a
+running Protocol Verifier.
+
+`kafka2amqp.py` bridges from Kafka to AMQP.  `kafka2amqp.py` will
+subscribe to the back-end topics on the Kafka broker and relay them to an
+ActiveMQ broker.
+
+`pvdashboard.py` is an AMQP-capable dashboard for Protocol Verifier.
+
+=== Steps to Take
+
+. Base `kafka2amqp.py` on `pvstats.py`.
+  ** Instead of processing the statistics simply do the forwarding.
+. Base `pvdashboard.py` on a set of listeners, one per topic to receive
+  messages and update report data.
+
+
+== Document References
+
+. [[dr-1]] https://stackoverflow.com/questions/46770328/activemq-stompssl-with-python-stomp-client/[ActiveMQ - STOMP+SSL with Python STOMP client]
+
