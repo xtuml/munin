@@ -17,7 +17,8 @@ class ConanFile(conan.ConanFile):
         self.requires('masl_json/[>=1.0 <2]@xtuml')
         self.requires('masl_logger/[>=1.0 <2]@xtuml')
         self.requires('masl_uuid/[>=1.0 <2]@xtuml')
+        self.requires('xtuml_activemq/[>=1.0 <2]@xtuml')
         super().requirements()
 
     def omit_requirements(self):
-        return ['boost', 'nlohmann_json', 'xtuml_asn1', 'xtuml_kafka', 'xtuml_sql', 'xtuml_sqlite', 'xtuml_transient']
+        return ['boost', 'nlohmann_json', 'xtuml_asn1', 'xtuml_sql', 'xtuml_sqlite', 'xtuml_transient']
