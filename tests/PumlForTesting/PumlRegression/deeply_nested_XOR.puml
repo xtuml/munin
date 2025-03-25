@@ -1,0 +1,39 @@
+@startuml
+    partition "deeply_nested_XOR" {
+        group "deeply_nested_XOR"
+            switch (XOR)
+                case ("")
+                    switch (XOR)
+                        case ("")
+                            switch (XOR)
+                                case ("")
+                                    :A;
+                                case ("")
+                                    :B;
+                                    switch (XOR)
+                                        case ("")
+                                            :A;
+                                        case ("")
+                                            repeat
+                                                :C;
+                                            repeat while
+                                            switch (XOR)
+                                                case ("")
+                                                    :A;
+                                                case ("")
+                                                    :D;
+                                                    :A;
+                                            endswitch
+                                    endswitch
+                            endswitch
+                            :E;
+                        case ("")
+                            :E;
+                    endswitch
+                    :F;
+                case ("")
+                    :F;
+            endswitch
+        end group
+    }
+@enduml
