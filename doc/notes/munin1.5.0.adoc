@@ -1,0 +1,125 @@
+= Munin 1.5.0 Release Notes
+
+== 1 Summary
+
+The Munin Protocol Verifier continued development and began hardening and
+industrialisation in Phase 2 Stage 6.  Protocol Verifier production
+deployment readiness commenced.  New feature development continued and
+nears completion in the addition of support for AMQP messaging with a
+target of the __Apache ActiveMQ__ broker (in addition to the supported
+Kafka messaging).
+
+The requirements input for Phase 2 Stage 6 and Phase 2 Stage 7, the last
+two Munin development releases, were documented and agreed upon in <<dr-3,
+Protocol Verifier Deployment Readiness>>.  Phase 2 Stage 6 delivers a bit
+more than half of these requirements.
+
+Testing and benchmarking continued throughout the stage.  The front end
+test driver (`plus2json --play`) and the back end dashboard
+(`pvdashboard`) are upgraded to support the AMQP messaging protocol while
+retaining Kafka capability.
+
+As compared to the 1.4.0 release, the 1.5.0 release exhibits an increase
+in throughput.  This performance improvement has been achieved by grouping
+multiple audit events within individual network messages.  This
+substantially reduces the "chatter" of the more finely grained messaging
+of the previous releases.
+
+=== 1.1 Highlights
+
+Following is a list of areas improved in this release cycle.  More detail
+follows.
+
+AMQP Messaging::
+In addition to __Apache Kafka__, AMQP as implemented by __Apache
+ActiveMQ__ is supported by the Protocol Verifier and auxiliary
+utilities.
+
+Minimal Base Linux::
+The base docker operating system image has been replaced.  Instead of a
+rich, general-purpose image, an intentionally minimal image is employed.
+
+Up-to-Date Software Components::
+All operating system and application dependencies have been upgraded to
+near latest stable versions.
+
+TLS and Authentication (front and back ends)::
+Certificate-based authentication and transport layer security (TLS) are
+implemented.
+
+MASL {cpp} Model Compiler::
+The code generator has been substantially upgraded for dependency
+minimisation and {cpp} standards adherence.
+
+Testing and Bug Fixing::
+Regression testing and benchmarking have continued.  Minor and major bug
+fixes have been supplied.  Performance is strong.
+
+== 2 Improvements
+
+=== 2.1 AMQP Message Broker
+
+AMQP messaging is supported.  Kafka messaging is retained as an
+option.  __Apache ActiveMQ__ is the specific target message broker that
+Protocol Verifier is being tested against.  It is noted, that the Protocol
+Verifier should work with __RabbitMQ__ as well, since RabbitMQ is an
+implementation of AMQP.  This would require some small changes.  However,
+only ActiveMQ has been tested.
+
+=== 2.2 Minimal Base Linux
+
+A deployment-oriented Linux distribution (_ChainGuard_) replaces the
+development-oriented Linux distribution (_Ubuntu_) of previous releases.
+The deployment docker image of the full Protocol Verifier is now in the
+size range of 50 MB as compared to 1.2 GB of the development image.
+
+The image has not yet been hardened.  That work will follow in the next
+stage.
+
+=== 2.3 TLS and Authentication (front and back ends)
+
+Mutual authentication and transport layer security are supported.  The
+Protocol Verifier application supplies a certificate to the message
+broker requiring the broker to authenticate the application.  The Protocol
+Verifier application optionally authenticates the broker if a broker
+certificate is supplied.  The Protocol Verifier application encrypts all
+traffic between itself and the ActiveMQ message broker.
+
+=== 2.4 MASL {cpp} Model Compiler
+
+MASL {cpp} is substantially streamlined and generalised.  As a by-product
+of image minimisation, the model compiler includes only the libraries and
+dependencies required by the application.  This omits a number of
+development-oriented libraries used for debug and test.  An asynchronous
+I/O library has been omitted in favour of an API recently included in the
+{cpp} standard library.
+
+== 2.5 Testing and Bug Fixing
+
+A key bug (omitted capability) was identified and fixed, <<single event
+sequence, dr-2>>.  Smaller annoyances were fixed in the application
+models, auxiliary utilities and model compiler.
+
+Testing continued throughout the stage.  Testing was performed by the
+development team and the test team.  Functional testing was the focus of
+the development team while performance was the focus of the test team.
+Testing with data from a deployed system was used late in the stage.
+
+Performance continues to be monitored.  In the previous release, an
+important protocol acknowledgement was implemented which led to a
+performance degradation.  It was promised in the previous release to
+analyse, understand, isolate and hopefully address this degradation.  A
+substantial performance improvement was achieved by sending fewer but
+larger messages.  This reduced the back-and-forth "chatter" of the
+messaging resulting in greater overall throughput.
+
+Benchmarking of the full end-to-end AMQP-based Protocol Verifier remains
+to be performed.  This benchmarking will commence at the beginning of Phase 2
+Stage 7.
+
+== 4 Document References
+
+. [[dr-1]] https://github.com/xtuml/munin/releases/tag/1.5.0[Munin Phase 2 Stage 6 release tag (1.5.0)]
+. [[dr-2]] https://github.com/xtuml/munin/blob/main/doc/notes/246_1_event_seq_ant.adoc[One Event Sequence]
+. [[dr-3]] https://github.com/xtuml/munin/blob/main/doc/notes/247_deployment_readiness/247_deployment_readiness_ant.adoc[Deployment Readiness]
+

@@ -57,7 +57,9 @@ if [[ $PREPOPULATION_QUANTITY -gt 0 ]] ; then
   echo "Done."
 
   echo "Prepopulating broker with" $PREPOPULATION_QUANTITY "events..."
-  echo ${puml_file_for_prepopulation} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $PREPOPULATION_QUANTITY
+  #Kafkaecho ${puml_file_for_prepopulation} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $PREPOPULATION_QUANTITY
+  #SSLecho ${puml_file_for_prepopulation} | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --keyfile /tmp/client.key --certfile /tmp/client.pem --certbroker /tmp/broker.pem --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $PREPOPULATION_QUANTITY
+  echo ${puml_file_for_prepopulation} | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --topic $RECEPTION_TOPIC --shuffle --rate $EVENTS_PER_SECOND --num-events $PREPOPULATION_QUANTITY
   echo "Done."
 
   # launch the application
@@ -76,11 +78,18 @@ else
 
 fi
 
+# launch the AMQP to Kafka bridge
+echo "Launching amqp2kafka.py."
+python ../doc/notes/247_deployment_readiness/activemq/amqp2kafka.py &
+AMQP2KAFKA_PID=$!
+
 # generate source job
 echo "Generating invariant source runtime event stream..."
 # little delay to assure everything is initialized
 sleep 1
-echo "../tests/PumlForTesting/PumlRegression/AAExtraJobInvariantSourceJob.puml" | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC
+#Kafkaecho "../tests/PumlForTesting/PumlRegression/AAExtraJobInvariantSourceJob.puml" | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC
+#SSLecho "../tests/PumlForTesting/PumlRegression/AAExtraJobInvariantSourceJob.puml" | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --keyfile /tmp/client.key --certfile /tmp/client.pem --certbroker /tmp/broker.pem --topic $RECEPTION_TOPIC
+echo "../tests/PumlForTesting/PumlRegression/AAExtraJobInvariantSourceJob.puml" | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --topic $RECEPTION_TOPIC
 echo "Done."
 
 # generate test event data
@@ -93,13 +102,20 @@ start_seconds=`date +%s`
 echo "0 of " $TOTAL_EVENTS
 LOOP_COUNT=0
 for ((i = 0; i < $ITERATIONS; i++)); do
-  echo ${puml_files} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --event-array --batch-size 500 --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
+  #Kafkaecho ${puml_files} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --event-array --batch-size 500 --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
+  #BatchByJobecho ${puml_files} | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --keyfile /tmp/client.key --certfile /tmp/client.pem --certbroker /tmp/broker.pem --topic $RECEPTION_TOPIC --shuffle --event-array --batch-by-job --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
+  #SSLecho ${puml_files} | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --keyfile /tmp/client.key --certfile /tmp/client.pem --certbroker /tmp/broker.pem --topic $RECEPTION_TOPIC --shuffle --event-array --batch-size 500 --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
+  echo ${puml_files} | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --topic $RECEPTION_TOPIC --shuffle --event-array --batch-size 500 --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
   if [[ $# -lt 3 ]] ; then
     # Inject an error to fail one job.
     echo "Inject error to fail a job."
-    $P2J ${puml_file_for_injection} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --omit CSJI
+    #Kafka$P2J ${puml_file_for_injection} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --omit CSJI
+    #SSL$P2J ${puml_file_for_injection} --play --amqpbroker localhost:61613 --username admin --passcode admin --keyfile /tmp/client.key --certfile /tmp/client.pem --certbroker /tmp/broker.pem --topic $RECEPTION_TOPIC --omit CSJI
+    $P2J ${puml_file_for_injection} --play --amqpbroker localhost:61613 --username admin --passcode admin --topic $RECEPTION_TOPIC --omit CSJI
     echo "Inject error to alarm a job."
-    $P2J ${puml_file_for_alarm} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --sibling CSJC
+    #Kafka$P2J ${puml_file_for_alarm} --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --sibling CSJC
+    #SSL$P2J ${puml_file_for_alarm} --play --amqpbroker localhost:61613 --username admin --passcode admin --keyfile /tmp/client.key --certfile /tmp/client.pem --certbroker /tmp/broker.pem --topic $RECEPTION_TOPIC --sibling CSJC
+    $P2J ${puml_file_for_alarm} --play --amqpbroker localhost:61613 --username admin --passcode admin --topic $RECEPTION_TOPIC --sibling CSJC
   fi
   LOOP_COUNT=$(($LOOP_COUNT + 1))
   echo $(($LOOP_COUNT * $BATCH_OF_EVENTS)) " of " $TOTAL_EVENTS
@@ -114,8 +130,11 @@ if [[ $# -ge 3 ]] ; then
   echo "Press ENTER to continue..."
   read a
 else
-  sleep 20
+  sleep 60
 fi
+
+# Kill off the AMQP to Kafka bridge.
+kill $AMQP2KAFKA_PID
 
 # run the benchmark script
 echo "Running benchmark calculations..."
@@ -125,7 +144,12 @@ echo "Done."
 # tear down docker
 echo "Tearing down the application... (ctrl-c to leave it running)"
 sleep 2
-docker compose -f docker-compose.kafka.yml down
+if [[ $# -ge 3 ]] ; then
+  docker compose -f docker-compose.onlykafka.yml down
+  docker compose -f docker-compose.onlypv.yml down
+else
+  docker compose -f docker-compose.kafka.yml down
+fi
 echo "Done."
 
 exit_code=0

@@ -1,12 +1,57 @@
 import argparse
 import datetime
-import kafka3
 import json
 import os
 import re
+import stomp
 import sys
 import time
 from string import Template
+
+class AMQPStatistics(object):
+
+    def __init__(self):
+        self.conn = stomp.Connection([(host, int(port))])
+        #self.conn.set_ssl(for_hosts=[(host, int(port))], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
+        self.conn.connect(username='admin', passcode='admin', wait=True)
+
+    def on_message(self, message):
+        # process Statistics message
+        report.consume_statistics(message.body.rstrip())
+
+    def receive_from_queue(self):
+        self.conn.set_listener('AMQPStatistics', AMQPStatistics())
+        self.conn.subscribe('Protocol_Verifier_Statistics', 21)
+
+class AMQPInfoWarn(object):
+
+    def __init__(self):
+        self.conn = stomp.Connection([(host, int(port))])
+        #self.conn.set_ssl(for_hosts=[(host, int(port))], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
+        self.conn.connect(username='admin', passcode='admin', wait=True)
+
+    def on_message(self, message):
+        # process InfoWarn message
+        report.consume_infowarn(message.body.rstrip())
+
+    def receive_from_queue(self):
+        self.conn.set_listener('AMQPInfoWarn', AMQPInfoWarn())
+        self.conn.subscribe('Protocol_Verifier_InfoWarn', 22)
+
+class AMQPReception(object):
+
+    def __init__(self):
+        self.conn = stomp.Connection([(host, int(port))])
+        #self.conn.set_ssl(for_hosts=[(host, int(port))], key_file='/tmp/client.key', cert_file='/tmp/client.pem', ca_certs='/tmp/broker.pem')
+        self.conn.connect(username='admin', passcode='admin', wait=True)
+
+    def on_message(self, message):
+        # process Reception message
+        report.preReceivedAuditEventCount += 1
+
+    def receive_from_queue(self):
+        self.conn.set_listener('AMQPReception', AMQPReception())
+        self.conn.subscribe('Protocol_Verifier_Reception', 23)
 
 class Report:
 
@@ -178,31 +223,26 @@ def parse_isoduration(isostring, as_dict=False):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='infowarn.py', description='dashboard for protocol verifier')
-    parser.add_argument('--msgbroker', required=True, help='Specify the message broker <host:port>')
-    parser.add_argument('--topic', required=False, help='Specify topic')
+    parser = argparse.ArgumentParser(prog='pvdashboard.py', description='dashboard for Protocol Verifier')
+    parser.add_argument('--amqpbroker', required=True, help='Specify the AMQP message broker <host:port>')
     args = parser.parse_args()
 
-    consumer = kafka3.KafkaConsumer(bootstrap_servers=args.msgbroker, auto_offset_reset='earliest')
-    consumer.subscribe( ['Protocol_Verifier_Statistics','Protocol_Verifier_InfoWarn','Protocol_Verifier_Reception'] )
+    host, port = args.amqpbroker.split(':')
 
     # initialise a report
     report = Report(1)
 
     t0 = time.monotonic()
     os.system('cls' if os.name == 'nt' else 'clear')
-    # process messages
-    raw_msgs = consumer.poll(timeout_ms=20000)
-    while len(raw_msgs) > 0:
-        for tp, partition in raw_msgs.items():
-            for msg in partition:
-                s = msg.value.decode('utf-8').rstrip()
-                if tp.topic == 'Protocol_Verifier_Statistics':
-                    report.consume_statistics(s)
-                elif tp.topic == 'Protocol_Verifier_InfoWarn':
-                    report.consume_infowarn(s)
-                elif tp.topic == 'Protocol_Verifier_Reception':
-                    report.preReceivedAuditEventCount += 1
+
+    amqp_statistics = AMQPStatistics()
+    amqp_infowarn = AMQPInfoWarn()
+    #amqp_reception = AMQPReception()
+    amqp_statistics.receive_from_queue()
+    amqp_infowarn.receive_from_queue()
+    #amqp_reception.receive_from_queue()
+
+    while True:
         # log periodically
         t1 = time.monotonic()
         if ( t1 - t0 ) > 1:
@@ -210,4 +250,3 @@ if __name__ == '__main__':
             report.report()
             t0 = t1
 
-        raw_msgs = consumer.poll(timeout_ms=8000)
