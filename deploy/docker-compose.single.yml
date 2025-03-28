@@ -1,31 +1,24 @@
 services:
-  pv_proc:
-    image: levistarrett/masl-dev:latest
+  apache-activemq:
+    image: apache/activemq-classic:latest
     volumes:
-      - type: volume
-        source: conan-cache
-        target: /conan-cache
-      - "../models/PV_PROC/build:/work/build"
-      - "./config:/root/config"
-      - "./logs/protocol_verifier:/var/log/protocol_verifier"
-      - "./reception-incoming:/root/incoming"
-      - "./reception-processed:/root/processed"
-      - "./InvariantStore:/root/InvariantStore"
+      - ./config/activemq.xml:/opt/apache-activemq/conf/activemq.xml
     ports:
-      - "20000:20000"
-      - "30000:30000"
-      - "40000:40000"
-    environment:
-      - OOA_PORT=0
+      # - 8161:8161 # uncomment this line to make the ActiveMQ web console available
+      - 61613:61613
+    healthcheck:
+      test: /opt/apache-activemq/bin/activemq status | grep "ActiveMQ is running"
+      interval: 1s
+      start_period: 5s
+      start_interval: 1s
+
+  pv_proc:
+    image: pv_proc
+    depends_on:
+      apache-activemq:
+        condition: service_healthy
+    volumes:
+      - "./config:/home/nonroot/config"
     ulimits:
       sigpending: -1
-    working_dir: /root
-    logging:
-      driver: local
-    entrypoint: ./config/entrypoint.sh
-    command: PV_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData
-
-volumes:
-  conan-cache:
-    name: conan-cache
-    external: true
+    command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
