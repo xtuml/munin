@@ -21,7 +21,7 @@ class AMQPStatistics(object):
 
     def receive_from_queue(self):
         self.conn.set_listener('AMQPStatistics', AMQPStatistics())
-        self.conn.subscribe('Protocol_Verifier_Statistics', 21)
+        self.conn.subscribe('/topic/Protocol_Verifier_Statistics', 21)
 
 class AMQPInfoWarn(object):
 
@@ -36,7 +36,7 @@ class AMQPInfoWarn(object):
 
     def receive_from_queue(self):
         self.conn.set_listener('AMQPInfoWarn', AMQPInfoWarn())
-        self.conn.subscribe('Protocol_Verifier_InfoWarn', 22)
+        self.conn.subscribe('/topic/Protocol_Verifier_InfoWarn', 22)
 
 class AMQPReception(object):
 
@@ -51,7 +51,7 @@ class AMQPReception(object):
 
     def receive_from_queue(self):
         self.conn.set_listener('AMQPReception', AMQPReception())
-        self.conn.subscribe('Protocol_Verifier_Reception', 23)
+        self.conn.subscribe('/topic/Protocol_Verifier_Reception', 23)
 
 class Report:
 

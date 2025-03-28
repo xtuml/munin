@@ -6,24 +6,16 @@ services:
         source: conan-cache
         target: /conan-cache
       - "../models/PV_PROC/build:/work/build"
+      - "../models/PV_PROC/schedule:/root/schedule"
       - "./config:/root/config"
-      - "./logs/protocol_verifier:/var/log/protocol_verifier"
-      - "./reception-incoming:/root/incoming"
-      - "./reception-processed:/root/processed"
       - "./InvariantStore:/root/InvariantStore"
-    ports:
-      - "20000:20000"
-      - "30000:30000"
-      - "40000:40000"
-    environment:
-      - OOA_PORT=0
     ulimits:
       sigpending: -1
     working_dir: /root
     logging:
       driver: local
-    entrypoint: ./config/entrypoint.sh
-    command: PV_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData
+    entrypoint: /root/config/entrypoint.sh
+    command: PV_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname host.docker.internal -util MetaData
 
 volumes:
   conan-cache:
