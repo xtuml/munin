@@ -25,8 +25,8 @@ if [[ $# -ge 3 ]] ; then
   PREPOPULATION_QUANTITY=$3
 fi
 
-# Allow over-riding the kafka topic for reception.
-RECEPTION_TOPIC="Protocol_Verifier_Reception"
+# Allow over-riding the messaging topic for reception.
+RECEPTION_TOPIC="/topic/Protocol_Verifier_Reception"
 if [[ $# -ge 4 ]] ; then
   RECEPTION_TOPIC=$4
 fi
@@ -52,8 +52,8 @@ echo "Done."
 if [[ $PREPOPULATION_QUANTITY -gt 0 ]] ; then
 
   # launch the broker
-  echo "Launching the message broker..."
-  docker compose -f docker-compose.onlykafka.yml up -d --wait
+  echo "not Launching the message broker..."
+  #docker compose -f docker-compose.onlykafka.yml up -d --wait
   echo "Done."
 
   echo "Prepopulating broker with" $PREPOPULATION_QUANTITY "events..."
@@ -78,11 +78,6 @@ else
 
 fi
 
-# launch the AMQP to Kafka bridge
-echo "Launching amqp2kafka.py."
-python ../doc/notes/247_deployment_readiness/activemq/amqp2kafka.py &
-AMQP2KAFKA_PID=$!
-
 # generate source job
 echo "Generating invariant source runtime event stream..."
 # little delay to assure everything is initialized
@@ -103,7 +98,8 @@ echo "0 of " $TOTAL_EVENTS
 LOOP_COUNT=0
 for ((i = 0; i < $ITERATIONS; i++)); do
   #Kafkaecho ${puml_files} | xargs $P2J --play --msgbroker localhost:9092 --topic $RECEPTION_TOPIC --shuffle --event-array --batch-size 500 --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
-  #BatchByJobecho ${puml_files} | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --keyfile /tmp/client.key --certfile /tmp/client.pem --certbroker /tmp/broker.pem --topic $RECEPTION_TOPIC --shuffle --event-array --batch-by-job --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
+  #BatchByJobSSLecho ${puml_files} | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --keyfile /tmp/client.key --certfile /tmp/client.pem --certbroker /tmp/broker.pem --topic $RECEPTION_TOPIC --shuffle --event-array --batch-by-job --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
+  #BatchByJobecho ${puml_files} | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --topic $RECEPTION_TOPIC --event-array --batch-by-job --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
   #SSLecho ${puml_files} | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --keyfile /tmp/client.key --certfile /tmp/client.pem --certbroker /tmp/broker.pem --topic $RECEPTION_TOPIC --shuffle --event-array --batch-size 500 --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
   echo ${puml_files} | xargs $P2J --play --amqpbroker localhost:61613 --username admin --passcode admin --topic $RECEPTION_TOPIC --shuffle --event-array --batch-size 500 --rate $EVENTS_PER_SECOND --num-events $BATCH_OF_EVENTS
   if [[ $# -lt 3 ]] ; then
@@ -133,22 +129,19 @@ else
   sleep 60
 fi
 
-# Kill off the AMQP to Kafka bridge.
-kill $AMQP2KAFKA_PID
-
 # run the benchmark script
-echo "Running benchmark calculations..."
-python ../metrics/benchmark.py --msgbroker localhost:9092 --topic BenchmarkingProbe_service0
+echo "not Running benchmark calculations..."
+#python ../metrics/benchmark.py --msgbroker localhost:9092 --topic BenchmarkingProbe_service0
 echo "Done."
 
 # tear down docker
 echo "Tearing down the application... (ctrl-c to leave it running)"
 sleep 2
 if [[ $# -ge 3 ]] ; then
-  docker compose -f docker-compose.onlykafka.yml down
+  #docker compose -f docker-compose.onlykafka.yml down
   docker compose -f docker-compose.onlypv.yml down
-else
-  docker compose -f docker-compose.kafka.yml down
+#else
+  #docker compose -f docker-compose.kafka.yml down
 fi
 echo "Done."
 
