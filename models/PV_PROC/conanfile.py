@@ -23,4 +23,4 @@ class ConanFile(conan.ConanFile):
         self.requires('xtuml_activemq/[>=1.0 <2]@xtuml', visible=False)
 
     def omit_requirements(self):
-        return ['boost', 'nlohmann_json', 'xtuml_asn1', 'xtuml_sql', 'xtuml_sqlite', 'xtuml_transient', 'xtuml_idm']
+        return ['boost', 'nlohmann_json', 'xtuml_asn1', 'xtuml_sql', 'xtuml_sqlite', 'xtuml_transient']
