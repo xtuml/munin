@@ -8,6 +8,7 @@ class ConanFile(conan.ConanFile):
     python_requires_extend = 'xtuml_masl_conan.MaslConanHelper'
 
     def requirements(self):
+        super().requirements()
         self.requires(f'aeordering/{self.version}@xtuml')
         self.requires(f'freception/{self.version}@xtuml')
         self.requires(f'istore/{self.version}@xtuml')
@@ -17,8 +18,9 @@ class ConanFile(conan.ConanFile):
         self.requires('masl_json/[>=1.0 <2]@xtuml')
         self.requires('masl_logger/[>=1.0 <2]@xtuml')
         self.requires('masl_uuid/[>=1.0 <2]@xtuml')
-        self.requires('xtuml_activemq/[>=1.0 <2]@xtuml')
-        super().requirements()
+
+        # required for dev run, but not for build
+        self.requires('xtuml_activemq/[>=1.0 <2]@xtuml', visible=False)
 
     def omit_requirements(self):
         return ['boost', 'nlohmann_json', 'xtuml_asn1', 'xtuml_sql', 'xtuml_sqlite', 'xtuml_transient']
