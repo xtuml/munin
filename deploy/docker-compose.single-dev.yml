@@ -18,14 +18,14 @@ services:
       apache-activemq:
         condition: service_healthy
     volumes:
-      - conan-cache:/conan-cache:ro
-      - ../models/PV_PROC/build:/work/build:ro
-      - ./config:/root/config:ro
+      - conan-cache:/conan-cache
+      - ../models/PV_PROC/build:/work/build
+      - ./config:/root/config
     ulimits:
       sigpending: -1
     working_dir: /root
     entrypoint: /root/config/entrypoint.sh
-    command: PV_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
+    command: PV_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq -util MetaData
 
 volumes:
   invariant-store:
