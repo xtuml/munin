@@ -1,16 +1,16 @@
 volumes:
-  ConanCache:
-    name: ConanCache
+  conan-cache:
+    name: conan-cache
     external: true
 
 services:
   jm_proc:
-    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
+    image: levistarrett/masl-dev:latest
     deploy:
       replicas: 1
     volumes:
       - type: volume
-        source: ConanCache
+        source: conan-cache
         target: /conan-cache
       - "../models/PV_PROC/build:/work/build"
       - "../models/PV_PROC/schedule:/root/schedule"
@@ -20,13 +20,14 @@ services:
     logging:
       driver: local
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/JM_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-group-id PVKafkaGroup -util MetaData"
+    entrypoint: /root/config/entrypoint.sh
+    command: JM_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname host.docker.internal -util MetaData
 
   istore_proc:
-    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
+    image: levistarrett/masl-dev:latest
     volumes:
       - type: volume
-        source: ConanCache
+        source: conan-cache
         target: /conan-cache
       - "../models/PV_PROC/build:/work/build"
       - "../models/PV_PROC/schedule:/root/schedule"
@@ -37,15 +38,16 @@ services:
     logging:
       driver: local
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -log-config config/log-pv-kafka.properties -util Kafka -kafka-broker-list kafka:9093 -kafka-offset-reset latest -util MetaData"
+    entrypoint: /root/config/entrypoint.sh
+    command: ISTORE_PROC_sqlite -db ./InvariantStore/InvariantStore.db -log-config config/log-pv-activemq.properties -util ActiveMQ -activemq-hostname host.docker.internal -util MetaData
 
   aeo_svdc_proc:
-    image: levistarrett/masl-dev:${MASL_VERSION:-latest}
+    image: levistarrett/masl-dev:latest
     deploy:
-      replicas: 4
+      replicas: 1
     volumes:
       - type: volume
-        source: ConanCache
+        source: conan-cache
         target: /conan-cache
       - "../models/PV_PROC/build:/work/build"
       - "../models/PV_PROC/schedule:/root/schedule"
@@ -55,5 +57,5 @@ services:
     logging:
       driver: local
     working_dir: /root
-    command: bash -c "source /work/build/Release/generators/conanrun.sh && export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:/work/build/Release/lib && /work/build/Release/bin/AEO_SVDC_PROC_transient -log-config config/log-pv-kafka.properties -configFile ${CONFIG_FILE:-pv-config.json} -util Kafka -kafka-broker-list kafka:9093 -kafka-offset-reset latest -util MetaData"
-
+    entrypoint: /root/config/entrypoint.sh
+    command: AEO_SVDC_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname host.docker.internal -util MetaData

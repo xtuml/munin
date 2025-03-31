@@ -1,0 +1,16 @@
+services:
+  pv_proc:
+    image: pv_proc
+    volumes:
+      - ./config:/home/nonroot/config
+      - ./reception-incoming:/home/nonroot/incoming
+      - ./logs/protocol_verifier:/home/nonroot/log/protocol_verifier
+      - ./InvariantStore:/home/nonroot/InvariantStore
+    ulimits:
+      sigpending: -1
+    logging:
+      driver: local
+    command: -fileStore -configFile pv-config.json -log-config config/log-pv-files.properties -util MetaData
+
+volumes:
+  istore:

@@ -4,7 +4,7 @@ on:
     types: [published]
 
 jobs:
-  build_and_test:
+  build_and_publish:
     runs-on: ubuntu-latest
     env:
       ARTIFACTORY_USERNAME: build_server
@@ -13,13 +13,13 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Create Conan Cache
-        run: docker volume create ConanCache
+        run: docker volume create conan-cache
 
       - name: Cache Artifacts
         id: cache-primes
         uses: actions/cache@v3
         with:
-          path: /var/lib/docker/volumes/ConanCache
+          path: /var/lib/docker/volumes/conan-cache
           key: $(docker compose -f bin/docker-compose.yml run --rm bash conan profile show)
 
       - name: Generate MASL
@@ -27,20 +27,19 @@ jobs:
           cd models/
           ./gen_all.sh
 
-      - name: Load .env
-        id: dotenv
-        uses: falti/dotenv-action@v1.1
-        with:
-          path: bin/.env
-          log-variables: true
-          export-variables: true
-
       - name: Build and Publish
         env:
           MUNIN_VERSION: ${{ github.ref_name }}
         run: |
           cd models/
           ./publish_all.sh
+
+      - name: Create Production Staging Area
+        env:
+          MUNIN_VERSION: ${{ github.ref_name }}
+        run: |
+          cd prod/pv_proc/
+          ../stage-project.sh
 
       - uses: docker/setup-buildx-action@v2
 
@@ -59,9 +58,6 @@ jobs:
       - name: Build/push image
         uses: docker/build-push-action@v3
         with:
-          context: bin/docker
-          build-args: |
-            MASL_VERSION=${{ steps.dotenv.outputs.masl_version }}
-            MUNIN_VERSION=${{ github.ref_name }}
+          context: prod/pv_proc
           tags: ${{ steps.meta.outputs.tags }}
           push: true

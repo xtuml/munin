@@ -5,15 +5,12 @@ import os
 class ConanFile(conan.ConanFile):
     name = 'istore'
     user = 'xtuml'
-    channel = 'stable'
-    python_requires = f'masl_conan/{os.environ["MASL_VERSION"]}@xtuml/stable'
-    python_requires_extend = 'masl_conan.MaslConanHelper'
-
-    exports_sources = 'src/*', 'masl/*', 'schedule/*', 'config/*', 'schema/*'
+    python_requires = 'xtuml_masl_conan/[>=5.0 <6]@xtuml'
+    python_requires_extend = 'xtuml_masl_conan.MaslConanHelper'
 
     def requirements(self):
-        self.requires(f'masl_core/{os.environ["MASL_VERSION"]}@xtuml/stable')
-        self.requires(f'masl_utils/{os.environ["MASL_VERSION"]}@xtuml/stable')
-
-    def build_requirements(self):
-        self.tool_requires(f'masl_codegen/{os.environ["MASL_VERSION"]}@xtuml/stable')
+        self.requires('masl_command_line/[>=1.0 <2]@xtuml')
+        self.requires('masl_filesystem/[>=1.0 <2]@xtuml')
+        self.requires('masl_logger/[>=1.0 <2]@xtuml')
+        self.requires('masl_strings/[>=1.0 <2]@xtuml')
+        super().requirements()

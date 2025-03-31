@@ -13,16 +13,22 @@ services:
       start_interval: 1s
 
   pv_proc:
-    image: ghcr.io/xtuml/protocol_verifier:latest
+    image: levistarrett/masl-dev:latest
     depends_on:
       apache-activemq:
         condition: service_healthy
     volumes:
-      - ./config:/home/nonroot/config:ro
-      - invariant-store:/home/nonroot/InvariantStore
+      - conan-cache:/conan-cache
+      - ../models/PV_PROC/build:/work/build
+      - ./config:/root/config
     ulimits:
       sigpending: -1
-    command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
+    working_dir: /root
+    entrypoint: /root/config/entrypoint.sh
+    command: PV_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq -util MetaData
 
 volumes:
   invariant-store:
+  conan-cache:
+    name: conan-cache
+    external: true
