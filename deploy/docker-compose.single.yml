@@ -19,10 +19,6 @@ services:
         condition: service_healthy
     volumes:
       - ./config:/home/nonroot/config:ro
-      - invariant-store:/home/nonroot/InvariantStore
     ulimits:
       sigpending: -1
     command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
-
-volumes:
-  invariant-store:

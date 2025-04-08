@@ -20,7 +20,7 @@ services:
     volumes:
       - conan-cache:/conan-cache
       - ../models/PV_PROC/build:/work/build
-      - ./config:/root/config
+      - ./config:/root/config:ro
     ulimits:
       sigpending: -1
     working_dir: /root
@@ -28,7 +28,6 @@ services:
     command: PV_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq -util MetaData
 
 volumes:
-  invariant-store:
   conan-cache:
     name: conan-cache
     external: true
