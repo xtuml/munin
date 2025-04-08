@@ -42,7 +42,7 @@ services:
       - type: volume
         source: conan-cache
         target: /conan-cache
-    command: bash -c "conan build --version=$${MUNIN_VERSION} --build=missing --options test=${INCLUDE_TEST:-False} . && conan export-pkg --version=$${MUNIN_VERSION} ."
+    command: bash -c "conan build --version=$${MUNIN_VERSION} --build=missing --options test=${INCLUDE_TEST:-False} --lockfile-partial . && conan export-pkg --version=$${MUNIN_VERSION} --lockfile-partial ."
 
   publish:
     image: levistarrett/masl-dev:latest

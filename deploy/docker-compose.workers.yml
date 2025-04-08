@@ -1,0 +1,52 @@
+services:
+  jm_proc:
+    image: ghcr.io/xtuml/jm_proc:latest
+    depends_on:
+      apache-activemq:
+        condition: service_healthy
+    volumes:
+      - ./config:/home/nonroot/config:ro
+    ulimits:
+      sigpending: -1
+    command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
+
+  istore_proc:
+    image: ghcr.io/xtuml/istore_proc:latest
+    depends_on:
+      apache-activemq:
+        condition: service_healthy
+    volumes:
+      - ./config:/home/nonroot/config:ro
+      - invariant-store:/home/nonroot/InvariantStore/
+    ulimits:
+      sigpending: -1
+    command: -log-config config/log-pv-activemq.properties -util ActiveMQ -activemq-hostname apache-activemq -db ./InvariantStore/InvariantStore.db
+
+  aeo_svdc_proc:
+    image: ghcr.io/xtuml/aeo_svdc_proc:latest
+    deploy:
+      replicas: 4
+    depends_on:
+      apache-activemq:
+        condition: service_healthy
+    volumes:
+      - ./config:/home/nonroot/config:ro
+    ulimits:
+      sigpending: -1
+    command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
+
+  apache-activemq:
+    image: apache/activemq-classic:latest
+    volumes:
+      - ./config/activemq.xml:/opt/apache-activemq/conf/activemq.xml
+    ports:
+      # - 8161:8161 # uncomment this line to make the ActiveMQ web console available
+      - 61613:61613
+    healthcheck:
+      test: /opt/apache-activemq/bin/activemq status | grep "ActiveMQ is running"
+      interval: 1s
+      start_period: 5s
+      start_interval: 1s
+
+volumes:
+  invariant-store:
