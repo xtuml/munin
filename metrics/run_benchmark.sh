@@ -73,7 +73,7 @@ else
   # launch the broker and application
   echo "Launching the application..."
   export CONFIG_FILE=benchmarking-config.json
-  docker compose -f docker-compose.kafka.yml up -d --wait
+  docker compose -f docker-compose.workers.yml up -d --wait
   echo "Done."
 
 fi
@@ -126,7 +126,7 @@ if [[ $# -ge 3 ]] ; then
   echo "Press ENTER to continue..."
   read a
 else
-  sleep 60
+  sleep 10
 fi
 
 # run the benchmark script
@@ -140,8 +140,8 @@ sleep 2
 if [[ $# -ge 3 ]] ; then
   #docker compose -f docker-compose.onlykafka.yml down
   docker compose -f docker-compose.onlypv.yml down
-#else
-  #docker compose -f docker-compose.kafka.yml down
+else
+  docker compose -f docker-compose.workers.yml down
 fi
 echo "Done."
 
