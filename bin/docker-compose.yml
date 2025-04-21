@@ -44,6 +44,14 @@ services:
         target: /conan-cache
     command: bash -c "conan build --version=$${MUNIN_VERSION} --build=missing --options test=${INCLUDE_TEST:-False} --lockfile-partial . && conan export-pkg --version=$${MUNIN_VERSION} --lockfile-partial ."
 
+  create-lock:
+    image: levistarrett/masl-dev:latest
+    volumes:
+      - type: volume
+        source: conan-cache
+        target: /conan-cache
+    command: bash -c "conan lock create --version=$${MUNIN_VERSION} --lockfile='' ."
+
   publish:
     image: levistarrett/masl-dev:latest
     volumes:
