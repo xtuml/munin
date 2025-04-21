@@ -58,4 +58,4 @@ services:
       - type: volume
         source: conan-cache
         target: /conan-cache
-    command: bash -c "conan-publish --version=$${MUNIN_VERSION}"
+    command: bash -c "conan-publish --version=$${MUNIN_VERSION} --lockfile-partial"
