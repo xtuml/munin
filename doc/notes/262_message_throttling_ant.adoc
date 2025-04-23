@@ -78,12 +78,18 @@ enable and disable message reception.
 
 . Supply a utility domain which provides the ability to enable and disable
   message reception (on a specific queue/topic).
+. In 'JobManagement' add a two new operations to the 'Reception' interface
+  which will result in two new terminator services.  Name the operations
+  'enableMessageReception' and 'disableMessageReception'.
 . In the 'AuditEventReception' 'Throttling' state, make the following
   changes.
-  .. In the 'if' side of the 'if' statement invoke the utility domain to
-     enable message reception.
-  .. In the 'else' side of the 'if' statement invoke the utility domain to
-     disable message reception.
+  .. In the 'if' side of the 'if' statement invoke the terminator service
+     `Reception~>enableMessageReception()` to enable message reception.
+  .. In the 'else' side of the 'if' statement invoke the terminator service
+     `Reception~>disableMessageReception()` to disable message reception.
+. In two new 'Reception' operations, bridge to the utility domain to
+  enable/disable message reception (e.g. for AMQP by adjusting the value
+  of the message credits).
 
 == 6 Acceptance Test
 
