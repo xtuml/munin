@@ -1,5 +1,7 @@
 FROM chainguard/glibc-dynamic:latest
 
+LABEL org.opencontainers.image.source="https://github.com/xtuml/munin"
+
 COPY /staging /
 
 WORKDIR /home/nonroot
