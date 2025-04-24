@@ -1,0 +1,51 @@
+= Protocol Verifier Simple Scenario
+
+== Introduction and Outline
+
+This HOWTO walks a user through a basic scenario of running the
+Protocol Verifier.  It is meant to be simple, open and revealing.
+
+== Scenario
+
+. Run plus2json to configure a single job definition.
+. Start the ActiveMQ message broker.
+. Start the prototype dashboard.
+. Start the Protocol Verifier.
+. Run plus2json to synthesize a runtime audit event stream.
+
+== Step by Step
+
+. Open four (4) shell windows and navigate to `munin/deploy` in each.  One
+  shell will be referred to as the __plus2json shell__, one will be
+  referred to as the__ActiveMQ shell__, one will be referred to as the
+  __Dashboard shell__ and one will be referred to as the __Protocol
+  Verifier shell__.
+
+. In the __plus2json shell__, run plus2json to configure a single job definition.
+
+  python ../bin/plus2json.pyz --job ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml -o config/job_definitions
+
+. In the __ActiveMQ shell__, tart the ActiveMQ message broker.
+
+  docker run -it --name apache-activemq -v ./config/activemq.xml:/opt/apache-activemq/conf/activemq.xml -p 8161:8161 -p 5672:5672 -p 61613:61613 --rm apache/activemq-classic:latest
+
+. In the __Dashboard shell__, start the prototype dashboard.
+
+  python ../metrics/pvdashboard.py --amqpbroker localhost:61613
+
+. In the __Protocol Verifier shell__, start the Protocol Verifier.
+
+  docker compose -f docker-compose.onlypv1.yml up
+
+. In the __plus2json shell__, run plus2json to synthesize a runtime audit event stream.
+
+  python ../bin/plus2json.pyz --play --amqpbroker localhost:61613 --username admin --passcode admin --topic /topic/Protocol_Verifier_Reception --shuffle --event-array --batch-size 500 --rate 100 --num-events 1000 ../tests/PumlForTesting/PumlRegression/SimpleSequenceJob.puml
+
+. Observe activity in each shell window.
+
+. In the __Protocol Verifier shell__, ctrl-c to stop the Protocol Verifier.
+
+. In the __Dashboard shell__, ctrl-c to stop the dashboard.
+
+. In the __ActiveMQ shell__, ctrl-c to stop the message broker.
+
