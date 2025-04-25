@@ -6,8 +6,6 @@ services:
         condition: service_healthy
     volumes:
       - ./config:/home/nonroot/config:ro
-    ulimits:
-      sigpending: -1
     command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
 
   istore_proc:
@@ -18,8 +16,6 @@ services:
     volumes:
       - ./config:/home/nonroot/config:ro
       - invariant-store:/home/nonroot/InvariantStore/
-    ulimits:
-      sigpending: -1
     command: -log-config config/log-pv-activemq.properties -util ActiveMQ -activemq-hostname apache-activemq -db ./InvariantStore/InvariantStore.db
 
   aeo_svdc_proc:
@@ -31,8 +27,6 @@ services:
         condition: service_healthy
     volumes:
       - ./config:/home/nonroot/config:ro
-    ulimits:
-      sigpending: -1
     command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
 
   apache-activemq:
@@ -44,9 +38,7 @@ services:
       - 61613:61613
     healthcheck:
       test: /opt/apache-activemq/bin/activemq status | grep "ActiveMQ is running"
-      interval: 1s
-      start_period: 5s
-      start_interval: 1s
+      interval: 10s
 
 volumes:
   invariant-store:
