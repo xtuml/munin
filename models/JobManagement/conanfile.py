@@ -13,13 +13,13 @@ class ConanFile(conan.ConanFile):
     exports_sources = 'src/*', 'masl/*', 'schedule/*', 'config/*', 'schema/*'
 
     def requirements(self):
-        self.requires('masl_command_line/[>=1.0 <2]@xtuml')
-        self.requires('masl_environment/[>=1.0 <2]@xtuml')
-        self.requires('masl_filesystem/[>=1.0 <2]@xtuml')
-        self.requires('masl_json/[>=1.0 <2]@xtuml')
-        self.requires('masl_json_validation/[>=1.0 <2]@xtuml')
-        self.requires('masl_logger/[>=1.0 <2]@xtuml')
-        self.requires('masl_uuid/[>=1.0 <2]@xtuml')
+        self.requires('masl_command_line/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
+        self.requires('masl_environment/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
+        self.requires('masl_filesystem/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
+        self.requires('masl_json/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
+        self.requires('masl_json_validation/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
+        self.requires('masl_logger/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
+        self.requires('masl_uuid/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
         super().requirements()
 
     def package(self):
