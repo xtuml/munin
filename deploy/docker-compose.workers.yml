@@ -1,4 +1,22 @@
 services:
+  apache-activemq:
+    image: apache/activemq-classic:latest
+    volumes:
+      - ./config/activemq.xml:/opt/apache-activemq/conf/activemq.xml
+      - ./certs/server:/certs
+    ports:
+      # - 8161:8161 # uncomment this line to make the ActiveMQ web console available
+      - 61613:61613
+    healthcheck:
+      test: /opt/apache-activemq/bin/activemq status | grep "ActiveMQ is running"
+      interval: 10s
+    # environment:
+    #   ACTIVEMQ_SSL_OPTS: >-
+    #     -Djavax.net.ssl.keyStore=/certs/broker.ks
+    #     -Djavax.net.ssl.keyStorePassword=password
+    #     -Djavax.net.ssl.trustStore=/certs/broker.ts
+    #     -Djavax.net.ssl.trustStorePassword=password
+
   jm_proc:
     image: ghcr.io/xtuml/jm_proc:latest
     depends_on:
@@ -6,7 +24,8 @@ services:
         condition: service_healthy
     volumes:
       - ./config:/home/nonroot/config:ro
-    command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
+      - ./certs/client:/certs
+    command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq # -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
 
   istore_proc:
     image: ghcr.io/xtuml/istore_proc:latest
@@ -15,8 +34,9 @@ services:
         condition: service_healthy
     volumes:
       - ./config:/home/nonroot/config:ro
+      - ./certs/client:/certs
       - invariant-store:/home/nonroot/InvariantStore/
-    command: -log-config config/log-pv-activemq.properties -util ActiveMQ -activemq-hostname apache-activemq -db ./InvariantStore/InvariantStore.db
+    command: -log-config config/log-pv-activemq.properties -util ActiveMQ -activemq-hostname apache-activemq -db ./InvariantStore/InvariantStore.db # -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
 
   aeo_svdc_proc:
     image: ghcr.io/xtuml/aeo_svdc_proc:latest
@@ -27,18 +47,8 @@ services:
         condition: service_healthy
     volumes:
       - ./config:/home/nonroot/config:ro
-    command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
-
-  apache-activemq:
-    image: apache/activemq-classic:latest
-    volumes:
-      - ./config/activemq.xml:/opt/apache-activemq/conf/activemq.xml
-    ports:
-      # - 8161:8161 # uncomment this line to make the ActiveMQ web console available
-      - 61613:61613
-    healthcheck:
-      test: /opt/apache-activemq/bin/activemq status | grep "ActiveMQ is running"
-      interval: 10s
+      - ./certs/client:/certs
+    command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq # -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
 
 volumes:
   invariant-store:
