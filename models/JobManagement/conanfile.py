@@ -16,6 +16,7 @@ class ConanFile(conan.ConanFile):
         self.requires('masl_command_line/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
         self.requires('masl_environment/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
         self.requires('masl_filesystem/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
+        self.requires('masl_idm/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
         self.requires('masl_json/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
         self.requires('masl_json_validation/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
         self.requires('masl_logger/[>=1.0 <2]@xtuml', transitive_libs=True, transitive_headers=True)
