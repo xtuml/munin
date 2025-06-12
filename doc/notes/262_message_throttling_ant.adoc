@@ -13,12 +13,12 @@ The primary approach to messaging in the MASL idiom is via asynchronous
 signals received through domain services.  A received message initiates a
 thread of control within the receiving domain.  This approach is fine when
 the number and frequency of message receptions is within performance
-limitations.  However, in the face large numbers of messages arriving at a
-high frequency a means of throttling is necessary.
+limitations.  However, in the face of large numbers of messages arriving
+at a high frequency, a means of throttling is necessary.
 
 This issue was solved when messaging through Kafka.  We must solve the
-issue (again) when when messaging through AMQP (via ActiveMQ) which has a
-few pertinent protocol differences compared to Kafka.
+issue (again) when messaging through AMQP (via ActiveMQ) which has a few
+pertinent protocol differences compared to Kafka.
 
 It is recommended that <<dr-2>> be read in its entirety before continuing.
 The problem statement and analysis in <<dr-2>> apply here.  The
@@ -101,7 +101,7 @@ Run the `regression.sh` script and see it pass.
 
 . Run the `run_benchmark.sh` script and see it pass with adequate
   throughput.
-. Prepopulate  the message broker with a substantial number of audit events.
+. Prepopulate the message broker with a substantial number of audit events.
 . Run hard/fast enough to see unassigned jobs begin to grow (as visible in
   the pvdashboard).
 . Observe that unassigned jobs grows to the value of
