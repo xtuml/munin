@@ -1,0 +1,106 @@
+= Munin 1.6.0 Release Notes
+
+== 1 Summary
+
+The Munin Protocol Verifier continued development and completed hardening
+and industrialisation in Phase 2 Stage 7.  An assessment of Protocol
+Verifier production deployment readiness was completed by the deployment
+support team.  New feature development continued and reached completion in
+this phase.  AMQP messaging targeting the __Apache ActiveMQ__ broker was
+refined and completed.
+
+The requirements input for Phase 2 Stage 6 and Phase 2 Stage 7, the last
+two Munin development releases, were documented and agreed upon in <<dr-3,
+Protocol Verifier Deployment Readiness>>.  Phase 2 Stage 7 delivers all
+remaining requirements.
+
+Testing and benchmarking continued through the stage.  The support team
+also began running the Protocol Verifier as part of its deployability
+assessment.
+
+As compared to the 1.5.0 release, the 1.6.0 release has maintained
+performance throughput requirements.  The ActiveMQ broker as configured
+is observed to consume fewer CPU cycles compared to Kafka.
+
+=== 1.1 Highlights
+
+Following is a list of areas improved in this release cycle.  More detail
+follows.
+
+AMQP Messaging::
+The deployment of AMQP as implemented by __Apache ActiveMQ__ was
+refined to support message throttling and refactored for maintainability.
+Performance was benchmarked and meets requirements.
+
+Minimal Base Linux::
+The base docker operating system image and compiled application images
+have been hardened.
+
+TLS and Authentication::
+The configuration and maintainability of certificate based authentication
+was improved.
+
+MASL {cpp} Model Compiler::
+The code generator has been further updated in this release to support
+message throttling in inter-process messaging using AMQP
+
+Testing and Knowledge Transfer::
+Testing and benchmarking continued.  Performance was benchmarked with AMQP
+messaging using the ActiveMQ broker (standard Apache image).
+
+== 2 Improvements
+
+=== 2.1 AMQP Message Broker
+
+AMQP messaging is supported.  The last feature to be added in this phase
+was AMQP throttling.  This is the mechanism used to ensure that the
+incoming audit event stream messages do not overwhelm the Protocol
+Verifier application.  AMQP and Kafka differ 
+
+=== 2.2 Minimal Base Linux
+
+In Phase 6 _ChainGuard_ Linux replaced the development-oriented _Ubuntu_
+Linux distribution of previous releases.  This image was tested and
+hardened in Phase 7.  _grype_ and _Trivy_ were used to check for known
+vulnerabilities.  Both utilities reported zero (0) known vulnerabilities
+in the image.  Having learned to use these utilities they were run against
+'plus2json' as well.  Again zero known vulnerabilities were reported.
+
+=== 2.3 TLS and Authentication
+
+Mutual authentication and transport layer security were supplied in the
+previous release cycle.  However, issues with runtime loading of the SSL
+library are addressed in this release.
+
+=== 2.4 MASL {cpp} Model Compiler
+
+MASL {cpp} was substantially streamlined and generalised in the previous
+release cycle.  More improvements are supplied in this release.  An issue
+with dynamic library loading was addressed.  Features and capabilities not
+specifically related to Project Munin have been added to the open source
+model compiler.
+
+== 2.5 Testing and Knowledge Transfer
+
+A simple scenario HOWTO (<<dr-2>>) was crafted to enable testing the most
+basic setup of the Protocol Verifier.  The scenario uses to production
+images and runs with a front-end test driver and back-end dashboard local
+to the repository.
+
+Testing was performed intermittently through this stage.  Testing was
+performed by the development team and the deployment support team.
+Functional and performance testing were the focus of the development team
+while deployability was the focus of the support team.
+
+Benchmarking of the full end-to-end AMQP-based Protocol Verifier was
+performed in this phase.  Performance matches the performance experienced
+with Kafka and meets throughput requirements.  It is noted that testing
+was performed using the Apache distribution of the ActiveMQ docker image.
+
+== 4 Document References
+
+. [[dr-1]] https://github.com/xtuml/munin/releases/tag/1.6.0[Munin Phase 2 Stage 7 release tag (1.6.0)]
+. [[dr-2]] https://github.com/xtuml/munin/blob/main/doc/howto/HOWTO_basic_scenario.adoc[Protocol Verifier Simple Scenario]
+. [[dr-3]] https://github.com/xtuml/munin/blob/main/doc/notes/247_deployment_readiness/247_deployment_readiness_ant.adoc[Deployment Readiness]
+
+
