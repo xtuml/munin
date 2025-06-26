@@ -1,66 +1,48 @@
-services:
-  apache-activemq:
-    image: apache/activemq-classic:latest
-    volumes:
-      - ./config/activemq.xml:/opt/apache-activemq/conf/activemq.xml
-      - ./certs/server:/certs
-    ports:
-      # - 8161:8161 # uncomment this line to make the ActiveMQ web console available
-      - 61613:61613
-    healthcheck:
-      test: /opt/apache-activemq/bin/activemq status | grep "ActiveMQ is running"
-      interval: 10s
-    # environment:
-    #   ACTIVEMQ_SSL_OPTS: >-
-    #     -Djavax.net.ssl.keyStore=/certs/broker.ks
-    #     -Djavax.net.ssl.keyStorePassword=password
-    #     -Djavax.net.ssl.trustStore=/certs/broker.ts
-    #     -Djavax.net.ssl.trustStorePassword=password
+include: # Comment out this block to run the PV without ActiveMQ
+  - docker-compose.activemq.yml
 
-  jm_proc:
+services:
+  jm_proc: &pv_service
     image: levistarrett/masl-dev:latest
-    depends_on:
+    depends_on: # Comment out this block to run the PV without ActiveMQ
       apache-activemq:
         condition: service_healthy
     volumes:
       - conan-cache:/conan-cache
       - ../models/PV_PROC/build:/work/build
-      - ./config:/root/config
+      - ./config:/root/config:ro
       - ./certs/client:/certs
     working_dir: /root
     entrypoint: /root/config/entrypoint.sh
-    command: JM_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq # -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
+    command: |
+      JM_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} \
+        -util MetaData -util ActiveMQ -activemq-hostname apache-activemq \
+    # Uncomment to enable SSL configuration (note: must enable in docker-compose.activemq.yml as well)
+    #   -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
 
   istore_proc:
-    image: levistarrett/masl-dev:latest
-    depends_on:
-      apache-activemq:
-        condition: service_healthy
+    <<: *pv_service
     volumes:
       - conan-cache:/conan-cache
       - ../models/PV_PROC/build:/work/build
       - ./config:/root/config:ro
       - ./certs/client:/certs
       - invariant-store:/root/InvariantStore/
-    working_dir: /root
-    entrypoint: /root/config/entrypoint.sh
-    command: ISTORE_PROC_sqlite -log-config config/log-pv-activemq.properties -util ActiveMQ -activemq-hostname apache-activemq -db ./InvariantStore/InvariantStore.db # -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
+    command: |
+      ISTORE_PROC_sqlite -log-config config/log-pv-activemq.properties \
+        -util MetaData -util ActiveMQ -activemq-hostname apache-activemq -db ./InvariantStore/InvariantStore.db \
+    # Uncomment to enable SSL configuration (note: must enable in docker-compose.activemq.yml as well)
+    #   -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
 
   aeo_svdc_proc:
-    image: levistarrett/masl-dev:latest
+    <<: *pv_service
     deploy:
       replicas: 4
-    depends_on:
-      apache-activemq:
-        condition: service_healthy
-    volumes:
-      - conan-cache:/conan-cache
-      - ../models/PV_PROC/build:/work/build
-      - ./config:/root/config:ro
-      - ./certs/client:/certs
-    working_dir: /root
-    entrypoint: /root/config/entrypoint.sh
-    command: AEO_SVDC_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq # -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
+    command: |
+      AEO_SVDC_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} \
+        -util MetaData -util ActiveMQ -activemq-hostname apache-activemq \
+    # Uncomment to enable SSL configuration (note: must enable in docker-compose.activemq.yml as well)
+    #   -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
 
 volumes:
   invariant-store:

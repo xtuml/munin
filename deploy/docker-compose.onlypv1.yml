@@ -1,8 +1,0 @@
-services:
-  pv_proc:
-    image: ghcr.io/xtuml/protocol_verifier:latest
-    volumes:
-      - ./config:/home/nonroot/config:ro
-    ulimits:
-      sigpending: -1
-    command: -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname host.docker.internal
