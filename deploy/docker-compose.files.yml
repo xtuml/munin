@@ -1,0 +1,25 @@
+services:
+  pv_proc:
+    image: levistarrett/masl-dev:latest
+    volumes:
+      - conan-cache:/conan-cache
+      - ../models/PV_PROC/build:/work/build
+      - ./config:/root/config:ro
+      - ./certs/client:/certs
+      - ./logs/protocol_verifier:/var/log/protocol_verifier
+      - ./reception-incoming:/root/incoming
+      - ./reception-processed:/root/processed
+    ports:
+      - 20000:20000
+      - 30000:30000
+      - 40000:40000
+    environment:
+      - OOA_PORT=0
+    working_dir: /root
+    entrypoint: /root/config/entrypoint.sh
+    command: PV_PROC_transient -fileStore -configFile pv-config.json -log-config config/log-pv-files.properties -util Inspector
+
+volumes:
+  conan-cache:
+    name: conan-cache
+    external: true

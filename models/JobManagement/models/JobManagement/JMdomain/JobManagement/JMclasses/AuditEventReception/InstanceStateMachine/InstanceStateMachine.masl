@@ -33,8 +33,18 @@ begin
     // See if the protocol verifier has completed enough work to receive more audit events.
     unassignedJobCount := (find UnassignedJob())'length;
     if (unassignedJobCount < (find_one JobManagementSpec()).maxUnassignedJobs) then
+        if ( Reception~>enableMessageReception() = false ) then
+            kvps["unassignedJobCount"] := unassignedJobCount'image;
+            Logger::log(Logger::Error, "pv.jm.auditeventreception.throttling",
+                jmLog("jobmanagement_reception_throttling", "failed to enable message reception", kvps));
+        end if;
         generate AuditEventReception.readyToReceive() to this;
     else
+        if ( Reception~>disableMessageReception() = false ) then
+            kvps["unassignedJobCount"] := unassignedJobCount'image;
+            Logger::log(Logger::Error, "pv.jm.auditeventreception.throttling",
+                jmLog("jobmanagement_reception_throttling", "failed to disable message reception", kvps));
+        end if;
         schedule this.pollTimer generate AuditEventReception.nextReception() to this delay @PT1S@;
         if (Logger::enabled(Logger::Debug, "pv.jm.auditeventreception.throttling")) then
             kvps["unassignedJobCount"] := unassignedJobCount'image;
