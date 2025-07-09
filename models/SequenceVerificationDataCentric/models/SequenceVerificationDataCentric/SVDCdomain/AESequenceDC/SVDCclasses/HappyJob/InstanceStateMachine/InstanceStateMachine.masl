@@ -86,6 +86,10 @@ auditEventData : sequence of auditEventDataStructure;
 
 begin
 
+  // DEBUG - Cause a message interchange with IStore for every audit event.
+  Persistence_Req_IF~>RestoreNamedInvariant("One", "Fact");
+  // DEBUG
+
   //Map the event parameters to local variables
   auditEventType := aeType;
   auditEventId := eventId;
