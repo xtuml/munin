@@ -39,6 +39,7 @@ end service;
 public service JobManagement::Reception~>enableMessageReception () return boolean is
 begin
   IDM::set_topic_config("Protocol_Verifier_Reception", "auto_credit", true);
+  IDM::set_topic_config("Protocol_Verifier_Reception", "credit", 4);
   return true;  // default to success
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
