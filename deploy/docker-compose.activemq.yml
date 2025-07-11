@@ -1,0 +1,20 @@
+services:
+  apache-activemq:
+    image: apache/activemq-classic:latest
+    volumes:
+      - ./config/activemq.xml:/opt/apache-activemq/conf/activemq.xml
+      - ./certs/server:/certs
+    ports:
+      # Uncomment the following line to make the ActiveMQ web console available
+      # - 8161:8161
+      - 61613:61613
+    healthcheck:
+      test: /opt/apache-activemq/bin/activemq status | grep "ActiveMQ is running"
+      interval: 10s
+    # Uncomment the following block to enable SSL configuration
+    # environment:
+    #   ACTIVEMQ_SSL_OPTS: >-
+    #     -Djavax.net.ssl.keyStore=/certs/broker.ks
+    #     -Djavax.net.ssl.keyStorePassword=password
+    #     -Djavax.net.ssl.trustStore=/certs/broker.ts
+    #     -Djavax.net.ssl.trustStorePassword=password

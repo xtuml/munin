@@ -1,0 +1,121 @@
+= Message Throttling
+
+xtUML Project Analysis Note
+
+== 1 Abstract
+
+This note provides requirements, analysis and work required to support
+message throttling with AMQP.
+
+== 2 Introduction and Background
+
+The primary approach to messaging in the MASL idiom is via asynchronous
+signals received through domain services.  A received message initiates a
+thread of control within the receiving domain.  This approach is fine when
+the number and frequency of message receptions is within performance
+limitations.  However, in the face of large numbers of messages arriving
+at a high frequency, a means of throttling is necessary.
+
+This issue was solved when messaging through Kafka.  We must solve the
+issue (again) when messaging through AMQP (via ActiveMQ) which has a few
+pertinent protocol differences compared to Kafka.
+
+It is recommended that <<dr-2>> be read in its entirety before continuing.
+The problem statement and analysis in <<dr-2>> apply here.  The
+terminology defined in <<dr-2>> will be used in this note.
+
+== 3 Requirements
+
+Provide a mechanism for the application to not receive a message(s) when
+the application is not ready/able.
+
+It is desirable that Kafka continue to be supported.
+
+== 4 Analysis
+
+=== 4.1 AMQP Message Quota
+
+AMQP supplies a mechanism to set the number of messages a consumer is
+prepared to receive.  This number is a positive integer and can be zero.
+This number is configured and can be modified at runtime.  Access to this
+value can be given to the application.
+
+=== 4.2 Current Behaviour (as of April 2025)
+
+==== 4.2.1 Audit Event Reception
+
+The singleton instance of 'Audit Event Reception' gets created by the
+initialisation function (`init.scn`) directly after 'Job Manager' is
+created.  The instance is initialised into the 'Receiving' state.  It
+is linked to the 'Job Manager' instance.  A stimulating event,
+'nextReception' is scheduled on a 1 second timer.
+
+The state machine wakes up after 1 second and tries to poll an event from
+the 'obtainEvent' terminator service.  In an AMQP configuration, this
+terminator service is empty and always returns 'false'.  The 1 second
+timer is reloaded and the periodic NOP occurs at 1 Hertz.
+
+Interestingly, this state machine will detect when 'maxUnassignedJobs' is
+reached and will switch to the 'Throttling' state.  However, in AMQP mode,
+this is a NOP.
+
+=== 4.3 Flow Control
+
+An architectural hook can be supplied through a utility domain which
+will enable and disable message reception.
+
+* When 'AuditEventReception' is in the 'Receiving' state, message
+  reception is enabled.
+* When 'AuditEventReception' is in the 'Throttling' state, message
+  reception is disabled.
+
+=== 4.3 Utility Domain
+
+A utility domain shall be supplied which carries bridge operations that
+enable and disable message reception.
+
+== 5 Work Required
+
+. Supply a utility domain which provides the ability to enable and disable
+  message reception (on a specific queue/topic).
+. In 'JobManagement' add two new operations to the 'Reception' interface
+  which will result in two new terminator services.  Name the operations
+  'enableMessageReception' and 'disableMessageReception'.
+. In the 'AuditEventReception' 'Throttling' state, make the following
+  changes.
+  .. In the 'if' side of the 'if' statement invoke the terminator service
+     `Reception~>enableMessageReception()` to enable message reception.
+  .. In the 'else' side of the 'if' statement invoke the terminator service
+     `Reception~>disableMessageReception()` to disable message reception.
+. In two new 'Reception' operations, bridge to the utility domain to
+  enable/disable message reception (e.g. for AMQP by adjusting the value
+  of the message credits).
+
+== 6 Acceptance Test
+
+=== 6.1 Regression
+
+Run the `regression.sh` script and see it pass.
+
+=== 6.2 Benchmark Stress
+
+. Run the `run_benchmark.sh` script and see it pass with adequate
+  throughput.
+. Prepopulate the message broker with a substantial number of audit events.
+. Run hard/fast enough to see unassigned jobs begin to grow (as visible in
+  the pvdashboard).
+. Observe that unassigned jobs grows to the value of
+  'maxUnassignedJobs' but no higher.
+. At the end of the run observe the Protocol Verifier "catch up" and
+  consume all audit events.
+
+== 7 Document References
+
+. [[dr-1]] https://github.com/xtuml/munin/issues/262[262 - audit event reception throttling]
+. [[dr-2]] link:219_overrun_ant.adoc[Protocol Verifier Application Messaging Overrun Analysis]
+
+---
+
+This work is licensed under the Creative Commons CC0 License
+
+---
