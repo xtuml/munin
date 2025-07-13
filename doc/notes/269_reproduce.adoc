@@ -1,0 +1,50 @@
+# 269 Reproduction
+
+## Scenario
+
+1. In one shell, run `./run_benchmark.sh 3000 1000000`
+  * This launches the Protocol Verifier with one instance of
+    JobManagement (manager), 4 instances of AEO_SVDC (workers) an
+    instance of IStore (a singleton managing a persistent store) and an
+    instance of ActiveMQ.
+  * This runs `plus2json --play` to synthesise 1000000 audit events at
+    3000 events/second (but achieving a rate substantially lower than
+    that due to CPU and I/O limits).
+  * I am running a 2 years old MacBook Air M2.  Depending upon your machine
+    you may need to adjust the 3000 up or down a bit.
+2. In another shell, run `python ../metrics/pvdashboard.py --amqpbroker localhost:61613 2> /tmp/o1.txt`
+  * This runs a back-end "dashboard" which displays results and
+    statistics.
+  * The `stderr` gets a few interesting log messages including a note on
+    whether the top end 'Protocol_Verifier_Reception' topic is enabled
+    (auto_credit = true and credit = positive integer) or disabled
+    (auto_credit = false and credit = 0).  This updates once per second.
+    I sometimes `tail -f` the log file in a separate shell.
+3. When you have hit a problem, you will see the dashboard report that
+   events are no longer being processed.  When you look at the docker stats
+   for the containers, you will see them going idle.
+4. In `munin/deploy/config/benchmarking-config.json` there are two values
+   that may need to be adjusted, 'MaxJobsPerWorker' and 'MaxUnassignedJobs'.
+   These control when the Audit Event Reception state machine throttles the
+   Reception topic.
+
+## Reproduction Branch
+
+Branch '269_recreate' (https://github.com/xtuml/munin/tree/269_recreate)
+is tweaked for reproduction of the issue.  A few extra log messages are
+enabled.  The docker compose files are adjusted.  The benchmarking script
+is adjusted to operate from a local build of Protocol Verifier.
+
+## Steps
+
+1. Fire up docker.
+2. Build branch '269_recreate'
+   (https://github.com/xtuml/munin/tree/269_recreate).
+3. In one shell navigate to `munin/metrics` and run:  `run_benchmark.sh 3000 1000000`
+4. In another shell navigate to `munin/deploy` and run `python ../metrics/pvdashboard.py --amqpbroker localhost:61613 2> /tmp/o1.txt`
+5. In another shell, watch container CPU. `docker stats`.
+6. In another shell, interrogate the status of the
+   'Protocol_Verifier_Reception' topic in JobManagement, `tail -f /tmp/o1.txt`
+7. In a browser, monitor the ActiveMQ message broker, `localhost:8161`
+
+
