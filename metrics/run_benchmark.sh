@@ -73,7 +73,7 @@ else
   # launch the broker and application
   echo "Launching the application..."
   export CONFIG_FILE=benchmarking-config.json
-  docker compose -f docker-compose.workers.yml up -d --wait
+  docker compose -f docker-compose.workers-dev.yml up -d --wait
   echo "Done."
 
 fi
@@ -136,12 +136,13 @@ echo "Done."
 
 # tear down docker
 echo "Tearing down the application... (ctrl-c to leave it running)"
-sleep 2
+sleep 30
 if [[ $# -ge 3 ]] ; then
   #docker compose -f docker-compose.onlykafka.yml down
   docker compose -f docker-compose.onlypv.yml down
 else
-  docker compose -f docker-compose.workers.yml down
+  echo "not bringing workers down."
+  #docker compose -f docker-compose.workers-dev.yml down
 fi
 echo "Done."
 

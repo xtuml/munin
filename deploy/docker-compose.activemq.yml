@@ -6,11 +6,11 @@ services:
       - ./certs/server:/certs
     ports:
       # Uncomment the following line to make the ActiveMQ web console available
-      # - 8161:8161
+      - 8161:8161
       - 61613:61613
     healthcheck:
       test: /opt/apache-activemq/bin/activemq status | grep "ActiveMQ is running"
-      interval: 10s
+      interval: 4s
     # Uncomment the following block to enable SSL configuration
     # environment:
     #   ACTIVEMQ_SSL_OPTS: >-

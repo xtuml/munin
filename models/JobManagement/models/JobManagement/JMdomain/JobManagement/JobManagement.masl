@@ -40,6 +40,7 @@ public service JobManagement::Reception~>enableMessageReception () return boolea
 begin
   IDM::set_topic_config("Protocol_Verifier_Reception", "auto_credit", true);
   IDM::set_topic_config("Protocol_Verifier_Reception", "credit", 4);
+  Logger::log(Logger::Information, "pv.jm.reception.enable","ENabling reception");
   return true;  // default to success
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.
@@ -49,6 +50,7 @@ public service JobManagement::Reception~>disableMessageReception () return boole
 begin
   IDM::set_topic_config("Protocol_Verifier_Reception", "auto_credit", false);
   IDM::set_topic_config("Protocol_Verifier_Reception", "credit", 0);
+  Logger::log(Logger::Information, "pv.jm.reception.disable","DISabling reception");
   return true;  // default to success
 end service;
 //! ACTIVITY END. DO NOT EDIT THIS LINE.

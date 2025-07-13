@@ -12,11 +12,18 @@ services:
       - ../models/PV_PROC/build:/work/build
       - ./config:/root/config:ro
       - ./certs/client:/certs
+    ports:
+      - 20000:20000
+      - 30000:30000
+      - 40000:40000
+    environment:
+      - OOA_PORT=0
     working_dir: /root
     entrypoint: /root/config/entrypoint.sh
     command: |
       JM_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} \
         -util MetaData -util ActiveMQ -activemq-hostname apache-activemq \
+        -util Inspector
     # Uncomment to enable SSL configuration (note: must enable in docker-compose.activemq.yml as well)
     #   -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
 
@@ -28,6 +35,7 @@ services:
       - ./config:/root/config:ro
       - ./certs/client:/certs
       - invariant-store:/root/InvariantStore/
+    ports: []
     command: |
       ISTORE_PROC_sqlite -log-config config/log-pv-activemq.properties \
         -util MetaData -util ActiveMQ -activemq-hostname apache-activemq -db ./InvariantStore/InvariantStore.db \
@@ -38,6 +46,7 @@ services:
     <<: *pv_service
     deploy:
       replicas: 4
+    ports: []
     command: |
       AEO_SVDC_PROC_transient -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} \
         -util MetaData -util ActiveMQ -activemq-hostname apache-activemq \
