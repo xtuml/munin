@@ -18,7 +18,8 @@ begin
     // See if the protocol verifier has completed enough work to begin receiving audit events.
     unassignedJobCount := (find UnassignedJob())'length;
     kvps["unassignedJobCount"] := unassignedJobCount'image;
-    if (unassignedJobCount < (find_one JobManagementSpec()).maxUnassignedJobs) then
+    if (this.throttleCount > 10) or (unassignedJobCount < (find_one JobManagementSpec()).maxUnassignedJobs) then
+        this.throttleCount := 0;
         // Enable message reception.
         if ( Reception~>enableMessageReception() = false ) then
             Logger::log(Logger::Error, "pv.jm.auditeventreception.throttling", "failed to enable message reception");
@@ -27,13 +28,15 @@ begin
             jmLog("jobmanagement_reception_throttling", "audit event reception ready to receive", kvps));
         generate AuditEventReception.readyToReceive() to this;
     else
-        if ( Reception~>disableMessageReception() = false ) then
-            Logger::log(Logger::Error, "pv.jm.auditeventreception.throttling",
-                jmLog("jobmanagement_reception_throttling", "failed to disable message reception", kvps));
+        if this.throttleCount = 0 then
+            if ( Reception~>disableMessageReception() = false ) then
+                Logger::log(Logger::Error, "pv.jm.auditeventreception.throttling",
+                    jmLog("jobmanagement_reception_throttling", "failed to disable message reception", kvps));
+            end if;
+            Logger::log(Logger::Information, "pv.jm.auditeventreception.throttling",
+                jmLog("jobmanagement_reception_throttling", "audit event reception throttling", kvps));
         end if;
-        Logger::log(Logger::Information, "pv.jm.auditeventreception.throttling",
-            jmLog("jobmanagement_reception_throttling", "audit event reception throttling", kvps));
-        end if;
+        this.throttleCount := this.throttleCount + 1;
         schedule this.pollTimer generate AuditEventReception.nextReception() to this delay @PT1S@;
     end if;
 end state;
