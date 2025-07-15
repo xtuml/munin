@@ -43,7 +43,7 @@ sleep $delay
 
 # tear down the protocol verifier
 echo "Tearing down protocol verifier..."
-docker compose down
+docker compose -f docker-compose.files.yml down
 echo "Done."
 
 # make sure there is a success log for every job definition
