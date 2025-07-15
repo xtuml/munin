@@ -11,7 +11,7 @@ services:
       - ./config:/home/nonroot/config:ro
       - ./certs/client:/certs
     command: |
-      -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq \
+      -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
     # Uncomment to enable SSL configuration (note: must enable in docker-compose.activemq.yml as well)
     # -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
 
@@ -23,7 +23,7 @@ services:
       - ./certs/client:/certs
       - invariant-store:/home/nonroot/InvariantStore/
     command: |
-      -log-config config/log-pv-activemq.properties -util ActiveMQ -activemq-hostname apache-activemq -db ./InvariantStore/InvariantStore.db \
+      -log-config config/log-pv-activemq.properties -util ActiveMQ -activemq-hostname apache-activemq -db ./InvariantStore/InvariantStore.db
     # Uncomment to enable SSL configuration (note: must enable in docker-compose.activemq.yml as well)
     # -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
 
@@ -33,7 +33,7 @@ services:
     deploy:
       replicas: 4
     command: |
-      -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq \
+      -log-config config/log-pv-activemq.properties -configFile ${CONFIG_FILE:-pv-config.json} -util ActiveMQ -activemq-hostname apache-activemq
     # Uncomment to enable SSL configuration (note: must enable in docker-compose.activemq.yml as well)
     # -ssl-ca /certs/client_ca.pem -ssl-key /certs/client.pem -ssl-password password
 
