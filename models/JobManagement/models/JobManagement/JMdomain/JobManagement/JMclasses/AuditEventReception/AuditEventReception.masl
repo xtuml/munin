@@ -3,7 +3,7 @@ public service JobManagement::AuditEventReception.createAuditEventReception () i
 auditEventReception : instance of AuditEventReception;
 jobManager : instance of JobManager;
 begin
-    auditEventReception := create unique AuditEventReception(receivedAuditEventCount => 0, Current_State => Receiving);
+    auditEventReception := create unique AuditEventReception(receivedAuditEventCount => 0, throttleCount => 0, Current_State => Receiving);
     jobManager := find_one JobManager();
     if ( jobManager /= null) then
         link auditEventReception R26 jobManager;
